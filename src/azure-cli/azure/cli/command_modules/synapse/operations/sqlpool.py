@@ -157,8 +157,7 @@ def sql_pool_show_connection_string(
 
 
 def _construct_database_resource_id(cli_ctx, resource_group_name, server_name, database_name):
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(

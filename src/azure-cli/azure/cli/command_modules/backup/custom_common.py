@@ -9,6 +9,7 @@ from azure.cli.command_modules.backup._client_factory import backup_protected_it
     protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.mgmt.recoveryservicesbackup.models import RecoveryPointTierStatus, RecoveryPointTierType
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -26,15 +27,17 @@ tier_type_map = {'VaultStandard': 'HardenedRP',
                  'VaultArchive': 'ArchivedRP',
                  'Snapshot': 'InstantRP'}
 
+crr_not_supported_bmt = ["azurestorage", "mab"]
+
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered", use_secondary_region=None):
     container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for container of type AzureStorage.
+                --use-secondary-region flag is not supported for this backup management type.
                 Please either remove the flag or query for any other container type.
                 """)
 
@@ -69,10 +72,10 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
               workload_type=None, use_secondary_region=None):
     container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for container of type AzureStorage.
+                --use-secondary-region flag is not supported for this backup management type.
                 Please either remove the flag or query for any other container type.
                 """)
     else:
@@ -99,10 +102,15 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
         'itemType': workload_type})
 
     if use_secondary_region:
-        if container_type and container_type.lower() == "azurestorage":
+        if container_type is None:
+            raise RequiredArgumentMissingError(
+                """
+                Provide --backup-management-type to list protected items in secondary region
+                """)
+        if container_type and container_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+                --use-secondary-region flag is not supported for the --backup-management-type provided.
                 Please either remove the flag or query for any other backup-management-type.
                 """)
         client = backup_protected_items_crr_cf(cmd.cli_ctx)
@@ -119,6 +127,14 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
     return paged_items
 
 
+def list_associated_items_for_policy(client, resource_group_name, vault_name, name, backup_management_type):
+    filter_string = custom_help.get_filter_string({
+        'policyName': name,
+        'backupManagementType': backup_management_type})
+    items = client.list(vault_name, resource_group_name, filter_string)
+    return custom_help.get_list_from_paged_response(items)
+
+
 def fetch_tier(paged_recovery_points):
 
     for rp in paged_recovery_points:
@@ -131,18 +147,19 @@ def fetch_tier(paged_recovery_points):
             continue
 
         for i in range(len(rp.properties.recovery_point_tier_details)):
-            if (rp.properties.recovery_point_tier_details[i].type == "ArchivedRP" and
-                    rp.properties.recovery_point_tier_details[i].status == "Rehydrated"):
+            currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+            if (currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP") and
+                    currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Rehydrated")):
                 isRehydrated = True
 
-            if rp.properties.recovery_point_tier_details[i].status == "Valid":
-                if rp.properties.recovery_point_tier_details[i].type == "InstantRP":
+            if currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Valid"):
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "InstantRP"):
                     isInstantRecoverable = True
 
-                if rp.properties.recovery_point_tier_details[i].type == "HardenedRP":
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "HardenedRP"):
                     isHardenedRP = True
 
-                if rp.properties.recovery_point_tier_details[i].type == "ArchivedRP":
+                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP"):
                     isArchived = True
 
         if (isHardenedRP and isArchived) or (isRehydrated):
@@ -254,10 +271,10 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
     filter_string = custom_help.get_filter_string(filter_dict)
 
     if use_secondary_region:
-        if backup_management_type.lower() == "azurestorage":
+        if backup_management_type.lower() in crr_not_supported_bmt:
             raise InvalidArgumentValueError(
                 """
-                --use-secondary-region flag is not supported for --backup-management-type AzureStorage.
+                --use-secondary-region flag is not supported for the --backup-management-type provided.
                 Please either remove the flag or query for any other backup-management-type.
                 """)
 
@@ -289,3 +306,15 @@ def _check_map(item_type, item_type_map):
     az_error = InvalidArgumentValueError(error_text)
     az_error.set_recommendation(recommendation_text)
     raise az_error
+
+
+def _get_enum_position(enum, value):
+    enum_len = len(enum)
+    count = 0
+    for val in enum:
+        if val == value:
+            break
+        count += 1
+    if count == enum_len:
+        raise InvalidArgumentValueError("enum value not present.")
+    return str(count)

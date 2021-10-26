@@ -1973,6 +1973,32 @@ examples:
     crafted: true
 """
 
+helps['vm application'] = """
+type: group
+short-summary: Manage appliations for VM
+"""
+
+helps['vm application set'] = """
+type: command
+short-summary: Set appliations for VM.
+examples:
+  - name: Set applications for vm
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications of a vm with config
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vm application list'] = """
+type: command
+short-summary: List applications for VM
+examples:
+  - name: List applications for vm
+    text: az vm application list -g MyResourceGroup -n MyVm
+"""
+
 helps['vm image'] = """
 type: group
 short-summary: Information on available virtual machine images.
@@ -2529,6 +2555,16 @@ examples:
     text: az vm update -n name -g group --add networkProfile.networkInterfaces primary=false id={NIC_ID}
   - name: Remove the fourth NIC from a VM.
     text: az vm update -n name -g group --remove networkProfile.networkInterfaces 3
+  - name: Add an existing VM to a dedicated host
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host my-host
+        az vm start -n name -g group
+  - name: Add an existing VM to a dedicated host group
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host-group my-host-group
+        az vm start -n name -g group
 """
 
 helps['vm user'] = """
@@ -2676,6 +2712,9 @@ examples:
   - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
 """
 
 helps['vmss deallocate'] = """
@@ -2925,6 +2964,32 @@ examples:
     crafted: true
 """
 
+helps['vmss application'] = """
+type: group
+short-summary: manage applications for VM scale set.
+"""
+
+helps['vmss application set'] = """
+type: command
+short-summary: Set applications for VMSS.
+examples:
+  - name: Set applications for vmss
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications for vmss with config
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vmss application list'] = """
+type: command
+short-summary: List applications for VMSS
+examples:
+  - name: List applications for vmss
+    text: az vmss application list -g MyResourceGroup --name MyVmss
+"""
+
 helps['vmss list'] = """
 type: command
 short-summary: List VMSS.
@@ -3125,6 +3190,8 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66
   - name: Update a VM to use a custom image.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
+  - name: Update a Linux VMSS to patch mode 'AutomaticByPlatform'.
+    text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
 """
 
 helps['vmss update-instances'] = """

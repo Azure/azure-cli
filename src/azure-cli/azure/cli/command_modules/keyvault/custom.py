@@ -1115,7 +1115,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 # region KeyVault Key
 def create_key(client, key_name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
+               not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
     return client.create_key(name=key_name,
                              key_type=kty,
@@ -1125,7 +1125,9 @@ def create_key(client, key_name=None, protection=None,  # pylint: disable=unused
                              not_before=not_before,
                              expires_on=expires,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             exportable=exportable,
+                             release_policy=release_policy)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1234,7 +1236,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
 def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', curve=None):
+               byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     JsonWebKey = cmd.loader.get_sdk('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT_KEYS, mod='_models')
@@ -1281,7 +1283,8 @@ def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
     return client.import_key(name=key_name, key=key_obj,
                              hardware_protected=(protection == 'hsm'),
                              enabled=not disabled, tags=tags,
-                             not_before=not_before, expires_on=expires)
+                             not_before=not_before, expires_on=expires,
+                             exportable=exportable, release_policy=release_policy)
 
 
 def _bytes_to_int(b):
@@ -1414,17 +1417,44 @@ def download_key(client, file_path, hsm_name=None, identifier=None,  # pylint: d
 
 def get_policy_template():
     policy = {
-        'version': '0.2',
+        'version': '1.0.0',
         'anyOf': [{
             'authority': '<issuer>',
             'allOf': [{
                 'claim': '<claim name>',
-                'condition': 'equals',
-                'value': '<value to match>'
+                'equals': '<value to match>'
             }]
         }]
     }
     return policy
+
+
+def update_key_rotation_policy(cmd, client, value, key_name=None):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    if os.path.exists(value):
+        policy = get_file_json(value)
+    else:
+        policy = shell_safe_json_parse(value)
+    if not policy:
+        raise InvalidArgumentValueError("Please specify a valid policy")
+
+    KeyRotationLifetimeAction = cmd.loader.get_sdk('KeyRotationLifetimeAction', mod='_models',
+                                                   resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    lifetime_actions = []
+    if policy.get('lifetime_actions', None):
+        for action in policy['lifetime_actions']:
+            action_type = action['action'].get('type', None) if action.get('action', None) else None
+            time_after_create = action['trigger'].get('time_after_create', None) \
+                if action.get('trigger', None) else None
+            time_before_expiry = action['trigger'].get('time_before_expiry', None) \
+                if action.get('trigger', None) else None
+            lifetime_action = KeyRotationLifetimeAction(action_type,
+                                                        time_after_create=time_after_create,
+                                                        time_before_expiry=time_before_expiry)
+            lifetime_actions.append(lifetime_action)
+
+    expires_in = policy['attributes'].get('expires_in', None) if policy.get('attributes', None) else None
+    return client.update_key_rotation_policy(name=key_name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
 

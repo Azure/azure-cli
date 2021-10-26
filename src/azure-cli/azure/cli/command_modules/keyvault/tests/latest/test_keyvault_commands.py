@@ -34,6 +34,10 @@ def _asn1_to_iso8601(asn1_date):
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
+# for hsm scenario tests
+TEST_HSM_NAME = 'ystesthsm'
+TEST_HSM_URL = 'https://{}.managedhsm.azure.net'.format(TEST_HSM_NAME)
+
 # for other HSM operations live/playback
 ACTIVE_HSM_NAME = 'clitest-1102'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
@@ -1082,6 +1086,46 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv2} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    def test_keyvault_key_rotation(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus2',
+            'key': self.create_random_name('key-', 24),
+            'policy': os.path.join(TEST_DIR, 'rotation_policy.json')
+        })
+        keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.extend(['rotate'])
+        self.kwargs['key_perms'] = ' '.join(key_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+
+        # create a key
+        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
+                       checks=self.check('attributes.enabled', True)).get_output_in_json()
+
+        # update rotation-policy
+        self.cmd('keyvault key rotation-policy update --value "{policy}" --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # show rotation-policy
+        self.cmd('keyvault key rotation-policy show --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # rotate key
+        self.cmd('keyvault key rotate --vault-name {kv} -n {key}')
+
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
     # @record_only()
@@ -1222,6 +1266,18 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+    def test_keyvault_hsm_key_random(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL
+        })
+
+        result = self.cmd('keyvault key random --count 4 --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
+
+        result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):

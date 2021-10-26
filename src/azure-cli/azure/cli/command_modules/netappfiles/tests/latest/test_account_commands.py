@@ -11,7 +11,7 @@ VAULT_LOCATION = "southcentralus"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_account(self):
         self.kwargs.update({
             'loc': LOCATION,
@@ -52,7 +52,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_list_accounts(self):
         self.kwargs.update({
             'loc': LOCATION,
@@ -73,7 +73,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('length(@)', 0)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_get_account_by_name(self):
         self.kwargs.update({
             'loc': LOCATION,
@@ -86,7 +86,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         # test get account from id
         self.cmd(("az netappfiles account show --ids %s" % account['id']), checks=[self.check('name', '{acc_name}')])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_update_account(self):
         self.kwargs.update({
             'loc': LOCATION,
@@ -103,7 +103,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('tags.Tag2', 'Value2')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_active_directory(self):
         self.kwargs.update({
             'loc': LOCATION,
@@ -147,7 +147,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.check('activeDirectories', None)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_account_encryption(self):
         self.kwargs.update({
             'loc': LOCATION,

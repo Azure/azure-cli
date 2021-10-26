@@ -17,8 +17,8 @@ import sys
 import uuid
 import base64
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -54,7 +54,8 @@ from ._bicep import (
     remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
-    validate_bicep_target_scope
+    validate_bicep_target_scope,
+    supports_bicep_publish
 )
 
 logger = get_logger(__name__)
@@ -936,7 +937,7 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
-    from six.moves.urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
+    from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
     try:
         scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
@@ -1931,9 +1932,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True
@@ -3558,6 +3559,13 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         print(run_bicep_command(args))
         return
     run_bicep_command(args)
+
+
+def publish_bicep_file(cmd, file, target):
+    if supports_bicep_publish():
+        run_bicep_command(["publish", file, "--target", target])
+    else:
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
 
 
 def decompile_bicep_file(cmd, file):

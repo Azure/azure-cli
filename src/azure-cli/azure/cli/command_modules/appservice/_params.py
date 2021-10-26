@@ -337,7 +337,7 @@ def load_arguments(self, _):
             c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
-                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. To avoid compatibility issues, it is recommended to use a JSON file to provide these configurations. If using a key=value pair, PowerShell and Windows Command Prompt users should be sure to use escape characters like so: {\\"key\\": value}, instead of: `{"key": value}`.')
+                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell and Windows Command Prompt users should use a JSON file to provide these configurations to avoid compatibility issues with escape characters.')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
@@ -472,15 +472,15 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
-        c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
+        c.argument('custom_id', options_list=['--custom-id', '-i'], help='name of the share configured within the web app')
         c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type',
                    arg_type=get_enum_type(AzureStorageType))
         c.argument('account_name', options_list=['--account-name', '-a'], help='storage account name')
         c.argument('share_name', options_list=['--share-name', '--sn'],
-                   help='share name (Azure Files) or container name (Azure Blob Storage)')
+                   help='name of the file share as given in the storage account')
         c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
         c.argument('mount_path', options_list=['--mount-path', '-m'],
-                   help='path to mount storage volume within web app')
+                   help='the path which the web app uses to read-write data ex: /share1 or /share2')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:

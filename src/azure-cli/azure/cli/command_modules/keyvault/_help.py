@@ -325,6 +325,55 @@ type: command
 short-summary: Return policy template as JSON encoded policy definition.
 """
 
+helps['keyvault key rotate'] = """
+type: command
+short-summary: Rotate the key based on the key policy by generating a new version of the key.
+"""
+
+helps['keyvault key rotation-policy'] = """
+type: group
+short-summary: Manage key's rotation policy.
+"""
+
+helps['keyvault key rotation-policy update'] = """
+type: command
+short-summary: Update the rotation policy of a Key Vault key.
+examples:
+  - name: Set rotation policy using json file
+    text: |
+        az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
+        A valid example for policy.json is:
+        {
+          "lifetime_actions": [
+            {
+              "trigger": {
+                "time_after_create": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "time_before_expiry" : null
+              },
+              "action": {
+                "type": "Rotate"
+              }
+            },
+            {
+              "trigger": {
+                "time_before_expiry" : "P30D" // ISO 8601 duration.
+              },
+              "action": {
+                "type": "Notify"
+              }
+            }
+          ],
+          "attributes": {
+            "expires_in": "P2Y" // ISO 8601 duration.
+          }
+        }
+"""
+
+helps['keyvault key rotation-policy show'] = """
+type: command
+short-summary: Get the rotation policy of a Key Vault key.
+"""
+
 helps['keyvault list'] = """
 type: command
 short-summary: List Vaults and/or HSMs.
