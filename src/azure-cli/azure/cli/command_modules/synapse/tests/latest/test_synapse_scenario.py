@@ -1812,7 +1812,7 @@ class SynapseScenarioTests(ScenarioTest):
         
         # create sqlscript
         self.cmd(
-            'az synapse sql-script create --workspace-name {workspace} --name {name} --definition-file "{file}" '
+            'az synapse sql-script create --workspace-name {workspace} --name {name} --file "{file}" '
             ' --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
@@ -1834,8 +1834,8 @@ class SynapseScenarioTests(ScenarioTest):
         
         # update sqlscript
         self.cmd(
-            'az synapse sql-script update --workspace-name {workspace} --name {name} --definition-file "{file}" '
-            '--sql-pool-name {sql_pool_name} --data-base-name {data_base_name} --folder-name {folder_name}',
+            'az synapse sql-script update --workspace-name {workspace} --name {name} --file "{file}" '
+            '--sql-pool-name {sql_pool_name} --sql-database-name {data_base_name} --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
