@@ -20,7 +20,7 @@ parameters:
     short-summary: A json file used to set redis-configuration settings. You may encounter parse errors if the json file is invalid.
     long-summary: |
         Usage: --redis-configuration @"{config_file.json}"
-        
+
         An example json file for configuring max-memory policies
         [
           {
