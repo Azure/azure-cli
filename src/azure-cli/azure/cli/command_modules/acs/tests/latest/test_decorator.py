@@ -2626,6 +2626,52 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_sgxquotehelper(), True)
 
+    def test_get_enable_secret_rotation(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "enable_secret_rotation": False,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_secret_rotation(), False)
+        addon_profiles_1 = {
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_SECRET_ROTATION_ENABLED: "true"},
+            )
+        }
+        mc = self.models.ManagedCluster(
+            location="test_location", addon_profiles=addon_profiles_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_secret_rotation(), True)
+
+    def test_get_rotation_poll_interval(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "rotation_poll_interval": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_rotation_poll_interval(), None)
+        addon_profiles_1 = {
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_ROTATION_POLL_INTERVAL: "2m"},
+            )
+        }
+        mc = self.models.ManagedCluster(
+            location="test_location", addon_profiles=addon_profiles_1
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_rotation_poll_interval(), "2m")
+
     def test_get_enable_aad(self):
         # default
         ctx_1 = AKSContext(
@@ -4905,6 +4951,57 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             open_service_mesh_profile, ground_truth_open_service_mesh_profile
         )
 
+    def test_build_azure_keyvault_secrets_provider_addon_profile(self):
+        # default
+        dec_1 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile = (
+            dec_1.build_azure_keyvault_secrets_provider_addon_profile()
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "false",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        self.assertEqual(
+            azure_keyvault_secrets_provider_addon_profile,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile,
+        )
+
+        # custom value
+        dec_2 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_secret_rotation": True, "rotation_poll_interval": "30m"},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        azure_keyvault_secrets_provider_addon_profile = (
+            dec_2.build_azure_keyvault_secrets_provider_addon_profile()
+        )
+        ground_truth_azure_keyvault_secrets_provider_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "30m",
+                },
+            )
+        )
+        self.assertEqual(
+            azure_keyvault_secrets_provider_addon_profile,
+            ground_truth_azure_keyvault_secrets_provider_addon_profile,
+        )
+
     def test_set_up_addon_profiles(self):
         # default value in `aks_create`
         dec_1 = AKSCreateDecorator(
@@ -4920,6 +5017,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_subnet_id": None,
                 "appgw_watch_namespace": None,
                 "enable_sgxquotehelper": False,
+                "enable_secret_rotation": False,
+                "rotation_poll_interval": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4947,7 +5046,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.client,
             {
                 "vnet_subnet_id": "test_vnet_subnet_id",
-                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh",
+                "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh,azure-keyvault-secrets-provider",
                 "workspace_resource_id": "test_workspace_resource_id",
                 "aci_subnet_name": "test_aci_subnet_name",
                 "appgw_name": "test_appgw_name",
@@ -4956,6 +5055,8 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "appgw_subnet_id": "test_appgw_subnet_id",
                 "appgw_watch_namespace": "test_appgw_watch_namespace",
                 "enable_sgxquotehelper": True,
+                "enable_secret_rotation": True,
+                "rotation_poll_interval": "30m",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5004,6 +5105,13 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             CONST_OPEN_SERVICE_MESH_ADDON_NAME: self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={},
+            ),
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "true",
+                    CONST_ROTATION_POLL_INTERVAL: "30m",
+                },
             ),
         }
         ground_truth_mc_2 = self.models.ManagedCluster(
