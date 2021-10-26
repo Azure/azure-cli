@@ -28,7 +28,7 @@ parameters:
           }
         ]
 
-        An example json file for enable the RDB back up data persistence is
+        An example json file for enabling the RDB back up data persistence is
         [
           {
             "rdb-storage-connection-string": "DefaultEndpointsProtocol=https;AccountName=mystorageaccount;AccountKey=myAccountKey;EndpointSuffix=core.windows.net",
@@ -38,7 +38,7 @@ parameters:
           }
         ]
 
-        An example json file for enable the AOF back up data persistence is
+        An example json file for enabling the AOF back up data persistence is
         [
           {
             "aof-backup-enabled": "true",
