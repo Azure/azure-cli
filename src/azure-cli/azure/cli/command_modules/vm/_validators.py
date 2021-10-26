@@ -1225,6 +1225,16 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
 
+def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
+    if len(namespace.application_version_ids) == 0:
+        from azure.cli.core.parser import InvalidArgumentValueError
+        raise InvalidArgumentValueError('usage error: --application-version-ids should not be empty list.')
+    if namespace.application_configuration_overrides and \
+       len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
+        raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
+                                 ' --application-version-ids')
+
+
 def _resolve_role_id(cli_ctx, role, scope):
     import re
     import uuid
@@ -1800,6 +1810,10 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
+
+
+def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    _validate_vm_vmss_set_applications(cmd, namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):
