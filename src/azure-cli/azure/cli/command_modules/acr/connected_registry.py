@@ -31,7 +31,7 @@ DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message
 REPO_SCOPES_BY_MODE = {
     ConnectedRegistryModes.READONLY.value: ['content/read', 'metadata/read'],
     ConnectedRegistryModes.READWRITE.value: ['content/read', 'content/write', 'content/delete',
-                                            'metadata/read', 'metadata/write'],
+                                             'metadata/read', 'metadata/write'],
     # Remove next release
     "mirror": ['content/read', 'metadata/read'],
     "registry": ['content/read', 'content/write', 'content/delete', 'metadata/read', 'metadata/write'],

@@ -10,6 +10,7 @@ VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
 VERSION_2020_11_01_PREVIEW = "2020-11-01-preview"
 VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 
+
 def get_acr_service_client(cli_ctx, api_version=None):
     """Returns the client for managing container registries. """
     from azure.cli.core.profiles import ResourceType
