@@ -2384,6 +2384,14 @@ helps['staticwebapp delete'] = """
       text: az staticwebapp delete -n MyStaticAppName -g MyRg
 """
 
+helps['staticwebapp browse'] = """
+    type: command
+    short-summary: Open a static web app in a browser.
+    examples:
+    - name: Open a static web app in a browser.
+      text: az staticwebapp browse -n MyStaticAppName -g MyRg
+"""
+
 helps['staticwebapp environment'] = """
     type: group
     short-summary: Manage environment of the static app.
