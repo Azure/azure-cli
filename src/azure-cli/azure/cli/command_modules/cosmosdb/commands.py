@@ -24,12 +24,9 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_mongodb_databases,
     cf_restorable_mongodb_collections,
     cf_restorable_mongodb_resources,
-<<<<<<< HEAD
     cf_db_locations
-=======
     cf_cassandra_cluster,
     cf_cassandra_data_center
->>>>>>> 071c1687d (managed-cassandra initial commit)
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -117,11 +114,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbResourcesOperations.{}',
         client_factory=cf_restorable_mongodb_resources)
 
-<<<<<<< HEAD
     cosmosdb_locations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#LocationsOperations.{}',
         client_factory=cf_db_locations)
-=======
+        
     cosmosdb_managed_cassandra_cluster_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraClustersOperations.{}',
         client_factory=cf_cassandra_cluster)
@@ -129,7 +125,6 @@ def load_command_table(self, _):
     cosmosdb_managed_cassandra_datacenter_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraDataCentersOperations.{}',
         client_factory=cf_cassandra_data_center)
->>>>>>> 071c1687d (managed-cassandra initial commit)
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get', transform=transform_db_account_json_output)
