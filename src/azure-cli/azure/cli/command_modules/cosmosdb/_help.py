@@ -1175,6 +1175,7 @@ examples:
   - name: Shows the Azure CosmosDB location properties in the given location.
     text: az cosmosdb locations show --location 'East US'
 """
+
 helps['managed-cassandra'] = """
 type: group
 short-summary: Azure Managed Cassandra.
@@ -1240,7 +1241,6 @@ examples:
     text: |
       az managed-cassandra cluster list
 """
-
 
 helps['managed-cassandra cluster invoke-command'] = """
 type: command

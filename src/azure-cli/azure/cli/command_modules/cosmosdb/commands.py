@@ -24,7 +24,7 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_mongodb_databases,
     cf_restorable_mongodb_collections,
     cf_restorable_mongodb_resources,
-    cf_db_locations
+    cf_db_locations,
     cf_cassandra_cluster,
     cf_cassandra_data_center
 )

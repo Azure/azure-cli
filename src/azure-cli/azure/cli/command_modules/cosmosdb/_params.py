@@ -426,7 +426,7 @@ def load_arguments(self, _):
     # Account locations
     with self.argument_context('cosmosdb locations show') as c:
         c.argument('location', options_list=['--location', '-l'], help="Name of the location", required=True)
-        
+
     # Managed Cassandra Cluster
     for scope in [
             'managed-cassandra cluster create',

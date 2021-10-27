@@ -141,7 +141,7 @@ def cf_restorable_mongodb_resources(cli_ctx, _):
 def cf_db_locations(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).locations
 
-    
+
 def cf_cassandra_cluster(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).cassandra_clusters
 
