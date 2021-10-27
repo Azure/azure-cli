@@ -155,52 +155,58 @@ class TestUtils(unittest.TestCase):
         platform = sys.platform.lower()
         open_page_in_browser('http://foo')
         if is_wsl():
-            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-Command', 'Start-Process "http://foo"'])
+            subprocess_open_mock.assert_called_once_with(['powershell.exe', '-NoProfile',
+                                                          '-Command', 'Start-Process "http://foo"'])
         elif platform == 'darwin':
             subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
             webbrowser_open_mock.assert_called_once_with('http://foo', 2)
 
+    @mock.patch('shutil.which', autospec=True)
     @mock.patch('azure.cli.core.util._get_platform_info', autospec=True)
     @mock.patch('webbrowser.get', autospec=True)
-    def test_can_launch_browser(self, webbrowser_get_mock, get_platform_mock):
-        # WSL is always fine
-        get_platform_mock.return_value = ('linux', '4.4.0-17134-microsoft')
-        result = can_launch_browser()
-        self.assertTrue(result)
+    def test_can_launch_browser(self, webbrowser_get_mock, get_platform_mock, which_mock):
+        import webbrowser
 
-        # windows is always fine
+        # Windows is always fine
         get_platform_mock.return_value = ('windows', '10')
-        result = can_launch_browser()
-        self.assertTrue(result)
+        assert can_launch_browser()
 
-        # osx is always fine
+        # MacOS is always fine
         get_platform_mock.return_value = ('darwin', '10')
-        result = can_launch_browser()
-        self.assertTrue(result)
+        assert can_launch_browser()
 
-        # now tests linux
-        with mock.patch('os.environ', autospec=True) as env_mock:
-            # when no GUI, return false
-            get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
-            env_mock.get.return_value = None
-            result = can_launch_browser()
-            self.assertFalse(result)
+        # Real linux with browser
+        get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
+        browser_mock = mock.MagicMock()
+        browser_mock.name = 'www-browser'
+        webbrowser_get_mock.return_value = browser_mock
+        assert can_launch_browser()
 
-            # when there is gui, and browser is a good one, return True
-            browser_mock = mock.MagicMock()
-            browser_mock.name = 'goodone'
-            env_mock.get.return_value = 'foo'
-            result = can_launch_browser()
-            self.assertTrue(result)
+        # Real linux without browser
+        get_platform_mock.return_value = ('linux', '4.15.0-1014-azure')
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        assert not can_launch_browser()
 
-            # when there is gui, but the browser is text mode, return False
-            browser_mock = mock.MagicMock()
-            browser_mock.name = 'www-browser'
-            webbrowser_get_mock.return_value = browser_mock
-            env_mock.get.return_value = 'foo'
-            result = can_launch_browser()
-            self.assertFalse(result)
+        # WSL Linux with www-browser
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        browser_mock = mock.MagicMock()
+        browser_mock.name = 'www-browser'
+        webbrowser_get_mock.return_value = browser_mock
+        assert can_launch_browser()
+
+        # WSL Linux without www-browser, but with powershell.exe
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        which_mock.return_value = True
+        assert can_launch_browser()
+
+        # Docker container on WSL 2 can't launch browser
+        get_platform_mock.return_value = ('linux', '5.10.16.3-microsoft-standard-WSL2')
+        import webbrowser
+        webbrowser_get_mock.side_effect = webbrowser.Error
+        which_mock.return_value = False
+        assert not can_launch_browser()
 
     def test_configured_default_setter(self):
         config = mock.MagicMock()

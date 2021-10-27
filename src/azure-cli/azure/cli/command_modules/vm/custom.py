@@ -22,7 +22,12 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError, ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    CLIInternalError,
+    ResourceNotFoundError,
+    ValidationError,
+    RequiredArgumentMissingError
+)
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
@@ -535,7 +540,7 @@ def list_images(cmd, resource_group_name=None):
 # region Snapshots
 # pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, incremental=None,
+                    source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
@@ -551,6 +556,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
+            option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
     else:
@@ -727,7 +734,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None,
+              ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
@@ -1372,7 +1380,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              dedicated_host=None, dedicated_host_group=None, **kwargs):
+              dedicated_host=None, dedicated_host_group=None, size=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1467,6 +1475,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     aux_subscriptions = None
     if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
         aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
+
+    if size is not None:
+        if vm.hardware_profile.vm_size == size:
+            logger.warning("VM size is already %s", size)
+        else:
+            vm.hardware_profile.vm_size = size
+
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -2536,7 +2551,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+                application_security_groups=None, ultra_ssd_enabled=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
@@ -2545,7 +2561,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2806,7 +2822,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group)
+            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            patch_mode=patch_mode, enable_agent=enable_agent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3082,7 +3099,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                **kwargs):
+                vm_sku=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3207,6 +3224,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
+
+    if vm_sku is not None:
+        if vmss.sku.name == vm_sku:
+            logger.warning("VMSS sku is already %s", vm_sku)
+        else:
+            vmss.sku.name = vm_sku
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -4138,3 +4161,72 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 def list_capacity_reservation(client, resource_group_name, capacity_reservation_group_name):
     return client.list_by_capacity_reservation_group(resource_group_name=resource_group_name,
                                                      capacity_reservation_group_name=capacity_reservation_group_name)
+
+
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
+    try:
+        vm = client.virtual_machines.get(resource_group_name, vm_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
+
+    vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+
+    if order_applications:
+        index = 1
+        for app in vm.application_profile.gallery_applications:
+            app.order = index
+            index += 1
+
+    if application_configuration_overrides:
+        index = 0
+        for over_ride in application_configuration_overrides:
+            vm.application_profile.gallery_applications[index].configuration_reference = over_ride
+            index += 1
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+
+
+def list_vm_applications(cmd, vm_name, resource_group_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    try:
+        vm = client.virtual_machines.get(resource_group_name, vm_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
+    return vm.application_profile
+
+
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
+    try:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+
+    # check if application_version_ids is empty
+    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+
+    if order_applications:
+        index = 1
+        for app in vmss.virtual_machine_profile.application_profile.gallery_applications:
+            app.order = index
+            index += 1
+
+    if application_configuration_overrides:
+        # check if the length of application_configuration_overrides is as same as application_version_ids
+        for over_ride in application_configuration_overrides:
+            index = 0
+            if over_ride or over_ride.lower() != 'null':
+                vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
+                index += 1
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+
+
+def list_vmss_applications(cmd, vmss_name, resource_group_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    try:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+    return vmss.virtual_machine_profile.application_profile

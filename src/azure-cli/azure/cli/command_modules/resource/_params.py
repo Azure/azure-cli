@@ -636,5 +636,11 @@ def load_arguments(self, _):
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
 
+    with self.argument_context('bicep publish') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep module file to publish in the file system."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
+                                                      help="The target location where the Bicep module will be published."))
+
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

@@ -1152,3 +1152,26 @@ helps['cosmosdb sql retrieve-latest-backup-time'] = """
 type: command
 short-summary: Retrieves latest restorable timestamp for the given sql container in given region.
 """
+
+helps['cosmosdb mongodb retrieve-latest-backup-time'] = """
+type: command
+short-summary: Retrieves latest restorable timestamp for the given mongodb collection in given region.
+"""
+
+helps['cosmosdb locations'] = """
+type: group
+short-summary: Manage Azure Cosmos DB location properties.
+"""
+
+helps['cosmosdb locations list'] = """
+type: command
+short-summary: Retrieves the list of cosmosdb locations and their properties.
+"""
+
+helps['cosmosdb locations show'] = """
+type: command
+short-summary: Show the Azure CosmosDB location properties in the given location.
+examples:
+  - name: Shows the Azure CosmosDB location properties in the given location.
+    text: az cosmosdb locations show --location 'East US'
+"""
