@@ -140,7 +140,7 @@ def is_bicep_file(file_path):
 
 def get_bicep_available_release_tags():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases")
+        response = requests.get("https://aka.ms/BicepReleases")
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -148,11 +148,18 @@ def get_bicep_available_release_tags():
 
 def get_bicep_latest_release_tag():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases/latest")
+        response = requests.get("https://aka.ms/BicepLatestRelease")
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+
+
+def supports_bicep_publish():
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, "0.4.1008") >= 0
 
 
 def _load_bicep_version_check_result_from_cache():

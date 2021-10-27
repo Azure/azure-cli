@@ -1303,6 +1303,99 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_ephemeral_os_disk_placement')
+    def test_vm_create_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vm-local-base',
+            'vm': 'cli-test-vm-local-1',
+            'vm_2': 'cli-test-vm-local-2',
+            'image': 'UbuntuLTS',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'loc': resource_group_location,
+            'user': 'user_1',
+            'placement1': 'ResourceDisk',
+            'placement2': 'CacheDisk',
+        })
+
+        # check base
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1}')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+        ])
+
+        # check that we can create a vm with ResourceDisk.
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm} --image {image} --size Standard_DS4_v2 --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --admin-username {user} --nsg-rule NONE')
+
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+        ])
+
+        # check that we can create a vm with CacheDisk.
+        self.cmd(
+            'vm create --resource-group {rg} --name {vm_2} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} --os-disk-caching ReadOnly --admin-username {user} --nsg-rule NONE')
+        self.cmd('vm show -g {rg} -n {vm_2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.caching', 'ReadOnly'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
+            self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
+        ])
+
+
+class VMUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_size_', location='westus2')
+    def test_vm_update_size(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vm-local-base',
+            'base2': 'cli-test-vm-local-base2',
+            'image': 'UbuntuLTS',
+            'loc': resource_group_location,
+            'size': 'Standard_DS5_v2',
+        })
+
+        # check base
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc}')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm to another size.
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vm create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm from default size.
+        self.cmd('vm update --resource-group {rg} --name {base2} --size {size}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+        ])
+
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -2469,6 +2562,56 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_ephemeral_os_disk_placement')
+    def test_vmss_create_ephemeral_os_disk_placement(self, resource_group):
+        self.kwargs.update({
+            'base': 'cli-test-vmss-local-base',
+            'vmss': 'cli-test-vmss-local-1',
+            'vmss_2': 'cli-test-vmss-local-2',
+            'image': 'UbuntuLTS',
+            'count': 2,
+            'caching': 'ReadOnly',
+            'user': 'user_1',
+            'password': 'testPassword09',
+            'placement1': 'ResourceDisk',
+            'placement2': 'CacheDisk',
+        })
+
+        # check base
+        self.cmd(
+            'vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk --ephemeral-os-disk-placement {placement1}')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+        ])
+
+        # check that we can create a vmss with ResourceDisk.
+        self.cmd(
+            'vmss create --resource-group {rg} --name {vmss} --image {image} --vm-sku Standard_DS4_v2 --ephemeral-os-disk --ephemeral-os-disk-placement {placement1} --disable-overprovision '
+            '--instance-count {count} --data-disk-sizes-gb 1 --storage-sku os=standard_lrs 0=premium_lrs --admin-username {user} --admin-password {password}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'ResourceDisk'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType',
+                       'Premium_LRS')
+        ])
+
+        # check that we can create a vmss with CacheDisk.
+        self.cmd('vmss create --resource-group {rg} --name {vmss_2} --image {image} --ephemeral-os-disk --ephemeral-os-disk-placement {placement2} '
+                 '--os-disk-caching {caching} --disable-overprovision --instance-count {count} --admin-username {user} --admin-password {password}')
+        self.cmd('vmss show -g {rg} -n {vmss_2}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_update_instance_disks(self, resource_group):
 
@@ -2710,6 +2853,51 @@ class VMSSUpdateTests(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image {image_id}')
         self.cmd('vmss update -g {rg} -n {vmss} --set tags.foo=bar', checks=[
             self.check('tags.foo', 'bar')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
+    def test_vmss_update_vm_sku(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vmss-local-base',
+            'base2': 'cli-test-vmss-local-base2',
+            'image': 'UbuntuLTS',
+            'vm_sku': 'Standard_DS5_v2',
+            'loc': resource_group_location,
+        })
+
+        # check base
+        self.cmd('vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update vmss to another size.
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vmss create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vmss from default size.
+        self.cmd('vmss update --resource-group {rg} --name {base2} --vm-sku {vm_sku}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
         ])
 
 
@@ -5958,6 +6146,55 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         ])
 
 
+class VMSSPatchModeScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_window_patch_mode_')
+    def test_vmss_windows_patch_mode(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('clitestvmss', 20),
+            'rg': resource_group
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
+        vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
+        self.kwargs['vm'] = vm
+
+        # Due to the service bug that patch mode is not returned in response body, we need verify the patch mode of virtual machines inside the VMSS as a workaround.
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', False),
+            self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'Manual')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_')
+    def test_vmss_linux_patch_mode(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('clitestvmss', 20),
+            'rg': resource_group
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --enable-agent --patch-mode ImageDefault --orchestration-mode Flexible --generate-ssh-keys --instance-count 0')
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
+        self.kwargs['extension_file'] = health_extension_file
+
+        # Health extension is required for the patch mode "AutomaticByPlatform".
+        self.cmd('vmss extension set --name ApplicationHealthLinux --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vmss-name {vmss} --settings {extension_file}')
+
+        self.cmd('vmss update --name {vmss} --resource-group {rg} --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform')
+
+        # Create a new VM to apply the new patch mode "AutomaticByPlatform".
+        self.cmd('vmss scale --name {vmss} --new-capacity 1 --resource-group {rg}')
+
+        vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
+        self.kwargs['vm'] = vm
+
+        # Due to the service bug that patch mode is not returned in response body, we need verify the patch mode of virtual machines inside the VMSS as a workaround.
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('osProfile.linuxConfiguration.patchSettings.patchMode', 'AutomaticByPlatform')
+        ])
+
+
 class VMDiskLogicalSectorSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_logical_sector_size_')
@@ -6325,6 +6562,50 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
         self.cmd('capacity reservation group delete -n {reservation_group} -g {rg} --yes')
         self.cmd('capacity reservation group delete -n {reservation_group2} -g {rg} --yes')
+
+
+class VMVMSSAddApplicationTestScenario(ScenarioTest):
+
+    # Need prepare app versions
+    @record_only()
+    @ResourceGroupPreparer()
+    def test_vm_add_application(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2}')
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
+    # Need prepare app versions
+    @record_only()
+    @ResourceGroupPreparer()
+    def test_vmss_add_application(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
 
 
 if __name__ == '__main__':

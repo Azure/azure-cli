@@ -71,14 +71,14 @@ class TestStaticAppCommands(unittest.TestCase):
     def test_delete_staticapp_with_resourcegroup(self):
         delete_staticsite(self.mock_cmd, self.name1, self.rg1)
 
-        self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.begin_delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
     def test_delete_staticapp_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
         delete_staticsite(self.mock_cmd, self.name1)
 
-        self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.begin_delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
     def test_delete_staticapp_not_exist(self):
         with self.assertRaises(CLIError):
@@ -98,8 +98,8 @@ class TestStaticAppCommands(unittest.TestCase):
             app_location=app_location, api_location=api_location, output_location=output_location,
             tags=tags)
 
-        self.staticapp_client.create_or_update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.create_or_update_static_site.call_args[1]
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+        arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
         self.assertEqual(self.name1, arg_list["name"])
         self.assertEqual(self.rg1, arg_list["resource_group_name"])
         self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
@@ -119,8 +119,8 @@ class TestStaticAppCommands(unittest.TestCase):
             self.mock_cmd, self.rg1, self.name1, self.location1,
             self.source1, self.branch1, self.token1, sku='standard')
 
-        self.staticapp_client.create_or_update_static_site.assert_called_once()
-        arg_list = self.staticapp_client.create_or_update_static_site.call_args[1]
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+        arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
         self.assertEqual('Standard', arg_list["static_site_envelope"].sku.name)
 
     def test_create_staticapp_missing_token(self):
@@ -184,14 +184,14 @@ class TestStaticAppCommands(unittest.TestCase):
     def test_disconnect_staticapp_with_resourcegroup(self):
         disconnect_staticsite(self.mock_cmd, self.name1, self.rg1)
 
-        self.staticapp_client.detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.begin_detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
     def test_disconnect_staticapp_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
         disconnect_staticsite(self.mock_cmd, self.name1)
 
-        self.staticapp_client.detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.begin_detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
     @mock.patch('azure.cli.command_modules.appservice.static_sites.create_staticsites', autospec=True)
     def test_reconnect_staticapp_with_resourcegroup(self, create_staticsites_mock):
@@ -239,7 +239,7 @@ class TestStaticAppCommands(unittest.TestCase):
     def test_set_staticsite_domain_with_resourcegroup(self):
         set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
 
-        self.staticapp_client.validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
+        self.staticapp_client.begin_validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
             self.rg1, self.name1, self.hostname1)
         self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
             resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
@@ -249,7 +249,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1)
 
-        self.staticapp_client.validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
+        self.staticapp_client.begin_validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
             self.rg1, self.name1, self.hostname1)
         self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
             resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
@@ -257,7 +257,7 @@ class TestStaticAppCommands(unittest.TestCase):
     def test_delete_staticsite_domain_with_resourcegroup(self):
         delete_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
 
-        self.staticapp_client.delete_static_site_custom_domain.assert_called_once_with(
+        self.staticapp_client.begin_delete_static_site_custom_domain.assert_called_once_with(
             resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
 
     def test_delete_staticsite_domain_without_resourcegroup(self):
@@ -265,20 +265,20 @@ class TestStaticAppCommands(unittest.TestCase):
 
         delete_staticsite_domain(self.mock_cmd, self.name1, self.hostname1)
 
-        self.staticapp_client.delete_static_site_custom_domain.assert_called_once_with(
+        self.staticapp_client.begin_delete_static_site_custom_domain.assert_called_once_with(
             resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
 
     def test_delete_staticsite_environment_with_resourcegroup(self):
         delete_staticsite_environment(self.mock_cmd, self.name1, self.environment1, self.rg1)
 
-        self.staticapp_client.delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+        self.staticapp_client.begin_delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
 
     def test_delete_staticsite_environment_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
         delete_staticsite_environment(self.mock_cmd, self.name1, self.environment1)
 
-        self.staticapp_client.delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+        self.staticapp_client.begin_delete_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
 
     def test_list_staticsite_functions_with_resourcegroup(self):
         list_staticsite_functions(self.mock_cmd, self.name1, self.rg1, self.environment1)

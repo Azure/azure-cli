@@ -23,7 +23,8 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_restorable_sql_resources,
     cf_restorable_mongodb_databases,
     cf_restorable_mongodb_collections,
-    cf_restorable_mongodb_resources
+    cf_restorable_mongodb_resources,
+    cf_db_locations
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -110,6 +111,10 @@ def load_command_table(self, _):
     cosmosdb_mongodb_restorable_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#RestorableMongodbResourcesOperations.{}',
         client_factory=cf_restorable_mongodb_resources)
+
+    cosmosdb_locations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#LocationsOperations.{}',
+        client_factory=cf_db_locations)
 
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get', transform=transform_db_account_json_output)
@@ -363,6 +368,15 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb mongodb restorable-resource', cosmosdb_mongodb_restorable_resources_sdk, client_factory=cf_restorable_mongodb_resources) as g:
         g.command('list', 'list')
 
-    # Retrieve backup info
-    with self.command_group('cosmosdb sql', cosmosdb_sql_sdk, client_factory=cf_sql_resources, is_preview=True) as g:
-        g.custom_command('retrieve-latest-backup-time', 'cli_retrieve_latest_backup_time')
+    # Get account locations
+    with self.command_group('cosmosdb locations', cosmosdb_locations_sdk, client_factory=cf_db_locations) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+
+    # Retrieve backup info for sql
+    with self.command_group('cosmosdb sql', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('retrieve-latest-backup-time', 'cli_sql_retrieve_latest_backup_time')
+
+    # Retrieve backup info for mongodb
+    with self.command_group('cosmosdb mongodb', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
+        g.custom_command('retrieve-latest-backup-time', 'cli_mongo_db_retrieve_latest_backup_time')
