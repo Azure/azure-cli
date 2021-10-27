@@ -126,10 +126,7 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
                                   ignore_data_before=None, skip_metric_validation=None):
     if metric_namespace:
         metric_namespace += '.'
-    validation_flag = ''
-    if skip_metric_validation:
-        validation_flag = '! '
-    condition = "{} {}{}'{}' {} ".format(aggregation, validation_flag, metric_namespace, metric_name, operator)
+    condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
     if condition_type == 'static':
         condition += '{} '.format(threshold)
     elif condition_type == 'dynamic':
@@ -147,6 +144,9 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
             dimensions = [t for t in dimensions.split(_metric_alert_dimension_prefix) if t]
             dimensions = 'where' + 'and'.join(dimensions)
         condition += dimensions
+
+    if skip_metric_validation:
+        condition += ' with skipmetricvalidation'
 
     return condition.strip()
 

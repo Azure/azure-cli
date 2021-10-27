@@ -4,7 +4,7 @@ grammar MetricAlertCondition ;
 
 /* Main Rules */
 
-expression          : aggregation validation_flag? (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator (threshold | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
+expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator (threshold | dynamics) (WHITESPACE dimensions)* (WHITESPACE options_)? NEWLINE* ;
 
 aggregation         : WORD WHITESPACE ;
 
@@ -13,8 +13,6 @@ namespace           : (NUMBER | WORD | '/' | '.')+;
 metric              : (NUMBER | WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%' | '-' | ',' | '|')+;
 
 operator            : OPERATOR WHITESPACE ;
-
-validation_flag     : '!' WHITESPACE ;
 
 /* Statics */
 
@@ -58,6 +56,14 @@ dim_values          : dim_value (dim_val_separator dim_value)* ;
 
 dim_value           : (NUMBER | WORD | '-' | '.' | '*' | WHITESPACE | ':'| '~' | ',' | '|' | '%' | '_')+ ;
 
+/* Options */
+
+options_            : with_ option ;
+
+with_               : WITH WHITESPACE ;
+
+option              : SKIPMETRICVALIDATION ;
+
 /* LEXER RULES */
 
 fragment A          : ('a'|'A') ;
@@ -67,13 +73,17 @@ fragment E          : ('e'|'E') ;
 fragment F          : ('f'|'F') ;
 fragment H          : ('h'|'H') ;
 fragment I          : ('i'|'I') ;
+fragment K          : ('k'|'K') ;
 fragment L          : ('l'|'L') ;
 fragment M          : ('m'|'M') ;
 fragment N          : ('n'|'N') ;
 fragment O          : ('o'|'O') ;
+fragment P          : ('p'|'P') ;
 fragment R          : ('r'|'R') ;
 fragment S          : ('s'|'S') ;
+fragment T          : ('t'|'T') ;
 fragment U          : ('u'|'U') ;
+fragment V          : ('v'|'V') ;
 fragment W          : ('w'|'W') ;
 fragment X          : ('x'|'X') ;
 fragment Y          : ('y'|'Y') ;
@@ -90,6 +100,8 @@ OR                  : O R ;
 DYNAMIC             : D Y N A M I C ;
 OF                  : O F ;
 SINCE               : S I N C E ;
+WITH                : W I T H ;
+SKIPMETRICVALIDATION : S K I P M E T R I C V A L I D A T I O N ;
 
 OPERATOR            : ('<' | '<=' | '=' | '>=' | '>' | '!=' | '><') ;
 NUMBER              : DIGIT+ ([.,] DIGIT+)? ;

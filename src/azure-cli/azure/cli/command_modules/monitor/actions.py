@@ -98,11 +98,12 @@ class MetricAlertConditionAction(argparse._AppendAction):
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
         from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
 
-        usage = 'usage error: --condition {avg,min,max,total,count} [!] [NAMESPACE.]METRIC\n' \
+        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
                 '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
-                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n' \
+                '                         [with skipmetricvalidation]'
 
         string_val = ' '.join(values)
 

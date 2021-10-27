@@ -49,11 +49,6 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         aggregation = agg_conversion[ctx.getText().strip()]
         self.parameters['time_aggregation'] = aggregation
 
-    # Exit a parse tree produced by MetricAlertConditionParser#validation_flag.
-    def exitValidation_flag(self, ctx):
-        if ctx.getText().strip() == '!':
-            self.parameters['skip_metric_validation'] = True
-
     # Exit a parse tree produced by MetricAlertConditionParser#namespace.
     def exitNamespace(self, ctx):
         self.parameters['metric_namespace'] = ctx.getText().strip()
@@ -130,6 +125,11 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
     def exitDim_values(self, ctx):
         dvalues = ctx.getText().strip().split(' ')
         self.parameters['dimensions'][self._dimension_index]['values'] = [x for x in dvalues if x not in ['', 'or']]
+
+    # Exit a parse tree produced by MetricAlertConditionParser#option.
+    def exitOption(self, ctx):
+        if ctx.getText().strip().lower() == 'skipmetricvalidation':
+            self.parameters['skip_metric_validation'] = True
 
     def result(self):
         from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, \
