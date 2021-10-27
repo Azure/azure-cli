@@ -4169,7 +4169,8 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
     if application_configuration_overrides:
         index = 0
         for over_ride in application_configuration_overrides:
-            vm.application_profile.gallery_applications[index].configuration_reference = over_ride
+            if over_ride or over_ride.lower() != 'null':
+                vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -4191,7 +4192,6 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
 
-    # check if application_version_ids is empty
     vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
 
     if order_applications:
@@ -4201,12 +4201,11 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
             index += 1
 
     if application_configuration_overrides:
-        # check if the length of application_configuration_overrides is as same as application_version_ids
+        index = 0
         for over_ride in application_configuration_overrides:
-            index = 0
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
-                index += 1
+            index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
 
