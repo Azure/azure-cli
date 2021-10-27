@@ -123,10 +123,11 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        os_disk_caching=None, data_disk_cachings=None, size='',
+                        ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
                         data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
@@ -152,6 +153,8 @@ def normalize_disk_info(image_data_disks=None,
         # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
+        if ephemeral_os_disk_placement:
+            info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
 
     # add managed image data disks
     for data_disk in image_data_disks:
