@@ -1486,7 +1486,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm.storage_profile.os_disk.diff_disk_settings is not None:
             vm.storage_profile.os_disk.diff_disk_settings.placement = ephemeral_os_disk_placement
         else:
-            raise ValidationError('should update from --ephemeral-os-disk true vm.')
+            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
+                                  "creating VM with the option '--ephemeral-os-disk true'")
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
@@ -3242,7 +3243,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
                 ephemeral_os_disk_placement
         else:
-            raise ValidationError('should update from --ephemeral-os-disk true vmss.')
+            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
+                                  "creating VMSS with the option '--ephemeral-os-disk true'")
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

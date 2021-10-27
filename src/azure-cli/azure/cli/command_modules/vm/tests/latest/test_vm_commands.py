@@ -1419,11 +1419,6 @@ class VMUpdateTests(ScenarioTest):
             self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
         ])
 
-        # check usage error
-        message = 'usage error: --ephemeral-os-disk-placement is only configurable when --size is specified.'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
-            self.cmd('vm update --resource-group {rg} --name {vm1} --ephemeral-os-disk-placement {placement2}')
-
         # check that we can update size1 and placement1.
         self.cmd('vm update --resource-group {rg} --name {vm1} --size {size1} --ephemeral-os-disk-placement {placement1}')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
@@ -1441,16 +1436,6 @@ class VMUpdateTests(ScenarioTest):
             self.check('tags.tagName', 'tagValue'),
         ])
 
-        # check create base2 without ephemeral-os-disk
-        self.cmd('vm create -n {vm2} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc}')
-        self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
-
-        # check --ephemeral-os-disk false error
-        message = 'should update from --ephemeral-os-disk true vm.'
-        with self.assertRaisesRegexp(ValidationError, message):
-            self.cmd('vm update --resource-group {rg} --name {vm2} --size {size1} --ephemeral-os-disk-placement {placement1}')
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -2976,11 +2961,6 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
         ])
 
-        # check usage error
-        message = 'usage error: --ephemeral-os-disk-placement is only configurable when --vm-sku is specified.'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
-            self.cmd('vmss update --resource-group {rg} --name {vm1} --ephemeral-os-disk-placement {placement2}')
-
         # check that we can update size1 and placement1.
         self.cmd('vmss update --resource-group {rg} --name {vm1} --vm-sku {size1} --ephemeral-os-disk-placement {placement1}')
         self.cmd('vmss show -g {rg} -n {vm1}', checks=[
@@ -2998,16 +2978,6 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('tags.tagName', 'tagValue'),
         ])
 
-        # check create base2 without ephemeral-os-disk
-        self.cmd('vmss create -n {vm2} -g {rg} --image {image} --vm-sku Standard_DS4_v2 --location {loc}')
-        self.cmd('vmss show -g {rg} -n {vm2}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
-
-        # check --ephemeral-os-disk false error
-        message = 'should update from --ephemeral-os-disk true vmss.'
-        with self.assertRaisesRegexp(ValidationError, message):
-            self.cmd('vmss update --resource-group {rg} --name {vm2} --vm-sku {size1} --ephemeral-os-disk-placement {placement1}')
 
 class AcceleratedNetworkingTest(ScenarioTest):
 
