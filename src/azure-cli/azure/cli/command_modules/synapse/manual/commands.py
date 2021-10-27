@@ -29,10 +29,11 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_integrationruntimecredentials_factory
     from ._client_factory import cf_synapse_client_integrationruntimeconnectioninfos_factory
     from ._client_factory import cf_synapse_client_integrationruntimestatus_factory
+    from ._client_factory import cf_kusto_pool
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
-            operations_tmpl='azure.cli.command_modules.synapse.operations.{}#'.format(custom_module) + '{}',
+            operations_tmpl='azure.cli.command_modules.synapse.manual.operations.{}#'.format(custom_module) + '{}',
             client_factory=client_factory,
         )
 
@@ -190,6 +191,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.synapse.artifacts.operations#SparkJobDefinitionOperations.{}',
         client_factory=None)
 
+    synapse_kusto_pool_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations._kusto_pools_operations#KustoPoolsOperations.{}',
+        client_factory=cf_kusto_pool,
+    )
     # Management Plane Commands --Workspace
     with self.command_group('synapse workspace', command_type=synapse_workspace_sdk,
                             custom_command_type=get_custom_sdk('workspace', cf_synapse_client_workspace_factory),
@@ -527,3 +532,15 @@ def load_command_table(self, _):
 
     with self.command_group('synapse', is_preview=True):
         pass
+
+# synapse kusto pool Commands --Managed kusto pool Commands
+    with self.command_group('synapse kusto pool',
+                            command_type=synapse_kusto_pool_sdk,
+                            custom_command_type=get_custom_sdk('kustopool',
+                                                               cf_kusto_pool),
+                            client_factory=cf_kusto_pool) as g:
+        g.custom_command('create', 'synapse_kusto_pool_create', supports_no_wait=True)
+        g.custom_command('update', 'synapse_kusto_pool_update', supports_no_wait=True)
+        g.custom_command('add-language-extension', 'synapse_kusto_pool_add_language_extension', supports_no_wait=True)
+        g.custom_command('detach-follower-database', 'synapse_kusto_pool_detach_follower_database', supports_no_wait=True)
+        g.custom_command('remove-language-extension', 'synapse_kusto_pool_remove_language_extension', supports_no_wait=True)

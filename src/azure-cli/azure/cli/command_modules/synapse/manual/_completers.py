@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.decorators import Completer
-from azure.cli.command_modules.synapse.operations.accesscontrol import list_role_definitions
+from azure.cli.command_modules.synapse.manual.operations.accesscontrol import list_role_definitions
 
 
 @Completer
