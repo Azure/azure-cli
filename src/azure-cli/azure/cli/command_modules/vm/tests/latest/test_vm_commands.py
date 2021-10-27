@@ -3835,6 +3835,47 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_v2')
+    def test_run_command_v2(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10),
+            'run_cmd': self.create_random_name('cmd-', 10)
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults')
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} ', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', None),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 0),
+            self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
+        ])
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600),
+            self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
+            ])
+        self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=[
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].name', '{run_cmd}'),
+            self.check('[0].source.script', 'script1'),
+            self.check('[0].asyncExecution', False),
+            self.check('[0].timeoutInSeconds', 3600)
+        ])
+        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600)
+        ])
+        self.cmd('vm run-command delete --vm-name {vm} --name {run_cmd} -g {rg} -y')
+        self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=self.is_empty())
+
+
 class VMSSRunCommandScenarioTest(ScenarioTest):
     @unittest.skip('Can\'t test it. We are not allowed to open ports.')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command')
@@ -3882,6 +3923,49 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             self.kwargs['id'] = id
             self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2')
+    def test_vmss_run_command_v2(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss-', 10),
+            'run_cmd': self.create_random_name('cmd_', 10),
+            'user': self.create_random_name('user-', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username {user} --generate-ssh-keys')
+        instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
+        self.kwargs.update({
+            'instance_id': instace_ids[0]
+        })
+        self.cmd('vmss run-command create --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', None),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 0),
+            self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
+        ])
+        self.cmd('vmss run-command update --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600),
+            ])
+        self.cmd('vmss run-command list --vmss-name {vmss} -g {rg} --instance-id {instance_id}', checks=[
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].name', '{run_cmd}'),
+            self.check('[0].source.script', 'script1'),
+            self.check('[0].asyncExecution', False),
+            self.check('[0].timeoutInSeconds', 3600)
+        ])
+        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600)
+        ])
+        self.cmd('vmss run-command delete --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} -y')
+        self.cmd('vmss run-command list --vmss-name {vmss} --instance-id {instance_id} -g {rg}', checks=self.is_empty())
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
