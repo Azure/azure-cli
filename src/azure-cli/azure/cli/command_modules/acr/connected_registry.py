@@ -84,8 +84,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             if ex.response.status_code == 404:
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
-        parent_mode = parent.mode.lower()
-        if parent_mode != ConnectedRegistryModes.READWRITE.value and parent_mode != mode:
+
+        if parent.mode.lower() not in (ConnectedRegistryModes.READWRITE.value, mode):
             raise CLIError("Can't create the registry '{}' with mode '{}' ".format(connected_registry_name, mode) +
                            "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
                            "For more information on connected registries " +
@@ -215,8 +215,11 @@ def acr_connected_registry_delete(cmd,
                                   resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
-        connected_registry_name, registry_name), yes)
+    extraMsg = ""
+    if not cleanup:
+        extraMsg = " without cleanup flag enabled"
+    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'{}?".format(
+        connected_registry_name, registry_name, extraMsg), yes)
     try:
         connected_registry = acr_connected_registry_show(
             cmd, client, connected_registry_name, registry_name, resource_group_name)
@@ -496,6 +499,7 @@ def _update_ancestor_permissions(cmd,
                                  mode=None,
                                  remove_access=False):
     gateway_actions_list = [[gateway.lower()] + DEFAULT_GATEWAY_SCOPE]
+    repo_msg = ""
     if repositories is not None:
         repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
         repo_msg = ", ".join(repositories)

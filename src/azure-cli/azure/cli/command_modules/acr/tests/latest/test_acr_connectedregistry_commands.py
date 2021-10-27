@@ -11,18 +11,28 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_connectedregistry(self, resource_group):
         # Agentpool prerequisites for connected registry testing
+        crName = 'connectedRegistry'
+        rootName = 'rootregistry'
+        childName = 'child'
+        grandchildName = 'grandchild'
+        repo1 = 'repo1'
+        repo2 = 'repo2'
+        repo3 = 'repo3'
         self.kwargs.update({
             'registry_name': self.create_random_name('clireg', 20),
-            'cr_name1': 'connectedRegistry1',
-            'cr_name2': 'connectedRegistry2',
+            'cr_name': crName,
+            'root_name': rootName,
+            'child_name': childName,
+            'grandchild_name': grandchildName,
             'rg_loc': 'eastus',
             'sku': 'Premium',
             'syncToken': 'syncToken',
             'clientToken': 'clientToken',
             'clientToken2': 'clientToken2',
             'scopeMap': 'scopeMap1',
-            'repo1': 'repo1',
-            'repo2': 'repo2',
+            'repo_1': repo1,
+            'repo_2': repo2,
+            'repo_3': repo3,
             'syncSchedule': '0 0/10 * * *',
             'defaultSyncSchedule': '* * * * *',
             'syncWindow': 'PT4H',
@@ -39,18 +49,18 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                  checks=self.check('dataEndpointEnabled', True))
 
         # Create a default connected registry.
-        self.cmd('acr connected-registry create -n {cr_name1} -r {registry_name} --repository {repo1} {repo2}',
-                 checks=[self.check('name', '{cr_name1}'),
+        self.cmd('acr connected-registry create -n {cr_name} -r {registry_name} --repository {repo_1} {repo_2} {repo_3}',
+                 checks=[self.check('name', '{cr_name}'),
                          self.check('mode', 'ReadWrite'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('resourceGroup', '{rg}')])
 
         # Create a custom connected-registry with a previously created token.
-        self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo1} content/read metadata/read --gateway {cr_name2} config/read config/write message/read message/write --no-passwords')
-        self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo1} content/read --no-passwords')
-        self.cmd('acr connected-registry create -n {cr_name2} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken}',
-                 checks=[self.check('name', '{cr_name2}'),
+        self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
+        self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo_1} content/read --no-passwords')
+        self.cmd('acr connected-registry create -n {root_name} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken}',
+                 checks=[self.check('name', '{root_name}'),
                          self.check('mode', 'ReadOnly'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('logging.logLevel', 'Warning'),
@@ -58,45 +68,84 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                          self.check('parent.syncProperties.syncWindow', '4:00:00'),
                          self.check('resourceGroup', '{rg}')])
 
+        # Create Child connected registry
+        self.cmd('acr connected-registry create -n {child_name} -p {root_name} -r {registry_name} --repository {repo_2} -m ReadOnly',
+                 checks=[self.check('name', '{child_name}'),
+                         self.check('mode', 'ReadOnly'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check("ends_with(parent.id, '{root_name}')", True),
+                         self.check('resourceGroup', '{rg}')])
+
+        # Create Grandchild connected registry
+        self.cmd('acr connected-registry create -n {grandchild_name} -p {child_name} -r {registry_name} --repository {repo_2} -m ReadOnly',
+                 checks=[self.check('name', '{grandchild_name}'),
+                         self.check('mode', 'ReadOnly'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check("ends_with(parent.id, '{child_name}')", True),
+                         self.check('resourceGroup', '{rg}')])
+
         # List connected registries
         self.cmd('acr connected-registry list -r {registry_name}',
-                 checks=[self.check('[0].name', '{cr_name1}'),
-                         self.check('[1].name', '{cr_name2}')])
+                 checks=[self.check('[0].name', '{cr_name}'),
+                         self.check('[1].name', '{root_name}')])
 
         # List client tokens
-        self.cmd('acr connected-registry list-client-tokens -n {cr_name2} -r {registry_name}',
+        self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
                  checks=[self.check('[0].name', '{clientToken}')])
 
-        # Update the connected registry using
-        self.cmd('acr token create -r {registry_name} -n {clientToken2} --repository {repo2} metadata/read --no-passwords')
-        self.cmd('acr connected-registry update -n {cr_name2} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}" --remove-client-tokens {clientToken} --add-client-tokens {clientToken2}',
-                 checks=[self.check('name', '{cr_name2}'),
+        # Update the connected registry
+        self.cmd('acr token create -r {registry_name} -n {clientToken2} --repository {repo_2} metadata/read --no-passwords')
+        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}" --remove-client-tokens {clientToken} --add-client-tokens {clientToken2}',
+                 checks=[self.check('name', '{root_name}'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('parent.syncProperties.schedule', '{defaultSyncSchedule}'),
                          self.check('parent.syncProperties.syncWindow', 'None'),
                          self.check('resourceGroup', '{rg}')])
 
         # List client tokens
-        self.cmd('acr connected-registry list-client-tokens -n {cr_name2} -r {registry_name}',
+        self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
                  checks=[self.check('[0].name', '{clientToken2}')])
 
         # Update connected registry repo permissions
-        self.cmd('acr connected-registry get-settings -n {cr_name2} -r {registry_name} --parent-protocol https --generate-password 2 -y')
+        self.cmd('acr connected-registry get-settings -n {root_name} -r {registry_name} --parent-protocol https --generate-password 2 -y')
         self.cmd('acr token show -n {syncToken} -r {registry_name}', checks=[
             self.check('credentials.passwords[0].name', 'password2')])
 
-        # Delete connected registry 2
-        self.cmd('acr connected-registry delete -n {cr_name2} -r {registry_name} -y')
+        # Update connected registry repo permissions
+        self.cmd('acr connected-registry permissions update -n {grandchild_name} -r {registry_name} --add {repo_1}')
+        self.cmd('acr connected-registry permissions update -n {child_name} -r {registry_name} --remove {repo_2} --add {repo_3}')
+        self.cmd('acr connected-registry permissions update -n {root_name} -r {registry_name} --remove {repo_1} {repo_2}')
+
+        # Show sync scope map and check permissions
+        scope_map = self.cmd('acr connected-registry permissions show -n {root_name} -r {registry_name}').get_output_in_json()
+        expected_actions = ['gateway/'+ childName +'/config/read', 'gateway/'+ childName +'/config/write',
+                            'gateway/'+ childName +'/message/read', 'gateway/'+ childName +'/message/write',
+                            'gateway/'+ grandchildName +'/config/read', 'gateway/'+ grandchildName +'/config/write',
+                            'gateway/'+ grandchildName +'/message/read', 'gateway/'+ grandchildName +'/message/write',
+                            'gateway/'+ rootName +'/config/read', 'gateway/'+ rootName +'/config/write',
+                            'gateway/'+ rootName +'/message/read', 'gateway/'+ rootName +'/message/write',
+                            'repositories/'+ repo3 +'/content/read', 'repositories/'+ repo3 +'/metadata/read']
+        self.assertListEqual(sorted(scope_map['actions']), expected_actions)
+
+        scope_map = self.cmd('acr connected-registry permissions show -n {child_name} -r {registry_name}').get_output_in_json()
+        self.assertListEqual(sorted(scope_map['actions']),
+                             ['gateway/'+ childName +'/config/read', 'gateway/'+ childName +'/config/write',
+                              'gateway/'+ childName +'/message/read', 'gateway/'+ childName +'/message/write',
+                              'gateway/'+ grandchildName +'/config/read', 'gateway/'+ grandchildName +'/config/write',
+                              'gateway/'+ grandchildName +'/message/read', 'gateway/'+ grandchildName +'/message/write',
+                              'repositories/'+ repo3 +'/content/read', 'repositories/'+ repo3 +'/metadata/read'])
+
+        scope_map = self.cmd('acr connected-registry permissions show -n {grandchild_name} -r {registry_name}').get_output_in_json()
+        self.assertListEqual(sorted(scope_map['actions']),
+                             ['gateway/'+ grandchildName +'/config/read', 'gateway/'+ grandchildName +'/config/write',
+                              'gateway/'+ grandchildName +'/message/read', 'gateway/'+ grandchildName +'/message/write'])
+
+        # Delete connected registry grand child
+        self.cmd('acr connected-registry delete -n {grandchild_name} -r {registry_name} --cleanup -y')
 
         # Show connected registry properties
-        self.cmd('acr connected-registry show -n {cr_name1} -r {registry_name}',
-                 checks=[self.check('name', '{cr_name1}')])
-
-        # Update connected registry repo permissions
-        self.cmd('acr connected-registry permissions update -n {cr_name1} -r {registry_name} --remove {repo1} {repo2} --add foo')
-
-        # Show sync scope map
-        self.cmd('acr connected-registry permissions show -n {cr_name1} -r {registry_name}')
+        self.cmd('acr connected-registry show -n {cr_name} -r {registry_name}',
+                 checks=[self.check('name', '{cr_name}')])
 
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
