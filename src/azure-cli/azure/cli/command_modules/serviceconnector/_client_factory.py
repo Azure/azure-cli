@@ -14,6 +14,10 @@ def cf_connection_cl(cli_ctx, *_):
 
 
 def cf_linker(cli_ctx, *_):
+    return cf_connection_cl(cli_ctx).linker
+
+
+def cf_linker_test_token(cli_ctx, *_):
     client = cf_connection_cl(cli_ctx).linker
 
     # pylint: disable=protected-access
@@ -26,7 +30,7 @@ def cf_linker(cli_ctx, *_):
 
 
 def cf_linker_user_token(cli_ctx, *_):
-    client = cf_linker(cli_ctx, *_)
+    client = cf_connection_cl(cli_ctx).linker
 
     # pylint: disable=protected-access
     # set user token header

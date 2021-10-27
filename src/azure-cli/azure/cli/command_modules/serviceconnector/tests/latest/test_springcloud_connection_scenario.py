@@ -1030,11 +1030,11 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create confluent-kafka --connection {} --source-id {} '
+        self.cmd('spring-cloud connection create confluent-cloud --connection {} --source-id {} '
                  '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
                  '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
                  '--client-type java'.format(name, source_id))

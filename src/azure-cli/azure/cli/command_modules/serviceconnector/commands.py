@@ -11,7 +11,8 @@ from ._transformers import (
 from ._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
-    SUPPORTED_AUTH_TYPE
+    SUPPORTED_AUTH_TYPE,
+    TARGET_RESOURCES_USERTOKEN
 )
 from ._utils import should_load_source
 
@@ -50,7 +51,7 @@ def load_command_table(self, _):
             supported_target_resources.remove(RESOURCE.ConfluentKafka)
             for target in supported_target_resources:
                 _type, _factory = connection_type, cf_linker
-                if target in [RESOURCE.KeyVault]:
+                if target in TARGET_RESOURCES_USERTOKEN:
                     _type, _factory = connection_type_user_token, cf_linker_user_token
 
                 with self.command_group('{} connection create'.format(source.value),

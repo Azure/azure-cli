@@ -33,9 +33,7 @@ def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
                     site=None,
-                    # HACK, only for bugbash
-                    # deployment=None,
-                    spring=None, app=None):
+                    spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return client.list(resource_uri=source_id)
@@ -78,9 +76,7 @@ def connection_show(client,
                     source_id=None,
                     indentifier=None,
                     site=None,
-                    # HACK, only for bugbash
-                    # deployment=None,
-                    spring=None, app=None):
+                    spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.get(resource_uri=source_id,
@@ -93,9 +89,7 @@ def connection_delete(client,
                       source_id=None,
                       indentifier=None,
                       site=None,
-                      # HACK, only for bugbash
-                      # deployment=None,
-                      spring=None, app=None,
+                      spring=None, app=None, deployment=None,
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -112,9 +106,7 @@ def connection_list_configuration(client,
                                   source_id=None,
                                   indentifier=None,
                                   site=None,
-                                  # HACK, only for bugbash
-                                  # deployment=None
-                                  spring=None, app=None):
+                                  spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.list_configurations(resource_uri=source_id,
@@ -127,9 +119,7 @@ def connection_validate(client,
                         source_id=None,
                         indentifier=None,
                         site=None,
-                        # HACK, only for bugbash
-                        # deployment=None
-                        spring=None, app=None):
+                        spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.begin_validate(resource_uri=source_id,
@@ -145,15 +135,14 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       new_addon=False, no_wait=False,
                       site=None,                                             # Resource.WebApp
-                      # HACK, only for bugbash
-                      # deployment=None
-                      spring=None, app=None,                                 # Resource.SpringCloud
+                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
-                      account=None, key_space=None, graph=None, table=None,  # Resource.Cosmos*, Resource.Storage*
-                      config_store=None,                                     # Resource.AppConfig
-                      signalr=None,                                          # Resource.SignalR
-                      namespace=None):                                       # Resource.EventHub
+                      account=None,                                          # Resource.Storage*
+                      # key_space=None, graph=None, table=None,              # Resource.Cosmos*,
+                      # config_store=None,                                   # Resource.AppConfig
+                      # namespace=None,                                      # Resource.EventHub
+                      signalr=None):                                         # Resource.SignalR
 
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
@@ -215,8 +204,7 @@ def connection_update(client,
                       service_principal_auth_info_secret=None,
                       no_wait=False,
                       site=None,                                              # Resource.WebApp
-                      # HACK, only for bugbash
-                      # deployment=None
+                      deployment=None,
                       spring=None, app=None):                                 # Resource.SpringCloud
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
@@ -275,8 +263,7 @@ def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_resource_group=None,
                             source_id=None,
                             site=None,                         # Resource.WebApp
-                            # HACK, only for bugbash
-                            # deployment=None
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     from ._transformers import transform_linker_properties
@@ -340,8 +327,7 @@ def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
                             source_resource_group=None,
                             source_id=None,
                             site=None,                         # Resource.WebApp
-                            # HACK, only for bugbash
-                            # deployment=None
+                            deployment=None,
                             spring=None, app=None):            # Resource.SpringCloud
 
     # use the suffix to decide the connection type

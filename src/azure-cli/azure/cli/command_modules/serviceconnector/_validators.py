@@ -138,8 +138,8 @@ def get_client_type(cmd, namespace):
         try:
             segments = parse_resource_id(source_id)
             output = run_cli_cmd('az spring-cloud app show '
-                                 '-g {} -s {} -n {}'.format(segments.get('name'), segments.get('child_name_1'),
-                                                            segments.get('child_name_2')))
+                                 '-g {} -s {} -n {}'.format(segments.get('resource_group'), segments.get('name'),
+                                                            segments.get('child_name_1')))
             prop_val = output.get('properties')\
                              .get('activeDeployment')\
                              .get('properties')\

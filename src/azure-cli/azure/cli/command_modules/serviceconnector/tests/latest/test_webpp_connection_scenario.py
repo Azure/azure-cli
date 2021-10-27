@@ -78,6 +78,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         )
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -121,6 +122,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -165,6 +167,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -210,6 +213,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -254,6 +258,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -298,6 +303,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -342,6 +348,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_eventhub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -385,6 +392,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_servicebus_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -563,6 +571,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -607,6 +616,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redisenterprise_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -798,7 +808,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
-    @unittest.skip('sql is removed from supported target resources')
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1033,7 +1043,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
 
         # create connection
-        self.cmd('webapp connection create confluent-kafka --connection {} --source-id {} '
+        self.cmd('webapp connection create confluent-cloud --connection {} --source-id {} '
                  '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
                  '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
                  '--client-type python'.format(name, source_id))
