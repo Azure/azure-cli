@@ -255,9 +255,9 @@ def validate_public_cloud(cmd):
 def _validate_vnet_integration(cmd, namespace):
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:
-            raise CLIError("Cannot use --vnet without --subnet")
+            raise ArgumentUsageError("Cannot use --vnet without --subnet")
         if not is_valid_resource_id(namespace.subnet) and not namespace.vnet:
-            raise CLIError("Must either specify subnet by resource ID or include --vnet argument")
+            raise ArgumentUsageError("Must either specify subnet by resource ID or include --vnet argument")
 
         client = web_client_factory(cmd.cli_ctx)
         if is_valid_resource_id(namespace.plan):
@@ -270,7 +270,7 @@ def _validate_vnet_integration(cmd, namespace):
         sku_name = plan_info.sku.name
         disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
         if get_sku_name(sku_name) in disallowed_skus:
-            raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
-                        "Plan sku cannot be one of: {}. "
-                        "Please run 'az appservice plan create -h' "
-                        "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
+            raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
+                                     "Plan sku cannot be one of: {}. "
+                                     "Please run 'az appservice plan create -h' "
+                                     "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
