@@ -2974,11 +2974,11 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     from msrestazure.tools import parse_resource_id
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
-            and vmss.orchestration_mode.lower() == 'flexible':
-        from azure.cli.core.azclierror import ArgumentUsageError
-        raise ArgumentUsageError('This command is not available for VMSS in Flex mode. '
-                                 'Please use the az network commands to retrieve networking information.')
+
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     # find the load balancer
     nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
@@ -3020,11 +3020,10 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
-            and vmss.orchestration_mode.lower() == 'flexible':
-        from azure.cli.core.azclierror import ArgumentUsageError
-        raise ArgumentUsageError('This command is not available for VMSS in Flex mode. '
-                                 'Please use the az network commands to retrieve networking information.')
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     public_ip_client = cf_public_ip_addresses(cmd.cli_ctx)
     result = public_ip_client.list_virtual_machine_scale_set_public_ip_addresses(resource_group_name, vm_scale_set_name)

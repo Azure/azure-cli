@@ -1468,10 +1468,6 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
 
-        if namespace.disable_overprovision is False:
-            raise ArgumentUsageError('usage error: --disable-overprovision can only be set to True in Flexible VMSS.')
-        namespace.disable_overprovision = True
-
         if namespace.single_placement_group:
             raise ArgumentUsageError('usage error: --single-placement-group can only be set to False for Flex mode')
         namespace.single_placement_group = False
@@ -1479,20 +1475,18 @@ def process_vmss_create_namespace(cmd, namespace):
         namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
-        if namespace.health_probe is not None:
-            raise ArgumentUsageError('usage error: --health-probe is not supported for Flex mode')
+        banned_params = {
+            '--disable-overprovision': namespace.disable_overprovision,
+            '--health-probe': namespace.health_probe,
+            '--host-group': namespace.host_group,
+            '--nat-pool-name': namespace.nat_pool_name,
+            '--scale-in-policy': namespace.scale_in_policy,
+            '--user-data': namespace.user_data
+        }
 
-        if namespace.host_group is not None:
-            raise ArgumentUsageError('usage error: --host-group is not supported for Flex mode')
-
-        if namespace.nat_pool_name is not None:
-            raise ArgumentUsageError('usage error: --nat-pool-name is not supported for Flex mode')
-
-        if namespace.scale_in_policy is not None:
-            raise ArgumentUsageError('usage error: --scale-in-policy is not supported for Flex mode')
-
-        if namespace.user_data is not None:
-            raise ArgumentUsageError('usage error: --user-data is not supported for Flex mode')
+        for param, value in banned_params.items():
+            if value is not None:
+                raise ArgumentUsageError(f'usage error: {param} is not supported for Flex mode')
 
         if namespace.image:
 

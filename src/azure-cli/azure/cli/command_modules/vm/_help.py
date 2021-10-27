@@ -3445,5 +3445,5 @@ examples:
 helps['vmss list-instances'] = """
 type: command
 short-summary: Get a list of all virtual machines in a VM scale sets.
-long-summary: Please note that this command is not very useful for Flex mode. If the VMSS you are querying is Flex mode, it is recommended to use the "az vm list" command instead.
+long-summary: Please note that the data returned by this command in Flex mode is incomplete. If the VMSS you are querying is Flex mode, it is recommended to use the "az vm list" command instead.
 """
