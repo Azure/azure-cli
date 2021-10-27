@@ -1091,7 +1091,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
     def test_keyvault_key_rotation(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus2',
-            'key': self.create_random_name('key-', 24)
+            'key': self.create_random_name('key-', 24),
+            'policy': os.path.join(TEST_DIR, 'rotation_policy.json')
         })
         keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
@@ -1105,8 +1106,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                        checks=self.check('attributes.enabled', True)).get_output_in_json()
 
         # update rotation-policy
-        self.cmd('keyvault key rotation-policy update --expires-in P30D --notify-before-expiry P7D '
-                 '--rotate-after-creation P15D --vault-name {kv} -n {key}',
+        self.cmd('keyvault key rotation-policy update --value "{policy}" --vault-name {kv} -n {key}',
                  checks=[self.check('expiresIn', 'P30D'),
                          self.check('length(lifetimeActions)', 2),
                          self.check('lifetimeActions[0].action', 'Rotate'),

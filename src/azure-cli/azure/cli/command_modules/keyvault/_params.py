@@ -484,21 +484,8 @@ def load_arguments(self, _):
         c.extra('tags', tags_type)
 
     with self.argument_context('keyvault key rotation-policy update') as c:
-        c.argument('notify_after_creation',
-                   help='Time after creation to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('notify_before_expiry',
-                   help='Time before expiry to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('rotate_after_creation',
-                   help='Time after creation to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('rotate_before_expiry',
-                   help='Time before expiry to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('expires_in',
-                   help='The expiry time of the policy that will be applied on new key versions, '
-                        'defined as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS). For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('value', type=file_type, completer=FilesCompleter(),
+                   help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
     # region KeyVault Secret
