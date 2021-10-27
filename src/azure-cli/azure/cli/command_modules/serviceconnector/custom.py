@@ -15,13 +15,15 @@ from azure.cli.core.azclierror import (
 from ._resource_config import (
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
-    TARGET_RESOURCES
+    TARGET_RESOURCES,
+    TARGET_RESOURCES_USERTOKEN
 )
 from ._validators import (
     get_source_resource_name,
     get_target_resource_name
 )
 from ._addon_factory import AddonFactory
+from ._utils import set_user_token_header
 # pylint: disable=unused-argument
 
 
@@ -113,15 +115,28 @@ def connection_list_configuration(client,
                                       linker_name=connection_name)
 
 
-def connection_validate(client,
+def connection_validate(cmd, client,
                         connection_name=None,
                         source_resource_group=None,
                         source_id=None,
                         indentifier=None,
                         site=None,
                         spring=None, app=None, deployment=None):
+    import re
+    from ._validators import get_resource_regex
+
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
+
+    # HACK: get linker first to infer target resource type so that user token can be
+    # set to work around OBO
+    linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+    target_id = linker.get('targetId')
+    for resource_type, resource_id in TARGET_RESOURCES.items():
+        matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
+        if matched and resource_type in TARGET_RESOURCES_USERTOKEN:
+            client = set_user_token_header(client, cmd.cli_ctx)
+
     return client.begin_validate(resource_uri=source_id,
                                  linker_name=connection_name)
 
@@ -170,8 +185,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         'client_type': client_type
     }
 
+    # HACK: set user token to work around OBO
+    target_type = get_target_resource_name(cmd)
+    if target_type in TARGET_RESOURCES_USERTOKEN:
+        client = set_user_token_header(client, cmd.cli_ctx)
+
     if new_addon:
-        target_type = get_target_resource_name(cmd)
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, auth_info = addon.provision()
         parameters['target_id'] = target_id
