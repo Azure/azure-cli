@@ -16,6 +16,7 @@ import uuid
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -6566,8 +6567,19 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    @ResourceGroupPreparer()
+    def test_vm_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids')
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
     # Need prepare app versions
-    @record_only()
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
@@ -6586,8 +6598,69 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @ResourceGroupPreparer()
+    def test_vm_add_application_with_order_application(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --order-applications', checks=[
+            self.check('applicationProfile.galleryApplications[0].order', 1),
+            self.check('applicationProfile.galleryApplications[1].order', 2)
+        ])
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
+    @ResourceGroupPreparer()
+    def test_vm_add_application_with_config_override(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        # wrong length of config-overrides
+        message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegexp(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
+            self.check('applicationProfile.galleryApplications[0].configurationReference', 'null'),
+            self.check('applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
     # Need prepare app versions
-    @record_only()
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
     @ResourceGroupPreparer()
     def test_vmss_add_application(self, resource_group):
         self.kwargs.update({
@@ -6603,7 +6676,59 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         # Prepare VMSS
         self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
 
-        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2}')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_with_order_application(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].order', 1),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].order', 2)
+        ])
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_with_config_override(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        # wrong length of config-overrides
+        message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegexp(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].configurationReference', 'null'),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
 
