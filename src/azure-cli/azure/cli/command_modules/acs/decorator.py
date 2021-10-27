@@ -4553,16 +4553,16 @@ class AKSCreateDecorator:
             confcom_addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         return confcom_addon_profile
 
-    def build_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
+    def build_open_service_mesh_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build open service mesh addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
-        open_service_mesh_profile = self.models.ManagedClusterAddonProfile(
+        open_service_mesh_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={},
         )
-        return open_service_mesh_profile
+        return open_service_mesh_addon_profile
 
     def build_azure_keyvault_secrets_provider_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build azure keyvault secrets provider addon profile.
@@ -4677,7 +4677,7 @@ class AKSCreateDecorator:
         if "open-service-mesh" in addons:
             addon_profiles[
                 CONST_OPEN_SERVICE_MESH_ADDON_NAME
-            ] = self.build_open_service_mesh_profile()
+            ] = self.build_open_service_mesh_addon_profile()
         if "azure-keyvault-secrets-provider" in addons:
             addon_profiles[
                 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
