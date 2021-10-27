@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, open_page_in_browser
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -376,3 +376,21 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
                                             name=name,
                                             reset_properties_envelope=reset_envelope)
+
+
+def _get_url(cmd, resource_group_name, name):
+    custom_domains = [d.domain_name for d in list(list_staticsite_domains(cmd, name, resource_group_name))]
+    site = show_staticsite(cmd, name, resource_group_name)
+    default_url = site.default_hostname
+
+    if not custom_domains or default_url in custom_domains:
+        url = default_url
+    else:
+        url = custom_domains[0]
+
+    return "https://{}".format(url)
+
+
+def view_in_browser(cmd, resource_group_name, name):
+    url = _get_url(cmd, resource_group_name, name)
+    open_page_in_browser(url)

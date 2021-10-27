@@ -439,6 +439,7 @@ def load_command_table(self, _):
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
         g.custom_command('update', 'update_staticsite', supports_no_wait=True)
+        g.custom_command('browse', 'view_in_browser')
 
     with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_environments')
