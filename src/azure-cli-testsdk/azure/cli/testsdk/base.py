@@ -12,7 +12,7 @@ import unittest
 import tempfile
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
-                                           OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
+                                           LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
                                            live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
@@ -22,7 +22,8 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
+from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer,
+                        AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
 logger = logging.getLogger('azure.cli.testsdk')
@@ -87,7 +88,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
-            OAuthRequestResponsesFilter(),
+            AADAuthRequestFilter(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
@@ -214,6 +215,9 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.kwargs = {}
         self.test_resources_count = 0
 
+    def setUp(self):
+        patch_main_exception_handler(self)
+
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
@@ -275,7 +279,7 @@ class ExecutionResult(object):
         return self.json_value
 
     def _in_process_execute(self, cli_ctx, command, expect_failure=False):
-        from six import StringIO
+        from io import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):

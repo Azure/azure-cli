@@ -8,7 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -24,6 +24,7 @@ class StorageProfile(Enum):
     ManagedPirImage = 4  # this would be the main scenarios
     ManagedCustomImage = 5
     ManagedSpecializedOSDisk = 6
+    SharedGalleryImage = 7
 
 
 def build_deployment_resource(name, template, dependencies=None):
@@ -299,7 +300,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
-        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None):
+        enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
+        capacity_reservation_group=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -448,6 +450,19 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
                         'id': attach_os_disk
                     }
                 }
+            },
+            'SharedGalleryImage': {
+                "osDisk": {
+                    "caching": os_caching,
+                    "managedDisk": {
+                        "storageAccountType": disk_info['os'].get('storageAccountType'),
+                    },
+                    "name": os_disk_name,
+                    "createOption": "fromImage"
+                },
+                "imageReference": {
+                    'sharedGalleryImageId': image_reference
+                }
             }
         }
         if os_disk_encryption_set is not None:
@@ -457,6 +472,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             storage_profiles['ManagedCustomImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
                 'id': os_disk_encryption_set,
             }
+            storage_profiles['SharedGalleryImage']['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set,
+            }
+
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
@@ -547,6 +566,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     if user_data:
         vm_properties['userData'] = b64encode(user_data)
+
+    if capacity_reservation_group:
+        vm_properties['capacityReservation'] = {
+            'capacityReservationGroup': {
+                'id': capacity_reservation_group
+            }
+        }
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
@@ -708,25 +734,24 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
                 'name': backend_pool_name
             }
         ],
-        'inboundNatPools': [
-            {
-                'name': nat_pool_name,
-                'properties': {
-                    'frontendIPConfiguration': {
-                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
-                            lb_id, frontend_ip_name)
-                    },
-                    'protocol': 'tcp',
-                    'frontendPortRangeStart': '50000',
-                    # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
-                    'frontendPortRangeEnd': str(max(50119,
-                                                    49999 + instance_count * (1 if disable_overprovision else 2))),
-                    'backendPort': backend_port
-                }
-            }
-        ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
+    if nat_pool_name:
+        lb_properties['inboundNatPools'] = [{
+            'name': nat_pool_name,
+            'properties': {
+                'frontendIPConfiguration': {
+                    'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(
+                        lb_id, frontend_ip_name)
+                },
+                'protocol': 'tcp',
+                'frontendPortRangeStart': '50000',
+                # keep 50119 as minimum for backward compat, and ensure over-provision is taken care of
+                'frontendPortRangeEnd': str(max(50119, 49999 + instance_count * (1 if disable_overprovision else 2))),
+                'backendPort': backend_port
+            }
+        }]
+
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
@@ -806,7 +831,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_batch_instance_percent=None, max_unhealthy_instance_percent=None,
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
-                        orchestration_mode=None, user_data=None, network_api_version=None):
+                        orchestration_mode=None, user_data=None, network_api_version=None,
+                        enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        enable_auto_update=None, patch_mode=None, enable_agent=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -900,6 +927,20 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         storage_properties['imageReference'] = {
             'id': image
         }
+    if storage_profile == StorageProfile.SharedGalleryImage:
+        storage_properties['osDisk'] = {
+            'caching': os_caching,
+            'managedDisk': {'storageAccountType': disk_info['os'].get('storageAccountType')},
+            "name": os_disk_name,
+            "createOption": "fromImage"
+        }
+        storage_properties['imageReference'] = {
+            'sharedGalleryImageId': image
+        }
+        if os_disk_encryption_set is not None:
+            storage_properties['osDisk']['managedDisk']['diskEncryptionSet'] = {
+                'id': os_disk_encryption_set
+            }
 
     if disk_info:
         data_disks = [v for k, v in disk_info.items() if k != 'os']
@@ -954,6 +995,38 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if secrets:
         os_profile['secrets'] = secrets
+
+    if enable_agent is not None:
+        if os_type.lower() == 'linux':
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
+            os_profile['linuxConfiguration']['provisionVMAgent'] = enable_agent
+        elif os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
+            os_profile['windowsConfiguration']['provisionVMAgent'] = enable_agent
+
+    if enable_auto_update is not None and os_type.lower() == 'windows':
+        os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
+
+    # Windows patch settings
+    if patch_mode is not None and os_type.lower() == 'windows':
+        if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Windows VMSS. Valid values are AutomaticByOS, '
+                'AutomaticByPlatform, Manual.')
+        os_profile['windowsConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
+        }
+
+    # Linux patch settings
+    if patch_mode is not None and os_type.lower() == 'linux':
+        if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Linux VMSS. Valid values are AutomaticByPlatform, ImageDefault.')
+        os_profile['linuxConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
+        }
 
     # Build VMSS
     nic_config = {}
@@ -1024,6 +1097,15 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         if not rolling_upgrade_policy:
             del rolling_upgrade_policy
 
+    if enable_spot_restore and cmd.supported_api_version(min_api='2021-04-01',
+                                                         operation_group='virtual_machine_scale_sets'):
+        vmss_properties['spotRestorePolicy'] = {}
+        if enable_spot_restore:
+            vmss_properties['spotRestorePolicy']['enabled'] = enable_spot_restore
+
+        if spot_restore_timeout:
+            vmss_properties['spotRestorePolicy']['restoreTimeout'] = spot_restore_timeout
+
     if license_type:
         virtual_machine_profile['licenseType'] = license_type
 
@@ -1091,6 +1173,13 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if network_profile:
         virtual_machine_profile['networkProfile'] = network_profile
+
+    if capacity_reservation_group:
+        virtual_machine_profile['capacityReservation'] = {
+            'capacityReservationGroup': {
+                'id': capacity_reservation_group
+            }
+        }
 
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile

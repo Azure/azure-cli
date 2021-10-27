@@ -123,10 +123,11 @@ def list_sku_info(cli_ctx, location=None):
     return result
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_disk_caching=None, data_disk_cachings=None, size='', ephemeral_os_disk=False,
+                        os_disk_caching=None, data_disk_cachings=None, size='',
+                        ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
                         data_disk_delete_option=None):
     from msrestazure.tools import is_valid_resource_id
     from ._validators import validate_delete_options
@@ -152,6 +153,8 @@ def normalize_disk_info(image_data_disks=None,
         # local os disks require readonly caching, default to ReadOnly if os_disk_caching not specified.
         if not os_disk_caching:
             os_disk_caching = 'ReadOnly'
+        if ephemeral_os_disk_placement:
+            info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
 
     # add managed image data disks
     for data_disk in image_data_disks:
@@ -359,6 +362,34 @@ def update_disk_sku_info(info_dict, skus):
             except ValueError:
                 raise CLIError("A sku ID is incorrect.\n{}".format(usage_msg))
             _update(info_dict, lun, value)
+
+
+def is_shared_gallery_image_id(image_reference):
+    if not image_reference:
+        return False
+
+    shared_gallery_id_pattern = re.compile(r'^/SharedGalleries/[^/]*/Images/[^/]*/Versions/.*$', re.IGNORECASE)
+    if shared_gallery_id_pattern.match(image_reference):
+        return True
+
+    return False
+
+
+def parse_shared_gallery_image_id(image_reference):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not image_reference:
+        raise InvalidArgumentValueError(
+            'Please pass in the shared gallery image id through the parameter --image')
+
+    image_info = re.search(r'^/SharedGalleries/([^/]*)/Images/([^/]*)/Versions/.*$', image_reference, re.IGNORECASE)
+    if not image_info or len(image_info.groups()) < 2:
+        raise InvalidArgumentValueError(
+            'The shared gallery image id is invalid. The valid format should be '
+            '"/SharedGalleries/{gallery_unique_name}/Images/{gallery_image_name}/Versions/{image_version}"')
+
+    # Return the gallery unique name and gallery image name parsed from shared gallery image id
+    return image_info.group(1), image_info.group(2)
 
 
 class ArmTemplateBuilder20190401(ArmTemplateBuilder):

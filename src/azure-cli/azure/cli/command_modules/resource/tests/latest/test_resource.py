@@ -8,7 +8,7 @@ import os
 import platform
 import shutil
 import time
-import mock
+from unittest import mock
 import unittest
 from pathlib import Path
 
@@ -17,6 +17,7 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
+from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 
@@ -334,6 +335,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 
@@ -2156,6 +2158,21 @@ class FeatureScenarioTest(ScenarioTest):
             self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
+    @AllowLargeResponse(8192)
+    def test_feature_registration_list(self):
+        self.cmd('feature registration list', checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
+
+        self.cmd('feature registration show --provider-namespace Microsoft.Network -n AllowLBPreview')
+    
+    @AllowLargeResponse(8192)
+    def test_feature_registration_create(self):
+        self.cmd('feature registration create --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Registering|Registered')
+        ])
+
+    @AllowLargeResponse(8192)
+    def test_feature_registration_delete(self):
+        self.cmd('feature registration delete --namespace Microsoft.Network --name AllowLBPreview --yes')
 
 class PolicyScenarioTest(ScenarioTest):
 
@@ -3360,7 +3377,9 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
 class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
-    def test_group_deployment_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_group_deployment_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3386,12 +3405,11 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_sub': AUX_SUBSCRIPTION,
+            'rg': another_resource_group,
+            'aux_tenant': AUX_TENANT
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
@@ -3483,7 +3501,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus')
-    def test_deployment_group_cross_tenant(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus',
+                           parameter_name='another_resource_group', subscription=AUX_SUBSCRIPTION)
+    def test_deployment_group_cross_tenant(self, resource_group, another_resource_group):
         # Prepare Network Interface
         self.kwargs.update({
             'vm_rg': resource_group,
@@ -3509,12 +3529,11 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
-            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_sub': AUX_SUBSCRIPTION,
+            'rg': another_resource_group,
+            'aux_tenant': AUX_TENANT
         })
-        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
-                 checks=self.check('name', self.kwargs['rg']))
+
         self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['image']))
@@ -3758,6 +3777,32 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.cmd('deployment tenant create --location WestUS --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    def test_create_template_specs_bicep(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
+        self.kwargs.update({
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+            'description': '"AzCLI test root template spec from bicep"',
+            'version_description': '"AzCLI test version of root template spec from bicep"',
+        })
+
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
+            self.check('location', "westus"),
+            self.check('mainTemplate.functions', []),
+            self.check("name", "1.0")
+        ]).get_output_in_json()
+
+        with self.assertRaises(IncorrectUsageError) as err:
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+            self.assertTrue("please provide --template-uri if --query-string is specified" in str(err.exception))
+
+        # clean up
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     def _remove_bicep_cli(self):
         bicep_cli_path = self._get_bicep_cli_path()

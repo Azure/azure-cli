@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.command_modules.vm._template_builder import build_load_balancer_resource
 

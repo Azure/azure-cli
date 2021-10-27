@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-import mock
+from unittest import mock
+from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError
 
 from knack import CLI
 
@@ -341,3 +342,65 @@ class TestAssignIdentity(unittest.TestCase):
         empty_identity_id = ""
         namespace = AssignIdentityNamespace(empty_identity_id)
         validators.validate_assign_identity(namespace)
+
+
+class TestExtractCommaSeparatedString(unittest.TestCase):
+    def test_extract_comma_separated_string(self):
+        s1 = "abc, xyz, 123"
+        t1 = validators.extract_comma_separated_string(s1)
+        g1 = ["abc", " xyz", " 123"]
+        self.assertEqual(t1, g1)
+
+        s2 = "abc, xyz, 123"
+        t2 = validators.extract_comma_separated_string(s2, enable_strip=True)
+        g2 = ["abc", "xyz", "123"]
+        self.assertEqual(t2, g2)
+
+        s3 = None
+        t3 = validators.extract_comma_separated_string(s3, keep_none=True, default_value="")
+        g3 = None
+        self.assertEqual(t3, g3)
+
+        s4 = None
+        t4 = validators.extract_comma_separated_string(s4, keep_none=False, default_value="")
+        g4 = ""
+        self.assertEqual(t4, g4)
+
+        s5 = ""
+        t5 = validators.extract_comma_separated_string(s5, keep_none=True, default_value={})
+        g5 = {}
+        self.assertEqual(t5, g5)
+
+        s6 = "abc = def, xyz = 123"
+        t6 = validators.extract_comma_separated_string(s6, extract_kv=True)
+        g6 = {"abc ": " def", " xyz ": " 123"}
+        self.assertEqual(t6, g6)
+
+        s7 = "abc = def, xyz = 123"
+        t7 = validators.extract_comma_separated_string(s7, enable_strip=True, extract_kv=True)
+        g7 = {"abc": "def", "xyz": "123"}
+        self.assertEqual(t7, g7)
+
+        s8 = "abc = def, xyz = 123"
+        t8 = validators.extract_comma_separated_string(s8, extract_kv=True, key_only=True)
+        g8 = {"abc ": "", " xyz ": ""}
+        self.assertEqual(t8, g8)
+
+        s9 = "abc = def, xyz = 123"
+        t9 = validators.extract_comma_separated_string(s9, enable_strip=True, extract_kv=True, key_only=True)
+        g9 = {"abc": "", "xyz": ""}
+        self.assertEqual(t9, g9)
+
+        s10 = "abc def, xyz 123"
+        t10 = validators.extract_comma_separated_string(s10, enable_strip=True, extract_kv=True, key_only=True)
+        g10 = {"abc def": "", "xyz 123": ""}
+        self.assertEqual(t10, g10)
+
+        s11 = "abc def, xyz 123"
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s11, enable_strip=True, extract_kv=True)
+
+        s12 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
+        t12 = validators.extract_comma_separated_string(s12, enable_strip=True, extract_kv=True, default_value={},)
+        g12 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
+        self.assertEqual(t12, g12)

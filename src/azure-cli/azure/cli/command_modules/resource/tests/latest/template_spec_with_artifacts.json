@@ -49,6 +49,25 @@
             "keyVaultName":{"value": "[parameters('keyVaultName')]"}
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "duplicateRelativePath",
+      "resourceGroup": "[parameters('rgName')]",
+      "dependsOn": [
+        "deploymentRg"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "relativePath":"artifacts/createKeyVaultWithSecret.json",
+          "contentVersion":"1.0.0.0"
+        },
+        "parameters": {
+            "keyVaultName":{"value": "[parameters('keyVaultName')]"}
+        }
+      }
     }
   ],
   "outputs": {}

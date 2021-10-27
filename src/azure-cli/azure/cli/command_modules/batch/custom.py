@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
-from six.moves import configparser
+from urllib.parse import urlsplit
+import configparser
 
 from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
 
-from azure.mgmt.batch import BatchManagement
+from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
                                      AutoStorageBaseProperties, ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
@@ -82,7 +82,7 @@ def create_account(client,
         if storage_account else None
     identity = BatchAccountIdentity(type=identity_type) if identity_type else None
     if (encryption_key_source and
-            encryption_key_source.tolower() == "microsoft.keyvault" and not encryption_key_identifier):
+            encryption_key_source.lower() == "microsoft.keyvault" and not encryption_key_identifier):
         raise ValueError("The --encryption-key-identifier property is required when "
                          "--encryption-key-source is set to Microsoft.KeyVault")
     encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
@@ -223,7 +223,7 @@ def create_application_package(cmd, client,
                                resource_group_name, account_name, application_name, version_name,
                                package_file):
     # create application if not exist
-    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagement)
+    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_name)
     except Exception:  # pylint:disable=broad-except

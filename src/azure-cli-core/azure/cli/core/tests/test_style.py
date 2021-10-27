@@ -56,6 +56,33 @@ class TestStyle(unittest.TestCase):
         excepted = "\x1b[0mPrimary text color\x1b[0m"
         self.assertEqual(formatted, excepted)
 
+    @mock.patch('azure.cli.core.util.get_parent_proc_name', return_value='powershell.exe')
+    @mock.patch('azure.cli.core.style.is_modern_terminal', return_value=False)
+    def test_format_styled_text_legacy_powershell(self, is_modern_terminal_mock, get_parent_proc_name_mock):
+        """Verify bright/dark blue is replaced with the default color in legacy powershell.exe terminal."""
+        styled_text = [
+            (Style.ACTION, "Blue: Commands, parameters, and system inputs")
+        ]
+
+        # Try to delete _is_legacy_powershell cache
+        try:
+            delattr(format_styled_text, '_is_legacy_powershell')
+        except AttributeError:
+            pass
+
+        # When theme is 'none', no need to call is_modern_terminal and get_parent_proc_name
+        formatted = format_styled_text(styled_text, theme='none')
+        is_modern_terminal_mock.assert_not_called()
+        get_parent_proc_name_mock.assert_not_called()
+        assert formatted == """Blue: Commands, parameters, and system inputs"""
+
+        excepted = """\x1b[0mBlue: Commands, parameters, and system inputs\x1b[0m"""
+        formatted = format_styled_text(styled_text, theme='dark')
+        assert formatted == excepted
+
+        formatted = format_styled_text(styled_text, theme='light')
+        assert formatted == excepted
+
     def test_format_styled_text_on_error(self):
         # Test invalid style
         from azure.cli.core.azclierror import CLIInternalError

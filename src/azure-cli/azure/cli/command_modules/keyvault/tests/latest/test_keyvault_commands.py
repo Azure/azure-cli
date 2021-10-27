@@ -11,6 +11,7 @@ import time
 import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
+from ipaddress import ip_network
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure_devtools.scenario_tests import RecordingProcessor
@@ -32,6 +33,10 @@ def _asn1_to_iso8601(asn1_date):
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
+
+# for hsm scenario tests
+TEST_HSM_NAME = 'ystesthsm'
+TEST_HSM_URL = 'https://{}.managedhsm.azure.net'.format(TEST_HSM_NAME)
 
 # for other HSM operations live/playback
 ACTIVE_HSM_NAME = 'clitest-1102'
@@ -238,6 +243,10 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         self.kwargs['hsm_pec_name'] = self.kwargs['hsm_pec_id'].split('/')[-1]
         self.cmd('keyvault private-endpoint-connection show --hsm-name {hsm} --name {hsm_pec_name}',
                  checks=self.check('name', '{hsm_pec_name}'))
+
+        # List private endpoint connections
+        self.cmd('keyvault private-endpoint-connection list --hsm-name {hsm}',
+                 checks=[self.check('length(@)', 1), self.check('[0].id', '{hsm_pec_id}')])
 
         # Test approval/rejection
         self.kwargs.update({
@@ -1077,6 +1086,46 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv2} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-', location='eastus2')
+    def test_keyvault_key_rotation(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus2',
+            'key': self.create_random_name('key-', 24),
+            'policy': os.path.join(TEST_DIR, 'rotation_policy.json')
+        })
+        keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+        key_perms.extend(['rotate'])
+        self.kwargs['key_perms'] = ' '.join(key_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+
+        # create a key
+        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
+                       checks=self.check('attributes.enabled', True)).get_output_in_json()
+
+        # update rotation-policy
+        self.cmd('keyvault key rotation-policy update --value "{policy}" --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # show rotation-policy
+        self.cmd('keyvault key rotation-policy show --vault-name {kv} -n {key}',
+                 checks=[self.check('expiresIn', 'P30D'),
+                         self.check('length(lifetimeActions)', 2),
+                         self.check('lifetimeActions[0].action', 'Rotate'),
+                         self.check('lifetimeActions[0].timeAfterCreate', 'P15D'),
+                         self.check('lifetimeActions[1].action', 'Notify'),
+                         self.check('lifetimeActions[1].timeBeforeExpiry', 'P7D')])
+
+        # rotate key
+        self.cmd('keyvault key rotate --vault-name {kv} -n {key}')
+
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
     # @record_only()
@@ -1217,6 +1266,18 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+    def test_keyvault_hsm_key_random(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL
+        })
+
+        result = self.cmd('keyvault key random --count 4 --hsm-name {hsm_name}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
+
+        result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
+        self.assertIsNotNone(result['value'])
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
@@ -2336,7 +2397,8 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'ip': '1.2.3.4/32',
             'ip2': '2.3.4.0/24',
             'ip3': '3.4.5.0/24',
-            'ip4': '4.5.0.0/16'
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
         })
 
         subnet = self._create_subnet().get_output_in_json()
@@ -2457,6 +2519,12 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('properties.networkAcls.ipRules[0].value', '{ip}')
         ])
 
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
         # list network-rule for ip-address
         self.cmd('keyvault network-rule list --name {kv} --resource-group {rg}', checks=[
             self.check('ipRules[0].value', '{ip}')])
@@ -2464,6 +2532,21 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         # remove network-rule for ip-address
         self.cmd('keyvault network-rule remove --ip-address {ip} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # Add multiple ip addresses
+        self.cmd('keyvault network-rule add --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 3)
+        ])
+
+        # Add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('keyvault network-rule add --ip-address {ip} {ip5} --name {kv} --resource-group {rg}')
+
+        # Add multiple ip addresses with some overlaps with the server
+        self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --name {kv} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 4)
+        ])
 
 
 if __name__ == '__main__':

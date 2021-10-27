@@ -10,10 +10,8 @@ import platform
 import tempfile
 import time
 import unittest
-import mock
+from unittest import mock
 import uuid
-
-import six
 
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only

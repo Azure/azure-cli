@@ -7,7 +7,7 @@ import tempfile
 import unittest
 import shutil
 import hashlib
-import mock
+from unittest import mock
 import sys
 
 from azure.cli.core.util import CLIError

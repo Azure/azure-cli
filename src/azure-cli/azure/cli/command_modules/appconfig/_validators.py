@@ -9,9 +9,11 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
+from ._constants import FeatureFlagConstants
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -67,27 +69,31 @@ def validate_separator(namespace):
 def validate_import(namespace):
     source = namespace.source
     if source == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif source == 'appconfig':
-        if (namespace.src_name is None) and (namespace.src_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.src_name is None) and (namespace.src_connection_string is None) and (namespace.src_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--src-name', '--src-connection-string' or '--src-endpoint' argument.")
     elif source == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_export(namespace):
     destination = namespace.destination
     if destination == 'file':
-        if namespace.path is None or namespace.format_ is None:
-            raise CLIError("usage error: --path PATH --format FORMAT")
+        if namespace.path is None:
+            raise RequiredArgumentMissingError("Please provide the '--path' argument.")
+        if namespace.format_ is None:
+            raise RequiredArgumentMissingError("Please provide the '--format' argument.")
     elif destination == 'appconfig':
-        if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
-            raise CLIError("usage error: --config-name NAME | --connection-string STR")
+        if (namespace.dest_name is None) and (namespace.dest_connection_string is None) and (namespace.dest_endpoint is None):
+            raise RequiredArgumentMissingError("Please provide '--dest-name', '--dest-connection-string' or '--dest-endpoint' argument.")
     elif destination == 'appservice':
         if namespace.appservice_account is None:
-            raise CLIError("usage error: --appservice-account NAME_OR_ID")
+            raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
 
 
 def validate_appservice_name_or_id(cmd, namespace):
@@ -225,10 +231,19 @@ def validate_resolve_keyvault(namespace):
 
 
 def validate_feature(namespace):
-    if namespace.feature:
-        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
-        invalid = re.search(invalid_pattern, namespace.feature)
-        if invalid:
-            raise CLIError("Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed.")
-    else:
-        raise CLIError("Feature name cannot be empty.")
+    if namespace.feature is not None:
+        if '%' in namespace.feature:
+            raise InvalidArgumentValueError("Feature name cannot contain the '%' character.")
+        if not namespace.feature:
+            raise InvalidArgumentValueError("Feature name cannot be empty.")
+
+
+def validate_feature_key(namespace):
+    if namespace.key is not None:
+        input_key = str(namespace.key).lower()
+        if '%' in input_key:
+            raise InvalidArgumentValueError("Feature flag key cannot contain the '%' character.")
+        if not input_key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+        if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))

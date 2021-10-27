@@ -89,7 +89,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='sfrp-cli-kv-', additional_params='--enabled-for-deployment --enabled-for-template-deployment')
-    def test_application(self, key_vault):
+    def test_application_related(self, key_vault, resource_group):
         self.kwargs.update({
             'kv_name': key_vault,
             'loc': 'westus',
