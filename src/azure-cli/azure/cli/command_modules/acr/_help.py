@@ -1262,24 +1262,24 @@ examples:
 
 helps['acr connected-registry list'] = """
 type: command
-short-summary: Lists all the connected registries under the current parent registry.
+short-summary: List all the connected registries under the current parent registry.
 examples:
-  - name: Lists all the connected registries of 'mycloudregistry' in table format.
+  - name: List all the connected registries of 'mycloudregistry' in table format.
     text: >
         az acr connected-registry list --registry mycloudregistry --output table
-  - name: Lists only the inmediate children of 'mycloudregistry' in expanded form in a table.
+  - name: List only the inmediate children of 'mycloudregistry' in expanded form in a table.
     text: >
         az acr connected-registry list --registry mycloudregistry --no-children --output table
-  - name: Lists all the offspring of 'myconnectedregistry' in expanded form inside a table.
+  - name: List all the offspring of 'myconnectedregistry' in expanded form inside a table.
     text: >
         az acr connected-registry list -r mycloudregistry -p myconnectedregistry --output table
 """
 
 helps['acr connected-registry list-client-tokens'] = """
 type: command
-short-summary: Lists all the client tokens associated to a specific connected registries.
+short-summary: List all the client tokens associated to a specific connected registries.
 examples:
-  - name: Lists all client tokens of 'myreadonlyacr'.
+  - name: List all client tokens of 'myreadonlyacr'.
     text: >
         az acr connected-registry list-client-tokens -r mycloudregistry -n myreadonlyacr -o table
 """
@@ -1310,39 +1310,39 @@ examples:
 
 helps['acr connected-registry get-settings'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry, and creates or rotates the sync token credentials.
+short-summary: Retrieve information required to activate a connected registry, and creates or rotates the sync token credentials.
 examples:
-  - name: Gets the settings information required to install a connected registry without the password.
+  - name: Get the settings information required to install a connected registry without the password.
     text: >
         az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --parent-protocol http
-  - name: Generates a new sync token password 1 or rotates the password if it already exists, and gets the settings information required to install a connected registry.
+  - name: Generate a new sync token password 1 or rotates the password if it already exists, and gets the settings information required to install a connected registry.
     text: >
         az acr connected-registry get-settings -r mycloudregistry -n myconnectedregistry --generate-password 1 --parent-protocol https
 """
 
 helps['acr connected-registry permissions'] = """
 type: group
-short-summary: Helps manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Manage the repository permissions accross multiple connected registries. Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry permissions update'] = """
 type: command
-short-summary: Adds and removes repository permissions accross all the necessary connected registry sync scope maps.
+short-summary: Add and remove repository permissions accross all the necessary connected registry sync scope maps.
 examples:
-  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+  - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
         az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --add repo1 repo2
-  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+  - name: Remove permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
     text: >
         az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
-  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+  - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
     text: >
         az acr connected-registry permissions update -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """
 
 helps['acr connected-registry permissions show'] = """
 type: command
-short-summary: Shows the connected registry sync scope map information.
+short-summary: Show the connected registry sync scope map information.
 examples:
   - name: Show details and attributes of a sync scope map for a connected registry.
     text: >
@@ -1352,12 +1352,12 @@ examples:
 # To be deprecated
 helps['acr connected-registry install'] = """
 type: group
-short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
+short-summary: Help to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
 """
 
 helps['acr connected-registry install info'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry.
+short-summary: Retrieve information required to activate a connected registry.
 examples:
   - name: Set http as the parent protocol, and prints the values required to activate a connected registry in json format
     text: >
@@ -1366,7 +1366,7 @@ examples:
 
 helps['acr connected-registry install renew-credentials'] = """
 type: command
-short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+short-summary: Retrieve information required to activate a connected registry, and renews the sync token credentials.
 examples:
   - name: Set http as the parent protocol, and prints the values in json format required to activate a connected registry and the newly generated sync token credentials.
     text: >
@@ -1375,15 +1375,15 @@ examples:
 
 helps['acr connected-registry repo'] = """
 type: command
-short-summary: Updates all the necessary connected registry sync scope maps repository permissions.
+short-summary: Update all the necessary connected registry sync scope maps repository permissions.
 examples:
-  - name: Adds permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
+  - name: Add permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its ancestors.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --add repo1 repo2
-  - name: Removes permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
+  - name: Remove permissions to synchronize images from 'repo1' and 'repo2' to the connected registry 'myconnectedregistry' and its descendants.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 repo2
-  - name: Removes permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
+  - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
 """

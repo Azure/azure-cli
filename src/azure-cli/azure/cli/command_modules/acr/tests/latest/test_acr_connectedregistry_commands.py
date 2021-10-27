@@ -106,7 +106,11 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
                  checks=[self.check('[0].name', '{clientToken2}')])
 
-        # Update connected registry repo permissions
+        # Show connected registry properties
+        self.cmd('acr connected-registry show -n {cr_name} -r {registry_name}',
+                 checks=[self.check('name', '{cr_name}')])
+
+        # Get connection string a generate new password.
         self.cmd('acr connected-registry get-settings -n {root_name} -r {registry_name} --parent-protocol https --generate-password 2 -y')
         self.cmd('acr token show -n {syncToken} -r {registry_name}', checks=[
             self.check('credentials.passwords[0].name', 'password2')])
@@ -137,15 +141,15 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Delete connected registry grand child
         self.cmd('acr connected-registry delete -n {grandchild_name} -r {registry_name} --cleanup -y')
 
+        # Check Gateway permission is removed by cleanup
         scope_map = self.cmd('acr connected-registry permissions show -n {child_name} -r {registry_name}').get_output_in_json()
         self.assertListEqual(sorted(scope_map['actions']),
                              ['gateway/'+ childName +'/config/read', 'gateway/'+ childName +'/config/write',
                               'gateway/'+ childName +'/message/read', 'gateway/'+ childName +'/message/write',
                               'repositories/'+ repo1 +'/content/read', 'repositories/'+ repo1 +'/metadata/read'])
 
-        # Show connected registry properties
-        self.cmd('acr connected-registry show -n {cr_name} -r {registry_name}',
-                 checks=[self.check('name', '{cr_name}')])
+        # Delete connected registry child
+        self.cmd('acr connected-registry delete -n {child_name} -r {registry_name} -y')
 
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
