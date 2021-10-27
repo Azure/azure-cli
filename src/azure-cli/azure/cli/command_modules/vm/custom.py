@@ -1380,7 +1380,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              dedicated_host=None, dedicated_host_group=None, **kwargs):
+              dedicated_host=None, dedicated_host_group=None, size=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1475,6 +1475,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     aux_subscriptions = None
     if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
         aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
+
+    if size is not None:
+        if vm.hardware_profile.vm_size == size:
+            logger.warning("VM size is already %s", size)
+        else:
+            vm.hardware_profile.vm_size = size
+
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -2207,6 +2214,194 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
 
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
     return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
+
+
+def vm_run_command_create(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          location,
+                          tags=None,
+                          script=None,
+                          script_uri=None,
+                          command_id=None,
+                          parameters=None,
+                          protected_parameters=None,
+                          async_execution=None,
+                          run_as_user=None,
+                          run_as_password=None,
+                          timeout_in_seconds=None,
+                          output_blob_uri=None,
+                          error_blob_uri=None,
+                          no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vm_run_command_update(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          location,
+                          tags=None,
+                          script=None,
+                          script_uri=None,
+                          command_id=None,
+                          parameters=None,
+                          protected_parameters=None,
+                          async_execution=None,
+                          run_as_user=None,
+                          run_as_password=None,
+                          timeout_in_seconds=None,
+                          output_blob_uri=None,
+                          error_blob_uri=None,
+                          no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vm_run_command_delete(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name)
+
+
+def vm_run_command_list(client,
+                        resource_group_name=None,
+                        vm_name=None,
+                        expand=None,
+                        location=None):
+    if resource_group_name or vm_name is not None:
+        return client.list_by_virtual_machine(resource_group_name=resource_group_name,
+                                              vm_name=vm_name,
+                                              expand=expand)
+    return client.list(location=location)
+
+
+def vm_run_command_show(client,
+                        resource_group_name=None,
+                        vm_name=None,
+                        run_command_name=None,
+                        expand=None,
+                        location=None,
+                        command_id=None):
+    if resource_group_name or vm_name is not None or run_command_name is not None:
+        return client.get_by_virtual_machine(resource_group_name=resource_group_name,
+                                             vm_name=vm_name,
+                                             run_command_name=run_command_name,
+                                             expand=expand)
+    return client.get(location=location,
+                      command_id=command_id)
 
 # endregion
 
@@ -3092,7 +3287,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                **kwargs):
+                vm_sku=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3217,6 +3412,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
+
+    if vm_sku is not None:
+        if vmss.sku.name == vm_sku:
+            logger.warning("VMSS sku is already %s", vm_sku)
+        else:
+            vmss.sku.name = vm_sku
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -3448,6 +3649,196 @@ def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=
 # region VirtualMachineScaleSets RunCommand
 def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, instance_id, scripts=None, parameters=None):  # pylint: disable=line-too-long
     return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
+
+
+def vmss_run_command_create(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            location,
+                            tags=None,
+                            script=None,
+                            script_uri=None,
+                            command_id=None,
+                            parameters=None,
+                            protected_parameters=None,
+                            async_execution=None,
+                            run_as_user=None,
+                            run_as_password=None,
+                            timeout_in_seconds=None,
+                            output_blob_uri=None,
+                            error_blob_uri=None,
+                            no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vmss_run_command_update(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            location,
+                            tags=None,
+                            script=None,
+                            script_uri=None,
+                            command_id=None,
+                            parameters=None,
+                            protected_parameters=None,
+                            async_execution=None,
+                            run_as_user=None,
+                            run_as_password=None,
+                            timeout_in_seconds=None,
+                            output_blob_uri=None,
+                            error_blob_uri=None,
+                            no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vmss_run_command_delete(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name)
+
+
+def vmss_run_command_list(client,
+                          resource_group_name,
+                          vmss_name,
+                          instance_id,
+                          expand=None):
+    return client.list(resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       expand=expand)
+
+
+def vmss_run_command_show(client,
+                          resource_group_name,
+                          vmss_name,
+                          instance_id,
+                          run_command_name,
+                          expand=None):
+    return client.get(resource_group_name=resource_group_name,
+                      vm_scale_set_name=vmss_name,
+                      instance_id=instance_id,
+                      run_command_name=run_command_name,
+                      expand=expand)
 # endregion
 
 
@@ -4169,7 +4560,8 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
     if application_configuration_overrides:
         index = 0
         for over_ride in application_configuration_overrides:
-            vm.application_profile.gallery_applications[index].configuration_reference = over_ride
+            if over_ride or over_ride.lower() != 'null':
+                vm.application_profile.gallery_applications[index].configuration_reference = over_ride
             index += 1
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
 
@@ -4191,7 +4583,6 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
 
-    # check if application_version_ids is empty
     vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
 
     if order_applications:
@@ -4201,12 +4592,11 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
             index += 1
 
     if application_configuration_overrides:
-        # check if the length of application_configuration_overrides is as same as application_version_ids
+        index = 0
         for over_ride in application_configuration_overrides:
-            index = 0
             if over_ride or over_ride.lower() != 'null':
                 vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
-                index += 1
+            index += 1
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
 
 

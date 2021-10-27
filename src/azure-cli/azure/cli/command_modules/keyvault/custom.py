@@ -532,7 +532,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         default_action=None,
                         no_self_perms=None,
                         tags=None,
-                        no_wait=False):
+                        no_wait=False,
+                        public_network_access=None,
+                        ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
@@ -554,7 +556,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             default_action=default_action,
                             no_self_perms=no_self_perms,
                             tags=tags,
-                            no_wait=no_wait)
+                            no_wait=no_wait,
+                            public_network_access=public_network_access)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -646,7 +649,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  default_action=None,
                  no_self_perms=None,
                  tags=None,
-                 no_wait=False):
+                 no_wait=False,
+                 public_network_access=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
@@ -764,7 +768,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                  enable_rbac_authorization=enable_rbac_authorization,
                                  enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days))
+                                 soft_delete_retention_in_days=int(retention_days),
+                                 public_network_access=public_network_access)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -815,7 +820,8 @@ def update_vault(cmd, instance,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
-                 default_action=None):
+                 default_action=None,
+                 public_network_access=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -849,6 +855,10 @@ def update_vault(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
