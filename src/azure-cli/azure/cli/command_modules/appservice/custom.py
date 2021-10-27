@@ -4309,7 +4309,10 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
             raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-        open_page_in_browser(scm_url + '/webssh/host')
+        if not instance:
+            open_page_in_browser(scm_url + '/webssh/host')
+        else:
+            open_page_in_browser(scm_url + '/webssh/host?instance={}'.format(instance))
     else:
         config = get_site_configs(cmd, resource_group_name, name, slot)
         if config.remote_debugging_enabled:

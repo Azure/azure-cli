@@ -113,6 +113,7 @@ def cli_cosmosdb_create(cmd,
                         network_acl_bypass_resource_ids=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_redundancy=None,
                         assign_identity=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
@@ -164,6 +165,7 @@ def cli_cosmosdb_create(cmd,
                                     analytical_storage_schema_type=analytical_storage_schema_type,
                                     backup_policy_type=backup_policy_type,
                                     backup_interval=backup_interval,
+                                    backup_redundancy=backup_redundancy,
                                     assign_identity=assign_identity,
                                     default_identity=default_identity,
                                     backup_retention=backup_retention,
@@ -198,6 +200,7 @@ def _create_database_account(client,
                              network_acl_bypass_resource_ids=None,
                              backup_interval=None,
                              backup_retention=None,
+                             backup_redundancy=None,
                              assign_identity=None,
                              default_identity=None,
                              backup_policy_type=None,
@@ -257,10 +260,11 @@ def _create_database_account(client,
     if backup_policy_type is not None:
         if backup_policy_type.lower() == 'periodic':
             backup_policy = PeriodicModeBackupPolicy()
-            if backup_interval is not None or backup_retention is not None:
+            if backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
                 periodic_mode_properties = PeriodicModeProperties(
                     backup_interval_in_minutes=backup_interval,
-                    backup_retention_interval_in_hours=backup_retention
+                    backup_retention_interval_in_hours=backup_retention,
+                    backup_storage_redundancy=backup_redundancy
                 )
             backup_policy.periodic_mode_properties = periodic_mode_properties
         elif backup_policy_type.lower() == 'continuous':
@@ -353,6 +357,7 @@ def cli_cosmosdb_update(client,
                         server_version=None,
                         backup_interval=None,
                         backup_retention=None,
+                        backup_redundancy=None,
                         default_identity=None,
                         analytical_storage_schema_type=None,
                         backup_policy_type=None):
@@ -387,19 +392,20 @@ def cli_cosmosdb_update(client,
     api_properties = {'ServerVersion': server_version}
 
     backup_policy = None
-    if backup_interval is not None or backup_retention is not None:
+    if backup_interval is not None or backup_retention is not None or backup_redundancy is not None:
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             if backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
                 raise CLIError('backup-interval and backup-retention can only be set with periodic backup policy.')
             periodic_mode_properties = PeriodicModeProperties(
                 backup_interval_in_minutes=backup_interval,
-                backup_retention_interval_in_hours=backup_retention
+                backup_retention_interval_in_hours=backup_retention,
+                backup_storage_redundancy=backup_redundancy
             )
             backup_policy = existing.backup_policy
             backup_policy.periodic_mode_properties = periodic_mode_properties
         else:
             raise CLIError(
-                'backup-interval and backup-retention can only be set for accounts with periodic backup policy.')
+                'backup-interval, backup-retention and backup_redundancy can only be set for accounts with periodic backup policy.')  # pylint: disable=line-too-long
     elif backup_policy_type is not None and backup_policy_type.lower() == 'continuous':
         if isinstance(existing.backup_policy, PeriodicModeBackupPolicy):
             backup_policy = ContinuousModeBackupPolicy()
@@ -1805,21 +1811,25 @@ def cli_cosmosdb_restorable_database_account_list(client,
     return matching_restorable_accounts
 
 
-def cli_retrieve_latest_backup_time(client,
-                                    resource_group_name,
-                                    account_name,
-                                    database_name,
-                                    container_name,
-                                    location):
+def cli_sql_retrieve_latest_backup_time(client,
+                                        resource_group_name,
+                                        account_name,
+                                        database_name,
+                                        container_name,
+                                        location):
     try:
         client.get_sql_database(resource_group_name, account_name, database_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a database with name {}".format(database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
 
     try:
         client.get_sql_container(resource_group_name, account_name, database_name, container_name)
-    except ResourceNotFoundError:
-        raise CLIError("Cannot find a container with name {} under database {}".format(container_name, database_name))
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Container with name '{}' under database '{}' could not be found.".format(container_name, database_name))
+        raise CLIError("{}".format(str(ex)))
 
     restoreLocation = ContinuousBackupRestoreLocation(
         location=location
@@ -1831,6 +1841,39 @@ def cli_retrieve_latest_backup_time(client,
                                                                           container_name,
                                                                           restoreLocation)
     return asyc_backupInfo.result()
+
+
+def cli_mongo_db_retrieve_latest_backup_time(client,
+                                             resource_group_name,
+                                             account_name,
+                                             database_name,
+                                             collection_name,
+                                             location):
+    try:
+        client.get_mongo_db_database(resource_group_name, account_name, database_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Database with name '{}' could not be found.".format(database_name))
+        raise CLIError("{}".format(str(ex)))
+
+    try:
+        client.get_mongo_db_collection(resource_group_name, account_name, database_name, collection_name)
+    except Exception as ex:
+        if ex.error.code == "NotFound":
+            raise CLIError("(NotFound) Collection with name '{}' under database '{}' could not be found.".format(collection_name, database_name))
+        raise CLIError("{}".format(str(ex)))
+
+    restoreLocation = ContinuousBackupRestoreLocation(
+        location=location
+    )
+
+    asyc_backupInfo = client.begin_retrieve_continuous_backup_information(resource_group_name,
+                                                                          account_name,
+                                                                          database_name,
+                                                                          collection_name,
+                                                                          restoreLocation)
+    return asyc_backupInfo.result()
+
 
 ######################
 # data plane APIs
