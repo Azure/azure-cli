@@ -1308,6 +1308,7 @@ def process_vm_create_namespace(cmd, namespace):
 def process_vm_update_namespace(cmd, namespace):
     _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1664,6 +1665,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 # endregion
 
 
@@ -2054,3 +2056,17 @@ def _validate_vm_vmss_create_ephemeral_placement(namespace):
     if ephemeral_os_disk_placement and not ephemeral_os_disk:
         raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
                                  '--ephemeral-os-disk is specified.')
+
+
+def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
+    size = getattr(namespace, 'size', None)
+    vm_sku = getattr(namespace, 'vm_sku', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    source = getattr(namespace, 'command').split()[0]
+    if ephemeral_os_disk_placement:
+        if source == 'vm' and not size:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--size is specified.')
+        if source == 'vmss' and not vm_sku:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--vm-sku is specified.')

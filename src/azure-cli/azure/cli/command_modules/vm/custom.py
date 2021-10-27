@@ -1380,7 +1380,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              dedicated_host=None, dedicated_host_group=None, size=None, **kwargs):
+              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1481,6 +1481,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             logger.warning("VM size is already %s", size)
         else:
             vm.hardware_profile.vm_size = size
+
+    if ephemeral_os_disk_placement is not None:
+        if vm.storage_profile.os_disk.diff_disk_settings is not None:
+            vm.storage_profile.os_disk.diff_disk_settings.placement = ephemeral_os_disk_placement
+        else:
+            raise ValidationError('should update from --ephemeral-os-disk true vm.')
 
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
@@ -3099,7 +3105,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3230,6 +3236,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             logger.warning("VMSS sku is already %s", vm_sku)
         else:
             vmss.sku.name = vm_sku
+
+    if ephemeral_os_disk_placement is not None:
+        if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
+                ephemeral_os_disk_placement
+        else:
+            raise ValidationError('should update from --ephemeral-os-disk true vmss.')
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

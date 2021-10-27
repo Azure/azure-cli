@@ -346,6 +346,8 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM.')
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
+        c.argument('ephemeral_os_disk_placement', options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01',
+                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -677,6 +679,8 @@ def load_arguments(self, _):
         c.argument('spot_restore_timeout', min_api='2021-04-01',
                    help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
+        c.argument('ephemeral_os_disk_placement', options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01',
+                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
