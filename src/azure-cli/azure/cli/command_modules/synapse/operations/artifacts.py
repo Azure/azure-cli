@@ -8,7 +8,7 @@ import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            NotebookResource)
+                                            NotebookResource, NotebookFolder, SparkJobDefinitionFolder)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
@@ -210,7 +210,7 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 
 # Notebook
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
-                              executor_size="Small", executor_count=2, no_wait=False):
+                              folder_name=None, executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
@@ -240,6 +240,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
+        definition_file['NotebookFolder'] = NotebookFolder(name=folder_name)
     properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)

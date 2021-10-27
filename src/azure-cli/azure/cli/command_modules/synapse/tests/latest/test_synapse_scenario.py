@@ -1196,7 +1196,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
+    #@record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_notebook(self):
         self.kwargs.update({
@@ -1204,6 +1204,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_name':'folder1/subfolder1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
@@ -1230,7 +1231,7 @@ class SynapseScenarioTests(ScenarioTest):
         # create notebook
         self.cmd(
             'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
-            '--spark-pool-name {spark-pool}',
+            '--spark-pool-name {spark-pool} --folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
