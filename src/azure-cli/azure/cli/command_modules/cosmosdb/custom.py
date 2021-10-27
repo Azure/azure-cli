@@ -2426,6 +2426,12 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
     if base64_encoded_cassandra_yaml_fragment is None:
         base64_encoded_cassandra_yaml_fragment = data_center_resource.properties.base64_encoded_cassandra_yaml_fragment
 
+    if managed_disk_customer_key_uri is None:
+        managed_disk_customer_key_uri = data_center_resource.properties.managed_disk_customer_key_uri
+
+    if backup_storage_customer_key_uri is None:
+        backup_storage_customer_key_uri = data_center_resource.properties.backup_storage_customer_key_uri
+
     data_center_properties = DataCenterResourceProperties(
         data_center_location=data_center_resource.properties.data_center_location,
         delegated_subnet_id=data_center_resource.properties.delegated_subnet_id,
