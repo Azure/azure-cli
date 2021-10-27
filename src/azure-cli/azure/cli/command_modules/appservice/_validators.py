@@ -8,6 +8,7 @@ import ipaddress
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.validators import validate_tags
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
@@ -253,6 +254,7 @@ def validate_public_cloud(cmd):
 
 
 def _validate_vnet_integration(cmd, namespace):
+    validate_tags(namespace)
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:
             raise ArgumentUsageError("Cannot use --vnet without --subnet")
