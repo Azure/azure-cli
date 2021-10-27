@@ -7,7 +7,7 @@ from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list, get_location_type, file_type
+    get_resource_name_completion_list, get_location_type, file_type, resource_group_name_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language, add_progress_callback, validate_repository_type
@@ -16,6 +16,11 @@ from .constant import SparkBatchLanguage, SparkStatementLanguage, SqlPoolConnect
     SqlPoolConnectionClientAuthenticationType, ItemType
 from .action import AddFilters, AddOrderBy
 from shlex import split
+from ..action import (
+    AddSku,
+    AddOptimizedAutoscale,
+    AddValue
+)
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.',
                                           completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
@@ -148,6 +153,10 @@ def load_arguments(self, _):
         c.argument('enable_auto_pause', arg_type=get_three_state_flag(), arg_group='AutoPause',
                    help='The flag of enabling auto pause.')
         c.argument('delay', arg_group='AutoPause', help='The delay time whose unit is minute.')
+
+        # Environment Configuration
+        c.argument('library_requirements', arg_group='Environment Configuration',
+                   help='The library requirements file.')
 
         # Default Folder
         c.argument('spark_events_folder', arg_group='Default Folder', help='The Spark events folder.')
@@ -953,3 +962,80 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
             c.argument('definition_file', arg_type=definition_file_arg_type)
+
+
+# kusto pool
+    with self.argument_context('synapse kusto pool create') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.')
+        c.argument('if_match', type=str, help='The ETag of the Kusto Pool. Omit this value to always overwrite the '
+                   'current Kusto Pool. Specify the last-seen ETag value to prevent accidentally overwriting '
+                   'concurrent changes.')
+        c.argument('if_none_match', type=str, help='Set to \'*\' to allow a new Kusto Pool to be created, but to '
+                   'prevent updating an existing Kusto Pool. Other values will result in a 412 Pre-condition Failed '
+                   'response.')
+        c.argument('tags', tags_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('sku', action=AddSku, nargs='+', help='The SKU of the kusto pool.')
+        c.argument('optimized_autoscale', action=AddOptimizedAutoscale, nargs='+', help='Optimized auto scale '
+                   'definition.')
+        c.argument('enable_streaming_ingest', options_list=['--enable-streaming-ingest', '--esig'],
+                   arg_type=get_three_state_flag(), help='A boolean value that indicates if '
+                   'the streaming ingest is enabled.')
+        c.argument('enable_purge', arg_type=get_three_state_flag(), help='A boolean value that indicates if the purge '
+                   'operations are enabled.')
+        c.argument('workspace_uid', type=str, help='The workspace unique identifier.')
+
+    with self.argument_context('synapse kusto pool update') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.', id_part='child_name_1')
+        c.argument('if_match', type=str, help='The ETag of the Kusto Pool. Omit this value to always overwrite the '
+                   'current Kusto Pool. Specify the last-seen ETag value to prevent accidentally overwriting '
+                   'concurrent changes.')
+        c.argument('tags', tags_type)
+        c.argument('sku', action=AddSku, nargs='+', help='The SKU of the kusto pool.')
+        c.argument('optimized_autoscale', action=AddOptimizedAutoscale, nargs='+', help='Optimized auto scale '
+                   'definition.')
+        c.argument('enable_streaming_ingest', options_list=['--enable-streaming-ingest', '--esig'],
+                   arg_type=get_three_state_flag(), help='A boolean value that indicates if '
+                   'the streaming ingest is enabled.')
+        c.argument('enable_purge', arg_type=get_three_state_flag(), help='A boolean value that indicates if the purge '
+                   'operations are enabled.')
+        c.argument('workspace_uid', type=str, help='The workspace unique identifier.')
+
+    with self.argument_context('synapse kusto pool add-language-extension') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('value', action=AddValue, nargs='+', help='The list of language extensions.')
+
+    with self.argument_context('synapse kusto pool remove-language-extension') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('value', action=AddValue, nargs='+', help='The list of language extensions.')
+
+    with self.argument_context('synapse kusto pool list-language-extension') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.')
+        c.argument('resource_group_name', resource_group_name_type)
+
+    with self.argument_context('synapse kusto pool detach-follower-database') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace', id_part='name')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                   'the Kusto pool.', id_part='child_name_1')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('kusto_pool_resource_id', type=str, help='Resource id of the cluster that follows a database owned '
+                   'by this cluster.')
+        c.argument('attached_database_configuration_name',
+                   options_list=['--attached-database-configuration-name', '--adcn'],
+                   type=str, help='Resource name of the attached database '
+                   'configuration in the follower cluster.')
