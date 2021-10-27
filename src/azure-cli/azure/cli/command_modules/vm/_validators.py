@@ -1230,9 +1230,6 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
-    if len(namespace.application_version_ids) == 0:
-        from azure.cli.core.parser import InvalidArgumentValueError
-        raise InvalidArgumentValueError('usage error: --application-version-ids should not be empty list.')
     if namespace.application_configuration_overrides and \
        len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
         raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'

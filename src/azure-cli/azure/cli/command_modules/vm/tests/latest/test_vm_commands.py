@@ -6567,6 +6567,18 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    @ResourceGroupPreparer()
+    def test_vm_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids')
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
     # Need prepare app versions
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
@@ -6633,6 +6645,20 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         ])
 
         self.cmd('vm application list -g {rg} -n {vm}')
+
+    # Need prepare app versions
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
 
     # Need prepare app versions
     @ResourceGroupPreparer()
