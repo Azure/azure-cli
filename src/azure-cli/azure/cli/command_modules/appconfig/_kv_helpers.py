@@ -1097,9 +1097,9 @@ def __validate_import_feature_flag(kv):
             ff = json.loads(kv.value)
             if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
                 return True
-            logger.warning("Feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
-        except Exception as exception:  # pylint: disable=broad-except
-            logger.warning("An error occurred while importing feature flag with key '{%s}'\n{%s}", kv.id, str(exception))
+            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+        except JSONDecodeError as exception:
+            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
     return False
 
 
