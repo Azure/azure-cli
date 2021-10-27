@@ -136,3 +136,7 @@ def cf_restorable_mongodb_collections(cli_ctx, _):
 
 def cf_restorable_mongodb_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).restorable_mongodb_resources
+
+
+def cf_db_locations(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).locations
