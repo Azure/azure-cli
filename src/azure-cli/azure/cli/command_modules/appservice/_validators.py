@@ -259,17 +259,18 @@ def _validate_vnet_integration(cmd, namespace):
         if not is_valid_resource_id(namespace.subnet) and not namespace.vnet:
             raise CLIError("Must either specify subnet by resource ID or include --vnet argument")
 
-    client = web_client_factory(cmd.cli_ctx)
-    if is_valid_resource_id(namespace.plan):
-        parse_result = parse_resource_id(namespace.plan)
-        plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
-    else:
-        plan_info = client.app_service_plans.get(name=namespace.plan, resource_group_name=namespace.resource_group_name)
+        client = web_client_factory(cmd.cli_ctx)
+        if is_valid_resource_id(namespace.plan):
+            parse_result = parse_resource_id(namespace.plan)
+            plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        else:
+            plan_info = client.app_service_plans.get(name=namespace.plan,
+                                                     resource_group_name=namespace.resource_group_name)
 
-    sku_name = plan_info.sku.name
-    disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
-    if get_sku_name(sku_name) in disallowed_skus:
-        raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
-                       "Plan sku cannot be one of: {}. "
-                       "Please run 'az appservice plan create -h' "
-                       "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
+        sku_name = plan_info.sku.name
+        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        if get_sku_name(sku_name) in disallowed_skus:
+            raise CLIError("App Service Plan has invalid sku for vnet integration: {}."
+                        "Plan sku cannot be one of: {}. "
+                        "Please run 'az appservice plan create -h' "
+                        "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
