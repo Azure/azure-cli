@@ -16,6 +16,7 @@ import uuid
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -1346,6 +1347,54 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
             self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
             self.check('storageProfile.osDisk.diffDiskSettings.placement', 'CacheDisk'),
             self.check('osProfile.computerName', '{vm_2}'),  # check that --computer-name defaults to --name here.
+        ])
+
+
+class VMUpdateTests(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_size_', location='westus2')
+    def test_vm_update_size(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vm-local-base',
+            'base2': 'cli-test-vm-local-base2',
+            'image': 'UbuntuLTS',
+            'loc': resource_group_location,
+            'size': 'Standard_DS5_v2',
+        })
+
+        # check base
+        self.cmd('vm create -n {base} -g {rg} --image {image} --size Standard_DS4_v2 --location {loc}')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm to another size.
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        self.cmd('vm update --resource-group {rg} --name {base} --size {size} --set tags.tagName=tagValue')
+        self.cmd('vm show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vm create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vm from default size.
+        self.cmd('vm update --resource-group {rg} --name {base2} --size {size}')
+        self.cmd('vm show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('hardwareProfile.vmSize', '{size}'),
         ])
 
 
@@ -2807,6 +2856,51 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_vm_sku_', location='westus2')
+    def test_vmss_update_vm_sku(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'base': 'cli-test-vmss-local-base',
+            'base2': 'cli-test-vmss-local-base2',
+            'image': 'UbuntuLTS',
+            'vm_sku': 'Standard_DS5_v2',
+            'loc': resource_group_location,
+        })
+
+        # check base
+        self.cmd('vmss create -n {base} -g {rg} --image {image} --vm-sku Standard_DS4_v2')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update vmss to another size.
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check not modify size value
+        self.cmd('vmss update --resource-group {rg} --name {base} --vm-sku {vm_sku} --set tags.tagName=tagValue')
+        self.cmd('vmss show -g {rg} -n {base}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+            self.check('tags.tagName', 'tagValue'),
+        ])
+
+        # check create with default size
+        self.cmd('vmss create -n {base2} -g {rg} --image {image}  --location {loc}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # check that we can update a vmss from default size.
+        self.cmd('vmss update --resource-group {rg} --name {base2} --vm-sku {vm_sku}')
+        self.cmd('vmss show -g {rg} -n {base2}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{vm_sku}'),
+        ])
+
 
 class AcceleratedNetworkingTest(ScenarioTest):
 
@@ -3741,6 +3835,47 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_v2')
+    def test_run_command_v2(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10),
+            'run_cmd': self.create_random_name('cmd-', 10)
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults')
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} ', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', None),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 0),
+            self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
+        ])
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600),
+            self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
+            ])
+        self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=[
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].name', '{run_cmd}'),
+            self.check('[0].source.script', 'script1'),
+            self.check('[0].asyncExecution', False),
+            self.check('[0].timeoutInSeconds', 3600)
+        ])
+        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600)
+        ])
+        self.cmd('vm run-command delete --vm-name {vm} --name {run_cmd} -g {rg} -y')
+        self.cmd('vm run-command list --vm-name {vm} -g {rg}', checks=self.is_empty())
+
+
 class VMSSRunCommandScenarioTest(ScenarioTest):
     @unittest.skip('Can\'t test it. We are not allowed to open ports.')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command')
@@ -3788,6 +3923,49 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             self.kwargs['id'] = id
             self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2')
+    def test_vmss_run_command_v2(self, resource_group):
+        self.kwargs.update({
+            'vmss': self.create_random_name('vmss-', 10),
+            'run_cmd': self.create_random_name('cmd_', 10),
+            'user': self.create_random_name('user-', 10)
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --admin-username {user} --generate-ssh-keys')
+        instace_ids = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
+        self.kwargs.update({
+            'instance_id': instace_ids[0]
+        })
+        self.cmd('vmss run-command create --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', None),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 0),
+            self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
+        ])
+        self.cmd('vmss run-command update --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600),
+            ])
+        self.cmd('vmss run-command list --vmss-name {vmss} -g {rg} --instance-id {instance_id}', checks=[
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].name', '{run_cmd}'),
+            self.check('[0].source.script', 'script1'),
+            self.check('[0].asyncExecution', False),
+            self.check('[0].timeoutInSeconds', 3600)
+        ])
+        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg}', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('source.script', 'script1'),
+            self.check('asyncExecution', False),
+            self.check('timeoutInSeconds', 3600)
+        ])
+        self.cmd('vmss run-command delete --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} -y')
+        self.cmd('vmss run-command list --vmss-name {vmss} --instance-id {instance_id} -g {rg}', checks=self.is_empty())
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
@@ -6473,8 +6651,19 @@ class CapacityReservationScenarioTest(ScenarioTest):
 
 class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
+    @ResourceGroupPreparer()
+    def test_vm_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids')
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
     # Need prepare app versions
-    @record_only()
     @ResourceGroupPreparer()
     def test_vm_add_application(self, resource_group):
         self.kwargs.update({
@@ -6493,8 +6682,69 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vm application list -g {rg} -n {vm}')
 
+    @ResourceGroupPreparer()
+    def test_vm_add_application_with_order_application(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --order-applications', checks=[
+            self.check('applicationProfile.galleryApplications[0].order', 1),
+            self.check('applicationProfile.galleryApplications[1].order', 2)
+        ])
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
+    @ResourceGroupPreparer()
+    def test_vm_add_application_with_config_override(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+        })
+        # Prepare VM
+        self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2012R2Datacenter --admin-username clitest1234 --admin-password Test123456789# --license-type Windows_Server --nsg-rule NONE')
+
+        # wrong length of config-overrides
+        message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegexp(ArgumentUsageError, message):
+            self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
+
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
+            self.check('applicationProfile.galleryApplications[0].configurationReference', 'null'),
+            self.check('applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
+
+        self.cmd('vm application list -g {rg} -n {vm}')
+
     # Need prepare app versions
-    @record_only()
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_empty_version_ids(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
     @ResourceGroupPreparer()
     def test_vmss_add_application(self, resource_group):
         self.kwargs.update({
@@ -6510,7 +6760,59 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         # Prepare VMSS
         self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
 
-        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications')
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2}')
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_with_order_application(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].order', 1),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].order', 2)
+        ])
+
+        self.cmd('vmss application list -g {rg} --name {vmss}')
+
+    # Need prepare app versions
+    @ResourceGroupPreparer()
+    def test_vmss_add_application_with_config_override(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'vid1': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MyFirstApp/versions/1.0.0'.format(
+                sub=self.get_subscription_id()
+            ),
+            'vid2': '/subscriptions/{sub}/resourceGroups/galleryappaccount/providers/Microsoft.Compute/galleries/MyGallery/applications/MySecondApp/versions/1.0.1'.format(
+                sub=self.get_subscription_id()
+            ),
+            'config': 'https://galleryappaccount.blob.core.windows.net/gallerytest/MyAppConfig'
+        })
+
+        # Prepare VMSS
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image Win2012R2Datacenter')
+
+        # wrong length of config-overrides
+        message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegexp(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
+
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].configurationReference', 'null'),
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].configurationReference', '{config}')
+        ])
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
 
