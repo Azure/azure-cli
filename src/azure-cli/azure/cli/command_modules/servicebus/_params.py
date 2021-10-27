@@ -32,7 +32,7 @@ def load_arguments_sb(self, _):
         c.argument('default_action', help='Default action for network rule set.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
-        c.argument('capacity', type=int, choices=[1, 2, 4, 8], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
+        c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
 
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
