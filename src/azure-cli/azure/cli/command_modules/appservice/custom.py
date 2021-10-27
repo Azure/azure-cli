@@ -3180,7 +3180,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
     error_message = ''
     endpoints = storage_properties.primary_endpoints
     sku = storage_properties.sku.name
-    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'Standard_GZRS']
+    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'Standard_GZRS']  # pylint: disable=line-too-long
 
     for e in ['blob', 'queue', 'table']:
         if not getattr(endpoints, e, None):
