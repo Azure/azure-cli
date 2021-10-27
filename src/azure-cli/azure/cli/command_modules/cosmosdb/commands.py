@@ -117,7 +117,7 @@ def load_command_table(self, _):
     cosmosdb_locations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#LocationsOperations.{}',
         client_factory=cf_db_locations)
-        
+
     cosmosdb_managed_cassandra_cluster_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#CassandraClustersOperations.{}',
         client_factory=cf_cassandra_cluster)
