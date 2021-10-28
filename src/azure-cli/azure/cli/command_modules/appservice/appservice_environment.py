@@ -120,8 +120,7 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
             return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
                                name=name, hosting_environment_envelope=ase_def)
-    logger.warning('No updates were applied. ' +
-                   'The version of App Service Environment may not be applicable to this update.')
+    logger.warning('No updates were applied. The version of ASE may not be applicable to this update.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
