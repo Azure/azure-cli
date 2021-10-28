@@ -2386,7 +2386,7 @@ helps['staticwebapp delete'] = """
 
 helps['staticwebapp browse'] = """
     type: command
-    short-summary: Open a static web app in a browser.
+    short-summary: Open a static web app in a browser. Uses the first custom domain URL if one exists. Otherwise opens the auto-generated URL.
     examples:
     - name: Open a static web app in a browser.
       text: az staticwebapp browse -n MyStaticAppName -g MyRg
