@@ -240,9 +240,10 @@ class TestStaticAppCommands(unittest.TestCase):
         set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
 
         self.staticapp_client.begin_validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
-            self.rg1, self.name1, self.hostname1)
-        self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
-            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+            self.rg1, self.name1, self.hostname1, self.hostname1_validation)
+        self.staticapp_client.begin_create_or_update_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1,
+            static_site_custom_domain_request_properties_envelope=self.hostname1_validation)
 
     def test_set_staticsite_domain_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
@@ -250,9 +251,10 @@ class TestStaticAppCommands(unittest.TestCase):
         set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1)
 
         self.staticapp_client.begin_validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
-            self.rg1, self.name1, self.hostname1)
-        self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
-            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+            self.rg1, self.name1, self.hostname1, self.hostname1_validation)
+        self.staticapp_client.begin_create_or_update_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1,
+            static_site_custom_domain_request_properties_envelope=self.hostname1_validation)
 
     def test_delete_staticsite_domain_with_resourcegroup(self):
         delete_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
@@ -525,7 +527,7 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.list_static_site_secrets.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
         from ast import literal_eval
         self.assertEqual(literal_eval(secret.__str__())["properties"]["apiKey"], "key")
-    
+
     def test_reset_staticsite_api_key(self):
         from azure.mgmt.web.models import StringDictionary, StaticSiteResetPropertiesARMResource
         self.staticapp_client.get_static_site.return_value = self.app1
@@ -540,7 +542,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         from ast import literal_eval
         reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
-        self.assertEqual(reset_envelope["repository_token"], self.token1)     
+        self.assertEqual(reset_envelope["repository_token"], self.token1)
 
 
 def _set_up_client_mock(self):
@@ -556,6 +558,8 @@ def _set_up_client_mock(self):
 
 
 def _set_up_fake_apps(self):
+    from azure.mgmt.web.models import StaticSiteCustomDomainRequestPropertiesARMResource
+
     self.rg1 = 'rg1'
     self.name1 = 'name1'
     self.name1_not_exist = 'name1_not_exist'
@@ -565,6 +569,7 @@ def _set_up_fake_apps(self):
     self.token1 = 'TOKEN_1'
     self.environment1 = 'default'
     self.hostname1 = 'www.app1.com'
+    self.hostname1_validation = StaticSiteCustomDomainRequestPropertiesARMResource(validation_method="cname-delegation")
     self.app1 = _contruct_static_site_object(
         self.rg1, self.name1, self.location1,
         self.source1, self.branch1, self.token1)
