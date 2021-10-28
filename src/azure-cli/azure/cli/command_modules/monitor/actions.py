@@ -102,7 +102,8 @@ class MetricAlertConditionAction(argparse._AppendAction):
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
                 '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
-                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n' \
+                '                         [with skipmetricvalidation]'
 
         string_val = ' '.join(values)
 

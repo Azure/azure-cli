@@ -1452,6 +1452,7 @@ parameters:
                            [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
+                           [with skipmetricvalidation]
 
         Sensitivity can be 'low', 'medium', 'high'.
 
