@@ -779,42 +779,6 @@ def load_arguments(self, _):
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=None)
 
-    with self.argument_context('functionapp devops-build create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
-                   local_context_attribute=LocalContextAttribute(name='functionapp_name',
-                                                                 actions=[LocalContextAction.GET]))
-        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use",
-                   required=False)
-        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
-        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
-        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('allow_force_push',
-                   help="If Azure DevOps repository is not clean, should it overwrite remote content?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository",
-                   required=False)
-        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
-                   required=False)
-
-    with self.argument_context('functionapp devops-pipeline create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
-                   local_context_attribute=LocalContextAttribute(name='functionapp_name',
-                                                                 actions=[LocalContextAction.GET]))
-        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use",
-                   required=False)
-        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
-        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
-        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('allow_force_push',
-                   help="If Azure DevOps repository is not clean, should it overwrite remote content?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository",
-                   required=False)
-        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
-                   required=False)
-
     with self.argument_context('functionapp deployment list-publishing-profiles') as c:
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:

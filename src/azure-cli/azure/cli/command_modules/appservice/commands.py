@@ -381,9 +381,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
-    with self.command_group('functionapp devops-pipeline') as g:
-        g.custom_command('create', 'create_devops_pipeline')
-
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
         g.custom_command('delete', 'delete_slot')
