@@ -4,8 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import random
+import string
 from knack.log import get_logger
-from knack.prompting import prompt
+from knack.prompting import (
+    prompt,
+    prompt_pass
+)
 from msrestazure.tools import (
     parse_resource_id,
     is_valid_resource_id
@@ -18,6 +23,7 @@ from azure.cli.core.azclierror import (
 
 from ._resource_config import (
     CLIENT_TYPE,
+    RESOURCE,
     SOURCE_RESOURCES,
     TARGET_RESOURCES,
     SOURCE_RESOURCES_PARAMS,
@@ -35,8 +41,9 @@ def get_source_resource_name(cmd):
     e.g, az webapp connection list: => RESOURCE.WebApp
     '''
     source = None
+    source_name = cmd.name.split(' ')[0]
     for item in SOURCE_RESOURCES:
-        if item.value in cmd.name:
+        if item.value.lower() == source_name.lower():
             source = item
     return source
 
@@ -46,8 +53,9 @@ def get_target_resource_name(cmd):
     e.g, az webapp connection create postgres: => RESOURCE.Postgres
     '''
     target = None
+    target_name = cmd.name.split(' ')[-1]
     for item in TARGET_RESOURCES:
-        if item.value in cmd.name:
+        if item.value.lower() == target_name.lower():
             target = item
     return target
 
@@ -75,12 +83,9 @@ def check_required_args(resource, cmd_arg_values):
 def generate_connection_name(cmd):
     '''Generate connection name for users if not provided
     '''
-    import random
-    import string
-    source = get_source_resource_name(cmd).value.replace('-', '')
     target = get_target_resource_name(cmd).value.replace('-', '')
     randstr = ''.join(random.sample(string.ascii_lowercase + string.digits, 5))
-    name = '{}_{}_{}'.format(source, target, randstr)
+    name = '{}_{}'.format(target, randstr)
 
     logger.warning('Connection name is not specified, use generated one: --connection %s', name)
     return name
@@ -136,8 +141,8 @@ def get_client_type(cmd, namespace):
         try:
             segments = parse_resource_id(source_id)
             output = run_cli_cmd('az spring-cloud app show '
-                                 '-g {} -s {} -n {}'.format(segments.get('name'), segments.get('child_name_1'),
-                                                            segments.get('child_name_2')))
+                                 '-g {} -s {} -n {}'.format(segments.get('resource_group'), segments.get('name'),
+                                                            segments.get('child_name_1')))
             prop_val = output.get('properties')\
                              .get('activeDeployment')\
                              .get('properties')\
@@ -177,24 +182,24 @@ def interactive_input(arg, hint):
     cmd_value = None
     if arg == 'secret_auth_info':
         name = prompt('User name of database (--secret name=): ')
-        secret = prompt('Password of database (--secret secret=): ')
+        secret = prompt_pass('Password of database (--secret secret=): ')
         value = {
             'name': name,
             'secret': secret,
             'auth_type': 'secret'
         }
-        cmd_value = 'name={} secret={}'.format(name, secret)
+        cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
         object_id = prompt('ServicePrincipal object-id (--service-principal object-id=): ')
-        secret = prompt('ServicePrincipal object-id (--service-principal secret=): ')
+        secret = prompt_pass('ServicePrincipal object-id (--service-principal secret=): ')
         value = {
             'client_id': client_id,
             'object-id': object_id,
             'secret': secret,
             'auth_type': 'servicePrincipalSecret'
         }
-        cmd_value = 'client-id={} principal-id={} secret={}'.format(client_id, object_id, secret)
+        cmd_value = 'client-id={} principal-id={} secret={}'.format(client_id, object_id, '*' * len(secret))
     elif arg == 'user_identity_auth_info':
         client_id = prompt('UserAssignedIdentity client-id (--user-identity client_id=): ')
         subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity subs_id=): ')
@@ -217,6 +222,25 @@ def interactive_input(arg, hint):
         raise RequiredArgumentMissingError('{} should not be blank'.format(hint))
 
     return value, cmd_value
+
+
+def get_local_context_value(cmd, arg):
+    '''Get local context values
+    '''
+    groups = ['all', 'cupertino', 'serviceconnector']
+    arg_map = {
+        'source_resource_group': ['resource_group_name'],
+        'target_resource_group': ['resource_group_name'],
+        'server': ['postgres_server_name'],
+        'database': ['postgres_database_name'],
+        'site': ['webapp_name']
+    }
+    for group in groups:
+        possible_args = arg_map.get(arg, [arg])
+        for item in possible_args:
+            if cmd.cli_ctx.local_context.get(group, item):
+                return cmd.cli_ctx.local_context.get(group, item)
+    return None
 
 
 def intelligent_experience(cmd, namespace, missing_args):
@@ -246,8 +270,8 @@ def intelligent_experience(cmd, namespace, missing_args):
         context_arg_values = dict()
         for arg in missing_args:
             if arg not in cmd_arg_values:
-                if cmd.cli_ctx.local_context.get('connection', arg):
-                    context_arg_values[arg] = cmd.cli_ctx.local_context.get('connection', arg)
+                if get_local_context_value(cmd, arg):
+                    context_arg_values[arg] = get_local_context_value(cmd, arg)
 
         # apply local context arguments
         param_str = ''
@@ -552,7 +576,7 @@ def validate_params(cmd, namespace):
             apply(cmd, namespace, arg_values)
 
     # for command: 'list'
-    if cmd.name.endswith('list'):
+    if cmd.name.endswith(' list'):
         _validate_and_apply(validate_list_params, apply_list_params)
     # for command: 'add'
     elif 'create' in cmd.name:
@@ -571,3 +595,22 @@ def validate_params(cmd, namespace):
     # for command: all others
     else:
         _validate_and_apply(validate_default_params, apply_default_params)
+
+
+def validate_kafka_params(cmd, namespace):
+    def _validate_and_apply(validate, apply):
+        missing_args = validate(cmd, namespace)
+        if missing_args:
+            arg_values = intelligent_experience(cmd, namespace, missing_args)
+            apply(cmd, namespace, arg_values)
+
+    _validate_and_apply(validate_list_params, apply_list_params)
+    if 'create {}'.format(RESOURCE.ConfluentKafka.value) in cmd.name:
+        if getattr(namespace, 'connection_name', None) is None:
+            namespace.connection_name = generate_connection_name(cmd)
+        elif namespace.connection_name.endswith('_schema'):
+            raise InvalidArgumentValueError("Connection name of {} can not end with "
+                                            "'_schema'".format(RESOURCE.ConfluentKafka.value))
+
+        if getattr(namespace, 'client_type', None) is None:
+            namespace.client_type = get_client_type(cmd, namespace)
