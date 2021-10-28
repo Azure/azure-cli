@@ -104,6 +104,10 @@ def backup_protection_containers_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protection_containers
 
 
+def backup_protection_intent_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protection_intent
+
+
 def backup_protectable_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protectable_items
 

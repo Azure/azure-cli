@@ -1943,8 +1943,8 @@ def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
 
 def _get_scm_url(cmd, resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
-    webapp = show_webapp(cmd, resource_group_name, name, slot=slot)
-    for host in webapp.host_name_ssl_states or []:
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    for host in app.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 
@@ -4309,32 +4309,16 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
             raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-        open_page_in_browser(scm_url + '/webssh/host')
+        if not instance:
+            open_page_in_browser(scm_url + '/webssh/host')
+        else:
+            open_page_in_browser(scm_url + '/webssh/host?instance={}'.format(instance))
     else:
         config = get_site_configs(cmd, resource_group_name, name, slot)
         if config.remote_debugging_enabled:
             raise ValidationError('Remote debugging is enabled, please disable')
         create_tunnel_and_session(
             cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
-
-
-def create_devops_pipeline(
-        cmd,
-        functionapp_name=None,
-        organization_name=None,
-        project_name=None,
-        repository_name=None,
-        overwrite_yaml=None,
-        allow_force_push=None,
-        github_pat=None,
-        github_repository=None
-):
-    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
-    azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
-                                                                 organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push,
-                                                                 github_pat, github_repository)
-    return azure_devops_build_interactive.interactive_azure_devops_build()
 
 
 def _configure_default_logging(cmd, rg_name, name):
