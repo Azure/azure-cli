@@ -174,7 +174,7 @@ helps['synapse kusto attached-database-configuration create'] = """
     type: command
     short-summary: "Create an attached database configuration."
     parameters:
-      - name: --table-level-sharing-properties --tlsp
+      - name: --table-level-sharing-properties
         short-summary: "Table level sharing specifications"
         long-summary: |
             Usage: --table-level-sharing-properties tables-to-include=XX tables-to-exclude=XX \
@@ -203,7 +203,7 @@ helps['synapse kusto attached-database-configuration update'] = """
     type: command
     short-summary: "Update an attached database configuration."
     parameters:
-      - name: --table-level-sharing-properties --tlsp
+      - name: --table-level-sharing-properties
         short-summary: "Table level sharing specifications"
         long-summary: |
             Usage: --table-level-sharing-properties tables-to-include=XX tables-to-exclude=XX \
