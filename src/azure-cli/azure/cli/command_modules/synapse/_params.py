@@ -955,7 +955,7 @@ def load_arguments(self, _):
             c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts sql script
-    for scope in ['create', 'update', 'show', 'wait', 'delete', 'export']:
+    for scope in ['create', 'show', 'wait', 'delete', 'export']:
         with self.argument_context('synapse sql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('sql_script_name', options_list=['--name', '-n'], help='The SQL script name')
