@@ -26,7 +26,6 @@ from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource
 
 VERSION_2019_08_01 = "2019-08-01"
 VERSION_2019_10_01 = "2019-10-01"
-VERSION_2021_02_01 = "2021-02-01"
 
 logger = get_logger(__name__)
 
@@ -121,11 +120,12 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
 
             return sdk_no_wait(no_wait, ase_client.begin_create_or_update, resource_group_name=resource_group_name,
                                name=name, hosting_environment_envelope=ase_def)
-    return 'No updates were applied. The version of App Service Environment may not be applicable to this update.'
+    logger.warning('No updates were applied. ' +
+                   'The version of App Service Environment may not be applicable to this update.')
 
 
 def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
-    ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2021_02_01)
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
