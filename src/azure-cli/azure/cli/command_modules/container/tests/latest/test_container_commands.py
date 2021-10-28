@@ -302,12 +302,14 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         container_group_name = self.create_random_name('clicontainer', 16)
         vnet_name = self.create_random_name('vent', 16)
         subnet_name = self.create_random_name('subnet', 16)
+        ip_address_type = "Private"
 
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
             'vnet_name': vnet_name,
-            'subnet_name': subnet_name
+            'subnet_name': subnet_name,
+            'ip_addresss': ip_address_type
         })
 
         # Vnet name with no subnet
@@ -319,7 +321,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--subnet {subnet_name} ')
 
-        self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name} --subnet {subnet_name}',
+        self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name} --subnet {subnet_name} --ip-address {ip_addresss}',
             checks=[self.exists('subnetIds[0].id')])
 
 

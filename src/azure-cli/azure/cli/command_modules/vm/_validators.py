@@ -365,6 +365,8 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
 
+    _validate_vm_vmss_create_ephemeral_placement(namespace)
+
     # specialized is only for image
     if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
         raise CLIError('usage error: --specialized is only configurable when --image is specified.')
@@ -540,6 +542,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
 
+    # pylint: disable=line-too-long
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
@@ -548,6 +551,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               os_disk_caching=namespace.os_caching,
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
+                                              ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None))
 
@@ -1225,6 +1229,13 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
 
 
+def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.application_configuration_overrides and \
+       len(namespace.application_version_ids) != len(namespace.application_configuration_overrides):
+        raise ArgumentUsageError('usage error: --app-config-overrides should have the same number of items as'
+                                 ' --application-version-ids')
+
+
 def _resolve_role_id(cli_ctx, role, scope):
     import re
     import uuid
@@ -1294,6 +1305,7 @@ def process_vm_create_namespace(cmd, namespace):
 def process_vm_update_namespace(cmd, namespace):
     _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 
 
 # region VMSS Create Validators
@@ -1650,6 +1662,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
+    _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)
 # endregion
 
 
@@ -1800,6 +1813,10 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            namespace.resource_group_name,
                                                            'userAssignedIdentities',
                                                            'Microsoft.ManagedIdentity')
+
+
+def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+    _validate_vm_vmss_set_applications(cmd, namespace)
 
 
 def process_gallery_image_version_namespace(cmd, namespace):
@@ -2028,3 +2045,25 @@ def _validate_capacity_reservation_group(cmd, namespace):
                 type='CapacityReservationGroups',
                 name=namespace.capacity_reservation_group
             )
+
+
+def _validate_vm_vmss_create_ephemeral_placement(namespace):
+    ephemeral_os_disk = getattr(namespace, 'ephemeral_os_disk', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    if ephemeral_os_disk_placement and not ephemeral_os_disk:
+        raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                 '--ephemeral-os-disk is specified.')
+
+
+def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: disable=unused-argument
+    size = getattr(namespace, 'size', None)
+    vm_sku = getattr(namespace, 'vm_sku', None)
+    ephemeral_os_disk_placement = getattr(namespace, 'ephemeral_os_disk_placement', None)
+    source = getattr(namespace, 'command').split()[0]
+    if ephemeral_os_disk_placement:
+        if source == 'vm' and not size:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--size is specified.')
+        if source == 'vmss' and not vm_sku:
+            raise ArgumentUsageError('usage error: --ephemeral-os-disk-placement is only configurable when '
+                                     '--vm-sku is specified.')

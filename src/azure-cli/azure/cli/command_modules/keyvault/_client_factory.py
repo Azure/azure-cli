@@ -71,7 +71,12 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
                          ResourceType.DATA_KEYVAULT_KEYS]:
         return KEYVAULT_TEMPLATE_STRINGS[resource_type].format(obj_name='.{}')
 
-    api_version = '.v' + str(get_api_version(cli_ctx, resource_type)).replace('.', '_').replace('-', '_')
+    api_version = get_api_version(cli_ctx, resource_type, as_sdk_profile=True)
+    from azure.cli.core.profiles import SDKProfile
+    if isinstance(api_version, SDKProfile):
+        api_version = api_version.profile[client_name] if api_version.profile.get(client_name, None) else \
+            api_version.profile[None]
+    api_version = '.v' + api_version.replace('.', '_').replace('-', '_')
     if is_mgmt_plane(resource_type):
         class_name = OPERATIONS_NAME.get(client_name, '') + '.' if module_name == 'operations' else ''
     else:

@@ -2424,6 +2424,9 @@ class AKSContext:
             CONST_OPEN_SERVICE_MESH_ADDON_NAME,
             CONST_VIRTUAL_NODE_ADDON_NAME,
             CONST_VIRTUAL_NODE_SUBNET_NAME,
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+            CONST_SECRET_ROTATION_ENABLED,
+            CONST_ROTATION_POLL_INTERVAL,
         )
 
         addon_consts = {}
@@ -2474,6 +2477,16 @@ class AKSContext:
         addon_consts[
             "CONST_VIRTUAL_NODE_SUBNET_NAME"
         ] = CONST_VIRTUAL_NODE_SUBNET_NAME
+        addon_consts[
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        ] = CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+        addon_consts[
+            "CONST_SECRET_ROTATION_ENABLED"
+        ] = CONST_SECRET_ROTATION_ENABLED
+        addon_consts[
+            "CONST_ROTATION_POLL_INTERVAL"
+        ] = CONST_ROTATION_POLL_INTERVAL
+
         return addon_consts
 
     # pylint: disable=unused-argument
@@ -2860,6 +2873,72 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_sgxquotehelper
+
+    def get_enable_secret_rotation(self) -> bool:
+        """Obtain the value of enable_secret_rotation.
+
+        :return: bool
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+
+        # read the original value passed by the command
+        enable_secret_rotation = self.raw_param.get("enable_secret_rotation")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ).config.get(CONST_SECRET_ROTATION_ENABLED) is not None
+        ):
+            enable_secret_rotation = self.mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ).config.get(CONST_SECRET_ROTATION_ENABLED) == "true"
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_secret_rotation
+
+    def get_rotation_poll_interval(self) -> Union[str, None]:
+        """Obtain the value of rotation_poll_interval.
+
+        :return: string or None
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+
+        # read the original value passed by the command
+        rotation_poll_interval = self.raw_param.get("rotation_poll_interval")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.addon_profiles and
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+            self.mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ).config.get(CONST_ROTATION_POLL_INTERVAL) is not None
+        ):
+            rotation_poll_interval = self.mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ).config.get(CONST_ROTATION_POLL_INTERVAL)
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return rotation_poll_interval
 
     # pylint: disable=unused-argument
     def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3402,6 +3481,7 @@ class AKSContext:
 
         return self._get_enable_private_cluster(enable_validation=True)
 
+    # pylint: disable=unused-argument
     def _get_disable_public_fqdn(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of disable_public_fqdn.
 
@@ -3514,6 +3594,7 @@ class AKSContext:
         """
         return self._get_enable_public_fqdn(enable_validation=True)
 
+    # pylint: disable=unused-argument
     def _get_private_dns_zone(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to obtain the value of private_dns_zone.
 
@@ -4472,16 +4553,49 @@ class AKSCreateDecorator:
             confcom_addon_profile.config[CONST_ACC_SGX_QUOTE_HELPER_ENABLED] = "true"
         return confcom_addon_profile
 
-    def build_open_service_mesh_profile(self) -> ManagedClusterAddonProfile:
+    def build_open_service_mesh_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build open service mesh addon profile.
 
         :return: a ManagedClusterAddonProfile object
         """
-        open_service_mesh_profile = self.models.ManagedClusterAddonProfile(
+        open_service_mesh_addon_profile = self.models.ManagedClusterAddonProfile(
             enabled=True,
             config={},
         )
-        return open_service_mesh_profile
+        return open_service_mesh_addon_profile
+
+    def build_azure_keyvault_secrets_provider_addon_profile(self) -> ManagedClusterAddonProfile:
+        """Build azure keyvault secrets provider addon profile.
+
+        :return: a ManagedClusterAddonProfile object
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+
+        azure_keyvault_secrets_provider_addon_profile = (
+            self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    CONST_SECRET_ROTATION_ENABLED: "false",
+                    CONST_ROTATION_POLL_INTERVAL: "2m",
+                },
+            )
+        )
+        if self.context.get_enable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_SECRET_ROTATION_ENABLED
+            ] = "true"
+        if self.context.get_rotation_poll_interval() is not None:
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_ROTATION_POLL_INTERVAL
+            ] = self.context.get_rotation_poll_interval()
+        return azure_keyvault_secrets_provider_addon_profile
 
     # pylint: disable=too-many-statements
     def set_up_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
@@ -4520,6 +4634,9 @@ class AKSCreateDecorator:
         CONST_CONFCOM_ADDON_NAME = addon_consts.get("CONST_CONFCOM_ADDON_NAME")
         CONST_OPEN_SERVICE_MESH_ADDON_NAME = addon_consts.get(
             "CONST_OPEN_SERVICE_MESH_ADDON_NAME"
+        )
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
         )
 
         addon_profiles = {}
@@ -4560,7 +4677,11 @@ class AKSCreateDecorator:
         if "open-service-mesh" in addons:
             addon_profiles[
                 CONST_OPEN_SERVICE_MESH_ADDON_NAME
-            ] = self.build_open_service_mesh_profile()
+            ] = self.build_open_service_mesh_addon_profile()
+        if "azure-keyvault-secrets-provider" in addons:
+            addon_profiles[
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            ] = self.build_azure_keyvault_secrets_provider_addon_profile()
         mc.addon_profiles = addon_profiles
         return mc
 

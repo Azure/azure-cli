@@ -1,0 +1,2301 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-10-25T08:39:45Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:39:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '34'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -r -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYYDVBJTCS\"\r\n    },\r\n    \"provisioningState\":
+        \"Creating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/df4b31a5-e3c0-43d7-a6e2-e4d367d36f53?api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:39:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateGallery3Min;49,Microsoft.Compute/CreateUpdateGallery30Min;296
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/df4b31a5-e3c0-43d7-a6e2-e4d367d36f53?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:39:55.9970999+00:00\",\r\n  \"endTime\":
+        \"2021-10-25T08:39:56.2158585+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"df4b31a5-e3c0-43d7-a6e2-e4d367d36f53\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:40:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1198,Microsoft.Compute/GetOperationStatus30Min;4192
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"gellery000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"identifier\": {\r\n      \"uniqueName\":
+        \"0b1f6471-1bf0-4dda-aec3-cb9272f09590-GELLERYYDVBJTCS\"\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '492'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:40:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGallery3Min;345,Microsoft.Compute/GetGallery30Min;2469
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r --os-type -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-10-25T08:39:45Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:40:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"supportedOSType": "Windows"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '68'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -r --os-type -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
+        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '400'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:40:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateGalleryApplication3Min;149,Microsoft.Compute/CreateUpdateGalleryApplication30Min;746
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r --os-type -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"app000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications\",\r\n  \"location\":
+        \"eastus\",\r\n  \"properties\": {\r\n    \"supportedOSType\": \"Windows\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '400'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:41:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGalleryApplication3Min;297,Microsoft.Compute/GetGalleryApplication30Min;1988
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-10-25T08:39:45Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:41:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "StorageV2", "location": "eastus",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '170'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000004?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:41:10 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/73da19cf-cac9-449d-82ad-1d8e61f8c806?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/73da19cf-cac9-449d-82ad-1d8e61f8c806?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000004","name":"account000004","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-10-25T08:41:10.3688270Z","key2":"2021-10-25T08:41:10.3688270Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-10-25T08:41:10.3688270Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-10-25T08:41:10.3688270Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-10-25T08:41:10.2594324Z","primaryEndpoints":{"dfs":"https://account000004.dfs.core.windows.net/","web":"https://account000004.z13.web.core.windows.net/","blob":"https://account000004.blob.core.windows.net/","queue":"https://account000004.queue.core.windows.net/","table":"https://account000004.table.core.windows.net/","file":"https://account000004.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available","secondaryLocation":"westus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://account000004-secondary.dfs.core.windows.net/","web":"https://account000004-secondary.z13.web.core.windows.net/","blob":"https://account000004-secondary.blob.core.windows.net/","queue":"https://account000004-secondary.queue.core.windows.net/","table":"https://account000004-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1893'
+      content-type:
+      - application/json
+      date:
+      - Mon, 25 Oct 2021 08:41:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000004/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-10-25T08:41:10.3688270Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-10-25T08:41:10.3688270Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Mon, 25 Oct 2021 08:41:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-blob-public-access:
+      - blob
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:33 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Mon, 25 Oct 2021 08:41:32 GMT
+      etag:
+      - '"0x8D997933F8252D0"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:33 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-blob-content-length:
+      - '512'
+      x-ms-blob-type:
+      - PageBlob
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:34 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Mon, 25 Oct 2021 08:41:34 GMT
+      etag:
+      - '"0x8D99793405EAF04"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:34 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "Moien Welt!\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '512'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:35 GMT
+      x-ms-page-write:
+      - update
+      x-ms-range:
+      - bytes=0-511
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006?comp=page
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - JgE0eZZ/KAIDhNg7UnHT+A==
+      date:
+      - Mon, 25 Oct 2021 08:41:34 GMT
+      etag:
+      - '"0x8D99793408F06D3"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:34 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-sequence-number:
+      - '0'
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-blob-content-length:
+      - '512'
+      x-ms-blob-type:
+      - PageBlob
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:36 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Mon, 25 Oct 2021 08:41:35 GMT
+      etag:
+      - '"0x8D99793416041D3"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "$contents = Get-Content -Path .\\FirstVMApp.config \r\n\r\n$contents |
+      Out-File -FilePath .\\AppInstall.txt \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '512'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:37 GMT
+      x-ms-page-write:
+      - update
+      x-ms-range:
+      - bytes=0-511
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006?comp=page
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - Y6xQzVtR+QobBjcWPHAkCw==
+      date:
+      - Mon, 25 Oct 2021 08:41:35 GMT
+      etag:
+      - '"0x8D997934193A654"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-sequence-number:
+      - '0'
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-blob-content-length:
+      - '512'
+      x-ms-blob-content-type:
+      - text/plain
+      x-ms-blob-type:
+      - PageBlob
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:37 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Mon, 25 Oct 2021 08:41:37 GMT
+      etag:
+      - '"0x8D99793425D6871"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:37 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "copy .\\AppInstall.txt .\\AppDidInstall.txt\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '512'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.9; Windows 10) AZURECLI/2.29.0
+      x-ms-date:
+      - Mon, 25 Oct 2021 08:41:39 GMT
+      x-ms-page-write:
+      - update
+      x-ms-range:
+      - bytes=0-511
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://account000004.blob.core.windows.net/container000005/blob000006?comp=page
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - McZjRnERC52gsI377ZT/nA==
+      date:
+      - Mon, 25 Oct 2021 08:41:37 GMT
+      etag:
+      - '"0x8D99793428F4690"'
+      last-modified:
+      - Mon, 25 Oct 2021 08:41:38 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-sequence-number:
+      - '0'
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-10-25T08:39:45Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:41:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"publishingProfile": {"source": {"mediaLink":
+      "https://account000004.blob.core.windows.net/container000005/blob000006"}, "manageActions":
+      {"install": "install", "remove": "remove"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '228'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"1.0.0\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n  \"location\":
+        \"eastus\",\r\n  \"properties\": {\r\n    \"publishingProfile\": {\r\n      \"source\":
+        {\r\n        \"mediaLink\": \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \     },\r\n      \"manageActions\": {\r\n        \"install\": \"install\",\r\n
+        \       \"remove\": \"remove\"\r\n      },\r\n      \"enableHealthCheck\":
+        false,\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n
+        \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"provisioningState\":
+        \"Creating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1059'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:41:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateGalleryApplicationVersion3Min;149,Microsoft.Compute/CreateUpdateGalleryApplicationVersion30Min;749
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:42:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1196,Microsoft.Compute/GetOperationStatus30Min;4190
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:42:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1193,Microsoft.Compute/GetOperationStatus30Min;4187
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:43:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1192,Microsoft.Compute/GetOperationStatus30Min;4184
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:43:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1189,Microsoft.Compute/GetOperationStatus30Min;4181
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:44:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1187,Microsoft.Compute/GetOperationStatus30Min;4179
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:44:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1185,Microsoft.Compute/GetOperationStatus30Min;4176
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:45:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4173
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:45:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4170
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/6937803f-2b59-421a-9ac1-9400a8b7dfa5?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n  \"endTime\":
+        \"2021-10-25T08:46:11.4501308+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"6937803f-2b59-421a-9ac1-9400a8b7dfa5\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:46:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4167
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --install-command --remove-command
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"1.0.0\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n  \"location\":
+        \"eastus\",\r\n  \"properties\": {\r\n    \"publishingProfile\": {\r\n      \"source\":
+        {\r\n        \"mediaLink\": \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \     },\r\n      \"manageActions\": {\r\n        \"install\": \"install\",\r\n
+        \       \"remove\": \"remove\"\r\n      },\r\n      \"enableHealthCheck\":
+        false,\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n
+        \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:46:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGalleryApplicationVersion3Min;1998,Microsoft.Compute/GetGalleryApplicationVersion30Min;9998
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-10-25T08:39:45Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:46:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {"tag": "test"}, "properties": {"publishingProfile":
+      {"source": {"mediaLink": "https://account000004.blob.core.windows.net/container000005/blob000006"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '192'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"1.0.0\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"publishingProfile\": {\r\n      \"source\": {\r\n        \"mediaLink\":
+        \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \     },\r\n      \"manageActions\": {\r\n        \"install\": \"install\",\r\n
+        \       \"remove\": \"remove\"\r\n      },\r\n      \"enableHealthCheck\":
+        false,\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n
+        \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"provisioningState\":
+        \"Updating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1097'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:46:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateGalleryApplicationVersion3Min;149,Microsoft.Compute/CreateUpdateGalleryApplicationVersion30Min;748
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:46:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1185,Microsoft.Compute/GetOperationStatus30Min;4165
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:47:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4162
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:47:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4159
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:48:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4156
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:48:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1184,Microsoft.Compute/GetOperationStatus30Min;4153
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/19f75671-ceb5-4c2e-9c3d-35133a9c4ed3?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:46:19.1376257+00:00\",\r\n  \"endTime\":
+        \"2021-10-25T08:49:19.3093698+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"19f75671-ceb5-4c2e-9c3d-35133a9c4ed3\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:49:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1183,Microsoft.Compute/GetOperationStatus30Min;4150
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g --package-file-link --tags
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"1.0.0\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"publishingProfile\": {\r\n      \"source\": {\r\n        \"mediaLink\":
+        \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \     },\r\n      \"manageActions\": {\r\n        \"install\": \"install\",\r\n
+        \       \"remove\": \"remove\"\r\n      },\r\n      \"enableHealthCheck\":
+        false,\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n
+        \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1098'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:49:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGalleryApplicationVersion3Min;1999,Microsoft.Compute/GetGalleryApplicationVersion30Min;9997
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r --application-name -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"1.0.0\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \     \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n
+        \     \"location\": \"eastus\",\r\n      \"tags\": {\r\n        \"tag\": \"test\"\r\n
+        \     },\r\n      \"properties\": {\r\n        \"publishingProfile\": {\r\n
+        \         \"source\": {\r\n            \"mediaLink\": \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \         },\r\n          \"manageActions\": {\r\n            \"install\":
+        \"install\",\r\n            \"remove\": \"remove\"\r\n          },\r\n          \"enableHealthCheck\":
+        false,\r\n          \"targetRegions\": [\r\n            {\r\n              \"name\":
+        \"East US\",\r\n              \"regionalReplicaCount\": 1,\r\n              \"storageAccountType\":
+        \"Standard_LRS\"\r\n            }\r\n          ],\r\n          \"replicaCount\":
+        1,\r\n          \"excludeFromLatest\": false,\r\n          \"publishedDate\":
+        \"2021-10-25T08:41:41.2470457+00:00\",\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        },\r\n        \"provisioningState\": \"Succeeded\"\r\n
+        \     }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1255'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:49:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListGalleryApplicationVersionsInGalleryApplication3Min;1499,Microsoft.Compute/ListGalleryApplicationVersionsInGalleryApplication30Min;9999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"1.0.0\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0\",\r\n
+        \ \"type\": \"Microsoft.Compute/galleries/applications/versions\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {\r\n    \"tag\": \"test\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"publishingProfile\": {\r\n      \"source\": {\r\n        \"mediaLink\":
+        \"https://account000004.blob.core.windows.net/container000005/blob000006\"\r\n
+        \     },\r\n      \"manageActions\": {\r\n        \"install\": \"install\",\r\n
+        \       \"remove\": \"remove\"\r\n      },\r\n      \"enableHealthCheck\":
+        false,\r\n      \"targetRegions\": [\r\n        {\r\n          \"name\": \"East
+        US\",\r\n          \"regionalReplicaCount\": 1,\r\n          \"storageAccountType\":
+        \"Standard_LRS\"\r\n        }\r\n      ],\r\n      \"replicaCount\": 1,\r\n
+        \     \"excludeFromLatest\": false,\r\n      \"publishedDate\": \"2021-10-25T08:41:41.2470457+00:00\",\r\n
+        \     \"storageAccountType\": \"Standard_LRS\"\r\n    },\r\n    \"provisioningState\":
+        \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1098'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:49:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetGalleryApplicationVersion3Min;1997,Microsoft.Compute/GetGalleryApplicationVersion30Min;9995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --application-name -r -g -y
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions/1.0.0?api-version=2021-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/34c9c6cc-f405-4333-ae61-7745166af692?api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 25 Oct 2021 08:49:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/34c9c6cc-f405-4333-ae61-7745166af692?monitor=true&api-version=2021-07-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/DeleteGalleryApplicationVersion3Min;149,Microsoft.Compute/DeleteGalleryApplicationVersion30Min;999
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g -y
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/34c9c6cc-f405-4333-ae61-7745166af692?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:49:30.4342724+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"34c9c6cc-f405-4333-ae61-7745166af692\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:50:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1187,Microsoft.Compute/GetOperationStatus30Min;4150
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g -y
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/34c9c6cc-f405-4333-ae61-7745166af692?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:49:30.4342724+00:00\",\r\n  \"status\":
+        \"InProgress\",\r\n  \"name\": \"34c9c6cc-f405-4333-ae61-7745166af692\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '134'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:50:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1187,Microsoft.Compute/GetOperationStatus30Min;4147
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --application-name -r -g -y
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/capsOperations/34c9c6cc-f405-4333-ae61-7745166af692?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-10-25T08:49:30.4342724+00:00\",\r\n  \"endTime\":
+        \"2021-10-25T08:51:00.6839713+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"34c9c6cc-f405-4333-ae61-7745166af692\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:51:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationStatus3Min;1186,Microsoft.Compute/GetOperationStatus30Min;4144
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sig gallery-application version list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r --application-name -g
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-compute/23.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/galleries/gellery000003/applications/app000002/versions?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"value\": []\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 25 Oct 2021 08:51:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListGalleryApplicationVersionsInGalleryApplication3Min;1498,Microsoft.Compute/ListGalleryApplicationVersionsInGalleryApplication30Min;9998
+    status:
+      code: 200
+      message: OK
+version: 1
