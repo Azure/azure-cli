@@ -4774,6 +4774,101 @@ class VMGalleryImage(ScenarioTest):
             self.check('name', '1.1.2'),
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
+
+
+class VMGalleryApplication(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    def test_gallery_application(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'app_name': self.create_random_name('app', 10),
+            'gallery': self.create_random_name('gellery', 16),
+        })
+
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', None),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/galleries/applications')
+        ])
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application update -n {app_name} -r {gallery} -g {rg} --description test --tags tag=test', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', 'test'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
+            self.check('[0].name', '{app_name}'),
+            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].description', 'test'),
+            self.check('[0].tags', {'tag': 'test'})
+            ])
+        self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', 'test'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application delete -n {app_name} -r {gallery} -g {rg} -y')
+        self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_gallery_application_version(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'app_name': self.create_random_name('app', 10),
+            'gallery': self.create_random_name('gellery', 15),
+            'ver_name': "1.0.0",
+            'account': self.create_random_name('account', 15),
+            'container': self.create_random_name('container', 15),
+            'blob': self.create_random_name('blob', 15),
+            'f1': os.path.join(curr_dir, 'MyAppInstaller.config').replace('\\', '\\\\'),
+            'f2': os.path.join(curr_dir, 'MyAppInstaller.ps1').replace('\\', '\\\\'),
+            'f3': os.path.join(curr_dir, 'Copylt.bat').replace('\\', '\\\\')
+        })
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', None),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/galleries/applications')
+        ])
+        self.cmd('storage account create -n {account} -g {rg}')
+        self.kwargs['storage_key'] = str(
+            self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
+        self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f2} --type page --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f3} --type page --account-key {storage_key}')
+        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
+             self.check('name', '1.0.0'),
+             self.check('publishingProfile.manageActions.install', 'install'),
+             self.check('publishingProfile.manageActions.remove', 'remove'),
+             self.check('type', 'Microsoft.Compute/galleries/applications/versions')
+        ])
+        self.cmd('sig gallery-application version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
+            self.check('name', '1.0.0'),
+            self.check('publishingProfile.manageActions.install', 'install'),
+            self.check('publishingProfile.manageActions.remove', 'remove'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=[
+            self.check('[0].name', '1.0.0'),
+            self.check('[0].publishingProfile.manageActions.install', 'install'),
+            self.check('[0].publishingProfile.manageActions.remove', 'remove'),
+            self.check('[0].tags', {'tag': 'test'}),
+        ])
+        self.cmd('sig gallery-application version show -n {ver_name} --application-name {app_name} -r {gallery} -g {rg}', checks=[
+            self.check('name', '1.0.0'),
+            self.check('publishingProfile.manageActions.install', 'install'),
+            self.check('publishingProfile.manageActions.remove', 'remove'),
+            self.check('tags', {'tag': 'test'}),
+        ])
+        self.cmd('sig gallery-application version delete -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} -y')
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=self.is_empty())
 # endregion
 
 
