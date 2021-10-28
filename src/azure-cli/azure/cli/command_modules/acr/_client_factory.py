@@ -8,6 +8,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 VERSION_2019_05_01_PREVIEW = "2019-05-01-preview"
 VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
 VERSION_2020_11_01_PREVIEW = "2020-11-01-preview"
+VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -65,4 +66,4 @@ def cf_acr_agentpool(cli_ctx, *_):
 
 
 def cf_acr_connected_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2020_11_01_PREVIEW).connected_registries
+    return get_acr_service_client(cli_ctx, VERSION_2021_08_01_PREVIEW).connected_registries
