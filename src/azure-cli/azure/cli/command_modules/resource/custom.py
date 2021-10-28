@@ -2082,8 +2082,19 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    try:
+        if rcf.deployment_stacks.get_at_subscription(name):
+            print("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it?")
+            yes_or_no = input()
+            if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+                pass
+            else:
+                return
+    except:
+        pass
 
     if not deployment_scope:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
@@ -2110,16 +2121,12 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     if param_file:
         if path.exists(param_file):
             parameters = json.load(open(param_file))
-            print(parameters)
     elif param_uri:
         #confirm with someone about this
         p_uri = "'" + param_uri + "'"
     
-    #need to add debug setting
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
-
-    print(deployment_stack_model)
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
@@ -2140,11 +2147,10 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
 
-def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
+def show_deployment_stack_at_subscription(cmd, name, stack):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
-            # return DeploymentStack(rcf.deployment_stacks.get_at_subscription(name))
             return rcf.deployment_stacks.get_at_subscription(name)
         return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
     raise CLIError("Please enter the stack name or stack resource id.")
@@ -2160,19 +2166,34 @@ def list_deployment_stack_at_subscription(cmd):
 def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        print("Are you sure you want to remove DeploymentStack " + name + "?")
+        yes_or_no = input()
+        if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+            pass
+        else:
+            return
         if name:
             return rcf.deployment_stacks.begin_delete_at_subscription(name)
         return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
     raise CLIError("Please enter the stack name or stack resource id")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, debug_setting = None, description = None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, description = None):
     if not deployment_scope:
         #fix this
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
 
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    
+    try:
+        if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
+            print("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it?")
+            yes_or_no = input()
+            if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+                pass
+            else:
+                return
+    except:
+        pass
     t_spec, t_uri, t_file = None, None, None
     parameters, p_uri = None, None
 
@@ -2192,14 +2213,11 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     if param_file:
         if path.exists(param_file):
             parameters = json.load(open(param_file))
-            print(parameters)
     elif param_uri:
         p_uri = param_uri
     
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, update_behavior = update_behavior, deployment_scope = deployment_scope)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
-
-    print(deployment_stack_model)
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
@@ -2251,6 +2269,12 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 
 def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    print("Are you sure you want to remove DeploymentStack " + name + "?")
+    yes_or_no = input()
+    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+        pass
+    else:
+        return
     if name and resource_group:
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
     if stack:
@@ -2300,6 +2324,12 @@ def list_deployment_stack_snapshot_at_resource_group(cmd, name=None, resource_gr
 
 def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    print("Are you sure you want to remove DeploymentStackSnapshot " + name + "?")
+    yes_or_no = input()
+    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+        pass
+    else:
+        return
     if snapshot:
         snapshot_arr = snapshot.split('/')
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, snapshot_arr[-3], snapshot_arr[-1])
@@ -2310,6 +2340,12 @@ def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=
 
 def delete_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    print("Are you sure you want to remove DeploymentStackSnapshot " + name + "?")
+    yes_or_no = input()
+    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
+        pass
+    else:
+        return
     if snapshot:
         snapshot_arr = snapshot.split('/')
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])

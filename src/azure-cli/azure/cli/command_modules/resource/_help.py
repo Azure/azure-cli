@@ -2555,3 +2555,148 @@ helps['bicep list-versions'] = """
 type: command
 short-summary: List out all available versions of Bicep CLI.
 """
+
+helps['stacks'] = """
+type: group
+short-summary: Manage deployment stacks at subscription or resource group scope.
+"""
+
+helps['stacks sub create'] = """
+type: command
+short-summary: Create a deployment stack at subscription scope
+examples:
+  - name: Create a deployment stack using template file.
+    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --location "westus2" --description "description"
+  - name: Create a deployment stack with parameter file.
+    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --location "westus2" --description "description"
+  - name: Create a deployment stack with template spec
+    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
+"""
+
+helps['stacks sub list'] = """
+type: command
+short-summary: Show all deployment stacks in subscription
+examples:
+  - name: List all stacks 
+    text: az stacks sub list
+"""
+
+helps['az stacks sub show'] = """
+type: command
+short-summary: Get specified deployment stack from subscription scope
+examples:
+  - name: Get stack by name.
+    text: az stacks sub show --name "StackName"
+  - name: Get stack by stack resource id.
+    text: az stacks sub show --stack "StackResourceID"
+"""
+
+helps['az stacks sub delete'] = """
+type: command
+short-summary: Delete specified deployment stack from subscription scope
+examples:
+  - name: Delete stack by name.
+    text: az stacks sub delete --name "StackName"
+  - name: Delete stack by stack resource id.
+    text: az stacks sub delete --stack "StackResourceID"
+"""
+
+helps['stacks group create'] = """
+type: command
+short-summary: Create a deployment stack at resource group scope
+examples:
+  - name: Create a deployment stack using template file.
+    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --description "description"
+  - name: Create a deployment stack with parameter file.
+    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --description "description"
+  - name: Create a deployment stack with template spec
+    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
+"""
+
+helps['stacks group list'] = """
+type: command
+short-summary: Show all deployment stacks in resource group
+examples:
+  - name: List all stacks in resource group
+    text: az stacks group list --resource-group "ResourceGroup"
+"""
+
+helps['az stacks group show'] = """
+type: command
+short-summary: Get specified deployment stack from resource group scope
+examples:
+  - name: Get stack by name.
+    text: az stacks group show --name "StackName" --resource-group "ResourceGroup"
+  - name: Get stack by stack resource id.
+    text: az stacks group show --stack "StackResourceID"
+"""
+
+helps['az stacks group delete'] = """
+type: command
+short-summary: Delete specified deployment stack from resource group scope
+examples:
+  - name: Delete stack by name.
+    text: az stacks group delete --name "StackName" --resource-group "ResourceGroup"
+  - name: Delete stack by stack resource id.
+    text: az stacks group delete --stack "StackResourceID"
+"""
+
+helps['stacks snapshot sub list'] = """
+type: command
+short-summary: Show all snapshots in specified deployment stack at subscription scope
+examples:
+  - name: List all snapshots using stack name
+    text: az stacks snapshot sub list --name "StackName"
+  - name: List all snapshots using stack id
+    text: az stacks snapshot sub list --stack "StackResourceID"
+"""
+
+helps['az stacks snapshot sub show'] = """
+type: command
+short-summary: Get specified snapshot in deployment stack at subscription scope
+examples:
+  - name: Get snapshot with stack name and snapshot name.
+    text: az stacks snapshot sub show --name "SnapshotName" --stack-name "StackName"
+  - name: Get snapshot by snapshot resource id.
+    text: az stacks snapshot sub show --snapshot "SnapshotResourceID"
+"""
+
+helps['az stacks snapshot sub delete'] = """
+type: command
+short-summary: Delete specified snapshot in deployment stack at subscription scope
+examples:
+  - name: Delete snapshot with stack name and snapshot name.
+    text: az stacks snapshot sub delete --name "SnapshotName" --stack-name "StackName"
+  - name: Delete snapshot by snapshot resource id.
+    text: az stacks snapshot sub delete --snapshot "SnapshotResourceID"
+"""
+
+helps['stacks snapshot group list'] = """
+type: command
+short-summary: Show all snapshots in specified deployment stack at resource group scope
+examples:
+  - name: List all snapshots using stack name
+    text: az stacks snapshot group list --name "StackName" --resource-group "ResourceGroup"
+  - name: List all snapshots using stack id
+    text: az stacks snapshot group list --stack "StackResourceID"
+"""
+
+helps['az stacks snapshot group show'] = """
+type: command
+short-summary: Get specified snapshot in deployment stack at resource group scope
+examples:
+  - name: Get snapshot with stack name and snapshot name.
+    text: az stacks snapshot group show --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+  - name: Get snapshot by snapshot resource id.
+    text: az stacks snapshot group show --snapshot "SnapshotResourceID"
+"""
+
+helps['az stacks snapshot group delete'] = """
+type: command
+short-summary: Delete specified snapshot in deployment stack at resource group scope
+examples:
+  - name: Delete snapshot with stack name and snapshot name.
+    text: az stacks snapshot group delete --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+  - name: Delete snapshot by snapshot resource id.
+    text: az stacks snapshot group delete --snapshot "SnapshotResourceID"
+"""
