@@ -18,7 +18,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_gallery_sharing_profile, cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_vmss_run_commands, cf_gallery_application, 
+                                                          cf_vmss_run_commands, cf_gallery_application,
                                                           cf_gallery_application_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
