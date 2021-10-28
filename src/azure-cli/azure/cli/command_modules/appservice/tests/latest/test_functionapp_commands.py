@@ -274,7 +274,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -299,7 +299,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.0 --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.0 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -469,7 +469,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 4' 
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -805,7 +805,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('sku.name', 'S1'),
         ])
 
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 3.8'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 4.8'
                  .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
@@ -1176,6 +1176,7 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
                  .format(resource_group, functionapp_name, function_name)).assert_with_checks([
                      JMESPathCheck('{}'.format(key_name), key_value)])
 
+    @unittest.skip("Known issue https://github.com/Azure/azure-cli/issues/17296")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_function_keys_delete(self, resource_group, storage_account):
@@ -1197,14 +1198,15 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
             JMESPathCheck('deployer', 'ZipDeploy'),
             JMESPathCheck('complete', True)])
 
+        self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
+
         # ping function so you know it's ready
         requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
         time.sleep(30)
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     #JMESPathCheck('value', key_value)
+                     JMESPathCheck('name', key_name)
                      ])
 
         self.cmd('functionapp function keys delete -g {} -n {} --function-name {} --key-name {}'

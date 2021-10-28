@@ -722,7 +722,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                        help='The container registry server password. Required for private registries.')
             if scope == 'functionapp':
-                c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
+                c.argument('functions_version', help='The functions app version. NOTE: This will be required starting the next release cycle', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
                 c.argument('runtime', help='The functions runtime stack.',
                            arg_type=get_enum_type(functionapp_runtime_strings))
                 c.argument('runtime_version',
