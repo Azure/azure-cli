@@ -7,7 +7,10 @@ import re
 import random
 import string
 from knack.log import get_logger
-from knack.prompting import prompt
+from knack.prompting import (
+    prompt,
+    prompt_pass
+)
 from msrestazure.tools import (
     parse_resource_id,
     is_valid_resource_id
@@ -179,24 +182,24 @@ def interactive_input(arg, hint):
     cmd_value = None
     if arg == 'secret_auth_info':
         name = prompt('User name of database (--secret name=): ')
-        secret = prompt('Password of database (--secret secret=): ')
+        secret = prompt_pass('Password of database (--secret secret=): ')
         value = {
             'name': name,
             'secret': secret,
             'auth_type': 'secret'
         }
-        cmd_value = 'name={} secret={}'.format(name, secret)
+        cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
         object_id = prompt('ServicePrincipal object-id (--service-principal object-id=): ')
-        secret = prompt('ServicePrincipal object-id (--service-principal secret=): ')
+        secret = prompt_pass('ServicePrincipal object-id (--service-principal secret=): ')
         value = {
             'client_id': client_id,
             'object-id': object_id,
             'secret': secret,
             'auth_type': 'servicePrincipalSecret'
         }
-        cmd_value = 'client-id={} principal-id={} secret={}'.format(client_id, object_id, secret)
+        cmd_value = 'client-id={} principal-id={} secret={}'.format(client_id, object_id, '*' * len(secret))
     elif arg == 'user_identity_auth_info':
         client_id = prompt('UserAssignedIdentity client-id (--user-identity client_id=): ')
         subscription_id = prompt('UserAssignedIdentity subscription-id (--user-identity subs_id=): ')
@@ -219,6 +222,25 @@ def interactive_input(arg, hint):
         raise RequiredArgumentMissingError('{} should not be blank'.format(hint))
 
     return value, cmd_value
+
+
+def get_local_context_value(cmd, arg):
+    '''Get local context values
+    '''
+    groups = ['all', 'cupertino', 'serviceconnector']
+    arg_map = {
+        'source_resource_group': ['resource_group_name'],
+        'target_resource_group': ['resource_group_name'],
+        'server': ['postgres_server_name'],
+        'database': ['postgres_database_name'],
+        'site': ['webapp_name']
+    }
+    for group in groups:
+        possible_args = arg_map.get(arg, [arg])
+        for item in possible_args:
+            if cmd.cli_ctx.local_context.get(group, item):
+                return cmd.cli_ctx.local_context.get(group, item)
+    return None
 
 
 def intelligent_experience(cmd, namespace, missing_args):
@@ -248,8 +270,8 @@ def intelligent_experience(cmd, namespace, missing_args):
         context_arg_values = dict()
         for arg in missing_args:
             if arg not in cmd_arg_values:
-                if cmd.cli_ctx.local_context.get('connection', arg):
-                    context_arg_values[arg] = cmd.cli_ctx.local_context.get('connection', arg)
+                if get_local_context_value(cmd, arg):
+                    context_arg_values[arg] = get_local_context_value(cmd, arg)
 
         # apply local context arguments
         param_str = ''

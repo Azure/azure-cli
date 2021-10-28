@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:50:59 GMT
+      - Thu, 28 Oct 2021 07:52:10 GMT
       expires:
       - '-1'
       pragma:
@@ -44,11 +44,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.32;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.96;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.132.3
+      - 1.9.150.1
       x-powered-by:
       - ASP.NET
     status:
@@ -87,7 +87,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:51:01 GMT
+      - Thu, 28 Oct 2021 07:52:12 GMT
       expires:
       - '-1'
       pragma:
@@ -97,18 +97,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.32;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=167.220.255.96;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.132.3
+      - 1.9.150.1
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql/databases/postgres",
+    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
       "authInfo": {"authType": "secret", "name": "servicelinker", "secret": "microsoft123!"},
       "clientType": "python"}}'
     headers:
@@ -121,40 +121,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '345'
+      - '342'
       Content-Type:
       - application/json
       ParameterSetName:
-      - --name --source-id --target-id --secret --client-type
+      - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      x-ms-serviceconnector-user-token:
       - hidden
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-12T06:51:02.7965335Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2021-10-12T06:51:02.7965335Z"}, "properties": {"targetId":
-        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql/databases/postgres",
+        "2021-10-28T07:49:58.1200405Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:50:10.5652502Z"},
+        "properties": {"provisioningState": "Accepted", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Accepted"}}'
+        "python"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+      - https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/01eec049-49fa-4c7b-aef6-a24b095897e8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '850'
+      - '873'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:51:04 GMT
+      - Thu, 28 Oct 2021 07:52:16 GMT
       etag:
-      - '"04002228-0000-3400-0000-616530580000"'
+      - '"3806d06a-0000-0500-0000-617a56b00000"'
       expires:
       - '-1'
       pragma:
@@ -182,30 +182,31 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --source-id --target-id --secret --client-type
+      - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      x-ms-serviceconnector-user-token:
       - hidden
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/01eec049-49fa-4c7b-aef6-a24b095897e8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "name": "79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Accepted", "startTime": "2021-10-12T06:51:03.8108258Z"}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/01eec049-49fa-4c7b-aef6-a24b095897e8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "name": "01eec049-49fa-4c7b-aef6-a24b095897e8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2021-10-28T07:52:16.1119057Z", "endTime":
+        "2021-10-28T07:52:28.9281747Z", "properties": {}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '590'
+      - '695'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:51:34 GMT
+      - Thu, 28 Oct 2021 07:52:46 GMT
       etag:
-      - '"03008b61-0000-3400-0000-616530570000"'
+      - '"05003408-0000-0500-0000-617a56bc0000"'
       expires:
       - '-1'
       pragma:
@@ -233,137 +234,34 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --source-id --target-id --secret --client-type
+      - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      x-ms-serviceconnector-user-token:
       - hidden
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "name": "79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Accepted", "startTime": "2021-10-12T06:51:03.8108258Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '590'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 12 Oct 2021 06:52:04 GMT
-      etag:
-      - '"03008b61-0000-3400-0000-616530570000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp connection create postgres-flexible
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --source-id --target-id --secret --client-type
-      User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
-    method: GET
-    uri: https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
-  response:
-    body:
-      string: '{"id": "/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "name": "79a18717-45fd-4fa9-8fd1-672c90d1d290*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-12T06:51:03.8108258Z", "endTime":
-        "2021-10-12T06:52:10.9697987Z", "properties": {}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '648'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 12 Oct 2021 06:52:35 GMT
-      etag:
-      - '"0300ee61-0000-3400-0000-6165309a0000"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp connection create postgres-flexible
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --source-id --target-id --secret --client-type
-      User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
-  response:
-    body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-12T06:51:02.7965335Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-12T06:52:10.7664944Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql/databases/postgres",
+        "2021-10-28T07:49:58.1200405Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:52:28.529891Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}'
+        "python"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '876'
+      - '873'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:52:36 GMT
+      - Thu, 28 Oct 2021 07:52:46 GMT
       etag:
-      - '"0400ca28-0000-3400-0000-6165309a0000"'
+      - '"38069e6e-0000-0500-0000-617a56bd0000"'
       expires:
       - '-1'
       pragma:
@@ -395,30 +293,28 @@ interactions:
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-12T06:51:02.7965335Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-12T06:52:10.7664944Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql/databases/postgres",
+        "2021-10-28T07:49:58.1200405Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:52:28.529891Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}]}'
+        "python"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '888'
+      - '885'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:52:41 GMT
+      - Thu, 28 Oct 2021 07:52:53 GMT
       expires:
       - '-1'
       pragma:
@@ -452,11 +348,9 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
   response:
     body:
       string: '{"configurations": [{"name": "AZURE_POSTGRESQL_CONNECTIONSTRING", "value":
@@ -465,11 +359,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '225'
+      - '222'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:52:42 GMT
+      - Thu, 28 Oct 2021 07:52:56 GMT
       expires:
       - '-1'
       pragma:
@@ -500,22 +394,77 @@ interactions:
       - webapp connection validate
       Connection:
       - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+  response:
+    body:
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
+        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
+        "2021-10-28T07:49:58.1200405Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:52:28.529891Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
+        "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
+        "python"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 Oct 2021 07:52:58 GMT
+      etag:
+      - '"38069e6e-0000-0500-0000-617a56bd0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-providerhub-traffic:
+      - 'True'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp connection validate
+      Connection:
+      - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      x-ms-serviceconnector-user-token:
       - hidden
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/1fd5493e-5d61-4706-a828-8632634f64e6*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+      - https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bf4dac57-5488-497b-93b4-caf1b311a1a8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -523,11 +472,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:52:43 GMT
+      - Thu, 28 Oct 2021 07:53:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/1fd5493e-5d61-4706-a828-8632634f64e6*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+      - https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bf4dac57-5488-497b-93b4-caf1b311a1a8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -555,30 +504,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      x-ms-serviceconnector-user-token:
       - hidden
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/1fd5493e-5d61-4706-a828-8632634f64e6*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bf4dac57-5488-497b-93b4-caf1b311a1a8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/1fd5493e-5d61-4706-a828-8632634f64e6*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "name": "1fd5493e-5d61-4706-a828-8632634f64e6*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-12T06:52:43.7368124Z", "endTime":
-        "2021-10-12T06:52:46.0837142Z", "properties": {"message": "ConnectionName:
-        testconn; IsConnectionAvailable: True; Reason:"}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/bf4dac57-5488-497b-93b4-caf1b311a1a8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "name": "bf4dac57-5488-497b-93b4-caf1b311a1a8*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2021-10-28T07:52:59.9415913Z", "endTime":
+        "2021-10-28T07:53:06.5617888Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
+        target existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
+        target service firewall is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
+        configured values (except username/password) is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2021-10-28T07:53:01.6130844Z\",\"ReportEndTimeUtc\":\"2021-10-28T07:53:06.4423418Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test\",\"AuthType\":4}"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '722'
+      - '1437'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:53:13 GMT
+      - Thu, 28 Oct 2021 07:53:30 GMT
       etag:
-      - '"03001362-0000-3400-0000-616530be0000"'
+      - '"05004508-0000-0500-0000-617a56e20000"'
       expires:
       - '-1'
       pragma:
@@ -608,32 +559,30 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
         {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-12T06:51:02.7965335Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-12T06:52:10.7664944Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql/databases/postgres",
+        "2021-10-28T07:49:58.1200405Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T07:52:28.529891Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/servicelinker-flexiblepostgresql2/databases/test",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}'
+        "python"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '876'
+      - '873'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:53:14 GMT
+      - Thu, 28 Oct 2021 07:53:32 GMT
       etag:
-      - '"0400ca28-0000-3400-0000-6165309a0000"'
+      - '"38069e6e-0000-0500-0000-617a56bd0000"'
       expires:
       - '-1'
       pragma:
@@ -667,17 +616,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/757d5eb5-06b6-4315-bb04-b2e4b217ed51*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+      - https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/85e6431d-8793-4209-bdc4-0b62fea8c426*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -685,13 +632,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:53:17 GMT
+      - Thu, 28 Oct 2021 07:53:39 GMT
       etag:
-      - '"04003629-0000-3400-0000-616530de0000"'
+      - '"38068384-0000-0500-0000-617a57040000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/757d5eb5-06b6-4315-bb04-b2e4b217ed51*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+      - https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/85e6431d-8793-4209-bdc4-0b62fea8c426*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -719,29 +666,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.0 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
-      x-ms-cupertino-test-token:
-      - hidden
+      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/757d5eb5-06b6-4315-bb04-b2e4b217ed51*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191?api-version=2021-11-01-preview
+    uri: https://eastus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/85e6431d-8793-4209-bdc4-0b62fea8c426*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/providers/Microsoft.ServiceLinker/locations/EASTUS2EUAP/operationStatuses/757d5eb5-06b6-4315-bb04-b2e4b217ed51*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "name": "757d5eb5-06b6-4315-bb04-b2e4b217ed51*A0495454659B4E7B3BC89A0D5A1CF6354FF0652AF10C310B2B8CA761EB1E2191",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-12T06:53:17.9693214Z", "endTime":
-        "2021-10-12T06:53:20.3201573Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/85e6431d-8793-4209-bdc4-0b62fea8c426*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "name": "85e6431d-8793-4209-bdc4-0b62fea8c426*B3300A09591C1A6C433369F385F8132A4EB67DDC506756081582946E8E95051D",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-flexiblepostgresql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2021-10-28T07:53:39.7680505Z", "endTime":
+        "2021-10-28T07:53:42.5057562Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '650'
+      - '697'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 Oct 2021 06:53:48 GMT
+      - Thu, 28 Oct 2021 07:54:09 GMT
       etag:
-      - '"03002962-0000-3400-0000-616530e00000"'
+      - '"05004a08-0000-0500-0000-617a57060000"'
       expires:
       - '-1'
       pragma:

@@ -154,7 +154,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
-                      # key_space=None, graph=None, table=None,              # Resource.Cosmos*,
+                      key_space=None, graph=None, table=None,                # Resource.Cosmos*,
                       # config_store=None,                                   # Resource.AppConfig
                       # namespace=None,                                      # Resource.EventHub
                       signalr=None):                                         # Resource.SignalR
@@ -215,7 +215,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                        parameters=parameters)
 
 
-def connection_update(client,
+def connection_update(cmd, client,
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
@@ -262,6 +262,11 @@ def connection_update(client,
         'auth_info': auth_info,
         'client_type': client_type or linker.get('clienType'),
     }
+
+    # HACK: set user token to work around OBO
+    target_type = get_target_resource_name(cmd)
+    if target_type in TARGET_RESOURCES_USERTOKEN:
+        client = set_user_token_header(client, cmd.cli_ctx)
 
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
