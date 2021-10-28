@@ -8,7 +8,7 @@ import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            NotebookResource, SparkJobDefinition)
+                                            NotebookResource, SparkJobDefinition, NotebookFolder)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
@@ -457,8 +457,12 @@ def delete_spark_job_definition(cmd, workspace_name, spark_job_definition_name, 
 
 
 def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definition_name, definition_file,
-                                          no_wait=False):
+                                          folder_name=None, no_wait=False):
     client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    folder = {}
+    folder['name'] = folder_name
+    definition_file['SparkJobDefinitionFolder'] = folder
+    print(definition_file)
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)

@@ -1732,6 +1732,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_name':'folder1/subfolder1',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
@@ -1757,7 +1758,8 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create a spark job definition
         self.cmd(
-            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" '
+            '--folder-name {folder_name}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
