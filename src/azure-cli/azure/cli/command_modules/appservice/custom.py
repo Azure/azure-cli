@@ -1943,8 +1943,8 @@ def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
 
 def _get_scm_url(cmd, resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
-    webapp = show_webapp(cmd, resource_group_name, name, slot=slot)
-    for host in webapp.host_name_ssl_states or []:
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    for host in app.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
 
@@ -2813,19 +2813,19 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
     return value
 
 
-def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, functions_version=None, runtime=None, runtime_version=None,
-                    consumption_plan_location=None, app_insights=None, app_insights_key=None,
-                    disable_app_insights=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None,
-                    docker_registry_server_password=None, docker_registry_server_user=None,
-                    deployment_container_image_name=None, tags=None, assign_identities=None,
-                    role='Contributor', scope=None):
+def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None, os_type=None,
+                       functions_version=None, runtime=None, runtime_version=None,
+                       consumption_plan_location=None, app_insights=None, app_insights_key=None,
+                       disable_app_insights=None, deployment_source_url=None,
+                       deployment_source_branch='master', deployment_local_git=None,
+                       docker_registry_server_password=None, docker_registry_server_user=None,
+                       deployment_container_image_name=None, tags=None, assign_identities=None,
+                       role='Contributor', scope=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
-        logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
-                       "be required. To create a 2.x function you would pass in the flag `--functions-version 2`")
-        functions_version = '2'
+        logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
+                       "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
+        functions_version = '3'
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -2891,6 +2891,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                                           functions_version,
                                                                           runtime_version,
                                                                           is_linux)
+
     if not runtime_version_json:
         supported_runtime_versions = list(map(lambda x: x[KEYS.DISPLAY_VERSION],
                                               _get_supported_runtime_versions_functionapp(runtime_json,
@@ -3179,7 +3180,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
     error_message = ''
     endpoints = storage_properties.primary_endpoints
     sku = storage_properties.sku.name
-    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS']
+    allowed_storage_types = ['Standard_GRS', 'Standard_RAGRS', 'Standard_LRS', 'Standard_ZRS', 'Premium_LRS', 'Standard_GZRS']  # pylint: disable=line-too-long
 
     for e in ['blob', 'queue', 'table']:
         if not getattr(endpoints, e, None):
@@ -4309,32 +4310,16 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
             raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
         scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
-        open_page_in_browser(scm_url + '/webssh/host')
+        if not instance:
+            open_page_in_browser(scm_url + '/webssh/host')
+        else:
+            open_page_in_browser(scm_url + '/webssh/host?instance={}'.format(instance))
     else:
         config = get_site_configs(cmd, resource_group_name, name, slot)
         if config.remote_debugging_enabled:
             raise ValidationError('Remote debugging is enabled, please disable')
         create_tunnel_and_session(
             cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
-
-
-def create_devops_pipeline(
-        cmd,
-        functionapp_name=None,
-        organization_name=None,
-        project_name=None,
-        repository_name=None,
-        overwrite_yaml=None,
-        allow_force_push=None,
-        github_pat=None,
-        github_repository=None
-):
-    from .azure_devops_build_interactive import AzureDevopsBuildInteractive
-    azure_devops_build_interactive = AzureDevopsBuildInteractive(cmd, logger, functionapp_name,
-                                                                 organization_name, project_name, repository_name,
-                                                                 overwrite_yaml, allow_force_push,
-                                                                 github_pat, github_repository)
-    return azure_devops_build_interactive.interactive_azure_devops_build()
 
 
 def _configure_default_logging(cmd, rg_name, name):

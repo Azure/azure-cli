@@ -1,0 +1,158 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "tags": {}, "zones": ["1"], "properties": {"containers":
+      [{"name": "clicontainer000002", "properties": {"image": "alpine:latest", "command":
+      ["/bin/sh", "-c", "while true; do echo hello; sleep 20; done"], "ports": [{"protocol":
+      "TCP", "port": 80}], "resources": {"requests": {"memoryInGB": 1.0, "cpu": 1.0}}}}],
+      "restartPolicy": "Never", "ipAddress": {"ports": [{"protocol": "TCP", "port":
+      80}], "type": "Public"}, "osType": "Linux"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '455'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --image --os-type --ip-address --cpu --memory --zone --command-line
+        --restart-policy --location
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-mgmt-containerinstance/9.1.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2021-09-01
+  response:
+    body:
+      string: '{"properties":{"sku":"Standard","provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"eastus","zones":["1"],"tags":{}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/14d4e48e-8f02-43c4-9398-5af4b535e4d6?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '856'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Oct 2021 21:35:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt1h:
+      - '983'
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt5m:
+      - '497'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --os-type --ip-address --cpu --memory --zone --command-line
+        --restart-policy --location
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-mgmt-containerinstance/9.1.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/eastus/operations/14d4e48e-8f02-43c4-9398-5af4b535e4d6?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2021-10-14T21:35:18.0605365Z","properties":{"events":[{"count":1,"firstTimestamp":"2021-10-14T21:35:23Z","lastTimestamp":"2021-10-14T21:35:23Z","name":"Pulling","message":"pulling
+        image \"alpine@sha256:69704ef328d05a9f806b6b8502915e6a0a4faa4d72018dc42343f511490daf8a\"","type":"Normal"},{"count":1,"firstTimestamp":"2021-10-14T21:35:25Z","lastTimestamp":"2021-10-14T21:35:25Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine@sha256:69704ef328d05a9f806b6b8502915e6a0a4faa4d72018dc42343f511490daf8a\"","type":"Normal"},{"count":1,"firstTimestamp":"2021-10-14T21:35:33Z","lastTimestamp":"2021-10-14T21:35:33Z","name":"Started","message":"Started
+        container","type":"Normal"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '943'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Oct 2021 21:35:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --os-type --ip-address --cpu --memory --zone --command-line
+        --restart-policy --location
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-mgmt-containerinstance/9.1.0 Python/3.8.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2021-09-01
+  response:
+    body:
+      string: '{"properties":{"sku":"Standard","provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"alpine:latest","command":["/bin/sh","-c","while
+        true; do echo hello; sleep 20; done"],"ports":[{"protocol":"TCP","port":80}],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2021-10-14T21:35:33.629Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2021-10-14T21:35:23Z","lastTimestamp":"2021-10-14T21:35:23Z","name":"Pulling","message":"pulling
+        image \"alpine@sha256:69704ef328d05a9f806b6b8502915e6a0a4faa4d72018dc42343f511490daf8a\"","type":"Normal"},{"count":1,"firstTimestamp":"2021-10-14T21:35:25Z","lastTimestamp":"2021-10-14T21:35:25Z","name":"Pulled","message":"Successfully
+        pulled image \"alpine@sha256:69704ef328d05a9f806b6b8502915e6a0a4faa4d72018dc42343f511490daf8a\"","type":"Normal"},{"count":1,"firstTimestamp":"2021-10-14T21:35:33Z","lastTimestamp":"2021-10-14T21:35:33Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.0,"cpu":1.0}}}}],"initContainers":[],"restartPolicy":"Never","ipAddress":{"ports":[{"protocol":"TCP","port":80}],"ip":"20.81.63.117","type":"Public"},"osType":"Linux","instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"eastus","zones":["1"],"tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1646'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 14 Oct 2021 21:35:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

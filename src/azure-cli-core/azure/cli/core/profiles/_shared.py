@@ -149,12 +149,12 @@ AZURE_API_PROFILES = {
             'disks': '2020-12-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2020-12-01',
+            'snapshots': '2021-04-01',
             'galleries': '2021-07-01',
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-04-01',
+            'virtual_machine_scale_sets': '2021-07-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -165,7 +165,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
+            'vaults': '2021-06-01-preview'
+        }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',

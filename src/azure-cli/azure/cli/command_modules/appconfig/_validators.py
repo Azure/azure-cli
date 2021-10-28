@@ -13,7 +13,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumen
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
-from ._constants import FeatureFlagConstants
+from ._constants import FeatureFlagConstants, ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
 
 logger = get_logger(__name__)
@@ -247,3 +247,44 @@ def validate_feature_key(namespace):
             raise InvalidArgumentValueError("Feature flag key must start with the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
         if len(input_key) == len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
             raise InvalidArgumentValueError("Feature flag key must contain more characters after the reserved prefix '{0}'.".format(FeatureFlagConstants.FEATURE_FLAG_PREFIX))
+
+
+def validate_import_profile(namespace):
+    if namespace.profile == ImportExportProfiles.KVSET:
+        if namespace.source != 'file':
+            raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON file.".format(ImportExportProfiles.KVSET))
+        if namespace.format_ != 'json':
+            raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON format.".format(ImportExportProfiles.KVSET))
+        if namespace.content_type is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='content-type')
+        if namespace.label is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='label')
+        if namespace.separator is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='separator')
+        if namespace.depth is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='depth')
+        if namespace.prefix is not None and namespace.prefix != '':
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='prefix')
+        if namespace.skip_features:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='skip-features')
+
+
+def validate_export_profile(namespace):
+    if namespace.profile == ImportExportProfiles.KVSET:
+        if namespace.destination != 'file':
+            raise InvalidArgumentValueError("The profile '{}' only supports exporting to a file.".format(ImportExportProfiles.KVSET))
+        if namespace.format_ != 'json':
+            raise CLIError("The profile '{}' only supports exporting in the JSON format".format(ImportExportProfiles.KVSET))
+        if namespace.prefix is not None and namespace.prefix != '':
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='prefix')
+        if namespace.dest_label is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='dest-label')
+        if namespace.resolve_keyvault:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
+        if namespace.separator is not None:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+
+
+def __construct_kvset_invalid_argument_error(is_exporting, argument):
+    action = 'exporting' if is_exporting else 'importing'
+    return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))

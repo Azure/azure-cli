@@ -7,6 +7,9 @@
 
 import io
 import json
+from difflib import Differ
+from json import JSONDecodeError
+from urllib.parse import urlparse
 
 import chardet
 import javaproperties
@@ -14,11 +17,14 @@ import yaml
 from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.appconfiguration import ResourceReadOnlyError
+
+from azure.keyvault.key_vault_id import KeyVaultIdentifier
+from azure.appconfiguration import ResourceReadOnlyError, ConfigurationSetting
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import user_confirmation
+from azure.cli.core.azclierror import FileOperationError, AzureInternalError
 
-from ._constants import (FeatureFlagConstants, KeyVaultConstants)
+from ._constants import (FeatureFlagConstants, KeyVaultConstants, SearchFilterOptions, KVSetConstants, ImportExportProfiles)
 from ._utils import prep_label_filter_for_url_encoding
 from ._models import (KeyValue, convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting, QueryFields)
@@ -370,14 +376,7 @@ def __write_kv_and_features_to_config_store(azconfig_client,
         if content_type and not __is_feature_flag(set_kv) and not __is_key_vault_ref(set_kv):
             set_kv.content_type = content_type
 
-        try:
-            azconfig_client.set_configuration_setting(set_kv)
-        except ResourceReadOnlyError:
-            logger.warning("Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.", set_kv.key, set_kv.label)
-        except HttpResponseError as exception:
-            logger.warning("Failed to set key-value with key '%s' and label '%s'. %s", set_kv.key, set_kv.label, str(exception))
-        except Exception as exception:
-            raise CLIError(str(exception))
+        __write_configuration_setting_to_config_store(azconfig_client, set_kv)
 
 
 def __is_feature_flag(kv):
@@ -429,7 +428,6 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
                             secret_version = appsvc_value_dict.get('secretversion')
                             secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
                         try:
-                            from azure.keyvault.key_vault_id import KeyVaultIdentifier
                             # this throws an exception for invalid format of secret identifier
                             KeyVaultIdentifier(uri=secret_identifier)
                             kv = KeyValue(key=key,
@@ -554,16 +552,22 @@ def __serialize_feature_list_to_comparable_json_object(features):
     return res
 
 
-def __serialize_kv_list_to_comparable_json_list(keyvalues):
+def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     res = []
     for kv in keyvalues:
         # value
-        kv_json = {'key': kv.key,
-                   'value': kv.value,
-                   'label': kv.label,
-                   'locked': kv.locked,
-                   'last modified': kv.last_modified,
-                   'content type': kv.content_type}
+        if profile == ImportExportProfiles.KVSET:
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'content_type': kv.content_type}
+        else:
+            kv_json = {'key': kv.key,
+                       'value': kv.value,
+                       'label': kv.label,
+                       'locked': kv.locked,
+                       'last modified': kv.last_modified,
+                       'content type': kv.content_type}
         # tags
         tag_json = {}
         if kv.tags:
@@ -662,6 +666,24 @@ def __print_preview(old_json, new_json):
                 logger.warning('+ %s', json.dumps(new_record, ensure_ascii=False))
     logger.warning("")  # printing an empty line for formatting purpose
     return True
+
+
+def __export_kvset_to_file(file_path, keyvalues, yes):
+    kvset = __serialize_kv_list_to_comparable_json_list(keyvalues, ImportExportProfiles.KVSET)
+    obj = {KVSetConstants.KVSETRootElementName: kvset}
+    json_string = json.dumps(obj, indent=2, ensure_ascii=False)
+    if not yes:
+        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
+        if len(kvset) == 0:
+            logger.warning('\nSource configuration is empty. Nothing to export.')
+            return
+        __print_preview_json_diff(new_obj=obj)
+        user_confirmation('Do you want to continue? \n')
+    try:
+        with open(file_path, 'w', encoding='utf-8') as fp:
+            fp.write(json_string)
+    except Exception as exception:
+        raise FileOperationError("Failed to export key-values to file. " + str(exception))
 
 
 def __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete):
@@ -998,6 +1020,121 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
     except Exception as exception:
         raise CLIError(str(exception))
+
+
+def __import_kvset_from_file(client, path, yes):
+    new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
+    if KVSetConstants.KVSETRootElementName not in new_kvset:
+        raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
+
+    kvset_to_import = [ConfigurationSetting(key=kv['key'],
+                                            label=kv['label'],
+                                            content_type=kv['content_type'],
+                                            value=kv['value'],
+                                            tags=kv['tags'])
+                       for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
+
+    if not yes:
+        existing_kvset = __read_kv_from_config_store(client,
+                                                     key=SearchFilterOptions.ANY_KEY,
+                                                     label=SearchFilterOptions.ANY_LABEL)
+        # we don't delete configurations if they are missing from the import file, so don't need to show them in the
+        # diff, so omit them from existing kvset
+        existing_kvset = list(filter(lambda kv:
+                                     any(kv_import.key == kv.key and kv_import.label == kv.label
+                                         for kv_import in kvset_to_import), existing_kvset))
+
+        existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
+        kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
+
+        logger.warning('\n---------------- KVSet Preview (Beta) ----------------')
+        changes_detected = __print_preview_json_diff(existing_kvset_list, kvset_to_import_list)
+        if not changes_detected:
+            logger.warning('Target configuration store already contains all configuration settings in source. No changes will be made.')
+            return
+
+        user_confirmation('Do you want to continue?\n')
+
+    for config_setting in kvset_to_import:
+        if __is_key_vault_ref(kv=config_setting):
+            if not __validate_import_keyvault_ref(kv=config_setting):
+                continue
+        elif __is_feature_flag(kv=config_setting):
+            if not __validate_import_feature_flag(kv=config_setting):
+                continue
+        elif not validate_import_key(config_setting.key):
+            continue
+
+        # All validations successful
+        __write_configuration_setting_to_config_store(client, config_setting)
+
+
+def __validate_import_keyvault_ref(kv):
+    if kv and validate_import_key(kv.key):
+        try:
+            value = json.loads(kv.value)
+        except JSONDecodeError as exception:
+            logger.warning("The keyvault reference with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.key, str(exception))
+            return False
+
+        if 'uri' in value:
+            parsed_url = urlparse(value['uri'])
+            # URL with a valid scheme and netloc is a valid url, but keyvault ref has path as well, so validate it
+            if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
+                try:
+                    KeyVaultIdentifier(uri=value['uri'])
+                    return True
+                except Exception:  # pylint: disable=broad-except
+                    pass
+
+        logger.warning("Keyvault reference with key '{%s}' is not a valid keyvault reference. It will not be imported.", kv.key)
+    return False
+
+
+def __validate_import_feature_flag(kv):
+    if kv and validate_import_feature(kv.key):
+        try:
+            ff = json.loads(kv.value)
+            if ff['id'] and ff['description'] and ff['enabled'] and ff['conditions']:
+                return True
+            logger.warning("The feature flag with key '{%s}' is not a valid feature flag. It will not be imported.", kv.key)
+        except JSONDecodeError as exception:
+            logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
+    return False
+
+
+def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
+    try:
+        azconfig_client.set_configuration_setting(configuration_setting)
+    except ResourceReadOnlyError:
+        logger.warning(
+            "Failed to set read only key-value with key '%s' and label '%s'. Unlock the key-value before updating it.",
+            configuration_setting.key, configuration_setting.label)
+    except HttpResponseError as exception:
+        logger.warning(
+            "Failed to set key-value with key '%s' and label '%s'. %s",
+            configuration_setting.key, configuration_setting.label, str(exception))
+    except Exception as exception:
+        raise AzureInternalError(str(exception))
+
+
+def __print_preview_json_diff(old_obj=None, new_obj=None):
+    # prints the json diff if two objects differ, returns whether the diff was found.
+
+    old_json = "" if old_obj is None else json.dumps(old_obj, indent=2, ensure_ascii=False).splitlines(True)
+    new_json = "" if new_obj is None else json.dumps(new_obj, indent=2, ensure_ascii=False).splitlines(True)
+
+    differ = Differ()
+    diff = list(differ.compare(old_json, new_json))
+
+    if not any(line.startswith('-') or line.startswith('+') for line in diff):
+        return False
+
+    # omit minuscule details of the diff outlining the characters that changed, and show rest of the diff.
+    logger.warning(''.join(filter(lambda line: not line.startswith('?'), diff)))
+    # print newline for readability
+    logger.warning('\n')
+    return True
 
 
 class Undef:  # pylint: disable=too-few-public-methods
