@@ -462,7 +462,6 @@ def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definit
     folder = {}
     folder['name'] = folder_name
     definition_file['SparkJobDefinitionFolder'] = folder
-    print(definition_file)
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)

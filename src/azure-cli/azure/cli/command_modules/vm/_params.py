@@ -62,6 +62,7 @@ def load_arguments(self, _):
     extension_instance_name_type = CLIArgumentType(help="Name of extension instance, which can be customized. Default: name of the extension.")
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
     disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
+    ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01')
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -346,6 +347,8 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM.')
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
+        c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
+                   help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -677,6 +680,8 @@ def load_arguments(self, _):
         c.argument('spot_restore_timeout', min_api='2021-04-01',
                    help='Timeout value expressed as an ISO 8601 time duration after which the platform will not try to restore the VMSS SPOT instances')
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
+        c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
+                   help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
@@ -765,6 +770,94 @@ def load_arguments(self, _):
         with self.argument_context('{} stop'.format(scope)) as c:
             c.argument('skip_shutdown', action='store_true', help='Skip shutdown and power-off immediately.', min_api='2019-03-01')
 
+    run_cmd_name_type = CLIArgumentType(options_list=['--name', '--run-command-name'], help='The name of the virtual machine run command.')
+    run_cmd_vm_name = CLIArgumentType(options_list=['--vm-name'], help='The name of the virtual machine')
+    for scope in ['create', 'update']:
+        with self.argument_context('vm run-command {}'.format(scope)) as c:
+            c.argument('vm_name', run_cmd_vm_name)
+            c.argument('run_command_name', run_cmd_name_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                       validator=get_default_location_from_resource_group)
+            c.argument('tags', tags_type)
+            c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+            c.argument('script_uri', help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+            c.argument('command_id', help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+            c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+            c.argument('protected_parameters', nargs='+', help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+            c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                       'will complete as soon as the script starts and will not wait for script to complete.')
+            c.argument('run_as_user', help='By default script process runs under system/root user. Specify custom user to host the process.')
+            c.argument('run_as_password', help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+            c.argument('output_blob_uri', help='Specify the Azure storage blob where script output stream will be uploaded.')
+            c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
+
+    with self.argument_context('vm run-command delete') as c:
+        c.argument('vm_name', run_cmd_vm_name)
+        c.argument('run_command_name', run_cmd_name_type)
+
+    with self.argument_context('vm run-command list') as c:
+        c.argument('vm_name', run_cmd_vm_name, id_part=None)
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+
+    with self.argument_context('vm run-command show') as c:
+        c.argument('vm_name', run_cmd_vm_name)
+        c.argument('run_command_name', run_cmd_name_type)
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('command_id', help='The command id.')
+
+    with self.argument_context('vm run-command wait') as c:
+        c.argument('vm_name', run_cmd_vm_name)
+        c.argument('run_command_name', run_cmd_name_type)
+        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('command_id', help='The command id.')
+
+    run_cmd_vmss_name = CLIArgumentType(options_list=['--vmss-name'], help='The name of the VM scale set.')
+    for scope in ['create', 'update']:
+        with self.argument_context('vmss run-command {}'.format(scope)) as c:
+            c.argument('vmss_name', run_cmd_vmss_name)
+            c.argument('instance_id', help='The instance ID of the virtual machine.')
+            c.argument('run_command_name', run_cmd_name_type)
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                       validator=get_default_location_from_resource_group)
+            c.argument('tags', tags_type)
+            c.argument('script', help='Contain the powershell or bash script to execute on the VM.')
+            c.argument('script_uri',
+                       help='Contain a uri to the script to execute on the VM. Uri can be any link accessible from the VM or a storage blob without SAS. If subscription has access to the storage blob, then SAS will be auto-generated. ')
+            c.argument('command_id',
+                       help='Specify a command id of predefined script. All command ids can be listed using "list" command.')
+            c.argument('parameters', nargs='+', help='Set custom parameters in a name-value pair.')
+            c.argument('protected_parameters', nargs='+',
+                       help='Set custom parameters in a name-value pair. These parameters will be encrypted during transmission and will not be logged.')
+            c.argument('async_execution', arg_type=get_three_state_flag(), help='Optional. If set to true, provisioning '
+                                                                                'will complete as soon as the script starts and will not wait for script to complete.')
+            c.argument('run_as_user',
+                       help='By default script process runs under system/root user. Specify custom user to host the process.')
+            c.argument('run_as_password',
+                       help='Password if needed for using run-as-user parameter. It will be encrypted and not logged. ')
+            c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
+            c.argument('output_blob_uri', help='Uri (without SAS) to an append blob where the script output will be uploaded.')
+            c.argument('error_blob_uri', help='Uri (without SAS) to an append blob where the script error stream will be uploaded.')
+
+    with self.argument_context('vmss run-command delete') as c:
+        c.argument('vmss_name', run_cmd_vmss_name)
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', run_cmd_name_type)
+
+    with self.argument_context('vmss run-command list') as c:
+        c.argument('vmss_name', run_cmd_vmss_name, id_part=None)
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('expand', help='The expand expression to apply on the operation.')
+
+    with self.argument_context('vmss run-command show') as c:
+        c.argument('vmss_name', run_cmd_vmss_name)
+        c.argument('instance_id', help='The instance ID of the virtual machine.')
+        c.argument('run_command_name', run_cmd_name_type)
+        c.argument('expand', help='The expand expression to apply on the operation.')
+
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
@@ -847,7 +940,7 @@ def load_arguments(self, _):
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
-            c.argument('ephemeral_os_disk_placement', options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01',
+            c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                        help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',

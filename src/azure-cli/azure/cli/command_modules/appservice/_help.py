@@ -605,26 +605,6 @@ examples:
         az functionapp deployment user set --user-name MyUserName
 """
 
-helps['functionapp devops-pipeline'] = """
-type: group
-short-summary: Azure Function specific integration with Azure DevOps. Please visit https://aka.ms/functions-azure-devops for more information.
-"""
-
-helps['functionapp devops-pipeline create'] = """
-type: command
-short-summary: Create an Azure DevOps pipeline for a function app.
-examples:
-  - name: create an Azure Pipeline to a function app.
-    text: >
-        az functionapp devops-pipeline create --functionapp-name FunctionApp
-  - name: create an Azure Pipeline from a Github function app repository.
-    text: >
-        az functionapp devops-pipeline create --github-repository GithubOrganization/GithubRepository --github-pat GithubPersonalAccessToken
-  - name: create an Azure Pipeline with specific Azure DevOps organization and project
-    text: >
-        az functionapp devops-pipeline create --organization-name AzureDevOpsOrganization --project-name AzureDevOpsProject
-"""
-
 helps['functionapp function'] = """
 type: group
 short-summary: Manage function app functions.
@@ -2436,10 +2416,22 @@ helps['staticwebapp hostname list'] = """
 
 helps['staticwebapp hostname set'] = """
     type: command
-    short-summary: Set given sub-domain hostname to the static app. Please configure a CNAME record with your DNS provider.
+    short-summary: Set given sub-domain hostname to the static app. Please configure CNAME/TXT/ALIAS record with your DNS provider. Use --no-wait to not wait for validation.
     examples:
-    - name: Set hostname to the static app.
+    - name: Set a hostname for a static app using CNAME validation (default)
       text: az staticwebapp hostname set -n MyStaticAppName --hostname www.example.com
+    - name: Set a root domain for a webapp using TXT validation
+      text: az staticwebapp hostname set -n MyStaticAppName --hostname example.com --validation-method "dns-txt-token"
+"""
+
+helps['staticwebapp hostname show'] = """
+    type: command
+    short-summary: Get details for a staticwebapp custom domain. Can be used to fetch validation token for TXT domain validation (see example).
+    examples:
+    - name: Fetch the validation token (if generated) for TXT validation
+      text: az staticwebapp hostname show -n MyStaticAppName -g MyResourceGroup --hostname example.com --query "validationToken"
+    - name: Show all custom domain details for a particular hostname
+      text: az staticwebapp hostname show -n MyStaticAppName -g MyResourceGroup --hostname example.com
 """
 
 helps['staticwebapp hostname delete'] = """

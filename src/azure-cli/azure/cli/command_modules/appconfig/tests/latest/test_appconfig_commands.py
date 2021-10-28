@@ -15,7 +15,7 @@ import yaml
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -681,6 +681,57 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_import_export_kvset(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='KVSetImportTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # File <--> AppConfig tests
+
+        imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
+
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'profile': ImportExportProfiles.KVSET,
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+        with open(imported_file_path) as json_file:
+            imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # export kvset with --skip-features option
+        no_features_file_path = os.path.join(TEST_DIR, 'kvset_no_features.json')
+
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} --skip-features -y')
+
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        with open(no_features_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        assert exported_kvs == expected_kvs
 
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
@@ -1899,7 +1950,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Missing key and feature
         with self.assertRaisesRegexp(CLIError, "Please provide either `--key` or `--feature` value."):
             self.cmd('appconfig feature delete -n {config_store_name}')
-
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
