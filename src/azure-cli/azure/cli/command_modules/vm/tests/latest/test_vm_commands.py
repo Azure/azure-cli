@@ -4843,32 +4843,32 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f2} --type page --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f3} --type page --account-key {storage_key}')
-        self.cmd('sig gallery-application-version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
+        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
              self.check('name', '1.0.0'),
              self.check('publishingProfile.manageActions.install', 'install'),
              self.check('publishingProfile.manageActions.remove', 'remove'),
              self.check('type', 'Microsoft.Compute/galleries/applications/versions')
         ])
-        self.cmd('sig gallery-application-version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
+        self.cmd('sig gallery-application version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
             self.check('name', '1.0.0'),
             self.check('publishingProfile.manageActions.install', 'install'),
             self.check('publishingProfile.manageActions.remove', 'remove'),
             self.check('tags', {'tag': 'test'})
         ])
-        self.cmd('sig gallery-application-version list -r {gallery} --application-name {app_name} -g {rg}', checks=[
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=[
             self.check('[0].name', '1.0.0'),
             self.check('[0].publishingProfile.manageActions.install', 'install'),
             self.check('[0].publishingProfile.manageActions.remove', 'remove'),
             self.check('[0].tags', {'tag': 'test'}),
         ])
-        self.cmd('sig gallery-application-version show -n {ver_name} --application-name {app_name} -r {gallery} -g {rg}', checks=[
+        self.cmd('sig gallery-application version show -n {ver_name} --application-name {app_name} -r {gallery} -g {rg}', checks=[
             self.check('name', '1.0.0'),
             self.check('publishingProfile.manageActions.install', 'install'),
             self.check('publishingProfile.manageActions.remove', 'remove'),
             self.check('tags', {'tag': 'test'}),
         ])
-        self.cmd('sig gallery-application-version delete -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} -y')
-        self.cmd('sig gallery-application-version list -r {gallery} --application-name {app_name} -g {rg}', checks=self.is_empty())
+        self.cmd('sig gallery-application version delete -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} -y')
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=self.is_empty())
 # endregion
 
 

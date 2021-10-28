@@ -1240,14 +1240,14 @@ def load_arguments(self, _):
         c.argument('description', help='The description of this gallery Application Definition resource. '
                    'This property is updatable.')
 
-    with self.argument_context('sig gallery-application-version') as c:
+    with self.argument_context('sig gallery-application version') as c:
         c.argument('gallery_application_name', options_list=['--application-name'],
                    help='The name of the gallery Application')
         c.argument('gallery_application_version_name', options_list=['--name', '-n', '--version-name'],
                    help='The name of the gallery Application Version')
 
     for scope in ['create', 'update']:
-        with self.argument_context('sig gallery-application-version {}'.format(scope)) as c:
+        with self.argument_context('sig gallery-application version {}'.format(scope)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
                        validator=get_default_location_from_resource_group)
             c.argument('tags', tags_type)
@@ -1260,14 +1260,12 @@ def load_arguments(self, _):
             c.argument('target_regions', type=validate_file_or_dict, help='The target regions where the Image Version is '
                        'going to be replicated to. This property is updatable. Expected value: '
                        'json-string/json-file/@json-file.')
-            c.argument('default_file_link', help='The defaultConfigurationLink of the artifact, must be a readable storage page blob.')
+            c.argument('default_file_link', help='The default configuration link of the artifact, must be a readable storage page blob.')
             c.argument('exclude_from', arg_type=get_three_state_flag(), help='If set to true, Virtual Machines '
                        'deployed from the latest version of the Image Definition won\'t use this Image Version.',
                        arg_group='Publishing Profile')
             c.argument('end_of_life_date', help='The end of life date of the gallery image version. This property can be '
                        'used for decommissioning purposes. This property is updatable.', arg_group='Publishing Profile')
-            c.argument('enable_health_check', arg_type=get_three_state_flag(), help='Optional. Whether or not this '
-                       'application reports health.', arg_group='Publishing Profile')
     # endregion
 
     # region Proximity Placement Group
