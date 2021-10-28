@@ -115,8 +115,38 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         self.cmd('acr token show -n {syncToken} -r {registry_name}', checks=[
             self.check('credentials.passwords[0].name', 'password2')])
 
+        # Update and check connected registry repo permissions
+        self.cmd('acr connected-registry permissions update -n {grandchild_name} -r {registry_name} --add {repo_1} {repo_3}')
+
+        scope_map = self.cmd('acr connected-registry permissions show -n {root_name} -r {registry_name}').get_output_in_json()
+        self.assertListEqual(sorted(scope_map['actions']),
+                             ['gateway/'+ childName +'/config/read', 'gateway/'+ childName +'/config/write',
+                              'gateway/'+ childName +'/message/read', 'gateway/'+ childName +'/message/write',
+                              'gateway/'+ grandchildName +'/config/read', 'gateway/'+ grandchildName +'/config/write',
+                              'gateway/'+ grandchildName +'/message/read', 'gateway/'+ grandchildName +'/message/write',
+                              'gateway/'+ rootName +'/config/read', 'gateway/'+ rootName +'/config/write',
+                              'gateway/'+ rootName +'/message/read', 'gateway/'+ rootName +'/message/write',
+                              'repositories/'+ repo1 +'/content/read', 'repositories/'+ repo1 +'/metadata/read',
+                              'repositories/'+ repo2 +'/content/read', 'repositories/'+ repo2 +'/metadata/read',
+                              'repositories/'+ repo3 +'/content/read', 'repositories/'+ repo3 +'/metadata/read'])
+
+        self.cmd('acr connected-registry permissions update -n {root_name} -r {registry_name} --remove {repo_1} {repo_2}')
+        self.cmd('acr connected-registry permissions update -n {child_name} -r {registry_name} --remove {repo_3} --add {repo_1}')
+
+        scope_map = self.cmd('acr connected-registry permissions show -n {grandchild_name} -r {registry_name}').get_output_in_json()
+        self.assertListEqual(sorted(scope_map['actions']),
+                             ['gateway/'+ grandchildName +'/config/read', 'gateway/'+ grandchildName +'/config/write',
+                              'gateway/'+ grandchildName +'/message/read', 'gateway/'+ grandchildName +'/message/write'])
+
         # Delete connected registry grand child
         self.cmd('acr connected-registry delete -n {grandchild_name} -r {registry_name} --cleanup -y')
+
+        # Check Gateway permission is removed by cleanup
+        scope_map = self.cmd('acr connected-registry permissions show -n {child_name} -r {registry_name}').get_output_in_json()
+        self.assertListEqual(sorted(scope_map['actions']),
+                             ['gateway/'+ childName +'/config/read', 'gateway/'+ childName +'/config/write',
+                              'gateway/'+ childName +'/message/read', 'gateway/'+ childName +'/message/write',
+                              'repositories/'+ repo1 +'/content/read', 'repositories/'+ repo1 +'/metadata/read'])
 
         # Delete connected registry child
         self.cmd('acr connected-registry delete -n {child_name} -r {registry_name} -y')
