@@ -1091,7 +1091,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
     def test_keyvault_key_rotation(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus2',
-            'key': self.create_random_name('key-', 24)
+            'key': self.create_random_name('key-', 24),
+            'policy': os.path.join(TEST_DIR, 'rotation_policy.json')
         })
         keyvault = self.cmd('keyvault show -n {kv} -g {rg}').get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
@@ -1105,8 +1106,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                        checks=self.check('attributes.enabled', True)).get_output_in_json()
 
         # update rotation-policy
-        self.cmd('keyvault key rotation-policy update --expires-in P30D --notify-before-expiry P7D '
-                 '--rotate-after-creation P15D --vault-name {kv} -n {key}',
+        self.cmd('keyvault key rotation-policy update --value "{policy}" --vault-name {kv} -n {key}',
                  checks=[self.check('expiresIn', 'P30D'),
                          self.check('length(lifetimeActions)', 2),
                          self.check('lifetimeActions[0].action', 'Rotate'),
@@ -2547,6 +2547,24 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --name {kv} --resource-group {rg}', checks=[
             self.check('length(properties.networkAcls.ipRules)', 4)
         ])
+
+class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pna')
+    def test_keyvault_public_network_access(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-pna-', 24),
+            'kv2': self.create_random_name('cli-test-kv2-pna-', 24),
+            'kv3': self.create_random_name('cli-test-kv3-pna-', 24),
+            'loc': 'eastus2euap'
+        })
+        self.cmd('keyvault create -g {rg} -n {kv} -l {loc}',
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
+        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --public-network-access Enabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
+        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --public-network-access Disabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Disabled')])
+        self.cmd('keyvault update -g {rg} -n {kv3} --public-network-access Enabled',
+                 checks=[self.check('properties.publicNetworkAccess', 'Enabled')])
 
 
 if __name__ == '__main__':

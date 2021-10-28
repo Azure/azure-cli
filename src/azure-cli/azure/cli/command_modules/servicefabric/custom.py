@@ -1060,7 +1060,7 @@ def _create_certificate(cmd,
     secret_url = None
     certificate_thumbprint = None
 
-    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT)
+    VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     _create_keyvault.__doc__ = VaultProperties.__doc__
 
     if secret_identifier is not None:
