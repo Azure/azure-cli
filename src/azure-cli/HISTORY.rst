@@ -10,8 +10,8 @@ Release History
 
 * [BREAKING CHANGE] `az connected-registry`: `--repository` flag short version `-t` is being removed. (#19755)
 * [BREAKING CHANGE] `az connected-registry install renew credentials`: Now it requires the user to confirm password generation. (#19755)
-* `az connected-registry install`: Is now deprecated, use az acr connected-registry get-settings instead. (#19755)
-* `az connected-registry repo`: Is now deprecated, use az acr connected-registry permissions update instead. (#19755)
+* `az connected-registry install`: deprecate and redirect to `az acr connected-registry get-settings`. (#19755)
+* `az connected-registry repo`: deprecate and redirect to `az acr connected-registry permissions update`. (#19755)
 * `az connected-registry permissions show`: A new command that allows the user to see the sync scope map information. (#19755)
 * `az connected-registry get-settings`: A new command that retrieves the necessary information to install a connected registry and allows the generation of a new sync token password. (#19755)
 * `az connected-registry create`: No longer adds a postfix to the sync token and scope map name. (#19755)
@@ -40,14 +40,6 @@ Release History
 **ARO**
 
 * `az aro create`: Remove Identifier URIs (#20095)
-
-**Backup**
-
-* Migrate the SDK `azure-mgmt-recoveryservicesbackup` to Track 2 (#19947)
-
-**Bastion**
-
-* Fix az network bastion rdp not working properly (#19944)
 
 **Compute **
 
