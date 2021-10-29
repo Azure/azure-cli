@@ -35,7 +35,7 @@ Release History
 
 **ARM**
 
-* `az bicep publish`: add new command to publish bicep modules (#19926)
+* `az bicep publish`: Add new command to publish bicep modules (#19926)
 
 **ARO**
 
