@@ -3,12 +3,19 @@
 Release History
 ===============
 
+2.29.2
+++++++
+
+**ARO**
+
+* Hotfix: `az aro create`: Remove Identifier URIs (#20104)
+
 2.29.1
 ++++++
 
 **Compute**
 
-Hotfix: Fix #19897,#19903: Fix static webapp commands that are broken due to the upgrade of `azure-mgmt-web` to 4.0.0 (#19897)
+* Hotfix: Fix #19897,#19903: Fix static webapp commands that are broken due to the upgrade of `azure-mgmt-web` to 4.0.0 (#19897)
 
 2.29.0
 ++++++
