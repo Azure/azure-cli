@@ -100,10 +100,10 @@ Release History
 
 * [BREAKING CHANGE] `az netappfiles account backup-policy create`: Removed optional parameter --yearly-backups. (#19711)
 * [BREAKING CHANGE] `az netappfiles account backup-policy update`: Removed optional parameter --yearly-backups. (#19711)
-* `az netappfiles account list`: Added option to skip -resource-group parameter and fetch accounts for subscription. (#19711)
-* `az netappfiles pool create`: Added optional parameter named --encryption-type (#19711)
-* `az netappfiles volume create`: Added optional parameters: --network-features, --avs-data-store, --default-group-quota, --default-user-quota, --is-def-quota-enabled (#19711)
-* `az netappfiles volume update`: Added optional parameters: --default-group-quota, --default-user-quota, --is-def-quota-enabled (#19711)
+* `az netappfiles account list`: Add option to skip `--resource-group` parameter and fetch accounts for subscription. (#19711)
+* `az netappfiles pool create`: Add optional parameter named `--encryption-type` (#19711)
+* `az netappfiles volume create`: Add optional parameters: `--network-features`, `--avs-data-store`, `--default-group-quota`, `--default-user-quota`, `--is-def-quota-enabled` (#19711)
+* `az netappfiles volume update`: Add optional parameters: `--default-group-quota`, `--default-user-quota`, `--is-def-quota-enabled` (#19711)
 
 **Network**
 
@@ -135,7 +135,7 @@ Release History
 
 **Sql db**
 
-* - Add missing word in docs description (#20015)
+* Add missing word in docs description (#20015)
 
 **Storage**
 
