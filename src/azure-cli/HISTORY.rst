@@ -110,6 +110,7 @@ Release History
 * `az network bastion create`: Add new parameter `--scale-units` and `--sku` to support setting scale unit (#19899)
 * `az network vnet`: Add parameter `--bgp-community` (#19876)
 * `az network private-endpoint-connection`: Support "Microsoft.Cache/Redis" (#19967)
+* `az network private-endpoint-connection`: Support "Microsoft.SignalRService/WebPubSub" (#20042)
 
 **RDBMS**
 
