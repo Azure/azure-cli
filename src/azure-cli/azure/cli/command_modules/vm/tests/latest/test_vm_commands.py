@@ -2790,7 +2790,8 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('vmsswithip', 20),
+            'flex_vmss': self.create_random_name('flexvmsswithip', 20),
             'nsg': 'testnsg',
             'ssh_key': TEST_SSH_KEY_PUB,
             'dns_label': self.create_random_name('clivmss', 20)
@@ -2808,6 +2809,11 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
+
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image UbuntuLTS --orchestration-mode Flexible')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vmss list-instance-public-ips -n {flex_vmss} -g {rg}')
 
 
 class VMSSUpdateTests(ScenarioTest):
@@ -3209,7 +3215,8 @@ class VMSSVMsScenarioTest(ScenarioTest):
     def test_vmss_vms(self, resource_group):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('clitestvmss', 20),
+            'flex_vmss': self.create_random_name('clitestflexvms', 20),
             'count': 2,
             'instance_ids': []
         })
@@ -3241,6 +3248,11 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self._check_vms_power_state('PowerState/deallocated')
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
+
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image UbuntuLTS --orchestration-mode Flexible')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
 
 
 class VMSSSimulateEvictionScenarioTest(ScenarioTest):
