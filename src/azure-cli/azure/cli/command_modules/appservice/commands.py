@@ -463,6 +463,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
 
+    with self.command_group('staticwebapp functions', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('link', 'link_user_function')
+        g.custom_command('unlink', 'unlink_user_function')
+        g.custom_command('show', 'get_user_function')
+
     with self.command_group('logicapp') as g:
         g.custom_command('delete', 'delete_function_app', confirmation=True)
         g.custom_command('stop', 'stop_webapp')

@@ -3,10 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from urllib import parse
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import ArgumentUsageError
+
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
 
@@ -345,7 +349,7 @@ def _parse_resource_group_from_arm_id(arm_id):
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):
     from azure.mgmt.web import WebSiteManagementClient
-    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).static_sites
+    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient, api_version=api_version).static_sites
     if api_version:
         client.api_version = api_version
     return client
@@ -400,3 +404,36 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
                                             name=name,
                                             reset_properties_envelope=reset_envelope)
+
+
+def link_user_function(cmd, name, resource_group_name, function_resource_id):
+    # TODO call begin_register_user_provided_function_app_with_static_site
+    if not is_valid_resource_id(function_resource_id):
+        raise ArgumentUsageError("--function-resource-id must specify a function resource ID. "
+                                 "To get resource ID, use the following commmand, inserting the function "
+                                 "group/name as needed: \n"
+                                 "az functionapp show --resource-group \"[FUNCTION_RESOURCE_GROUP]\" "
+                                 "--name \"[FUNCTION_NAME]\" --query id ")
+
+    from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
+
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id)
+
+    function_name = parse_resource_id(function_resource_id)["name"]
+
+    return client.begin_register_user_provided_function_app_with_static_site(
+        name=name,
+        resource_group_name=resource_group_name,
+        function_app_name=function_name,
+        static_site_user_provided_function_envelope=function)
+
+
+def unlink_user_function(cmd, name, resource_group_name):
+    # TODO call get_user_provided_function_app_for_static_site
+    pass
+
+
+def get_user_function(cmd, name, resource_group_name):
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
