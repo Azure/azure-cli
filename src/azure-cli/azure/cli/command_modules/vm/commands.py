@@ -530,7 +530,7 @@ def load_command_table(self, _):
                             is_experimental=True, min_api='2020-09-30') as g:
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
-        g.custom_command('enable-community', 'sig_share_update',  min_api='2021-07-01', supports_no_wait=True)
+        g.custom_command('enable-community', 'sig_share_update', min_api='2021-07-01', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 

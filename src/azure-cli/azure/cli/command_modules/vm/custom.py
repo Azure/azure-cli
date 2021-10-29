@@ -3525,6 +3525,10 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
         if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
             CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo')
             gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
                                                                                   publisher_contact=publisher_contact,
