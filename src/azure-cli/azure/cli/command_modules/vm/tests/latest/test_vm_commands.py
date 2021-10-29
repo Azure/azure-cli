@@ -4836,7 +4836,7 @@ class VMGalleryApplication(ScenarioTest):
             'account': self.create_random_name('account', 15),
             'container': self.create_random_name('container', 15),
             'blob': self.create_random_name('blob', 15),
-            'f1': os.path.join(curr_dir, 'Copylt.bat').replace('\\', '\\\\')
+            'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\')
         })
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
