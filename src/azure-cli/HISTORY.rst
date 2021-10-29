@@ -146,10 +146,6 @@ Release History
 
 * `az synapse kusto`: Add Kusto pool(mgmt) support (#19984)
 
-**WebPubSub**
-
-* Add support for private link resource for az webpubsub (#20042)
-
 2.29.1
 ++++++
 
