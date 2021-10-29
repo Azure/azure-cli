@@ -397,3 +397,10 @@ class ArmTemplateBuilder20190401(ArmTemplateBuilder):
     def __init__(self):
         super().__init__()
         self.template['$schema'] = 'https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#'
+
+
+def raise_unsupported_error_for_flex_vmss(vmss, error_message):
+    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
+            and vmss.orchestration_mode.lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
