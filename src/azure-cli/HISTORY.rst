@@ -3,6 +3,162 @@
 Release History
 ===============
 
+2.30.0
+++++++
+
+**ACR**
+
+* [BREAKING CHANGE] `az connected-registry`: `--repository` flag short version `-t` is being removed. (#19755)
+* [BREAKING CHANGE] `az connected-registry install renew credentials`: Now it requires the user to confirm password generation. (#19755)
+* `az connected-registry install`: Is now deprecated, use az acr connected-registry get-settings instead. (#19755)
+* `az connected-registry repo`: Is now deprecated, use az acr connected-registry permissions update instead. (#19755)
+* `az connected-registry permissions show`: A new command that allows the user to see the sync scope map information. (#19755)
+* `az connected-registry get-settings`: A new command that retrieves the necessary information to install a connected registry and allows the generation of a new sync token password. (#19755)
+* `az connected-registry create`: No longer adds a postfix to the sync token and scope map name. (#19755)
+
+**AKS**
+
+* `az aks create/update`: Add new parameter `--aks-custom-headers` to support for custom headers (#19807)
+* `az aks create`: Support setting `--private-dns-zone` to none for private cluster creation (#19883)
+* `az aks create/update`: Add new parameter `--enable-secret-rotation` and `--rotation-poll-interval` to support secret rotation (#19986)
+* `az aks enable-addons`: Add new parameter `--enable-secret-rotation` and `--rotation-poll-interval` to support secret rotation (#19986)
+
+**App Config**
+
+* `az appconfig kv import/export`: Add new parameter `--profile` to support using `appconfig/kvset` profile (#19923)
+
+**App Service**
+
+* Fix #19617: `az webapp ssh`: Open Web SSH on the specified instance (#19769)
+* `az staticwebapp hostname`: Support adding static webapp hostname via TXT validation (#20074)
+* Enable support for PowerShell on Linux function apps with V4 (#19869)
+
+**ARM**
+
+* `az bicep publish`: add new command to publish bicep modules (#19926)
+
+**ARO**
+
+* `az aro create`: Remove Identifier URIs (#20095)
+
+**Backup**
+
+* Migrate the SDK `azure-mgmt-recoveryservicesbackup` to Track 2 (#19947)
+
+**Bastion**
+
+* Fix az network bastion rdp not working properly (#19944)
+
+**Compute **
+
+* `az disk update`: Fix the problem that updating network access policy to `AllowPrivate` failed (#19862)
+* `az vm update`: Add `--host` argument and `--host-group` argument to support assign an existing VM to a specific ADH (#19819)
+* Fix #19599: `az vm create`: Fix the issue that `--nic-delete-option` not working when no `--nics` is provided. (#19861)
+* `az snapshot create`: Support copyStart as createOption (#19875)
+* `az vmss create/update`: Support in-guest patching for VMSS (#19961)
+* `az vm application set/list`: Add new commands to support VM application (#19928)
+* `az vmss application set/list`: Add new commands to support VMSS application (#19928)
+* `az vm create`: Add `--ephemeral-os-disk-placement` argument to support choosing the Ephemeral OS disk provisioning location (#19886)
+* `az vmss create`: Add `--ephemeral-os-disk-placement` argument to support choosing the Ephemeral OS disk provisioning location (#19886)
+* `az vm update`: Add `--size` argument to support the resize (#20043)
+* `az vmss update`: Add `--vm-sku` argument to support the resize (#20043)
+* Improve test coverage for `az vm application set/list` (#20059)
+* Add  new operations  to `az vm run-command`, `az vmss run-command` (#19697)
+* `az vm update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
+* `az vmss update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
+* `sig gallery-application`: Add new commands to support managing gallery application (#19996)
+* `sig gallery-application version`: Add new commands to support managing gallery application version (#19996)
+* Add validation for scenarios where Flex VMSS is not supported to GA (#19994)
+
+**Container**
+
+* `az container create`: Add parameter `--zone` to support Availability Zone selection (#19895)
+* `az container create`: Fix the issue that `--subnet` or `--vnet` cannot be used with IP address type `Public` to allow `Private` (#20032)
+* `az container create`:  Add Support for `--registry-login-server` to work with `--acr-identity` (#20055)
+
+**Cosmos DB**
+
+* Update Backup API for fetching latest restorable timestamp.Also, Update database account backup redundancy. (#20007)
+* `az managed-cassandra cluster/data-center`: GA support for managed cassandra cluster and data center (#19962)
+
+**DMS**
+
+* `az dms project create/az dms project task create` : Add MySQL projects/tasks for offline migrations. (#19634)
+
+**FunctionApp**
+
+* [BREAKING CHANGE] az functionapp devops-pipeline: Removed command. Moved to extension. (#19716)
+
+**HDInsight**
+
+* `az hdinsight create`: add two parameters "--zones" and "--private-link-configurations" to support creating cluster with availability zones feature and creating private link enabled cluster with private link configurations feature. (#20060)
+
+**Key Vault**
+
+* Support Keyvault SKR (#19746)
+* `az keyvault key random`: Request some random bytes from managedHSM (#19959)
+* Support rotate key and manage key rotation policy (#19927)
+* `az keyvault create`, `az keyvault update`: add --public-network-access parameter (#19956)
+
+**Monitor**
+
+* `az monitor metrics alert condition` : Add support for 'skip metric validation' (#19907)
+
+**NetAppFiles**
+
+* [BREAKING CHANGE] az netappfiles account backup-policy create: Removed optional parameter --yearly-backups. (#19711)
+* [BREAKING CHANGE] az netappfiles account backup-policy update: Removed optional parameter --yearly-backups. (#19711)
+* `az netappfiles account list`: Added option to skip -resource-group parameter and fetch accounts for subscription. (#19711)
+* `az netappfiles pool create`: Added optional parameter named --encryption-type (#19711)
+* `az netappfiles volume create`: Added optional parameters: --network-features, --avs-data-store, --default-group-quota, --default-user-quota, --is-def-quota-enabled (#19711)
+* `az netappfiles volume update`: Added optional parameters: --default-group-quota, --default-user-quota, --is-def-quota-enabled (#19711)
+
+**Network**
+
+* Bump network to 2021-03-01 (#19590)
+* Fix CI for bump network 2021-03-01 (#19874)
+* `az network bastion create`: Add new parameter `--scale-units` and `--sku` to support setting scale unit (#19899)
+* `az network vnet`: Add parameter `--bgp-community` (#19876)
+
+**RDBMS**
+
+* Introduce MySQL georestore command and update validators (#19782)
+* GA `az mysql flexible-server` (#19783)
+
+**Redis**
+
+* Add private endpoints support and help examples (#19967)
+* Add help examples for Redis Configuration parameter for Azure Cache for Redis (#20029)
+
+**Service Bus**
+
+* Fix MU capacity to include 16 when updating namespace (#19724)
+
+**ServiceConnector**
+
+* `az webapp/spring-cloud connection`: New command group to support service to service connection (#19834)
+* Add test for service connector (#19943)
+
+**SQL**
+
+* `az sql server ad-admin`: Fix breaking change made to update and delete (#19866)
+
+**Sql db**
+
+* - Add missing word in docs description (#20015)
+
+**Storage**
+
+* Bump `ResourceType.DATA_STORAGE_BLOB` to `2020-06-12` (#19840)
+
+**Synapse**
+
+* `az synapse kusto`: Add Kusto pool(mgmt) support (#19984)
+
+**WebPubSub**
+
+* Add support for private link resource for az webpubsub (#20042)
+
 2.29.1
 ++++++
 
