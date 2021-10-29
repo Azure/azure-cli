@@ -98,8 +98,7 @@ Release History
 
 **NetAppFiles**
 
-* [BREAKING CHANGE] `az netappfiles account backup-policy create`: Remove optional parameter `--yearly-backups`. (#19711)
-* [BREAKING CHANGE] `az netappfiles account backup-policy update`: Remove optional parameter `--yearly-backups`. (#19711)
+* [BREAKING CHANGE] `az netappfiles account backup-policy create/update`: Remove optional parameter `--yearly-backups`. (#19711)
 * `az netappfiles account list`: Add option to skip `--resource-group` parameter and fetch accounts for subscription. (#19711)
 * `az netappfiles pool create`: Add optional parameter named `--encryption-type` (#19711)
 * `az netappfiles volume create`: Add optional parameters: `--network-features`, `--avs-data-store`, `--default-group-quota`, `--default-user-quota`, `--is-def-quota-enabled` (#19711)
