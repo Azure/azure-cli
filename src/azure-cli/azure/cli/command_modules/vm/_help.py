@@ -3642,3 +3642,9 @@ examples:
   - name: List the capacity reservations.
     text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
 """
+
+helps['vmss list-instances'] = """
+type: command
+short-summary: Get a list of all virtual machines in a VM scale sets.
+long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
+"""
