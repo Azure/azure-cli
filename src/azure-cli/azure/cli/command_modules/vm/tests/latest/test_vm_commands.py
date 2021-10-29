@@ -4836,9 +4836,7 @@ class VMGalleryApplication(ScenarioTest):
             'account': self.create_random_name('account', 15),
             'container': self.create_random_name('container', 15),
             'blob': self.create_random_name('blob', 15),
-            'f1': os.path.join(curr_dir, 'MyAppInstaller.config').replace('\\', '\\\\'),
-            'f2': os.path.join(curr_dir, 'MyAppInstaller.ps1').replace('\\', '\\\\'),
-            'f3': os.path.join(curr_dir, 'Copylt.bat').replace('\\', '\\\\')
+            'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\')
         })
         self.cmd('sig create -r {gallery} -g {rg}')
         self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
@@ -4853,8 +4851,6 @@ class VMGalleryApplication(ScenarioTest):
             self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
         self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f2} --type page --account-key {storage_key}')
-        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f3} --type page --account-key {storage_key}')
         self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
              self.check('name', '1.0.0'),
              self.check('publishingProfile.manageActions.install', 'install'),
