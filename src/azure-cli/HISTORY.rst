@@ -118,7 +118,6 @@ Release History
 
 **Redis**
 
-* Add private endpoints support and help examples (#19967)
 * Add help examples for Redis Configuration parameter for Azure Cache for Redis (#20029)
 
 **Service Bus**
