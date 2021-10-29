@@ -993,7 +993,7 @@ def load_arguments(self, _):
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
 
-    for scope in ['sig share add', 'sig share remove']:
+    for scope in ['sig share add', 'sig share remove', 'sig share enable-community']:
         with self.argument_context(scope) as c:
             c.argument('gallery_name', type=str, help='The name of the Shared Image Gallery.', id_part='name')
             c.argument('subscription_ids', nargs='+', help='A list of subscription ids to share the gallery.')
@@ -1005,6 +1005,10 @@ def load_arguments(self, _):
 
     with self.argument_context('sig share remove') as c:
         c.argument('op_type', default='Remove', deprecate_info=c.deprecate(hide=True),
+                   help='distinguish add operation and remove operation')
+
+    with self.argument_context('sig share enable-community') as c:
+        c.argument('op_type', default='EnableCommunity', deprecate_info=c.deprecate(hide=True),
                    help='distinguish add operation and remove operation')
 
     with self.argument_context('sig share reset') as c:

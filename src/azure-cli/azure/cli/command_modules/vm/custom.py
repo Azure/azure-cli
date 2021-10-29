@@ -4032,8 +4032,9 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
                      op_type=None):
     SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
         'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
-    if subscription_ids is None and tenant_ids is None:
-        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    if op_type != 'EnableCommunity':
+        if subscription_ids is None and tenant_ids is None:
+            raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
     groups = []
     if subscription_ids:
         groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))

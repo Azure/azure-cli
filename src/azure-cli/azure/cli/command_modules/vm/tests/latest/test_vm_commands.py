@@ -4254,14 +4254,19 @@ class VMGalleryImage(ScenarioTest):
         self.kwargs.update({
             'gallery': self.create_random_name('gellery', 16),
         })
-        self.cmd('sig create -r {gallery} -g{rg} --permissions Community --publisher-uri puburi --publisher-email abc@123 --eula eula --public-name-prefix pubname', checks=[
+        self.cmd('sig create -r {gallery} -g{rg} --permissions Community --publisher-uri puburi --publisher-email abc@123.com --eula eula --public-name-prefix pubname', checks=[
             self.check('name', '{gallery}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sharingProfile.permissions', 'Community'),
             self.check('sharingProfile.communityGalleryInfo.publisherUri', 'puburi'),
-            self.check('sharingProfile.communityGalleryInfo.publisherContact', 'abc@123'),
+            self.check('sharingProfile.communityGalleryInfo.publisherContact', 'abc@123.com'),
             self.check('sharingProfile.communityGalleryInfo.eula', 'eula'),
-            self.check("sharingProfile.communityGalleryInfo.publicNames[0].starts_with(@, 'pubname')", True)
+            self.check("sharingProfile.communityGalleryInfo.publicNames[0].starts_with(@, 'pubname')", True),
+            self.check('sharingProfile.communityGalleryInfo.communityGalleryEnabled', False)
+        ])
+        self.cmd('sig share enable-community -r {gallery} -g {rg}')
+        self.cmd('sig show -r {gallery} -g {rg}', checks=[
+            self.check('sharingProfile.communityGalleryInfo.communityGalleryEnabled', True)
         ])
         self.cmd('sig share reset -r {gallery} -g {rg}')
         self.cmd('sig delete -r {gallery} -g {rg}')
