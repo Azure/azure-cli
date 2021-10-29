@@ -57,8 +57,8 @@ Release History
 * `az vm run-command`: Add new commands to support managing the running commands in VM (#19697)
 * `az vm update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
 * `az vmss update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
-* `sig gallery-application`: Add new commands to support managing gallery application (#19996)
-* `sig gallery-application version`: Add new commands to support managing gallery application version (#19996)
+* `az sig gallery-application`: Add new commands to support managing gallery application (#19996)
+* `az sig gallery-application version`: Add new commands to support managing gallery application version (#19996)
 * GA the features related to Flex VMSS (#19994)
 
 **Container**
@@ -79,7 +79,7 @@ Release History
 
 **FunctionApp**
 
-* [BREAKING CHANGE]: `az functionapp devops-pipeline`: Remove commands and move them to `functionapp` extension (#19716)
+* [BREAKING CHANGE] `az functionapp devops-pipeline`: Remove commands and move them to `functionapp` extension (#19716)
 
 **HDInsight**
 
