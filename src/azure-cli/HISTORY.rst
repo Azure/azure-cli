@@ -89,7 +89,7 @@ Release History
 
 * Support Keyvault SKR (#19746)
 * `az keyvault key random`: Request some random bytes from managedHSM (#19959)
-* Support rotate key and manage key rotation policy (#19927)
+* `az keyvault rotation-policy/key rotate`: Support rotate key and manage key rotation policy (#19927)
 * `az keyvault create/update`: Add `--public-network-access` parameter (#19956)
 
 **Monitor**
@@ -98,8 +98,8 @@ Release History
 
 **NetAppFiles**
 
-* [BREAKING CHANGE] `az netappfiles account backup-policy create`: Removed optional parameter --yearly-backups. (#19711)
-* [BREAKING CHANGE] `az netappfiles account backup-policy update`: Removed optional parameter --yearly-backups. (#19711)
+* [BREAKING CHANGE] `az netappfiles account backup-policy create`: Remove optional parameter `--yearly-backups`. (#19711)
+* [BREAKING CHANGE] `az netappfiles account backup-policy update`: Remove optional parameter `--yearly-backups`. (#19711)
 * `az netappfiles account list`: Add option to skip `--resource-group` parameter and fetch accounts for subscription. (#19711)
 * `az netappfiles pool create`: Add optional parameter named `--encryption-type` (#19711)
 * `az netappfiles volume create`: Add optional parameters: `--network-features`, `--avs-data-store`, `--default-group-quota`, `--default-user-quota`, `--is-def-quota-enabled` (#19711)
@@ -117,10 +117,6 @@ Release History
 * Introduce MySQL georestore command and update validators (#19782)
 * GA `az mysql flexible-server` (#19783)
 
-**Redis**
-
-* Add help examples for Redis Configuration parameter for Azure Cache for Redis (#20029)
-
 **Service Bus**
 
 * Fix MU capacity to include 16 when updating namespace (#19724)
@@ -128,19 +124,10 @@ Release History
 **ServiceConnector**
 
 * `az webapp/spring-cloud connection`: New command group to support service to service connection (#19834)
-* Add test for service connector (#19943)
 
 **SQL**
 
 * `az sql server ad-admin`: Fix breaking change made to update and delete (#19866)
-
-**Sql db**
-
-* Add missing word in docs description (#20015)
-
-**Storage**
-
-* Bump `ResourceType.DATA_STORAGE_BLOB` to `2020-06-12` (#19840)
 
 **Synapse**
 
