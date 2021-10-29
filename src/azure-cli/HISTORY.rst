@@ -79,7 +79,7 @@ Release History
 
 **FunctionApp**
 
-* BREAKING CHANGE: `az functionapp devops-pipeline`: Remove commands and move them to `functionapp` extension (#19716)
+* [BREAKING CHANGE]: `az functionapp devops-pipeline`: Remove commands and move them to `functionapp` extension (#19716)
 
 **HDInsight**
 
