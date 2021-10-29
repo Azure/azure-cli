@@ -54,23 +54,23 @@ Release History
 * `az vmss create`: Add `--ephemeral-os-disk-placement` argument to support choosing the Ephemeral OS disk provisioning location (#19886)
 * `az vm update`: Add `--size` argument to support the resize (#20043)
 * `az vmss update`: Add `--vm-sku` argument to support the resize (#20043)
-* Improve test coverage for `az vm application set/list` (#20059)
-* Add  new operations  to `az vm run-command`, `az vmss run-command` (#19697)
+* `az vm run-command`: Add new commands to support managing the running commands in VM (#19697)
 * `az vm update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
 * `az vmss update`: Add `--ephemeral-os-disk-placement` argument to support choose the Ephemeral OS disk provisioning location (#20062)
 * `sig gallery-application`: Add new commands to support managing gallery application (#19996)
 * `sig gallery-application version`: Add new commands to support managing gallery application version (#19996)
-* Add validation for scenarios where Flex VMSS is not supported to GA (#19994)
+* GA the features related to Flex VMSS (#19994)
 
 **Container**
 
 * `az container create`: Add parameter `--zone` to support Availability Zone selection (#19895)
 * `az container create`: Fix the issue that `--subnet` or `--vnet` cannot be used with IP address type `Public` to allow `Private` (#20032)
-* `az container create`:  Add Support for `--registry-login-server` to work with `--acr-identity` (#20055)
+* `az container create`: Add Support for `--registry-login-server` to work with `--acr-identity` (#20055)
 
 **Cosmos DB**
 
-* Update Backup API for fetching latest restorable timestamp.Also, Update database account backup redundancy. (#20007)
+* `az cosmosdb mongodb retrieve-latest-backup-time`: Add new command for fetching latest restorable timestamp for Mongo Account. (#20007)
+* `az cosmosdb locations`: Add new commands for listing account locations and their properties. (#20007)
 * `az managed-cassandra cluster/data-center`: GA support for managed cassandra cluster and data center (#19962)
 
 **DMS**
@@ -79,18 +79,18 @@ Release History
 
 **FunctionApp**
 
-* [BREAKING CHANGE] az functionapp devops-pipeline: Removed command. Moved to extension. (#19716)
+* BREAKING CHANGE: `az functionapp devops-pipeline`: Remove commands and move them to `functionapp` extension (#19716)
 
 **HDInsight**
 
-* `az hdinsight create`: add two parameters "--zones" and "--private-link-configurations" to support creating cluster with availability zones feature and creating private link enabled cluster with private link configurations feature. (#20060)
+* `az hdinsight create`: Add two parameters `--zones` and `--private-link-configurations` to support creating cluster with availability zones feature and creating private link enabled cluster with private link configurations feature. (#20060)
 
 **Key Vault**
 
 * Support Keyvault SKR (#19746)
 * `az keyvault key random`: Request some random bytes from managedHSM (#19959)
 * Support rotate key and manage key rotation policy (#19927)
-* `az keyvault create`, `az keyvault update`: add --public-network-access parameter (#19956)
+* `az keyvault create/update`: Add `--public-network-access` parameter (#19956)
 
 **Monitor**
 
@@ -98,8 +98,8 @@ Release History
 
 **NetAppFiles**
 
-* [BREAKING CHANGE] az netappfiles account backup-policy create: Removed optional parameter --yearly-backups. (#19711)
-* [BREAKING CHANGE] az netappfiles account backup-policy update: Removed optional parameter --yearly-backups. (#19711)
+* [BREAKING CHANGE] `az netappfiles account backup-policy create`: Removed optional parameter --yearly-backups. (#19711)
+* [BREAKING CHANGE] `az netappfiles account backup-policy update`: Removed optional parameter --yearly-backups. (#19711)
 * `az netappfiles account list`: Added option to skip -resource-group parameter and fetch accounts for subscription. (#19711)
 * `az netappfiles pool create`: Added optional parameter named --encryption-type (#19711)
 * `az netappfiles volume create`: Added optional parameters: --network-features, --avs-data-store, --default-group-quota, --default-user-quota, --is-def-quota-enabled (#19711)
