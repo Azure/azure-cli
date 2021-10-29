@@ -1018,12 +1018,11 @@ examples:
 
 helps['sig share enable-community'] = """
 type: command
-short-summary: stop sharing gallery with a subscription or tenant
+short-summary: Allow to share gallery to the community
 examples:
   - name: Allow to share gallery to the community
     text: |
-        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery \\
-        --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
+        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
 """
 
 helps['sig share reset'] = """
