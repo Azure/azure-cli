@@ -115,8 +115,6 @@ Release History
 
 **Network**
 
-* Bump network to 2021-03-01 (#19590)
-* Fix CI for bump network 2021-03-01 (#19874)
 * `az network bastion create`: Add new parameter `--scale-units` and `--sku` to support setting scale unit (#19899)
 * `az network vnet`: Add parameter `--bgp-community` (#19876)
 
