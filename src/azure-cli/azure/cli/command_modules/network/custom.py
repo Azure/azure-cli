@@ -3210,11 +3210,13 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None):
+                            request_message=None, manual_request=None, edge_zone=None,
+                            application_security_groups=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
-    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
-                                                                           'Subnet',
-                                                                           'PrivateLinkServiceConnection')
+    PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models(
+        'PrivateEndpoint',
+        'Subnet',
+        'PrivateLinkServiceConnection')
     pls_connection = PrivateLinkServiceConnection(private_link_service_id=private_connection_resource_id,
                                                   group_ids=group_ids,
                                                   request_message=request_message,
@@ -3232,10 +3234,12 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
 
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
+    if application_security_groups and cmd.supported_api_version('2021-03-01'):
+        private_endpoint.application_security_groups = application_security_groups
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
-def update_private_endpoint(instance, cmd, tags=None, request_message=None):
+def update_private_endpoint(instance, cmd, tags=None, request_message=None, application_security_groups=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
 
@@ -3245,6 +3249,9 @@ def update_private_endpoint(instance, cmd, tags=None, request_message=None):
         else:
             instance.manual_private_link_service_connections[0].request_message = request_message
 
+    if application_security_groups is not None and cmd.supported_api_version('2021-03-01'):
+        instance.application_security_groups = application_security_groups
+
     return instance
 
 
@@ -3253,6 +3260,80 @@ def list_private_endpoints(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+def add_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name, group_id=None,
+                                   member_name=None, private_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    pe = client.get(resource_group_name, private_endpoint_name)
+    PrivateEndpointIPConfiguration = cmd.get_models('PrivateEndpointIPConfiguration')
+    peipconfig = PrivateEndpointIPConfiguration(
+        name=ip_config_name,
+        group_id=group_id,
+        member_name=member_name,
+        private_ip_address=private_ip_address
+    )
+    pe.ip_configurations.append(peipconfig)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, pe)
+
+
+def update_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name, group_id=None,
+                                      member_name=None, private_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    pe = client.get(resource_group_name, private_endpoint_name).ip_configurations
+
+    instance = None
+
+    for config in pe.ip_configurations:
+        if config.name == ip_config_name:
+            instance = config
+            break
+    else:
+        raise ResourceNotFoundError(f"Ip Configuration {ip_config_name} doesn't exist")
+
+    if group_id is not None:
+        instance.group_id = group_id
+    if member_name is not None:
+        instance.member_name = member_name
+    if private_ip_address is not None:
+        instance.private_ip_address = private_ip_address
+
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, pe)
+
+
+def list_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    return client.get(resource_group_name, private_endpoint_name).ip_configurations
+
+
+def show_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    pe = client.get(resource_group_name, private_endpoint_name).ip_configurations
+
+    instance = None
+
+    for config in pe.ip_configurations:
+        if config.name == ip_config_name:
+            instance = config
+            break
+    else:
+        raise ResourceNotFoundError(f"Ip Configuration {ip_config_name} doesn't exist")
+
+    return instance
+
+
+def remove_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    pe = client.get(resource_group_name, private_endpoint_name).ip_configurations
+
+    for config in pe.ip_configurations:
+        if config.name == ip_config_name:
+            pe.ip_configurations.remove(config)
+            break
+    else:
+        raise ResourceNotFoundError(f"Ip Configuration {ip_config_name} doesn't exist")
+
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, pe)
 
 
 def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,

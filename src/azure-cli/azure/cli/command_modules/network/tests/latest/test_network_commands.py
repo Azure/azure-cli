@@ -139,6 +139,68 @@ class NetworkPrivateEndpoints(ScenarioTest):
         ])
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_network_private_endpoint_with_asg_and_ipconfig')
+    def test_network_private_endpoint_with_asg_and_ipconfig(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb1',
+            'sku': 'Standard',
+            'vnet': 'vnet1',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'location': 'eastus2euap',
+            'ip': 'pubip1',
+            'lks1': 'lks1',
+            'lks2': 'lks2',
+            'pe': 'pe1',
+            'rg': resource_group,
+            'asg1': 'asg1',
+            'asg2': 'asg2',
+            'ipconfig': 'pestaticconfig',
+        })
+
+        # Create PLS
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1} -l {location}')
+        self.cmd('network lb create -g {rg} -l {location} -n {lb} --public-ip-address {ip} --sku {sku}')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+        pls1 = self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+            self.check('type', 'Microsoft.Network/privateLinkServices'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['lks1'])
+        ]).get_output_in_json()
+        self.kwargs['pls_id'] = pls1['id']
+        self.cmd('network private-endpoint list-types -l {location}')
+
+        # Create ASG
+        self.cmd('network asg create -g {rg} -n {asg1} --tags foo=doo -l {location}')
+        self.cmd('network asg create -g {rg} -n {asg2} --tags foo=doo -l {location}')
+
+        # Create PE with ASG
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location} '
+                 '--application-security-groups {asg1} {asg2} --edge-zone=eastus2euapmockedge', checks=[
+            self.check('name', 'pe1'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+        self.cmd('network private-endpoint update -g {rg} -n {pe} '
+                 '--application-security-groups {asg1}', checks=[
+            self.check('name', 'pe1'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+        self.cmd('network private-endpoint show -g {rg} -n {pe}')
+
+        # Add ipconfig
+        self.cmd('network private-endpoint ip-config add -g {rg} -n {pe} --ip-config-name {ipconfig} --group-id file --member-id file --private-ip-address "10.0.2.6"')
+        self.cmd('network private-endpoint ip-config list -g {rg} -n {pe}')
+        self.cmd('network private-endpoint ip-config show -g {rg} -n {pe} --ip-config-name {ipconfig}')
+        self.cmd('network private-endpoint ip-config update -g {rg} -n {pe} --ip-config-name {ipconfig} --private-ip-address "10.0.2.5"')
+        self.cmd('network private-endpoint ip-config remove -g {rg} -n {pe} --ip-config-name {ipconfig}')
+
+        # Delete PE
+        self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):

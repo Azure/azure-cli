@@ -4480,6 +4480,55 @@ examples:
     crafted: true
 """
 
+helps['network private-endpoint ip-config'] = """
+type: group
+short-summary: Manage private endpoint ip configurations.
+"""
+
+helps['network private-endpoint ip-config add'] = """
+type: command
+short-summary: Add a private endpoint ip configuration into a private endpoint.
+examples:
+  - name: Add a private endpoint ip configuration.
+    text: az network private-endpoint ip-config add --endpoint-name MyPE -g MyRG -n MyZoneGroup --ip-config-name Config \
+--group-id file --member-name file --private-ip-address "192.168.0.6"
+"""
+
+helps['network private-endpoint ip-config remove'] = """
+type: command
+short-summary: Remove a private endpoint ip configuration into a private endpoint.
+examples:
+  - name: Remove a private endpoint ip configuration.
+    text: az network private-endpoint ip-config remove --endpoint-name MyPE -g MyRG -n MyZoneGroup --ip-config-name Config
+"""
+
+helps['network private-endpoint ip-config update'] = """
+type: command
+short-summary: Update a private endpoint ip configuration.
+examples:
+  - name: Update a private endpoint ip configuration.
+    text: |
+        az network private-endpoint ip-config update --endpoint-name MyEndpoint --ip-config-name Config --resource-group MyResourceGroup --private-ip-address "192.168.0.6"
+"""
+
+helps['network private-endpoint ip-config list'] = """
+type: command
+short-summary: List all private endpoint ip configurations.
+examples:
+  - name: List all private endpoint dns ip configurations.
+    text: |
+        az network private-endpoint ip-config list --endpoint-name MyEndpoint --resource-group MyResourceGroup 
+"""
+
+helps['network private-endpoint ip-config show'] = """
+type: command
+short-summary: Show a private endpoint ip configuration.
+examples:
+  - name: Show a private endpoint ip configuration.
+    text: |
+        az network private-endpoint ip-config show --endpoint-name MyEndpoint --ip-config-name Config --resource-group MyResourceGroup
+"""
+
 helps['network private-endpoint dns-zone-group'] = """
 type: group
 short-summary: Manage private endpoint dns zone group.

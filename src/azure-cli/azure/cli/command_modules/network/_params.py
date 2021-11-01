@@ -887,6 +887,13 @@ def load_arguments(self, _):
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
         c.argument('edge_zone', edge_zone)
+        c.argument('application_security_groups', min_api='2021-03-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
+
+    with self.argument_context('network private-endpoint ip-config') as c:
+        c.argument('ip_config_name', help='The name of the Ip Config that is unique within a resource group.')
+        c.argument('group_id', help='The ID of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('member_name', help='The member name of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('private_ip_address', help='A private ip address obtained from the private endpoint\'s subnet.')
 
     with self.argument_context('network private-endpoint dns-zone-group') as c:
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
