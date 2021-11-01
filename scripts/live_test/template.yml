@@ -80,6 +80,8 @@ jobs:
   displayName: Send email
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
+  pool:
+    vmImage: 'Ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
       inputs:
