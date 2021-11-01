@@ -2567,6 +2567,40 @@ examples:
     crafted: true
 """
 
+helps['storage share list-handle'] = """
+type: command
+short-summary: List file handles of a file share.
+examples:
+  - name: List all file handles of a file share recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --recursive
+  - name: List all file handles of a file directory recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive 
+  - name: List all file handles of a file.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt'
+"""
+
+helps['storage share close-handle'] = """
+type: command
+short-summary: Close file handles of a file share.
+examples:
+  - name: Close all file handles of a file share recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive 
+        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive 
+  - name: Close all file handles of a file directory recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive 
+  - name: Close all file handles of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all 
+  - name: Close file handle with a specific handle-id of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --handle-id "id"
+"""
+
 helps['storage table'] = """
 type: group
 short-summary: Manage NoSQL key-value storage.
