@@ -11,7 +11,7 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_function_app_settings, \
     set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
-    reset_staticsite_api_key, delete_staticsite_environment
+    reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -544,6 +544,26 @@ class TestStaticAppCommands(unittest.TestCase):
         reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
         self.assertEqual(reset_envelope["repository_token"], self.token1)
 
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_functionapp")
+    def test_functions_link(self, *args, **kwargs):
+        functionapp_name = "functionapp"
+        functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
+            self.rg1, functionapp_name
+        )
+        link_user_function(self.mock_cmd, self.name1, self.rg1, functionapp_resource_id)
+
+        self.staticapp_client.begin_register_user_provided_function_app_with_static_site.assert_called_once()
+
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.get_user_function", return_value=[mock.MagicMock()])
+    def test_functions_unlink(self, *args, **kwargs):
+        unlink_user_function(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.detach_user_provided_function_app_from_static_site.assert_called_once()
+
+    def test_functions_show(self, *args, **kwargs):
+        get_user_function(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.get_user_provided_function_apps_for_static_site.assert_called_once()
 
 def _set_up_client_mock(self):
     self.mock_cmd = mock.MagicMock()
