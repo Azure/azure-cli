@@ -78,32 +78,10 @@ def load_arguments(self, _):
         upload = "upload"  #: Upload operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
-     NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
-         'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
-         'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
-
-    # Todo: Remove this after azure-mgmt-keyvault bumped to 2021-06-01-preview
-    class CLIKeyPermissions(str, Enum):
-        ENCRYPT = "encrypt"
-        DECRYPT = "decrypt"
-        WRAP_KEY = "wrapKey"
-        UNWRAP_KEY = "unwrapKey"
-        SIGN = "sign"
-        VERIFY = "verify"
-        GET = "get"
-        LIST = "list"
-        CREATE = "create"
-        UPDATE = "update"
-        IMPORT_ENUM = "import"
-        DELETE = "delete"
-        BACKUP = "backup"
-        RESTORE = "restore"
-        RECOVER = "recover"
-        PURGE = "purge"
-        RELEASE = "release"
-        ROTATE = "rotate"
-
-    KeyPermissions = CLIKeyPermissions
+     NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
+        'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
+        'NetworkRuleBypassOptions', 'NetworkRuleAction', 'PublicNetworkAccess',
+        resource_type=ResourceType.MGMT_KEYVAULT)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -163,6 +141,11 @@ def load_arguments(self, _):
                         'this key vault. If it\'s not set to any value (true or false) when creating new key vault, it '
                         'will be set to true by default. Once set to true, it cannot be reverted to false.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
+        c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
+                   help="Property to specify whether the vault will accept traffic from public internet. If set to "
+                        "'disabled' all traffic except private endpoint traffic and that originates from trusted "
+                        "services will be blocked. This will override the set firewall rules, meaning that even if the "
+                        "firewall rules are present we will not honor the rules.")
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
@@ -501,21 +484,8 @@ def load_arguments(self, _):
         c.extra('tags', tags_type)
 
     with self.argument_context('keyvault key rotation-policy update') as c:
-        c.argument('notify_after_creation',
-                   help='Time after creation to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('notify_before_expiry',
-                   help='Time before expiry to attempt notifying, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('rotate_after_creation',
-                   help='Time after creation to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('rotate_before_expiry',
-                   help='Time before expiry to attempt rotating, as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS).'
-                        ' For example, 90 days is "P90D" and 48 hours is "PT48H"')
-        c.argument('expires_in',
-                   help='The expiry time of the policy that will be applied on new key versions, '
-                        'defined as an ISO 8601 duration(\'P\'nnYnnMnnD\'T\'nnHnnMnnS). For example, 90 days is "P90D" and 48 hours is "PT48H"')
+        c.argument('value', type=file_type, completer=FilesCompleter(),
+                   help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
     # region KeyVault Secret

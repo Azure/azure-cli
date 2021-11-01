@@ -301,7 +301,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
-        g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
@@ -381,9 +381,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
-    with self.command_group('functionapp devops-pipeline') as g:
-        g.custom_command('create', 'create_devops_pipeline')
-
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
         g.custom_command('delete', 'delete_slot')
@@ -450,6 +447,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'get_staticsite_domain')
 
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')

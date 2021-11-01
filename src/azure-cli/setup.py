@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.29.1"
+VERSION = "2.30.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,7 +56,6 @@ DEPENDENCIES = [
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
-    'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
@@ -77,9 +76,9 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=23.1.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
-    'azure-mgmt-containerregistry==8.1.0',
+    'azure-mgmt-containerregistry==8.2.0',
     'azure-mgmt-containerservice~=16.1.0',
-    'azure-mgmt-cosmosdb~=6.4.0',
+    'azure-mgmt-cosmosdb~=7.0.0b2',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -90,12 +89,12 @@ DEPENDENCIES = [
     'azure-mgmt-eventgrid==9.0.0',
     'azure-mgmt-eventhub~=9.1.0',
     'azure-mgmt-extendedlocation~=1.0.0b2',
-    'azure-mgmt-hdinsight~=8.0.0',
+    'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=9.0.0b1',
     'azure-mgmt-iothub==2.1.0',
     'azure-mgmt-iothubprovisioningservices~=0.3.0',
-    'azure-mgmt-keyvault==9.1.0',
+    'azure-mgmt-keyvault==9.2.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=11.0.0',
     'azure-mgmt-managedservices~=1.0',
@@ -110,7 +109,7 @@ DEPENDENCIES = [
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
-    'azure-mgmt-recoveryservicesbackup~=0.15.0',
+    'azure-mgmt-recoveryservicesbackup~=3.0.0',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
     'azure-mgmt-redis~=13.0.0',
@@ -127,7 +126,7 @@ DEPENDENCIES = [
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
     'azure-mgmt-storage~=19.0.0',
-    'azure-mgmt-synapse~=2.0.0',
+    'azure-mgmt-synapse~=2.1.0b2',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=4.0.0',
     'azure-multiapi-storage~=0.7.0',
@@ -139,7 +138,7 @@ DEPENDENCIES = [
     'chardet~=3.0.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
-    'jsondiff~=1.2.0',
+    'jsondiff~=1.3.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',

@@ -51,6 +51,8 @@ class CredentialReplacer(RecordingProcessor):
         # hide token in header
         if 'x-ms-cupertino-test-token' in request.headers:
             request.headers['x-ms-cupertino-test-token'] = 'hidden'
+        if 'x-ms-serviceconnector-user-token' in request.headers:
+            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
         
         return request
 
@@ -90,21 +92,21 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.AppConfig).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create appconfig --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
-        
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list --source-id {}'.format(source_id),
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -126,7 +128,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def test_springcloud_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-win-group',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'spring': 'servicelinker-springcloud',
             'app': 'cosmoscassandra',
@@ -136,13 +138,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosCassandra).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create cosmos-cassandra --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -150,7 +152,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -172,7 +174,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def test_springcloud_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-win-group',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'spring': 'servicelinker-springcloud',
             'app': 'cosmosgremlin',
@@ -183,13 +185,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosGremlin).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create cosmos-gremlin --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -197,7 +199,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -219,7 +221,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def test_springcloud_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-win-group',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'spring': 'servicelinker-springcloud',
             'app': 'cosmosmongo',
@@ -229,13 +231,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosMongo).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create cosmos-mongo --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type dotnet'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -243,7 +245,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'dotnet')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -265,7 +267,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def test_springcloud_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-win-group',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'spring': 'servicelinker-springcloud',
             'app': 'cosmossql',
@@ -275,13 +277,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosSql).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create cosmos-sql --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -289,7 +291,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -311,7 +313,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
     def test_springcloud_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
-            'source_resource_group': 'servicelinker-test-win-group',
+            'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-win-group',
             'spring': 'servicelinker-springcloud',
             'app': 'cosmostable',
@@ -321,13 +323,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.CosmosTable).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create cosmos-table --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -335,7 +337,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -366,13 +368,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.EventHub).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create eventhub --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -380,7 +382,52 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('spring-cloud connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_springcloud_servicebus_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'servicebus',
+            'deployment': 'default',
+            'namespace': 'servicelinkertestservicebus' 
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.ServiceBus).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create servicebus --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -417,13 +464,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.PostgresFlexible).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create postgres-flexible --connection {} --source-id {} --target-id {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
+                 '--secret name={} secret={} --client-type java'.format(name, source_id, target_id, user, password))
         
         # list connection
         connections = self.cmd(
@@ -431,7 +478,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -462,13 +509,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create keyvault --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -476,7 +523,99 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('spring-cloud connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+    
+    # @record_only()
+    def test_springcloud_redis_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'redis',
+            'deployment': 'default',
+            'server': 'servicelinker-redis',
+            'database': '0'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Redis).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create redis --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type java'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('spring-cloud connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_springcloud_redisenterprise_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'redisenterprise',
+            'deployment': 'default',
+            'server': 'servicelinker-redis-enterprise',
+            'database': 'default'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.RedisEnterprise).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create redis-enterprise --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type java'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -513,13 +652,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Mysql).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create mysql --connection {} --source-id {} --target-id {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
+                 '--secret name={} secret={} --client-type java'.format(name, source_id, target_id, user, password))
         
         # list connection
         connections = self.cmd(
@@ -527,7 +666,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -564,13 +703,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.MysqlFlexible).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create mysql-flexible --connection {} --source-id {} --target-id {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
+                 '--secret name={} secret={} --client-type java'.format(name, source_id, target_id, user, password))
         
         # list connection
         connections = self.cmd(
@@ -578,7 +717,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -615,13 +754,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Postgres).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create postgres --connection {} --source-id {} --target-id {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
+                 '--secret name={} secret={} --client-type java'.format(name, source_id, target_id, user, password))
         
         # list connection
         connections = self.cmd(
@@ -629,7 +768,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -648,6 +787,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only
+    @unittest.skip('sql is removed from supported target resources')
     def test_springcloud_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -666,13 +806,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             .get_output_in_json().get('value')
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.Sql).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create sql --connection {} --source-id {} --target-id {} '
-                 '--secret name={} secret={} --client-type python'.format(name, source_id, target_id, user, password))
+                 '--secret name={} secret={} --client-type java'.format(name, source_id, target_id, user, password))
         
         # list connection
         connections = self.cmd(
@@ -680,7 +820,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -711,13 +851,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+                 '--system-identity --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -725,7 +865,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -756,13 +896,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageQueue).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create storage-queue --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python'.format(name, source_id, target_id))
+                 '--secret --client-type java'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
@@ -770,7 +910,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -801,13 +941,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageFile).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create storage-file --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python'.format(name, source_id, target_id))
+                 '--secret --client-type java'.format(name, source_id, target_id))
 
         # list connection
         connections = self.cmd(
@@ -815,7 +955,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')
@@ -846,13 +986,13 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageTable).format(**self.kwargs)
 
         # create connection
         self.cmd('spring-cloud connection create storage-table --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python'.format(name, source_id, target_id))
+                 '--secret --client-type java'.format(name, source_id, target_id))
 
         # list connection
         connections = self.cmd(
@@ -860,7 +1000,51 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'python')
+                self.check('[0].clientType', 'java')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('spring-cloud connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('spring-cloud connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('spring-cloud connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
+
+
+        # @record_only()
+    def test_springcloud_confluentkafka_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'kafka',
+            'deployment': 'default',
+        })
+
+        # prepare params
+        name = 'testconn2'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create confluent-cloud --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type java'.format(name, source_id))
+
+        # list connection
+        connections = self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+                self.check('[0].clientType', 'java')
             ]
         ).get_output_in_json()
         connection_id = connections[0].get('id')

@@ -7,6 +7,7 @@ from knack.log import get_logger
 from knack.util import todict
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
     RequiredArgumentMissingError,
     ValidationError,
     AzureResponseError
@@ -14,13 +15,15 @@ from azure.cli.core.azclierror import (
 from ._resource_config import (
     SUPPORTED_AUTH_TYPE,
     SUPPORTED_CLIENT_TYPE,
-    TARGET_RESOURCES
+    TARGET_RESOURCES,
+    TARGET_RESOURCES_USERTOKEN
 )
 from ._validators import (
     get_source_resource_name,
     get_target_resource_name
 )
 from ._addon_factory import AddonFactory
+from ._utils import set_user_token_header
 # pylint: disable=unused-argument
 
 
@@ -32,9 +35,7 @@ def connection_list(client,
                     source_resource_group=None,
                     source_id=None,
                     site=None,
-                    # HACK, only for bugbash
-                    # deployment=None,
-                    spring=None, app=None):
+                    spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
     return client.list(resource_uri=source_id)
@@ -53,7 +54,10 @@ def connection_list_support_types(cmd, client,
                 targets.append(resource)
                 break
 
-    for target in targets:
+    # use SUPPORTED_AUTH_TYPE to decide target resource, as some
+    # target resources are not avialable for certain source resource
+    supported_target_resources = SUPPORTED_AUTH_TYPE.get(source).keys()
+    for target in supported_target_resources:
         auth_types = SUPPORTED_AUTH_TYPE.get(source).get(target)
         client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target)
         auth_types = [item.value for item in auth_types]
@@ -74,9 +78,7 @@ def connection_show(client,
                     source_id=None,
                     indentifier=None,
                     site=None,
-                    # HACK, only for bugbash
-                    # deployment=None,
-                    spring=None, app=None):
+                    spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.get(resource_uri=source_id,
@@ -89,9 +91,7 @@ def connection_delete(client,
                       source_id=None,
                       indentifier=None,
                       site=None,
-                      # HACK, only for bugbash
-                      # deployment=None,
-                      spring=None, app=None,
+                      spring=None, app=None, deployment=None,
                       no_wait=False):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
@@ -108,26 +108,35 @@ def connection_list_configuration(client,
                                   source_id=None,
                                   indentifier=None,
                                   site=None,
-                                  # HACK, only for bugbash
-                                  # deployment=None
-                                  spring=None, app=None):
+                                  spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
     return client.list_configurations(resource_uri=source_id,
                                       linker_name=connection_name)
 
 
-def connection_validate(client,
+def connection_validate(cmd, client,
                         connection_name=None,
                         source_resource_group=None,
                         source_id=None,
                         indentifier=None,
                         site=None,
-                        # HACK, only for bugbash
-                        # deployment=None
-                        spring=None, app=None):
+                        spring=None, app=None, deployment=None):
+    import re
+    from ._validators import get_resource_regex
+
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
+
+    # HACK: get linker first to infer target resource type so that user token can be
+    # set to work around OBO
+    linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+    target_id = linker.get('targetId')
+    for resource_type, resource_id in TARGET_RESOURCES.items():
+        matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
+        if matched and resource_type in TARGET_RESOURCES_USERTOKEN:
+            client = set_user_token_header(client, cmd.cli_ctx)
+
     return client.begin_validate(resource_uri=source_id,
                                  linker_name=connection_name)
 
@@ -141,14 +150,14 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       service_principal_auth_info_secret=None,
                       new_addon=False, no_wait=False,
                       site=None,                                             # Resource.WebApp
-                      # HACK, only for bugbash
-                      # deployment=None
-                      spring=None, app=None,                                 # Resource.SpringCloud
+                      spring=None, app=None, deployment=None,                # Resource.SpringCloud
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
-                      account=None, key_space=None, graph=None, table=None,  # Resource.Cosmos*, Resource.Storage*
-                      config_store=None,                                     # Resource.AppConfig
-                      namespace=None):                                       # Resource.EventHub
+                      account=None,                                          # Resource.Storage*
+                      key_space=None, graph=None, table=None,                # Resource.Cosmos*,
+                      # config_store=None,                                   # Resource.AppConfig
+                      # namespace=None,                                      # Resource.EventHub
+                      signalr=None):                                         # Resource.SignalR
 
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
@@ -176,8 +185,12 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
         'client_type': client_type
     }
 
+    # HACK: set user token to work around OBO
+    target_type = get_target_resource_name(cmd)
+    if target_type in TARGET_RESOURCES_USERTOKEN:
+        client = set_user_token_header(client, cmd.cli_ctx)
+
     if new_addon:
-        target_type = get_target_resource_name(cmd)
         addon = AddonFactory.get(target_type)(cmd, source_id)
         target_id, auth_info = addon.provision()
         parameters['target_id'] = target_id
@@ -202,7 +215,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                        parameters=parameters)
 
 
-def connection_update(client,
+def connection_update(cmd, client,
                       connection_name=None, client_type=None,
                       source_resource_group=None, source_id=None, indentifier=None,
                       secret_auth_info=None, secret_auth_info_auto=None,
@@ -210,8 +223,7 @@ def connection_update(client,
                       service_principal_auth_info_secret=None,
                       no_wait=False,
                       site=None,                                              # Resource.WebApp
-                      # HACK, only for bugbash
-                      # deployment=None
+                      deployment=None,
                       spring=None, app=None):                                 # Resource.SpringCloud
 
     linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
@@ -251,8 +263,131 @@ def connection_update(client,
         'client_type': client_type or linker.get('clienType'),
     }
 
+    # HACK: set user token to work around OBO
+    target_type = get_target_resource_name(cmd)
+    if target_type in TARGET_RESOURCES_USERTOKEN:
+        client = set_user_token_header(client, cmd.cli_ctx)
+
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        resource_uri=source_id,
                        linker_name=connection_name,
                        parameters=parameters)
+
+
+def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals
+                            bootstrap_server,
+                            kafka_key,
+                            kafka_secret,
+                            schema_registry,
+                            schema_key,
+                            schema_secret,
+                            connection_name=None,
+                            client_type=None,
+                            source_resource_group=None,
+                            source_id=None,
+                            site=None,                         # Resource.WebApp
+                            deployment=None,
+                            spring=None, app=None):            # Resource.SpringCloud
+
+    from ._transformers import transform_linker_properties
+    # validation
+    if 'azure.confluent.cloud' not in bootstrap_server.lower():
+        raise InvalidArgumentValueError('Kafka bootstrap server url is invalid: {}'.format(bootstrap_server))
+    if 'azure.confluent.cloud' not in schema_registry.lower():
+        raise InvalidArgumentValueError('Schema registry url is invalid: {}'.format(schema_registry))
+
+    # create bootstrap-server
+    parameters = {
+        'target_id': bootstrap_server,
+        'auth_info': {
+            'name': kafka_key,
+            'secret': kafka_secret,
+            'auth_type': 'secret'
+        },
+        'client_type': client_type,
+    }
+    logger.warning('Start creating a connection for bootstrap server ...')
+    server_linker = client.begin_create_or_update(resource_uri=source_id,
+                                                  linker_name=connection_name,
+                                                  parameters=parameters)
+    # block to poll the connection
+    server_linker = server_linker.result()
+    logger.warning('Created')
+
+    # create schema registry
+    parameters = {
+        'target_id': schema_registry,
+        'auth_info': {
+            'name': schema_key,
+            'secret': schema_secret,
+            'auth_type': 'secret'
+        },
+        'client_type': client_type,
+    }
+    logger.warning('Start creating a connection for schema registry ...')
+    registry_linker = client.begin_create_or_update(resource_uri=source_id,
+                                                    linker_name='{}_schema'.format(connection_name),
+                                                    parameters=parameters)
+    # block to poll the connection
+    registry_linker = registry_linker.result()
+    logger.warning('Created')
+
+    return [
+        transform_linker_properties(server_linker),
+        transform_linker_properties(registry_linker)
+    ]
+
+
+def connection_update_kafka(cmd, client,  # pylint: disable=too-many-locals
+                            connection_name,
+                            bootstrap_server=None,
+                            kafka_key=None,
+                            kafka_secret=None,
+                            schema_registry=None,
+                            schema_key=None,
+                            schema_secret=None,
+                            client_type=None,
+                            source_resource_group=None,
+                            source_id=None,
+                            site=None,                         # Resource.WebApp
+                            deployment=None,
+                            spring=None, app=None):            # Resource.SpringCloud
+
+    # use the suffix to decide the connection type
+    if connection_name.endswith('_schema'):  # the schema registry connection
+        if schema_secret is None:
+            raise ValidationError("'--schema-secret' is required to update a schema registry connection")
+        if bootstrap_server or kafka_key or kafka_secret:
+            raise ValidationError("The available parameters to update a schema registry connection are:"
+                                  " ['--schema-registry', '--schema-key', '--schema-secret', '--client-type']")
+        server_linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+        parameters = {
+            'target_id': schema_registry or server_linker.get('targetId'),
+            'auth_info': {
+                'name': schema_key or server_linker.get('authInfo').get('name'),
+                'secret': schema_secret,
+                'auth_type': 'secret'
+            },
+            'client_type': client_type or server_linker.get('clientType'),
+        }
+    else:  # the bootstrap server connection
+        if kafka_secret is None:
+            raise ValidationError("'--kafka-secret' is required to update a bootstrap server connection")
+        if schema_registry or schema_key or schema_secret:
+            raise ValidationError("The available parameters to update a bootstrap server connection are:"
+                                  " ['--bootstrap-server', '--kafka-key', '--skafka-secret', '--client-type']")
+        schema_linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+        parameters = {
+            'target_id': bootstrap_server or schema_linker.get('targetId'),
+            'auth_info': {
+                'name': kafka_key or schema_linker.get('authInfo').get('name'),
+                'secret': kafka_secret,
+                'auth_type': 'secret'
+            },
+            'client_type': client_type or schema_linker.get('clientType'),
+        }
+
+    return client.begin_create_or_update(resource_uri=source_id,
+                                         linker_name=connection_name,
+                                         parameters=parameters)

@@ -72,3 +72,18 @@ def run_cli_cmd(cmd, retry=0):
                                    '{}, error message is: {}'.format(cmd, output.stderr))
 
     return json.loads(output.stdout) if output.stdout else None
+
+
+def set_user_token_header(client, cli_ctx):
+    '''Set user token header to work around OBO'''
+    from azure.cli.core._profile import Profile
+
+    # pylint: disable=protected-access
+    # HACK: set custom header to work around OBO
+    profile = Profile(cli_ctx=cli_ctx)
+    creds, _, _ = profile.get_raw_token()
+    client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
+    # HACK: hide token header
+    client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
+
+    return client
