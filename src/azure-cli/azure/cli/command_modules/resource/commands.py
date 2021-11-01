@@ -17,7 +17,7 @@ from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs, cf_resource_deploymentstacks)
-from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out
+from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out, validate_deployment_stack_files
 
 from ._exception_handler import managementgroups_exception_handler
 
@@ -341,24 +341,24 @@ def load_command_table(self, _):
     with self.command_group('stacks sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_at_subscription')
         g.custom_command('list', 'list_deployment_stack_at_subscription')
-        g.custom_command('delete', 'delete_deployment_stack_at_subscription')
-        g.custom_command('create', 'create_deployment_stack_at_subscription')
+        g.custom_command('delete', 'delete_deployment_stack_at_subscription', confirmation = True)
+        g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files)
 
     with self.command_group('stacks group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_at_resource_group')
         g.custom_command('list', 'list_deployment_stack_at_resource_group')
-        g.custom_command('delete', 'delete_deployment_stack_at_resource_group')
-        g.custom_command('create', 'create_deployment_stack_at_resource_group')
+        g.custom_command('delete', 'delete_deployment_stack_at_resource_group', confirmation = True)
+        g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files)
     
     with self.command_group('stacks snapshot sub', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_snapshot_at_subscription')
         g.custom_command('list', 'list_deployment_stack_snapshot_at_subscription')
-        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_subscription')
+        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_subscription', confirmation = True)
     
     with self.command_group('stacks snapshot group', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_snapshot_at_resource_group')
         g.custom_command('list', 'list_deployment_stack_snapshot_at_resource_group')
-        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_resource_group')
+        g.custom_command('delete', 'delete_deployment_stack_snapshot_at_resource_group', confirmation = True)
     
     # az deployment group
     with self.command_group('deployment group', resource_deployment_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:

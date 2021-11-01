@@ -40,6 +40,12 @@ def _validate_template_spec_out(namespace):
     if namespace.output_folder and not os.path.isdir(namespace.output_folder):
         raise CLIError('Please enter a valid output folder')
 
+def validate_deployment_stack_files(namespace):
+    if namespace.template_file and not os.path.isfile(namespace.template_file):
+        raise CLIError('Please enter a valid template file path')
+    if namespace.param_file and not os.path.isfile(namespace.param_file):
+        raise CLIError('Please enter a valid parameter file path')
+
 
 def _validate_deployment_name_with_template_specs(namespace):
     # If missing,try come out with a name associated with the template name

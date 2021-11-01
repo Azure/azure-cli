@@ -2087,7 +2087,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
 
     try:
         if rcf.deployment_stacks.get_at_subscription(name):
-            print("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it?")
+            print("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it? (y/n)")
             yes_or_no = input()
             if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
                 pass
@@ -2106,10 +2106,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     p_uri, parameters = None, None
 
     if template_file:
-        if path.exists(template_file):
-            t_file = template_file
-        else:
-            raise CLIError("Please enter a valid file path")
+        t_file = template_file
     elif template_spec:
         t_spec = template_spec
     elif template_uri:
@@ -2119,8 +2116,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         raise CLIError("Please enter one of the following: template file, template spec, or template url")
     
     if param_file:
-        if path.exists(param_file):
-            parameters = json.load(open(param_file))
+        parameters = json.load(open(param_file))
     elif param_uri:
         #confirm with someone about this
         p_uri = "'" + param_uri + "'"
@@ -2147,7 +2143,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
 
-def show_deployment_stack_at_subscription(cmd, name, stack):
+def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
@@ -2166,12 +2162,6 @@ def list_deployment_stack_at_subscription(cmd):
 def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        print("Are you sure you want to remove DeploymentStack " + name + "?")
-        yes_or_no = input()
-        if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-            pass
-        else:
-            return
         if name:
             return rcf.deployment_stacks.begin_delete_at_subscription(name)
         return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
@@ -2186,7 +2176,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            print("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it?")
+            print("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it? (y/n")
             yes_or_no = input()
             if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
                 pass
@@ -2198,10 +2188,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     parameters, p_uri = None, None
 
     if template_file:
-        if path.exists(template_file):
-            t_file = template_file
-        else:
-            raise CLIError("Please enter a valid file path")
+        t_file = template_file
     elif template_spec:
         t_spec = template_spec
     elif template_uri:
@@ -2211,8 +2198,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
         raise CLIError("Please enter one of the following: template file, template spec, or template url")
     
     if param_file:
-        if path.exists(param_file):
-            parameters = json.load(open(param_file))
+        parameters = json.load(open(param_file))
     elif param_uri:
         p_uri = param_uri
     
@@ -2269,12 +2255,6 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 
 def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    print("Are you sure you want to remove DeploymentStack " + name + "?")
-    yes_or_no = input()
-    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-        pass
-    else:
-        return
     if name and resource_group:
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
     if stack:
@@ -2324,12 +2304,6 @@ def list_deployment_stack_snapshot_at_resource_group(cmd, name=None, resource_gr
 
 def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    print("Are you sure you want to remove DeploymentStackSnapshot " + name + "?")
-    yes_or_no = input()
-    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-        pass
-    else:
-        return
     if snapshot:
         snapshot_arr = snapshot.split('/')
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, snapshot_arr[-3], snapshot_arr[-1])
@@ -2340,12 +2314,6 @@ def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=
 
 def delete_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-    print("Are you sure you want to remove DeploymentStackSnapshot " + name + "?")
-    yes_or_no = input()
-    if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-        pass
-    else:
-        return
     if snapshot:
         snapshot_arr = snapshot.split('/')
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])

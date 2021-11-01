@@ -2037,13 +2037,13 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
 
         #create deployment stack with template spec and parameter file
         self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
 
     def test_show_deployment_stack_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2069,7 +2069,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub show --stack {deployment-stack-id}', checks=self.check('name', '{name}'))
 
         # cleanup 
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
         
     #test again
     @AllowLargeResponse(4096)
@@ -2097,7 +2097,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.assertTrue(list_deployment_stacks[0]['name'], '{name}')
 
          # cleanup 
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
     
     @AllowLargeResponse(4096)
     def test_delete_deployment_stack_subscription(self):
@@ -2119,7 +2119,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub show --name {name}', checks=self.check('name', '{name}'))
 
         # delete stack with stack name
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
 
         #confirm stack is deleted
         self.cmd('stacks sub list', checks=self.check("length([?name=='{name}'])", 0))
@@ -2131,7 +2131,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({'id': stack_id})
 
         # delete stack with id 
-        self.cmd('stacks sub delete --stack  {id}')
+        self.cmd('stacks sub delete --stack  {id} --yes')
 
         #confirm stack is deleted
         self.cmd('stacks sub list', checks=self.check("length([?name=='{name}'])", 0))
@@ -2164,13 +2164,13 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
 
         #create deployment stack with template spec and parameter file
         self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_show_deployment_stack_resource_group(self, resource_group):
@@ -2197,7 +2197,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks group show --stack {deployment-stack-id}', checks=self.check('name', '{name}'))
 
         # cleanup 
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_list_deployment_stack_resource_group(self, resource_group):
@@ -2222,7 +2222,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.assertTrue(list_deployment_stacks_rg[0]['name'], '{name}')
 
          # cleanup 
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_delete_deployment_stack_resource_group(self, resource_group):
@@ -2244,7 +2244,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
         # delete stack
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
         
         #confirm stack is deleted
         self.cmd('stacks group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
@@ -2258,7 +2258,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
         # delete stack with stack id 
-        self.cmd('stacks group delete --stack {id} --resource-group {resource-group}')
+        self.cmd('stacks group delete --stack {id} --resource-group {resource-group} --yes')
 
         #confirm stack is deleted
         self.cmd('stacks group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
@@ -2292,7 +2292,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # will this need snapshot delete
         # cleanup
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
     
     def test_list_deployment_stack_snapshot_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2324,7 +2324,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.assertTrue(list_with_stack_id[0]['name'], '{name}')
 
          # cleanup 
-        self.cmd('stacks sub delete --name {name}')
+        self.cmd('stacks sub delete --name {name} --yes')
     
     def test_delete_deployment_stack_snapshot_subscription(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -2351,7 +2351,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot sub show --name {snapshot-name} --stack-name {name}', checks=self.check('name', '{snapshot-name}'))
 
         # delete stack with snapshot name and stack name
-        self.cmd('stacks snapshot sub delete --name {snapshot-name} --stack-name {name}')
+        self.cmd('stacks snapshot sub delete --name {snapshot-name} --stack-name {name} --yes')
         
         #confirm stack is deleted
         self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
@@ -2373,7 +2373,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot sub show --name {snapshot-name} --stack-name {name}', checks=self.check('name', '{snapshot-name}'))
 
         # delete stack with snapshot id
-        self.cmd('stacks snapshot sub delete --snapshot {snapshot-id}')
+        self.cmd('stacks snapshot sub delete --snapshot {snapshot-id} --yes')
         
         #confirm stack is deleted
         self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
@@ -2406,7 +2406,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # will this need snapshot delete
         # cleanup
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
     def test_list_deployment_stack_snapshot_resource_group(self, resource_group):
@@ -2439,7 +2439,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.assertTrue(list_with_stack_id[0]['name'], '{name}')
 
          # cleanup 
-        self.cmd('stacks group delete --name {name} --resource-group {resource-group}')
+        self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)    
     def test_delete_deployment_stack_snapshot_resource_group(self, resource_group):
@@ -2465,7 +2465,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot group show --name {snapshot-name} --stack-name {name} --resource-group {resource-group}', checks=self.check('name', '{snapshot-name}'))
 
         # delete stack with snapshot name and stack name
-        self.cmd('stacks snapshot group delete --name {snapshot-name} --stack-name {name} --resource-group {resource-group}')
+        self.cmd('stacks snapshot group delete --name {snapshot-name} --stack-name {name} --resource-group {resource-group} --yes')
         
         #confirm stack is deleted
         self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
@@ -2479,7 +2479,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot group show --snapshot {snapshot-id}', checks=self.check('id', '{snapshot-id}'))
 
         # delete stack with snapshot id
-        self.cmd('stacks snapshot group delete --snapshot {snapshot-id}')
+        self.cmd('stacks snapshot group delete --snapshot {snapshot-id} --yes')
         
         #confirm stack is deleted
         self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
