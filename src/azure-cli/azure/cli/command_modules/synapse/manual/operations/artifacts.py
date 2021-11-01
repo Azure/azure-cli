@@ -217,7 +217,7 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 
 # Notebook
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
-                              folder_name=None, executor_size="Small", executor_count=2, no_wait=False):
+                              folder_path=None, executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
@@ -247,7 +247,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
-        definition_file['NotebookFolder'] = NotebookFolder(name=folder_name)
+        definition_file['NotebookFolder'] = NotebookFolder(name=folder_path)
     properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
@@ -457,10 +457,10 @@ def delete_spark_job_definition(cmd, workspace_name, spark_job_definition_name, 
 
 
 def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definition_name, definition_file,
-                                          folder_name=None, no_wait=False):
+                                          folder_path=None, no_wait=False):
     client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
     folder = {}
-    folder['name'] = folder_name
+    folder['name'] = folder_path
     definition_file['SparkJobDefinitionFolder'] = folder
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
