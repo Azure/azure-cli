@@ -1583,7 +1583,7 @@ examples:
   - name: Import a notebook.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb
+          --name testnotebook --file @path/notebook.ipynb --folder-name 'folder/subfolder'
 """
 
 helps['synapse notebook show'] = """
