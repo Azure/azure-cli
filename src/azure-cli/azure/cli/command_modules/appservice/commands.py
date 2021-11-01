@@ -449,6 +449,11 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'get_staticsite_domain')
 
+    with self.command_group('staticwebapp identity', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('assign', 'assign_identity')
+        g.custom_command('remove', 'remove_identity')
+        g.custom_command('show', 'show_identity')
+
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
         g.custom_command('set', 'set_staticsite_function_app_settings')

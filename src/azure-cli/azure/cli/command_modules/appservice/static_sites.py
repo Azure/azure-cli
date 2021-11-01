@@ -5,10 +5,12 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.commands import LongRunningOperation
 from knack.util import CLIError
 from knack.log import get_logger
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
+from .custom import _build_identities_info
 
 logger = get_logger(__name__)
 
@@ -127,6 +129,104 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
     logger.warning("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
     return sdk_no_wait(no_wait, client.begin_delete_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
+
+
+def show_identity(cmd, resource_group_name, name):
+    return show_staticsite(cmd, name, resource_group_name).identity
+
+
+def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', scope=None):
+    ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
+                                                                  'ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
+
+    def getter():
+        client = _get_staticsites_client_factory(cmd.cli_ctx)
+        return client.get_static_site(resource_group_name=resource_group_name, name=name)
+
+    def setter(staticsite):
+        if staticsite.identity and staticsite.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif staticsite.identity and staticsite.identity.type == ResourceIdentityType.system_assigned and external_identities:  # pylint: disable=line-too-long
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif staticsite.identity and staticsite.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:  # pylint: disable=line-too-long
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        if staticsite.identity:
+            staticsite.identity.type = identity_types
+        else:
+            staticsite.identity = ManagedServiceIdentity(type=identity_types)
+        if external_identities:
+            if not staticsite.identity.user_assigned_identities:
+                staticsite.identity.user_assigned_identities = {}
+            for identity in external_identities:
+                staticsite.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
+        client = _get_staticsites_client_factory(cmd.cli_ctx)
+        poller = client.begin_create_or_update_static_site(resource_group_name, name, staticsite)
+
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    staticsite = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
+    return staticsite.identity
+
+
+def remove_identity(cmd, resource_group_name, name, remove_identities=None):
+    IdentityType = cmd.get_models('ManagedServiceIdentityType')
+    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
+
+    def getter():
+        client = _get_staticsites_client_factory(cmd.cli_ctx)
+        return client.get_static_site(resource_group_name=resource_group_name, name=name)
+
+    def setter(staticsite):
+        if staticsite.identity is None:
+            return staticsite
+        to_remove = []
+        existing_identities = {x.lower() for x in list((staticsite.identity.user_assigned_identities or {}).keys())}
+        if external_identities:
+            to_remove = {x.lower() for x in external_identities}
+            non_existing = to_remove.difference(existing_identities)
+            if non_existing:
+                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+            if not list(existing_identities - to_remove):
+                if staticsite.identity.type == IdentityType.user_assigned:
+                    staticsite.identity.type = IdentityType.none
+                elif staticsite.identity.type == IdentityType.system_assigned_user_assigned:
+                    staticsite.identity.type = IdentityType.system_assigned
+
+        staticsite.identity.user_assigned_identities = None
+        if remove_local_identity:
+            staticsite.identity.type = (IdentityType.none
+                                        if staticsite.identity.type == IdentityType.system_assigned or
+                                        staticsite.identity.type == IdentityType.none
+                                        else IdentityType.user_assigned)
+
+        if staticsite.identity.type not in [IdentityType.none, IdentityType.system_assigned]:
+            staticsite.identity.user_assigned_identities = {}
+        if to_remove:
+            for identity in list(existing_identities - to_remove):
+                staticsite.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+        else:
+            for identity in list(existing_identities):
+                staticsite.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+
+        client = _get_staticsites_client_factory(cmd.cli_ctx)
+        poller = client.begin_create_or_update_static_site(resource_group_name, name, staticsite)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    staticsite = _assign_identity(cmd.cli_ctx, getter, setter)
+    return staticsite.identity
 
 
 def list_staticsite_functions(cmd, name, resource_group_name=None, environment_name='default'):
