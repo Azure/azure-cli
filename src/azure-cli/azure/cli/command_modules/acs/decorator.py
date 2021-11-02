@@ -1429,6 +1429,8 @@ class AKSContext:
         """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
         according to the context.
 
+        Note: This function is intended to be used in create mode.
+
         When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
@@ -1521,6 +1523,8 @@ class AKSContext:
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
+        Note: This function is intended to be used in create mode.
+
         When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
@@ -1532,10 +1536,30 @@ class AKSContext:
 
         return self._get_windows_admin_username_and_password()
 
-    def get_enable_ahub(self) -> bool:
-        """Obtain the value of enable_ahub.
+    def get_windows_admin_username(self) -> Union[str, None]:
+        """Obtain the value of windows_admin_username.
+
+        Note: This function is intended to be used in update mode.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        windows_admin_username = self.raw_param.get("windows_admin_username")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return windows_admin_username
+
+    # pylint: disable=unused-argument
+    def _get_enable_ahub(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
+        """Internal function to obtain the value of enable_ahub.
 
         Note: enable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
@@ -1543,11 +1567,68 @@ class AKSContext:
         enable_ahub = self.raw_param.get("enable_ahub")
         # try to read the property value corresponding to the parameter from the `mc` object
         if self.mc and self.mc.windows_profile:
-            enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
+            enable_ahub = (
+                self.mc.windows_profile.license_type == "Windows_Server"
+            )
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if enable_ahub and self._get_disable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
         return enable_ahub
+
+    def get_enable_ahub(self) -> bool:
+        """Obtain the value of enable_ahub.
+
+        Note: enable_ahub will not be directly decorated into the `mc` object.
+
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_ahub(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_ahub(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_ahub = self.raw_param.get("disable_ahub")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.windows_profile:
+            disable_ahub = self.mc.windows_profile.license_type == "None"
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if disable_ahub and self._get_enable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
+        return disable_ahub
+
+    def get_disable_ahub(self) -> bool:
+        """Obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_ahub(enable_validation=True)
 
     # pylint: disable=unused-argument,too-many-statements
     def _get_service_principal_and_client_secret(
@@ -5301,6 +5382,29 @@ class AKSUpdateDecorator:
             profile_holder = None
         mc.api_server_access_profile = profile_holder
         return mc
+
+    def update_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update api server access profile and fqdn subdomain for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if not mc.windows_profile:
+            raise UnknownError(
+                "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
+            )
+
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_username()
+
+        if enable_ahub:
+            mc.windows_profile.license_type = 'Windows_Server'
+        if disable_ahub:
+            mc.windows_profile.license_type = 'None'
+        if windows_admin_password:
+            mc.windows_profile.admin_password = windows_admin_password
 
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
