@@ -4787,6 +4787,29 @@ class VMGalleryImage(ScenarioTest):
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
 
+        @ResourceGroupPreparer(location='eastus')
+        def test_architecture(self, resource_group):
+            self.kwargs.update({
+                'sig_name': self.create_random_name('sig_', 10),
+                'img_def_name': self.create_random_name('def_', 10),
+                'pub_name': self.create_random_name('pub_', 10),
+                'of_name': self.create_random_name('of_', 10),
+                'sku_name': self.create_random_name('sku_', 10),
+                'img_def_name1': self.create_random_name('def_', 10),
+                'pub_name1': self.create_random_name('pub_', 10),
+                'of_name1': self.create_random_name('of_', 10),
+                'sku_name1': self.create_random_name('sku_', 10)
+            })
+            self.cmd('sig create -g {rg} -r {sig_name}')
+            self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} --architecture x64'
+                     '--gallery-image-definition {img_def_name} --os-type linux -p {pub_name} -f {of_name} -s {sku_name}', checks=[
+                self.check('architecture', 'x64')
+            ])
+            self.cmd('sig image-definition create -g {rg} --gallery-name {sig_name} --architecture Arm64'
+                     '--gallery-image-definition {img_def_name1} --os-type linux -p {pub_name1} -f {of_name1} -s {sku_name1}', checks=[
+                self.check('architecture', 'Arm64')
+            ])
+
 
 class VMGalleryApplication(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
