@@ -15,7 +15,7 @@ from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
                          ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
-                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT,
+                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME,
                          DOTNET_TARGET_FRAMEWORK_STRING, GENERATE_RANDOM_APP_NAMES)
 
 logger = get_logger(__name__)
@@ -77,8 +77,8 @@ def get_runtime_version_details(file_path, lang_name):
     version_detected = None
     version_to_create = None
     if lang_name.lower() == DOTNET_RUNTIME_NAME:
-        version_detected = DOTNET_VERSION_DEFAULT
-        version_to_create = DOTNET_VERSION_DEFAULT
+        version_detected = parse_dotnet_version(file_path)
+        version_to_create = detect_dotnet_version_tocreate(version_detected)
     elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
@@ -213,6 +213,8 @@ def parse_dotnet_version(file_path):
         import re
         xmldoc = minidom.parse(file_path)
         framework_ver = xmldoc.getElementsByTagName('TargetFrameworkVersion')
+        if not framework_ver:
+            framework_ver = xmldoc.getElementsByTagName('TargetFramework')
         target_ver = framework_ver[0].firstChild.data
         non_decimal = re.compile(r'[^\d.]+')
         # reduce the version to '5.7.4' from '5.7'
@@ -221,6 +223,7 @@ def parse_dotnet_version(file_path):
             c = non_decimal.sub('', target_ver)
             version_detected = c[:3]
     except:  # pylint: disable=bare-except
+        logger.warning("Could not parse dotnet version from *.csproj. Defaulting to %s", version_detected[0])
         version_detected = version_detected[0]
     return version_detected
 
