@@ -15,8 +15,8 @@ from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
                          ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
-                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME,
-                         DOTNET_TARGET_FRAMEWORK_STRING, GENERATE_RANDOM_APP_NAMES)
+                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS,
+                         DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES)
 
 logger = get_logger(__name__)
 
@@ -77,16 +77,17 @@ def get_runtime_version_details(file_path, lang_name):
     version_detected = None
     version_to_create = None
     if lang_name.lower() == DOTNET_RUNTIME_NAME:
-        version_detected = parse_dotnet_version(file_path)
-        version_to_create = detect_dotnet_version_tocreate(version_detected)
+        version_detected = parse_dotnet_version(file_path, DOTNET_VERSION_DEFAULT)
+        version_to_create = detect_dotnet_version_tocreate(version_detected, DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS)
     elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
         version_to_create = detect_netcore_version_tocreate(version_detected)
     elif lang_name.lower() == ASPDOTNET_RUNTIME_NAME:
         # method returns list in DESC, pick the first
-        version_detected = parse_dotnet_version(file_path)
-        version_to_create = detect_dotnet_version_tocreate(version_detected)
+        version_detected = parse_dotnet_version(file_path, ASPDOTNET_VERSION_DEFAULT)
+        version_to_create = detect_dotnet_version_tocreate(version_detected,
+                                                           ASPDOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
         if file_path == '':
             version_detected = "-"
@@ -199,15 +200,15 @@ def detect_dotnet_lang(csproj_path):
         version_full = ''.join(version_full.split()).lower()
         version_lang = re.sub(r'([^a-zA-Z\s]+?)', '', target_ver.text)
 
-    if version_full and version_full.startswith(DOTNET_TARGET_FRAMEWORK_STRING):
-        return DOTNET_RUNTIME_NAME
     if 'netcore' in version_lang.lower():
         return NETCORE_RUNTIME_NAME
+    if version_full and re.fullmatch(DOTNET_TARGET_FRAMEWORK_REGEX, version_full):
+        return DOTNET_RUNTIME_NAME
     return ASPDOTNET_RUNTIME_NAME
 
 
-def parse_dotnet_version(file_path):
-    version_detected = ['4.7']
+def parse_dotnet_version(file_path, default_version):
+    version_detected = [default_version]
     try:
         from xml.dom import minidom
         import re
@@ -270,13 +271,13 @@ def detect_netcore_version_tocreate(detected_ver):
     return NETCORE_VERSION_DEFAULT
 
 
-def detect_dotnet_version_tocreate(detected_ver):
-    min_ver = DOTNET_VERSIONS[0]
-    if detected_ver in DOTNET_VERSIONS:
+def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list):
+    min_ver = versions_list[0]
+    if detected_ver in versions_list:
         return detected_ver
     if detected_ver < min_ver:
         return min_ver
-    return ASPDOTNET_VERSION_DEFAULT
+    return default_version
 
 
 def detect_node_version_tocreate(detected_ver):
