@@ -9,6 +9,7 @@ import stat
 import platform
 import subprocess
 import json
+import certifi
 
 from json.decoder import JSONDecodeError
 from contextlib import suppress
@@ -106,8 +107,8 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
                 print(f"Installing Bicep CLI {release_tag}...")
             else:
                 print("Installing Bicep CLI...")
-
-        request = urlopen(_get_bicep_download_url(system, release_tag))
+        ca_file = certifi.where()
+        request = urlopen(_get_bicep_download_url(system, release_tag), cafile=ca_file)
         with open(installation_path, "wb") as f:
             f.write(request.read())
 
