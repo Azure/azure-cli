@@ -247,7 +247,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
-        definition_file['NotebookFolder'] = NotebookFolder(name=folder_path)
+        definition_file['folder'] = NotebookFolder(name=folder_path)
     properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
@@ -461,7 +461,7 @@ def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definit
     client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
     folder = {}
     folder['name'] = folder_path
-    definition_file['SparkJobDefinitionFolder'] = folder
+    definition_file['folder'] = folder
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)

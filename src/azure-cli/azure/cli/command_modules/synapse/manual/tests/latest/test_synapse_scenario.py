@@ -2417,7 +2417,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
-            'folder_path':'folder1/subfolder1',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
@@ -2446,7 +2446,8 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
             '--spark-pool-name {spark-pool} --folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # get notebook
@@ -2702,7 +2703,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
-            'folder_path':'folder1/subfolder1',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
@@ -2731,7 +2732,8 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" '
             '--folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # Get a spark job definition
