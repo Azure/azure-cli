@@ -339,8 +339,8 @@ def get_app_details(cmd, name):
     return None
 
 
-def get_rg_to_use(user, loc, os_name, rg_name=None):
-    default_rg = "{}_rg_{}_{}".format(user, os_name, loc.replace(" ", "").lower())
+def get_rg_to_use(user, loc, rg_name=None):
+    default_rg = "{}_rg_{}".format(user, loc.replace(" ", "").lower())
     if rg_name is not None:
         return rg_name
     return default_rg
@@ -377,8 +377,8 @@ def detect_os_form_src(src_dir, html=False):
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
 
 
-def get_plan_to_use(cmd, user, os_name, loc, sku, create_rg, resource_group_name, plan=None):
-    _default_asp = "{}_asp_{}_{}_0".format(user, os_name, loc)
+def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, plan=None):
+    _default_asp = "{}_asp_{}_0".format(user, loc)
     if plan is None:  # --plan not provided by user
         # get the plan name to use
         return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
