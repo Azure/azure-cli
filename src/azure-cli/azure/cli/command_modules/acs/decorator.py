@@ -1536,19 +1536,19 @@ class AKSContext:
 
         return self._get_windows_admin_username_and_password()
 
-    def get_windows_admin_username(self) -> Union[str, None]:
-        """Obtain the value of windows_admin_username.
+    def get_windows_admin_password(self) -> Union[str, None]:
+        """Obtain the value of windows_admin_password.
 
         Note: This function is intended to be used in update mode.
 
         :return: string or None
         """
         # read the original value passed by the command
-        windows_admin_username = self.raw_param.get("windows_admin_username")
+        windows_admin_password = self.raw_param.get("windows_admin_password")
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
-        return windows_admin_username
+        return windows_admin_password
 
     # pylint: disable=unused-argument
     def _get_enable_ahub(
@@ -1565,11 +1565,10 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.windows_profile:
-            enable_ahub = (
-                self.mc.windows_profile.license_type == "Windows_Server"
-            )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.windows_profile:
+                enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
 
         # this parameter does not need dynamic completion
         # validation
@@ -1605,9 +1604,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_ahub = self.raw_param.get("disable_ahub")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.windows_profile:
-            disable_ahub = self.mc.windows_profile.license_type == "None"
+        # we do not support this option in create mode
 
         # this parameter does not need dynamic completion
         # validation
@@ -3579,7 +3576,7 @@ class AKSContext:
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
                         )
-                    # In fact, there is currently no such option in the create command
+                    # In fact, there is no such option in the create command.
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn should only be used with --enable-private-cluster"
                     )
@@ -3675,14 +3672,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_public_fqdn = self.raw_param.get("enable_public_fqdn")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.api_server_access_profile and
-                self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
-            ):
-                enable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
+        # we do not support this option in create mode
 
         # this parameter does not need dynamic completion
         # validation
@@ -3698,7 +3688,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn can only be used for private cluster"
                     )
-                # In fact, there is currently no such option in the create command
+                # In fact, there is no such option in the create command.
                 raise InvalidArgumentValueError(
                     "--enable-public-fqdn should only be used with --enable-private-cluster"
                 )
@@ -5384,7 +5374,7 @@ class AKSUpdateDecorator:
         return mc
 
     def update_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:
-        """Update api server access profile and fqdn subdomain for the ManagedCluster object.
+        """Update windows profile for the ManagedCluster object.
 
         :return: the ManagedCluster object
         """
@@ -5397,14 +5387,14 @@ class AKSUpdateDecorator:
 
         enable_ahub = self.context.get_enable_ahub()
         disable_ahub = self.context.get_disable_ahub()
-        windows_admin_password = self.context.get_windows_admin_username()
-
+        windows_admin_password = self.context.get_windows_admin_password()
         if enable_ahub:
             mc.windows_profile.license_type = 'Windows_Server'
         if disable_ahub:
             mc.windows_profile.license_type = 'None'
         if windows_admin_password:
             mc.windows_profile.admin_password = windows_admin_password
+        return mc
 
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
