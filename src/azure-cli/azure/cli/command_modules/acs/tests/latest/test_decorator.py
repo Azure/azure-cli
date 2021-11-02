@@ -6731,6 +6731,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
 
         ground_truth_windows_profile_2 = (
             self.models.ManagedClusterWindowsProfile(
+                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
                 admin_username="test_mc_win_admin_name",
                 admin_password="test_admin_password",
                 license_type="Windows_Server",
@@ -6767,6 +6768,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
 
         ground_truth_windows_profile_3 = (
             self.models.ManagedClusterWindowsProfile(
+                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
                 admin_username="test_mc_win_admin_name",
                 admin_password="test_mc_win_admin_pd",
                 license_type="None",
