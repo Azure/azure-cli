@@ -2576,7 +2576,7 @@ examples:
         az storage share list-handle --account-name MyAccount --name MyFileShare --recursive
   - name: List all file handles of a file directory recursively.
     text: |
-        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive 
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive
   - name: List all file handles of a file.
     text: |
         az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt'
@@ -2588,14 +2588,14 @@ short-summary: Close file handles of a file share.
 examples:
   - name: Close all file handles of a file share recursively.
     text: |
-        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive 
-        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive 
+        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive
+        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive
   - name: Close all file handles of a file directory recursively.
     text: |
-        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive 
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive
   - name: Close all file handles of a file.
     text: |
-        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all 
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all
   - name: Close file handle with a specific handle-id of a file.
     text: |
         az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --handle-id "id"
