@@ -452,7 +452,7 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp identity', custom_command_type=staticsite_sdk) as g:
         g.custom_command('assign', 'assign_identity')
         g.custom_command('remove', 'remove_identity')
-        g.custom_command('show', 'show_identity')
+        g.custom_show_command('show', 'show_identity')
 
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
