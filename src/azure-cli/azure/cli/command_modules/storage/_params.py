@@ -1519,7 +1519,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share close-handle') as c:
         c.register_path_argument(default_file_param="")
-        c.argument('recursive', arg_type=get_three_state_flag())
+        c.argument('recursive', arg_type=get_three_state_flag(),
+                   help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
+                        "files, its subdirectories and their files.")
         c.argument('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
                    help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
         c.argument('marker', help="An opaque continuation token. This value can be retrieved from the next_marker field"
@@ -1529,8 +1531,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('handle_id', help="Specifies handle ID opened on the file or directory to be closed. "
                                      "Astrix (‘*’) is a wildcard that specifies all handles.")
         c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
-        c.argument('recursive', help="Boolean that specifies if operation should apply to the directory specified in "
-                                     "the URI, its files, its subdirectories and their files.")
 
     with self.argument_context('storage directory') as c:
         c.argument('directory_name', directory_type, options_list=('--name', '-n'))
