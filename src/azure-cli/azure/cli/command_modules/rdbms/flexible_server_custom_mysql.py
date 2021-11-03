@@ -72,6 +72,7 @@ def flexible_server_create(cmd, client,
                               auto_grow=auto_grow,
                               version=version,
                               geo_redundant_backup=geo_redundant_backup)
+
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location)
     iops_info = list_skus_info['iops_info']
 
