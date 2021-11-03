@@ -145,7 +145,8 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
-    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+    if attach_data_disks and data_disk_delete_option:
+        data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
