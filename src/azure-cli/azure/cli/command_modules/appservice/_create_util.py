@@ -339,8 +339,8 @@ def get_app_details(cmd, name):
     return None
 
 
-def get_rg_to_use(user, loc, rg_name=None):
-    default_rg = "{}_rg_{}".format(user, loc.replace(" ", "").lower())
+def get_rg_to_use(user, rg_name=None):
+    default_rg = "{}_rg".format(user)
     if rg_name is not None:
         return rg_name
     return default_rg
@@ -378,7 +378,7 @@ def detect_os_form_src(src_dir, html=False):
 
 
 def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, plan=None):
-    _default_asp = "{}_asp_{}_0".format(user, loc)
+    _default_asp = "{}_asp_0".format(user)
     if plan is None:  # --plan not provided by user
         # get the plan name to use
         return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
