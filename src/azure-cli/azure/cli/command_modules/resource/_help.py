@@ -2581,7 +2581,7 @@ examples:
     text: az stacks sub list
 """
 
-helps['az stacks sub show'] = """
+helps['stacks sub show'] = """
 type: command
 short-summary: Get specified deployment stack from subscription scope
 examples:
@@ -2591,7 +2591,7 @@ examples:
     text: az stacks sub show --stack "StackResourceID"
 """
 
-helps['az stacks sub delete'] = """
+helps['stacks sub delete'] = """
 type: command
 short-summary: Delete specified deployment stack from subscription scope
 examples:
@@ -2621,7 +2621,7 @@ examples:
     text: az stacks group list --resource-group "ResourceGroup"
 """
 
-helps['az stacks group show'] = """
+helps['stacks group show'] = """
 type: command
 short-summary: Get specified deployment stack from resource group scope
 examples:
@@ -2631,7 +2631,7 @@ examples:
     text: az stacks group show --stack "StackResourceID"
 """
 
-helps['az stacks group delete'] = """
+helps['stacks group delete'] = """
 type: command
 short-summary: Delete specified deployment stack from resource group scope
 examples:
@@ -2651,7 +2651,7 @@ examples:
     text: az stacks snapshot sub list --stack "StackResourceID"
 """
 
-helps['az stacks snapshot sub show'] = """
+helps['stacks snapshot sub show'] = """
 type: command
 short-summary: Get specified snapshot in deployment stack at subscription scope
 examples:
@@ -2661,7 +2661,7 @@ examples:
     text: az stacks snapshot sub show --snapshot "SnapshotResourceID"
 """
 
-helps['az stacks snapshot sub delete'] = """
+helps['stacks snapshot sub delete'] = """
 type: command
 short-summary: Delete specified snapshot in deployment stack at subscription scope
 examples:
@@ -2681,7 +2681,7 @@ examples:
     text: az stacks snapshot group list --stack "StackResourceID"
 """
 
-helps['az stacks snapshot group show'] = """
+helps['stacks snapshot group show'] = """
 type: command
 short-summary: Get specified snapshot in deployment stack at resource group scope
 examples:
@@ -2691,7 +2691,7 @@ examples:
     text: az stacks snapshot group show --snapshot "SnapshotResourceID"
 """
 
-helps['az stacks snapshot group delete'] = """
+helps['stacks snapshot group delete'] = """
 type: command
 short-summary: Delete specified snapshot in deployment stack at resource group scope
 examples:

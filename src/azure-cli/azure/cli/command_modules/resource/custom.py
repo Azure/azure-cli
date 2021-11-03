@@ -2163,8 +2163,17 @@ def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         if name:
+            try:
+                rcf.deployment_stacks.get_at_subscription(name)
+            except:
+                raise CLIError("DeploymentStack " + name + " not found in the current subscription scope.")
             return rcf.deployment_stacks.begin_delete_at_subscription(name)
-        return rcf.deployment_stacks.begin_delete_at_subscription(stack.split('/')[-1])
+        stack_name = stack.split('/')[-1]
+        try:
+                rcf.deployment_stacks.get_at_subscription(stack_name)
+        except:
+                raise CLIError("DeploymentStack " + stack_name + " not found in the current subscription scope.")
+        return rcf.deployment_stacks.begin_delete_at_subscription(stack_name)
     raise CLIError("Please enter the stack name or stack resource id")
 
 
@@ -2256,10 +2265,20 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if name and resource_group:
+        try:
+            rcf.deployment_stacks.get_at_resource_group(resource_group,name)
+        except:
+            raise CLIError("DeploymentStack " + name + " not found in the current resource group scope.")
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
     if stack:
         stack_arr = stack.split('/')
-        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group,stack_arr[4], stack_arr[-1])
+        stack_name = stack_arr[-1]
+        stack_rg = stack_arr[-5]
+        try:
+            rcf.deployment_stacks.get_at_resource_group(stack_rg, stack_name)
+        except:
+            raise CLIError("DeploymentStack " + stack_name + " not found in the current resource group scope.")
+        return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, stack_name)
     raise CLIError("Please enter the (stack name and resource group) or stack resource id")
 
 
@@ -2306,8 +2325,16 @@ def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if snapshot:
         snapshot_arr = snapshot.split('/')
+        try:
+            rcf.deployment_stack_snapshots.get_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
+        except:
+            raise CLIError("DeploymentStack Snapshot " + snapshot_arr[-1] + " not found in the subscription scope.")
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
+        try:
+            rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
+        except:
+            raise CLIError("DeploymentStack Snapshot " + name + " not found in the subscription scope.")
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, stack_name, name)
     raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
 
@@ -2316,11 +2343,18 @@ def delete_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_nam
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if snapshot:
         snapshot_arr = snapshot.split('/')
+        try:
+            rcf.deployment_stack_snapshots.get_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
+        except:
+            raise CLIError("Snapshot " + snapshot_arr[-1] + " not found in the stack.")
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name and resource_group:
+        try:
+            rcf.deployment_stack_snapshots.get_at_resource_group(resource_group, stack_name, name)
+        except:
+            raise CLIError("Snapshot " + name + " not found in the stack")
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(resource_group, stack_name, name)
     raise CLIError("Please enter the (snapshot name, stack name and resource group) or snapshot resource id")
-
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
