@@ -118,7 +118,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id {}'.format(source_id))
+            output = run_cli_cmd('az webapp show --id {} -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -140,9 +140,9 @@ def get_client_type(cmd, namespace):
         client_type = None
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring-cloud app show '
-                                 '-g {} -s {} -n {}'.format(segments.get('resource_group'), segments.get('name'),
-                                                            segments.get('child_name_1')))
+            output = run_cli_cmd('az spring-cloud app show -g {} -s {} -n {}'
+                                 ' -o json'.format(segments.get('resource_group'), segments.get('name'),
+                                                   segments.get('child_name_1')))
             prop_val = output.get('properties')\
                              .get('activeDeployment')\
                              .get('properties')\
