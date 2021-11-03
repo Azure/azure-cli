@@ -34,7 +34,7 @@ def transform_linker_properties(result):
     result = todict(result)
     resource_id = result.get('id')
     try:
-        output = run_cli_cmd('az webapp connection list-configuration --id {}'.format(resource_id))
+        output = run_cli_cmd('az webapp connection list-configuration --id {} -o json'.format(resource_id))
         result['configurations'] = output.get('configurations')
     except CLIInternalError:
         pass
