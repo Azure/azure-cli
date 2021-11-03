@@ -1037,6 +1037,7 @@ def _validate_vm_data_disk_delete_option(namespace):
         if len(namespace.data_disk_delete_option) == 1 and len(namespace.data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
             namespace.data_disk_delete_option = namespace.data_disk_delete_option[0]
 
+
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
