@@ -2538,6 +2538,14 @@ examples:
     text: az bicep decompile --file {json_template_file}
 """
 
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
+"""
+
 helps['bicep version'] = """
 type: command
 short-summary: Show the installed version of Bicep CLI.

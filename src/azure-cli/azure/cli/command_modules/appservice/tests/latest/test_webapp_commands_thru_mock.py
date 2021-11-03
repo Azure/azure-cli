@@ -8,7 +8,6 @@ from unittest import mock
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.adal_authentication import AdalAuthentication
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
@@ -46,7 +45,7 @@ def _get_test_cmd():
 
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
+        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -228,7 +227,7 @@ class TestWebappMocked(unittest.TestCase):
         faked_web = mock.MagicMock()
         site_op_mock.return_value = faked_web
         # action
-        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None, app_instance=None)
+        result = show_webapp(mock.MagicMock(), 'myRG', 'myweb', slot=None)
         # assert (we invoke the site op)
         self.assertEqual(faked_web, result)
         self.assertTrue(rename_mock.called)

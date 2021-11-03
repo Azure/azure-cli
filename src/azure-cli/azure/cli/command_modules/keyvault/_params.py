@@ -27,7 +27,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
-    process_hsm_name, KeyEncryptionDataType)
+    process_hsm_name, KeyEncryptionDataType, process_key_release_policy)
 
 # CUSTOM CHOICE LISTS
 
@@ -78,9 +78,10 @@ def load_arguments(self, _):
         upload = "upload"  #: Upload operation
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
-     NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
-         'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
-         'NetworkRuleBypassOptions', 'NetworkRuleAction', resource_type=ResourceType.MGMT_KEYVAULT)
+     NetworkRuleBypassOptions, NetworkRuleAction, PublicNetworkAccess) = self.get_models(
+        'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
+        'NetworkRuleBypassOptions', 'NetworkRuleAction', 'PublicNetworkAccess',
+        resource_type=ResourceType.MGMT_KEYVAULT)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -140,6 +141,11 @@ def load_arguments(self, _):
                         'this key vault. If it\'s not set to any value (true or false) when creating new key vault, it '
                         'will be set to true by default. Once set to true, it cannot be reverted to false.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag())
+        c.argument('public_network_access', arg_type=get_enum_type(PublicNetworkAccess),
+                   help="Property to specify whether the vault will accept traffic from public internet. If set to "
+                        "'disabled' all traffic except private endpoint traffic and that originates from trusted "
+                        "services will be blocked. This will override the set firewall rules, meaning that even if the "
+                        "firewall rules are present we will not honor the rules.")
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
@@ -364,6 +370,13 @@ def load_arguments(self, _):
                        type=datetime_type)
             c.argument('not_before', default=None, type=datetime_type,
                        help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+            c.argument('exportable', arg_type=get_three_state_flag(), is_preview=True,
+                       help='Whether the private key can be exported. To create key with release policy, '
+                            '"exportable" must be true and caller must have "export" permission.')
+            c.argument('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
+                       validator=process_key_release_policy, is_preview=True,
+                       help='The policy rules under which the key can be exported. '
+                            'Policy definition as JSON, or a path to a file containing JSON policy definition.')
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -436,7 +449,7 @@ def load_arguments(self, _):
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
                 help='Include managed keys. Default: false')
 
-    for scope in ['create', 'import', 'set-attributes', 'show']:
+    for scope in ['create', 'import', 'set-attributes', 'show', 'rotate', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -450,6 +463,12 @@ def load_arguments(self, _):
                     help='Id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
 
+    with self.argument_context('keyvault key random') as c:
+        c.extra('hsm_name', hsm_url_type, arg_group='Id', required=False)
+        c.extra('identifier', options_list=['--id'], arg_group='Id',
+                help='Id of the HSM.', validator=validate_vault_or_hsm)
+        c.argument('count', type=int, help='The requested number of random bytes.')
+
     with self.argument_context('keyvault key set-attributes') as c:
         c.extra('enabled', help='Enable the key.', arg_type=get_three_state_flag())
         c.extra('expires_on', options_list=['--expires'], default=None, type=datetime_type,
@@ -458,7 +477,15 @@ def load_arguments(self, _):
                 help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
         c.extra('key_operations', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
                 help='Space-separated list of permitted JSON web key operations.')
+        c.extra('release_policy', options_list=['--policy'], type=file_type, completer=FilesCompleter(),
+                validator=process_key_release_policy, is_preview=True,
+                help='The policy rules under which the key can be exported. '
+                     'Policy definition as JSON, or a path to a file containing JSON policy definition.')
         c.extra('tags', tags_type)
+
+    with self.argument_context('keyvault key rotation-policy update') as c:
+        c.argument('value', type=file_type, completer=FilesCompleter(),
+                   help='The rotation policy file definition as JSON, or a path to a file containing JSON policy definition.')
     # endregion
 
     # region KeyVault Secret

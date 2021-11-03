@@ -337,7 +337,7 @@ def load_arguments(self, _):
             c.argument('vnet_route_all_enabled', help="Configure regional VNet integration to route all traffic to the VNet.",
                        arg_type=get_three_state_flag(return_label=True))
             c.argument('generic_configurations', nargs='+',
-                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. To avoid compatibility issues, it is recommended to use a JSON file to provide these configurations. If using a key=value pair, PowerShell and Windows Command Prompt users should be sure to use escape characters like so: {\\"key\\": value}, instead of: `{"key": value}`.')
+                       help='Provide site configuration list in a format of either `key=value` pair or `@<json_file>`. PowerShell and Windows Command Prompt users should use a JSON file to provide these configurations to avoid compatibility issues with escape characters.')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
@@ -472,15 +472,15 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
-        c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
+        c.argument('custom_id', options_list=['--custom-id', '-i'], help='name of the share configured within the web app')
         c.argument('storage_type', options_list=['--storage-type', '-t'], help='storage type',
                    arg_type=get_enum_type(AzureStorageType))
         c.argument('account_name', options_list=['--account-name', '-a'], help='storage account name')
         c.argument('share_name', options_list=['--share-name', '--sn'],
-                   help='share name (Azure Files) or container name (Azure Blob Storage)')
+                   help='name of the file share as given in the storage account')
         c.argument('access_key', options_list=['--access-key', '-k'], help='storage account access key')
         c.argument('mount_path', options_list=['--mount-path', '-m'],
-                   help='path to mount storage volume within web app')
+                   help='the path which the web app uses to read-write data ex: /share1 or /share2')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('webapp config storage-account add') as c:
@@ -722,7 +722,7 @@ def load_arguments(self, _):
             c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'],
                        help='The container registry server password. Required for private registries.')
             if scope == 'functionapp':
-                c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
+                c.argument('functions_version', help='The functions app version. NOTE: This will be required starting the next release cycle', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
                 c.argument('runtime', help='The functions runtime stack.',
                            arg_type=get_enum_type(functionapp_runtime_strings))
                 c.argument('runtime_version',
@@ -778,42 +778,6 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=None)
-
-    with self.argument_context('functionapp devops-build create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
-                   local_context_attribute=LocalContextAttribute(name='functionapp_name',
-                                                                 actions=[LocalContextAction.GET]))
-        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use",
-                   required=False)
-        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
-        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
-        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('allow_force_push',
-                   help="If Azure DevOps repository is not clean, should it overwrite remote content?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository",
-                   required=False)
-        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
-                   required=False)
-
-    with self.argument_context('functionapp devops-pipeline create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
-                   local_context_attribute=LocalContextAttribute(name='functionapp_name',
-                                                                 actions=[LocalContextAction.GET]))
-        c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use",
-                   required=False)
-        c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
-        c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
-        c.argument('overwrite_yaml', help="If you have an existing yaml, should it be overwritten?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('allow_force_push',
-                   help="If Azure DevOps repository is not clean, should it overwrite remote content?",
-                   arg_type=get_three_state_flag(return_label=True), required=False)
-        c.argument('github_pat', help="Github personal access token for creating pipeline from Github repository",
-                   required=False)
-        c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
-                   required=False)
 
     with self.argument_context('functionapp deployment list-publishing-profiles') as c:
         c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
@@ -1008,6 +972,11 @@ def load_arguments(self, _):
         c.argument('hostname',
                    options_list=['--hostname'],
                    help="custom hostname such as www.example.com. Only support sub domain in preview.")
+    with self.argument_context('staticwebapp hostname set') as c:
+        c.argument('validation_method',
+                   options_list=['--validation-method', '-m'],
+                   help="Validation method for the custom domain.",
+                   arg_type=get_enum_type(["cname-delegation", "dns-txt-token"]))
     with self.argument_context('staticwebapp appsettings') as c:
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",

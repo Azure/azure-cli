@@ -27,7 +27,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SAP HANA workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using akneema-hana-ccy and akneema-vault-ccy -
+    # For the tests using saphana-clitest-vm and saphana-clitest-vault -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -88,11 +88,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         if is_restorable:
             # # Integrated Restore
             self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container} --rp-name {rp_restore}').get_output_in_json(), separators=(',', ':'))
-            with open("recoveryconfig.json", "w") as f:
+            with open("recoveryconfig_hana_archive.json", "w") as f:
                 f.write(self.kwargs['rc'])
 
             # # Trigger Restore
-            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig.json --rehydration-priority High', checks=[
+            self.cmd('backup restore restore-azurewl -g {rg} -v {vault} --recovery-config recoveryconfig_hana_archive.json --rehydration-priority High', checks=[
                 self.check("properties.operation", "RestoreWithRehydrate"),
                 self.check("properties.status", "InProgress"),
                 self.check("resourceGroup", '{rg}')
@@ -413,11 +413,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn(self.kwargs['fitem'], self.kwargs['backup_job']['properties']['entityFriendlyName'].lower())
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -488,10 +489,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -c {name} -i {item} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -510,10 +512,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['rp'] = self.kwargs['rp']['name']
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode AlternateWorkloadRestore --rp-name {rp} --item-name {item} --container-name {container1} --target-item-name {titem} --target-server-type {tpit} --target-server-name {fname} --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_hana_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_hana_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -524,10 +526,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode OriginalWorkloadRestore --item-name {item} --container-name {container1} --rp-name {rp}').get_output_in_json(), separators=(',', ':'))
-        with open("recoveryconfig.json", "w") as f:
+        with open("recoveryconfig_hana_restore.json", "w") as f:
             f.write(self.kwargs['rc'])
 
-        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig_hana_restore.json', checks=[
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')

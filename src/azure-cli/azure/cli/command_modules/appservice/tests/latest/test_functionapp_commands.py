@@ -14,7 +14,8 @@ import datetime
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
-from azure.cli.testsdk.checkers import JMESPathPatternCheck
+from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -273,7 +274,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -298,7 +299,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.0 --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.0 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -468,7 +469,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 4' 
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -804,7 +805,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('sku.name', 'S1'),
         ])
 
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 3.8'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 4.8'
                  .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
@@ -1017,14 +1018,12 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -1044,7 +1043,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
         self.cmd('functionapp keys list -g {} -n {}'
@@ -1068,7 +1066,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
         self.cmd('functionapp keys delete -g {} -n {} --key-name {} --key-type {}'
@@ -1078,7 +1075,6 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), None)])
 
-    @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set_slot(self, resource_group, storage_account):
@@ -1102,14 +1098,12 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys')])
 
 
@@ -1141,14 +1135,12 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1177,13 +1169,14 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)
+                     ])
 
         self.cmd('functionapp function keys list -g {} -n {} --function-name {}'
                  .format(resource_group, functionapp_name, function_name)).assert_with_checks([
                      JMESPathCheck('{}'.format(key_name), key_value)])
 
+    @unittest.skip("Known issue https://github.com/Azure/azure-cli/issues/17296")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_function_keys_delete(self, resource_group, storage_account):
@@ -1205,14 +1198,16 @@ class FunctionAppFunctionKeysTests(LiveScenarioTest):
             JMESPathCheck('deployer', 'ZipDeploy'),
             JMESPathCheck('complete', True)])
 
+        self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
+
         # ping function so you know it's ready
         requests.get('http://{}.azurewebsites.net/api/{}'.format(functionapp_name, function_name), timeout=240)
         time.sleep(30)
 
         self.cmd('functionapp function keys set -g {} -n {} --function-name {} --key-name {} --key-value {}'
                  .format(resource_group, functionapp_name, function_name, key_name, key_value)).assert_with_checks([
-                     JMESPathCheck('name', key_name),
-                     JMESPathCheck('value', key_value)])
+                     JMESPathCheck('name', key_name)
+                     ])
 
         self.cmd('functionapp function keys delete -g {} -n {} --function-name {} --key-name {}'
                  .format(resource_group, functionapp_name, function_name, key_name))
@@ -1238,6 +1233,11 @@ class FunctionAppFunctionTests(LiveScenarioTest):
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
 
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name)
+        ])
+
         self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'ZipDeploy'),
@@ -1247,6 +1247,7 @@ class FunctionAppFunctionTests(LiveScenarioTest):
             JMESPathCheck('name', '{}/{}'.format(functionapp_name, function_name)),
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('scriptHref', 'https://{}.azurewebsites.net/admin/vfs/site/wwwroot/{}/run.csx'.format(functionapp_name, function_name))])
+
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1261,16 +1262,20 @@ class FunctionAppFunctionTests(LiveScenarioTest):
 
         requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
         time.sleep(30)
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name)
+        ])
 
         self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('deployer', 'ZipDeploy'),
             JMESPathCheck('complete', True)])
 
-        self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
-
         self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
             JMESPathCheck('config.bindings[0].type', 'httpTrigger')])
+
+        self.cmd('functionapp function delete -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name))
 
 
 # LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
