@@ -2801,8 +2801,9 @@ def _is_management_group_scope(scope):
     return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
-def cli_managementgroups_group_list(cmd, client):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_list(cmd, client, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.list()
 
 
@@ -2811,8 +2812,10 @@ def cli_managementgroups_group_show(
         client,
         group_name,
         expand=False,
-        recurse=False):
-    _register_rp(cmd.cli_ctx)
+        recurse=False,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     if expand:
         return client.get(group_name, "children", recurse)
     return client.get(group_name)
@@ -2823,8 +2826,10 @@ def cli_managementgroups_group_create(
         client,
         group_name,
         display_name=None,
-        parent=None):
-    _register_rp(cmd.cli_ctx)
+        parent=None,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     parent_id = _get_parent_id_from_parent(parent)
     from azure.mgmt.managementgroups.models import (
         CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
@@ -2858,8 +2863,9 @@ def cli_managementgroups_group_update_set(
     return client.update(group_name, parameters)
 
 
-def cli_managementgroups_group_delete(cmd, client, group_name):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.delete(group_name)
 
 
