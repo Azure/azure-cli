@@ -138,11 +138,10 @@ DEPENDENCIES = [
     'chardet~=3.0.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
-    'jsondiff~=1.2.0',
+    'jsondiff~=1.3.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
-    'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
