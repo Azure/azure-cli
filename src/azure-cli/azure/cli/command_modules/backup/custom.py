@@ -382,6 +382,9 @@ def show_encryption(client, resource_group_name, vault_name):
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
                           soft_delete_feature_state=None, cross_region_restore_flag=None):
     if soft_delete_feature_state:
+        logger.warning("""
+        --backup-storage-redundancy and --cross-region-restore-flag parameters will be ignored if provided.
+        """)
         soft_delete_feature_state += "d"
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
         vault_config_response = vault_config_client.get(vault_name, resource_group_name)
@@ -391,8 +394,21 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
-    if cross_region_restore_flag is not None:
+    backup_config_response = client.get(vault_name, resource_group_name)
+    prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
+    if cross_region_restore_flag is None or backup_storage_redundancy == 'LocallyRedundant':
+        logger.warning("""
+        --cross-region-restore-flag parameter value will get overwritten with existing cross region restore state
+        of the vault
+        """)
+        cross_region_restore_flag = prev_crr_flag
+    else:
         cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
+
+    if prev_crr_flag and not cross_region_restore_flag:
+        raise ArgumentUsageError("""
+        Cross Region Restore is currently a non-reversible storage property. You can not disable it once enabled.
+        """)
 
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
                                                  cross_region_restore_flag=cross_region_restore_flag)
