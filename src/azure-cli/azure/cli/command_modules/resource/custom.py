@@ -26,7 +26,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -2087,7 +2087,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
 
     try:
         if rcf.deployment_stacks.get_at_subscription(name):
-            print("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it? (y/n)")
+            logger.info("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it? (y/n)")
             yes_or_no = input()
             if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
                 pass
@@ -2113,7 +2113,7 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         t_uri = template_uri
     else:
         # we assume this will end the code
-        raise CLIError("Please enter one of the following: template file, template spec, or template url")
+        raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     if param_file:
         parameters = json.load(open(param_file))
@@ -2149,7 +2149,7 @@ def show_deployment_stack_at_subscription(cmd, name=None, stack=None):
         if name:
             return rcf.deployment_stacks.get_at_subscription(name)
         return rcf.deployment_stacks.get_at_subscription(stack.split('/')[-1])
-    raise CLIError("Please enter the stack name or stack resource id.")
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
 
 
 def list_deployment_stack_at_subscription(cmd):
@@ -2166,15 +2166,15 @@ def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
             try:
                 rcf.deployment_stacks.get_at_subscription(name)
             except:
-                raise CLIError("DeploymentStack " + name + " not found in the current subscription scope.")
+                raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current subscription scope.")
             return rcf.deployment_stacks.begin_delete_at_subscription(name)
         stack_name = stack.split('/')[-1]
         try:
                 rcf.deployment_stacks.get_at_subscription(stack_name)
         except:
-                raise CLIError("DeploymentStack " + stack_name + " not found in the current subscription scope.")
+            raise ResourceNotFoundError("DeploymentStack " + stack_name + " not found in the current subscription scope.")
         return rcf.deployment_stacks.begin_delete_at_subscription(stack_name)
-    raise CLIError("Please enter the stack name or stack resource id")
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
 def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, description = None):
@@ -2185,7 +2185,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            print("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it? (y/n")
+            logger.info("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it? (y/n")
             yes_or_no = input()
             if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
                 pass
@@ -2204,7 +2204,7 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
         t_uri = template_uri
     else:
         # we assume this will end the code
-        raise CLIError("Please enter one of the following: template file, template spec, or template url")
+        raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     if param_file:
         parameters = json.load(open(param_file))
@@ -2252,14 +2252,14 @@ def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None,
     if stack:
         stack_arr = stack.split('/')
         return rcf.deployment_stacks.get_at_resource_group(stack_arr[4], stack_arr[-1])
-    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
+    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
 def list_deployment_stack_at_resource_group(cmd, resource_group):
     if resource_group:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
         return rcf.deployment_stacks.list_at_resource_group(resource_group)
-    raise CLIError("Please enter the resource group")
+    raise InvalidArgumentValueError("Please enter the resource group")
 
 
 def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = None, stack=None):
@@ -2268,7 +2268,7 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
         try:
             rcf.deployment_stacks.get_at_resource_group(resource_group,name)
         except:
-            raise CLIError("DeploymentStack " + name + " not found in the current resource group scope.")
+            raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
     if stack:
         stack_arr = stack.split('/')
@@ -2277,9 +2277,9 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
         try:
             rcf.deployment_stacks.get_at_resource_group(stack_rg, stack_name)
         except:
-            raise CLIError("DeploymentStack " + stack_name + " not found in the current resource group scope.")
+            raise ResourceNotFoundError("DeploymentStack " + stack_name + " not found in the current resource group scope.")
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, stack_rg, stack_name)
-    raise CLIError("Please enter the (stack name and resource group) or stack resource id")
+    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
 
 def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
@@ -2289,7 +2289,7 @@ def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=No
         return rcf.deployment_stack_snapshots.get_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
         return rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
-    raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
+    raise InvalidArgumentValueError("Please enter the (snapshot name and stack name) or snapshot resource id")
  
 
 def show_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
@@ -2299,12 +2299,12 @@ def show_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=
         return rcf.deployment_stack_snapshots.get_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name and resource_group:
         return rcf.deployment_stack_snapshots.get_at_resource_group(resource_group, stack_name, name)
-    raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
+    raise InvalidArgumentValueError("Please enter the (snapshot name and stack name) or snapshot resource id")
 
 
 def list_deployment_stack_snapshot_at_subscription(cmd, name=None, stack=None):
     if not name and not stack:
-        raise CLIError("Please enter the stack name or stack resource id")
+        raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if name:
         return rcf.deployment_stack_snapshots.list_at_subscription(name)
@@ -2318,7 +2318,7 @@ def list_deployment_stack_snapshot_at_resource_group(cmd, name=None, resource_gr
         return rcf.deployment_stack_snapshots.list_at_resource_group(stack_arr[4], stack_arr[-1])
     if name and resource_group:
         return rcf.deployment_stack_snapshots.list_at_resource_group(resource_group, name)
-    raise CLIError("Please enter the stack name or stack resource id")
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
 def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=None, snapshot=None):
@@ -2328,15 +2328,15 @@ def delete_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=
         try:
             rcf.deployment_stack_snapshots.get_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
         except:
-            raise CLIError("DeploymentStack Snapshot " + snapshot_arr[-1] + " not found in the subscription scope.")
+            raise ResourceNotFoundError("DeploymentStack Snapshot " + snapshot_arr[-1] + " not found in the subscription scope.")
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
         try:
             rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
         except:
-            raise CLIError("DeploymentStack Snapshot " + name + " not found in the subscription scope.")
+            raise ResourceNotFoundError("DeploymentStack Snapshot " + name + " not found in the subscription scope.")
         return sdk_no_wait(False, rcf.deployment_stack_snapshots.delete_at_subscription, stack_name, name)
-    raise CLIError("Please enter the (snapshot name and stack name) or snapshot resource id")
+    raise InvalidArgumentValueError("Please enter the (snapshot name and stack name) or snapshot resource id")
 
 
 def delete_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=None, resource_group=None, snapshot=None):
@@ -2346,15 +2346,15 @@ def delete_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_nam
         try:
             rcf.deployment_stack_snapshots.get_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
         except:
-            raise CLIError("Snapshot " + snapshot_arr[-1] + " not found in the stack.")
+            raise ResourceNotFoundError("Snapshot " + snapshot_arr[-1] + " not found in the stack.")
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name and resource_group:
         try:
             rcf.deployment_stack_snapshots.get_at_resource_group(resource_group, stack_name, name)
         except:
-            raise CLIError("Snapshot " + name + " not found in the stack")
+            raise ResourceNotFoundError("Snapshot " + name + " not found in the stack")
         return rcf.deployment_stack_snapshots.begin_delete_at_resource_group(resource_group, stack_name, name)
-    raise CLIError("Please enter the (snapshot name, stack name and resource group) or snapshot resource id")
+    raise InvalidArgumentValueError("Please enter the (snapshot name, stack name and resource group) or snapshot resource id")
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
