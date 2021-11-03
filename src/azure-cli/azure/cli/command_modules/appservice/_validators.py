@@ -5,7 +5,7 @@
 
 import ipaddress
 
-from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, ValidationError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from knack.log import get_logger
@@ -244,6 +244,22 @@ def _validate_service_tag_existence(cmd, namespace):
         if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
             raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
                                      'Cannot add duplicate Service Tag values.')
+
+
+def validate_staticsite_does_not_exist(cmd, namespace):
+    from azure.mgmt.web import WebSiteManagementClient
+    from azure.core.exceptions import ResourceNotFoundError
+
+    client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).static_sites
+    try:
+        client.get_static_site(namespace.resource_group_name, namespace.name)
+        exists = True
+    except ResourceNotFoundError:
+        exists = False
+
+    if exists:
+        raise ValidationError("Static Web App {} already exists in resource group {}".format(
+            namespace.name, namespace.resource_group_name))
 
 
 def validate_public_cloud(cmd):
