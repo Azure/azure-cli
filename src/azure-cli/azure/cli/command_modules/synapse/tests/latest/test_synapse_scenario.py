@@ -1203,9 +1203,8 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
+            'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c'
         })
