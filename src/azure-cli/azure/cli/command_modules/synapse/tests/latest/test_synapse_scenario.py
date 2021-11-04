@@ -2559,12 +2559,12 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'chayang-test-rg',
-            'workspace': 'zes0219test',
+            'rg': 'rgtesting',
+            'workspace': 'testingsynapseworkspace',
             'name': 'integrationruntime',
             'selfhosted-name': 'selfhostedir',
-            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'ssisirname':'testssisir'})
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'ssisirname': 'testssisir'})
 
         # create managed integration runtime
         self.cmd(
