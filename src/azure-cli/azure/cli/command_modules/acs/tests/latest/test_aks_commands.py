@@ -1435,7 +1435,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags}', checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1 --tags {tags}', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -1484,7 +1484,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # nodepool update
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --tags {new_tags}', checks=[
             self.check('tags.key2', 'value2'),
-            self.check('labels.label1', 'value1'),
+            self.check('nodeLabels.label1', 'value1'),
         ])
 
         # #nodepool delete
@@ -1562,7 +1562,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # nodepool add user mode pool
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags}', checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1 --tags {tags}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('mode', 'User')
         ])
@@ -1586,7 +1586,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool add another system mode pool
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool3_name} --labels {labels} --node-count=1 --tags {tags} --mode system', checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool3_name} --node-count=1 --tags {tags} --mode system', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -1600,8 +1600,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --no-wait', checks=[self.is_empty()])
 
         # nodepool update nodepool2 to system pool
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --mode System', checks=[
-            self.check('mode', 'System')
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --mode System', checks=[
+            self.check('mode', 'System'),
+            self.check('nodeLabels.label1', 'value1')
         ])
 
         # nodepool show
@@ -3803,9 +3804,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool update
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --tags {new_tags}', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels label1=value2 --tags {new_tags}', checks=[
             self.check('tags.key2', 'value2'),
-            self.check('labels.label1', 'value1'),
+            self.check('nodeLabels.label1', 'value2'),
         ])
 
         # #nodepool delete
