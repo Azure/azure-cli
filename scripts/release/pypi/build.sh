@@ -17,7 +17,7 @@ echo "Branch $branch"
 echo "Search setup files from `pwd`."
 python --version
 
-pip install -U pip setuptools wheel
+pip install -U pip setuptools==58.4.0 wheel
 pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
