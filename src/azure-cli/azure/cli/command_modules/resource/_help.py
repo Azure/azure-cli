@@ -2615,7 +2615,7 @@ examples:
 
 helps['stacks group list'] = """
 type: command
-short-summary: Show all deployment stacks in resource group
+short-summary: List all deployment stacks in resource group
 examples:
   - name: List all stacks in resource group
     text: az stacks group list --resource-group "ResourceGroup"
