@@ -5,6 +5,7 @@
 
 import os
 import zipfile
+from random import randint
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -340,7 +341,7 @@ def get_app_details(cmd, name):
 
 
 def get_rg_to_use(user, rg_name=None):
-    default_rg = "{}_rg".format(user)
+    default_rg = "{}_rg_{:04}".format(user, randint(0, 9999))
     if rg_name is not None:
         return rg_name
     return default_rg
@@ -378,7 +379,7 @@ def detect_os_form_src(src_dir, html=False):
 
 
 def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, plan=None):
-    _default_asp = "{}_asp_0".format(user)
+    _default_asp = "{}_asp_{:04}".format(user, randint(0, 9999))
     if plan is None:  # --plan not provided by user
         # get the plan name to use
         return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
