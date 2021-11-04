@@ -2575,7 +2575,7 @@ examples:
 
 helps['stacks sub list'] = """
 type: command
-short-summary: Show all deployment stacks in subscription
+short-summary: List all deployment stacks in subscription
 examples:
   - name: List all stacks 
     text: az stacks sub list
@@ -2615,7 +2615,7 @@ examples:
 
 helps['stacks group list'] = """
 type: command
-short-summary: Show all deployment stacks in resource group
+short-summary: List all deployment stacks in resource group
 examples:
   - name: List all stacks in resource group
     text: az stacks group list --resource-group "ResourceGroup"
@@ -2643,7 +2643,7 @@ examples:
 
 helps['stacks snapshot sub list'] = """
 type: command
-short-summary: Show all snapshots in specified deployment stack at subscription scope
+short-summary: List all snapshots in specified deployment stack at subscription scope
 examples:
   - name: List all snapshots using stack name
     text: az stacks snapshot sub list --name "StackName"
@@ -2673,7 +2673,7 @@ examples:
 
 helps['stacks snapshot group list'] = """
 type: command
-short-summary: Show all snapshots in specified deployment stack at resource group scope
+short-summary: List all snapshots in specified deployment stack at resource group scope
 examples:
   - name: List all snapshots using stack name
     text: az stacks snapshot group list --name "StackName" --resource-group "ResourceGroup"
