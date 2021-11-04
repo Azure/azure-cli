@@ -2643,7 +2643,7 @@ examples:
 
 helps['stacks snapshot sub list'] = """
 type: command
-short-summary: Show all snapshots in specified deployment stack at subscription scope
+short-summary: List all snapshots in specified deployment stack at subscription scope
 examples:
   - name: List all snapshots using stack name
     text: az stacks snapshot sub list --name "StackName"
