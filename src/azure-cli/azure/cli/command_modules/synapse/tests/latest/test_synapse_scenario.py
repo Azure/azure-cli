@@ -1285,13 +1285,13 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0219test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'rivertiger0220 ',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtesting',
+            'sql-pool': 'testrestoresqlpool ',
             'performance-level': 'DW1000c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2021-05-24T08:09:15'
+            'restore-point-time': '2021-11-04T07:02:09'
         })
 
         # restore sql pool
@@ -1326,10 +1326,10 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0514test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'sqlzes0514test',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtesting',
+            'sql-pool': 'testingsqlpool',
             'schema': 'dbo',
             'table': 'Persons',
             'column': 'City',
