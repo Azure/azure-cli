@@ -231,7 +231,7 @@ examples:
         az keyvault key decrypt -n mykey --vault-name myvault -a RSA-OAEP --data-type base64 --value "CbFcCxHG7WTU+nbpFRrHoqSduwlPy8xpWxf1JxZ2y12BY/qFJirMSYq1i4SO9rvSmvmEMxFV5kw5s9Tc+YoKmv8X6oe+xXx+JytYV8obA5l3OQD9epuuQHWW0kir/mp88lzhcYWxYuF7mKDpPKDV4if+wnAZqQ4woB6t2JEZU5MVK3s+3E/EU4ehb5XrVxAl6xpYy8VYbyF33uJ5s+aUsYIrsVtXgrW99HQ3ic7tJtIOGuWqKhPCdQRezRkOcyxkJcmnDHOLjWA/9strzzx/dyg/t884gT7qrkmIHh8if9SFal/vi1h4XhoDqUleMTnKev2IFHyDNcYVYG3pftJiuA=="
   - name: Decrypt value(Base64 encoded string returned by encrypt command) with MHSM's key using AES-GCM and get result as plaintext.
     text: |
-        az keyvault key decrypt -n mykey --hsm-name myhsm -a A256GCM --value "N5w02jS77xg536Ddzv/xPWQ=" --data-type plaintext 
+        az keyvault key decrypt -n mykey --hsm-name myhsm -a A256GCM --value "N5w02jS77xg536Ddzv/xPWQ=" --data-type plaintext
         --aad "101112131415161718191a1b1c1d1e1f" --iv "727b26f78e55cf4cd8d34216" --tag "f7207d02cead35a77a1c7e5f8af959e9"
 """
 
