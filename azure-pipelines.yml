@@ -116,7 +116,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
 
   steps:
   - task: UsePythonVersion@0
@@ -154,7 +154,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -182,7 +182,7 @@ jobs:
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
