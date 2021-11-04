@@ -2378,6 +2378,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_secret_rotation=False,
                rotation_poll_interval=None,
                tags=None,
+               nodepool_labels=None,
                aks_custom_headers=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3871,6 +3872,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          tags=None,
                          max_surge=None,
                          mode=None,
+                         labels=None,
                          no_wait=False):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,

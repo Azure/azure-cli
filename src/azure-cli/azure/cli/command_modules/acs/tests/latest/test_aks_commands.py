@@ -1482,8 +1482,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool update
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
-            self.check('tags.key2', 'value2')
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --tags {new_tags}', checks=[
+            self.check('tags.key2', 'value2'),
+            self.check('labels.label1', 'value1'),
         ])
 
         # #nodepool delete
@@ -3802,8 +3803,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool update
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
-            self.check('tags.key2', 'value2')
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --tags {new_tags}', checks=[
+            self.check('tags.key2', 'value2'),
+            self.check('labels.label1', 'value1'),
         ])
 
         # #nodepool delete
