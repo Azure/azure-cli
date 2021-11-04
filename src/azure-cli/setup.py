@@ -137,6 +137,7 @@ DEPENDENCIES = [
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
+    'colorama~=0.4.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
     'jsondiff~=1.3.0',
