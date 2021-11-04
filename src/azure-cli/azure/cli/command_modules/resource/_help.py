@@ -2575,7 +2575,7 @@ examples:
 
 helps['stacks sub list'] = """
 type: command
-short-summary: Show all deployment stacks in subscription
+short-summary: List all deployment stacks in subscription
 examples:
   - name: List all stacks 
     text: az stacks sub list
