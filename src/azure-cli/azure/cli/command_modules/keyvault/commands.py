@@ -169,8 +169,6 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('download', 'download_key')
-        # g.keyvault_command('encrypt', 'encrypt', is_preview=True)
-        # g.keyvault_command('decrypt', 'decrypt', transform=transform_key_decryption_output, is_preview=True)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output,

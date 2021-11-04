@@ -1,0 +1,576 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/create?api-version=7.3-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://managedhsm.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-server-latency:
+      - '2'
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"kty": "oct-HSM", "key_size": 256, "key_ops": ["encrypt", "decrypt"],
+      "attributes": {"enabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/create?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"key":{"key_ops":["decrypt","encrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '200'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"key":{"key_ops":["encrypt","decrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20211018-1-9c44708a-develop
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '44'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"alg": "A256GCM", "value": "dGhpcyBpcyBwbGFpbnRleHQ", "aad": "EBESExQVFhcYGRobHB0eHw"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '87'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b/encrypt?api-version=7.3-preview
+  response:
+    body:
+      string: '{"aad":"EBESExQVFhcYGRobHB0eHw","alg":"A256GCM","iv":"2P2Kgh7IZPQpXs5Z","kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","tag":"LdM06a7ez20d6XhOjmAF0Q","value":"cer7mgzKr-yq7RP_hnrmiTo"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '247'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '27'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"key":{"key_ops":["encrypt","decrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20211018-1-9c44708a-develop
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '40'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"alg": "A256GCM", "value": "dGhpcyBpcyBwbGFpbnRleHQ", "aad": "EBESExQVFhcYGRobHB0eHw"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '87'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b/encrypt?api-version=7.3-preview
+  response:
+    body:
+      string: '{"aad":"EBESExQVFhcYGRobHB0eHw","alg":"A256GCM","iv":"Rbajizxbnw2gIaaU","kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","tag":"yHdM_rRTVOFEtl4K8jCI2g","value":"XtIrV5EU4s-DvmcQt1am_hE"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '247'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '11'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"key":{"key_ops":["encrypt","decrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20211018-1-9c44708a-develop
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '43'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"alg": "A256GCM", "value": "cer7mgzKr-yq7RP_hnrmiTo", "iv": "2P2Kgh7IZPQpXs5Z",
+      "aad": "EBESExQVFhcYGRobHB0eHw", "tag": "LdM06a7ez20d6XhOjmAF0Q"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '146'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b/decrypt?api-version=7.3-preview
+  response:
+    body:
+      string: '{"alg":"A256GCM","kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","value":"dGhpcyBpcyBwbGFpbnRleHQ"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '161'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '17'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/?api-version=7.3-preview
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"key":{"key_ops":["encrypt","decrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '319'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-build-version:
+      - 1.0.20211018-1-9c44708a-develop
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"alg": "A256GCM", "value": "XtIrV5EU4s-DvmcQt1am_hE", "iv": "Rbajizxbnw2gIaaU",
+      "aad": "EBESExQVFhcYGRobHB0eHw", "tag": "yHdM_rRTVOFEtl4K8jCI2g"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '146'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - azsdk-python-keyvault-keys/4.5.0b4 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b/decrypt?api-version=7.3-preview
+  response:
+    body:
+      string: '{"alg":"A256GCM","kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","value":"dGhpcyBpcyBwbGFpbnRleHQ"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '161'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001?api-version=7.0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://managedhsm.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-server-latency:
+      - '1'
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001?api-version=7.0
+  response:
+    body:
+      string: '{"attributes":{"created":1636001182,"enabled":true,"exportable":false,"recoverableDays":90,"recoveryLevel":"Recoverable+Purgeable","updated":1636001182},"deletedDate":1636001196,"key":{"key_ops":["decrypt","encrypt"],"kid":"https://ystesthsm.managedhsm.azure.net/keys/oct256key-000001/1184bad837da4d55821f53db3083453b","kty":"oct-HSM"},"recoveryId":"https://ystesthsm.managedhsm.azure.net/deletedkeys/oct256key-000001","scheduledPurgeDate":1643777196}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '467'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '105'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://ystesthsm.managedhsm.azure.net/deletedkeys/oct256key-000001?api-version=7.0
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-security-policy:
+      - default-src 'self'
+      content-type:
+      - application/json; charset=utf-8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.19;act_addr_fam=Ipv4;
+      x-ms-keyvault-region:
+      - eastus
+      x-ms-server-latency:
+      - '120'
+    status:
+      code: 204
+      message: ''
+version: 1

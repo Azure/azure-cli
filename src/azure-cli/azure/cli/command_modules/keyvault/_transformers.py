@@ -60,9 +60,9 @@ def transform_key_encryption_output(result, **command_args):  # pylint: disable=
         'kid': result.key_id,
         'result': base64.b64encode(result.ciphertext),
         'algorithm': result.algorithm,
-        'iv': binascii.hexlify(result.iv),
-        'tag': binascii.hexlify(result.tag),
-        'aad': binascii.hexlify(result.aad)
+        'iv': binascii.hexlify(result.iv) if result.iv else None,
+        'tag': binascii.hexlify(result.tag) if result.tag else None,
+        'aad': binascii.hexlify(result.aad) if result.aad else None
     }
     return output
 

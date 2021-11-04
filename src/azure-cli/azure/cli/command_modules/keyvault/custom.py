@@ -1150,7 +1150,8 @@ def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, ver
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
-def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None, name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
+def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
+                name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
