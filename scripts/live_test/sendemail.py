@@ -68,10 +68,10 @@ def main():
         logger.exception(traceback.format_exc())
 
     # Write database
-    try:
-        write_db(container, testdata)
-    except Exception:
-        logger.exception(traceback.format_exc())
+    # try:
+    #     write_db(container, testdata)
+    # except Exception:
+    #     logger.exception(traceback.format_exc())
 
     logger.warning('Exit main()')
 
