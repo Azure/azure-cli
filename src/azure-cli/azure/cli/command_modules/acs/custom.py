@@ -2429,7 +2429,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not rotation_poll_interval and
             not enable_public_fqdn and
             not disable_public_fqdn and
-            tags is None):
+            tags is None and nodepool_labels is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2461,7 +2461,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--rotation-poll-interval" or '
                        '"--enable-public-fqdn" or '
                        '"--disable-public-fqdn" or '
-                       '"--tags"')
+                       '"--tags or '
+                       '"--nodepool-labels"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
@@ -3888,11 +3889,11 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge):
+    if (update_autoscaler == 0 and not tags and not mode and not max_surge and not labels):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge"')
+                       '"--tags" or "--mode" or "--max-surge" or "--labels"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
