@@ -2571,6 +2571,8 @@ examples:
     text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --location "westus2" --description "description"
   - name: Create a deployment stack with template spec
     text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
+  - name: Create a deployment stack using bicep file.
+    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simple.bicep --location "westus2" --description "description"
 """
 
 helps['stacks sub list'] = """
@@ -2611,6 +2613,8 @@ examples:
     text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --description "description"
   - name: Create a deployment stack with template spec
     text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
+  - name: Create a deployment stack using bicep file.
+    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simple.bicep --description "description"
 """
 
 helps['stacks group list'] = """
