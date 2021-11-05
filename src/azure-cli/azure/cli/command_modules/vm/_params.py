@@ -811,7 +811,7 @@ def load_arguments(self, _):
     with self.argument_context('vm run-command wait') as c:
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
-        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('status', action='store_true', help='Track the run command progress')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
