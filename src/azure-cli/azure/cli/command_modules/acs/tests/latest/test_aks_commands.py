@@ -5985,7 +5985,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         nodepool_labels = "label1=value1 label2=value2"
         self.kwargs.update({
-           'resource_group': resource_group,
+            'resource_group': resource_group,
             'name': aks_name,
             'service_principal': _process_sp_name(sp_name),
             'client_secret': sp_password,
