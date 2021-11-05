@@ -1431,7 +1431,7 @@ class AKSContext:
 
         Note: This function is intended to be used in create mode.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
@@ -1525,7 +1525,7 @@ class AKSContext:
 
         Note: This function is intended to be used in create mode.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
