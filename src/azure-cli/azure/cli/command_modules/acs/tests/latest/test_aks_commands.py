@@ -4005,7 +4005,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool update nodepool2 label
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels label1=value2', checks=[
-            self.check('mode', 'User')
+            self.check('nodeLabels.label1', 'value2')
         ])
 
         # nodepool show
