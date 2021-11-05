@@ -3,13 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import re
 import unittest
-from unittest import mock
 
 from azure.cli.core.auth.adal_authentication import _normalize_expires_on
-from knack.util import CLIError
 
 
 class TestUtil(unittest.TestCase):
