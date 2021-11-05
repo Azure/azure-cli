@@ -4,11 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import requests
-from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import _normalize_scopes, scopes_to_resource
+from .util import _normalize_scopes, scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
 

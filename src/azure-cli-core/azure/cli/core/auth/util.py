@@ -4,9 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from collections import namedtuple
+
 from knack.log import get_logger
 
 logger = get_logger(__name__)
+
+
+AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
 
 
 def aad_error_handler(error, **kwargs):

@@ -5,31 +5,24 @@
 
 # pylint: disable=protected-access
 import json
-import os
-import sys
 import unittest
-from unittest import mock
-import re
-import datetime
-
 from copy import deepcopy
-
-from azure.core.credentials import AccessToken
+from unittest import mock
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
                                      _transform_subscription_for_multiapi)
-
-from azure.mgmt.resource.subscriptions.models import \
-    (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant, TenantIdDescription)
-
+from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
 from azure.identity import AuthenticationRecord
+from azure.mgmt.resource.subscriptions.models import \
+    (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from knack.util import CLIError
 
-
 MOCK_ACCESS_TOKEN = "mock_access_token"
-MOCK_EXPIRES_ON = 1630920323
+MOCK_EXPIRES_ON_STR = "1630920323"
+MOCK_EXPIRES_ON_INT = 1630920323
+MOCK_EXPIRES_ON_DATETIME = '2021-09-06 17:25:23.000000'
 BEARER = 'Bearer'
 
 
@@ -43,14 +36,15 @@ class MockCredential:
         import time
         now = int(time.time())
         # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
-        return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON)
+        return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON_INT)
 
 
 class MSRestAzureAuthStub:
     def __init__(self, *args, **kwargs):
         self._token = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_msi_access_token,
+            'expires_on': MOCK_EXPIRES_ON_STR
         }
         self.set_token_invoked_count = 0
         self.token_read_count = 0
@@ -69,6 +63,9 @@ class MSRestAzureAuthStub:
     @token.setter
     def token(self, value):
         self._token = value
+
+    def get_token(self, *args, **kwargs):
+        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
 class TestProfile(unittest.TestCase):
@@ -1049,7 +1046,8 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
@@ -1060,7 +1058,8 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)
@@ -1084,7 +1083,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
         # the last in the tuple is the whole token entry which has several fields
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
@@ -1095,7 +1095,8 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)
@@ -1124,11 +1125,15 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+
+        # Make sure expires_on and expiresOn are set
+        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for MSI account
-        with self.assertRaisesRegexp(CLIError, "MSI"):
+        with self.assertRaisesRegexp(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
@@ -1157,6 +1162,10 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+
+        # Make sure expires_on and expiresOn are set
+        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
