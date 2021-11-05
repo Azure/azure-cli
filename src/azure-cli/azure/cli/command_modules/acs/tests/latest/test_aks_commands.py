@@ -3815,7 +3815,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='uksouth')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_system_pool_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -3915,14 +3915,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --no-wait', checks=[self.is_empty()])
 
         # nodepool update nodepool2 to system pool
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --mode System --labels label1=value2', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --mode System', checks=[
             self.check('mode', 'System')
         ])
 
         # nodepool show
         self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name}', checks=[
-            self.check('mode', 'System'),
-            self.check('nodeLabels.label1', 'value2')
+            self.check('mode', 'System')
         ])
 
         # delete
@@ -3991,42 +3990,26 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.close(fd)
             os.remove(temp_path)
 
-        # nodepool add user mode pool
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1 --tags {tags}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('mode', 'User')
-        ])
-
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels}', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels {labels}', checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
-
 
         # nodepool list
         self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name}', checks=[
             StringContainCheck(aks_name),
             StringContainCheck(resource_group),
             StringContainCheck(nodepool1_name),
-            StringContainCheck(nodepool2_name),
             self.check('[0].mode', 'System'),
-            self.check('[1].tags.key1', 'value1'),
-            self.check('[1].nodeLabels.label1', 'value1'),
-            self.check('[1].mode', 'User')
-        ])
-
-        # nodepool list in tabular format
-        self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name} -o table', checks=[
-            StringContainCheck(nodepool1_name),
-            StringContainCheck(nodepool2_name)
+            self.check('[0].nodeLabels.label1', 'value1'),
         ])
 
         # nodepool update nodepool2 label
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels label1=value2', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels label1=value2', checks=[
             self.check('mode', 'User')
         ])
 
         # nodepool show
-        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name}', checks=[
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name}', checks=[
             self.check('nodeLabels.label1', 'value2')
         ])
 
