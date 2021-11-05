@@ -5974,3 +5974,45 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=[
             self.is_empty(),
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    def test_aks_update_labels(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_labels = "label1=value1 label2=value2"
+        self.kwargs.update({
+           'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'nodepool_labels': nodepool_labels,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-labels {nodepool_labels}'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+        ])
+
+        nodepool_labels = "label1=value11"
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-labels {nodepool_labels}'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', None),
+        ])
