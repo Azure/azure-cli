@@ -183,7 +183,7 @@ class AddonBase:
         '''Retrive the location of source resource group
         '''
         rg = self._retrive_source_rg()
-        output = run_cli_cmd('az group show -n {}'.format(rg))
+        output = run_cli_cmd('az group show -n {} -o json'.format(rg))
         return output.get('location')
 
     def _get_source_type(self):
