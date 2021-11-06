@@ -3941,11 +3941,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("The webapp '%s' doesn't exist", name)
         sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
-        rg_name = get_rg_to_use(user, loc, os_name, resource_group_name)
+        rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
-                               os_name=os_name,
                                loc=loc,
                                sku=sku,
                                create_rg=_create_new_rg,
