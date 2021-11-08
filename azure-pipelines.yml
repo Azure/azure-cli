@@ -116,7 +116,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
 
   steps:
   - task: UsePythonVersion@0
@@ -154,7 +154,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -182,7 +182,7 @@ jobs:
   dependsOn: BuildWindowsMSI
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -380,6 +380,11 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
+       echo "== Testing pip install on Python 3.10 =="
+       docker run \
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+
     displayName: 'Test pip Install'
 
 - job: TestCore
@@ -395,6 +400,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -414,6 +421,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -436,6 +445,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -459,6 +470,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -478,6 +491,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -497,6 +512,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
@@ -516,6 +533,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - template: .azure-pipelines/templates/automation_test.yml
       parameters:
