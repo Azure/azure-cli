@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params, validate_staticsite_does_not_exist
+from ._validators import validate_onedeploy_params
 
 
 def output_slots_in_table(slots):
@@ -431,7 +431,7 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_show_command('show', 'show_staticsite')
-        g.custom_command('create', 'create_staticsites', supports_no_wait=True, validator=validate_staticsite_does_not_exist)
+        g.custom_command('create', 'create_staticsites', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)

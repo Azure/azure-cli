@@ -12,7 +12,6 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment
-from azure.cli.command_modules.appservice._validators import validate_staticsite_does_not_exist
 from azure.cli.core.azclierror import ValidationError
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -26,21 +25,6 @@ class TestStaticAppCommands(unittest.TestCase):
         response = list_staticsites(self.mock_cmd)
 
         self.assertEqual(len(response), 0)
-
-    def test_create_validator(self):
-        from azure.core.exceptions import ResourceNotFoundError
-
-        with mock.patch("azure.cli.command_modules.appservice._validators.get_mgmt_service_client") as mock_get_client:
-            with self.assertRaises(ValidationError):
-                validate_staticsite_does_not_exist(self.mock_cmd, mock.MagicMock())
-
-            mock_client = mock.MagicMock()
-            def raise_resource_not_found(*args, **kwargs):
-                raise ResourceNotFoundError()
-            mock_client.get_static_site.side_effect = raise_resource_not_found
-            mock_get_client.return_value.static_sites = mock_client
-            validate_staticsite_does_not_exist(self.mock_cmd, mock.MagicMock())
-
 
     def test_list_staticapp_with_resourcegroup(self):
         self.staticapp_client.get_static_sites_by_resource_group.return_value = [self.app1]
@@ -126,6 +110,15 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
         self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
         self.assertEqual(output_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
+
+        # assert that a duplicate create call doesn't raise an error or call client create method again
+        create_staticsites(
+            self.mock_cmd, self.rg1, self.name1, self.location1,
+            self.source1, self.branch1, self.token1,
+            app_location=app_location, api_location=api_location, output_location=output_location,
+            tags=tags)
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+
 
     def test_create_staticapp_with_standard_sku(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
