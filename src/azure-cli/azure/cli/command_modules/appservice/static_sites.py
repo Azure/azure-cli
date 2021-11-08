@@ -229,9 +229,8 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        tags=None, no_wait=False, sku='Free', login_with_github=False):
     from azure.core.exceptions import ResourceNotFoundError
 
-    client = _get_staticsites_client_factory(cmd.cli_ctx)
     try:
-        site = client.get_static_site(resource_group_name, name)
+        site = show_staticsite(cmd, name, resource_group_name)
         logger.warning("Static Web App %s already exists in resource group %s", name, resource_group_name)
         return site
     except ResourceNotFoundError:
@@ -265,6 +264,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         build_properties=build,
         sku=sku_def)
 
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)

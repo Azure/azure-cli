@@ -12,7 +12,7 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment
-from azure.cli.core.azclierror import ValidationError
+from azure.core.exceptions import ResourceNotFoundError
 
 class TestStaticAppCommands(unittest.TestCase):
     def setUp(self):
@@ -84,6 +84,7 @@ class TestStaticAppCommands(unittest.TestCase):
         with self.assertRaises(CLIError):
             delete_staticsite(self.mock_cmd, self.name1_not_exist)
 
+
     def test_create_staticapp(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -92,11 +93,12 @@ class TestStaticAppCommands(unittest.TestCase):
         output_location = '/.git/'
         tags = {'key1': 'value1'}
 
-        create_staticsites(
-            self.mock_cmd, self.rg1, self.name1, self.location1,
-            self.source1, self.branch1, self.token1,
-            app_location=app_location, api_location=api_location, output_location=output_location,
-            tags=tags)
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+            create_staticsites(
+                self.mock_cmd, self.rg1, self.name1, self.location1,
+                self.source1, self.branch1, self.token1,
+                app_location=app_location, api_location=api_location, output_location=output_location,
+                tags=tags)
 
         self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
         arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
@@ -124,9 +126,10 @@ class TestStaticAppCommands(unittest.TestCase):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
         self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
 
-        create_staticsites(
-            self.mock_cmd, self.rg1, self.name1, self.location1,
-            self.source1, self.branch1, self.token1, sku='standard')
+        with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+            create_staticsites(
+                self.mock_cmd, self.rg1, self.name1, self.location1,
+                self.source1, self.branch1, self.token1, sku='standard')
 
         self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
         arg_list = self.staticapp_client.begin_create_or_update_static_site.call_args[1]
@@ -139,11 +142,12 @@ class TestStaticAppCommands(unittest.TestCase):
         tags = {'key1': 'value1'}
 
         with self.assertRaises(CLIError):
-            create_staticsites(
-                self.mock_cmd, self.rg1, self.name1, self.location1,
-                self.source1, self.branch1,
-                app_location=app_location, api_location=api_location, output_location=output_location,
-                tags=tags)
+            with mock.patch("azure.cli.command_modules.appservice.static_sites.show_staticsite", side_effect=ResourceNotFoundError("msg")):
+                create_staticsites(
+                    self.mock_cmd, self.rg1, self.name1, self.location1,
+                    self.source1, self.branch1,
+                    app_location=app_location, api_location=api_location, output_location=output_location,
+                    tags=tags)
 
     def test_update_staticapp(self):
         from azure.mgmt.web.models import StaticSiteARMResource, SkuDescription
