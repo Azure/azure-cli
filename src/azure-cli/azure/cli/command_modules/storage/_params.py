@@ -22,7 +22,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_immutability_arguments, validate_blob_name_for_upload)
+                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -1512,6 +1512,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
+
+    with self.argument_context('storage share list-handle') as c:
+        c.register_path_argument(default_file_param="")
+        c.argument('recursive', arg_type=get_three_state_flag())
+
+    with self.argument_context('storage share close-handle') as c:
+        c.register_path_argument(default_file_param="")
+        c.argument('recursive', arg_type=get_three_state_flag(),
+                   help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
+                        "files, its subdirectories and their files.")
+        c.argument('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
+                   help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
+        c.argument('marker', help="An opaque continuation token. This value can be retrieved from the next_marker field"
+                                  " of a previous generator object if it has not finished closing handles. "
+                                  "If specified, this generator will begin closing handles from the point where the "
+                                  "previous generator stopped.")
+        c.argument('handle_id', help="Specifies handle ID opened on the file or directory to be closed. "
+                                     "Astrix (‘*’) is a wildcard that specifies all handles.")
+        c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
 
     with self.argument_context('storage directory') as c:
         c.argument('directory_name', directory_type, options_list=('--name', '-n'))
