@@ -1290,7 +1290,8 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     if tag:
         key = list(tag.keys())[0]
         filters.append("tagname eq '{}'".format(key))
-        filters.append("tagvalue eq '{}'".format(tag[key]))
+        if tag[key]:
+            filters.append("tagvalue eq '{}'".format(tag[key]))
 
     filter_text = ' and '.join(filters) if filters else None
 
