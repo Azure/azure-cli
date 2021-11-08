@@ -362,21 +362,22 @@ class Profile:
 
         account = self.get_subscription(subscription)
 
-        # This is not used anyway, just a placeholder
-        mi_resoure = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
             # managed identity
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for managed identity account")
-            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, mi_resoure)
+            from .auth.util import scopes_to_resource
+            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
+                                                         scopes_to_resource(scopes))
             sdk_token = msi_creds.get_token(*scopes)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id, mi_resoure)
+            from .auth.util import scopes_to_resource
+            msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id,
+                                                         scopes_to_resource(scopes))
             sdk_token = msi_creds.get_token(*scopes)
         else:
             credential = self._create_credential(account, tenant)
