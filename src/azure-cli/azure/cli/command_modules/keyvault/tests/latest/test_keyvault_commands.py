@@ -1282,7 +1282,7 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.assertIsNotNone(result['value'])
 
     # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
-    #@record_only()
+    @record_only()
     def test_keyvault_hsm_key_encrypt_AES(self):
         self.kwargs.update({
             'hsm_name': TEST_HSM_NAME,
