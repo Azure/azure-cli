@@ -2306,6 +2306,20 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('additionalCapabilities.ultraSsdEnabled', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_hibernation_enabled', location='eastus2')
+    def test_vm_hibernation_enabled(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --hibernation-enabled Ture', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', True)
+        ])
+
+        self.cmd('vm update -g {rg} -n {vm} --hibernation-enabled False', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', False)
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 
