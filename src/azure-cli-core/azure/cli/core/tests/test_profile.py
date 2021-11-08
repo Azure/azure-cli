@@ -30,17 +30,20 @@ BEARER = 'Bearer'
 class MockCredential:
 
     def __init__(self, *args, **kwargs):
+        self.get_token_scopes = None
         super().__init__()
 
     def get_token(self, *scopes, **kwargs):
+        self.get_token_scopes = scopes
         from azure.core.credentials import AccessToken
-        import time
-        now = int(time.time())
         # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
         return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON_INT)
 
 
 class MSRestAzureAuthStub:
+
+    return_value = None
+
     def __init__(self, *args, **kwargs):
         self._token = {
             'token_type': 'Bearer',
@@ -49,9 +52,12 @@ class MSRestAzureAuthStub:
         }
         self.set_token_invoked_count = 0
         self.token_read_count = 0
+        self.get_token_scopes = None
         self.client_id = kwargs.get('client_id')
         self.object_id = kwargs.get('object_id')
         self.msi_res_id = kwargs.get('msi_res_id')
+        self.resource = kwargs.get('resource')
+        MSRestAzureAuthStub.return_value = self
 
     def set_token(self):
         self.set_token_invoked_count += 1
@@ -66,6 +72,7 @@ class MSRestAzureAuthStub:
         self._token = value
 
     def get_token(self, *args, **kwargs):
+        self.get_token_scopes = args
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
@@ -261,7 +268,8 @@ class TestProfile(unittest.TestCase):
                 'authority_type': 'MSSTS'
             }]
 
-        cls.msal_scopes = ['https://foo/.default']
+        cls.adal_resource = 'https://foo/'
+        cls.msal_scopes = ['https://foo//.default']
 
         cls.service_principal_id = "00000001-0000-0000-0000-000000000000"
         cls.service_principal_secret = "test_secret"
@@ -1037,7 +1045,7 @@ class TestProfile(unittest.TestCase):
 
         # action
         # Get token with ADAL-style resource
-        resource_result = profile.get_raw_token(resource='https://foo')
+        resource_result = profile.get_raw_token(resource=self.adal_resource)
         # Get token with MSAL-style scopes
         scopes_result = profile.get_raw_token(scopes=self.msal_scopes)
 
@@ -1055,7 +1063,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
         # Test get_raw_token with tenant
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1068,7 +1076,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
-        get_service_principal_credential_mock.return_value = MockCredential()
+        credential_mock = MockCredential()
+        get_service_principal_credential_mock.return_value = credential_mock
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -1078,9 +1087,11 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
         # action
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource)
 
         # verify
+        assert list(credential_mock.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
         # the last in the tuple is the whole token entry which has several fields
@@ -1092,7 +1103,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
         # Test get_raw_token with tenant
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1120,9 +1131,12 @@ class TestProfile(unittest.TestCase):
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
-        # assert
+        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
+        assert MSRestAzureAuthStub.return_value.resource == self.adal_resource
+        assert list(MSRestAzureAuthStub.return_value.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
@@ -1157,9 +1171,12 @@ class TestProfile(unittest.TestCase):
         mock_msi_auth.side_effect = MSRestAzureAuthStub
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
-        # assert
+        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
+        assert MSRestAzureAuthStub.return_value.resource == self.adal_resource
+        assert list(MSRestAzureAuthStub.return_value.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
