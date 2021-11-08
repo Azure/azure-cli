@@ -222,8 +222,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     immutability_period_since_creation_in_days_type = CLIArgumentType(
         options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
-        help='The immutability period for the blobs in the container since the policy creation, in days.',
-        is_preview=True
+        help='The immutability period for the blobs in the container since the policy creation, in days.'
     )
 
     account_immutability_policy_state_enum = self.get_sdk(
@@ -238,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'Locked state only allows the increase of the immutability retention time. '
         'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
         'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
-        'be reverted.', is_preview=True)
+        'be reverted.')
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
@@ -365,14 +364,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' at the account creation time. When set to true, it enables object level immutability for all '
                         'the containers in the account by default.',
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('immutability_period_since_creation_in_days',
                    arg_type=immutability_period_since_creation_in_days_type,
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
                    options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
                    min_api='2021-06-01',
@@ -381,7 +380,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
@@ -460,7 +459,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'When enabled, new blocks can be written to an append blob while maintaining immutability '
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
-                   arg_group='Account Level Immutability', is_preview=True)
+                   arg_group='Account Level Immutability')
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
