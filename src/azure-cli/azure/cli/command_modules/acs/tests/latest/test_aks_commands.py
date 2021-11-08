@@ -6009,9 +6009,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
         ])
 
-        nodepool_labels = "label1=value11"
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-labels {nodepool_labels}'
+                     '--nodepool-labels label1=value11'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
