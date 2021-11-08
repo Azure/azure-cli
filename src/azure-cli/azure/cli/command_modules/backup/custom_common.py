@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-import azure.cli.command_modules.backup.custom_help as custom_help
+from azure.cli.command_modules.backup import custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
     protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
