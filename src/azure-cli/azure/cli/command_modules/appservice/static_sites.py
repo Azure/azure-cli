@@ -6,6 +6,7 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.azclierror import ValidationError
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -197,7 +198,7 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None):
             to_remove = {x.lower() for x in external_identities}
             non_existing = to_remove.difference(existing_identities)
             if non_existing:
-                raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+                raise ValidationError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
             if not list(existing_identities - to_remove):
                 if staticsite.identity.type == IdentityType.user_assigned:
                     staticsite.identity.type = IdentityType.none
