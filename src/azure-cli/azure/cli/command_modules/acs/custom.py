@@ -2731,7 +2731,8 @@ def aks_update(cmd, client, resource_group_name, name,
         azure_keyvault_secrets_provider_addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
 
     if nodepool_labels is not None:
-        instance.node_labels = nodepool_labels
+        for agent_profile in instance.agent_pool_profiles:
+            agent_profile.node_labels = nodepool_labels
 
     # normalize user-provided header
     # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
