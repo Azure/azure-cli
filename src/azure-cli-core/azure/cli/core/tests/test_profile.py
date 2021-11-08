@@ -5,6 +5,7 @@
 
 # pylint: disable=protected-access
 import json
+import datetime
 import unittest
 from copy import deepcopy
 from unittest import mock
@@ -22,7 +23,7 @@ from knack.util import CLIError
 MOCK_ACCESS_TOKEN = "mock_access_token"
 MOCK_EXPIRES_ON_STR = "1630920323"
 MOCK_EXPIRES_ON_INT = 1630920323
-MOCK_EXPIRES_ON_DATETIME = '2021-09-06 17:25:23.000000'
+MOCK_EXPIRES_ON_DATETIME = datetime.datetime.fromtimestamp(MOCK_EXPIRES_ON_INT).strftime("%Y-%m-%d %H:%M:%S.%f")
 BEARER = 'Bearer'
 
 
