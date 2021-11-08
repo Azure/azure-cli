@@ -795,6 +795,24 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
                  checks=[self.check('incremental', True)])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_copy_start_')
+    def test_vm_snapshot_copy_start_detection(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('testdisk-', length=24),
+            'snapshot1': self.create_random_name('testsnap1-', length=24),
+            'snapshot2': self.create_random_name('testsnap2-', length=24)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l westus')
+        # in the same region, it should default copyStart as false
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk}',
+                 checks=[self.check('creationData.createOption', 'Copy')])
+        # in different region, it should default copyStart as True
+        # TODO: should not throw exception after feature GA
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegexp(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+            self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
+
     """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
     def test_vm_large_disk(self, resource_group):
