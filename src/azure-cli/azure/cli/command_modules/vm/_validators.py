@@ -542,7 +542,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
 
-    _validate_vm_data_disk_delete_option(namespace)
     # pylint: disable=line-too-long
     namespace.disk_info = normalize_disk_info(size=vm_size,
                                               image_data_disks=image_data_disks,
@@ -1028,14 +1027,6 @@ def _validate_vm_nic_delete_option(namespace):
                                             "--nics nic1 nic2 --nic-delete-option nic1=Delete nic2=Detach or specify "
                                             "delete option for all: --nics nic1 nic2 --nic-delete-option Delete or "
                                             "specify delete option for the new nic created: --nic-delete-option Delete")
-
-
-def _validate_vm_data_disk_delete_option(namespace):
-    if "attach_data_disks" not in namespace:
-        return
-    if not namespace.attach_data_disks and namespace.data_disk_delete_option:
-        if len(namespace.data_disk_delete_option) == 1 and len(namespace.data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
-            namespace.data_disk_delete_option = namespace.data_disk_delete_option[0]
 
 
 def _validate_vm_vmss_create_auth(namespace, cmd=None):
