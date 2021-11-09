@@ -2566,6 +2566,35 @@ helps['staticwebapp secrets reset-api-key'] = """
       text: az staticwebapp secrets reset-api-key --name MyStaticAppName
 """
 
+helps['staticwebapp functions'] = """
+type: group
+short-summary: Link or unlink a prexisting functionapp with a static webapp. Also known as "Bring your own Functions."
+"""
+
+helps['staticwebapp functions link'] = """
+    type: command
+    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
+    examples:
+    - name: Link a function to a static webapp
+      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
+"""
+
+helps['staticwebapp functions unlink'] = """
+    type: command
+    short-summary: Unlink an Azure Function from a static webapp
+    examples:
+    - name: Show static app functions.
+      text: az staticwebapp functions unlink -n MyStaticAppName -g MyResourceGroup
+"""
+
+helps['staticwebapp functions show'] = """
+    type: command
+    short-summary: Show details on the Azure Function linked to a static webapp
+    examples:
+    - name: Show static app functions.
+      text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
+"""
+
 helps['webapp deploy'] = """
     type: command
     short-summary: Deploys a provided artifact to Azure Web Apps.

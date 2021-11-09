@@ -5,13 +5,16 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
+
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import ValidationError
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
-from .custom import _build_identities_info
+from .custom import show_functionapp, _build_identities_info
+
 
 logger = get_logger(__name__)
 
@@ -435,7 +438,6 @@ def _get_resource_group_name_of_staticsite(client, static_site_name):
 
 
 def _parse_resource_group_from_arm_id(arm_id):
-    from msrestazure.tools import parse_resource_id
     components = parse_resource_id(arm_id)
     rg_key = 'resource_group'
     if rg_key not in components:
@@ -446,7 +448,7 @@ def _parse_resource_group_from_arm_id(arm_id):
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):
     from azure.mgmt.web import WebSiteManagementClient
-    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).static_sites
+    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient, api_version=api_version).static_sites
     if api_version:
         client.api_version = api_version
     return client
@@ -501,3 +503,40 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
                                             name=name,
                                             reset_properties_envelope=reset_envelope)
+
+
+def link_user_function(cmd, name, resource_group_name, function_resource_id, force=False):
+    from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
+
+    if force:
+        logger.warning("--force: overwriting static webapp connection with this function if one exists")
+
+    parsed_rid = parse_resource_id(function_resource_id)
+    function_name = parsed_rid["name"]
+    function_group = parsed_rid["resource_group"]
+    function_location = show_functionapp(cmd, resource_group_name=function_group, name=function_name).location
+
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
+                                                            function_app_region=function_location)
+
+    return client.begin_register_user_provided_function_app_with_static_site(
+        name=name,
+        resource_group_name=resource_group_name,
+        function_app_name=function_name,
+        static_site_user_provided_function_envelope=function,
+        is_forced=force)
+
+
+def unlink_user_function(cmd, name, resource_group_name):
+    function_name = list(get_user_function(cmd, name, resource_group_name))[0].name
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    return client.detach_user_provided_function_app_from_static_site(
+        name=name,
+        resource_group_name=resource_group_name,
+        function_app_name=function_name)
+
+
+def get_user_function(cmd, name, resource_group_name):
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
