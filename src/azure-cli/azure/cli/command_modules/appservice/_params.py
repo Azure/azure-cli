@@ -926,8 +926,12 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='Scale of front ends to app service plan instance ratio between 5 and 15.')
-        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, help='Size of front end servers.')
+                   help='(ASEv2 only) Scale of front ends to app service plan instance ratio between 5 and 15.')
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
+                   help='(ASEv2 only) Size of front end servers.')
+        c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
+                   options_list=['--allow-new-private-endpoint-connections', '-p'],
+                   help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
     with self.argument_context('appservice ase list-addresses') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -1005,6 +1009,13 @@ def load_arguments(self, _):
                         "Define roles in routes.json during root directory of your GitHub repo.")
         c.argument('invitation_expiration_in_hours', options_list=['--invitation-expiration-in-hours'],
                    help="This value sets when the link will expire in hours. The maximum is 168 (7 days).")
+    with self.argument_context('staticwebapp identity') as c:
+        c.argument('scope', help="The scope the managed identity has access to")
+        c.argument('role', help="Role name or id the managed identity will be assigned")
+    with self.argument_context('staticwebapp identity assign') as c:
+        c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+    with self.argument_context('staticwebapp identity remove') as c:
+        c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
     with self.argument_context('staticwebapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)

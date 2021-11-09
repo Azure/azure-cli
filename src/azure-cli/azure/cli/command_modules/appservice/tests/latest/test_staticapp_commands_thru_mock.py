@@ -11,7 +11,8 @@ from azure.cli.command_modules.appservice.static_sites import \
     set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_function_app_settings, \
     set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
-    reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function
+    reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function, \
+    assign_identity, remove_identity, show_identity
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -527,6 +528,29 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.list_static_site_secrets.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
         from ast import literal_eval
         self.assertEqual(literal_eval(secret.__str__())["properties"]["apiKey"], "key")
+
+
+    def test_staticsite_identity_assign(self):
+        from azure.mgmt.web.models import ManagedServiceIdentity, ManagedServiceIdentityType
+        self.mock_cmd.get_models.return_value = ManagedServiceIdentity, ManagedServiceIdentityType
+
+        assign_identity(self.mock_cmd, self.rg1, self.name1)
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+
+    def test_staticsite_identity_remove(self):
+        from azure.mgmt.web.models import ManagedServiceIdentityType, Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties
+        get_models = lambda s: ManagedServiceIdentityType if s == "ManagedServiceIdentityType" else Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties
+        self.mock_cmd.get_models.side_effect = get_models
+
+        remove_identity(self.mock_cmd, self.rg1, self.name1)
+        self.staticapp_client.begin_create_or_update_static_site.assert_called_once()
+
+    def test_staticsite_identity_show(self):
+        mock_site = mock.MagicMock()
+        mock_site.identity = "identity"
+        self.staticapp_client.get_static_site.return_value = mock_site
+        self.assertEqual(show_identity(self.mock_cmd, self.rg1, self.name1), "identity")
+
 
     def test_reset_staticsite_api_key(self):
         from azure.mgmt.web.models import StringDictionary, StaticSiteResetPropertiesARMResource
