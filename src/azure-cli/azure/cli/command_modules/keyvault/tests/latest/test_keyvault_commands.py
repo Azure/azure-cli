@@ -1267,6 +1267,8 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
+    @record_only()
     def test_keyvault_hsm_key_random(self):
         self.kwargs.update({
             'hsm_name': TEST_HSM_NAME,
@@ -1278,6 +1280,32 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
 
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
+
+    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
+    @record_only()
+    def test_keyvault_hsm_key_encrypt_AES(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL,
+            'key': self.create_random_name('oct256key-', 24)
+        })
+
+        self.cmd('keyvault key create --kty oct-HSM --size 256 -n {key} --hsm-name {hsm_name} --ops encrypt decrypt')
+
+        self.kwargs['plaintext_value'] = 'this is plaintext'
+        self.kwargs['base64_value'] = 'dGhpcyBpcyBwbGFpbnRleHQ='
+        self.kwargs['aad'] = '101112131415161718191a1b1c1d1e1f'
+        encryption_result1 = self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a A256GCM --value "{plaintext_value}" --data-type plaintext --aad {aad}').get_output_in_json()
+        encryption_result2 = self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a A256GCM --value "{base64_value}" --data-type base64 --aad {aad}').get_output_in_json()
+        self.cmd('keyvault key decrypt -n {} --hsm-name {} -a A256GCM --value "{}" --data-type plaintext --iv {} --tag {} --aad {}'
+                 .format(self.kwargs['key'], self.kwargs['hsm_name'], encryption_result1['result'], encryption_result1['iv'], encryption_result1['tag'], encryption_result1['aad']),
+                 checks=self.check('result', '{plaintext_value}'))
+        self.cmd('keyvault key decrypt -n {} --hsm-name {} -a A256GCM --value "{}" --data-type base64 --iv {} --tag {} --aad {}'
+                 .format(self.kwargs['key'], self.kwargs['hsm_name'], encryption_result2['result'], encryption_result2['iv'], encryption_result2['tag'], encryption_result2['aad']),
+                 checks=self.check('result', '{base64_value}'))
+
+        self.cmd('keyvault key delete -n {key} --hsm-name {hsm_name}')
+        self.cmd('keyvault key purge -n {key} --hsm-name {hsm_name}')
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):

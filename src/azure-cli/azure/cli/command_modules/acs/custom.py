@@ -2378,6 +2378,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_secret_rotation=False,
                rotation_poll_interval=None,
                tags=None,
+               nodepool_labels=None,
                aks_custom_headers=None):
     ManagedClusterSKU = cmd.get_models('ManagedClusterSKU',
                                        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -2428,7 +2429,7 @@ def aks_update(cmd, client, resource_group_name, name,
             not rotation_poll_interval and
             not enable_public_fqdn and
             not disable_public_fqdn and
-            tags is None):
+            tags is None and nodepool_labels is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2460,7 +2461,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--rotation-poll-interval" or '
                        '"--enable-public-fqdn" or '
                        '"--disable-public-fqdn" or '
-                       '"--tags"')
+                       '"--tags or '
+                       '"--nodepool-labels"')
 
     if not enable_managed_identity and assign_identity:
         raise CLIError(
@@ -2727,6 +2729,10 @@ def aks_update(cmd, client, resource_group_name, name,
             raise ArgumentUsageError(
                 '--rotation-poll-interval can only be specified when azure-keyvault-secrets-provider is enabled')
         azure_keyvault_secrets_provider_addon_profile.config[CONST_ROTATION_POLL_INTERVAL] = rotation_poll_interval
+
+    if nodepool_labels is not None:
+        for agent_profile in instance.agent_pool_profiles:
+            agent_profile.node_labels = nodepool_labels
 
     # normalize user-provided header
     # usually the purpose is to enable (preview) features through AKSHTTPCustomFeatures
@@ -3871,6 +3877,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          tags=None,
                          max_surge=None,
                          mode=None,
+                         labels=None,
                          no_wait=False):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3883,11 +3890,11 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge):
+    if (update_autoscaler == 0 and not tags and not mode and not max_surge and not labels):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge"')
+                       '"--tags" or "--mode" or "--max-surge" or "--labels"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -3931,6 +3938,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
 
     if mode is not None:
         instance.mode = mode
+
+    if labels is not None:
+        instance.node_labels = labels
 
     return sdk_no_wait(
         no_wait,
