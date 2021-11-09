@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -49,6 +50,8 @@ class CredentialReplacer(RecordingProcessor):
         # hide token in header
         if 'x-ms-cupertino-test-token' in request.headers:
             request.headers['x-ms-cupertino-test-token'] = 'hidden'
+        if 'x-ms-serviceconnector-user-token' in request.headers:
+            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
         
         return request
 
@@ -75,12 +78,13 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         )
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-config-app',
+            'site': 'servicelinker-config-app2',
             'config_store': 'servicelinker-app-configuration'
         })
 
@@ -123,8 +127,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-cassandra-cosmos-asp-app',
-            'account': 'servicelinker-cassandra-cosmos',
+            'site': 'servicelinker-cassandra-cosmos-asp-app2',
+            'account': 'servicelinker-cassandra-cosmos2',
             'key_space': 'coredb'
         })
 
@@ -167,8 +171,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-gremlin-cosmos-asp-app',
-            'account': 'servicelinker-gremlin-cosmos',
+            'site': 'servicelinker-gremlin-cosmos-asp-app2',
+            'account': 'servicelinker-gremlin-cosmos2',
             'database': 'coreDB',
             'graph': 'MyItem'
         })
@@ -212,8 +216,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-mongo-cosmos-asp-app',
-            'account': 'servicelinker-mongo-cosmos',
+            'site': 'servicelinker-mongo-cosmos-asp-app2',
+            'account': 'servicelinker-mongo-cosmos2',
             'database': 'coreDB'
         })
 
@@ -256,8 +260,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-sql-cosmos-asp-app',
-            'account': 'servicelinker-sql-cosmos',
+            'site': 'servicelinker-sql-cosmos-asp-app2',
+            'account': 'servicelinker-sql-cosmos2',
             'database': 'coreDB'
         })
 
@@ -300,8 +304,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-table-cosmos-asp-app',
-            'account': 'servicelinker-table-cosmos',
+            'site': 'servicelinker-table-cosmos-asp-app2',
+            'account': 'servicelinker-table-cosmos2',
             'table': 'MyItem'
         })
 
@@ -339,13 +343,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_eventhub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-eventhub-app',
-            'namespace': 'servicelinkertesteventhub' 
+            'site': 'servicelinker-eventhub-app2',
+            'namespace': 'servicelinkertesteventhub2' 
         })
 
         # prepare params
@@ -382,14 +387,144 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
+    def test_webapp_servicebus_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-servicebus-app2',
+            'namespace': 'servicelinkertestservicebus' 
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.ServiceBus).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create servicebus --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_signalr_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-signalr-app2',
+            'signalr': 'servicelinker-signalr2' 
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.SignalR).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create signalr --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type dotnet'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'dotnet')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_keyvault_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-keyvault-app2',
+            'vault': 'servicelinker-test-kv2'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create keyvault --connection {} --source-id {} --target-id {} '
+                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
     def test_webapp_postgresflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblepostgresql-app',
-            'server': 'servicelinker-flexiblepostgresql',
-            'database': 'postgres'
+            'site': 'servicelinker-flexiblepostgresql-app2',
+            'server': 'servicelinker-flexiblepostgresql2',
+            'database': 'test'
         })
 
         # prepare password
@@ -431,30 +566,77 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
-    def test_webapp_keyvault_e2e(self):
+    @unittest.skip('Temporarily removed from supported target resources')
+    def test_webapp_redis_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-keyvault-app',
-            'vault': 'servicelinker-test-kv'
+            'site': 'servicelinker-redis-app2',
+            'server': 'servicelinker-redis',
+            'database': '0'
         })
 
         # prepare params
         name = 'testconn'
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
-        target_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.Redis).format(**self.kwargs)
 
         # create connection
-        self.cmd('webapp connection create keyvault --connection {} --source-id {} --target-id {} '
-                 '--system-identity --client-type python'.format(name, source_id, target_id))
+        self.cmd('webapp connection create redis --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
         
         # list connection
         connections = self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
             checks = [
                 self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'systemAssignedIdentity'),
+                self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
+    def test_webapp_redisenterprise_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-redis-enterprise-app2',
+            'server': 'servicelinker-redis-enterprise',
+            'database': 'default'
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.RedisEnterprise).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create redis-enterprise --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python'.format(name, source_id, target_id))
+        
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 1),
+                self.check('[0].authInfo.authType', 'secret'),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()
@@ -479,8 +661,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-mysql-app',
-            'server': 'servicelinker-mysql',
+            'site': 'servicelinker-mysql-app2',
+            'server': 'servicelinker-mysql2',
             'database': 'mysqlDB'
         })
 
@@ -528,8 +710,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblemysql-app',
-            'server': 'servicelinker-flexible-mysql',
+            'site': 'servicelinker-flexiblemysql-app2',
+            'server': 'servicelinker-flexible-mysql2',
             'database': 'mysqlDB'
         })
 
@@ -577,9 +759,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-postgresql-app',
-            'server': 'servicelinker-postgresql',
-            'database': 'postgres'
+            'site': 'servicelinker-postgresql-app2',
+            'server': 'servicelinker-postgresql2',
+            'database': 'test'
         })
 
         # prepare password
@@ -621,12 +803,13 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
 
     # @record_only()
+    @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_sql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-sql-app',
+            'site': 'servicelinker-sql-app2',
             'server': 'servicelinker-sql',
             'database': 'handler-test'
         })
@@ -675,8 +858,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
-            'account': 'servicelinkerteststorage'
+            'site': 'servicelinker-storageblob-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -718,8 +901,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagequeue-app',
-            'account': 'servicelinkerteststorage'
+            'site': 'servicelinker-storagequeue-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -761,8 +944,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagefile-app',
-            'account': 'servicelinkerteststorage'
+            'site': 'servicelinker-storagefile-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -804,8 +987,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagetable-app',
-            'account': 'servicelinkerteststorage'
+            'site': 'servicelinker-storagetable-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -823,6 +1006,48 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             checks = [
                 self.check('length(@)', 1),
                 self.check('[0].authInfo.authType', 'secret'),
+                self.check('[0].clientType', 'python')
+            ]
+        ).get_output_in_json()
+        connection_id = connections[0].get('id')
+
+        # list configuration
+        self.cmd('webapp connection list-configuration --id {}'.format(connection_id))
+
+        # validate connection
+        self.cmd('webapp connection validate --id {}'.format(connection_id))
+
+        # show connection
+        self.cmd('webapp connection show --id {}'.format(connection_id))
+
+        # delete connection
+        self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    # @record_only()
+    def test_webapp_confluentkafka_e2e(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-kafka-app2',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create confluent-cloud --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type python'.format(name, source_id))
+
+        # list connection
+        connections = self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
                 self.check('[0].clientType', 'python')
             ]
         ).get_output_in_json()

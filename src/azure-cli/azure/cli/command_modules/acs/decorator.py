@@ -295,6 +295,46 @@ class AKSModels:
         #     setattr(self, model_name, model_type)
 
 
+class AKSParamDict:
+    """Store the original parameters passed in by the command as an internal dictionary.
+
+    Only expose the "get" method externally for obtaining parameter values. At the same time records the usage of
+    parameters.
+    """
+    def __init__(self, param_dict):
+        if not isinstance(param_dict, dict):
+            raise CLIInternalError(
+                "Unexpected param_dict object with type '{}'.".format(
+                    type(param_dict)
+                )
+            )
+        self.__store = param_dict.copy()
+        self.__count = {}
+
+    @property
+    def __class__(self):
+        return dict
+
+    def __increase(self, key):
+        self.__count[key] = self.__count.get(key, 0) + 1
+
+    def get(self, key):
+        self.__increase(key)
+        return self.__store.get(key)
+
+    def __format_count(self):
+        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        for k in untouched_keys:
+            self.__count[k] = 0
+
+    def print_usage_statistics(self):
+        self.__format_count()
+        print("\nParameter usage statistics:")
+        for k, v in self.__count.items():
+            print(k, v)
+        print("Total: {}".format(len(self.__count.keys())))
+
+
 # pylint: disable=too-many-public-methods
 class AKSContext:
     """Implement getter functions for all parameters in aks_create and aks_update.
@@ -1389,7 +1429,9 @@ class AKSContext:
         """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
         according to the context.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        Note: This function is intended to be used in create mode.
+
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
@@ -1481,7 +1523,9 @@ class AKSContext:
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        Note: This function is intended to be used in create mode.
+
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
@@ -1492,22 +1536,96 @@ class AKSContext:
 
         return self._get_windows_admin_username_and_password()
 
-    def get_enable_ahub(self) -> bool:
-        """Obtain the value of enable_ahub.
+    def get_windows_admin_password(self) -> Union[str, None]:
+        """Obtain the value of windows_admin_password.
+
+        Note: This function is intended to be used in update mode.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        windows_admin_password = self.raw_param.get("windows_admin_password")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return windows_admin_password
+
+    # pylint: disable=unused-argument
+    def _get_enable_ahub(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
+        """Internal function to obtain the value of enable_ahub.
 
         Note: enable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.windows_profile:
-            enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.windows_profile:
+                enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if enable_ahub and self._get_disable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
         return enable_ahub
+
+    def get_enable_ahub(self) -> bool:
+        """Obtain the value of enable_ahub.
+
+        Note: enable_ahub will not be directly decorated into the `mc` object.
+
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_ahub(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_ahub(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_ahub = self.raw_param.get("disable_ahub")
+        # we do not support this option in create mode
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if disable_ahub and self._get_enable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
+        return disable_ahub
+
+    def get_disable_ahub(self) -> bool:
+        """Obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_ahub(enable_validation=True)
 
     # pylint: disable=unused-argument,too-many-statements
     def _get_service_principal_and_client_secret(
@@ -3458,7 +3576,7 @@ class AKSContext:
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
                         )
-                    # In fact, there is currently no such option in the create command
+                    # In fact, there is no such option in the create command.
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn should only be used with --enable-private-cluster"
                     )
@@ -3554,14 +3672,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_public_fqdn = self.raw_param.get("enable_public_fqdn")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.api_server_access_profile and
-                self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
-            ):
-                enable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
+        # we do not support this option in create mode
 
         # this parameter does not need dynamic completion
         # validation
@@ -3577,7 +3688,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn can only be used for private cluster"
                     )
-                # In fact, there is currently no such option in the create command
+                # In fact, there is no such option in the create command.
                 raise InvalidArgumentValueError(
                     "--enable-public-fqdn should only be used with --enable-private-cluster"
                 )
@@ -5260,6 +5371,29 @@ class AKSUpdateDecorator:
         ):
             profile_holder = None
         mc.api_server_access_profile = profile_holder
+        return mc
+
+    def update_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update windows profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if not mc.windows_profile:
+            raise UnknownError(
+                "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
+            )
+
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+        if enable_ahub:
+            mc.windows_profile.license_type = 'Windows_Server'
+        if disable_ahub:
+            mc.windows_profile.license_type = 'None'
+        if windows_admin_password:
+            mc.windows_profile.admin_password = windows_admin_password
         return mc
 
     def update_default_mc_profile(self) -> ManagedCluster:

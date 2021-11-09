@@ -9,15 +9,18 @@ from ._transformers import (
     transform_linker_properties
 )
 from ._resource_config import (
+    RESOURCE,
     SOURCE_RESOURCES,
-    TARGET_RESOURCES,
+    SUPPORTED_AUTH_TYPE
 )
 from ._utils import should_load_source
 
 
 def load_command_table(self, _):
 
-    from azure.cli.command_modules.serviceconnector._client_factory import cf_linker
+    from azure.cli.command_modules.serviceconnector._client_factory import (
+        cf_linker
+    )
     connection_type = CliCommandType(
         operations_tmpl='azure.mgmt.servicelinker.operations._linker_operations#LinkerOperations.{}',
         client_factory=cf_linker)
@@ -37,7 +40,11 @@ def load_command_table(self, _):
                                   table_transformer=transform_support_types)
                 og.custom_wait_command('wait', 'connection_show')
 
-            for target in TARGET_RESOURCES:
+            # use SUPPORTED_AUTH_TYPE to decide target resource, as some
+            # target resources are not avialable for certain source resource
+            supported_target_resources = list(SUPPORTED_AUTH_TYPE.get(source).keys())
+            supported_target_resources.remove(RESOURCE.ConfluentKafka)
+            for target in supported_target_resources:
                 with self.command_group('{} connection create'.format(source.value),
                                         connection_type, client_factory=cf_linker) as ig:
                     ig.custom_command(target.value, 'connection_create',
@@ -46,3 +53,12 @@ def load_command_table(self, _):
                                         connection_type, client_factory=cf_linker) as ig:
                     ig.custom_command(target.value, 'connection_update',
                                       supports_no_wait=True, transform=transform_linker_properties)
+
+            # special target resource, independent implementation
+            target = RESOURCE.ConfluentKafka
+            with self.command_group('{} connection create'.format(source.value),
+                                    connection_type, client_factory=cf_linker) as ig:
+                ig.custom_command(target.value, 'connection_create_kafka', supports_no_wait=True)
+            with self.command_group('{} connection update'.format(source.value),
+                                    connection_type, client_factory=cf_linker) as ig:
+                ig.custom_command(target.value, 'connection_update_kafka', supports_no_wait=True)

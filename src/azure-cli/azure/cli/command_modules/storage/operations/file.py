@@ -129,6 +129,15 @@ def list_share_files(cmd, client, share_name, directory_name=None, timeout=None,
     return generator
 
 
+def close_handle(client, share_name, close_all=None, directory_name=None, file_name=None, recursive=None,
+                 handle_id=None, marker=None, snapshot=None, timeout=None):
+    if close_all:
+        return client.close_handles(share_name, directory_name=directory_name, file_name=file_name, recursive=recursive,
+                                    handle_id='*', marker=marker, snapshot=snapshot, timeout=timeout)
+    return client.close_handles(share_name, directory_name=directory_name, file_name=file_name, recursive=recursive,
+                                handle_id=handle_id, marker=marker, snapshot=snapshot, timeout=timeout)
+
+
 def storage_file_upload_batch(cmd, client, destination, source, destination_path=None, pattern=None, dryrun=False,
                               validate_content=False, content_settings=None, max_connections=1, metadata=None,
                               progress_callback=None):
