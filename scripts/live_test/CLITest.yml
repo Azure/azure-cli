@@ -456,6 +456,7 @@ jobs:
         downloadType: 'specific'
         downloadPath: '$(System.ArtifactsDirectory)'
     - bash: |
+        set -o errexit
         echo $(System.ArtifactsDirectory)
         ls $(System.ArtifactsDirectory)
         pwd

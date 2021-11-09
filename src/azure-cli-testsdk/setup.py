@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-VERSION = "0.2.4"
+VERSION = "0.3.0"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -19,6 +19,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 

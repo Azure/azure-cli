@@ -252,14 +252,14 @@ def load_arguments(self, _):
         c.argument('assign_identity', type=str,
                    validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
-                   help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
+                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true')
         c.argument('node_public_ip_prefix_id', type=str)
         c.argument('windows_admin_username', options_list=[
                    '--windows-admin-username'])
         c.argument('windows_admin_password', options_list=[
                    '--windows-admin-password'])
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
         c.argument('node_osdisk_diskencryptionset_id', type=str,
                    options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('aci_subnet_name')
@@ -315,8 +315,8 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
-        c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
+        c.argument('disable_ahub', options_list=['--disable-ahub'], action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('windows_admin_password', options_list=[
@@ -331,6 +331,8 @@ def load_arguments(self, _):
         c.argument('rotation_poll_interval', type=str)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
+                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -450,6 +452,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
         c.argument('max_surge', type=str, validator=validate_max_surge)
+        c.argument('labels', nargs='*', validator=validate_nodepool_labels)
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', type=str, options_list=[
