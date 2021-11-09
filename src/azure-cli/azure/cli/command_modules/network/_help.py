@@ -2836,29 +2836,29 @@ examples:
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
 """
 
-helps['network express-route peering connection config'] = """
+helps['network express-route peering connection ipv6-config'] = """
 type: group
 short-summary: Manage ExpressRoute circuit connection configs.
 """
 
-helps['network express-route peering connection config add'] = """
+helps['network express-route peering connection ipv6-config set'] = """
 type: command
-short-summary: Add connection config to ExpressRoute circuit connection.
+short-summary: Set connection config to ExpressRoute circuit connection.
 examples:
-  - name: Add connection config to ExpressRoute circuit connection.
+  - name: Set connection config to ExpressRoute circuit connection.
     text: |
-        az network express-route peering connection config add -g MyResourceGroup --circuit-name \\
-            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125 --address-prefix-type IPv6
+        az network express-route peering connection ipv6-config set -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125
 """
 
-helps['network express-route peering connection config remove'] = """
+helps['network express-route peering connection ipv6-config remove'] = """
 type: command
 short-summary: Remove connection config to ExpressRoute circuit connection.
 examples:
   - name: Remove connection config to ExpressRoute circuit connection.
     text: |
-        az network express-route peering connection config remove -g MyResourceGroup --circuit-name \\
-            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix-type IPv6
+        az network express-route peering connection ipv6-config remove -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection
 """
 
 helps['network express-route peering create'] = """

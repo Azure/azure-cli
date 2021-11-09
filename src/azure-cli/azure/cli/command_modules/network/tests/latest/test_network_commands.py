@@ -2407,9 +2407,9 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
-            self.cmd('network express-route peering connection config add -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --address-prefix .../125 --address-prefix-type IPv6')
+            self.cmd('network express-route peering connection ipv6-config set -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --address-prefix .../125')
         with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
-            self.cmd('network express-route peering connection config remove -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --address-prefix-type IPv6')
+            self.cmd('network express-route peering connection ipv6-config remove -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
 

@@ -2822,8 +2822,8 @@ def create_express_route_peering_connection(cmd, resource_group_name, circuit_na
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
-def add_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
-                                                address_prefix, address_prefix_type):
+def set_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name, connection_name,
+                                                address_prefix):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
 
     # Get Conn
@@ -2832,19 +2832,18 @@ def add_express_route_peering_connection_config(cmd, resource_group_name, circui
     except ResourceNotFoundError:
         raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
 
-    if address_prefix_type == 'IPv6':
-        Ipv6CircuitConnectionConfig = cmd.get_models('Ipv6CircuitConnectionConfig')
+    Ipv6CircuitConnectionConfig = cmd.get_models('Ipv6CircuitConnectionConfig')
 
-        ipv6_config = Ipv6CircuitConnectionConfig(
-            address_prefix=address_prefix
-        )
-        conn.ipv6_circuit_connection_config = ipv6_config
+    ipv6_config = Ipv6CircuitConnectionConfig(
+        address_prefix=address_prefix
+    )
+    conn.ipv6_circuit_connection_config = ipv6_config
 
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
 
 def remove_express_route_peering_connection_config(cmd, resource_group_name, circuit_name, peering_name,
-                                                   connection_name, address_prefix_type):
+                                                   connection_name):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
 
     # Get Conn
@@ -2853,8 +2852,7 @@ def remove_express_route_peering_connection_config(cmd, resource_group_name, cir
     except ResourceNotFoundError:
         raise ResourceNotFoundError("Peering Connection {} doesn't exist".format(connection_name))
 
-    if address_prefix_type == 'IPv6':
-        conn.ipv6_circuit_connection_config = None
+    conn.ipv6_circuit_connection_config = None
 
     return client.begin_create_or_update(resource_group_name, circuit_name, peering_name, connection_name, conn)
 
