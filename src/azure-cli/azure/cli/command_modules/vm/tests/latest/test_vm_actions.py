@@ -465,7 +465,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[5], {
             'lun': 5,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         # last image data disk
@@ -536,7 +537,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[7], {
             'lun': 7,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         self.assertEqual(r[10], {

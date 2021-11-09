@@ -1203,9 +1203,8 @@ class SynapseScenarioTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
+            'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'rg',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c'
         })
@@ -1286,13 +1285,13 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_restore_and_list_deleted(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0219test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'rivertiger0220 ',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtesting',
+            'sql-pool': 'testrestoresqlpool ',
             'performance-level': 'DW1000c',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
-            'restore-point-time': '2021-05-24T08:09:15'
+            'restore-point-time': '2021-11-04T07:02:09'
         })
 
         # restore sql pool
@@ -1327,10 +1326,10 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_sql_pool_classification_and_recommendation(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0514test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'sqlzes0514test',
+            'location': 'eastus',
+            'workspace': 'testingsynapseworkspace',
+            'rg': 'rgtesting',
+            'sql-pool': 'testingsqlpool',
             'schema': 'dbo',
             'table': 'Persons',
             'column': 'City',
@@ -1393,13 +1392,27 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_tde(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool' #self.create_random_name(prefix='testsqlpool', length=15),
+            'location': 'eastus',
+            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'performance-level': 'DW400c'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
+            '--workspace {workspace} --resource-group {rg}', checks=[
+                self.check('name', self.kwargs['sql-pool']),
+                self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('status', 'Online')
+            ]).get_output_in_json()
 
         self.cmd(
             'az synapse sql pool tde set --status Enabled --name {sql-pool} --workspace-name {workspace} \
@@ -1413,15 +1426,28 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_pool_threat_policy(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
-            'sql-pool': 'zes0508test1pool',  # self.create_random_name(prefix='testsqlpool', length=15),
-            'storage-account': 'chayangstoragewestus2',
+            'location': 'eastus',
+            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'performance-level': 'DW400c',
             'threat-policy': 'threatpolicy'
         })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
+            '--workspace {workspace} --resource-group {rg}', checks=[
+                self.check('name', self.kwargs['sql-pool']),
+                self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
+                self.check('provisioningState', 'Succeeded'),
+                self.check('status', 'Online')
+            ]).get_output_in_json()
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
                  '--name {sql-pool} --workspace-name {workspace} --resource-group {rg} --security-alert-policy-name {threat-policy}')
@@ -1777,15 +1803,19 @@ class SynapseScenarioTests(ScenarioTest):
 
 
     @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_sql_aad_admin(self):
         self.kwargs.update({
-            'location': 'eastus2euap',
-            'workspace': 'zes0508test',
-            'rg': 'chayang-test-rg',
+            'location': 'eastus',
             'user-name': 'fakeuser',
             'object-id': '00000000-0000-4002-becf-488f3e6ab703',
             'user-email': 'fakeuser@fakedomain.com'
         })
+
+        # create a workspace
+        self._create_workspace()
+
         # Test create cmdlet
         self.cmd('az synapse sql ad-admin create --workspace-name {workspace} --resource-group {rg} '
                  '--display-name {user-name} --object-id {object-id}',
@@ -2128,7 +2158,7 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('provisioningState', 'Succeeded')
             ])
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_linked_service(self):
@@ -2408,7 +2438,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    #@record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
@@ -2531,12 +2561,12 @@ class SynapseScenarioTests(ScenarioTest):
     @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
-            'rg': 'chayang-test-rg',
-            'workspace': 'zes0219test',
+            'rg': 'rgtesting',
+            'workspace': 'testingsynapseworkspace',
             'name': 'integrationruntime',
             'selfhosted-name': 'selfhostedir',
-            'selfhosted-integration-runtime': 'IntegrationRuntime0219selfhosted0507',
-            'ssisirname':'testssisir'})
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'ssisirname': 'testssisir'})
 
         # create managed integration runtime
         self.cmd(

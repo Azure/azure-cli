@@ -2132,6 +2132,6 @@ true --workspace-uid "11111111-2222-3333-444444444444" --sku name="Storage optim
 """
 
 helps['synapse kusto'] = """
-    type: command
+    type: group
     short-summary: "Manage synapse kusto"
 """

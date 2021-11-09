@@ -3178,6 +3178,12 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     from msrestazure.tools import parse_resource_id
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
+
     # find the load balancer
     nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
     primary_nic_config = next((n for n in nic_configs if n.primary), None)
@@ -3215,8 +3221,16 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
-    result = cf_public_ip_addresses(cmd.cli_ctx).list_virtual_machine_scale_set_public_ip_addresses(
-        resource_group_name, vm_scale_set_name)
+
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
+
+    public_ip_client = cf_public_ip_addresses(cmd.cli_ctx)
+    result = public_ip_client.list_virtual_machine_scale_set_public_ip_addresses(resource_group_name, vm_scale_set_name)
     # filter away over-provisioned instances which are deleted after 'create/update' returns
     return [r for r in result if r.ip_address]
 
@@ -4455,6 +4469,138 @@ def sig_shared_image_version_list(client, location, gallery_unique_name, gallery
         shared_to = None
     return client.list(location=location, gallery_unique_name=gallery_unique_name,
                        gallery_image_name=gallery_image_name, shared_to=shared_to)
+
+
+def gallery_application_create(client,
+                               resource_group_name,
+                               gallery_name,
+                               gallery_application_name,
+                               os_type,
+                               location,
+                               tags=None,
+                               description=None,
+                               no_wait=False):
+    gallery_application = {}
+    gallery_application['location'] = location
+    if tags is not None:
+        gallery_application['tags'] = tags
+    if description is not None:
+        gallery_application['description'] = description
+    if os_type is not None:
+        gallery_application['supported_os_type'] = os_type
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application=gallery_application)
+
+
+def gallery_application_update(client,
+                               resource_group_name,
+                               gallery_name,
+                               gallery_application_name,
+                               location,
+                               tags=None,
+                               description=None,
+                               no_wait=False):
+    gallery_application = {}
+    gallery_application['location'] = location
+    if tags is not None:
+        gallery_application['tags'] = tags
+    if description is not None:
+        gallery_application['description'] = description
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application=gallery_application)
+
+
+def gallery_application_version_create(client,
+                                       resource_group_name,
+                                       gallery_name,
+                                       gallery_application_name,
+                                       gallery_application_version_name,
+                                       location,
+                                       package_file_link,
+                                       install_command,
+                                       remove_command,
+                                       tags=None,
+                                       update_command=None,
+                                       target_regions=None,
+                                       default_file_link=None,
+                                       end_of_life_date=None,
+                                       exclude_from=None,
+                                       no_wait=False):
+    gallery_application_version = {}
+    gallery_application_version['publishing_profile'] = {}
+    gallery_application_version['location'] = location
+    if tags is not None:
+        gallery_application_version['tags'] = tags
+    source = {}
+    source['media_link'] = package_file_link
+    if default_file_link is not None:
+        source['default_configuration_link'] = default_file_link
+    gallery_application_version['publishing_profile']['source'] = source
+    manage_actions = {}
+    manage_actions['install'] = install_command
+    manage_actions['remove'] = remove_command
+    if update_command is not None:
+        manage_actions['update'] = update_command
+    gallery_application_version['publishing_profile']['manage_actions'] = manage_actions
+    if target_regions is not None:
+        gallery_application_version['publishing_profile']['target_regions'] = target_regions
+    if exclude_from is not None:
+        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
+    if end_of_life_date is not None:
+        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application_version_name=gallery_application_version_name,
+                       gallery_application_version=gallery_application_version)
+
+
+def gallery_application_version_update(client,
+                                       resource_group_name,
+                                       gallery_name,
+                                       gallery_application_name,
+                                       gallery_application_version_name,
+                                       location,
+                                       package_file_link,
+                                       tags=None,
+                                       target_regions=None,
+                                       default_file_link=None,
+                                       end_of_life_date=None,
+                                       exclude_from=None,
+                                       no_wait=False):
+    gallery_application_version = {}
+    gallery_application_version['publishing_profile'] = {}
+    gallery_application_version['location'] = location
+    if tags is not None:
+        gallery_application_version['tags'] = tags
+    source = {}
+    source['media_link'] = package_file_link
+    if default_file_link is not None:
+        source['default_configuration_link'] = default_file_link
+    gallery_application_version['publishing_profile']['source'] = source
+    if target_regions is not None:
+        gallery_application_version['publishing_profile']['target_regions'] = [target_regions]
+    if exclude_from is not None:
+        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
+    if end_of_life_date is not None:
+        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application_version_name=gallery_application_version_name,
+                       gallery_application_version=gallery_application_version)
 
 
 def get_gallery_instance(cmd, resource_group_name, gallery_name):

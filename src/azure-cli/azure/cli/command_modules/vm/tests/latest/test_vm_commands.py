@@ -665,6 +665,48 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @ResourceGroupPreparer()
+    def test_vm_create_data_disk_delete_option(self, resource_group):
+        self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:7-RAW:7.4.2018010506 -l northeurope '
+                 '--size Standard_E8as_v4 --generate-ssh-keys --public-ip-address "" --os-disk-size-gb 64 '
+                 '--data-disk-sizes-gb 200 --data-disk-delete-option Delete',
+                 checks=self.check('powerState', 'VM running'))
+        result = self.cmd('vm show -g {rg} -n Delete_CLI1').get_output_in_json()
+        self.assertEqual(result['storageProfile']['dataDisks'][0]['deleteOption'], 'Delete')
+
+        # creating a vm
+        self.cmd(
+            'vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --nsg-rule NONE')
+        result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
+
+        self.kwargs.update({
+            'origin_os_disk': result['storageProfile']['osDisk']['name'],
+            'origin_data_disk': result['storageProfile']['dataDisks'][0]['name'],
+            # snapshot the os & data disks
+            'os_snapshot': 'oSnapshot',
+            'os_disk': 'sDisk',
+            'data_snapshot': 'dSnapshot',
+            'data_disk': 'dDisk',
+            'data_disk2': 'dDisk2'
+        })
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
+        self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
+        self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
+        self.cmd('disk create -g {rg} -n {data_disk2} --source {data_snapshot}')
+
+        # rebuild a new vm
+        # (os disk can be resized)
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk} --os-disk-delete-option Delete '
+                 '--attach-data-disks {data_disk} {data_disk2} --data-disk-delete-option {data_disk}=Delete {data_disk2}=Detach '
+                 '--os-disk-size-gb 100 --os-type linux --nsg-rule NONE',
+                 checks=self.check('powerState', 'VM running'))
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].deleteOption', 'Delete'),
+            self.check('storageProfile.dataDisks[1].deleteOption', 'Detach'),
+        ])
+
 
 class VMOSDiskSize(ScenarioTest):
 
@@ -794,6 +836,24 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # test snapshot --incremental
         self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
                  checks=[self.check('incremental', True)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_copy_start_')
+    def test_vm_snapshot_copy_start_detection(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('testdisk-', length=24),
+            'snapshot1': self.create_random_name('testsnap1-', length=24),
+            'snapshot2': self.create_random_name('testsnap2-', length=24)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l westus')
+        # in the same region, it should default copyStart as false
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk}',
+                 checks=[self.check('creationData.createOption', 'Copy')])
+        # in different region, it should default copyStart as True
+        # TODO: should not throw exception after feature GA
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegexp(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+            self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')
@@ -2790,7 +2850,8 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('vmsswithip', 20),
+            'flex_vmss': self.create_random_name('flexvmsswithip', 20),
             'nsg': 'testnsg',
             'ssh_key': TEST_SSH_KEY_PUB,
             'dns_label': self.create_random_name('clivmss', 20)
@@ -2808,6 +2869,11 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
+
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image UbuntuLTS --orchestration-mode Flexible')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vmss list-instance-public-ips -n {flex_vmss} -g {rg}')
 
 
 class VMSSUpdateTests(ScenarioTest):
@@ -3209,7 +3275,8 @@ class VMSSVMsScenarioTest(ScenarioTest):
     def test_vmss_vms(self, resource_group):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('clitestvmss', 20),
+            'flex_vmss': self.create_random_name('clitestflexvms', 20),
             'count': 2,
             'instance_ids': []
         })
@@ -3241,6 +3308,11 @@ class VMSSVMsScenarioTest(ScenarioTest):
         self._check_vms_power_state('PowerState/deallocated')
         self.cmd('vmss delete-instances --resource-group {rg} --name {vmss} --instance-ids *')
         self.cmd('vmss list-instances --resource-group {rg} --name {vmss}')
+
+        self.cmd('vmss create -g {rg} -n {flex_vmss} --image UbuntuLTS --orchestration-mode Flexible')
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('vmss list-instance-connection-info --resource-group {rg} --name {flex_vmss}')
 
 
 class VMSSSimulateEvictionScenarioTest(ScenarioTest):
@@ -4774,6 +4846,97 @@ class VMGalleryImage(ScenarioTest):
             self.check('name', '1.1.2'),
             self.check('publishingProfile.replicationMode', 'Shallow')
         ])
+
+
+class VMGalleryApplication(ScenarioTest):
+    @ResourceGroupPreparer(location='eastus')
+    def test_gallery_application(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'app_name': self.create_random_name('app', 10),
+            'gallery': self.create_random_name('gellery', 16),
+        })
+
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', None),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/galleries/applications')
+        ])
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application update -n {app_name} -r {gallery} -g {rg} --description test --tags tag=test', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', 'test'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=[
+            self.check('[0].name', '{app_name}'),
+            self.check('[0].supportedOsType', 'Windows'),
+            self.check('[0].description', 'test'),
+            self.check('[0].tags', {'tag': 'test'})
+            ])
+        self.cmd('sig gallery-application show -n {app_name} -r {gallery} -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', 'test'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application delete -n {app_name} -r {gallery} -g {rg} -y')
+        self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(location='eastus')
+    def test_gallery_application_version(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'app_name': self.create_random_name('app', 10),
+            'gallery': self.create_random_name('gellery', 15),
+            'ver_name': "1.0.0",
+            'account': self.create_random_name('account', 15),
+            'container': self.create_random_name('container', 15),
+            'blob': self.create_random_name('blob', 15),
+            'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\')
+        })
+        self.cmd('sig create -r {gallery} -g {rg}')
+        self.cmd('sig gallery-application create -n {app_name} -r {gallery} --os-type windows -g {rg}', checks=[
+            self.check('name', '{app_name}'),
+            self.check('supportedOsType', 'Windows'),
+            self.check('description', None),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/galleries/applications')
+        ])
+        self.cmd('storage account create -n {account} -g {rg}')
+        self.kwargs['storage_key'] = str(
+            self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
+        self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
+        self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
+        self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
+             self.check('name', '1.0.0'),
+             self.check('publishingProfile.manageActions.install', 'install'),
+             self.check('publishingProfile.manageActions.remove', 'remove'),
+             self.check('type', 'Microsoft.Compute/galleries/applications/versions')
+        ])
+        self.cmd('sig gallery-application version update -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --tags tag=test', checks=[
+            self.check('name', '1.0.0'),
+            self.check('publishingProfile.manageActions.install', 'install'),
+            self.check('publishingProfile.manageActions.remove', 'remove'),
+            self.check('tags', {'tag': 'test'})
+        ])
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=[
+            self.check('[0].name', '1.0.0'),
+            self.check('[0].publishingProfile.manageActions.install', 'install'),
+            self.check('[0].publishingProfile.manageActions.remove', 'remove'),
+            self.check('[0].tags', {'tag': 'test'}),
+        ])
+        self.cmd('sig gallery-application version show -n {ver_name} --application-name {app_name} -r {gallery} -g {rg}', checks=[
+            self.check('name', '1.0.0'),
+            self.check('publishingProfile.manageActions.install', 'install'),
+            self.check('publishingProfile.manageActions.remove', 'remove'),
+            self.check('tags', {'tag': 'test'}),
+        ])
+        self.cmd('sig gallery-application version delete -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} -y')
+        self.cmd('sig gallery-application version list -r {gallery} --application-name {app_name} -g {rg}', checks=self.is_empty())
 # endregion
 
 
