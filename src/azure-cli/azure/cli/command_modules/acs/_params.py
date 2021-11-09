@@ -259,7 +259,7 @@ def load_arguments(self, _):
                    '--windows-admin-username'])
         c.argument('windows_admin_password', options_list=[
                    '--windows-admin-password'])
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
         c.argument('node_osdisk_diskencryptionset_id', type=str,
                    options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('aci_subnet_name')
@@ -315,8 +315,8 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
-        c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
+        c.argument('disable_ahub', options_list=['--disable-ahub'], action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('windows_admin_password', options_list=[
