@@ -926,8 +926,12 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
-                   help='Scale of front ends to app service plan instance ratio between 5 and 15.')
-        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, help='Size of front end servers.')
+                   help='(ASEv2 only) Scale of front ends to app service plan instance ratio between 5 and 15.')
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
+                   help='(ASEv2 only) Size of front end servers.')
+        c.argument('allow_new_private_endpoint_connections', arg_type=get_three_state_flag(),
+                   options_list=['--allow-new-private-endpoint-connections', '-p'],
+                   help='(ASEv3 only) Configure Apps in App Service Environment to allow new private endpoint connections.')
     with self.argument_context('appservice ase list-addresses') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))

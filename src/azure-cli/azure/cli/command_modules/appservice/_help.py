@@ -2258,12 +2258,15 @@ helps['appservice ase create-inbound-services'] = """
 
 helps['appservice ase update'] = """
     type: command
-    short-summary: Update app service environment v2.
+    short-summary: Update app service environment.
     examples:
-    - name: Update app service environment with medium front-ends and scale factor of 10.
+    - name: Update app service environment v2 with medium front-ends and scale factor of 10.
       text: |
-          az appservice ase update -n MyAseName -g MyResourceGroup --front-end-sku I2 \\
+          az appservice ase update -n MyAseV2Name -g MyResourceGroup --front-end-sku I2 \\
             --front-end-scale-factor 10
+    - name: Update app service environment v3 to allow new private endpoint connections.
+      text: |
+          az appservice ase update -n MyAseV3Name -g MyResourceGroup --allow-new-private-endpoint-connections
 """
 
 helps['appservice ase delete'] = """
