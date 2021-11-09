@@ -86,7 +86,6 @@ def create_or_update_assign_sp_to_mediaservice(cmd, client, account_name, resour
                                          homepage=sp_name,
                                          years=years,
                                          password=sp_password,
-                                         identifier_uris=[sp_name],
                                          available_to_other_tenants=False)
 
     app_id = aad_application.app_id
@@ -279,13 +278,12 @@ def _create_service_principal(
     return aad_sp.object_id
 
 
-def create_application(client, display_name, homepage, years, password, identifier_uris,
+def create_application(client, display_name, homepage, years, password,
                        available_to_other_tenants=False, reply_urls=None):
     password_credential = _build_password_credential(password, years)
 
     app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                    display_name=display_name,
-                                                   identifier_uris=identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    password_credentials=[password_credential])
