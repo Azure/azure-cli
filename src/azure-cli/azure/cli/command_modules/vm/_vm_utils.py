@@ -215,15 +215,14 @@ def normalize_disk_info(image_data_disks=None,
         }
 
         d = attach_data_disks_copy.pop(0)
-
+        info[i]['name'] = d.split('/')[-1].split('.')[0]
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
             if data_disk_delete_option:
                 info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
-                    else data_disk_delete_option.get(d.split('/')[-1].split('.')[0], None)
+                    else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
-            info[i]['name'] = d.split('/')[-1].split('.')[0]
             if data_disk_delete_option:
                 info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
                     else data_disk_delete_option.get(info[i]['name'], None)
