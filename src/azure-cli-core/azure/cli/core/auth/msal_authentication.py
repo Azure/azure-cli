@@ -43,7 +43,7 @@ class UserCredential(PublicClientApplication):
 
         accounts = self.get_accounts(username)
 
-        # MSAL should never return multiple accounts for the same username
+        # Usernames are usually unique. We are collecting corner cases to better understand its behavior.
         if len(accounts) > 1:
             raise CLIError(f"Found multiple accounts with the same username '{username}': {accounts}\n"
                            "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20168")
