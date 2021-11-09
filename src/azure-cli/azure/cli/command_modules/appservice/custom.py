@@ -816,8 +816,9 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     app_type = _kind_to_app_type(app.kind) if app else None
     if app_type != cmd_app_type:
         raise ResourceNotFoundError(
-            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
-            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
+            "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
+                app_type=cmd_app_type, name=name, resource_group=resource_group_name),
+            "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
