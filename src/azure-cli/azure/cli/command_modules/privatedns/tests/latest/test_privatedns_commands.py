@@ -76,7 +76,7 @@ class BaseScenarioTests(ScenarioTest):
         self.check(result, True)
 
     def _Create_PrivateZones(self, numOfZones=2):
-        createdZones = list()
+        createdZones = []
         for num in range(numOfZones):
             createdZones.append(self._Create_PrivateZone())
         createdZones.sort(key=lambda x: x['name'])
@@ -113,7 +113,7 @@ class BaseScenarioTests(ScenarioTest):
 
     def _Create_VirtualNetworkLinks(self, numOfLinks=2):
         self._Create_PrivateZone()
-        createdLinks = list()
+        createdLinks = []
         for num in range(numOfLinks):
             createdLinks.append(
                 self._Create_VirtualNetworkLink(createZone=False))

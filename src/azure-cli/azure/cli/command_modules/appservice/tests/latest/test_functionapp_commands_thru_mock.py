@@ -136,33 +136,6 @@ class TestFunctionappMocked(unittest.TestCase):
         web_client_mock.web_apps.get.assert_called_with('rg', 'name')
         enable_zip_deploy_mock.assert_called_with(cmd_mock, 'rg', 'name', 'src', None, None)
 
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')
-    @mock.patch('azure.cli.command_modules.appservice.custom.enable_zip_deploy')
-    def test_functionapp_remote_build_doesnt_support_windows(self,
-                                                             enable_zip_deploy_mock,
-                                                             parse_resource_id_mock,
-                                                             web_client_factory_mock):
-        # prepare
-        cmd_mock = _get_test_cmd()
-        cli_ctx_mock = mock.MagicMock()
-        cmd_mock.cli_ctx = cli_ctx_mock
-
-        appservice_mock = mock.Mock()
-        appservice_mock.reserved = False  # Marked app service as Windows
-
-        web_client_mock = mock.Mock()
-        web_client_mock.web_apps = mock.Mock()
-        web_client_mock.web_apps.get = mock.Mock(return_value=appservice_mock)
-        web_client_factory_mock.return_value = web_client_mock
-
-        # action
-        with self.assertRaises(CLIError):
-            enable_zip_deploy_functionapp(cmd_mock, 'rg', 'name', 'src', build_remote=True, timeout=None, slot=None)
-
-        # assert
-        web_client_mock.web_apps.get.assert_called_with('rg', 'name')
-
     @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential', return_value=('usr', 'pwd'))
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', side_effect=ValueError())
     def test_enable_zip_deploy_remote_build_no_scm_site(self,
