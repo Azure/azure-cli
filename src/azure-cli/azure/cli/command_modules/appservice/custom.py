@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import ast
 import threading
 import time
-import ast
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -477,15 +477,12 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
             break
         time.sleep(retry_delay)
 
-    if build_remote and not app.reserved:
-        raise CLIError('Remote build is only available on Linux function apps')
-
     is_consumption = is_plan_consumption(cmd, plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    if build_remote:
+    if build_remote and app.reserved:
         add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
+    elif app.reserved:
         remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
@@ -849,7 +846,7 @@ def _list_app(cli_ctx, resource_group_name=None):
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
     locations = _get_deleted_apps_locations(cli_ctx)
-    result = list()
+    result = []
     for location in locations:
         result = result + list(client.deleted_web_apps.list_by_location(location))
     if resource_group_name:
