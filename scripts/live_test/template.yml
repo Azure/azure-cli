@@ -25,7 +25,7 @@ jobs:
         Target: {{module}}
     {% endfor %}
   pool:
-    vmImage: 'Ubuntu-16.04'
+    vmImage: 'Ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -80,6 +80,8 @@ jobs:
   displayName: Send email
   dependsOn: LiveTestPython38
   condition: succeededOrFailed()
+  pool:
+    vmImage: 'Ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
       inputs:

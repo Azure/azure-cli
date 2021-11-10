@@ -21,7 +21,7 @@ def register_providers():
     _register_one_provider('Microsoft.AppConfiguration/configurationStores', '2020-06-01', True)
     _register_one_provider("Microsoft.Batch/batchAccounts", "2020-03-01", True)
     _register_one_provider("Microsoft.BotService/botServices", "2021-03-01", True)
-
+    _register_one_provider("Microsoft.Cache/Redis", "2020-12-01", True)
     # "Microsoft.Cache/redisEnterprise", "2021-03-01", True
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2021-04-30', True)
     _register_one_provider('Microsoft.Compute/diskAccesses', '2020-09-30', True)
@@ -57,6 +57,7 @@ def register_providers():
     _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
     _register_one_provider("Microsoft.Web/hostingEnvironments", "2020-10-01", True)
+    _register_one_provider('Microsoft.SignalRService/WebPubSub', '2021-09-01-preview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

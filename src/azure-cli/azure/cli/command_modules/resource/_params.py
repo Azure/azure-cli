@@ -570,6 +570,7 @@ def load_arguments(self, _):
 
     with self.argument_context('account management-group') as c:
         c.argument('group_name', options_list=['--name', '-n'])
+        c.argument('no_register', action='store_true', help='Skip registration for resource provider Microsoft.Management')
 
     with self.argument_context('account management-group show') as c:
         c.argument('expand', options_list=['--expand', '-e'], action='store_true')
@@ -635,6 +636,12 @@ def load_arguments(self, _):
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
                                                     type=file_type, help="The path to the ARM template to decompile in the file system."))
+
+    with self.argument_context('bicep publish') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="The path to the Bicep module file to publish in the file system."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
+                                                      help="The target location where the Bicep module will be published."))
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

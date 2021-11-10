@@ -285,7 +285,7 @@ def prepare_public_network(public_access, yes):
 
     if str(public_access).lower() == 'all':
         start_ip, end_ip = '0.0.0.0', '255.255.255.255'
-    elif str(public_access).lower() == 'none' or str(public_access) == 'Disabled' or str(public_access) == 'Enabled':
+    elif str(public_access).lower() in ['none', 'disabled', 'enabled']:
         start_ip, end_ip = -1, -1
     else:
         start_ip, end_ip = parse_public_access_input(public_access)

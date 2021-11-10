@@ -8,7 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, InvalidArgumentValueError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -832,7 +832,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
-                        enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None):
+                        enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
+                        enable_auto_update=None, patch_mode=None, enable_agent=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -995,6 +996,38 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if secrets:
         os_profile['secrets'] = secrets
 
+    if enable_agent is not None:
+        if os_type.lower() == 'linux':
+            if 'linuxConfiguration' not in os_profile:
+                os_profile['linuxConfiguration'] = {}
+            os_profile['linuxConfiguration']['provisionVMAgent'] = enable_agent
+        elif os_type.lower() == 'windows':
+            if 'windowsConfiguration' not in os_profile:
+                os_profile['windowsConfiguration'] = {}
+            os_profile['windowsConfiguration']['provisionVMAgent'] = enable_agent
+
+    if enable_auto_update is not None and os_type.lower() == 'windows':
+        os_profile['windowsConfiguration']['enableAutomaticUpdates'] = enable_auto_update
+
+    # Windows patch settings
+    if patch_mode is not None and os_type.lower() == 'windows':
+        if patch_mode.lower() not in ['automaticbyos', 'automaticbyplatform', 'manual']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Windows VMSS. Valid values are AutomaticByOS, '
+                'AutomaticByPlatform, Manual.')
+        os_profile['windowsConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
+        }
+
+    # Linux patch settings
+    if patch_mode is not None and os_type.lower() == 'linux':
+        if patch_mode.lower() not in ['automaticbyplatform', 'imagedefault']:
+            raise InvalidArgumentValueError(
+                'Invalid value of --patch-mode for Linux VMSS. Valid values are AutomaticByPlatform, ImageDefault.')
+        os_profile['linuxConfiguration']['patchSettings'] = {
+            'patchMode': patch_mode
+        }
+
     # Build VMSS
     nic_config = {}
     nic_config_properties = {}
@@ -1151,7 +1184,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if virtual_machine_profile:
         vmss_properties['virtualMachineProfile'] = virtual_machine_profile
 
-    if orchestration_mode:
+    if orchestration_mode and cmd.supported_api_version(min_api='2020-06-01',
+                                                        operation_group='virtual_machine_scale_sets'):
         vmss_properties['orchestrationMode'] = orchestration_mode
 
     vmss = {
