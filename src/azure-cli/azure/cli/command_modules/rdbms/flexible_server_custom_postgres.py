@@ -20,7 +20,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import pg_arguments_validator, validate_server_name
+from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -176,6 +176,8 @@ def flexible_server_restore(cmd, client,
             raise ValueError('The provided source server {} is invalid.'.format(source_server))
     else:
         source_server_id = source_server
+
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
 
     try:
         id_parts = parse_resource_id(source_server_id)

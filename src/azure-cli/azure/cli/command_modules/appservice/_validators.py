@@ -5,16 +5,18 @@
 
 import ipaddress
 
-from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError)
+from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError, ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.validators import validate_tags
+
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import _normalize_sku
+from .utils import _normalize_sku, get_sku_name
 
 logger = get_logger(__name__)
 
@@ -250,3 +252,54 @@ def validate_public_cloud(cmd):
     from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
     if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
         raise CLIError('This command is not yet supported on soveriegn clouds.')
+
+
+def validate_staticsite_sku(cmd, namespace):
+    from azure.mgmt.web import WebSiteManagementClient
+    client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient).static_sites
+    sku_name = client.get_static_site(namespace.resource_group_name, namespace.name).sku.name
+    if sku_name.lower() != "standard":
+        raise ValidationError("Invalid SKU: '{}'. Staticwebapp must have 'Standard' SKU".format(sku_name))
+
+
+def validate_staticsite_link_function(cmd, namespace):
+    from azure.mgmt.web import WebSiteManagementClient
+    validate_staticsite_sku(cmd, namespace)
+
+    if not is_valid_resource_id(namespace.function_resource_id):
+        raise ArgumentUsageError("--function-resource-id must specify a function resource ID. "
+                                 "To get resource ID, use the following commmand, inserting the function "
+                                 "group/name as needed: \n"
+                                 "az functionapp show --resource-group \"[FUNCTION_RESOURCE_GROUP]\" "
+                                 "--name \"[FUNCTION_NAME]\" --query id ")
+
+    client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient, api_version="2020-12-01").static_sites
+    functions = client.get_user_provided_function_apps_for_static_site(
+        name=namespace.name, resource_group_name=namespace.resource_group_name)
+    if list(functions):
+        raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
+
+
+def _validate_vnet_integration(cmd, namespace):
+    validate_tags(namespace)
+    if namespace.subnet or namespace.vnet:
+        if not namespace.subnet:
+            raise ArgumentUsageError("Cannot use --vnet without --subnet")
+        if not is_valid_resource_id(namespace.subnet) and not namespace.vnet:
+            raise ArgumentUsageError("Must either specify subnet by resource ID or include --vnet argument")
+
+        client = web_client_factory(cmd.cli_ctx)
+        if is_valid_resource_id(namespace.plan):
+            parse_result = parse_resource_id(namespace.plan)
+            plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+        else:
+            plan_info = client.app_service_plans.get(name=namespace.plan,
+                                                     resource_group_name=namespace.resource_group_name)
+
+        sku_name = plan_info.sku.name
+        disallowed_skus = {'FREE', 'SHARED', 'BASIC', 'ElasticPremium', 'PremiumContainer', 'Isolated', 'IsolatedV2'}
+        if get_sku_name(sku_name) in disallowed_skus:
+            raise ArgumentUsageError("App Service Plan has invalid sku for vnet integration: {}."
+                                     "Plan sku cannot be one of: {}. "
+                                     "Please run 'az appservice plan create -h' "
+                                     "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))

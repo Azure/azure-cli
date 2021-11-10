@@ -143,7 +143,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-06-01',
-        ResourceType.MGMT_NETWORK: '2021-03-01',
+        ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
@@ -154,7 +154,7 @@ AZURE_API_PROFILES = {
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-04-01',
+            'virtual_machine_scale_sets': '2021-07-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -165,7 +165,9 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
+            'vaults': '2021-06-01-preview'
+        }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
@@ -185,7 +187,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2020-06-12',
+        ResourceType.DATA_STORAGE_BLOB: '2020-10-02',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',

@@ -183,6 +183,9 @@ def load_arguments(self, _):
         c.argument('ignore_data_before', options_list=['--since'],
                    arg_type=get_datetime_type(
                        help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+        c.argument('skip_metric_validation', options_list=['--skip-metric-validation'],
+                   arg_type=get_three_state_flag(),
+                   help='Cause the metric validation to be skipped. This allows to use a metric that has not been emitted yet.')
 
     # endregion
 

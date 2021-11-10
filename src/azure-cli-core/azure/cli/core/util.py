@@ -673,10 +673,7 @@ def open_page_in_browser(url):
 
 def _get_platform_info():
     uname = platform.uname()
-    # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
-    platform_name = getattr(uname, 'system', None) or uname[0]
-    release = getattr(uname, 'release', None) or uname[2]
-    return platform_name.lower(), release.lower()
+    return uname.system.lower(), uname.release.lower()
 
 
 def is_wsl():
@@ -696,25 +693,27 @@ def is_windows():
 def can_launch_browser():
     import webbrowser
     platform_name, _ = _get_platform_info()
-    if is_wsl() or platform_name != 'linux':
-        return True
-    # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
-    # and https://unix.stackexchange.com/questions/193827/what-is-display-0
-    # we can check a few env vars
-    gui_env_vars = ['DESKTOP_SESSION', 'XDG_CURRENT_DESKTOP', 'DISPLAY']
-    result = True
-    if platform_name == 'linux':
-        if any(os.getenv(v) for v in gui_env_vars):
-            try:
-                default_browser = webbrowser.get()
-                if getattr(default_browser, 'name', None) == 'www-browser':  # text browser won't work
-                    result = False
-            except webbrowser.Error:
-                result = False
-        else:
-            result = False
 
-    return result
+    if platform_name != 'linux':
+        # Only Linux may have no browser
+        return True
+
+    # Using webbrowser to launch a browser is the preferred way.
+    try:
+        webbrowser.get()
+        return True
+    except webbrowser.Error:
+        # Don't worry. We may still try powershell.exe.
+        pass
+
+    if is_wsl():
+        # Docker container running on WSL 2 also shows WSL, but it can't launch a browser.
+        # If powershell.exe is on PATH, it can be called to launch a browser.
+        import shutil
+        if shutil.which("powershell.exe"):
+            return True
+
+    return False
 
 
 def get_command_type_kwarg(custom_command=False):

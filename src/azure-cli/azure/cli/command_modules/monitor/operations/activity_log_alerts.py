@@ -15,7 +15,7 @@ def process_condition_parameter(namespace):
     except AttributeError:
         return
 
-    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALIE[ and FIELD=VALUE...]'
+    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALUE[ and FIELD=VALUE...]'
 
     if not expression:
         raise CLIError(error)

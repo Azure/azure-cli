@@ -1122,14 +1122,14 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                  checks=[
                      self.check('[0].login', '{user}'),
                      self.check('[0].sid', '{oid}')])
-
-        self.cmd('sql server ad-admin update -s {sn} -g {rg} --administrator-name {administrator_name}'
+        
+        self.cmd('sql server ad-admin update -s {sn} -g {rg}'
                  ' -u {user2} -i {oid2}',
                  checks=[
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
-
-        self.cmd('sql server ad-admin delete -s {sn} -g {rg} --administrator-name {administrator_name}')
+        
+        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[

@@ -106,14 +106,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_app_instance = self._build_persistent_msal_app()
         return self._msal_app_instance
 
-    def login_with_auth_code(self, scopes=None, **kwargs):
+    def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self._msal_authority)
+                       "with `az login --use-device-code`.", self.msal_app.authority.authorization_endpoint)
 
-        success_template, error_template = _read_response_templates()
+        from .util import read_response_templates
+        success_template, error_template = read_response_templates()
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
@@ -122,7 +123,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
-    def login_with_device_code(self, scopes=None, **kwargs):
+    def login_with_device_code(self, scopes, **kwargs):
         flow = self.msal_app.initiate_device_flow(scopes, **kwargs)
         if "user_code" not in flow:
             raise ValueError(
@@ -131,11 +132,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         result = self.msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes=None, **kwargs):
+    def login_with_username_password(self, username, password, scopes, **kwargs):
         result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
-    def login_with_service_principal(self, client_id, credential, scopes=None):
+    def login_with_service_principal(self, client_id, credential, scopes):
         """
         `credential` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -265,7 +266,7 @@ class ServicePrincipalStore:
         matched = [x for x in self._entries if sp_id == x[_CLIENT_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
-                           "Please run `az login` for this service principal."
+                           "Run `az login` for this service principal."
                            .format(sp_id))
         matched_with_tenant = [x for x in matched if tenant == x[_TENANT]]
         if matched_with_tenant:
@@ -313,19 +314,6 @@ class ServicePrincipalStore:
 
     def _load_persistence(self):
         self._entries = self._secret_store.load()
-
-
-def _read_response_templates():
-    """Read from success.html and error.html to strings and pass them to MSAL. """
-    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
-    with open(success_file) as f:
-        success_template = f.read()
-
-    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
-    with open(error_file) as f:
-        error_template = f.read()
-
-    return success_template, error_template
 
 
 def _get_authority_url(authority_endpoint, tenant):

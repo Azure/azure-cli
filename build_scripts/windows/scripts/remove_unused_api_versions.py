@@ -33,7 +33,7 @@ def remove_unused_network_api_versions():
     model_file = os.path.join(path, 'models.py')
     with open(model_file, 'r', encoding='utf-8') as f:
         content = f.read()
-    for m in re.finditer(r'from \.(v[_\d]*)\.models import \*', content):
+    for m in re.finditer(r'from \.(v[_\d\w]*)\.models import \*', content):
         used_network_api_vers.add(m.group(1))
 
     _LOGGER.info('Used network API versions:')

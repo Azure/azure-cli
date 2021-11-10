@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -41,11 +42,10 @@ def _generate_login_message(**kwargs):
     from azure.cli.core.util import in_cloud_console
     login_command = _generate_login_command(**kwargs)
 
-    login_msg = "To re-authenticate, please {}" .format(
+    msg = "To re-authenticate, please {}" .format(
         "refresh Azure Portal." if in_cloud_console() else "run:\n{}".format(login_command))
 
-    contact_admin_msg = "If the problem persists, please contact your tenant administrator."
-    return "{}\n\n{}".format(login_msg, contact_admin_msg)
+    return msg
 
 
 def resource_to_scopes(resource):
@@ -108,7 +108,8 @@ def _normalize_scopes(scopes):
 
 
 def check_result(result, **kwargs):
-    """
+    """Parse the result returned by MSAL:
+
     1. Check if the MSAL result contains a valid access token.
     2. If there is error, handle the error and show re-login message.
     3. For user login, return the username and tenant_id in a dict.
@@ -141,3 +142,16 @@ def decode_access_token(access_token):
     # Access token consists of headers.claims.signature. Decode the claim part
     decoded_str = decode_part(access_token.split('.')[1])
     return json.loads(decoded_str)
+
+
+def read_response_templates():
+    """Read from success.html and error.html to strings and pass them to MSAL. """
+    success_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'success.html')
+    with open(success_file) as f:
+        success_template = f.read()
+
+    error_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landing_pages', 'error.html')
+    with open(error_file) as f:
+        error_template = f.read()
+
+    return success_template, error_template
