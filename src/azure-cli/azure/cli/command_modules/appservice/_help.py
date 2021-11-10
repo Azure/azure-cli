@@ -2323,7 +2323,7 @@ helps['staticwebapp show'] = """
 
 helps['staticwebapp create'] = """
     type: command
-    short-summary: Create a static app with content from GitHubRepository URL provided in source on provided branch. Return the app created.
+    short-summary: Create a static app with content from a GitHub repository URL and on the provided branch. If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
@@ -2564,6 +2564,35 @@ helps['staticwebapp secrets reset-api-key'] = """
     examples:
     - name: Reset deployment token
       text: az staticwebapp secrets reset-api-key --name MyStaticAppName
+"""
+
+helps['staticwebapp functions'] = """
+type: group
+short-summary: Link or unlink a prexisting functionapp with a static webapp. Also known as "Bring your own Functions."
+"""
+
+helps['staticwebapp functions link'] = """
+    type: command
+    short-summary: Link an Azure Function to a static webapp. Also known as "Bring your own Functions." Only one Azure Functions app is available to a single static web app. Static webapp SKU must be "Standard"
+    examples:
+    - name: Link a function to a static webapp
+      text: az staticwebapp functions link -n MyStaticAppName -g MyResourceGroup --function-resource-id "/subscriptions/<<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.Web/sites/<function-name>"
+"""
+
+helps['staticwebapp functions unlink'] = """
+    type: command
+    short-summary: Unlink an Azure Function from a static webapp
+    examples:
+    - name: Show static app functions.
+      text: az staticwebapp functions unlink -n MyStaticAppName -g MyResourceGroup
+"""
+
+helps['staticwebapp functions show'] = """
+    type: command
+    short-summary: Show details on the Azure Function linked to a static webapp
+    examples:
+    - name: Show static app functions.
+      text: az staticwebapp functions show -n MyStaticAppName -g MyResourceGroup
 """
 
 helps['webapp deploy'] = """

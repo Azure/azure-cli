@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params, _validate_vnet_integration
+from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, _validate_vnet_integration
 
 
 def output_slots_in_table(slots):
@@ -468,6 +468,11 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
+
+    with self.command_group('staticwebapp functions', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('link', 'link_user_function', validator=validate_staticsite_link_function)
+        g.custom_command('unlink', 'unlink_user_function', validator=validate_staticsite_sku)
+        g.custom_show_command('show', 'get_user_function', validator=validate_staticsite_sku)
 
     with self.command_group('logicapp') as g:
         g.custom_command('delete', 'delete_function_app', confirmation=True)
