@@ -31,12 +31,28 @@ class NetworkCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.network.commands import load_command_table
+        self.load_aaz_command_table(args)
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
         from azure.cli.command_modules.network._params import load_arguments
+        self.load_aaz_arguments(command)
         load_arguments(self, command)
+
+    def load_aaz_command_table(self, args):
+        from azure.cli.core.aaz import load_aaz_command_table
+        from . import aaz
+        command_table, command_group_table = load_aaz_command_table(
+            aaz_module_name=aaz.__name__,
+            cloud=self.cli_ctx.cloud,
+            args=args
+        )
+        print(command_table, command_group_table)
+
+    def load_aaz_arguments(self, command):
+        from . import aaz
+
 
 
 COMMAND_LOADER_CLS = NetworkCommandsLoader
