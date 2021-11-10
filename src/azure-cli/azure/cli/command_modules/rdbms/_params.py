@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_three_state_flag)
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
-    retention_validator, firewall_rule_name_validator, administrator_login_validator
+    retention_validator, firewall_rule_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
@@ -53,9 +53,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} server'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
+
             c.argument('server_name', arg_type=server_name_arg_type, options_list=['--name', '-n'], id_part='name', help='Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.')
-            c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_group='Authentication', arg_type=administrator_login_arg_type, help='Administrator username for the server. It cannot be changed once set.')
-            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], arg_group='Authentication', help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'], help='Administrator username for the server. Once set, it cannot be changed.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator. Minimum 8 characters and maximum 128 characters. Password must contain characters from three of the following categories: English uppercase letters, English lowercase letters, numbers, and non-alphanumeric characters.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable or disable ssl enforcement for connections to server. Default is Enabled.')
             c.argument('minimal_tls_version', arg_type=get_enum_type(['TLS1_0', 'TLS1_1', 'TLS1_2', 'TLSEnforcementDisabled']), options_list=['--minimal-tls-version'], help='Set the minimal TLS version for connections to server when SSL is enabled. Default is TLSEnforcementDisabled.', validator=tls_validator)
             c.argument('public_network_access', options_list=['--public-network-access', '--public'], help='Enable or disable public network access to server. When disabled, only connections made through Private Links can reach this server. Allowed values are : Enabled, Disabled, all, 0.0.0.0, <SingleIP>, <StartIP-DestinationIP>. Default is Enabled.')
@@ -75,14 +76,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.ignore('infrastructure_encryption')
 
         with self.argument_context('{} server create'.format(command_group)) as c:
-            if command_group == 'mysql':
-                c.argument('administrator_login', validator=administrator_login_validator, default=generate_username())
-            else:
-                c.argument('administrator_login', default=generate_username())
             c.argument('server_name', options_list=['--name', '-n'], arg_type=server_name_setter_arg_type)
             c.argument('sku_name', default='GP_Gen5_2', options_list=['--sku-name'],
                        help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16. ')
-            c.argument('administrator_login_password')
+            c.argument('administrator_login', default=generate_username(), arg_group='Authentication')
+            c.argument('administrator_login_password', arg_group='Authentication')
+
             c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
             c.argument('storage_mb', default=51200, options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
@@ -420,7 +419,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('version', default='12', arg_type=version_arg_type)
                 c.argument('high_availability', arg_type=pg_high_availability_arg_type, default="Disabled")
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
-                c.argument('administrator_login', default=generate_username(), validator=administrator_login_validator, arg_type=administrator_login_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -431,8 +429,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('high_availability', arg_type=mysql_high_availability_arg_type, default="Disabled")
                 c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
                 c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
-                c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
+            c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('public_access', arg_type=public_access_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
@@ -572,7 +570,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server show-connection-string'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
-            c.argument('administrator_login', arg_type=administrator_login_arg_type)
+            c.argument('administrator_login', arg_type=administrator_login_arg_type,)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
             c.argument('database_name', arg_type=database_name_arg_type)
 

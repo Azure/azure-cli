@@ -520,16 +520,3 @@ def validate_public_access_server(cmd, client, resource_group_name, server_name)
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
         raise ValidationError("Firewall rule operations cannot be requested for a private access enabled server.")
-
-
-def administrator_login_validator(ns):
-    if not ns.administrator_login:
-        return
-
-    if not re.search(r'^[a-zA-Z0-9]{1,16}[a-zA-Z0-9]$', ns.administrator_login):
-        raise ValidationError("Administrator name Admin username must be at least 1 characters "
-                              "and at most 16 characters. "
-                              "Admin username must only contain characters and numbers.")
-    if ns.administrator_login in ['admin', 'administrator', 'root', 'guest', 'public']:
-        raise ValidationError("Admin login name cannot be 'azure_superuser', 'admin', 'administrator', 'root', "
-                              "'guest' or 'public'.")
