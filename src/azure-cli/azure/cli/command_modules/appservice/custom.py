@@ -1763,11 +1763,11 @@ def list_app_service_plans(cmd, resource_group_name=None):
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False):
+                            tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
     sku = _normalize_sku(sku)
-    _validate_asp_sku(app_service_environment, sku)
+    _validate_asp_sku(sku, app_service_environment, zone_redundant)
     if is_linux and hyper_v:
         raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
@@ -1797,6 +1797,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    # TODO use AppServicePlan field for zone redundancy if/when one becomes available in SDK
+    if zone_redundant:
+        plan_def.enable_additional_properties_sending()
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+        plan_def.additional_properties["properties"]["zoneRedundant"] = True
+        if number_of_workers is None:
+            sku_def.capacity = 3
+        else:
+            sku_def.capacity = max(3, number_of_workers)
+
     return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
@@ -4479,16 +4491,19 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         name=ase)
 
 
-def _validate_asp_sku(app_service_environment, sku):
+def _validate_asp_sku(sku, app_service_environment, zone_redundant):
+    if zone_redundant and get_sku_name(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
+        raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
     if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+            raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
+                                  "Use this link to learn more: "
+                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+            raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
