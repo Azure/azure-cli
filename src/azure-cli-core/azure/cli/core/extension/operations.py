@@ -345,7 +345,7 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
             pass
         if ext:
             if isinstance(ext, WheelExtension):
-                if not upgrade and not install_setup_extras:
+                if not upgrade:
                     logger.warning("Extension '%s' is already installed.", extension_name)
                     return
                 logger.warning("Extension '%s' %s is already installed.", extension_name, ext.get_version())
