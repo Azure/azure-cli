@@ -3019,6 +3019,7 @@ class AKSContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         aad_profile_2 = self.models.ManagedClusterAADProfile(
+            managed=True,
             enable_azure_rbac=True,
         )
         mc_2 = self.models.ManagedCluster(
@@ -3665,6 +3666,13 @@ class AKSContextTestCase(unittest.TestCase):
             auto_scaler_profile=auto_scaler_profile_2,
         )
         ctx_2.attach_mc(mc_2)
+        self.assertEqual(
+            ctx_2._get_cluster_autoscaler_profile(read_only=True),
+            {
+                "scan-interval": "30s",
+                "expander": "least-waste",
+            },
+        )
         self.assertEqual(
             ctx_2.get_cluster_autoscaler_profile(),
             {
@@ -6481,7 +6489,9 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "ManagedClusterLoadBalancerProfileManagedOutboundIPs"
             )(count=10),
             outbound_i_ps=None,
-            outbound_ip_prefixes=self.models.lb_models.get("ManagedClusterLoadBalancerProfileOutboundIPPrefixes")(
+            outbound_ip_prefixes=self.models.lb_models.get(
+                "ManagedClusterLoadBalancerProfileOutboundIPPrefixes"
+            )(
                 public_ip_prefixes=[
                     self.models.lb_models.get("ResourceReference")(
                         id="test_ip_prefix_1"
@@ -6729,13 +6739,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.update_windows_profile(mc_2)
 
-        ground_truth_windows_profile_2 = (
-            self.models.ManagedClusterWindowsProfile(
-                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
-                admin_username="test_mc_win_admin_name",
-                admin_password="test_admin_password",
-                license_type="Windows_Server",
-            )
+        ground_truth_windows_profile_2 = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
+            admin_username="test_mc_win_admin_name",
+            admin_password="test_admin_password",
+            license_type="Windows_Server",
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -6766,13 +6774,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_windows_profile(mc_3)
 
-        ground_truth_windows_profile_3 = (
-            self.models.ManagedClusterWindowsProfile(
-                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
-                admin_username="test_mc_win_admin_name",
-                admin_password="test_mc_win_admin_pd",
-                license_type="None",
-            )
+        ground_truth_windows_profile_3 = self.models.ManagedClusterWindowsProfile(
+            # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
+            admin_username="test_mc_win_admin_name",
+            admin_password="test_mc_win_admin_pd",
+            license_type="None",
         )
         ground_truth_mc_3 = self.models.ManagedCluster(
             location="test_location",
