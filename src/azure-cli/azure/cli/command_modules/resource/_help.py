@@ -625,7 +625,7 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
-  - name: Create a deployment at subscription scope from a template-spec
+  - name: Create a deployment at resource group scope from a template-spec
     text: >
         az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
@@ -2536,6 +2536,14 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file {json_template_file}
+"""
+
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
 """
 
 helps['bicep version'] = """

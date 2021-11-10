@@ -406,12 +406,26 @@ class NetworkCustomIpPrefix(ScenarioTest):
         # Test custom prefix CRUD
         self.cmd('network custom-ip prefix create -g {rg} -n {prefix} --cidr 40.40.40.0/24')
         self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+        # self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state Commissioning')
         self.cmd('network custom-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         # Delete operation isn't ready.
         # self.cmd('network custom-ip prefix delete -g {rg} -n {prefix}')
         # self.cmd('network custom-ip prefix list -g {rg}',
         #          checks=self.is_empty())
+
+    @record_only()
+    def test_network_custom_ip_prefix_update_state(self):
+        self.kwargs.update({
+            'rg': 'cli_test_custom_ip_prefix',
+            'prefix': 'prefix1'
+        })
+
+        self.cmd('network custom-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('commissionedState', 'Provisioned'))
+
+        self.cmd('network custom-ip prefix update -g {rg} -n {prefix} --state commission',
+                 checks=self.check('commissionedState', 'Commissioning'))
 
 
 class NetworkPublicIpPrefix(ScenarioTest):
@@ -741,6 +755,14 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         self.cmd('network application-gateway client-cert list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
 
+        self.cmd('network application-gateway client-cert update -g {rg} --gateway-name {gw} '
+                 '--name {cname1} --data "{cert}"')
+
+        cert = self.cmd('network application-gateway client-cert show -g {rg} --gateway-name {gw} --name {cname}').get_output_in_json()
+
+        self.cmd('network application-gateway client-cert show -g {rg} --gateway-name {gw} --name {cname1}',
+                 checks=[self.check('data', cert['data'])])
+
         self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}',
                  checks=[self.check('length(trustedClientCertificates)', 1)])
 
@@ -768,6 +790,13 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
                  '--client-auth-configuration True --min-protocol-version TLSv1_0 '
                  '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
                  checks=[self.check('length(sslProfiles)', 2)])
+
+        self.cmd('network application-gateway ssl-profile update -g {rg} --gateway-name {gw} --name {name1} '
+                 '--client-auth-configuration False',
+                 checks=[self.check('sslProfiles[1].clientAuthConfiguration.verifyClientCertIssuerDn', False)])
+
+        self.cmd('network application-gateway ssl-profile show -g {rg} --gateway-name {gw} --name {name1} ',
+                 checks=[self.check('clientAuthConfiguration.verifyClientCertIssuerDn', False)])
 
         self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
                  checks=[self.check('length(@)', 2)])
@@ -3520,6 +3549,23 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('length(@)', 5)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_bgp_community')
+    def test_network_vnet_with_bgp_community(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default --bgp-community "12076:20000"', checks=[
+            self.check('newVNet.bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('newVNet.bgpCommunities.virtualNetworkCommunity', '12076:20000')
+        ])
+
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --bgp-community "12076:20001"', checks=[
+            self.check('bgpCommunities.regionalCommunity', '12076:50006'),
+            self.check('bgpCommunities.virtualNetworkCommunity', '12076:20001')
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
@@ -4821,6 +4867,7 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
     def test_network_batsion_host_create(self, resource_group):
         self.kwargs.update({
@@ -4830,16 +4877,21 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             'subnet1': 'AzureBastionSubnet',
             'subnet2': 'vmSubnet',
             'ip1': 'ip1',
+            'num': 29,
             'bastion': 'clibastion'
+
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1} --scale-units {num} --tags a=b', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
-            self.check('name', '{bastion}')
+            self.check('name', '{bastion}'),
+            self.check('scaleUnits', '{num}'),
+            self.check('sku.name', 'Standard'),
+            self.check('tags.a', 'b')
         ])
         self.cmd('network bastion list')
         self.cmd('network bastion list -g {rg}', checks=[

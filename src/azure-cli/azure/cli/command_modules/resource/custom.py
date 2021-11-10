@@ -17,8 +17,8 @@ import sys
 import uuid
 import base64
 
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -54,7 +54,8 @@ from ._bicep import (
     remove_bicep_installation,
     get_bicep_latest_release_tag,
     get_bicep_available_release_tags,
-    validate_bicep_target_scope
+    validate_bicep_target_scope,
+    supports_bicep_publish
 )
 
 logger = get_logger(__name__)
@@ -286,12 +287,15 @@ def _urlretrieve(url):
 
 # pylint: disable=redefined-outer-name
 def _remove_comments_from_json(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
+    from ._json_handler import json_min
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    # It will affect the subsequent multi-line processing logic, so remove those comments in advance here.
+    # Related issue: https://github.com/Azure/azure-cli/issues/11995, the sample is in the additional context of it.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
+
+    # In order to solve the package conflict introduced by jsmin, the jsmin code is referenced into json_min
+    minified = json_min(template)
     try:
         return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
@@ -403,7 +407,6 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        logger.info(http_request.data)
         if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
@@ -934,7 +937,7 @@ def _build_preflight_error_message(preflight_error):
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
-    from six.moves.urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
+    from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
 
     try:
         scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
@@ -1287,7 +1290,8 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     if tag:
         key = list(tag.keys())[0]
         filters.append("tagname eq '{}'".format(key))
-        filters.append("tagvalue eq '{}'".format(tag[key]))
+        if tag[key]:
+            filters.append("tagvalue eq '{}'".format(tag[key]))
 
     filter_text = ' and '.join(filters) if filters else None
 
@@ -1929,9 +1933,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         exists = False
         if no_prompt is False:
             try:  # Check if child template spec already exists.
-                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n
-                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                confirmation = prompt_y_n("This will override template spec {} version {}. Proceed?".format(name, version))
                 if not confirmation:
                     return None
                 exists = True
@@ -2798,8 +2802,9 @@ def _is_management_group_scope(scope):
     return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
-def cli_managementgroups_group_list(cmd, client):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_list(cmd, client, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.list()
 
 
@@ -2808,8 +2813,10 @@ def cli_managementgroups_group_show(
         client,
         group_name,
         expand=False,
-        recurse=False):
-    _register_rp(cmd.cli_ctx)
+        recurse=False,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     if expand:
         return client.get(group_name, "children", recurse)
     return client.get(group_name)
@@ -2820,8 +2827,10 @@ def cli_managementgroups_group_create(
         client,
         group_name,
         display_name=None,
-        parent=None):
-    _register_rp(cmd.cli_ctx)
+        parent=None,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     parent_id = _get_parent_id_from_parent(parent)
     from azure.mgmt.managementgroups.models import (
         CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
@@ -2855,8 +2864,9 @@ def cli_managementgroups_group_update_set(
     return client.update(group_name, parameters)
 
 
-def cli_managementgroups_group_delete(cmd, client, group_name):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.delete(group_name)
 
 
@@ -3556,6 +3566,13 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
         print(run_bicep_command(args))
         return
     run_bicep_command(args)
+
+
+def publish_bicep_file(cmd, file, target):
+    if supports_bicep_publish():
+        run_bicep_command(["publish", file, "--target", target])
+    else:
+        logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v0.4.1008 or later.")
 
 
 def decompile_bicep_file(cmd, file):

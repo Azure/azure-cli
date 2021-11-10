@@ -46,6 +46,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('[0].name', '{rg}'),
             self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
+        self.cmd('group list --tag a', checks=[
+            self.check('[0].name', '{rg}'),
+            self.check('[0].tags', {'a': 'b', 'c': ''})
+        ])
         # test --force-string
         self.kwargs.update({'tag': "\"{\\\"k\\\":\\\"v\\\"}\""})
         self.cmd('group update -g {rg} --tags ""',
@@ -335,6 +339,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 

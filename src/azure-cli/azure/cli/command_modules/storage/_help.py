@@ -85,7 +85,7 @@ long-summary: >
     Sharing) rules.
 parameters:
   - name: --enable-change-feed
-    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
+    short-summary: 'Indicate whether change feed event logging is enabled. If it is true, you enable the storage account to begin capturing changes. The default value is true. You can see more details in https://docs.microsoft.com/azure/storage/blobs/storage-blob-change-feed?tabs=azure-portal#register-by-using-azure-cli'
   - name: --enable-delete-retention
     short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
   - name: --delete-retention-days
@@ -194,7 +194,7 @@ short-summary: Failover request can be triggered for a storage account in case o
 long-summary: |
     The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
     cluster will become primary after failover. For more information, please refer to
-    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+    https://docs.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
   - name: Failover a storage account.
     text: |
@@ -635,6 +635,29 @@ examples:
     crafted: true
 """
 
+helps['storage account hns-migration'] = """
+type: group
+short-summary: Manage storage account migration to enable hierarchical namespace.
+"""
+
+helps['storage account hns-migration start'] = """
+type: command
+short-summary: Validate/Begin migrating a storage account to enable hierarchical namespace.
+examples:
+  - name: Validate migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type validation --name mystorageaccount --resource-group myresourcegroup
+  - name: Begin migrating a storage account to enable hierarchical namespace.
+    text: az storage account hns-migration start --type upgrade --name mystorageaccount --resource-group myresourcegroup
+"""
+
+helps['storage account hns-migration stop'] = """
+type: command
+short-summary: Stop the enabling hierarchical namespace migration of a storage account.
+examples:
+  - name: Stop the enabling hierarchical namespace migration of a storage account.
+    text: az storage account hns-migration stop --name mystorageaccount --resource-group myresourcegroup
+"""
+
 helps['storage blob'] = """
 type: group
 short-summary: Manage object storage for unstructured data (blobs).
@@ -1029,6 +1052,39 @@ examples:
     text: |
         az storage blob set-tier --account-key 00000000 --account-name MyAccount --container-name mycontainer --name MyBlob --tier P10
     crafted: true
+"""
+
+helps['storage blob immutability-policy'] = """
+type: group
+short-summary: Manage blob immutability policy.
+"""
+
+helps['storage blob immutability-policy set'] = """
+type: command
+short-summary: Set blob's immutability policy.
+examples:
+  - name: Set an unlocked immutability policy.
+    text: az storage blob immutability-policy set --expiry-time 2021-09-07T08:00:00Z --policy-mode Unlocked -c mycontainer -n myblob --account-name mystorageaccount
+  - name: Lock a immutability policy.
+    text: az storage blob immutability-policy set --policy-mode Locked -c mycontainer -n myblob --account-name mystorageaccount
+"""
+
+helps['storage blob immutability-policy delete'] = """
+type: command
+short-summary: Delete blob's immutability policy.
+examples:
+  - name: Delete an unlocked immutability policy.
+    text: az storage blob immutability-policy delete -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage blob set-legal-hold'] = """
+type: command
+short-summary: Set blob legal hold.
+examples:
+  - name: Configure blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+  - name: Clear blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold false -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage blob show'] = """
@@ -1849,7 +1905,7 @@ parameters:
         For example, the following ACL grants read, write, and execute rights to the file owner an
         john.doe@contoso, the read right to the owning group, and nothing to everyone else:
         "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
-        For more information, please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.
+        For more information, please refer to https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control.
     - name: --permissions
       short-summary: >
         Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
@@ -1859,12 +1915,12 @@ parameters:
       short-summary: >
         The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
         set as the owner. For more information, please refer to
-        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
     - name: --group
       short-summary: >
         The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
         set as the owning group. For more information, please refer to
-        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+        https://docs.microsoft.com/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
 examples:
     - name: Set the access control list of a path.
       text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
@@ -2542,6 +2598,40 @@ examples:
     text: |
         az storage share url --account-key 00000000 --account-name MyAccount --name MyFileShare
     crafted: true
+"""
+
+helps['storage share list-handle'] = """
+type: command
+short-summary: List file handles of a file share.
+examples:
+  - name: List all file handles of a file share recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --recursive
+  - name: List all file handles of a file directory recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive
+  - name: List all file handles of a file.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt'
+"""
+
+helps['storage share close-handle'] = """
+type: command
+short-summary: Close file handles of a file share.
+examples:
+  - name: Close all file handles of a file share recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive
+        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive
+  - name: Close all file handles of a file directory recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive
+  - name: Close all file handles of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all
+  - name: Close file handle with a specific handle-id of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --handle-id "id"
 """
 
 helps['storage table'] = """

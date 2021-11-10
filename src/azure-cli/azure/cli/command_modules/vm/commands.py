@@ -16,7 +16,10 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_log_analytics_data_plane,
                                                           cf_disk_encryption_set, cf_shared_galleries,
                                                           cf_gallery_sharing_profile, cf_shared_gallery_image,
-                                                          cf_shared_gallery_image_version)
+                                                          cf_shared_gallery_image_version,
+                                                          cf_capacity_reservation_groups, cf_capacity_reservations,
+                                                          cf_vmss_run_commands, cf_gallery_application,
+                                                          cf_gallery_application_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -24,7 +27,8 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace)
+    process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
+    process_vm_update_namespace, process_set_applications_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -118,6 +122,11 @@ def load_command_table(self, _):
         client_factory=cf_run_commands
     )
 
+    compute_vmss_run_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVmRunCommandsOperations.{}',
+        client_factory=cf_vmss_run_commands
+    )
+
     compute_vm_size_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineSizesOperations.{}',
         client_factory=cf_vm_sizes
@@ -161,6 +170,16 @@ def load_command_table(self, _):
         client_factory=cf_gallery_image_versions,
     )
 
+    compute_gallery_application_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
+        client_factory=cf_gallery_application,
+    )
+
+    compute_gallery_application_version_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
+        client_factory=cf_gallery_application_version,
+    )
+
     compute_proximity_placement_groups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
     )
@@ -196,6 +215,16 @@ def load_command_table(self, _):
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
         exception_handler=monitor_exception_handler
+    )
+
+    capacity_reservation_groups_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#CapacityReservationGroupsOperations.{}',
+        client_factory=cf_capacity_reservation_groups
+    )
+
+    capacity_reservations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#CapacityReservationsOperations.{}',
+        client_factory=cf_capacity_reservations
     )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
@@ -267,6 +296,9 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_show_command('identity show', 'show_vm_identity')
 
+        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
+        g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
+
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
         g.command('convert', 'begin_convert_to_managed_disks', min_api='2016-04-30-preview')
@@ -290,7 +322,7 @@ def load_command_table(self, _):
         g.command('start', 'begin_start', supports_no_wait=True)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.command('reapply', 'begin_reapply', supports_no_wait=True, min_api='2019-07-01')
-        g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
+        g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
         g.command('assess-patches', 'begin_assess_patches', min_api='2020-06-01')
@@ -360,10 +392,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
         g.custom_command('invoke', 'vm_run_command_invoke')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
+        g.custom_command('list', 'vm_run_command_list')
+        g.custom_show_command('show', 'vm_run_command_show')
+        g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
+        g.custom_command('update', 'vm_run_command_update', supports_no_wait=True)
+        g.custom_command('delete', 'vm_run_command_delete', supports_no_wait=True, confirmation=True)
+        g.custom_wait_command('wait', 'vm_run_command_show')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
         g.custom_command('format', 'get_vm_format_secret', validator=process_vm_secret_format)
@@ -403,6 +439,8 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01', is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
+        g.custom_command('application set', 'set_vmss_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
+        g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True)
@@ -458,10 +496,13 @@ def load_command_table(self, _):
         g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
         g.show_command('show', 'get_virtual_machine_scale_set_network_interface')
 
-    with self.command_group('vmss run-command', compute_vm_run_sdk, min_api='2018-04-01') as g:
+    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
+        g.custom_command('list', 'vmss_run_command_list')
+        g.custom_show_command('show', 'vmss_run_command_show')
+        g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
+        g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
+        g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
         g.command('cancel', 'begin_cancel')
@@ -537,6 +578,21 @@ def load_command_table(self, _):
         g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
         g.command('show-shared', 'get', is_experimental=True)
 
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01') as g:
+        g.command('list', 'list_by_gallery')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
+        g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
+
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01') as g:
+        g.command('list', 'list_by_gallery_application')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
+        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_proximity_placement_group')
@@ -555,3 +611,19 @@ def load_command_table(self, _):
             g.command('list-definitions', 'list', table_transformer=metrics_definitions_table)
         except APIVersionException:
             pass
+
+    with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
+                            client_factory=cf_capacity_reservation_groups, is_preview=True) as g:
+        g.custom_command('create', 'create_capacity_reservation_group')
+        g.custom_command('update', 'update_capacity_reservation_group')
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_show_command('show', 'show_capacity_reservation_group')
+        g.custom_command('list', 'list_capacity_reservation_group')
+
+    with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
+                            client_factory=cf_capacity_reservations, is_preview=True) as g:
+        g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
+        g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'show_capacity_reservation')
+        g.custom_command('list', 'list_capacity_reservation')

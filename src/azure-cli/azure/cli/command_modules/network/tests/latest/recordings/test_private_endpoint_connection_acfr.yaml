@@ -1,0 +1,2309 @@
+interactions:
+- request:
+    body: '{"location": "westus", "properties": {"tenantSettings": {}, "sku": {"name":
+      "Standard", "family": "c", "capacity": 1}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '119'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --location --name --resource-group --sku --vm-size
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-redis/13.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/redis/cli-test-acfr-pe-000002?api-version=2020-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002","location":"West
+        US","name":"cli-test-acfr-pe-000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Standard","family":"C","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false},{"sslPort":15001,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"1000","maxmemory-reserved":"50","maxfragmentationmemory-reserved":"50","maxmemory-delta":"50"},"accessKeys":{"primaryKey":"aaaaaa","secondaryKey":"aaaaaa"},"hostName":"cli-test-acfr-pe-000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1011'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:31:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/redis/cli-test-acfr-pe-000002?api-version=2020-12-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1187'
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --name --resource-group --sku --vm-size
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-redis/13.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/redis/cli-test-acfr-pe-000002?api-version=2020-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002","location":"West
+        US","name":"cli-test-acfr-pe-000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Standard","family":"C","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false},{"sslPort":15001,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"1000","maxmemory-reserved":"50","maxfragmentationmemory-reserved":"50","maxmemory-delta":"50"},"accessKeys":null,"hostName":"cli-test-acfr-pe-000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '892'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "cli-subnet-000004",
+      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '315'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"f3de5978-5d7e-4dcc-b970-e30912f97557\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"87860684-50de-457d-910b-8e7b48e4a2c9\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"f3de5978-5d7e-4dcc-b970-e30912f97557\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fe21388a-a4ab-4c68-8737-34bb15d83d3c?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 343907cb-372e-4c24-9d5f-507a1f9a7874
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1192'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fe21388a-a4ab-4c68-8737-34bb15d83d3c?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bd5c002b-e7a1-4df4-b9a8-1251cc652d37
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"d7667542-2e8d-4d2d-b933-a381153b545e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"87860684-50de-457d-910b-8e7b48e4a2c9\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"d7667542-2e8d-4d2d-b933-a381153b545e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:10 GMT
+      etag:
+      - W/"d7667542-2e8d-4d2d-b933-a381153b545e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e8a69cc8-e67f-42c7-852b-8689c9125974
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"d7667542-2e8d-4d2d-b933-a381153b545e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:13 GMT
+      etag:
+      - W/"d7667542-2e8d-4d2d-b933-a381153b545e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1fad1383-2c34-46df-aa6f-7f6d3c1e6d7d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "name": "cli-subnet-000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '504'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"bed4f7ac-c2cd-4ae6-ab47-7ba7f5a6387d\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2088f4b2-491f-4843-820a-b1c57162e485?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2d70e844-54fc-479b-995e-ad97330c8160
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1186'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2088f4b2-491f-4843-820a-b1c57162e485?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5d1f19aa-3e72-4084-94ee-83597c7822be
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"92a4cc93-8d51-4f5f-ad6e-126aea3c1146\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:32:21 GMT
+      etag:
+      - W/"92a4cc93-8d51-4f5f-ad6e-126aea3c1146"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8c4a37e1-7b85-400b-93a3-e4e52334d4c0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "privateLinkServiceConnections": [{"name": "cli-pec-000006", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002",
+      "groupIds": ["redisCache"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '761'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"a1ba04d1-bfbc-48af-b67c-70877a0b5a1b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"4e277aaa-d2d8-407e-be1f-bec583b8c18f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"a1ba04d1-bfbc-48af-b67c-70877a0b5a1b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"redisCache\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.adf533ff-5980-4314-867c-264c1d40fd25\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/97e95ffa-121a-4266-9b29-bd6a199f74ec?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:57:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - bb37b859-430e-4b1a-9bc2-bc643d307c7c
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1188'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/97e95ffa-121a-4266-9b29-bd6a199f74ec?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:57:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b3f458c4-4555-4975-8eb1-6873d6691b0c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/97e95ffa-121a-4266-9b29-bd6a199f74ec?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:57:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e9aa62c7-9047-4c4d-80ca-41762a075f7b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/97e95ffa-121a-4266-9b29-bd6a199f74ec?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d4bc185a-b30e-4055-ad13-9e61ba906399
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"4e277aaa-d2d8-407e-be1f-bec583b8c18f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"redisCache\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto-Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.adf533ff-5980-4314-867c-264c1d40fd25\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"cli-test-acfr-pe-000002.redis.cache.windows.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2549'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:09 GMT
+      etag:
+      - W/"c5b4107e-752c-46fc-b52e-cd57585af92e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fdb827c8-a9f0-460f-a89f-547b94e3f936
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"4e277aaa-d2d8-407e-be1f-bec583b8c18f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"redisCache\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto-Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.adf533ff-5980-4314-867c-264c1d40fd25\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"cli-test-acfr-pe-000002.redis.cache.windows.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2549'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:13 GMT
+      etag:
+      - W/"c5b4107e-752c-46fc-b52e-cd57585af92e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7b4302c8-c917-41f3-8152-476781bc94a6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"4e277aaa-d2d8-407e-be1f-bec583b8c18f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"c5b4107e-752c-46fc-b52e-cd57585af92e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"redisCache\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto-Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.adf533ff-5980-4314-867c-264c1d40fd25\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"cli-test-acfr-pe-000002.redis.cache.windows.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2549'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:14 GMT
+      etag:
+      - W/"c5b4107e-752c-46fc-b52e-cd57585af92e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f5ff9703-e9c3-4155-a867-0c9f95daca22
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-redis/13.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/redis/cli-test-acfr-pe-000002?api-version=2020-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002","location":"West
+        US","name":"cli-test-acfr-pe-000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Standard","family":"C","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":true,"isPrimary":true},{"sslPort":15001,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Disabled","tenantSettings":{},"privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-Approved","actionsRequired":"None"}}}],"redisConfiguration":{"maxclients":"1000","maxmemory-reserved":"50","maxfragmentationmemory-reserved":"50","maxmemory-delta":"50"},"accessKeys":null,"hostName":"cli-test-acfr-pe-000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1593'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Approved\",\r\n      \"description\": \"Auto-Approved\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '886'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:58:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Approved\",\r\n      \"description\": \"Auto-Approved\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '886'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:58:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54",
+      "name": "cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54", "type": "Microsoft.Cache/Redis/privateEndpointConnections",
+      "properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": null,
+      "actionsRequired": "None"}}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '803'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/West
+        US/asyncOperations/2d608061-ca9c-4336-b374-50beeac94aed?api-version=2019-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 09:58:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/locations/West%20US/asyncOperations/2d608061-ca9c-4336-b374-50beeac94aed?api-version=2019-07-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:58:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:58:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:59:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:59:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:59:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:59:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 09:59:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:00:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:00:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:00:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:00:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:00:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:01:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:01:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:01:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:01:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:02:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:02:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:02:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n
+        \ \"name\": \"cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54\",\r\n  \"type\":
+        \"Microsoft.Cache/Redis/privateEndpointConnections\",\r\n  \"properties\":
+        {\r\n    \"privateEndpoint\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\r\n
+        \   },\r\n    \"privateLinkServiceConnectionState\": {\r\n      \"status\":
+        \"Rejected\",\r\n      \"description\": \"\",\r\n      \"actionsRequired\":
+        \"None\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Nov 2021 10:02:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) AZURECLI/2.30.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_pe000001/providers/Microsoft.Cache/Redis/cli-test-acfr-pe-000002/privateEndpointConnections/cli-pe-000005.4db68c8e-002a-4608-be54-0ad2ec8b8d54?api-version=2020-12-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 03 Nov 2021 10:02:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-rp-server-mvid:
+      - 32edddcd-f962-4b60-aaae-e7c5eb9f0d3f
+    status:
+      code: 200
+      message: OK
+version: 1

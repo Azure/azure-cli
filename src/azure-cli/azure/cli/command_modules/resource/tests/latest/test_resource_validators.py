@@ -6,7 +6,7 @@
 import unittest
 import os.path
 from unittest import mock
-from six import StringIO
+from io import StringIO
 
 from knack.util import CLIError
 from azure.cli.command_modules.resource._validators import (

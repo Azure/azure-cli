@@ -1,0 +1,82 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "UnemittedMetric", "metricNamespace": "MyNs", "timeAggregation": "Average",
+      "dimensions": [], "skipMetricValidation": true, "operator": "GreaterThanOrEqual",
+      "threshold": 10.0}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor metrics alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '765'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --scopes --region --description --condition
+      User-Agent:
+      - AZURECLI/2.29.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.9.7 (Windows-10-10.0.19042-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \ \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\":
+        \"Test\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\":
+        [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_skip_metric_validation000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
+        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
+        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
+        10.0,\r\n          \"name\": \"cond0\",\r\n          \"metricNamespace\":
+        \"MyNs\",\r\n          \"metricName\": \"UnemittedMetric\",\r\n          \"operator\":
+        \"GreaterThanOrEqual\",\r\n          \"timeAggregation\": \"Average\",\r\n
+        \         \"skipMetricValidation\": true,\r\n          \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n        }\r\n      ],\r\n      \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n    },\r\n
+        \   \"targetResourceRegion\": \"westus\",\r\n    \"actions\": []\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '1244'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 27 Oct 2021 02:37:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

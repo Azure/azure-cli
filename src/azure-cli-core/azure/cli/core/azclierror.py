@@ -76,7 +76,7 @@ class AzCLIError(CLIError):
                 print(recommendation, file=sys.stderr)
 
         if self.aladdin_recommendations:
-            print('\nTRY THIS:', file=sys.stderr)
+            print('\nExamples from AI knowledge base:', file=sys.stderr)
             for recommendation, description in self.aladdin_recommendations:
                 print_styled_text(recommendation, file=sys.stderr)
                 print_styled_text(description, file=sys.stderr)

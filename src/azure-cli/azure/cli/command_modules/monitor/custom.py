@@ -107,7 +107,7 @@ def list_metrics(cmd, resource,
     from azure.mgmt.monitor.models import ResultType
     from datetime import datetime
     import dateutil.parser
-    from six.moves.urllib.parse import quote_plus
+    from urllib.parse import quote_plus
 
     if not start_time and not end_time:
         # if neither value provided, end_time is now

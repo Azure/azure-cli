@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-from six import string_types
 
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
@@ -431,7 +430,7 @@ class AzureBatchDataPlaneCommand:
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
     def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
-        if not isinstance(operation, string_types):
+        if not isinstance(operation, str):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
         self._flatten = kwargs.pop('flatten', pformat.FLATTEN)  # Number of object levels to flatten

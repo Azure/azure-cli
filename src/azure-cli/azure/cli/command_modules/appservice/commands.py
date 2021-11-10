@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params
+from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, _validate_vnet_integration
 
 
 def output_slots_in_table(slots):
@@ -110,8 +110,10 @@ def load_command_table(self, _):
 
     appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
 
+    logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
-        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=_validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
@@ -273,12 +275,12 @@ def load_command_table(self, _):
         g.custom_command('set-key', 'set_hc_key')
 
     with self.command_group('webapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_webapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
     with self.command_group('functionapp vnet-integration') as g:
-        g.custom_command('add', 'add_vnet_integration')
+        g.custom_command('add', 'add_functionapp_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
@@ -299,9 +301,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
-        g.custom_command('create', 'create_function', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
+                         validator=_validate_vnet_integration)
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_webapp', table_transformer=transform_web_output)
+        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -379,9 +382,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_container_settings')
         g.custom_show_command('show', 'show_container_settings_functionapp')
 
-    with self.command_group('functionapp devops-pipeline') as g:
-        g.custom_command('create', 'create_devops_pipeline')
-
     with self.command_group('functionapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
         g.custom_command('delete', 'delete_slot')
@@ -442,11 +442,18 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
+        g.custom_command('delete', 'delete_staticsite_environment', confirmation=True)
 
     with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
+        g.custom_show_command('show', 'get_staticsite_domain')
+
+    with self.command_group('staticwebapp identity', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('assign', 'assign_identity')
+        g.custom_command('remove', 'remove_identity', confirmation=True)
+        g.custom_show_command('show', 'show_identity')
 
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
@@ -461,3 +468,19 @@ def load_command_table(self, _):
     with self.command_group('staticwebapp secrets', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_secrets')
         g.custom_command('reset-api-key', 'reset_staticsite_api_key', supports_no_wait=True)
+
+    with self.command_group('staticwebapp functions', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('link', 'link_user_function', validator=validate_staticsite_link_function)
+        g.custom_command('unlink', 'unlink_user_function', validator=validate_staticsite_sku)
+        g.custom_show_command('show', 'get_user_function', validator=validate_staticsite_sku)
+
+    with self.command_group('logicapp') as g:
+        g.custom_command('delete', 'delete_function_app', confirmation=True)
+        g.custom_command('stop', 'stop_webapp')
+        g.custom_command('start', 'start_webapp')
+        g.custom_command('restart', 'restart_webapp')
+
+    with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
+        g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)

@@ -12,16 +12,23 @@ import unittest
 from knack.util import CLIError
 from azure.cli.core.azclierror import CLIInternalError
 
-from azure.cli.testsdk import (
-    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, VirtualNetworkPreparer, ScenarioTest, live_only)
+from azure.cli.testsdk import ScenarioTest, live_only
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
-    StringCheck, StringContainCheck, StringContainCheckIgnoreCase)
+    StringCheck,
+    StringContainCheck,
+    StringContainCheckIgnoreCase,
+)
 from azure.cli.command_modules.acs._format import version_to_tuple
-from azure.cli.command_modules.acs._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
+from azure.cli.command_modules.acs._consts import (
+    CONST_KUBE_DASHBOARD_ADDON_NAME,
+)
 from .recording_processors import KeyReplacer
-
-from .custom_preparers import AKSCustomResourceGroupPreparer, AKSCustomVirtualNetworkPreparer, AKSCustomRoleBasedServicePrincipalPreparer
+from .custom_preparers import (
+    AKSCustomResourceGroupPreparer,
+    AKSCustomVirtualNetworkPreparer,
+    AKSCustomRoleBasedServicePrincipalPreparer,
+)
 # flake8: noqa
 
 
@@ -109,7 +116,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -142,7 +149,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('tags.key1', 'value1')
+            self.check('tags.key1', 'value1'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
         ])
 
         # list
@@ -206,10 +214,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # TODO: Remove when issue #9392 is addressed.
-    @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -298,8 +304,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap', preserve_default_location=True)
-    @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_edge_zone(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_edge_zone(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -347,10 +352,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # TODO: remove when issue #9392 is addressed.
-    @live_only()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         create_version, _ = self._get_versions(resource_group_location)
         # kwargs for string formatting
@@ -411,12 +414,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    # TODO: Remove when issue #9392 is addressed.
-
-    @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_without_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -459,11 +459,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-    # TODO: Remove when issue #9392 is addressed.
-    @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -488,7 +486,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    # TODO: Remove when issue #9392 is addressed.
+    # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -513,10 +511,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
 
-    # TODO: Remove when issue #9392 is addressed.
+    # live only due to workspace is not mocked
     @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_monitoring_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
@@ -610,12 +608,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # TODO: Remove when issue #9392 is addressed.
-    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomVirtualNetworkPreparer(address_prefixes='10.128.0.0/24', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
@@ -705,7 +701,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_blb_vmas(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -779,7 +775,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_default_setting(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -854,7 +850,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -869,7 +866,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_private_cluster_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -964,7 +961,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_cluster_with_apiserver_authorized_ranges_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1061,7 +1058,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_default_mgd_outbound_ip_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1161,7 +1158,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_outbound_ip_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1267,7 +1264,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_outbound_ip_prefixes_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1375,7 +1372,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_nodepool_create_scale_delete(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1499,7 +1496,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_nodepool_system_pool(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1616,8 +1613,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_availability_zones(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1693,7 +1690,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_managed_identity_with_service_principal(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1777,7 +1774,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_paid_sku(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1811,7 +1808,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_windows(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1865,7 +1862,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_ahub(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -1989,7 +1986,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -2014,7 +2012,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2050,7 +2047,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_managed_aad_enable_azure_rbac(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2089,7 +2085,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_aadv1_and_update_with_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2134,7 +2129,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_nonaad_and_update_with_managed_aad(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2169,7 +2163,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_upgrade_node_image_only_cluster(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2204,7 +2197,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_upgrade_node_image_only_nodepool(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2245,7 +2237,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
     def test_aks_create_spot_node_pool(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2287,7 +2278,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_create_with_ppg(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -2375,12 +2366,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
-            'name': aks_name
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
         })
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--generate-ssh-keys ' \
                      '--vm-set-type VirtualMachineScaleSets -c 1 ' \
-                     '--os-sku Ubuntu'
+                     '--os-sku Ubuntu ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('agentPoolProfiles[0].osSku', 'Ubuntu'),
@@ -2399,12 +2391,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'node_pool_name_second': node_pool_name_second
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-name {node_pool_name} ' \
-                     '-c 1'
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -2481,8 +2474,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
-            self.exists('identity'),
-            self.exists('identityProfile')
+            self.exists('identityProfile'),
+            self.check(
+                "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(
+                    self.kwargs.get("identity_resource_id")
+                ),
+                True,
+            )
         ])
 
         # get-credentials
@@ -2499,7 +2497,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -2522,7 +2521,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
     def test_aks_create_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2543,6 +2541,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.2.0.0/16")
         ])
 
+    # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2599,6 +2598,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'addon_client_id': addon_client_id,
         })
 
+    # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2761,8 +2761,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # TODO: Remove when issue #9392 is addressed.
-    @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_service_no_wait_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
@@ -2848,9 +2846,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    # TODO: remove when issue #9392 is addressed.
-    @live_only()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_scale_with_custom_nodepool_name_msi(self, resource_group, resource_group_location):
         create_version, _ = self._get_versions(resource_group_location)
         # kwargs for string formatting
@@ -2909,8 +2905,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again and expect failure
         self.cmd('aks show -g {resource_group} -n {name}', expect_failure=True)
 
-    # TODO: Remove when issue #9392 is addressed.
-
+    # live only due to role assignment is not mocked
     @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2938,9 +2933,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('[0].scope', '{vnet_subnet_id}')
         ])
 
-    # TODO: Remove when issue #9392 is addressed.
-
-    @live_only()
     @AllowLargeResponse(8192)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_with_skip_role_assignment_msi(self, resource_group, resource_group_location):
@@ -2965,7 +2957,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-    # TODO: Remove when issue #9392 is addressed.
+    # live only due to workspace is not mocked
     @live_only()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_with_monitoring_addon_msi(self, resource_group, resource_group_location):
@@ -3202,7 +3194,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
+        from azure.cli.testsdk.utilities import create_random_name
+        temp_path = create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
@@ -3937,6 +3930,95 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_update_label_msi(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool1_name = "nodepool1"
+        nodepool2_name = "nodepool2"
+        nodepool3_name = "nodepool3"
+        tags = "key1=value1"
+        new_tags = "key2=value2"
+        labels = "label1=value1"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'tags': tags,
+            'new_tags': new_tags,
+            'labels': labels,
+            'nodepool1_name': nodepool1_name,
+            'nodepool2_name': nodepool2_name,
+            'nodepool3_name': nodepool3_name
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].mode', 'System'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd(
+                'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels {labels}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool list
+        self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool1_name),
+            self.check('[0].mode', 'System'),
+            self.check('[0].nodeLabels.label1', 'value1'),
+        ])
+
+        # nodepool update nodepool2 label
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels label1=value2', checks=[
+            self.check('nodeLabels.label1', 'value2')
+        ])
+
+        # nodepool show
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name}', checks=[
+            self.check('nodeLabels.label1', 'value2')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
     def test_aks_availability_zones_msi(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -4027,12 +4109,24 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--uptime-sla '
+                     '--uptime-sla'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
             self.check('sku.tier', 'Paid')
+        ])
+
+        # update to no uptime sla
+        no_uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --no-uptime-sla'
+        self.cmd(no_uptime_sla_cmd, checks=[
+            self.check('sku.tier', 'Free')
+        ])
+
+        # update to uptime sla again
+        uptime_sla_cmd = 'aks update --resource-group={resource_group} --name={name} --uptime-sla --no-wait'
+        self.cmd(uptime_sla_cmd, checks=[
+            self.is_empty()
         ])
 
         # delete
@@ -4421,7 +4515,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "true")
         ])
 
-    @live_only()  # without live only fails with need az login
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_enable_addons_confcom_addon(self, resource_group, resource_group_location):
@@ -4447,7 +4540,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ACCSGXDevicePlugin.config.ACCSGXQuoteHelperEnabled', "false")
         ])
 
-    @live_only()  # without live only fails with need az login
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_disable_addons_confcom_addon(self, resource_group, resource_group_location):
@@ -4538,7 +4630,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_update_with_windows_password(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -4590,10 +4682,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4622,10 +4713,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only due to workspace is not mocked
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
-    @RoleBasedServicePrincipalPreparer()
+    @AKSCustomRoleBasedServicePrincipalPreparer()
     def test_aks_update_to_msi_cluster_with_addons(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4654,19 +4746,21 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_auto_upgrade_channel(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--generate-ssh-keys --enable-managed-identity ' \
-                     '--auto-upgrade-channel rapid'
+                     '--enable-managed-identity ' \
+                     '--auto-upgrade-channel rapid ' \
+                     '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
@@ -4682,6 +4776,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only due to "could not grant Managed Identity Operator permission to cluster identity at scope ..."
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -4735,9 +4830,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    @live_only()
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus', preserve_default_location=True)
     def test_aks_enable_utlra_ssd(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -4783,9 +4877,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    # live only for the following reasons
-    # 1. execute `kubectl get pods` in subprocess and cannot be mocked by testsdk
-    # 2. rely on some environment variable to indicate the execution is under test environment (e.g. "PYTEST_CURRENT_TEST")
+    # live only since execution of `kubectl get pods` in subprocess and cannot be mocked by testsdk
+    @unittest.skip("Unable to create a cluster with version lower than 1.19.0 that meets the test requirements")
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -4874,23 +4967,74 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_autoscaler(self, resource_group, resource_group_location):
+    def test_aks_create_autoscaler_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
+        tags = "tag1=v1 tag2=v2"
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
+            'tags': tags,
             'ssh_key_value': self.generate_ssh_keys()
         })
 
         # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --tags {tags} ' \
                      '--ssh-key-value={ssh_key_value} --enable-cluster-autoscaler ' \
                      '--min-count 1 --max-count 3 --cluster-autoscaler-profile scan-interval=30s expander=least-waste'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoScalerProfile.scanInterval', '30s'),
             self.check('autoScalerProfile.expander', 'least-waste'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', True),
             self.check('agentPoolProfiles[0].minCount', 1),
+            self.check('agentPoolProfiles[0].maxCount', 3),
+            self.check('tags.tag1', 'v1'),
+            self.check('tags.tag2', 'v2'),
+        ])
+
+        # disable autoscaler and update tags
+        new_tags = "tag3=v3"
+        self.kwargs.update({'tags': new_tags})
+        disable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                 '--tags {tags} --disable-cluster-autoscaler'
+        self.cmd(disable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', False),
+            self.check('agentPoolProfiles[0].minCount', None),
+            self.check('agentPoolProfiles[0].maxCount', None),
+            self.check('tags.tag1', None),
+            self.check('tags.tag2', None),
+            self.check('tags.tag3', "v3"),
+        ])
+
+        # enable autoscaler and update tags
+        other_new_tags = ""
+        self.kwargs.update({'tags': other_new_tags})
+        enable_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                '--tags {tags} --enable-cluster-autoscaler --min-count 2 --max-count 5'
+        self.cmd(enable_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].enableAutoScaling', True),
+            self.check('agentPoolProfiles[0].minCount', 2),
+            self.check('agentPoolProfiles[0].maxCount', 5),
+            self.check('tags', None),
+        ])
+
+        # clear autoscaler profile
+        clear_autoscaler_profile_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                       '--cluster-autoscaler-profile=""'
+        self.cmd(clear_autoscaler_profile_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoScalerProfile.scanInterval', '10s'),
+            self.check('autoScalerProfile.expander', 'random')
+        ])
+
+        # update autoscaler
+        update_autoscaler_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                                '--update-cluster-autoscaler --min-count 3 --max-count 3'
+        self.cmd(update_autoscaler_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].minCount', 3),
             self.check('agentPoolProfiles[0].maxCount', 3)
         ])
 
@@ -4900,7 +5044,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_loadbalancer(self, resource_group, resource_group_location):
+    def test_aks_create_loadbalancer_then_update(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'name': aks_name,
@@ -4918,6 +5062,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 2048),
             self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 5),
             self.check('networkProfile.loadBalancerProfile.effectiveOutboundIPs | length(@) == `2`', True)
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--load-balancer-outbound-ports 1024 --load-balancer-idle-timeout 10'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.loadBalancerProfile.allocatedOutboundPorts', 1024),
+            self.check('networkProfile.loadBalancerProfile.idleTimeoutInMinutes', 10)
         ])
 
         # delete
@@ -5006,7 +5159,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create acr
-        create_acr_cmd = 'acr create -n {acr_name} -g {resource_group} --sku basic'
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
         self.cmd(create_acr_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
@@ -5026,15 +5179,31 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install kubectl with error: '{}'!".format(err))
 
-        # check acr
-        check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
-        self.cmd(check_cmd, checks=[
-            StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-        ])
+        # create test hook file
+        hook_file_path = self.get_test_data_file_path("test_aks_create_attach_acr.hook")
+        test_hook_data = {
+            "configs": {
+                "returnOutput": True,
+            }
+        }
+        with open(hook_file_path, "w") as f:
+            json.dump(test_hook_data, f)
 
-        # delete
-        self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+        try:
+           # check acr
+            check_cmd = 'aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io'
+            self.cmd(check_cmd, checks=[
+                StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
+            ])
+        # clean up test hook file even if test failed
+        finally:
+            if os.path.exists(hook_file_path):
+                # delete file
+                os.remove(hook_file_path)
+
+            # delete cluster
+            self.cmd(
+                'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     # live only due to role assignment is not mocked
     @live_only()
@@ -5433,6 +5602,417 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
         ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_private_cluster_disable_public_fqdn_then_update(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--enable-private-cluster --disable-public-fqdn --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.exists('privateFqdn'),
+            self.check('fqdn', None),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', False),
+        ])
+
+        # update
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-public-fqdn'
+        self.cmd(update_cmd, checks=[
+            self.exists('privateFqdn'),
+            self.exists('fqdn'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('apiServerAccessProfile.enablePrivateClusterPublicFqdn', True),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only due to dependency `_add_role_assignment` is not mocked
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_update_attatch_acr(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        acr_name = self.create_random_name('cliaksacr', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'acr_name': acr_name
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
+        ])
+
+        # create acr
+        create_acr_cmd = 'acr create -g {resource_group} -n {acr_name} --sku basic'
+        self.cmd(create_acr_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # build command to check role assignment
+        subscription_id = self.get_subscription_id()
+        acr_scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.ContainerRegistry/registries/{}".format(
+            subscription_id, resource_group, acr_name
+        )
+        self.kwargs.update({"sp_name": sp_name, "acr_scope": acr_scope})
+        role_assignment_check_cmd = (
+            "role assignment list --assignee {sp_name} --scope {acr_scope}"
+        )
+
+        # attach acr
+        attach_cmd = "aks update --resource-group={resource_group} --name={name} --attach-acr={acr_name}"
+        self.cmd(attach_cmd)
+
+        # check role assignment
+        self.cmd(role_assignment_check_cmd, checks=[self.check('length(@) == `1`', True)])
+
+        # detach acr
+        attach_cmd = 'aks update --resource-group={resource_group} --name={name} --detach-acr={acr_name}'
+        self.cmd(attach_cmd)
+
+        # check role assignment
+        self.cmd(role_assignment_check_cmd, checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_SP_then_update_to_user_assigned_identity(self, resource_group, resource_group_location, sp_name, sp_password):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'name': aks_name,
+            'resource_group': resource_group,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('servicePrincipalProfile.clientId', sp_name)
+        ])
+
+        # update to assignd identity
+        identity_resource_id = self.generate_user_assigned_identity_resource_id(resource_group)
+        self.kwargs.update({
+            "identity_resource_id": identity_resource_id
+        })
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-managed-identity --assign-identity={identity_resource_id} --yes'
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check(
+                    "identity.userAssignedIdentities | keys(@) | contains(@, '{}')".format(identity_resource_id),
+                    True,
+                )
+            ],
+        )
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_disable_local_accounts(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value} --enable-managed-identity --disable-local-accounts'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('disableLocalAccounts', True)
+        ])
+
+        # update to enable local accounts
+        self.cmd('aks update --resource-group={resource_group} --name={name} --enable-local-accounts', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('disableLocalAccounts', False)
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_openservicemesh_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
+                     '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh.enabled', True),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_openservicemesh_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh', None),
+        ])
+
+        # TODO: add support for option --aks-custom-headers to `aks enable-addons` command
+        enable_cmd = 'aks enable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh.enabled', True),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_disable_openservicemesh_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
+                     '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh.enabled', True),
+        ])
+
+        # TODO: add support for option --aks-custom-headers to `aks disable-addons` command
+        disable_cmd = 'aks disable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
+        self.cmd(disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.openServiceMesh.enabled', False),
+            self.check('addonProfiles.openServiceMesh.config', None)
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_azurekeyvaultsecretsprovider_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '-a azure-keyvault-secrets-provider --ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "2m")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_addon_with_azurekeyvaultsecretsprovider_with_secret_rotation(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '-a azure-keyvault-secrets-provider --enable-secret-rotation --rotation-poll-interval 30m ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "30m")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_enable_addon_with_azurekeyvaultsecretsprovider(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.azureKeyvaultSecretsProvider', None)
+        ])
+
+        enable_cmd = 'aks enable-addons --addons azure-keyvault-secrets-provider --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false")
+        ])
+
+        update_enable_cmd = 'aks update --resource-group={resource_group} --name={name} --enable-secret-rotation --rotation-poll-interval 120s -o json'
+        self.cmd(update_enable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "120s")
+        ])
+
+        update_disable_cmd = 'aks update --resource-group={resource_group} --name={name} --disable-secret-rotation -o json'
+        self.cmd(update_disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "false"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "120s")
+        ])
+
+        disable_cmd = 'aks disable-addons --addons azure-keyvault-secrets-provider --resource-group={resource_group} --name={name} -o json'
+        self.cmd(disable_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', False),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config', None)
+        ])
+
+        enable_with_secret_rotation_cmd = 'aks enable-addons --addons azure-keyvault-secrets-provider --enable-secret-rotation --rotation-poll-interval 1h --resource-group={resource_group} --name={name} -o json'
+        self.cmd(enable_with_secret_rotation_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.enabled', True),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.enableSecretRotation', "true"),
+            self.check(
+                'addonProfiles.azureKeyvaultSecretsProvider.config.rotationPollInterval', "1h")
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2')
+    @AKSCustomRoleBasedServicePrincipalPreparer()
+    def test_aks_update_labels(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool_labels = "label1=value1 label2=value2"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'nodepool_labels': nodepool_labels,
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--ssh-key-value={ssh_key_value}'
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-labels {nodepool_labels}'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+        ])
+
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-labels label1=value11'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', None),
+        ])

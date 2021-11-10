@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import requests
 import semver
 
-from six.moves.urllib.request import urlopen
+from urllib.request import urlopen
 from knack.log import get_logger
 from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (
@@ -31,7 +31,7 @@ from azure.cli.core.azclierror import (
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
-# See: https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/template-syntax#template-format
+# See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
 
 _config_dir = get_config_dir()
@@ -140,7 +140,7 @@ def is_bicep_file(file_path):
 
 def get_bicep_available_release_tags():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases")
+        response = requests.get("https://aka.ms/BicepReleases")
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -148,11 +148,18 @@ def get_bicep_available_release_tags():
 
 def get_bicep_latest_release_tag():
     try:
-        response = requests.get("https://api.github.com/repos/Azure/bicep/releases/latest")
+        response = requests.get("https://aka.ms/BicepLatestRelease")
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+
+
+def supports_bicep_publish():
+    system = platform.system()
+    installation_path = _get_bicep_installation_path(system)
+    installed_version = _get_bicep_installed_version(installation_path)
+    return semver.compare(installed_version, "0.4.1008") >= 0
 
 
 def _load_bicep_version_check_result_from_cache():

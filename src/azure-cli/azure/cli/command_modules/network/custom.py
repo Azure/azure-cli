@@ -384,7 +384,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            firewall_policy=None, no_wait=False, host_names=None):
+                            ssl_profile=None, firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -404,13 +404,16 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
 
+    if cmd.supported_api_version(min_api='2020-06-01'):
+        new_listener.ssl_profile = SubResource(id=ssl_profile) if ssl_profile else None
+
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
                        resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, firewall_policy=None, host_names=None):
+                            host_name=None, ssl_cert=None, ssl_profile=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -429,6 +432,10 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
+
+    if cmd.supported_api_version(min_api='2020-06-01'):
+        if ssl_profile is not None:
+            instance.ssl_profile = SubResource(id=ssl_profile)
 
     if host_names is not None:
         instance.host_names = host_names or None
@@ -655,6 +662,22 @@ def add_trusted_client_certificate(cmd, resource_group_name, application_gateway
                        application_gateway_name, appgw)
 
 
+def update_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                      client_cert_data, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            cert.data = client_cert_data
+            break
+    else:
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
 def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -675,6 +698,21 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
+
+
+def show_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            instance = cert
+            break
+    else:
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return instance
 
 
 def show_ag_backend_health(cmd, client, resource_group_name, application_gateway_name, expand=None,
@@ -759,6 +797,43 @@ def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_prof
                        application_gateway_name, appgw)
 
 
+def update_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
+                       policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
+                       trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for profile in appgw.ssl_profiles:
+        if profile.name == ssl_profile_name:
+            instance = profile
+            break
+    else:
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+
+    if policy_name is not None:
+        instance.ssl_policy.policy_name = policy_name
+    if policy_type is not None:
+        instance.ssl_policy.policy_type = policy_type
+    if min_protocol_version is not None:
+        instance.ssl_policy.min_protocol_version = min_protocol_version
+    if cipher_suites is not None:
+        instance.ssl_policy.cipher_suites = cipher_suites
+    if disabled_ssl_protocols is not None:
+        instance.ssl_policy.disabled_ssl_protocols = disabled_ssl_protocols
+    if trusted_client_certificates is not None:
+        SubResource = cmd.get_models('SubResource')
+        instance.trusted_client_certificates = [SubResource(id=item) for item in trusted_client_certificates]
+    if client_auth_configuration is not None:
+        ApplicationGatewayClientAuthConfiguration = cmd.get_models('ApplicationGatewayClientAuthConfiguration')
+        instance.client_auth_configuration = ApplicationGatewayClientAuthConfiguration(
+            verify_client_cert_issuer_dn=(client_auth_configuration == 'True')
+        )
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
 def list_ssl_profile(cmd, resource_group_name, application_gateway_name):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -779,6 +854,19 @@ def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
 
+
+def show_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    instance = None
+    for profile in appgw.ssl_profiles:
+        if profile.name == ssl_profile_name:
+            instance = profile
+            break
+    else:
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+    return instance
 
 # endregion
 
@@ -5920,13 +6008,19 @@ def create_custom_ip_prefix(cmd, client, resource_group_name, custom_ip_prefix_n
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, custom_ip_prefix_name, prefix)
 
 
-def update_custom_ip_prefix(instance, signed_message=None, authorization_message=None, tags=None):
+def update_custom_ip_prefix(instance,
+                            signed_message=None,
+                            authorization_message=None,
+                            tags=None,
+                            commissioned_state=None):
     if tags is not None:
         instance.tags = tags
     if signed_message is not None:
         instance.signed_message = signed_message
     if authorization_message is not None:
         instance.authorization_message = authorization_message
+    if commissioned_state is not None:
+        instance.commissioned_state = commissioned_state[0].upper() + commissioned_state[1:] + 'ing'
     return instance
 # endregion
 
@@ -6305,7 +6399,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 # pylint: disable=too-many-locals
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None,
+                location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
                 ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
@@ -6335,11 +6429,14 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         vnet.extended_location = _edge_zone_model(cmd, edge_zone)
     if flowtimeout is not None:
         vnet.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        vnet.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None, flowtimeout=None):
+                ddos_protection_plan=None, flowtimeout=None, bgp_community=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6365,6 +6462,9 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
     if flowtimeout is not None:
         instance.flow_timeout_in_minutes = flowtimeout
+    if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
+        VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
+        instance.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
     return instance
 
 
@@ -7558,7 +7658,7 @@ def list_service_aliases(cmd, location, resource_group_name=None):
 
 # region bastion
 def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
-                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+                        public_ip_address, location=None, subnet='AzureBastionSubnet', scale_units=None, sku=None, tags=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
     (BastionHost,
      BastionHostIPConfiguration,
@@ -7571,7 +7671,17 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
                                                   public_ip_address=SubResource(id=public_ip_address))
 
     bastion_host = BastionHost(ip_configurations=[ip_configuration],
-                               location=location)
+                               location=location,
+                               tags=tags)
+
+    if cmd.supported_api_version(min_api='2021-03-01'):
+        sku_type = cmd.get_models('Sku')
+        sku = sku_type(name=sku)
+        bastion_host = BastionHost(ip_configurations=[ip_configuration],
+                                   location=location,
+                                   scale_units=scale_units,
+                                   sku=sku,
+                                   tags=tags)
     return client.begin_create_or_update(resource_group_name=resource_group_name,
                                          bastion_host_name=bastion_host_name,
                                          parameters=bastion_host)
@@ -7628,7 +7738,7 @@ def _get_ssh_path(ssh_command="ssh"):
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return ssh_path
 
@@ -7650,7 +7760,7 @@ def _get_rdp_path(rdp_command="mstsc"):
         if not os.path.isfile(rdp_path):
             raise CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for thie command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
     return rdp_path
 
@@ -7698,7 +7808,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, ssh_key)
     else:
-        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or akv.")
+        raise UnrecognizedArgumentError("Unknown auth type. Use one of password, aad or ssh-key.")
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
@@ -7715,14 +7825,19 @@ def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
 
-    tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
-    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
-    t.daemon = True
-    t.start()
-    command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
-    logger.debug("Running rdp command %s", ' '.join(command))
-    subprocess.call(command, shell=platform.system() == 'Windows')
-    tunnel_server.cleanup()
+    if platform.system() == 'Windows':
+        tunnel_server = get_tunnel(cmd, resource_group_name, bastion_host_name, target_resource_id, resource_port)
+        t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+        t.daemon = True
+        t.start()
+        command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+        logger.debug("Running rdp command %s", ' '.join(command))
+
+        from ._process_helper import launch_and_wait
+        launch_and_wait(command)
+        tunnel_server.cleanup()
+    else:
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
 
 
 def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):

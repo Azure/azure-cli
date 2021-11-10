@@ -214,6 +214,7 @@ def load_arguments(self, _):
                                                             CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
+        # TODO: replace "validate_cluster_autoscaler_profile" with "_extract_cluster_autoscaler_params"
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
@@ -251,14 +252,14 @@ def load_arguments(self, _):
         c.argument('assign_identity', type=str,
                    validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
-                   help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
+                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true')
         c.argument('node_public_ip_prefix_id', type=str)
         c.argument('windows_admin_username', options_list=[
                    '--windows-admin-username'])
         c.argument('windows_admin_password', options_list=[
                    '--windows-admin-password'])
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
         c.argument('node_osdisk_diskencryptionset_id', type=str,
                    options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('aci_subnet_name')
@@ -277,6 +278,9 @@ def load_arguments(self, _):
         c.argument('appgw_watch_namespace', options_list=[
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('assign_kubelet_identity', validator=validate_assign_kubelet_identity)
+        c.argument('disable_local_accounts', action='store_true')
+        c.argument('enable_secret_rotation', action='store_true')
+        c.argument('rotation_poll_interval', type=str)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
@@ -292,6 +296,7 @@ def load_arguments(self, _):
                    "--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
+        # TODO: replace "validate_cluster_autoscaler_profile" with "_extract_cluster_autoscaler_params
         c.argument('cluster_autoscaler_profile', nargs='+', options_list=["--cluster-autoscaler-profile", "--ca-profile"], validator=validate_cluster_autoscaler_profile,
                    help="Space-separated list of key=value pairs for configuring cluster autoscaler. Pass an empty string to clear the profile.")
         c.argument('min_count', type=int, validator=validate_nodes_count)
@@ -310,8 +315,8 @@ def load_arguments(self, _):
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('api_server_authorized_ip_ranges',
                    type=str, validator=validate_ip_ranges)
-        c.argument('enable_ahub', options_list=['--enable-ahub'])
-        c.argument('disable_ahub', options_list=['--disable-ahub'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'], action='store_true')
+        c.argument('disable_ahub', options_list=['--disable-ahub'], action='store_true')
         c.argument('enable_public_fqdn', action='store_true')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('windows_admin_password', options_list=[
@@ -319,8 +324,15 @@ def load_arguments(self, _):
         c.argument('enable_managed_identity', action='store_true')
         c.argument('assign_identity', type=str,
                    validator=validate_assign_identity)
+        c.argument('disable_local_accounts', action='store_true')
+        c.argument('enable_local_accounts', action='store_true')
+        c.argument('enable_secret_rotation', action='store_true')
+        c.argument('disable_secret_rotation', action='store_true')
+        c.argument('rotation_poll_interval', type=str)
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
+                   help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
 
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -340,6 +352,8 @@ def load_arguments(self, _):
         c.argument('appgw_watch_namespace', options_list=[
                    '--appgw-watch-namespace'], arg_group='Application Gateway')
         c.argument('enable_sgxquotehelper', action='store_true')
+        c.argument('enable_secret_rotation', action='store_true')
+        c.argument('rotation_poll_interval', type=str)
 
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -438,6 +452,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
         c.argument('max_surge', type=str, validator=validate_max_surge)
+        c.argument('labels', nargs='*', validator=validate_nodepool_labels)
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', type=str, options_list=[
