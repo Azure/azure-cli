@@ -3194,7 +3194,9 @@ class AKSContext:
         return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
 
     # pylint: disable=unused-argument
-    def _get_aad_tenant_id(self, enable_validation: bool = False, read_only: bool = False, **kwargs) -> Union[str, None]:
+    def _get_aad_tenant_id(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
