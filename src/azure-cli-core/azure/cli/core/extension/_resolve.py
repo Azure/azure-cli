@@ -70,7 +70,9 @@ def _is_greater_than_or_equal_to_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None, reinstall=False):
+def resolve_from_index(
+    extension_name, cur_version=None, index_url=None, target_version=None, cli_ctx=None, reinstall=False
+):
     """
     Gets the download Url and digest for the matching extension
 
@@ -84,7 +86,9 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     filters = [_is_not_platform_specific, _is_compatible_with_cli_version]
     if not target_version:
         filters.append(
-            _is_greater_than_or_equal_to_cur_version(cur_version) if reinstall else _is_greater_than_cur_version(cur_version)
+            _is_greater_than_or_equal_to_cur_version(cur_version)
+            if reinstall
+            else _is_greater_than_cur_version(cur_version)
         )
 
     for f in filters:

@@ -189,6 +189,7 @@ def _add_whl_ext(
 
     return extension_name
 
+
 def _check_setup_extras(install_setup_extras, ext_file, extension_name):
     # Check the setup extras keywords
     extras = ""
@@ -427,7 +428,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
         ext = get_extension(extension_name, ext_type=WheelExtension)
         cur_version = ext.get_version()
         try:
-            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, reinstall=not(install_setup_extras is None))
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, reinstall=not install_setup_extras is None)
             _, ext_version = _get_extension_info_from_source(download_url)
             set_extension_management_detail(extension_name, ext_version)
         except NoExtensionCandidatesError as err:
