@@ -3692,6 +3692,7 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
         super().setup()
@@ -3721,6 +3722,7 @@ class BicepInstallationTest(LiveScenarioTest):
         self.cmd('az bicep install --version v0.4.63')
         self.cmd('az bicep upgrade -t win-x64')
         self.cmd('az bicep version')
+
 
 class DeploymentWithBicepScenarioTest(LiveScenarioTest):
     def setup(self):
