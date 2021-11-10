@@ -6,6 +6,7 @@
 import threading
 import time
 import ast
+from typing import Protocol
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -1043,10 +1044,31 @@ def list_instances(cmd, resource_group_name, name, slot=None):
 # Stacks API is updated with Antares deployments,
 # which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
-    client = web_client_factory(cmd.cli_ctx)
-    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
-    return [s['displayName'] for s in runtime_helper.stacks]
+    client = web_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    # API returns malformed ISO timestamps -- this prevents a DeserializationError
+
+    # print(client.provider._deserialize.deserialize_type["iso-8601"])
+    # client.provider._deserialize.deserialize_type.update({"iso-8601": lambda s: datetime.datetime.utcnow()})
+
+    # print(client.provider._deserialize.deserialize_type["iso-8601"])
+
+    # runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
+
+    # return [s['displayName'] for s in runtime_helper.stacks]
+
+    stacks = client.provider.get_web_app_stacks()
+    stack = stacks.next()
+
+    return stack
+
+    # endpoint = "/providers/Microsoft.Web/webAppStacks"
+    # url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{endpoint}?api-version=2020-12-01"
+
+    # res = send_raw_request(cmd.cli_ctx, "GET", url).json()
+
+    # return res
+
 
 
 def list_runtimes_hardcoded(linux=False):
@@ -2731,7 +2753,8 @@ class _StackRuntimeHelper:
 
     @property
     def stacks(self):
-        self._load_stacks_hardcoded()
+        #self._load_stacks_hardcoded()
+        self._load_stacks()
         return self._stacks
 
     @staticmethod
@@ -2777,22 +2800,21 @@ class _StackRuntimeHelper:
     def _load_stacks(self):
         if self._stacks:
             return
+        self._linux = False # TODO remove
         os_type = ('Linux' if self._linux else 'Windows')
-        raw_stacks = self._client.provider.get_available_stacks(os_type_selected=os_type, raw=True)
-        bytes_value = raw_stacks._get_next().content  # pylint: disable=protected-access
-        json_value = bytes_value.decode('utf8')
-        json_stacks = json.loads(json_value)
-        stacks = json_stacks['value']
+        stacks = list(self._client.provider.get_available_stacks(os_type_selected=os_type))
+
         result = []
         if self._linux:
-            for properties in [(s['properties']) for s in stacks]:
-                for major in properties['majorVersions']:
-                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
-                                         None)
-                    result.append({
-                        'displayName': (default_minor['runtimeVersion']
-                                        if default_minor else major['runtimeVersion'])
-                    })
+            for properties in stacks:
+                for major in properties.major_versions:
+                    if not major.is_deprecated:
+                        default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
+                                            None)
+                        result.append({
+                            'displayName': (default_minor.runtime_version
+                                            if default_minor else major.runtime_version)
+                        })
         else:  # Windows stacks
             config_mappings = {
                 'node': 'WEBSITE_NODE_DEFAULT_VERSION',
@@ -2803,34 +2825,35 @@ class _StackRuntimeHelper:
 
             # get all stack version except 'java'
             for stack in stacks:
-                if stack['name'] not in config_mappings:
+                if stack.name not in config_mappings:
+                    print(stack.name)
                     continue
-                name, properties = stack['name'], stack['properties']
-                for major in properties['majorVersions']:
-                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
+                name, properties = stack.name, stack
+                for major in properties.major_versions:
+                    default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
                                          None)
                     result.append({
-                        'displayName': name + '|' + major['displayVersion'],
+                        'displayName': name + '|' + major.display_version,
                         'configs': {
-                            config_mappings[name]: (default_minor['runtimeVersion']
-                                                    if default_minor else major['runtimeVersion'])
+                            config_mappings[name]: (default_minor.runtime_version
+                                                    if default_minor else major.runtime_version)
                         }
                     })
 
             # deal with java, which pairs with java container version
-            java_stack = next((s for s in stacks if s['name'] == 'java'))
-            java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
-            for java_version in java_stack['properties']['majorVersions']:
-                for fx in java_container_stack['properties']['frameworks']:
-                    for fx_version in fx['majorVersions']:
+            java_stack = next((s for s in stacks if s.name == 'java'))
+            java_container_stack = next((s for s in stacks if s.name == 'javaContainers'))
+            for java_version in java_stack.major_versions:
+                for fx in java_container_stack.frameworks:
+                    for fx_version in fx.major_versions:
                         result.append({
-                            'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
-                                                                  fx['display'],
-                                                                  fx_version['displayVersion']),
+                            'displayName': 'java|{}|{}|{}'.format(java_version.display_version,
+                                                                  fx.display,
+                                                                  fx_version.display_version),
                             'configs': {
-                                'java_version': java_version['runtimeVersion'],
-                                'java_container': fx['name'],
-                                'java_container_version': fx_version['runtimeVersion']
+                                'java_version': java_version.runtime_version,
+                                'java_container': fx.name,
+                                'java_container_version': fx_version.runtime_version
                             }
                         })
 
