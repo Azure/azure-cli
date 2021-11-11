@@ -26,7 +26,7 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
