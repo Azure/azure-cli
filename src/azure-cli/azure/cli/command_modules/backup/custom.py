@@ -396,11 +396,9 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
 
     backup_config_response = client.get(vault_name, resource_group_name)
     prev_crr_flag = backup_config_response.properties.cross_region_restore_flag
-    if cross_region_restore_flag is None or backup_storage_redundancy == 'LocallyRedundant':
-        logger.warning("""
-        --cross-region-restore-flag parameter value will get overwritten with existing cross region restore state
-        of the vault
-        """)
+    if backup_storage_redundancy is None:
+        backup_storage_redundancy = backup_config_response.properties.storage_type
+    if cross_region_restore_flag is None:
         cross_region_restore_flag = prev_crr_flag
     else:
         cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
@@ -564,6 +562,10 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = protectable_item.properties.virtual_machine_id
 
+    if disk_list_setting is not None and exclude_all_data_disks is not None:
+        raise MutuallyExclusiveArgumentError("""
+        Both --disk-list-setting and --exclude-all-data-disks can not be provided together.
+        """)
     if disk_list_setting is not None:
         if diskslist is None:
             raise CLIError("Please provide LUNs of disks that will be included or excluded.")
@@ -597,6 +599,10 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item,
     vm_item_properties.policy_id = item.properties.policy_id
     vm_item_properties.source_resource_id = item.properties.virtual_machine_id
 
+    if disk_list_setting is not None and exclude_all_data_disks is not None:
+        raise MutuallyExclusiveArgumentError("""
+        Both --disk-list-setting and --exclude-all-data-disks can not be provided together.
+        """)
     if disk_list_setting is not None:
         if disk_list_setting.lower() == "resetexclusionsettings":
             disk_exclusion_properties = None
