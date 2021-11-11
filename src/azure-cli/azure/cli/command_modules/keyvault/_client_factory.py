@@ -88,6 +88,12 @@ def get_docs_tmpl(cli_ctx, resource_type, client_name, module_name='operations')
         obj_name='{}')
 
 
+def get_client_api_version(cli_ctx, resource_type):
+    if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
+        return '7.3-preview' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
+    return get_api_version(cli_ctx, resource_type)
+
+
 def get_client_factory(resource_type, client_name=''):
     if is_mgmt_plane(resource_type):
         return keyvault_mgmt_client_factory(resource_type, client_name)
@@ -100,7 +106,7 @@ def get_client_factory(resource_type, client_name=''):
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         return data_plane_azure_keyvault_administration_access_control_client
     if resource_type == ResourceType.DATA_KEYVAULT_KEYS:
-        return latest_data_plane_key_client if client_name == 'latest' else stable_data_plane_key_client
+        return data_plane_azure_keyvault_key_client
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
@@ -213,17 +219,7 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
         vault_url=vault_url, credential=credential, api_version=version)
 
 
-def latest_data_plane_key_client(cli_ctx, command_args):
-    api_version = '7.3-preview' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
-    return data_plane_azure_keyvault_key_client(cli_ctx, command_args, api_version)
-
-
-def stable_data_plane_key_client(cli_ctx, command_args):
-    api_version = '7.2' if not is_azure_stack_profile(cmd=None, cli_ctx=cli_ctx) else '2016-10-01'
-    return data_plane_azure_keyvault_key_client(cli_ctx, command_args, api_version)
-
-
-def data_plane_azure_keyvault_key_client(cli_ctx, command_args, api_version=None):
+def data_plane_azure_keyvault_key_client(cli_ctx, command_args):
     from azure.keyvault.keys import KeyClient
 
     vault_url, credential, version = _prepare_data_plane_azure_keyvault_client(
@@ -232,11 +228,11 @@ def data_plane_azure_keyvault_key_client(cli_ctx, command_args, api_version=None
     command_args.pop('vault_base_url', None)
     command_args.pop('identifier', None)
     return KeyClient(
-        vault_url=vault_url, credential=credential, api_version=api_version or version)
+        vault_url=vault_url, credential=credential, api_version=version)
 
 
 def _prepare_data_plane_azure_keyvault_client(cli_ctx, command_args, resource_type):
-    version = str(get_api_version(cli_ctx, resource_type))
+    version = str(get_client_api_version(cli_ctx, resource_type))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials()
     vault_url = \
