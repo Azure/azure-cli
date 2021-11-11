@@ -31,7 +31,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-import azure.cli.command_modules.backup.custom as custom
+from azure.cli.command_modules.backup import custom
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
