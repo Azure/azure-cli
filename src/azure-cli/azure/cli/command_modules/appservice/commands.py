@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, _validate_vnet_integration
+from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, validate_vnet_integration, validate_asp_create
 
 
 def output_slots_in_table(slots):
@@ -69,12 +69,13 @@ def _polish_bad_errors(ex, creating_plan):
         if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
             detail = ex.response.text
         else:
-            detail = json.loads(ex.response.text)['Message']
+            detail = json.loads(ex.response.text())['Message']
             if creating_plan:
                 if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with linux worker is not supported in current region. For " +
-                              "supported regions, please refer to https://docs.microsoft.com/"
-                              "azure/app-service-web/app-service-linux-intro")
+                    detail = ("Plan with requested features is not supported in current region. \n"
+                              "If creating an App Service Plan with --zone-redundant/-z, "
+                              "please see supported regions here: "
+                              "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
                 elif 'Not enough available reserved instance servers to satisfy' in detail:
                     detail = ("Plan with Linux worker can only be created in a group " +
                               "which has never contained a Windows worker, and vice versa. " +
@@ -113,7 +114,7 @@ def load_command_table(self, _):
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
     with self.command_group('webapp', webapp_sdk) as g:
-        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=_validate_vnet_integration)
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
@@ -286,7 +287,7 @@ def load_command_table(self, _):
 
     with self.command_group('appservice plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_app_service_plan', supports_no_wait=True,
-                         exception_handler=ex_handler_factory(creating_plan=True))
+                         exception_handler=ex_handler_factory(creating_plan=True), validator=validate_asp_create)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.custom_show_command('show', 'show_plan')
@@ -302,7 +303,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
-                         validator=_validate_vnet_integration)
+                         validator=validate_vnet_integration)
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')

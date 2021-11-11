@@ -45,7 +45,7 @@ from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
                                        CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
+                                       ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -1761,15 +1761,23 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
+def _get_existing_asp(cmd, resource_group_name, name):
+    try:
+        plan = show_plan(cmd, resource_group_name, name)
+        logger.warning("App Service Plan %s already exists in resource group %s", name, resource_group_name)
+        return plan
+    except CLIError:  # plan exists; resume ASP creation
+        pass
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
-    sku = _normalize_sku(sku)
-    _validate_asp_sku(sku, app_service_environment, zone_redundant)
-    if is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
+
+    existing_plan = _get_existing_asp(cmd, resource_group_name, name)
+    if existing_plan:
+        return existing_plan
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
@@ -4491,19 +4499,7 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         name=ase)
 
 
-def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    if zone_redundant and get_sku_name(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
-        raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
-    # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
-        if not app_service_environment:
-            raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
-                                  "Use this link to learn more: "
-                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
-    else:
-        if app_service_environment:
-            raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
