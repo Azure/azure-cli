@@ -1769,6 +1769,7 @@ def _get_existing_asp(cmd, resource_group_name, name):
     except CLIError:  # plan exists; resume ASP creation
         pass
 
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False):
@@ -4497,9 +4498,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         namespace='Microsoft.Web',
         type='hostingEnvironments',
         name=ase)
-
-
-
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):

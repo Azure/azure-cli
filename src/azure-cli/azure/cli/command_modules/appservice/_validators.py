@@ -83,7 +83,7 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
                                   "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
-def validate_asp_create(cmd, namespace):
+def validate_asp_create(namespace):
     validate_tags(namespace)
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
