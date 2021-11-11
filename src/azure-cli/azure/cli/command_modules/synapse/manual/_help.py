@@ -2135,3 +2135,46 @@ helps['synapse kusto'] = """
     type: group
     short-summary: "Manage synapse kusto"
 """
+
+helps['kusto script'] = """
+    type: group
+    short-summary: Manage script with kusto
+"""
+
+helps['kusto script show'] = """
+    type: command
+    short-summary: "Gets a Kusto pool script."
+    examples:
+      - name: KustoScriptsGet
+        text: |-
+               az kusto script show --workspace-name "kustoWorkspaceName" --name "kustoScript1"
+"""
+
+helps['kusto script create'] = """
+    type: command
+    short-summary: "Creates a Kusto pool script."
+    examples:
+      - name: KustoScriptsCreateOrUpdate
+        text: |-
+               az kusto script update --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
+               --kusto-pool-name kustopooltest --definition-file C:\\samples\\KqlScript.kql --script-name "kustoScript1"
+"""
+
+helps['kusto script update'] = """
+    type: command
+    short-summary: "Updates a Kusto pool script."
+    examples:
+      - name: KustoScriptsUpdate
+        text: |-
+               az kusto script update --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
+               --kusto-pool-name kustopooltest --definition-file C:\\samples\\KqlScript.kql --script-name "kustoScript1"
+"""
+
+helps['kusto script delete'] = """
+    type: command
+    short-summary: "Deletes a Kusto pool script"
+    examples:
+      - name: KustoScriptsDelete
+        text: |-
+               az kusto script delete --workspace-name "kustoWorkspaceName" --name "kustoScript1"
+"""

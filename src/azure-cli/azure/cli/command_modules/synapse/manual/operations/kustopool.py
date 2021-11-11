@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.core.util import sdk_no_wait
-from .._client_factory import cf_synapse_client_workspace_factory
-
+from azure.cli.core.util import sdk_no_wait, read_file_content
+from .._client_factory import cf_synapse_client_workspace_factory, cf_kusto_script
+from azure.synapse.artifacts.models import KqlScriptResource, KqlScript, KqlScriptContent, KqlScriptContentMetadata
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 # Synapse kustopool
 def synapse_kusto_pool_create(cmd,
@@ -147,3 +148,82 @@ def synapse_kusto_pool_detach_follower_database(client,
                        kusto_pool_name=kusto_pool_name,
                        resource_group_name=resource_group_name,
                        follower_database_to_remove=follower_database_to_remove)
+
+
+def synapse_kusto_script_show(cmd,
+                              workspace_name,
+                              script_name):
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+
+    return client.get_by_name(kql_script_name=script_name)
+
+
+def synapse_kusto_script_create(cmd,
+                                resource_group_name,
+                                workspace_name,
+                                kusto_pool_name,
+                                script_name,
+                                definition_file,
+                                no_wait=False):
+
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    scirpt_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}/kqlScripts/{}".format(
+        (subscription_id),
+        (resource_group_name),
+        (workspace_name),
+        (kusto_pool_name))
+
+    scirpt_type = "Microsoft.Synapse/workspaces/kqlScripts"
+    query = read_file_content(definition_file)
+    metadata = KqlScriptContentMetadata(Language = "?")
+    script_content = KqlScriptContent(query=query,metadata=metadata)
+    properties = KqlScript(script_content=script_content)
+    kql_script = KqlScriptResource(id=scirpt_id, type=scirpt_type, name=script_name, properties=properties)
+
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       kql_script_name=script_name,
+                       kql_script=kql_script
+                       )
+
+
+def synapse_kusto_script_update(cmd,
+                                resource_group_name,
+                                workspace_name,
+                                kusto_pool_name,
+                                script_name,
+                                definition_file,
+                                no_wait=False):
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    scirpt_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}/kqlScripts/{}".format(
+        (subscription_id),
+        (resource_group_name),
+        (workspace_name),
+        (kusto_pool_name))
+
+    scirpt_type = "Microsoft.Synapse/workspaces/kqlScripts"
+    query = read_file_content(definition_file)
+    metadata = KqlScriptContentMetadata(Language="?")
+    script_content = KqlScriptContent(query=query, metadata=metadata)
+    properties = KqlScript(script_content=script_content)
+    kql_script = KqlScriptResource(id=scirpt_id, type=scirpt_type, name=script_name, properties=properties)
+
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       kql_script_name=script_name,
+                       kql_script=kql_script)
+
+
+def synapse_kusto_script_delete(cmd,
+                                workspace_name,
+                                script_name,
+                                no_wait=False):
+    client = cf_kusto_script(cmd.cli_ctx, workspace_name)
+
+    return sdk_no_wait(no_wait,
+                       client.begin_delete_by_name,
+                       kql_script_name=script_name)

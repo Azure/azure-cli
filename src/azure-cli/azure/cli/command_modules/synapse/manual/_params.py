@@ -1039,3 +1039,33 @@ def load_arguments(self, _):
                    options_list=['--attached-database-configuration-name', '--adcn'],
                    type=str, help='Resource name of the attached database '
                    'configuration in the follower cluster.')
+
+    with self.argument_context('synapse kusto script create') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                                                                                                         'the Kusto pool.')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('script_name', type=str,
+                   help='The name of the Kusto database script.')
+        c.argument('definition_file', type=str,
+                   help='The name of the definition file.')
+
+    with self.argument_context('synapse kusto script update') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('kusto_pool_name', options_list=['--name', '-n', '--kusto-pool-name'], type=str, help='The name of '
+                                                                                                         'the Kusto pool.')
+        c.argument('resource_group_name', resource_group_name_type)
+        c.argument('script_name', type=str,
+                   help='The name of the Kusto database script.')
+        c.argument('definition_file', type=str,
+                   help='The name of the definition file.')
+
+    with self.argument_context('synapse kusto script delete') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('script_name', type=str,
+                   help='The name of the Kusto database script.')
+
+    with self.argument_context('synapse kusto script show') as c:
+        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('script_name', type=str,
+                   help='The name of the Kusto database script.')
