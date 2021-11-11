@@ -3243,9 +3243,7 @@ class AKSContext:
                 if self.decorator_mode == DecoratorMode.UPDATE:
                     if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
                         raise InvalidArgumentValueError(
-                            'Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/'
-                            '--enable-azure-rbac/--disable-azure-rbac"'
-                            ' if managed AAD is not enabled'
+                            'Cannot specify "--aad-tenant-id" if managed AAD is not enabled'
                         )
         return aad_tenant_id
 
@@ -3298,9 +3296,7 @@ class AKSContext:
                 if self.decorator_mode == DecoratorMode.UPDATE:
                     if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
                         raise InvalidArgumentValueError(
-                            'Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/'
-                            '--enable-azure-rbac/--disable-azure-rbac"'
-                            ' if managed AAD is not enabled'
+                            'Cannot specify "--aad-admin-group-object-ids" if managed AAD is not enabled'
                         )
 
         return aad_admin_group_object_ids
@@ -3435,9 +3431,7 @@ class AKSContext:
                 elif self.decorator_mode == DecoratorMode.UPDATE:
                     if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
                         raise InvalidArgumentValueError(
-                            'Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/'
-                            '--enable-azure-rbac/--disable-azure-rbac"'
-                            ' if managed AAD is not enabled'
+                            'Cannot specify "--enable-azure-rbac" if managed AAD is not enabled'
                         )
                     if self._get_disable_azure_rbac(enable_validation=False):
                         raise MutuallyExclusiveArgumentError(
@@ -3480,9 +3474,7 @@ class AKSContext:
                 if self.decorator_mode == DecoratorMode.UPDATE:
                     if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
                         raise InvalidArgumentValueError(
-                            'Cannot specify "--aad-tenant-id/--aad-admin-group-object-ids/'
-                            '--enable-azure-rbac/--disable-azure-rbac"'
-                            ' if managed AAD is not enabled'
+                            'Cannot specify "--disable-azure-rbac" if managed AAD is not enabled'
                         )
                     if self._get_enable_azure_rbac(enable_validation=False):
                         raise MutuallyExclusiveArgumentError(
