@@ -46,6 +46,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -105,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=5.1.0',
-    'azure-mgmt-network~=19.1.0',
+    'azure-mgmt-network~=19.3.0',
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
@@ -136,13 +137,13 @@ DEPENDENCIES = [
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
+    'colorama~=0.4.4',
     'fabric~=2.4',
     'javaproperties~=0.5.1',
-    'jsondiff~=1.2.0',
+    'jsondiff~=1.3.0',
     'packaging~=20.9',
     'PyGithub~=1.38',
     'PyNaCl~=1.4.0',
-    'pytz==2019.1',
     'scp~=0.13.2',
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions

@@ -8,6 +8,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.cli.core.azclierror import (RequiredArgumentMissingError)
+from azure.cli.core.commands.parameters import get_subscription_locations
 
 from ._client_factory import web_client_factory
 
@@ -123,3 +124,12 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
     if not webapp:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     return webapp.location
+
+
+def _normalize_location(cmd, location):
+    location = location.lower()
+    locations = get_subscription_locations(cmd.cli_ctx)
+    for loc in locations:
+        if loc.display_name.lower() == location or loc.name.lower() == location:
+            return loc.name
+    return location

@@ -143,7 +143,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-06-01',
-        ResourceType.MGMT_NETWORK: '2021-03-01',
+        ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-12-01',
@@ -187,7 +187,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2020-06-12',
+        ResourceType.DATA_STORAGE_BLOB: '2020-10-02',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',

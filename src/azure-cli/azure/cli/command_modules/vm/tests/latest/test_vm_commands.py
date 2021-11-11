@@ -665,6 +665,48 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @ResourceGroupPreparer()
+    def test_vm_create_data_disk_delete_option(self, resource_group):
+        self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:7-RAW:7.4.2018010506 -l northeurope '
+                 '--size Standard_E8as_v4 --generate-ssh-keys --public-ip-address "" --os-disk-size-gb 64 '
+                 '--data-disk-sizes-gb 200 --data-disk-delete-option Delete',
+                 checks=self.check('powerState', 'VM running'))
+        result = self.cmd('vm show -g {rg} -n Delete_CLI1').get_output_in_json()
+        self.assertEqual(result['storageProfile']['dataDisks'][0]['deleteOption'], 'Delete')
+
+        # creating a vm
+        self.cmd(
+            'vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --nsg-rule NONE')
+        result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
+
+        self.kwargs.update({
+            'origin_os_disk': result['storageProfile']['osDisk']['name'],
+            'origin_data_disk': result['storageProfile']['dataDisks'][0]['name'],
+            # snapshot the os & data disks
+            'os_snapshot': 'oSnapshot',
+            'os_disk': 'sDisk',
+            'data_snapshot': 'dSnapshot',
+            'data_disk': 'dDisk',
+            'data_disk2': 'dDisk2'
+        })
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
+        self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
+        self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
+        self.cmd('disk create -g {rg} -n {data_disk2} --source {data_snapshot}')
+
+        # rebuild a new vm
+        # (os disk can be resized)
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk} --os-disk-delete-option Delete '
+                 '--attach-data-disks {data_disk} {data_disk2} --data-disk-delete-option {data_disk}=Delete {data_disk2}=Detach '
+                 '--os-disk-size-gb 100 --os-type linux --nsg-rule NONE',
+                 checks=self.check('powerState', 'VM running'))
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].deleteOption', 'Delete'),
+            self.check('storageProfile.dataDisks[1].deleteOption', 'Detach'),
+        ])
+
 
 class VMOSDiskSize(ScenarioTest):
 
@@ -794,6 +836,24 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # test snapshot --incremental
         self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
                  checks=[self.check('incremental', True)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_copy_start_')
+    def test_vm_snapshot_copy_start_detection(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('testdisk-', length=24),
+            'snapshot1': self.create_random_name('testsnap1-', length=24),
+            'snapshot2': self.create_random_name('testsnap2-', length=24)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 -l westus')
+        # in the same region, it should default copyStart as false
+        self.cmd('snapshot create -g {rg} -n {snapshot1} --source {disk}',
+                 checks=[self.check('creationData.createOption', 'Copy')])
+        # in different region, it should default copyStart as True
+        # TODO: should not throw exception after feature GA
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegexp(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+            self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
     @ResourceGroupPreparer(name_prefix='cli_test_large_disk')

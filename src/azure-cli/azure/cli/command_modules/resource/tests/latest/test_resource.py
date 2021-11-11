@@ -46,6 +46,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
             self.check('[0].name', '{rg}'),
             self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
+        self.cmd('group list --tag a', checks=[
+            self.check('[0].name', '{rg}'),
+            self.check('[0].tags', {'a': 'b', 'c': ''})
+        ])
         # test --force-string
         self.kwargs.update({'tag': "\"{\\\"k\\\":\\\"v\\\"}\""})
         self.cmd('group update -g {rg} --tags ""',

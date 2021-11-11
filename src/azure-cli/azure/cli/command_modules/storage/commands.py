@@ -327,6 +327,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('query', 'query_blob',
                                        is_preview=True, min_api='2019-12-12')
         g.storage_custom_command_oauth('rewrite', 'rewrite_blob', is_preview=True, min_api='2020-04-08')
+        g.storage_command_oauth('set-legal-hold', 'set_legal_hold', min_api='2020-10-02')
+        g.storage_custom_command_oauth('immutability-policy set', 'set_immutability_policy', min_api='2020-10-02')
+        g.storage_command_oauth('immutability-policy delete', 'delete_immutability_policy', min_api='2020-10-02')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -593,6 +596,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('metadata show', 'get_share_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_share_metadata')
+        g.storage_command('list-handle', 'list_handles')
+        g.storage_custom_command('close-handle', 'close_handle')
 
     with self.command_group('storage share policy', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('acl', file_data_service_factory)) as g:
