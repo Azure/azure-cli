@@ -794,6 +794,9 @@ def load_arguments(self, _):
         c.argument('circuit_name', id_part=None)
         c.argument('peering_name', id_part=None)
 
+    with self.argument_context('network express-route peering connection ipv6-config') as c:
+        c.argument('address_prefix', help='/125 IP address space to carve out customer addresses for global reach.')
+
     with self.argument_context('network express-route peering peer-connection') as c:
         c.argument('circuit_name', circuit_name_type, id_part=None)
         c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part=None)
