@@ -7083,6 +7083,55 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
 
+    def test_update_auto_upgrade_profile(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "auto_upgrade_channel": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_auto_upgrade_profile(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_auto_upgrade_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "auto_upgrade_channel": "stable",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_auto_upgrade_profile(mc_2)
+
+        auto_upgrade_profile_2 = self.models.ManagedClusterAutoUpgradeProfile(
+            upgrade_channel="stable"
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            auto_upgrade_profile=auto_upgrade_profile_2,
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_update_default_mc_profile(self):
         pass
 

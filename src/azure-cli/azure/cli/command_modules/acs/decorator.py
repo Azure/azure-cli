@@ -5547,6 +5547,20 @@ class AKSUpdateDecorator:
             mc.aad_profile.enable_azure_rbac = False
         return mc
 
+    def update_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update auto upgrade profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5580,6 +5594,8 @@ class AKSUpdateDecorator:
         mc = self.update_windows_profile(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
+        # update auto upgrade profile
+        mc = self.update_auto_upgrade_profile(mc)
 
         return mc
 
