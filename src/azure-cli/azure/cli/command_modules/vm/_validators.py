@@ -1642,7 +1642,9 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     try:
-                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
                     except ResourceNotFoundError:
                         # There's a chance that the source doesn't exist, eg, vmss os disk.
                         # You can get the id of vmss os disk by
