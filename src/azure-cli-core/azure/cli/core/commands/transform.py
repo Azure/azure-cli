@@ -7,7 +7,7 @@ import re
 
 from azure.cli.core.util import b64_to_hex
 
-import knack.events as events
+from knack import events
 
 
 def register_global_transforms(cli_ctx):
