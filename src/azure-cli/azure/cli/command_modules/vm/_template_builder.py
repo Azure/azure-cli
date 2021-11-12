@@ -524,7 +524,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties['additionalCapabilities'] = {}
     if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+        vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
 
     if hibernation_enabled is not None:
         vm_properties['additionalCapabilities']['hibernationEnabled'] = hibernation_enabled
