@@ -2312,12 +2312,12 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vm': self.create_random_name('vm-', 10)
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --hibernation-enabled True')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --enable-hibernation True')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('additionalCapabilities.hibernationEnabled', True)
         ])
         self.cmd('vm deallocate -g {rg} -n {vm}')
-        self.cmd('vm update -g {rg} -n {vm} --hibernation-enabled False', checks=[
+        self.cmd('vm update -g {rg} -n {vm} --enable-hibernation False', checks=[
             self.check('additionalCapabilities.hibernationEnabled', False)
         ])
 

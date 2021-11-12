@@ -742,7 +742,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, hibernation_enabled=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -961,7 +961,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
-        hibernation_enabled=hibernation_enabled)
+        enable_hibernation=enable_hibernation)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1382,7 +1382,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              hibernation_enabled=None, **kwargs):
+              enable_hibernation=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1444,12 +1444,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         else:
             vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
-    if hibernation_enabled is not None:
+    if enable_hibernation is not None:
         if vm.additional_capabilities is None:
             AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-            vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=hibernation_enabled)
+            vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
         else:
-            vm.additional_capabilities.hibernation_enabled = hibernation_enabled
+            vm.additional_capabilities.hibernation_enabled = enable_hibernation
 
     if priority is not None:
         vm.priority = priority
