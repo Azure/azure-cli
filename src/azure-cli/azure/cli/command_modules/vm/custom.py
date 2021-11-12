@@ -2399,11 +2399,11 @@ def vm_run_command_show(client,
                         resource_group_name=None,
                         vm_name=None,
                         run_command_name=None,
+                        expand=None,
                         status=False,
                         location=None,
                         command_id=None):
     if resource_group_name or vm_name is not None or run_command_name is not None:
-        expand = None
         if status:
             expand = 'instanceView'
         return client.get_by_virtual_machine(resource_group_name=resource_group_name,
@@ -3865,8 +3865,8 @@ def vmss_run_command_show(client,
                           vmss_name,
                           instance_id,
                           run_command_name,
+                          expand=None,
                           status=False):
-    expand = None
     if status:
         expand = 'instanceView'
     return client.get(resource_group_name=resource_group_name,
