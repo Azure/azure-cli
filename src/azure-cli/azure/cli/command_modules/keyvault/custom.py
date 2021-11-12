@@ -532,7 +532,9 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                         default_action=None,
                         no_self_perms=None,
                         tags=None,
-                        no_wait=False):
+                        no_wait=False,
+                        public_network_access=None,
+                        ):
     if is_azure_stack_profile(cmd) or vault_name:
         return create_vault(cmd=cmd,
                             client=client,
@@ -554,7 +556,8 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             default_action=default_action,
                             no_self_perms=no_self_perms,
                             tags=tags,
-                            no_wait=no_wait)
+                            no_wait=no_wait,
+                            public_network_access=public_network_access)
 
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
@@ -646,7 +649,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                  default_action=None,
                  no_self_perms=None,
                  tags=None,
-                 no_wait=False):
+                 no_wait=False,
+                 public_network_access=None):
     from azure.core.exceptions import HttpResponseError
     try:
         vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
@@ -764,7 +768,8 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                  enable_rbac_authorization=enable_rbac_authorization,
                                  enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
-                                 soft_delete_retention_in_days=int(retention_days))
+                                 soft_delete_retention_in_days=int(retention_days),
+                                 public_network_access=public_network_access)
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -815,7 +820,8 @@ def update_vault(cmd, instance,
                  enable_purge_protection=None,
                  retention_days=None,
                  bypass=None,
-                 default_action=None):
+                 default_action=None,
+                 public_network_access=None):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -849,6 +855,10 @@ def update_vault(cmd, instance,
                 instance.properties.network_acls.bypass = bypass
             if default_action:
                 instance.properties.network_acls.default_action = default_action
+
+    if public_network_access is not None:
+        instance.properties.public_network_access = public_network_access
+
     return instance
 
 
@@ -1113,11 +1123,11 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
 
 
 # region KeyVault Key
-def create_key(client, key_name=None, protection=None,  # pylint: disable=unused-argument
+def create_key(client, name=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None):
 
-    return client.create_key(name=key_name,
+    return client.create_key(name=name,
                              key_type=kty,
                              size=key_size,
                              key_operations=key_ops,
@@ -1128,6 +1138,28 @@ def create_key(client, key_name=None, protection=None,  # pylint: disable=unused
                              curve=curve,
                              exportable=exportable,
                              release_policy=release_policy)
+
+
+def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, version=None):
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, version=version)
+    return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
+
+
+def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
+                name=None, version=None, data_type='base64'):  # pylint: disable=unused-argument
+    EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
+                                             resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    import binascii
+    crypto_client = client.get_cryptography_client(name, version=version)
+    return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
+                                 iv=binascii.unhexlify(iv) if iv else None,
+                                 authentication_tag=binascii.unhexlify(tag) if tag else None,
+                                 additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1233,7 +1265,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
+def import_key(cmd, client, name=None,  # pylint: disable=too-many-locals
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None, kty='RSA', curve=None, exportable=None, release_policy=None):
@@ -1280,7 +1312,7 @@ def import_key(cmd, client, key_name=None,  # pylint: disable=too-many-locals
         key_obj.t = byok_data
         key_obj.crv = curve
 
-    return client.import_key(name=key_name, key=key_obj,
+    return client.import_key(name=name, key=key_obj,
                              hardware_protected=(protection == 'hsm'),
                              enabled=not disabled, tags=tags,
                              not_before=not_before, expires_on=expires,
@@ -1429,7 +1461,7 @@ def get_policy_template():
     return policy
 
 
-def update_key_rotation_policy(cmd, client, value, key_name=None):
+def update_key_rotation_policy(cmd, client, value, name=None):
     from azure.cli.core.util import get_file_json, shell_safe_json_parse
     if os.path.exists(value):
         policy = get_file_json(value)
@@ -1454,7 +1486,7 @@ def update_key_rotation_policy(cmd, client, value, key_name=None):
             lifetime_actions.append(lifetime_action)
 
     expires_in = policy['attributes'].get('expires_in', None) if policy.get('attributes', None) else None
-    return client.update_key_rotation_policy(name=key_name, lifetime_actions=lifetime_actions, expires_in=expires_in)
+    return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
 

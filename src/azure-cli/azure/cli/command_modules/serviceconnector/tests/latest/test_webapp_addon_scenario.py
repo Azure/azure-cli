@@ -48,6 +48,8 @@ class CredentialReplacer(RecordingProcessor):
         # hide token in header
         if 'x-ms-cupertino-test-token' in request.headers:
             request.headers['x-ms-cupertino-test-token'] = 'hidden'
+        if 'x-ms-serviceconnector-user-token' in request.headers:
+            request.headers['x-ms-serviceconnector-user-token'] = 'hidden'
         
         return request
 

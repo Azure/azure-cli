@@ -21,8 +21,6 @@ logger = get_logger(__name__)
 
 
 class AADManager:
-    MANAGED_APP_PREFIX = 'https://az.aro.azure.com/'
-
     def __init__(self, cli_ctx):
         profile = Profile(cli_ctx=cli_ctx)
         credentials, _, tenant_id = profile.get_login_credentials(
@@ -38,9 +36,7 @@ class AADManager:
 
         app = self.client.applications.create(ApplicationCreateParameters(
             display_name=display_name,
-            identifier_uris=[
-                self.MANAGED_APP_PREFIX + str(uuid.uuid4()),
-            ],
+            identifier_uris=[],
             password_credentials=[
                 PasswordCredential(
                     custom_key_identifier=str(start_date).encode(),
@@ -97,7 +93,7 @@ class AADManager:
         # https://github.com/Azure/azure-sdk-for-python/issues/18131
         for c in credentials:
             if c.custom_key_identifier is None:
-                raise BadRequestError("Cluster AAD application contains a client secret with an empty description.\n\
+                raise BadRequestError("Cluster AAD application contains a client secret with an empty identifier.\n\
 Please either manually remove the existing client secret and run `az aro update --refresh-credentials`, \n\
 or manually create a new client secret and run `az aro update --client-secret <ClientSecret>`.")
 

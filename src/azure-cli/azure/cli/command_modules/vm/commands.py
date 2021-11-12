@@ -17,7 +17,9 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_disk_encryption_set, cf_shared_galleries,
                                                           cf_gallery_sharing_profile, cf_shared_gallery_image,
                                                           cf_shared_gallery_image_version,
-                                                          cf_capacity_reservation_groups, cf_capacity_reservations)
+                                                          cf_capacity_reservation_groups, cf_capacity_reservations,
+                                                          cf_vmss_run_commands, cf_gallery_application,
+                                                          cf_gallery_application_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -120,6 +122,11 @@ def load_command_table(self, _):
         client_factory=cf_run_commands
     )
 
+    compute_vmss_run_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVmRunCommandsOperations.{}',
+        client_factory=cf_vmss_run_commands
+    )
+
     compute_vm_size_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineSizesOperations.{}',
         client_factory=cf_vm_sizes
@@ -161,6 +168,16 @@ def load_command_table(self, _):
     compute_gallery_image_versions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImageVersionsOperations.{}',
         client_factory=cf_gallery_image_versions,
+    )
+
+    compute_gallery_application_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationsOperations.{}',
+        client_factory=cf_gallery_application,
+    )
+
+    compute_gallery_application_version_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#GalleryApplicationVersionsOperations.{}',
+        client_factory=cf_gallery_application_version,
     )
 
     compute_proximity_placement_groups_sdk = CliCommandType(
@@ -375,10 +392,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
         g.custom_command('invoke', 'vm_run_command_invoke')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
+        g.custom_command('list', 'vm_run_command_list')
+        g.custom_show_command('show', 'vm_run_command_show')
+        g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
+        g.custom_command('update', 'vm_run_command_update', supports_no_wait=True)
+        g.custom_command('delete', 'vm_run_command_delete', supports_no_wait=True, confirmation=True)
+        g.custom_wait_command('wait', 'vm_run_command_show')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
         g.custom_command('format', 'get_vm_format_secret', validator=process_vm_secret_format)
@@ -475,10 +496,13 @@ def load_command_table(self, _):
         g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
         g.show_command('show', 'get_virtual_machine_scale_set_network_interface')
 
-    with self.command_group('vmss run-command', compute_vm_run_sdk, min_api='2018-04-01') as g:
+    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
-        g.command('list', 'list')
-        g.show_command('show', 'get')
+        g.custom_command('list', 'vmss_run_command_list')
+        g.custom_show_command('show', 'vmss_run_command_show')
+        g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
+        g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
+        g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
         g.command('cancel', 'begin_cancel')
@@ -553,6 +577,21 @@ def load_command_table(self, _):
                             client_factory=cf_shared_gallery_image_version) as g:
         g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
         g.command('show-shared', 'get', is_experimental=True)
+
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01') as g:
+        g.command('list', 'list_by_gallery')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
+        g.custom_command('update', 'gallery_application_update', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
+
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01') as g:
+        g.command('list', 'list_by_gallery_application')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
+        g.custom_command('update', 'gallery_application_version_update', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         g.show_command('show', 'get')

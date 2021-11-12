@@ -295,6 +295,46 @@ class AKSModels:
         #     setattr(self, model_name, model_type)
 
 
+class AKSParamDict:
+    """Store the original parameters passed in by the command as an internal dictionary.
+
+    Only expose the "get" method externally for obtaining parameter values. At the same time records the usage of
+    parameters.
+    """
+    def __init__(self, param_dict):
+        if not isinstance(param_dict, dict):
+            raise CLIInternalError(
+                "Unexpected param_dict object with type '{}'.".format(
+                    type(param_dict)
+                )
+            )
+        self.__store = param_dict.copy()
+        self.__count = {}
+
+    @property
+    def __class__(self):
+        return dict
+
+    def __increase(self, key):
+        self.__count[key] = self.__count.get(key, 0) + 1
+
+    def get(self, key):
+        self.__increase(key)
+        return self.__store.get(key)
+
+    def __format_count(self):
+        untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
+        for k in untouched_keys:
+            self.__count[k] = 0
+
+    def print_usage_statistics(self):
+        self.__format_count()
+        print("\nParameter usage statistics:")
+        for k, v in self.__count.items():
+            print(k, v)
+        print("Total: {}".format(len(self.__count.keys())))
+
+
 # pylint: disable=too-many-public-methods
 class AKSContext:
     """Implement getter functions for all parameters in aks_create and aks_update.
@@ -556,7 +596,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_location()
 
     def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
@@ -696,7 +735,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_dns_name_prefix(enable_validation=True)
 
     def get_kubernetes_version(self) -> str:
@@ -782,12 +820,10 @@ class AKSContext:
 
         :return: string or None
         """
-
-        # this parameter does not need validation
         return self._get_vm_set_type()
 
     def get_nodepool_name(self) -> str:
-        """Dynamically obtain the value of nodepool_name according to the context.
+        """Obtain the value of nodepool_name.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
 
@@ -1389,7 +1425,9 @@ class AKSContext:
         """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
         according to the context.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        Note: This function is intended to be used in create mode.
+
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
@@ -1481,7 +1519,9 @@ class AKSContext:
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
-        When ont of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
+        Note: This function is intended to be used in create mode.
+
+        When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
@@ -1489,25 +1529,98 @@ class AKSContext:
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
         """
-
         return self._get_windows_admin_username_and_password()
+
+    def get_windows_admin_password(self) -> Union[str, None]:
+        """Obtain the value of windows_admin_password.
+
+        Note: This function is intended to be used in update mode.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        windows_admin_password = self.raw_param.get("windows_admin_password")
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return windows_admin_password
+
+    # pylint: disable=unused-argument
+    def _get_enable_ahub(
+        self, enable_validation: bool = False, **kwargs
+    ) -> bool:
+        """Internal function to obtain the value of enable_ahub.
+
+        Note: enable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_ahub = self.raw_param.get("enable_ahub")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.windows_profile:
+                enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if enable_ahub and self._get_disable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
+        return enable_ahub
 
     def get_enable_ahub(self) -> bool:
         """Obtain the value of enable_ahub.
 
         Note: enable_ahub will not be directly decorated into the `mc` object.
 
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_ahub(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_ahub(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function supports the option of enable_validation. When enabled, if both enable_ahub and disable_ahub are
+        specified, raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
-        enable_ahub = self.raw_param.get("enable_ahub")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.windows_profile:
-            enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
+        disable_ahub = self.raw_param.get("disable_ahub")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return enable_ahub
+        # validation
+        if enable_validation:
+            if disable_ahub and self._get_enable_ahub(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    'Cannot specify "--enable-ahub" and "--disable-ahub" at the same time'
+                )
+        return disable_ahub
+
+    def get_disable_ahub(self) -> bool:
+        """Obtain the value of disable_ahub.
+
+        Note: disable_ahub will not be directly decorated into the `mc` object.
+
+        This function will verify the parameter by default. If both enable_ahub and disable_ahub are specified,
+        raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_ahub(enable_validation=True)
 
     # pylint: disable=unused-argument,too-many-statements
     def _get_service_principal_and_client_secret(
@@ -1619,7 +1732,6 @@ class AKSContext:
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
         string type or None
         """
-
         return self._get_service_principal_and_client_secret()
 
     # pylint: disable=unused-argument
@@ -1681,7 +1793,6 @@ class AKSContext:
 
         :return: bool
         """
-
         return self._get_enable_managed_identity(enable_validation=True)
 
     def get_skip_subnet_role_assignment(self) -> bool:
@@ -1948,7 +2059,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return safe_lower(self._get_load_balancer_sku(enable_validation=True))
 
     def get_load_balancer_managed_outbound_ip_count(self) -> Union[int, None]:
@@ -1962,7 +2072,7 @@ class AKSContext:
         load_balancer_managed_outbound_ip_count = self.raw_param.get(
             "load_balancer_managed_outbound_ip_count"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -1990,7 +2100,7 @@ class AKSContext:
         load_balancer_outbound_ips = self.raw_param.get(
             "load_balancer_outbound_ips"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2016,7 +2126,7 @@ class AKSContext:
         load_balancer_outbound_ip_prefixes = self.raw_param.get(
             "load_balancer_outbound_ip_prefixes"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2044,7 +2154,7 @@ class AKSContext:
         load_balancer_outbound_ports = self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2071,7 +2181,7 @@ class AKSContext:
         load_balancer_idle_timeout = self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2196,7 +2306,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_outbound_type(
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
@@ -2652,7 +2761,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_workspace_resource_id(enable_validation=True)
 
     # pylint: disable=no-self-use
@@ -2943,12 +3051,10 @@ class AKSContext:
     # pylint: disable=unused-argument
     def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_aad.
-
         This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and
         any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
         MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
         enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
-
         :return: bool
         """
         # read the original value passed by the command
@@ -2991,12 +3097,10 @@ class AKSContext:
 
     def get_enable_aad(self) -> bool:
         """Obtain the value of enable_aad.
-
         This function will verify the parameter by default. If the value of enable_aad is True and any of
         aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
         will be raised. If the value of enable_aad is False and the value of enable_azure_rbac is True,
         a RequiredArgumentMissingError will be raised.
-
         :return: bool
         """
 
@@ -3074,14 +3178,11 @@ class AKSContext:
     # pylint: disable=unused-argument
     def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
-
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
-
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
-
         :return: string or None
         """
         # read the original value passed by the command
@@ -3115,12 +3216,10 @@ class AKSContext:
 
     def get_aad_tenant_id(self) -> Union[str, None]:
         """Dynamically obtain the value of aad_server_app_secret according to the context.
-
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
-
         :return: string or None
         """
 
@@ -3128,10 +3227,8 @@ class AKSContext:
 
     def get_aad_admin_group_object_ids(self) -> Union[List[str], None]:
         """Obtain the value of aad_admin_group_object_ids.
-
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
-
         :return: empty list or list of strings, or None
         """
         # read the original value passed by the command
@@ -3233,11 +3330,9 @@ class AKSContext:
     # pylint: disable=unused-argument
     def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_azure_rbac.
-
         This function supports the option of enable_validation. When enabled, if the values of disable_rbac and
         enable_azure_rbac are both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad
         is False and the value of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
-
         :return: bool
         """
         # read the original value passed by the command
@@ -3265,11 +3360,9 @@ class AKSContext:
 
     def get_enable_azure_rbac(self) -> bool:
         """Obtain the value of enable_azure_rbac.
-
         This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
         both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value
         of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
-
         :return: bool
         """
 
@@ -3315,7 +3408,7 @@ class AKSContext:
                     )
                 ]
         elif self.decorator_mode == DecoratorMode.UPDATE:
-            # normalize
+            # normalize, keep None as None
             if api_server_authorized_ip_ranges is not None:
                 api_server_authorized_ip_ranges = [
                     x.strip()
@@ -3458,7 +3551,7 @@ class AKSContext:
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
                         )
-                    # In fact, there is currently no such option in the create command
+                    # In fact, there is no such option in the create command.
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn should only be used with --enable-private-cluster"
                     )
@@ -3495,7 +3588,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_public_fqdn = self.raw_param.get("disable_public_fqdn")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3554,14 +3647,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_public_fqdn = self.raw_param.get("enable_public_fqdn")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.api_server_access_profile and
-                self.mc.api_server_access_profile.enable_private_cluster_public_fqdn is not None
-            ):
-                enable_public_fqdn = self.mc.api_server_access_profile.enable_private_cluster_public_fqdn
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -3577,7 +3663,7 @@ class AKSContext:
                     raise InvalidArgumentValueError(
                         "--enable-public-fqdn can only be used for private cluster"
                     )
-                # In fact, there is currently no such option in the create command
+                # In fact, there is no such option in the create command.
                 raise InvalidArgumentValueError(
                     "--enable-public-fqdn should only be used with --enable-private-cluster"
                 )
@@ -3737,8 +3823,9 @@ class AKSContext:
         # this parameter does not need validation
         return node_osdisk_diskencryptionset_id
 
-    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
-        """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
+    # pylint: disable=unused-argument
+    def _get_cluster_autoscaler_profile(self, read_only: bool = False, **kwargs) -> Union[Dict[str, str], None]:
+        """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
         In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
         been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
@@ -3777,13 +3864,17 @@ class AKSContext:
                         )
                     )
 
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
                 cluster_autoscaler_profile = self.mc.auto_scaler_profile
 
-        # dynamic completion
-        if self.decorator_mode == DecoratorMode.UPDATE:
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return cluster_autoscaler_profile
+
+        # dynamic completion for update mode only
+        if not read_only and self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
                 copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
@@ -3797,6 +3888,23 @@ class AKSContext:
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
+    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
+        """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
+
+        In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
+        been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
+        (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
+        dictionary with the dictionary of new options.
+
+        This function will verify the parameter by default. If the user input is not empty, take the keys from the
+        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
+        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
+        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
+
+        :return: dictionary or None
+        """
+        return self._get_cluster_autoscaler_profile()
+
     # pylint: disable=unused-argument
     def _get_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of uptime_sla.
@@ -3808,7 +3916,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3847,6 +3955,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -3875,7 +3984,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         tags = self.raw_param.get("tags")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.tags is not None:
                 tags = self.mc.tags
@@ -3955,7 +4064,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.disable_local_accounts is not None:
                 disable_local_accounts = self.mc.disable_local_accounts
@@ -3992,6 +4101,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_local_accounts = self.raw_param.get("enable_local_accounts")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -5262,6 +5372,29 @@ class AKSUpdateDecorator:
         mc.api_server_access_profile = profile_holder
         return mc
 
+    def update_windows_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update windows profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if not mc.windows_profile:
+            raise UnknownError(
+                "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
+            )
+
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+        if enable_ahub:
+            mc.windows_profile.license_type = 'Windows_Server'
+        if disable_ahub:
+            mc.windows_profile.license_type = 'None'
+        if windows_admin_password:
+            mc.windows_profile.admin_password = windows_admin_password
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5291,6 +5424,8 @@ class AKSUpdateDecorator:
         mc = self.update_disable_local_accounts(mc)
         # update api server access profile
         mc = self.update_api_server_access_profile(mc)
+        # update windows profile
+        mc = self.update_windows_profile(mc)
 
         return mc
 
