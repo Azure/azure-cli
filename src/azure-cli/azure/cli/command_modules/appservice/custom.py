@@ -1761,24 +1761,11 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
-def _get_existing_asp(cmd, resource_group_name, name):
-    try:
-        plan = show_plan(cmd, resource_group_name, name)
-        logger.warning("App Service Plan %s already exists in resource group %s", name, resource_group_name)
-        return plan
-    except CLIError:  # plan exists; resume ASP creation
-        pass
-
-
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
-
-    existing_plan = _get_existing_asp(cmd, resource_group_name, name)
-    if existing_plan:
-        return existing_plan
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
@@ -1807,7 +1794,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
 
-    # TODO use AppServicePlan field for zone redundancy if/when one becomes available in SDK
+    # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
     if zone_redundant:
         plan_def.enable_additional_properties_sending()
         existing_properties = plan_def.serialize()["properties"]
