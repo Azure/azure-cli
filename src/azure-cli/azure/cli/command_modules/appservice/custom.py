@@ -18,6 +18,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
@@ -4439,7 +4440,11 @@ def _start_ssh_session(hostname, port, username, password):
             logger.warning('.')
             time.sleep(1)
     try:
-        c.run('cat /etc/motd', pty=True)
+        try:
+            c.run('cat /etc/motd', pty=True)
+        except invoke.exceptions.UnexpectedExit:
+            # Don't crash over a non-existing /etc/motd.
+            pass
         c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
