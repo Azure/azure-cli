@@ -9,11 +9,13 @@ import ssl
 import json
 import socket
 import time
+import os
 import traceback
 import logging as logs
 from contextlib import closing
 from datetime import datetime
 from threading import Thread
+import urllib
 
 import websocket
 from websocket import create_connection, WebSocket
@@ -89,11 +91,25 @@ class TunnelServer:
         except ImportError:
             pass
 
-        http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        if should_disable_connection_verify():
-            http = urllib3.PoolManager(cert_reqs='CERT_NONE')
-        headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
+
+        proxies = urllib.request.getproxies()
+        bypass_proxy = urllib.request.proxy_bypass(urllib.parse.urlparse(url).hostname)
+
+        if 'https' in proxies and bypass_proxy is False:
+            proxy = urllib.parse.urlparse(proxies['https'])
+            logger.info('Using proxy for app service tunnel connection')
+            http = urllib3.ProxyManager(proxy.geturl())
+        else:
+            http = urllib3.PoolManager()
+
+        if should_disable_connection_verify():
+            http.connection_pool_kw['cert_reqs'] = 'CERT_NONE'
+        else:
+            http.connection_pool_kw['cert_reqs'] = 'CERT_REQUIRED'
+            http.connection_pool_kw['ca_certs'] = certifi.where()
+
+        headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         if self.instance is not None:
             headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(
