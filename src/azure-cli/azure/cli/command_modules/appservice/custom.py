@@ -59,7 +59,9 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     _rename_server_farm_props,
-                    _get_location_from_webapp, _normalize_location)
+                    _get_location_from_webapp,
+                    _normalize_location,
+                    get_pool_manager)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -2400,7 +2402,6 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 
 def _get_log(url, user_name, password, log_file=None):
-    import certifi
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2408,7 +2409,7 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    http = get_pool_manager(url)
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',

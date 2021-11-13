@@ -9,22 +9,19 @@ import ssl
 import json
 import socket
 import time
-import os
 import traceback
 import logging as logs
 from contextlib import closing
 from datetime import datetime
 from threading import Thread
-import urllib
 
 import websocket
 from websocket import create_connection, WebSocket
 
+from .utils import get_pool_manager
 from knack.util import CLIError
 from knack.log import get_logger
 logger = get_logger(__name__)
-
-REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
 
 
 class TunnelWebSocket(WebSocket):
@@ -83,9 +80,7 @@ class TunnelServer:
             return is_port_open
 
     def is_webapp_up(self):
-        import certifi
         import urllib3
-        from azure.cli.core.util import should_disable_connection_verify
 
         try:
             import urllib3.contrib.pyopenssl
@@ -93,39 +88,9 @@ class TunnelServer:
         except ImportError:
             pass
 
-        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
-
-        proxies = urllib.request.getproxies()
-        bypass_proxy = urllib.request.proxy_bypass(urllib.parse.urlparse(url).hostname)
-
-        if 'https' in proxies and bypass_proxy is False:
-            proxy = urllib.parse.urlparse(proxies['https'])
-
-            if proxy.username and proxy.password:
-                proxy_headers = urllib3.util.make_headers(proxy_basic_auth='{0}:{1}'.format(proxy.username, proxy.password))
-                logger.debug('Setting proxy-authorization header for basic auth')
-            else:
-                proxy_headers = None
-
-            logger.info('Using proxy for app service tunnel connection')
-            http = urllib3.ProxyManager(proxy.geturl(), proxy_headers=proxy_headers)
-        else:
-            http = urllib3.PoolManager()
-
-        if should_disable_connection_verify():
-            http.connection_pool_kw['cert_reqs'] = 'CERT_NONE'
-        else:
-            http.connection_pool_kw['cert_reqs'] = 'CERT_REQUIRED'
-            if REQUESTS_CA_BUNDLE in os.environ:
-                ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
-                logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
-                if not os.path.isfile(ca_bundle_file):
-                    raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
-            else:
-                ca_bundle_file = certifi.where()
-            http.connection_pool_kw['ca_certs'] = ca_bundle_file
-
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
+        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
+        http = get_pool_manager(url)
         if self.instance is not None:
             headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(
