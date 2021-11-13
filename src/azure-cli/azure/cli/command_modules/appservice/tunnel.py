@@ -100,8 +100,15 @@ class TunnelServer:
 
         if 'https' in proxies and bypass_proxy is False:
             proxy = urllib.parse.urlparse(proxies['https'])
+
+            if proxy.username and proxy.password:
+                proxy_headers = urllib3.util.make_headers(proxy_basic_auth='{0}:{1}'.format(proxy.username, proxy.password))
+                logger.debug('Setting proxy-authorization header for basic auth')
+            else:
+                proxy_headers = None
+
             logger.info('Using proxy for app service tunnel connection')
-            http = urllib3.ProxyManager(proxy.geturl())
+            http = urllib3.ProxyManager(proxy.geturl(), proxy_headers=proxy_headers)
         else:
             http = urllib3.PoolManager()
 
