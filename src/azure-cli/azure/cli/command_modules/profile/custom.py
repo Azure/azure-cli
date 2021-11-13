@@ -219,9 +219,6 @@ def _remove_adal_token_cache():
     adal_token_cache = os.path.join(get_config_dir(), 'accessTokens.json')
     try:
         os.remove(adal_token_cache)
-        logger.warning("ADAL token cache '%s' has been deleted. `az login` no longer generates this file. "
-                       "For more details, see https://docs.microsoft.com/cli/azure/msal-based-azure-cli",
-                       adal_token_cache)
         return True  # Deleted
     except FileNotFoundError:
         return False  # Not exist
