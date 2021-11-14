@@ -1621,7 +1621,11 @@ class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
     def write(self, str_or_bytes):
         content = str_or_bytes
         if isinstance(str_or_bytes, bytes):
-            content = str_or_bytes.decode('utf8')
+            try:
+                content = str_or_bytes.decode('utf8')
+            except UnicodeDecodeError:
+                logger.warning("A few characters have been ignored because they were not valid unicode.")
+                content = str_or_bytes.decode('ascii', 'ignore')
         try:
             self.out.write(content)
         except UnicodeEncodeError:
