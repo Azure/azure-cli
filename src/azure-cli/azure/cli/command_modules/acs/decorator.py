@@ -596,7 +596,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_location()
 
     def get_ssh_key_value_and_no_ssh_key(self) -> Tuple[str, bool]:
@@ -736,7 +735,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_dns_name_prefix(enable_validation=True)
 
     def get_kubernetes_version(self) -> str:
@@ -822,12 +820,10 @@ class AKSContext:
 
         :return: string or None
         """
-
-        # this parameter does not need validation
         return self._get_vm_set_type()
 
     def get_nodepool_name(self) -> str:
-        """Dynamically obtain the value of nodepool_name according to the context.
+        """Obtain the value of nodepool_name.
 
         Note: SDK performs the following validation {'required': True, 'pattern': r'^[a-z][a-z0-9]{0,11}$'}.
 
@@ -1533,7 +1529,6 @@ class AKSContext:
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
         """
-
         return self._get_windows_admin_username_and_password()
 
     def get_windows_admin_password(self) -> Union[str, None]:
@@ -1565,7 +1560,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_ahub = self.raw_param.get("enable_ahub")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.windows_profile:
                 enable_ahub = self.mc.windows_profile.license_type == "Windows_Server"
@@ -1604,7 +1599,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_ahub = self.raw_param.get("disable_ahub")
-        # we do not support this option in create mode
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -1737,7 +1732,6 @@ class AKSContext:
         :return: a tuple containing two elements: service_principal of string type or None and client_secret of
         string type or None
         """
-
         return self._get_service_principal_and_client_secret()
 
     # pylint: disable=unused-argument
@@ -1799,7 +1793,6 @@ class AKSContext:
 
         :return: bool
         """
-
         return self._get_enable_managed_identity(enable_validation=True)
 
     def get_skip_subnet_role_assignment(self) -> bool:
@@ -2066,7 +2059,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return safe_lower(self._get_load_balancer_sku(enable_validation=True))
 
     def get_load_balancer_managed_outbound_ip_count(self) -> Union[int, None]:
@@ -2080,7 +2072,7 @@ class AKSContext:
         load_balancer_managed_outbound_ip_count = self.raw_param.get(
             "load_balancer_managed_outbound_ip_count"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2108,7 +2100,7 @@ class AKSContext:
         load_balancer_outbound_ips = self.raw_param.get(
             "load_balancer_outbound_ips"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2134,7 +2126,7 @@ class AKSContext:
         load_balancer_outbound_ip_prefixes = self.raw_param.get(
             "load_balancer_outbound_ip_prefixes"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2162,7 +2154,7 @@ class AKSContext:
         load_balancer_outbound_ports = self.raw_param.get(
             "load_balancer_outbound_ports"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2189,7 +2181,7 @@ class AKSContext:
         load_balancer_idle_timeout = self.raw_param.get(
             "load_balancer_idle_timeout"
         )
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -2314,7 +2306,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_outbound_type(
             enable_validation=True, load_balancer_profile=load_balancer_profile
         )
@@ -2770,7 +2761,6 @@ class AKSContext:
 
         :return: string or None
         """
-
         return self._get_workspace_resource_id(enable_validation=True)
 
     # pylint: disable=no-self-use
@@ -3062,58 +3052,72 @@ class AKSContext:
     def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_aad.
 
-        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and
-        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
+        This function supports the option of enable_validation. When enabled, in create mode, if the value of enable_aad
+        is True and any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
         MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
-        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
+        specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
         :return: bool
         """
         # read the original value passed by the command
         enable_aad = self.raw_param.get("enable_aad")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.managed is not None
-        ):
-            enable_aad = self.mc.aad_profile.managed
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.managed is not None
+            ):
+                enable_aad = self.mc.aad_profile.managed
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            (
-                aad_client_app_id,
-                aad_server_app_id,
-                aad_server_app_secret,
-            ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-                enable_validation=False
-            )
-            if enable_aad:
-                if any(
-                    [
-                        aad_client_app_id,
-                        aad_server_app_id,
-                        aad_server_app_secret,
-                    ]
-                ):
-                    raise MutuallyExclusiveArgumentError(
-                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                        "--aad-server-app-secret"
-                    )
-            if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
-                raise RequiredArgumentMissingError(
-                    "--enable-azure-rbac can only be used together with --enable-aad"
+            if self.decorator_mode == DecoratorMode.CREATE:
+                (
+                    aad_client_app_id,
+                    aad_server_app_id,
+                    aad_server_app_secret,
+                ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+                    enable_validation=False
                 )
+                if enable_aad:
+                    if any(
+                        [
+                            aad_client_app_id,
+                            aad_server_app_id,
+                            aad_server_app_secret,
+                        ]
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                            "--aad-server-app-secret"
+                        )
+                if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
+                    raise RequiredArgumentMissingError(
+                        "--enable-azure-rbac can only be used together with --enable-aad"
+                    )
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if enable_aad:
+                    if (
+                        self.mc and
+                        self.mc.aad_profile is not None and
+                        self.mc.aad_profile.managed
+                    ):
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--enable-aad" if managed AAD is already enabled'
+                        )
         return enable_aad
 
     def get_enable_aad(self) -> bool:
         """Obtain the value of enable_aad.
 
-        This function will verify the parameter by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised. If the value of enable_aad is False and the value of enable_azure_rbac is True,
-        a RequiredArgumentMissingError will be raised.
+        This function will verify the parameter by default. In create mode, if the value of enable_aad is True and
+        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
+        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
+        specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
 
         :return: bool
         """
@@ -3190,86 +3194,125 @@ class AKSContext:
         return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
 
     # pylint: disable=unused-argument
-    def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+    def _get_aad_tenant_id(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
-
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
 
-        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of enable_validation. When enabled in update mode, if aad_tenant_id
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
 
+        This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
         :return: string or None
         """
         # read the original value passed by the command
         aad_tenant_id = self.raw_param.get("aad_tenant_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.tenant_id is not None
-        ):
-            aad_tenant_id = self.mc.aad_profile.tenant_id
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.tenant_id is not None
+            ):
+                aad_tenant_id = self.mc.aad_profile.tenant_id
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
             return aad_tenant_id
 
-        # dynamic completion
-        if not read_from_mc and not self._get_enable_aad(
-            enable_validation=False
-        ):
-            if aad_tenant_id is None and any(
-                self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
+        # dynamic completion for create mode only
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if not read_from_mc and not self._get_enable_aad(
+                enable_validation=False
             ):
-                profile = Profile(cli_ctx=self.cmd.cli_ctx)
-                _, _, aad_tenant_id = profile.get_login_credentials()
+                if aad_tenant_id is None and any(
+                    self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
+                ):
+                    profile = Profile(cli_ctx=self.cmd.cli_ctx)
+                    _, _, aad_tenant_id = profile.get_login_credentials()
 
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if aad_tenant_id:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--aad-tenant-id" if managed AAD is not enabled'
+                        )
         return aad_tenant_id
 
     def get_aad_tenant_id(self) -> Union[str, None]:
         """Dynamically obtain the value of aad_server_app_secret according to the context.
-
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
 
+        This function will verify the parameter by default. In update mode, if aad_tenant_id is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+
         :return: string or None
         """
+        return self._get_aad_tenant_id(enable_validation=True)
 
-        return self._get_aad_tenant_id()
+    # pylint: disable=unused-argument
+    def _get_aad_admin_group_object_ids(self, enable_validation: bool = False, **kwargs) -> Union[List[str], None]:
+        """Internal function to obtain the value of aad_admin_group_object_ids.
+
+        This function supports the option of enable_validation. When enabled in update mode, if
+        aad_admin_group_object_ids is specified, while aad_profile is not set or managed aad is not enabled,
+        raise an InvalidArgumentValueError.
+
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+        :return: empty list or list of strings, or None
+        """
+        # read the original value passed by the command
+        aad_admin_group_object_ids = self.raw_param.get("aad_admin_group_object_ids")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        read_from_mc = False
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.admin_group_object_i_ds is not None
+            ):
+                aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
+                read_from_mc = True
+
+        # keep None as None, but empty string ("") to empty list ([])
+        if not read_from_mc and aad_admin_group_object_ids is not None:
+            aad_admin_group_object_ids = aad_admin_group_object_ids.split(',') if aad_admin_group_object_ids else []
+
+        # validation
+        if enable_validation:
+            if aad_admin_group_object_ids:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--aad-admin-group-object-ids" if managed AAD is not enabled'
+                        )
+
+        return aad_admin_group_object_ids
 
     def get_aad_admin_group_object_ids(self) -> Union[List[str], None]:
         """Obtain the value of aad_admin_group_object_ids.
+
+        This function will verify the parameter by default. In update mode, if aad_admin_group_object_ids is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
 
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
 
         :return: empty list or list of strings, or None
         """
-        # read the original value passed by the command
-        aad_admin_group_object_ids = self.raw_param.get("aad_admin_group_object_ids")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        read_from_mc = False
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.admin_group_object_i_ds is not None
-        ):
-            aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
-            read_from_mc = True
-
-        # keep None as None, but empty string ("") to empty list ([])
-        if not read_from_mc and aad_admin_group_object_ids is not None:
-            aad_admin_group_object_ids = aad_admin_group_object_ids.split(',') if aad_admin_group_object_ids else []
-
-        # this parameter does not need validation
-        return aad_admin_group_object_ids
+        return self._get_aad_admin_group_object_ids(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_disable_rbac(self, enable_validation: bool = False, **kwargs) -> Union[bool, None]:
@@ -3352,46 +3395,103 @@ class AKSContext:
     def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_azure_rbac.
 
-        This function supports the option of enable_validation. When enabled, if the values of disable_rbac and
-        enable_azure_rbac are both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad
-        is False and the value of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+        This function supports the option of enable_validation. When enabled and enable_azure_rbac is specified,
+        in create mode, if the value of enable_aad is not True, a RequiredArgumentMissingError will be raised.
+        If disable_rbac is specified, a MutuallyExclusiveArgumentError will be raised. In update mode, if
+        enable_azure_rbac is specified, while aad_profile is not set or managed aad is not enabled,
+        raise an InvalidArgumentValueError. If both disable_azure_rbac and enable_azure_rbac are specified,
+        raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
         # read the original value passed by the command
         enable_azure_rbac = self.raw_param.get("enable_azure_rbac")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.enable_azure_rbac is not None
-        ):
-            enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.enable_azure_rbac is not None
+            ):
+                enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if enable_azure_rbac and self._get_disable_rbac(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "--enable-azure-rbac cannot be used together with --disable-rbac"
-                )
-            if enable_azure_rbac and not self._get_enable_aad(enable_validation=False):
-                raise RequiredArgumentMissingError(
-                    "--enable-azure-rbac can only be used together with --enable-aad"
-                )
+            if enable_azure_rbac:
+                if self.decorator_mode == DecoratorMode.CREATE:
+                    if not self._get_enable_aad(enable_validation=False):
+                        raise RequiredArgumentMissingError(
+                            "--enable-azure-rbac can only be used together with --enable-aad"
+                        )
+                    if self._get_disable_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "--enable-azure-rbac cannot be used together with --disable-rbac"
+                        )
+                elif self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--enable-azure-rbac" if managed AAD is not enabled'
+                        )
+                    if self._get_disable_azure_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time'
+                        )
         return enable_azure_rbac
 
     def get_enable_azure_rbac(self) -> bool:
         """Obtain the value of enable_azure_rbac.
 
-        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
-        both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value
-        of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+        This function will verify the parameter by default. If enable_azure_rbac is specified, in create mode,
+        if the value of enable_aad is not True, a RequiredArgumentMissingError will be raised. If disable_rbac
+        is specified, a MutuallyExclusiveArgumentError will be raised. In update mode, if enable_azure_rbac
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
 
         :return: bool
         """
 
         return self._get_enable_azure_rbac(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_azure_rbac.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if disable_azure_rbac
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_azure_rbac = self.raw_param.get("disable_azure_rbac")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if disable_azure_rbac:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--disable-azure-rbac" if managed AAD is not enabled'
+                        )
+                    if self._get_enable_azure_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time'
+                        )
+        return disable_azure_rbac
+
+    def get_disable_azure_rbac(self) -> bool:
+        """Obtain the value of disable_azure_rbac.
+
+        This function will verify the parameter by default. In update mode, if disable_azure_rbac is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_azure_rbac(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False, **kwargs) -> List[str]:
@@ -3433,7 +3533,7 @@ class AKSContext:
                     )
                 ]
         elif self.decorator_mode == DecoratorMode.UPDATE:
-            # normalize
+            # normalize, keep None as None
             if api_server_authorized_ip_ranges is not None:
                 api_server_authorized_ip_ranges = [
                     x.strip()
@@ -3613,7 +3713,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_public_fqdn = self.raw_param.get("disable_public_fqdn")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3672,7 +3772,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_public_fqdn = self.raw_param.get("enable_public_fqdn")
-        # we do not support this option in create mode
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -3848,8 +3948,9 @@ class AKSContext:
         # this parameter does not need validation
         return node_osdisk_diskencryptionset_id
 
-    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
-        """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
+    # pylint: disable=unused-argument
+    def _get_cluster_autoscaler_profile(self, read_only: bool = False, **kwargs) -> Union[Dict[str, str], None]:
+        """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
         In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
         been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
@@ -3888,13 +3989,17 @@ class AKSContext:
                         )
                     )
 
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.auto_scaler_profile is not None:
                 cluster_autoscaler_profile = self.mc.auto_scaler_profile
 
-        # dynamic completion
-        if self.decorator_mode == DecoratorMode.UPDATE:
+        # skip dynamic completion & validation if option read_only is specified
+        if read_only:
+            return cluster_autoscaler_profile
+
+        # dynamic completion for update mode only
+        if not read_only and self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
                 copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
@@ -3908,6 +4013,23 @@ class AKSContext:
         # this parameter does not need validation
         return cluster_autoscaler_profile
 
+    def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
+        """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
+
+        In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
+        been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
+        (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
+        dictionary with the dictionary of new options.
+
+        This function will verify the parameter by default. If the user input is not empty, take the keys from the
+        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
+        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
+        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
+
+        :return: dictionary or None
+        """
+        return self._get_cluster_autoscaler_profile()
+
     # pylint: disable=unused-argument
     def _get_uptime_sla(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of uptime_sla.
@@ -3919,7 +4041,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         uptime_sla = self.raw_param.get("uptime_sla")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if (
                 self.mc and
@@ -3958,6 +4080,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         no_uptime_sla = self.raw_param.get("no_uptime_sla")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -3986,7 +4109,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         tags = self.raw_param.get("tags")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.tags is not None:
                 tags = self.mc.tags
@@ -4066,7 +4189,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         disable_local_accounts = self.raw_param.get("disable_local_accounts")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
             if self.mc and self.mc.disable_local_accounts is not None:
                 disable_local_accounts = self.mc.disable_local_accounts
@@ -4103,6 +4226,7 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_local_accounts = self.raw_param.get("enable_local_accounts")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
 
         # this parameter does not need dynamic completion
         # validation
@@ -5396,6 +5520,33 @@ class AKSUpdateDecorator:
             mc.windows_profile.admin_password = windows_admin_password
         return mc
 
+    def update_aad_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update aad profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_aad():
+            mc.aad_profile = self.models.ManagedClusterAADProfile(
+                managed=True
+            )
+
+        aad_tenant_id = self.context.get_aad_tenant_id()
+        aad_admin_group_object_ids = self.context.get_aad_admin_group_object_ids()
+        enable_azure_rbac = self.context.get_enable_azure_rbac()
+        disable_azure_rbac = self.context.get_disable_azure_rbac()
+        if aad_tenant_id is not None:
+            mc.aad_profile.tenant_id = aad_tenant_id
+        if aad_admin_group_object_ids is not None:
+            # ids -> i_ds due to track 2 naming issue
+            mc.aad_profile.admin_group_object_i_ds = aad_admin_group_object_ids
+        if enable_azure_rbac:
+            mc.aad_profile.enable_azure_rbac = True
+        if disable_azure_rbac:
+            mc.aad_profile.enable_azure_rbac = False
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5425,6 +5576,10 @@ class AKSUpdateDecorator:
         mc = self.update_disable_local_accounts(mc)
         # update api server access profile
         mc = self.update_api_server_access_profile(mc)
+        # update windows profile
+        mc = self.update_windows_profile(mc)
+        # update aad profile
+        mc = self.update_aad_profile(mc)
 
         return mc
 
