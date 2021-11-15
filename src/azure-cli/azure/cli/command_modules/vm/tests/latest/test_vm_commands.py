@@ -3939,7 +3939,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
         ])
-        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg} --status', checks=[
+        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg} --instance-view', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('instanceView.executionState', 'Running')
@@ -4037,7 +4037,7 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
         ])
-        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} --status', checks=[
+        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} --instance-view', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('instanceView.executionState', 'Running')

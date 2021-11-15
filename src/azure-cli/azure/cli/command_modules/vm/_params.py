@@ -805,7 +805,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('status', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -813,7 +813,7 @@ def load_arguments(self, _):
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('status', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -859,7 +859,7 @@ def load_arguments(self, _):
         c.argument('instance_id', help='The instance ID of the virtual machine.')
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
-        c.argument('status', action='store_true', help='Track the run command progress')
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
