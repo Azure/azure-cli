@@ -198,3 +198,15 @@ def cf_capacity_reservation_groups(cli_ctx, *_):
 
 def cf_capacity_reservations(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).capacity_reservations
+
+
+def cf_community_gallery(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).community_galleries
+
+
+def cf_community_gallery_image(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).community_gallery_images
+
+
+def cf_community_gallery_image_version(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).community_gallery_image_versions

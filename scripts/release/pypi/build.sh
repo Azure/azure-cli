@@ -23,12 +23,12 @@ pip list
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 
 if [[ "$branch" != "release" ]]; then
-    . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
+    . ./scripts/ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
 
 for setup_file in $(find src -name 'setup.py' | grep -v azure-cli-testsdk); do
     pushd `dirname $setup_file`
-    python setup.py bdist_wheel -d $BUILD_STAGINGDIRECTORY
-    python setup.py sdist -d $BUILD_STAGINGDIRECTORY
+    python setup.py bdist_wheel -d C:\\Users\\zhoxing.FAREAST\\Desktop\\project\\output
+    python setup.py sdist -d C:\\Users\\zhoxing.FAREAST\\Desktop\\project\\output
     popd
 done

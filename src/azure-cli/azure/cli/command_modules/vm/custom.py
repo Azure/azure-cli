@@ -3916,14 +3916,7 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 
 # from azure.mgmt.compute.models import Gallery, SharingProfile
-def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, permissions=None,
-                           soft_delete=None, **kwargs):
-    if permissions:
-        if gallery.sharing_profile is None:
-            SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
-            gallery.sharing_profile = SharingProfile(permissions=permissions)
-        else:
-            gallery.sharing_profile.permissions = permissions
+def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, soft_delete=None, **kwargs):
     if soft_delete is not None:
         gallery.soft_delete_policy.is_soft_delete_enabled = soft_delete
 
@@ -3933,7 +3926,8 @@ def update_image_galleries(cmd, resource_group_name, gallery_name, gallery, perm
 
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
-                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None):
+                         location=None, no_wait=False, tags=None, permissions=None, soft_delete=None,
+                         publisher_uri=None, publisher_contact=None, eula=None, public_name_prefix=None):
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
@@ -3943,6 +3937,16 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     if permissions:
         SharingProfile = cmd.get_models('SharingProfile', operation_group='shared_galleries')
         gallery.sharing_profile = SharingProfile(permissions=permissions)
+        if permissions == 'Community':
+            if publisher_uri is None or publisher_contact is None or eula is None or public_name_prefix is None:
+                raise RequiredArgumentMissingError('If you want to share to the community, '
+                                                   'you need to fill in all the following parameters:'
+                                                   ' --publisher-uri, --publisher-email, --eula, --public-name-prefix.')
+            CommunityGalleryInfo = cmd.get_models('CommunityGalleryInfo')
+            gallery.sharing_profile.community_gallery_info = CommunityGalleryInfo(publisher_uri=publisher_uri,
+                                                                                  publisher_contact=publisher_contact,
+                                                                                  eula=eula,
+                                                                                  public_name_prefix=public_name_prefix)
 
     return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
@@ -4445,8 +4449,9 @@ def sig_share_update(cmd, client, resource_group_name, gallery_name, subscriptio
                      op_type=None):
     SharingProfileGroup, SharingUpdate, SharingProfileGroupTypes = cmd.get_models(
         'SharingProfileGroup', 'SharingUpdate', 'SharingProfileGroupTypes', operation_group='shared_galleries')
-    if subscription_ids is None and tenant_ids is None:
-        raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
+    if op_type != 'EnableCommunity':
+        if subscription_ids is None and tenant_ids is None:
+            raise RequiredArgumentMissingError('At least one of subscription ids or tenant ids must be provided')
     groups = []
     if subscription_ids:
         groups.append(SharingProfileGroup(type=SharingProfileGroupTypes.SUBSCRIPTIONS, ids=subscription_ids))
@@ -4781,3 +4786,53 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
     return vmss.virtual_machine_profile.application_profile
+
+
+def sig_community_image_definition_list(client, location, public_gallery_name, marker=None, show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name)
+    return get_page_result(generator, marker, show_next_marker)
+
+
+def sig_community_image_version_list(client, location, public_gallery_name, gallery_image_name, marker=None,
+                                     show_next_marker=None):
+    generator = client.list(location=location, public_gallery_name=public_gallery_name,
+                            gallery_image_name=gallery_image_name)
+    return get_page_result(generator, marker, show_next_marker)
+
+
+def get_page_result(generator, marker, show_next_marker=None):
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
+    result = list_generator(pages=pages)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+# The REST service takes 50 items as a page by default
+def list_generator(pages, num_results=50):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result

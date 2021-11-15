@@ -1016,6 +1016,15 @@ examples:
         --subscription-ids subId1 subId2 --tenant-ids tenantId1 tenantId2
 """
 
+helps['sig share enable-community'] = """
+type: command
+short-summary: Allow to share gallery to the community
+examples:
+  - name: Allow to share gallery to the community
+    text: |
+        az sig share enable-community --resource-group MyResourceGroup --gallery-name MyGallery
+"""
+
 helps['sig share reset'] = """
 type: command
 short-summary: disable gallery from being shared with subscription or tenant
@@ -1475,6 +1484,9 @@ examples:
   - name: Create a VM from shared gallery image (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a VM from community gallery image (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vm deallocate'] = """
@@ -2777,12 +2789,13 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI. In addition, it also supports shared gallery image and community gallery image.
         Valid URN format: "Publisher:Offer:Sku:Version".
     populator-commands:
       - az vm image list
       - az vm image show
       - az sig image-version show-shared
+      - az sig community-image-version show (in image-gallery extension)
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
@@ -2848,6 +2861,9 @@ examples:
   - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
+  - name: Create a VMSS from community gallery image. (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
 """
 
 helps['vmss deallocate'] = """
@@ -3647,4 +3663,58 @@ helps['vmss list-instances'] = """
 type: command
 short-summary: Get a list of all virtual machines in a VM scale sets.
 long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
+"""
+
+helps['sig show-community'] = """
+type: command
+short-summary: Get a gallery that has been community (preview).
+long-summary: Get a gallery that has been community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: Get a gallery that has been community in the given location.
+    text: |
+        az sig show-community --public-gallery-name publicGalleryName --location myLocation
+"""
+
+helps['sig image-definition show-community'] = """
+type: command
+short-summary: Get an image in a gallery community (preview).
+long-summary: Get an image in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: Get an image definition in a gallery community in the given location.
+    text: |
+        az sig image-definition show-community --public-gallery-name publicGalleryName \\
+        --gallery-image-definition myGalleryImageName --location myLocation
+"""
+
+helps['sig image-definition list-community'] = """
+type: command
+short-summary: List VM Image definitions in a gallery community (preview).
+long-summary: List VM Image definitions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image definition in a gallery community.
+    text: |
+        az sig image-definition list-community --public-gallery-name publicGalleryName \\
+        --location myLocation
+"""
+
+helps['sig image-version show-community'] = """
+type: command
+short-summary: Get an image version in a gallery community (preview).
+long-summary: Get an image version in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: Get an image version in a gallery community in the given location.
+    text: |
+        az sig image-version show-community --public-gallery-name publicGalleryName \\
+        --gallery-image-definition MyImage --gallery-image-version 1.0.0 --location myLocation
+"""
+
+helps['sig image-version list-community'] = """
+type: command
+short-summary: List VM Image Versions in a gallery community (preview).
+long-summary: List VM Image Versions in a gallery community (private preview feature, please contact community image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
+examples:
+  - name: List an image versions in a gallery community.
+    text: |
+        az sig image-version list-community --public-gallery-name publicGalleryName \\
+        --gallery-image-definition MyImage --location myLocation
 """

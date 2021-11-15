@@ -19,7 +19,10 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_shared_gallery_image_version,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_vmss_run_commands, cf_gallery_application,
-                                                          cf_gallery_application_version)
+                                                          cf_gallery_application_version,
+                                                          cf_community_gallery,
+                                                          cf_community_gallery_image,
+                                                          cf_community_gallery_image_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -226,6 +229,18 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#CapacityReservationsOperations.{}',
         client_factory=cf_capacity_reservations
     )
+
+    community_gallery_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#CommunityGalleriesOperations.{}',
+        client_factory=cf_community_gallery)
+
+    community_gallery_image_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImagesOperations.{}',
+        client_factory=cf_community_gallery_image)
+
+    community_gallery_image_version_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImageVersionsOperations.{}',
+        client_factory=cf_community_gallery_image_version)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
@@ -554,6 +569,7 @@ def load_command_table(self, _):
                             is_experimental=True, min_api='2020-09-30') as g:
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
+        g.custom_command('enable-community', 'sig_share_update', min_api='2021-07-01', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
@@ -627,3 +643,16 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'show_capacity_reservation')
         g.custom_command('list', 'list_capacity_reservation')
+
+    with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery) as g:
+        g.command('show-community', 'get', is_experimental=True)
+
+    with self.command_group('sig image-definition', community_gallery_image_sdk,
+                            client_factory=cf_community_gallery_image) as g:
+        g.command('show-community', 'get', is_experimental=True)
+        g.custom_command('list-community', 'sig_community_image_definition_list', is_experimental=True)
+
+    with self.command_group('sig image-version', community_gallery_image_version_sdk,
+                            client_factory=cf_community_gallery_image_version) as g:
+        g.command('show-community', 'get', is_experimental=True)
+        g.custom_command('list-community', 'sig_community_image_version_list', is_experimental=True)
