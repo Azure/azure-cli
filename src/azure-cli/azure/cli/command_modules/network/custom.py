@@ -3840,7 +3840,8 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                                           new_pool)
 
 
-def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, backend_addresses=None, backend_addresses_config_file=None):
+def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, backend_addresses=None,
+                                backend_addresses_config_file=None):
 
     if backend_addresses and backend_addresses_config_file:
         raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
