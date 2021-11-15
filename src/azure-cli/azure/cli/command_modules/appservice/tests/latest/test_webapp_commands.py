@@ -1525,6 +1525,32 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         self.assertEqual(asp_F1, result)
 
 
+class ContainerWebappE2ETest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_long_server_url(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+        self.cmd('appservice plan create --hyper-v -n {} -g {} --sku p1v3 -l westus2'.format(plan, resource_group))
+        container = "mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_docker_image_name(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container', length=24)
+        plan = self.create_random_name(prefix='webapp-plan', length=24)
+        self.cmd('appservice plan create --is-linux -n {} -g {} -l westus2'.format(plan, resource_group))
+        container = "nginx"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+
 @unittest.skip("Known issue with creating windows containers")
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
     @AllowLargeResponse()
