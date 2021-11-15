@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import ValidationError
 
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.mgmt.web.models import HostingEnvironmentProfile
+from azure.mgmt.web.models import HostingEnvironmentProfile, AseV3NetworkingConfiguration
 from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
@@ -58,15 +58,23 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client_factory_mock.return_value = ase_client
         host_env1 = HostingEnvironmentProfile(id='id1')
         host_env1.name = ase_name_1
+        host_env1.kind = 'ASEv2'
         host_env1.resource_group = rg_name_1
         host_env2 = HostingEnvironmentProfile(id='id2')
         host_env2.name = ase_name_2
+        host_env2.kind = 'ASEv3'
         host_env2.resource_group = rg_name_2
         ase_client.list.return_value = [host_env1, host_env2]
 
-        # Assert listvips is called
+        ase_client.get.return_value = host_env1
+        # Assert listvips is called (ASEv2)
         list_appserviceenvironment_addresses(self.mock_cmd, ase_name_1)
         ase_client.get_vip_info.assert_called_with(rg_name_1, ase_name_1)
+
+        ase_client.get.return_value = host_env2
+        # Assert get_ase_v3_networking_configuration is called (ASEv3)
+        list_appserviceenvironment_addresses(self.mock_cmd, ase_name_2)
+        ase_client.get_ase_v3_networking_configuration.assert_called_with(rg_name_2, ase_name_2)
 
         # Assert list_app_service_plans is called
         list_appserviceenvironment_plans(self.mock_cmd, ase_name_2)
@@ -137,7 +145,6 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env.name = ase_name
         host_env.kind = 'ASEv2'
         host_env.resource_group = rg_name
-        host_env.worker_pools = []
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
 
@@ -148,11 +155,37 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         assert_host_env.name = ase_name
         assert_host_env.kind = 'ASEv2'
         assert_host_env.resource_group = rg_name
-        assert_host_env.worker_pools = []
         assert_host_env.internal_load_balancing_mode = None
         assert_host_env.front_end_scale_factor = 10
         ase_client.begin_create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
                                                                   hosting_environment_envelope=assert_host_env)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_update_asev3(self, ase_client_factory_mock, resource_group_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_group_mock.return_value = rg_name
+
+        host_env = HostingEnvironmentProfile(id='id1')
+        host_env.name = ase_name
+        host_env.kind = 'ASEv3'
+        host_env.resource_group = rg_name
+        ase_client.get.return_value = host_env
+        ase_client.list.return_value = [host_env]
+        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False)
+        ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
+
+        update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True)
+
+        # Assert create_or_update is called with correct properties
+        ase_client.update_ase_networking_configuration.assert_called_once_with(resource_group_name=rg_name,
+                                                                               name=ase_name,
+                                                                               ase_networking_configuration=ase_networking_conf)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)

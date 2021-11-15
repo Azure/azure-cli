@@ -22,7 +22,7 @@ from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default
 from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
@@ -1642,11 +1642,10 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
-                source_location = source_info.location
-                target_location = namespace.location if namespace.location \
-                    else get_default_location_from_resource_group(cmd, namespace)
+                if not namespace.location:
+                    get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
-                namespace.copy_start = source_location != target_location
+                namespace.copy_start = source_info.location != namespace.location
         except CloudError:
             raise CLIError(usage_error)
 
