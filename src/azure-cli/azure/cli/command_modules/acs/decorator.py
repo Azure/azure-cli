@@ -3918,13 +3918,15 @@ class AKSContext:
         """
         # read the original value passed by the command
         auto_upgrade_channel = self.raw_param.get("auto_upgrade_channel")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.auto_upgrade_profile and
-            self.mc.auto_upgrade_profile.upgrade_channel is not None
-        ):
-            auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.upgrade_channel is not None
+            ):
+                auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
