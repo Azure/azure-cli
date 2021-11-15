@@ -808,6 +808,10 @@ def load_command_table(self, _):
         g.show_command('show')
         g.command('list', 'list')
 
+    with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
+        g.custom_command('set', 'set_express_route_peering_connection_config')
+        g.custom_command('remove', 'remove_express_route_peering_connection_config')
+
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
         g.show_command('show', is_preview=True)
         g.show_command('list', 'list', is_preview=True)
