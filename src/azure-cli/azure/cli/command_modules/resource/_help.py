@@ -2568,7 +2568,7 @@ examples:
   - name: Create a deployment stack using template file.
     text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --location "westus2" --description "description"
   - name: Create a deployment stack with parameter file.
-    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --location "westus2" --description "description"
+    text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location "westus2" --description "description"
   - name: Create a deployment stack with template spec
     text: az stacks sub create --name "StackName" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
   - name: Create a deployment stack using bicep file.
@@ -2610,7 +2610,7 @@ examples:
   - name: Create a deployment stack using template file.
     text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --description "description"
   - name: Create a deployment stack with parameter file.
-    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --param-file simpleTemplateParams.json --description "description"
+    text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description "description"
   - name: Create a deployment stack with template spec
     text: az stacks group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
   - name: Create a deployment stack using bicep file.

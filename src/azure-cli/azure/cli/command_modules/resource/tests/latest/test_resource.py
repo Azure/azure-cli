@@ -2034,13 +2034,13 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
-        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stacks sub delete --name {name} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stacks sub create --name {name} --update-behavior {update-behavior} --location {location} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
         self.cmd('stacks sub delete --name {name} --yes')
@@ -2057,7 +2057,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         })
 
-        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
 
         self.kwargs.update({'deployment-stack-id': deployment_stack_id})
@@ -2086,7 +2086,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         })
 
-        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         # list stacks 
         list_deployment_stacks = self.cmd('stacks sub list').get_output_in_json()
@@ -2113,7 +2113,7 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         # check stack to make sure it exists
         self.cmd('stacks sub show --name {name}', checks=self.check('name', '{name}'))
@@ -2125,7 +2125,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks sub list', checks=self.check("length([?name=='{name}'])", 0))
 
         #add delete with stack id
-        created_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         stack_id = created_stack['id']
 
         self.kwargs.update({'id': stack_id})
@@ -2161,13 +2161,13 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
-        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
 
         #create deployment stack with template spec and parameter file
-        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-spec "{template-spec-id}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
         self.cmd('stacks group delete --name {name} --resource-group {resource-group} --yes')
@@ -2185,7 +2185,7 @@ class DeploymentStacksTest(ScenarioTest):
             'update-behavior': "detachResources",
         })
 
-        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
 
         self.kwargs.update({'deployment-stack-id': deployment_stack_id})
@@ -2213,7 +2213,7 @@ class DeploymentStacksTest(ScenarioTest):
             'update-behavior': "detachResources",
         })
 
-        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         # list stacks in rg
         list_deployment_stacks_rg = self.cmd('stacks group list --resource-group {resource-group}').get_output_in_json()
@@ -2239,7 +2239,7 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         self.cmd('stacks group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
@@ -2250,7 +2250,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
         # create stack 
-        created_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         stack_id = created_stack['id']
 
         self.kwargs.update({'id':stack_id})
@@ -2276,7 +2276,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         })
 
-        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_snapshot_id = created_deployment_stack['snapshotId']
         #double check this
         deployment_stack_snapshot_name = deployment_stack_snapshot_id.split('/')[-1]
@@ -2306,7 +2306,7 @@ class DeploymentStacksTest(ScenarioTest):
             'update-behavior': "detachResources",
         })
 
-        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
 
         self.kwargs.update({'id': deployment_stack_id})
@@ -2339,10 +2339,10 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         #create stack again to make another snapshot
-        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         snapshot_name = created_deployment_stack['snapshotId'].split('/')[-1]
 
@@ -2357,14 +2357,14 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot sub list --name {name}', checks=self.check("length([?name=='{name}'])", 0))
 
         # create stack
-        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         snapshot_name = created_deployment_stack['snapshotId'].split('/')[-1]
 
         self.kwargs.update({'snapshot-name': snapshot_name})
         
         #create stack again
-        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks sub create --name {name} --location {location} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         snapshot_id = created_deployment_stack['snapshotId']
 
@@ -2390,7 +2390,7 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-group': resource_group
         })
 
-        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_snapshot_id = created_deployment_stack['snapshotId']
         #double check this
         deployment_stack_snapshot_name = deployment_stack_snapshot_id.split('/')[-1]
@@ -2421,7 +2421,7 @@ class DeploymentStacksTest(ScenarioTest):
             'resource-group': resource_group
         })
 
-        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         deployment_stack_id = created_deployment_stack['id']
 
         self.kwargs.update({'id': deployment_stack_id})
@@ -2455,8 +2455,8 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
-        created_deployment_stack_second = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        created_deployment_stack_second = self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         snapshot_name = created_deployment_stack['snapshotId'].split('/')[-1]
 
@@ -2471,7 +2471,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stacks snapshot group list --name {name} --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
 
         # create stack
-        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --param-file "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stacks group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-file "{template-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
         snapshot_id = created_deployment_stack_second['snapshotId']
 
         self.kwargs.update({'snapshot-id': snapshot_id})

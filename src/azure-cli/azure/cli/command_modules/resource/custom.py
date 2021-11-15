@@ -2082,9 +2082,8 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, description = None):
+def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-
     try:
         if rcf.deployment_stacks.get_at_subscription(name):
             from knack.prompting import prompt_y_n
@@ -2114,8 +2113,8 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
         # we assume this will end the code
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    if param_file:
-        parameters = json.load(open(param_file))
+    if parameters:
+        parameters = json.load(open(parameters))
     elif param_uri:
         #confirm with someone about this
         p_uri = "'" + param_uri + "'"
@@ -2176,11 +2175,11 @@ def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, param_file = None, param_uri = None, description = None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
     if not deployment_scope:
         #fix this
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
-
+    
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
@@ -2204,8 +2203,8 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
         # we assume this will end the code
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    if param_file:
-        parameters = json.load(open(param_file))
+    if parameters:
+        parameters = json.load(open(parameters))
     elif param_uri:
         p_uri = param_uri
     
