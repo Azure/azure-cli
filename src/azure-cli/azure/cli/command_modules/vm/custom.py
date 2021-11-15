@@ -373,8 +373,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     if disk_encryption_set:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
 
+    if accelerated_network is not None:
+        # supportedCapabilities = cmd.get_models('SupportedCapabilities')
+        # supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+        supportedCapabilities = {"acceleratedNetwork": accelerated_network}
+    supported_capabilities = supportedCapabilities if accelerated_network else None
+
     disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
-                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption)
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, os_type=os_type, encryption=encryption,
+                supported_capabilities=supported_capabilities)
 
     if hyper_v_generation:
         disk.hyper_v_generation = hyper_v_generation
@@ -407,8 +414,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.supports_hibernation = support_hibernation
     if public_network_access is not None:
         disk.public_network_access = public_network_access
-    if accelerated_network is not None:
-        disk.accelerated_network = accelerated_network
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
