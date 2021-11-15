@@ -372,7 +372,7 @@ class Profile:
                                                          scopes_to_resource(scopes))
             sdk_token = msi_creds.get_token(*scopes)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            # Cloud Shell
+            # Cloud Shell, which is just a system-assigned managed identity.
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             from .auth.util import scopes_to_resource
