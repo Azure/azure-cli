@@ -5,7 +5,8 @@
 
 import ipaddress
 
-from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError, ValidationError
+from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, ValidationError,
+                                       MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
@@ -67,33 +68,27 @@ def validate_ase_create(cmd, namespace):
             raise CLIError(name_validation.message)
 
 
-def validate_asp_create(cmd, namespace):
-    """Validate the SiteName that is being used to create is available
-    This API requires that the RG is already created"""
-    client = web_client_factory(cmd.cli_ctx)
-    if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str):
-        resource_group_name = namespace.resource_group_name
-        if isinstance(namespace.location, str):
-            location = namespace.location
-        else:
-            rg_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+def _validate_asp_sku(sku, app_service_environment, zone_redundant):
+    if zone_redundant and get_sku_name(sku.upper()) not in ['PREMIUMV2', 'PREMIUMV3']:
+        raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
+    # Isolated SKU is supported only for ASE
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
+        if not app_service_environment:
+            raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
+                                  "Use this link to learn more: "
+                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+    else:
+        if app_service_environment:
+            raise ValidationError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
+                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
-            group = rg_client.resource_groups.get(resource_group_name)
-            location = group.location
-        validation_payload = {
-            "name": namespace.name,
-            "type": "Microsoft.Web/serverfarms",
-            "location": location,
-            "properties": {
-                "skuName": _normalize_sku(namespace.sku) or 'B1',
-                "capacity": namespace.number_of_workers or 1,
-                "needLinuxWorkers": namespace.is_linux,
-                "isXenon": namespace.hyper_v
-            }
-        }
-        validation = client.validate(resource_group_name, validation_payload)
-        if validation.status.lower() == "failure" and validation.error.code != 'ServerFarmAlreadyExists':
-            raise CLIError(validation.error.message)
+
+def validate_asp_create(namespace):
+    validate_tags(namespace)
+    sku = _normalize_sku(namespace.sku)
+    _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
+    if namespace.is_linux and namespace.hyper_v:
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
 
 def validate_app_or_slot_exists_in_rg(cmd, namespace):
@@ -280,7 +275,7 @@ def validate_staticsite_link_function(cmd, namespace):
         raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
 
 
-def _validate_vnet_integration(cmd, namespace):
+def validate_vnet_integration(cmd, namespace):
     validate_tags(namespace)
     if namespace.subnet or namespace.vnet:
         if not namespace.subnet:

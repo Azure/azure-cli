@@ -9,6 +9,7 @@ import stat
 import platform
 import subprocess
 import json
+import certifi
 
 from json.decoder import JSONDecodeError
 from contextlib import suppress
@@ -108,8 +109,8 @@ def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=Tru
                 print(f"Installing Bicep CLI {release_tag}...")
             else:
                 print("Installing Bicep CLI...")
-
-        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform))
+        ca_file = certifi.where()
+        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform), cafile=ca_file)
         with open(installation_path, "wb") as f:
             f.write(request.read())
 
@@ -142,7 +143,8 @@ def is_bicep_file(file_path):
 
 def get_bicep_available_release_tags():
     try:
-        response = requests.get("https://aka.ms/BicepReleases")
+        ca_file = certifi.where()
+        response = requests.get("https://aka.ms/BicepReleases", verify=ca_file)
         return [release["tag_name"] for release in response.json()]
     except IOError as err:
         raise ClientRequestError(f"Error while attempting to retrieve available Bicep versions: {err}.")
@@ -150,7 +152,8 @@ def get_bicep_available_release_tags():
 
 def get_bicep_latest_release_tag():
     try:
-        response = requests.get("https://aka.ms/BicepLatestRelease")
+        ca_file = certifi.where()
+        response = requests.get("https://aka.ms/BicepLatestRelease", verify=ca_file)
         response.raise_for_status()
         return response.json()["tag_name"]
     except IOError as err:
