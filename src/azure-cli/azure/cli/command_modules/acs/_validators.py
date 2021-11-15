@@ -18,7 +18,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 
 
 logger = get_logger(__name__)

@@ -15,7 +15,7 @@ import uuid
 from collections import defaultdict
 from functools import wraps
 from knack.util import CLIError
-import azure.cli.core.decorators as decorators
+from azure.cli.core import decorators
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'

@@ -239,6 +239,15 @@ def set_delete_policy(client, enable=None, days_retained=None):
     return client.get_blob_service_properties().delete_retention_policy
 
 
+def set_immutability_policy(cmd, client, expiry_time=None, policy_mode=None, **kwargs):
+    ImmutabilityPolicy = cmd.get_models("_models#ImmutabilityPolicy", resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if not expiry_time and not policy_mode:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('Please specify --expiry-time | --policy-mode')
+    immutability_policy = ImmutabilityPolicy(expiry_time=expiry_time, policy_mode=policy_mode)
+    return client.set_immutability_policy(immutability_policy=immutability_policy, **kwargs)
+
+
 def set_service_properties(client, parameters, delete_retention=None, delete_retention_period=None,
                            static_website=None, index_document=None, error_document_404_path=None):
     # update

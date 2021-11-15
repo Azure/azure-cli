@@ -57,6 +57,7 @@ def register_providers():
     _register_one_provider("Microsoft.Synapse/workspaces", "2019-06-01-preview", True)
     _register_one_provider('Microsoft.Web/sites', '2019-08-01', False)
     _register_one_provider("Microsoft.Web/hostingEnvironments", "2020-10-01", True)
+    _register_one_provider('Microsoft.SignalRService/WebPubSub', '2021-09-01-preview', False)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
