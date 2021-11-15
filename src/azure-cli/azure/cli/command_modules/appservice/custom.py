@@ -91,7 +91,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
-    docker_registry_server_url = parse_container_registry_url(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
     print(docker_registry_server_url)
 
     client = web_client_factory(cmd.cli_ctx)
@@ -327,7 +327,7 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
-def parse_container_registry_url(deployment_container_image_name):
+def parse_docker_image_name(deployment_container_image_name):
     if not deployment_container_image_name:
         return None
     non_url = "/" not in deployment_container_image_name
@@ -2931,7 +2931,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
-    docker_registry_server_url = parse_container_registry_url(deployment_container_image_name)
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
