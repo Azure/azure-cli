@@ -91,7 +91,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_container_registry_url(deployment_container_image_name)
+    print(docker_registry_server_url)
 
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
@@ -326,14 +327,18 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
     return len([x for x in opts if x]) == 1  # you can only specify one out the combinations
 
 
-def parse_docker_image_name(deployment_container_image_name):
+def parse_container_registry_url(deployment_container_image_name):
     if not deployment_container_image_name:
         return None
-    slash_ix = deployment_container_image_name.rfind('/')
-    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
-    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+    non_url = "/" not in deployment_container_image_name
+    non_url = non_url or ("." not in deployment_container_image_name and ":" not in deployment_container_image_name)
+    if non_url:
         return None
-    return docker_registry_server_url
+    parsed_url = urlparse(deployment_container_image_name)
+    if parsed_url.scheme:
+        return parsed_url.hostname
+    hostname = urlparse("https://{}".format(deployment_container_image_name)).hostname
+    return "https://{}".format(hostname)
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -2926,7 +2931,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
-    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+    docker_registry_server_url = parse_container_registry_url(deployment_container_image_name)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])

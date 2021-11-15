@@ -20,7 +20,7 @@ from azure.cli.command_modules.appservice.custom import (
     _format_fx_version,
     _get_extension_version_functionapp,
     get_app_insights_key,
-    parse_docker_image_name,
+    parse_container_registry_url,
     list_consumption_locations,
     is_plan_elastic_premium,
     _validate_and_get_connection_string,
@@ -68,7 +68,7 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
 
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
 
-    docker_registry_server_url = parse_docker_image_name(
+    docker_registry_server_url = parse_container_registry_url(
         deployment_container_image_name)
 
     site_config = SiteConfig(app_settings=[])
