@@ -2881,6 +2881,18 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet}',
                  checks=self.check('name', 'bap2'))
+
+        # update backendpool
+        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} '
+                 '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
+                 '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
+                 '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet}',
+                 checks=[
+                     self.check('loadBalancerBackendAddresses[0].ipAddress', '10.0.0.3'),
+                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
+                     self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5')
+                 ])
+
         self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))

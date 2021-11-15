@@ -3840,6 +3840,72 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                                           new_pool)
 
 
+def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, backend_addresses=None, backend_addresses_config_file=None):
+
+    if backend_addresses and backend_addresses_config_file:
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+    if backend_addresses_config_file:
+        if not isinstance(backend_addresses_config_file, list):
+            raise CLIError('Config file must be a list. Please see example as a reference.')
+        for addr in backend_addresses_config_file:
+            if not isinstance(addr, dict):
+                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
+
+    (LoadBalancerBackendAddress,
+     Subnet,
+     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
+                                      'Subnet',
+                                      'VirtualNetwork')
+
+    addresses_pool = []
+    if backend_addresses:
+        addresses_pool.extend(backend_addresses)
+    if backend_addresses_config_file:
+        addresses_pool.extend(backend_addresses_config_file)
+    for addr in addresses_pool:
+        if 'virtual_network' not in addr and vnet:
+            addr['virtual_network'] = vnet
+
+    # pylint: disable=line-too-long
+    if cmd.supported_api_version(min_api='2020-11-01'):  # pylint: disable=too-many-nested-blocks
+        try:
+            if addresses_pool:
+                new_addresses = []
+                for addr in addresses_pool:
+                    # vnet      | subnet        |  status
+                    # name/id   | name/id/null  |    ok
+                    # null      | id            |    ok
+                    if 'virtual_network' in addr:
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                             subnet=Subnet(id=_process_subnet_name_and_id(addr['subnet'], addr['virtual_network'], cmd, resource_group_name)) if 'subnet' in addr else None,
+                                                             ip_address=addr['ip_address'])
+                    elif 'subnet' in addr and is_valid_resource_id(addr['subnet']):
+                        address = LoadBalancerBackendAddress(name=addr['name'],
+                                                             subnet=Subnet(id=addr['subnet']),
+                                                             ip_address=addr['ip_address'])
+                    else:
+                        raise KeyError
+
+                    new_addresses.append(address)
+            else:
+                new_addresses = None
+        except KeyError:
+            raise UnrecognizedArgumentError('Each backend address must have name, ip-address, (vnet name and subnet '
+                                            'name | subnet id) information.')
+    else:
+        try:
+            new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                        virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'], cmd, resource_group_name)),
+                                                        ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+        except KeyError:
+            raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
+
+    instance.load_balancer_backend_addresses = new_addresses
+
+    return instance
+
+
 def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     from azure.cli.core.commands import LongRunningOperation
     ncf = network_client_factory(cmd.cli_ctx)
