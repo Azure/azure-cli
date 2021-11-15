@@ -2787,9 +2787,8 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
         self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp  --backend-port 3 '
-                 '--frontend-port-range-start 0 --frontend-port-range-end 3 --backend-pool-name lb1bepool', checks=[
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3', checks=[
                  self.check('name', 'rule3'),
-                #  self.check('backendAddressPool.id', ''),
                  self.check('frontendPortRangeStart', 0),
                  self.check('frontendPortRangeEnd', 3)])
         self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule3 --floating-ip true --idle-timeout 10 --frontend-port-range-end 5',

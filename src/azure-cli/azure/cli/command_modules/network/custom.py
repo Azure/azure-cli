@@ -3523,7 +3523,7 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
         frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None, backend_address_pool_name=None):
+        frontend_port_range_start=None, frontend_port_range_end=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
@@ -3541,8 +3541,6 @@ def create_lb_inbound_nat_rule(
         new_rule.frontend_port_range_end = frontend_port_range_end
     if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
         new_rule.frontend_port_range_start = frontend_port_range_start
-    if backend_address_pool_name and cmd.supported_api_version('2021-03-01'):
-        new_rule.backend_address_pool = get_property(lb.backend_address_pools, backend_address_pool_name)  # pylint: disable=no-member
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)
@@ -3566,13 +3564,10 @@ def lb_get_operation(lb):
 def set_lb_inbound_nat_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
         frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None, backend_address_pool_name=None):
+        frontend_port_range_start=None, frontend_port_range_end=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
             get_property(parent.frontend_ip_configurations, frontend_ip_name)
-    if backend_address_pool_name and cmd.supported_api_version('2021-03-01'):
-        instance.backend_address_pool = \
-            get_property(parent.backend_address_pools, backend_address_pool_name)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
@@ -3671,14 +3666,6 @@ def create_lb_frontend_ip_configuration(
 
 
 def update_lb_frontend_ip_configuration_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
-    aux_subscriptions = []
-    if is_valid_resource_id(gateway_lb):
-        aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
-    client = network_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions).load_balancers
-    return client.begin_create_or_update(resource_group_name, load_balancer_name, parameters)
-
-
-def update_lb_inbound_nat_rule_setter(cmd, resource_group_name, load_balancer_name, parameters, gateway_lb):
     aux_subscriptions = []
     if is_valid_resource_id(gateway_lb):
         aux_subscriptions.append(parse_resource_id(gateway_lb)['subscription'])
