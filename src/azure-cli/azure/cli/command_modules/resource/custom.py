@@ -2087,12 +2087,11 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
 
     try:
         if rcf.deployment_stacks.get_at_subscription(name):
-            logger.info("The DeploymentStack " + name + " you're trying to create already exists in the current subscription. Do you want to overwrite it? (y/n)")
-            yes_or_no = input()
-            if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-                pass
-            else:
-                return
+            from knack.prompting import prompt_y_n
+            confirmation = prompt_y_n("The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it?".format(name))
+            if not confirmation:
+                return None
+            pass
     except:
         pass
 
@@ -2185,12 +2184,11 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
-            logger.info("The DeploymentStack " + name + " you're trying to create already exists in the current resource group. Do you want to overwrite it? (y/n")
-            yes_or_no = input()
-            if yes_or_no.lower() == "yes" or yes_or_no.lower() == "y":
-                pass
-            else:
-                return
+            from knack.prompting import prompt_y_n
+            confirmation = prompt_y_n("The DeploymentStack {} you're trying to create already exists in the current resource group. Do you want to overwrite it?".format(name))
+            if not confirmation:
+                return None
+            pass
     except:
         pass
     t_spec, t_uri, t_file = None, None, None
