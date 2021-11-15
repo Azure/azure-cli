@@ -2196,3 +2196,14 @@ helps['synapse sql-script wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a sql script is met.
 """
+
+helps['synapse sql-script import'] = """
+type: command
+short-summary: Import a SQL script.
+examples:
+  - name: Import a SQL script.
+    text: |-
+        az synapse sql-script import --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname \\
+          --file 'path/test.sql'
+"""
