@@ -38,17 +38,20 @@ class UserCredential(PublicClientApplication):
         """
         super().__init__(client_id, **kwargs)
 
+        # Make sure username is specified, otherwise MSAL returns all accounts
+        assert username, "username must be specified, got {!r}".format(username)
+
         accounts = self.get_accounts(username)
 
-        if not accounts:
-            raise CLIError("User {} does not exist in MSAL token cache. Run `az login`.".format(username))
-
+        # Usernames are usually unique. We are collecting corner cases to better understand its behavior.
         if len(accounts) > 1:
-            raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
-                           "https://github.com/Azure/azure-cli/issues/new")
+            raise CLIError(f"Found multiple accounts with the same username '{username}': {accounts}\n"
+                           "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20168")
 
-        account = accounts[0]
-        self._account = account
+        if not accounts:
+            raise CLIError("User '{}' does not exist in MSAL token cache. Run `az login`.".format(username))
+
+        self._account = accounts[0]
 
     def get_token(self, *scopes, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']

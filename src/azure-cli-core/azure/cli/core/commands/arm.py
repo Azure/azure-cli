@@ -115,7 +115,7 @@ def handle_template_based_exception(ex):
 
 
 def handle_long_running_operation_exception(ex):
-    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import telemetry
 
     telemetry.set_exception(
         ex,

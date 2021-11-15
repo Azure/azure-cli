@@ -665,6 +665,48 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} --os-type linux --use-unmanaged-disk --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @ResourceGroupPreparer()
+    def test_vm_create_data_disk_delete_option(self, resource_group):
+        self.cmd('vm create -n Delete_CLI1 -g {rg} --image RedHat:RHEL:7-RAW:7.4.2018010506 -l northeurope '
+                 '--size Standard_E8as_v4 --generate-ssh-keys --public-ip-address "" --os-disk-size-gb 64 '
+                 '--data-disk-sizes-gb 200 --data-disk-delete-option Delete',
+                 checks=self.check('powerState', 'VM running'))
+        result = self.cmd('vm show -g {rg} -n Delete_CLI1').get_output_in_json()
+        self.assertEqual(result['storageProfile']['dataDisks'][0]['deleteOption'], 'Delete')
+
+        # creating a vm
+        self.cmd(
+            'vm create -g {rg} -n vm1 --image centos --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --nsg-rule NONE')
+        result = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()
+
+        self.kwargs.update({
+            'origin_os_disk': result['storageProfile']['osDisk']['name'],
+            'origin_data_disk': result['storageProfile']['dataDisks'][0]['name'],
+            # snapshot the os & data disks
+            'os_snapshot': 'oSnapshot',
+            'os_disk': 'sDisk',
+            'data_snapshot': 'dSnapshot',
+            'data_disk': 'dDisk',
+            'data_disk2': 'dDisk2'
+        })
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
+        self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
+        self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
+        self.cmd('disk create -g {rg} -n {data_disk2} --source {data_snapshot}')
+
+        # rebuild a new vm
+        # (os disk can be resized)
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk} --os-disk-delete-option Delete '
+                 '--attach-data-disks {data_disk} {data_disk2} --data-disk-delete-option {data_disk}=Delete {data_disk2}=Detach '
+                 '--os-disk-size-gb 100 --os-type linux --nsg-rule NONE',
+                 checks=self.check('powerState', 'VM running'))
+        self.cmd('vm show -g {rg} -n vm2', checks=[
+            self.check('length(storageProfile.dataDisks)', 2),
+            self.check('storageProfile.dataDisks[0].deleteOption', 'Delete'),
+            self.check('storageProfile.dataDisks[1].deleteOption', 'Detach'),
+        ])
+
 
 class VMOSDiskSize(ScenarioTest):
 
@@ -2304,6 +2346,21 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vmss deallocate -g {rg} -n {vmss}')
         self.cmd('vmss update -g {rg} -n {vmss} --ultra-ssd-enabled', checks=[
             self.check('additionalCapabilities.ultraSsdEnabled', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_hibernation_enabled', location='eastus2')
+    def test_vm_hibernation_enabled(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --enable-hibernation True')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', True)
+        ])
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --enable-hibernation False', checks=[
+            self.check('additionalCapabilities.hibernationEnabled', False)
         ])
 
 
@@ -3949,7 +4006,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'run_cmd': self.create_random_name('cmd-', 10)
         })
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults')
-        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} ', checks=[
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('source.script', None),
@@ -3957,7 +4014,12 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
         ])
-        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg} --instance-view', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('instanceView.executionState', 'Running')
+        ])
+        self.cmd('vm run-command update -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('source.script', 'script1'),
@@ -4049,6 +4111,11 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             self.check('asyncExecution', False),
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
+        ])
+        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} --instance-view', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('instanceView.executionState', 'Running')
         ])
         self.cmd('vmss run-command update --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
             self.check('resourceGroup', '{rg}'),

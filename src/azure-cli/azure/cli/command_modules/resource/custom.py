@@ -58,6 +58,8 @@ from ._bicep import (
     supports_bicep_publish
 )
 
+from ._utils import _build_preflight_error_message, _build_http_response_error_message
+
 logger = get_logger(__name__)
 
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
@@ -369,8 +371,9 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
@@ -489,8 +492,9 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
@@ -579,8 +583,9 @@ def _deploy_arm_template_at_resource_group(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
@@ -667,8 +672,9 @@ def _deploy_arm_template_at_management_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -750,8 +756,9 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -927,13 +934,6 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
             init()
 
     return what_if_result
-
-
-def _build_preflight_error_message(preflight_error):
-    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
-    for detail in preflight_error.details or []:
-        err_messages.append(_build_preflight_error_message(detail))
-    return '\n'.join(err_messages)
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
@@ -1290,7 +1290,8 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     if tag:
         key = list(tag.keys())[0]
         filters.append("tagname eq '{}'".format(key))
-        filters.append("tagvalue eq '{}'".format(tag[key]))
+        if tag[key]:
+            filters.append("tagvalue eq '{}'".format(tag[key]))
 
     filter_text = ' and '.join(filters) if filters else None
 
@@ -2801,8 +2802,9 @@ def _is_management_group_scope(scope):
     return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
-def cli_managementgroups_group_list(cmd, client):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_list(cmd, client, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.list()
 
 
@@ -2811,8 +2813,10 @@ def cli_managementgroups_group_show(
         client,
         group_name,
         expand=False,
-        recurse=False):
-    _register_rp(cmd.cli_ctx)
+        recurse=False,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     if expand:
         return client.get(group_name, "children", recurse)
     return client.get(group_name)
@@ -2823,8 +2827,10 @@ def cli_managementgroups_group_create(
         client,
         group_name,
         display_name=None,
-        parent=None):
-    _register_rp(cmd.cli_ctx)
+        parent=None,
+        no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     parent_id = _get_parent_id_from_parent(parent)
     from azure.mgmt.managementgroups.models import (
         CreateManagementGroupRequest, CreateManagementGroupDetails, CreateParentGroupInfo)
@@ -2858,8 +2864,9 @@ def cli_managementgroups_group_update_set(
     return client.update(group_name, parameters)
 
 
-def cli_managementgroups_group_delete(cmd, client, group_name):
-    _register_rp(cmd.cli_ctx)
+def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
+    if not no_register:
+        _register_rp(cmd.cli_ctx)
     return client.delete(group_name)
 
 

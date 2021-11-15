@@ -107,7 +107,7 @@ class AzCli(CLI):
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
     def get_progress_controller(self, det=False, spinner=None):
-        import azure.cli.core.commands.progress as progress
+        from azure.cli.core.commands import progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
@@ -279,7 +279,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 except Exception as ex:  # pylint: disable=broad-except
                     # Changing this error message requires updating CI script that checks for failed
                     # module loading.
-                    import azure.cli.core.telemetry as telemetry
+                    from azure.cli.core import telemetry
                     logger.error("Error loading command module '%s': %s", mod, ex)
                     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                             summary='Error loading module: {}'.format(mod))

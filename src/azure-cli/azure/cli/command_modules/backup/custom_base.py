@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.backup.custom as custom
-import azure.cli.command_modules.backup.custom_afs as custom_afs
-import azure.cli.command_modules.backup.custom_help as custom_help
+from azure.cli.command_modules.backup import custom
+from azure.cli.command_modules.backup import custom_afs
+from azure.cli.command_modules.backup import custom_help
 import azure.cli.command_modules.backup.custom_common as common
-import azure.cli.command_modules.backup.custom_wl as custom_wl
+from azure.cli.command_modules.backup import custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \

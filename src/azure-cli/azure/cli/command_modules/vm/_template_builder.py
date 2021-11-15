@@ -301,7 +301,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None):
+        capacity_reservation_group=None, enable_hibernation=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -522,8 +522,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             }
         }
 
+    vm_properties['additionalCapabilities'] = {}
     if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities'] = {'ultraSSDEnabled': ultra_ssd_enabled}
+        vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
+
+    if enable_hibernation is not None:
+        vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     if proximity_placement_group:
         vm_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}

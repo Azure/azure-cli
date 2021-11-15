@@ -22,7 +22,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_immutability_arguments, validate_blob_name_for_upload)
+                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -222,8 +222,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     immutability_period_since_creation_in_days_type = CLIArgumentType(
         options_list=['--immutability-period-in-days', '--immutability-period'], min_api='2021-06-01',
-        help='The immutability period for the blobs in the container since the policy creation, in days.',
-        is_preview=True
+        help='The immutability period for the blobs in the container since the policy creation, in days.'
     )
 
     account_immutability_policy_state_enum = self.get_sdk(
@@ -238,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'Locked state only allows the increase of the immutability retention time. '
         'A policy can only be created in a Disabled or Unlocked state and can be toggled between the '
         'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
-        'be reverted.', is_preview=True)
+        'be reverted.')
 
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
@@ -365,14 +364,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' at the account creation time. When set to true, it enables object level immutability for all '
                         'the containers in the account by default.',
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('immutability_period_since_creation_in_days',
                    arg_type=immutability_period_since_creation_in_days_type,
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('immutability_policy_state', arg_type=immutability_policy_state_type,
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('allow_protected_append_writes', arg_type=get_three_state_flag(),
                    options_list=['--allow-protected-append-writes', '--allow-append', '-w'],
                    min_api='2021-06-01',
@@ -381,7 +380,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
                    arg_group='Account Level Immutability',
-                   validator=validate_immutability_arguments, is_preview=True)
+                   validator=validate_immutability_arguments)
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
@@ -460,7 +459,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'When enabled, new blocks can be written to an append blob while maintaining immutability '
                         'protection and compliance. Only new blocks can be added and any existing blocks cannot be '
                         'modified or deleted.',
-                   arg_group='Account Level Immutability', is_preview=True)
+                   arg_group='Account Level Immutability')
         c.argument('public_network_access', arg_type=get_enum_type(public_network_access_enum), min_api='2021-06-01',
                    help='Enable or disable public network access to the storage account. '
                         'Possible values include: `Enabled` or `Disabled`.')
@@ -866,6 +865,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
                    is_preview=True, help="Indicate the priority with which to rehydrate an archived blob. "
                                          "The priority can be set on a blob only once, default value is Standard.")
+
+    with self.argument_context('storage blob set-legal-hold') as c:
+        c.register_blob_arguments()
+        c.argument('legal_hold', arg_type=get_three_state_flag(),
+                   help='Specified if a legal hold should be set on the blob.')
+
+    with self.argument_context('storage blob immutability-policy delete') as c:
+        c.register_blob_arguments()
+
+    with self.argument_context('storage blob immutability-policy set') as c:
+        c.register_blob_arguments()
+        c.argument('expiry_time', type=get_datetime_type(False),
+                   help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.argument('policy_mode', arg_type=get_enum_type(['Locked', 'Unlocked']), help='Lock or Unlock the policy')
 
     with self.argument_context('storage blob service-properties delete-policy update') as c:
         c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
@@ -1512,6 +1525,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
+
+    with self.argument_context('storage share list-handle') as c:
+        c.register_path_argument(default_file_param="")
+        c.argument('recursive', arg_type=get_three_state_flag())
+
+    with self.argument_context('storage share close-handle') as c:
+        c.register_path_argument(default_file_param="")
+        c.argument('recursive', arg_type=get_three_state_flag(),
+                   help="Boolean that specifies if operation should apply to the directory specified in the URI, its "
+                        "files, its subdirectories and their files.")
+        c.argument('close_all', arg_type=get_three_state_flag(), validator=validate_share_close_handle,
+                   help="Whether or not to close all the file handles. Specify close-all or a specific handle-id.")
+        c.argument('marker', help="An opaque continuation token. This value can be retrieved from the next_marker field"
+                                  " of a previous generator object if it has not finished closing handles. "
+                                  "If specified, this generator will begin closing handles from the point where the "
+                                  "previous generator stopped.")
+        c.argument('handle_id', help="Specifies handle ID opened on the file or directory to be closed. "
+                                     "Astrix (‘*’) is a wildcard that specifies all handles.")
+        c.argument('snapshot', help="A string that represents the snapshot version, if applicable.")
 
     with self.argument_context('storage directory') as c:
         c.argument('directory_name', directory_type, options_list=('--name', '-n'))
