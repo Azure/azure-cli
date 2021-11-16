@@ -7190,9 +7190,10 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent')
-    def test_completion_percent(self, resource_group):
-        pass
+    # TODO
+    # @ResourceGroupPreparer(name_prefix='cli_test_completion_percent')
+    # def test_completion_percent(self, resource_group):
+    #     pass
 
 
 if __name__ == '__main__':
