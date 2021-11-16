@@ -7095,27 +7095,27 @@ class DiskRPTestScenario(ScenarioTest):
             'snapshot3': 'snapshot3',
         })
 
-        # self.cmd('disk create --public-network-access Enabled --size-gb 5 -n {disk1} -g {rg}')
-        # self.cmd('disk show -g {rg} -n {disk1}', checks=[
-        #     self.check('name', '{disk1}'),
-        #     self.check('publicNetworkAccess', 'Enabled')
-        # ])
-        # self.cmd('disk update --public-network-access Disabled -n {disk1} -g {rg}')
-        # self.cmd('disk show -g {rg} -n {disk1}', checks=[
-        #     self.check('name', '{disk1}'),
-        #     self.check('publicNetworkAccess', 'Disabled')
-        # ])
-        # self.cmd('disk create --network-access-policy AllowAll --public-network-access Disabled --size-gb 5 -n {disk2} -g {rg}')
-        # self.cmd('disk show -g {rg} -n {disk2}', checks=[
-        #     self.check('name', '{disk2}'),
-        #     self.check('publicNetworkAccess', 'Disabled')
-        # ])
-        # self.cmd('disk-access create -g {rg} -n diskaccess')
-        # self.cmd('snapshot create --network-access-policy AllowPrivate --disk-access diskaccess --public-network-access Enabled --size-gb 5 -n {disk3} -g {rg}')
-        # self.cmd('snapshot show -g {rg} -n {disk3}', checks=[
-        #     self.check('name', '{disk3}'),
-        #     self.check('publicNetworkAccess', 'Enabled')
-        # ])
+        self.cmd('disk create --public-network-access Enabled --size-gb 5 -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
+        self.cmd('disk update --public-network-access Disabled -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('disk create --network-access-policy AllowAll --public-network-access Disabled --size-gb 5 -n {disk2} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('disk-access create -g {rg} -n diskaccess')
+        self.cmd('snapshot create --network-access-policy AllowPrivate --disk-access diskaccess --public-network-access Enabled --size-gb 5 -n {disk3} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {disk3}', checks=[
+            self.check('name', '{disk3}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
 
         self.cmd('snapshot create --public-network-access Enabled --size-gb 5 -n {snapshot1} -g {rg}')
         self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
@@ -7143,29 +7143,51 @@ class DiskRPTestScenario(ScenarioTest):
     def test_accelerated_network(self, resource_group):
         self.kwargs.update({
             'disk1': 'disk1',
+            'disk2': 'disk2',
             'snapshot1': 'snapshot1',
+            'snapshot2': 'snapshot2',
         })
 
         self.cmd('disk create --accelerated-network true --size-gb 5 -n {disk1} -g {rg}')
         self.cmd('disk show -g {rg} -n {disk1}', checks=[
             self.check('name', '{disk1}'),
-            self.check('acceleratedNetwork', 'true')
+            self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
         self.cmd('disk update --accelerated-network false -n {disk1} -g {rg}')
         self.cmd('disk show -g {rg} -n {disk1}', checks=[
             self.check('name', '{disk1}'),
-            self.check('acceleratedNetwork', 'false')
+            self.check('supportedCapabilities.acceleratedNetwork', False)
+        ])
+        self.cmd('disk create --size-gb 5 -n {disk2} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('supportedCapabilities', None)
+        ])
+        self.cmd('disk update --accelerated-network true -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
 
         self.cmd('snapshot create --accelerated-network true --size-gb 5 -n {snapshot1} -g {rg}')
         self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
             self.check('name', '{snapshot1}'),
-            self.check('acceleratedNetwork', 'true')
+            self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
         self.cmd('snapshot update --accelerated-network false -n {snapshot1} -g {rg}')
         self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
             self.check('name', '{snapshot1}'),
-            self.check('acceleratedNetwork', 'false')
+            self.check('supportedCapabilities.acceleratedNetwork', False)
+        ])
+        self.cmd('snapshot create --size-gb 5 -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+            self.check('name', '{snapshot2}'),
+            self.check('supportedCapabilities', None)
+        ])
+        self.cmd('snapshot update --accelerated-network true -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+            self.check('name', '{snapshot2}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_completion_percent')
