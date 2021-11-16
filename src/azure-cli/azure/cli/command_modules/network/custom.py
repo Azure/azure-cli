@@ -3902,7 +3902,8 @@ def set_lb_backend_address_pool(cmd, instance, resource_group_name, vnet=None, b
         except KeyError:
             raise UnrecognizedArgumentError('Each backend address must have name, vnet and ip-address information.')
 
-    instance.load_balancer_backend_addresses = new_addresses
+    if new_addresses:
+        instance.load_balancer_backend_addresses = new_addresses
 
     return instance
 
