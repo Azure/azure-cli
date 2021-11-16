@@ -6,4 +6,6 @@ from azure.cli.core.aaz import AAZCommand, register_command
 
 @register_command("network vnet subnet list-available-delegations")
 class ListAvailableDelegations(AAZCommand):
+    """ List the services available for subnet delegation.
+    """
     pass

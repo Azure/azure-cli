@@ -8,4 +8,6 @@ from azure.cli.core.aaz import AAZCommand, register_command
 
 @register_command("network vnet list")
 class List(AAZCommand):
+    """ List virtual networks.
+    """
     pass

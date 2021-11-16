@@ -8,4 +8,8 @@ from azure.cli.core.aaz import AAZCommand, register_command
 
 @register_command("network vnet list-endpoint-services")
 class ListEndpointServices(AAZCommand):
+    """ List which services support VNET service tunneling in a given region.
+
+    To learn more about service endpoints visit https://docs.microsoft.com/azure/virtual-network/virtual-network-service-endpoints-configure#azure-cli
+    """
     pass

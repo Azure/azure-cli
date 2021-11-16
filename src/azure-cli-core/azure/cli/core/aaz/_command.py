@@ -7,15 +7,22 @@ from knack.commands import CLICommand, CommandGroup
 class AAZCommandGroup:
     """Atomic Layer Command Group"""
     AZ_NAME = None
+    AZ_HELP = None
 
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
-        self.group_kwargs = {}
+        self.group_kwargs = {
+            # 'deprecate_info'  # deprecate_info should be in group_kwargs
+            # 'preview_info'
+            # 'experimental_info'
+        }
+        self.help = self.AZ_HELP  # TODO: change knack to load help directly
 
 
 class AAZCommand(CLICommand):
     """Atomic Layer Command"""
     AZ_NAME = None
+    AZ_HELP = None
 
     def __init__(self, loader):
         self.loader = loader
@@ -24,9 +31,11 @@ class AAZCommand(CLICommand):
             name=self.AZ_NAME,
             handler=self._handler,
             arguments_loader=self._arguments_loader,
-            description_loader=self._description_loader,
         )
         self.command_kwargs = {}
+        self.help = self.AZ_HELP
+        # help property will be assigned as help_file for command parser https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
+        # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
 
     def _handler(self, *args, **kwargs):
         return None
@@ -35,9 +44,6 @@ class AAZCommand(CLICommand):
         """load arguments"""
         return {}
 
-    def _description_loader(self):
-        return f"This is command description for {self.AZ_NAME}"
-
     def __call__(self, *args, **kwargs):
         return self.handler(*args, **kwargs)
 
@@ -45,8 +51,20 @@ class AAZCommand(CLICommand):
 def register_command_group(name):
     """register AAZCommandGroup"""
     def decorator(cls):
+        import yaml
+        from knack.help_files import helps
         assert issubclass(cls, AAZCommandGroup)
         cls.AZ_NAME = name
+        short_summary, long_summary = parse_cls_summary(cls)
+        cls.AZ_HELP = {
+            "type": "group",
+            "short-summary": short_summary,
+            "long-summary": long_summary
+        }
+
+        # the only way to load command group help in knack is by _load_from_file
+        # TODO: change knack to load AZ_HELP directly
+        helps[name] = yaml.safe_dump(cls.AZ_HELP)
         return cls
     return decorator
 
@@ -56,6 +74,12 @@ def register_command(name):
     def decorator(cls):
         assert issubclass(cls, AAZCommand)
         cls.AZ_NAME = name
+        short_summary, long_summary = parse_cls_summary(cls)
+        cls.AZ_HELP = {
+            "type": "command",
+            "short-summary": short_summary,
+            "long-summary": long_summary
+        }
         return cls
     return decorator
 
@@ -87,8 +111,8 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
                 if sub_path.startswith('_') or not os.path.isdir(os.path.join(pkg_path, sub_path)):
                     continue
                 try:
-                    pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
-                    pkgs.append(pkg)
+                    sub_pkg = importlib.import_module(f'.{sub_path}', pkg.__name__)
+                    pkgs.append(sub_pkg)
                 except ModuleNotFoundError:
                     continue
         idx += 1
@@ -99,3 +123,19 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
         loader.command_table[command_name] = command
     return command_table, command_group_table
 
+
+def parse_cls_summary(cls):
+    doc = cls.__doc__
+    short_summary = None
+    long_summary = None
+    lines = []
+    if doc:
+        for line in doc.splitlines():
+            l = line.strip()
+            if l:
+                lines.append(l)
+    if lines:
+        short_summary = lines[0]
+        if len(lines) > 1:
+            long_summary = '\n'.join(lines[1:])
+    return short_summary, long_summary
