@@ -147,7 +147,7 @@ def get_pool_manager(url):
     proxies = urllib.request.getproxies()
     bypass_proxy = urllib.request.proxy_bypass(urllib.parse.urlparse(url).hostname)
 
-    if 'https' in proxies and bypass_proxy is False:
+    if 'https' in proxies and not bypass_proxy:
         proxy = urllib.parse.urlparse(proxies['https'])
 
         if proxy.username and proxy.password:
