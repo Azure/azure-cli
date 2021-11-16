@@ -6825,9 +6825,6 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
         allow_gateway_transit=allow_gateway_transit,
         allow_forwarded_traffic=allow_forwarded_traffic,
         use_remote_gateways=use_remote_gateways)
-        # remote_virtual_network_encryption = VirtualNetworkEncryption(
-        #     enabled=enable_encryption,
-        #     enforcement=encryption_enforcement_policy),)
     aux_subscription = parse_resource_id(remote_virtual_network)['subscription']
     ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
     return ncf.virtual_network_peerings.begin_create_or_update(
