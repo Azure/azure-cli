@@ -97,6 +97,10 @@ def load_arguments(self, _):
     ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
 
+    bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
+                                                 arg_type=get_enum_type(["win-x64", "linux-musl-x64", "linux-x64", "osx-x64"]),
+                                                 help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
+
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
     with self.argument_context('resource') as c:
@@ -645,3 +649,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')
+        c.argument('target_platform', arg_type=bicep_target_platform_type)
+
+    with self.argument_context('bicep upgrade') as c:
+        c.argument('target_platform', arg_type=bicep_target_platform_type)

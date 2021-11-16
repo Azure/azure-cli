@@ -3541,18 +3541,18 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                   latest_include_preview=latest_include_preview)
 
 
-def install_bicep_cli(cmd, version=None):
+def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version)
+    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
     remove_bicep_installation()
 
 
-def upgrade_bicep_cli(cmd):
+def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag)
+    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):
