@@ -30,13 +30,13 @@ BEARER = 'Bearer'
 class CredentialMock:
 
     def __init__(self, *args, **kwargs):
+        # If get_token_scopes is checked, make sure to create a new instance of CredentialMock
+        # to avoid interference from other tests.
         self.get_token_scopes = None
         super().__init__()
 
     def get_token(self, *scopes, **kwargs):
         self.get_token_scopes = scopes
-        from azure.core.credentials import AccessToken
-        # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
         return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON_INT)
 
 
@@ -47,8 +47,6 @@ credential_mock = CredentialMock()
 
 
 class MSRestAzureAuthStub:
-
-    return_value = None
 
     def __init__(self, *args, **kwargs):
         self._token = {
@@ -63,7 +61,6 @@ class MSRestAzureAuthStub:
         self.object_id = kwargs.get('object_id')
         self.msi_res_id = kwargs.get('msi_res_id')
         self.resource = kwargs.get('resource')
-        MSRestAzureAuthStub.return_value = self
 
     def set_token(self):
         self.set_token_invoked_count += 1
@@ -1039,8 +1036,10 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
         self.assertTrue(cred.msi_res_id, test_res_id)
 
-    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
     def test_get_raw_token(self, get_user_credential_mock):
+        credential_mock_temp = CredentialMock()
+        get_user_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -1073,7 +1072,7 @@ class TestProfile(unittest.TestCase):
         creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
 
         # verify
-        assert list(credential_mock.get_token_scopes) == self.msal_scopes
+        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1084,8 +1083,10 @@ class TestProfile(unittest.TestCase):
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
 
-    @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential', return_value=credential_mock)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
+        credential_mock_temp = CredentialMock()
+        get_service_principal_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -1098,7 +1099,7 @@ class TestProfile(unittest.TestCase):
         creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource)
 
         # verify
-        assert list(credential_mock.get_token_scopes) == self.msal_scopes
+        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
@@ -1136,14 +1137,21 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
 
-        mock_msi_auth.side_effect = MSRestAzureAuthStub
+        mi_auth_instance = None
+
+        def mi_auth_factory(*args, **kwargs):
+            nonlocal mi_auth_instance
+            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
+            return mi_auth_instance
+
+        mock_msi_auth.side_effect = mi_auth_factory
 
         # action
         cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
         # Make sure resource/scopes are passed to MSIAuthenticationWrapper
-        assert MSRestAzureAuthStub.return_value.resource == self.adal_resource
-        assert list(MSRestAzureAuthStub.return_value.get_token_scopes) == self.msal_scopes
+        assert mi_auth_instance.resource == self.adal_resource
+        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
 
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
@@ -1176,14 +1184,21 @@ class TestProfile(unittest.TestCase):
         consolidated[0]['user']['cloudShellID'] = True
         profile._set_subscriptions(consolidated)
 
-        mock_msi_auth.side_effect = MSRestAzureAuthStub
+        mi_auth_instance = None
+
+        def mi_auth_factory(*args, **kwargs):
+            nonlocal mi_auth_instance
+            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
+            return mi_auth_instance
+
+        mock_msi_auth.side_effect = mi_auth_factory
 
         # action
         cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
         # Make sure resource/scopes are passed to MSIAuthenticationWrapper
-        assert MSRestAzureAuthStub.return_value.resource == self.adal_resource
-        assert list(MSRestAzureAuthStub.return_value.get_token_scopes) == self.msal_scopes
+        assert mi_auth_instance.resource == self.adal_resource
+        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
 
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
