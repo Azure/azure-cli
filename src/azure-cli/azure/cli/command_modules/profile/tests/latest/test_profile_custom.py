@@ -159,6 +159,7 @@ class ProfileCommandTest(unittest.TestCase):
         logout(cmd, username='user2')
         remove_adal_token_cache_mock.assert_called_once()
         profile_instance.get_current_account_user.assert_not_called()
+        profile_instance.logout.assert_called_with('user2')
 
     @mock.patch('azure.cli.command_modules.profile.custom._remove_adal_token_cache', autospec=True)
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
