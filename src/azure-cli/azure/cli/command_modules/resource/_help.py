@@ -2504,6 +2504,8 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+  - name: Install Bicep CLI and specify the target platform.
+    text: az bicep install --target-platform linux-x64
 """
 
 helps['bicep uninstall'] = """
@@ -2514,6 +2516,11 @@ short-summary: Uninstall Bicep CLI.
 helps['bicep upgrade'] = """
 type: command
 short-summary: Upgrade Bicep CLI to the latest version.
+examples:
+  - name: Upgrade Bicep CLI.
+    text: az bicep upgrade
+  - name: Upgrade Bicep CLI and specify the target platform.
+    text: az bicep upgrade --target-platform linux-x64
 """
 
 helps['bicep build'] = """

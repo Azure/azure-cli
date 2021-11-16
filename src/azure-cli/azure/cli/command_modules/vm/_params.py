@@ -349,6 +349,7 @@ def load_arguments(self, _):
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+        c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -387,6 +388,7 @@ def load_arguments(self, _):
         c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
                    help='Enable vTPM. It is part of trusted launch.')
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
+        c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -804,14 +806,16 @@ def load_arguments(self, _):
     with self.argument_context('vm run-command show') as c:
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
-        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
     with self.argument_context('vm run-command wait') as c:
         c.argument('vm_name', run_cmd_vm_name)
         c.argument('run_command_name', run_cmd_name_type)
-        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('command_id', help='The command id.')
 
@@ -856,7 +860,8 @@ def load_arguments(self, _):
         c.argument('vmss_name', run_cmd_vmss_name)
         c.argument('instance_id', help='The instance ID of the virtual machine.')
         c.argument('run_command_name', run_cmd_name_type)
-        c.argument('expand', help='The expand expression to apply on the operation.')
+        c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

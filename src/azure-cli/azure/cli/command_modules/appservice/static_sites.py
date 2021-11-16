@@ -331,6 +331,15 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', output_location='.github/workflows',
                        tags=None, no_wait=False, sku='Free', login_with_github=False):
+    from azure.core.exceptions import ResourceNotFoundError
+
+    try:
+        site = show_staticsite(cmd, name, resource_group_name)
+        logger.warning("Static Web App %s already exists in resource group %s", name, resource_group_name)
+        return site
+    except ResourceNotFoundError:
+        pass
+
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
