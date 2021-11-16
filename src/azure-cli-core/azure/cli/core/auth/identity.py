@@ -37,7 +37,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     _msal_token_cache = None
 
     # MSAL HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
-    # It *must* follow singleton pattern so that all MSAL app instances shares the same HTTP cache.
+    # It *must* follow singleton pattern so that all MSAL app instances share the same HTTP cache.
     # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
     _msal_http_cache = None
 
