@@ -18,7 +18,7 @@ def get_spark_pool(cmd, client, resource_group_name, workspace_name, spark_pool_
 def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_pool_name,
                       spark_version, node_size, node_count,
                       node_size_family=NodeSizeFamily.memory_optimized.value, enable_auto_scale=None,
-                      min_node_count=None, max_node_count=None, Spark_Config_File_Path=None,
+                      min_node_count=None, max_node_count=None, spark_config_file_path=None,
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
                       spark_log_folder="/logs", tags=None, no_wait=False):
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
@@ -36,9 +36,9 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     big_data_pool_info.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                         delay_in_minutes=delay)
 
-    filename = Path(Spark_Config_File_Path).stem
+    filename = Path(spark_config_file_path).stem
     try:
-        with open(Spark_Config_File_Path, 'r') as stream:
+        with open(spark_config_file_path, 'r') as stream:
             content = stream.read()
     except:
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -55,7 +55,7 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       node_size=None, node_count=None, enable_auto_scale=None,
                       min_node_count=None, max_node_count=None,
                       enable_auto_pause=None, delay=None,
-                      library_requirements=None, Spark_Config_File_Path=None,
+                      library_requirements=None, spark_config_file_path=None,
                       package_action=None, package=None,
                       tags=None, force=False, no_wait=False):
     existing_spark_pool = client.get(resource_group_name, workspace_name, spark_pool_name)
@@ -103,10 +103,10 @@ def update_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
         if package_action == "Remove":
             existing_spark_pool.custom_libraries = [library for library in existing_spark_pool.custom_libraries if library.name not in package]
 
-    if Spark_Config_File_Path:
-        filename = Path(Spark_Config_File_Path).stem
+    if spark_config_file_path:
+        filename = Path(spark_config_file_path).stem
         try:
-            with open(Spark_Config_File_Path, 'r') as stream:
+            with open(spark_config_file_path, 'r') as stream:
                 content = stream.read()
         except:
             from azure.cli.core.azclierror import InvalidArgumentValueError
