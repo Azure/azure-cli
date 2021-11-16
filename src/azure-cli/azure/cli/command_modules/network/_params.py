@@ -1899,7 +1899,7 @@ def load_arguments(self, _):
         c.argument('flowtimeout', type=int, help='The FlowTimeout value (in minutes) for the Virtual Network', min_api='2021-02-01', is_preview=True)
         c.argument('bgp_community', help='The BGP community associated with the virtual network.')
         c.argument('enable_encryption', arg_type=get_three_state_flag(), help='Enable encryption on the virtual network.', min_api='2021-05-01', is_preview=True)
-        c.argument('encryption_enforcement_policy', arg_type=get_enum_type(encryption_policy_types), help='If Virtual Machine without encryption is allowed in encrypted Virtual Network.', min_api='2021-05-01', is_preview=True)
+        c.argument('encryption_enforcement_policy', options_list=['--encryption-enforcement-policy', '--encryption-policy'], arg_type=get_enum_type(encryption_policy_types), help='If Virtual Machine without encryption is allowed in encrypted Virtual Network.', min_api='2021-05-01', is_preview=True)
 
     with self.argument_context('network vnet check-ip-address') as c:
         c.argument('ip_address', required=True)
