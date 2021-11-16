@@ -57,8 +57,7 @@ DEPENDENCIES = [
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests[socks]~=2.25.1',
-    'urllib3[secure]>=1.26.5'
+    'requests[socks]'
 ]
 
 # dependencies for specific OSes
