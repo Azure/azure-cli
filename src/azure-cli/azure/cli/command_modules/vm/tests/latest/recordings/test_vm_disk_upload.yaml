@@ -13,15 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --for-upload --upload-size-bytes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.21.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_disk_upload_000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001","name":"cli_test_vm_disk_upload_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-04-08T03:01:05Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001","name":"cli_test_vm_disk_upload_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-15T11:55:16Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:01:10 GMT
+      - Mon, 15 Nov 2021 11:55:19 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +43,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "tags": {}, "sku": {"name": "Premium_LRS"}, "properties":
-      {"creationData": {"createOption": "Upload", "uploadSizeBytes": 21474836992}}}'
+      {"hyperVGeneration": "V1", "creationData": {"createOption": "Upload", "uploadSizeBytes":
+      21474836992}}}'
     headers:
       Accept:
       - application/json
@@ -57,37 +55,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '158'
+      - '184'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --for-upload --upload-size-bytes
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"disk1\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
         {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"creationData\": {\r\n      \"createOption\": \"Upload\",\r\n      \"uploadSizeBytes\":
-        21474836992\r\n    },\r\n    \"provisioningState\": \"Updating\",\r\n    \"isArmResource\":
-        true\r\n  }\r\n}"
+        {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"Upload\",\r\n      \"uploadSizeBytes\": 21474836992\r\n    },\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"isArmResource\": true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/294b7f71-7285-4bdd-a6c0-73a1c4064302?api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/6d7bc8c5-70f8-4427-a4a8-98d90b570029?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '300'
+      - '331'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:01:14 GMT
+      - Mon, 15 Nov 2021 11:55:23 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/294b7f71-7285-4bdd-a6c0-73a1c4064302?monitor=true&api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/6d7bc8c5-70f8-4427-a4a8-98d90b570029?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&monitor=true&api-version=2021-04-01
       pragma:
       - no-cache
       server:
@@ -98,9 +96,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7998
+      - Microsoft.Compute/CreateUpdateDisks3Min;996,Microsoft.Compute/CreateUpdateDisks30Min;7982
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -118,34 +116,35 @@ interactions:
       ParameterSetName:
       - -g -n --for-upload --upload-size-bytes
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/294b7f71-7285-4bdd-a6c0-73a1c4064302?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/DiskOperations/6d7bc8c5-70f8-4427-a4a8-98d90b570029?p=42128af7-4c72-4222-9761-fb0d8e6cebdc&api-version=2021-04-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-04-08T03:01:15.103269+00:00\",\r\n  \"endTime\":
-        \"2021-04-08T03:01:15.2439165+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2021-11-15T11:55:24.0698137+00:00\",\r\n  \"endTime\":
+        \"2021-11-15T11:55:24.1650283+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"disk1\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Upload\",\r\n      \"uploadSizeBytes\": 21474836992\r\n
-        \   },\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\": 25,\r\n
-        \   \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2021-04-08T03:01:15.103269+00:00\",\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"diskState\": \"ReadyToUpload\",\r\n    \"uniqueId\":
-        \"ddd00a17-817e-4f0a-8e94-e834925b2be0\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P4\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"294b7f71-7285-4bdd-a6c0-73a1c4064302\"\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Upload\",\r\n      \"uploadSizeBytes\":
+        21474836992\r\n    },\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
+        25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T11:55:24.0698137+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"ReadyToUpload\",\r\n
+        \   \"uniqueId\": \"0511d180-c72e-4b32-83ef-1f2a5ae8c719\",\r\n    \"tier\":
+        \"P4\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"6d7bc8c5-70f8-4427-a4a8-98d90b570029\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1100'
+      - '1172'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:01:16 GMT
+      - Mon, 15 Nov 2021 11:55:25 GMT
       expires:
       - '-1'
       pragma:
@@ -162,7 +161,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49998,Microsoft.Compute/GetOperation30Min;399998
+      - Microsoft.Compute/GetOperation3Min;49984,Microsoft.Compute/GetOperation30Min;399886
     status:
       code: 200
       message: OK
@@ -180,31 +179,32 @@ interactions:
       ParameterSetName:
       - -g -n --for-upload --upload-size-bytes
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"disk1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_disk_upload_000001/providers/Microsoft.Compute/disks/disk1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Upload\",\r\n      \"uploadSizeBytes\": 21474836992\r\n
-        \   },\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\": 25,\r\n
-        \   \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2021-04-08T03:01:15.103269+00:00\",\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"diskState\": \"ReadyToUpload\",\r\n    \"uniqueId\":
-        \"ddd00a17-817e-4f0a-8e94-e834925b2be0\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P4\"\r\n  }\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Upload\",\r\n      \"uploadSizeBytes\":
+        21474836992\r\n    },\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
+        25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T11:55:24.0698137+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"ReadyToUpload\",\r\n
+        \   \"uniqueId\": \"0511d180-c72e-4b32-83ef-1f2a5ae8c719\",\r\n    \"tier\":
+        \"P4\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '876'
+      - '947'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:01:17 GMT
+      - Mon, 15 Nov 2021 11:55:26 GMT
       expires:
       - '-1'
       pragma:
@@ -221,7 +221,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4998,Microsoft.Compute/LowCostGet30Min;39998
+      - Microsoft.Compute/LowCostGet3Min;4962,Microsoft.Compute/LowCostGet30Min;39847
     status:
       code: 200
       message: OK
