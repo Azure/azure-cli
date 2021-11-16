@@ -11,7 +11,7 @@ start_time = timeit.default_timer()
 import sys
 import uuid
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger

@@ -5,7 +5,7 @@
 
 from enum import Enum
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from knack.log import get_logger
 
 

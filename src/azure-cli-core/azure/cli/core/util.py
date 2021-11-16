@@ -60,7 +60,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -185,8 +185,8 @@ def extract_http_operation_error(ex):
 
 
 def get_error_type_by_azure_error(ex):
-    import azure.core.exceptions as exceptions
-    import azure.cli.core.azclierror as azclierror
+    from azure.core import exceptions
+    from azure.cli.core import azclierror
 
     if isinstance(ex, exceptions.HttpResponseError):
         status_code = str(ex.status_code)
@@ -205,7 +205,7 @@ def get_error_type_by_azure_error(ex):
 
 # pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
 
     if status_code == '400':
         return azclierror.BadRequestError

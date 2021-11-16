@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import ast
 import threading
 import time
-import ast
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -45,7 +45,7 @@ from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
                                        CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
+                                       ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -477,15 +477,12 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
             break
         time.sleep(retry_delay)
 
-    if build_remote and not app.reserved:
-        raise CLIError('Remote build is only available on Linux function apps')
-
     is_consumption = is_plan_consumption(cmd, plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    if build_remote:
+    if build_remote and app.reserved:
         add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
+    elif app.reserved:
         remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
@@ -819,8 +816,9 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     app_type = _kind_to_app_type(app.kind) if app else None
     if app_type != cmd_app_type:
         raise ResourceNotFoundError(
-            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
-            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
+            "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
+                app_type=cmd_app_type, name=name, resource_group=resource_group_name),
+            "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
@@ -849,7 +847,7 @@ def _list_app(cli_ctx, resource_group_name=None):
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
     locations = _get_deleted_apps_locations(cli_ctx)
-    result = list()
+    result = []
     for location in locations:
         result = result + list(client.deleted_web_apps.list_by_location(location))
     if resource_group_name:
@@ -1766,13 +1764,9 @@ def list_app_service_plans(cmd, resource_group_name=None):
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False):
+                            tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
-    sku = _normalize_sku(sku)
-    _validate_asp_sku(app_service_environment, sku)
-    if is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
@@ -1800,6 +1794,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+    if zone_redundant:
+        plan_def.enable_additional_properties_sending()
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+        plan_def.additional_properties["properties"]["zoneRedundant"] = True
+        if number_of_workers is None:
+            sku_def.capacity = 3
+        else:
+            sku_def.capacity = max(3, number_of_workers)
+
     return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
@@ -4480,18 +4486,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         namespace='Microsoft.Web',
         type='hostingEnvironments',
         name=ase)
-
-
-def _validate_asp_sku(app_service_environment, sku):
-    # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
-        if not app_service_environment:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
-    else:
-        if app_service_environment:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
