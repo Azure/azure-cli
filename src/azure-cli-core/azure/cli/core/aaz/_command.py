@@ -3,6 +3,8 @@ import os
 from ._utils import _get_profile_pkg
 from knack.commands import CLICommand, CommandGroup
 
+_DOC_EXAMPLE_FLAG = ':example:'
+
 
 class AAZCommandGroup:
     """Atomic Layer Command Group"""
@@ -55,7 +57,7 @@ def register_command_group(name):
         from knack.help_files import helps
         assert issubclass(cls, AAZCommandGroup)
         cls.AZ_NAME = name
-        short_summary, long_summary = parse_cls_summary(cls)
+        short_summary, long_summary, _ = parse_cls_doc(cls)
         cls.AZ_HELP = {
             "type": "group",
             "short-summary": short_summary,
@@ -74,11 +76,12 @@ def register_command(name):
     def decorator(cls):
         assert issubclass(cls, AAZCommand)
         cls.AZ_NAME = name
-        short_summary, long_summary = parse_cls_summary(cls)
+        short_summary, long_summary, examples = parse_cls_doc(cls)
         cls.AZ_HELP = {
             "type": "command",
             "short-summary": short_summary,
-            "long-summary": long_summary
+            "long-summary": long_summary,
+            "examples": examples
         }
         return cls
     return decorator
@@ -124,7 +127,7 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
     return command_table, command_group_table
 
 
-def parse_cls_summary(cls):
+def parse_cls_doc(cls):
     doc = cls.__doc__
     short_summary = None
     long_summary = None
@@ -134,8 +137,29 @@ def parse_cls_summary(cls):
             l = line.strip()
             if l:
                 lines.append(l)
+    examples = []
     if lines:
         short_summary = lines[0]
-        if len(lines) > 1:
-            long_summary = '\n'.join(lines[1:])
-    return short_summary, long_summary
+        assert not short_summary.startswith(':')
+        idx = 1
+        while idx < len(lines):
+            line = lines[idx]
+            if line.startswith(_DOC_EXAMPLE_FLAG):
+                break
+            idx += 1
+        long_summary = '\n'.join(lines[1:idx]) or None
+        while idx < len(lines):
+            line = lines[idx]
+            if line.startswith(_DOC_EXAMPLE_FLAG):
+                example = {
+                    "name": line[len(_DOC_EXAMPLE_FLAG):].strip()
+                }
+                e_idx = idx + 1
+                while e_idx < len(lines) and not lines[e_idx].startswith(_DOC_EXAMPLE_FLAG):
+                    e_idx += 1
+                example["text"] = ' '.join(lines[idx+1: e_idx]) or None
+                if example["text"]:
+                    examples.append(example)
+                idx = e_idx - 1
+            idx += 1
+    return short_summary, long_summary, examples
