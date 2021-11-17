@@ -2413,9 +2413,12 @@ def vm_run_command_show(client,
                         vm_name=None,
                         run_command_name=None,
                         expand=None,
+                        instance_view=False,
                         location=None,
                         command_id=None):
     if resource_group_name or vm_name is not None or run_command_name is not None:
+        if instance_view:
+            expand = 'instanceView'
         return client.get_by_virtual_machine(resource_group_name=resource_group_name,
                                              vm_name=vm_name,
                                              run_command_name=run_command_name,
@@ -3875,7 +3878,10 @@ def vmss_run_command_show(client,
                           vmss_name,
                           instance_id,
                           run_command_name,
-                          expand=None):
+                          expand=None,
+                          instance_view=False):
+    if instance_view:
+        expand = 'instanceView'
     return client.get(resource_group_name=resource_group_name,
                       vm_scale_set_name=vmss_name,
                       instance_id=instance_id,

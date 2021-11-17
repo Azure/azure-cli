@@ -4006,7 +4006,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'run_cmd': self.create_random_name('cmd-', 10)
         })
         self.cmd('vm create -g {rg} -n {vm} --image ubuntults')
-        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} ', checks=[
+        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('source.script', None),
@@ -4014,7 +4014,12 @@ class VMRunCommandScenarioTest(ScenarioTest):
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachines/runCommands')
         ])
-        self.cmd('vm run-command create -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
+        self.cmd('vm run-command show --vm-name {vm} --name {run_cmd} -g {rg} --instance-view', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('instanceView.executionState', 'Running')
+        ])
+        self.cmd('vm run-command update -g {rg} --vm-name {vm} --name {run_cmd}  --vm-name {vm} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{run_cmd}'),
             self.check('source.script', 'script1'),
@@ -4106,6 +4111,11 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
             self.check('asyncExecution', False),
             self.check('timeoutInSeconds', 0),
             self.check('type', 'Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommands')
+        ])
+        self.cmd('vmss run-command show --vmss-name {vmss} --name {run_cmd} --instance-id {instance_id} -g {rg} --instance-view', checks=[
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{run_cmd}'),
+            self.check('instanceView.executionState', 'Running')
         ])
         self.cmd('vmss run-command update --name {run_cmd} -g {rg} --vmss-name {vmss} --instance-id {instance_id} --script script1 --parameters arg1=f1 --run-as-user user1 --timeout-in-seconds 3600', checks=[
             self.check('resourceGroup', '{rg}'),

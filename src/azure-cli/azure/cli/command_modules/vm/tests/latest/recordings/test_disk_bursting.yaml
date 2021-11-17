@@ -1,8 +1,8 @@
 interactions:
 - request:
     body: '{"location": "centraluseuap", "tags": {}, "sku": {"name": "Premium_LRS"},
-      "properties": {"creationData": {"createOption": "Empty"}, "diskSizeGB": 1024,
-      "burstingEnabled": true}}'
+      "properties": {"hyperVGeneration": "V1", "creationData": {"createOption": "Empty"},
+      "diskSizeGB": 1024, "burstingEnabled": true}}'
     headers:
       Accept:
       - application/json
@@ -13,38 +13,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '177'
+      - '203'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --size-gb --location --enable-bursting
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk1\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n
-        \ \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n    \"burstingEnabled\":
-        true,\r\n    \"provisioningState\": \"Updating\",\r\n    \"isArmResource\":
-        true\r\n  }\r\n}"
+        \ \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\":
+        {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
+        \   \"burstingEnabled\": true,\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"isArmResource\": true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/6bad5278-b405-44e7-b6c0-729df4f63b9c?api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/07ffe5db-200a-4184-b94c-da603a4cad66?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '324'
+      - '355'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:08:47 GMT
+      - Mon, 15 Nov 2021 12:05:24 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/6bad5278-b405-44e7-b6c0-729df4f63b9c?monitor=true&api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/07ffe5db-200a-4184-b94c-da603a4cad66?p=157f1a74-df5f-47b0-a815-476d8af3dce4&monitor=true&api-version=2021-04-01
       pragma:
       - no-cache
       server:
@@ -55,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7997
+      - Microsoft.Compute/CreateUpdateDisks3Min;997,Microsoft.Compute/CreateUpdateDisks30Min;7994
       x-ms-ratelimit-remaining-subscription-writes:
       - '1196'
     status:
@@ -75,36 +75,36 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --location --enable-bursting
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/6bad5278-b405-44e7-b6c0-729df4f63b9c?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/07ffe5db-200a-4184-b94c-da603a4cad66?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-04-08T03:08:48.0029705+00:00\",\r\n  \"endTime\":
-        \"2021-04-08T03:08:48.1829677+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2021-11-15T12:05:24.8540071+00:00\",\r\n  \"endTime\":
+        \"2021-11-15T12:05:24.9634253+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"mydisk1\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:08:48.0029705+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:08:48.0929817+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"c2dceed7-caee-4f42-b59b-02bfe62923f1\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\":
-        \"6bad5278-b405-44e7-b6c0-729df4f63b9c\"\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:24.8540071+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:24.9165323+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"fbab714a-fc2f-43c4-ac8f-90de7e3136e5\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"07ffe5db-200a-4184-b94c-da603a4cad66\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1230'
+      - '1300'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:08:50 GMT
+      - Mon, 15 Nov 2021 12:05:27 GMT
       expires:
       - '-1'
       pragma:
@@ -121,7 +121,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49987,Microsoft.Compute/GetOperation30Min;399979
+      - Microsoft.Compute/GetOperation3Min;49985,Microsoft.Compute/GetOperation30Min;399964
     status:
       code: 200
       message: OK
@@ -139,32 +139,33 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --location --enable-bursting
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:08:48.0029705+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:08:48.0929817+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"c2dceed7-caee-4f42-b59b-02bfe62923f1\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:24.8540071+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:24.9165323+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"fbab714a-fc2f-43c4-ac8f-90de7e3136e5\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1005'
+      - '1075'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:08:50 GMT
+      - Mon, 15 Nov 2021 12:05:27 GMT
       expires:
       - '-1'
       pragma:
@@ -181,7 +182,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14986,Microsoft.Compute/LowCostGet30Min;119976
+      - Microsoft.Compute/LowCostGet3Min;14978,Microsoft.Compute/LowCostGet30Min;119950
     status:
       code: 200
       message: OK
@@ -199,32 +200,33 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:08:48.0029705+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:08:48.0929817+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"c2dceed7-caee-4f42-b59b-02bfe62923f1\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:24.8540071+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:24.9165323+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"fbab714a-fc2f-43c4-ac8f-90de7e3136e5\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1005'
+      - '1075'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:08:52 GMT
+      - Mon, 15 Nov 2021 12:05:29 GMT
       expires:
       - '-1'
       pragma:
@@ -241,13 +243,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14985,Microsoft.Compute/LowCostGet30Min;119975
+      - Microsoft.Compute/LowCostGet3Min;14984,Microsoft.Compute/LowCostGet30Min;119949
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "centraluseuap", "tags": {}, "sku": {"name": "Premium_LRS"},
-      "properties": {"creationData": {"createOption": "Empty"}, "diskSizeGB": 1024}}'
+      "properties": {"hyperVGeneration": "V1", "creationData": {"createOption": "Empty"},
+      "diskSizeGB": 1024}}'
     headers:
       Accept:
       - application/json
@@ -258,343 +261,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '152'
+      - '178'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --size-gb --location
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n
-        \ \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n    \"provisioningState\":
-        \"Updating\",\r\n    \"isArmResource\": true\r\n  }\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/f67db57d-bebf-4b3a-bf68-c5fff018c570?api-version=2020-12-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '294'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 08 Apr 2021 03:08:59 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/f67db57d-bebf-4b3a-bf68-c5fff018c570?monitor=true&api-version=2020-12-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;997,Microsoft.Compute/CreateUpdateDisks30Min;7996
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --size-gb --location
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/f67db57d-bebf-4b3a-bf68-c5fff018c570?api-version=2020-12-01
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2021-04-08T03:09:00.1353399+00:00\",\r\n  \"endTime\":
-        \"2021-04-08T03:09:00.3104069+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"mydisk2\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\":
-        \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\":
-        \"f67db57d-bebf-4b3a-bf68-c5fff018c570\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1135'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 08 Apr 2021 03:09:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49987,Microsoft.Compute/GetOperation30Min;399977
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --size-gb --location
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\":
-        \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '910'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 08 Apr 2021 03:09:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14982,Microsoft.Compute/LowCostGet30Min;119972
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\":
-        \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '910'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 08 Apr 2021 03:09:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14981,Microsoft.Compute/LowCostGet30Min;119971
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --enable-bursting
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
-        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"timeCreated\":
-        \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '910'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 08 Apr 2021 03:09:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14980,Microsoft.Compute/LowCostGet30Min;119970
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "centraluseuap", "tags": {}, "sku": {"name": "Premium_LRS"},
-      "properties": {"creationData": {"createOption": "Empty"}, "diskSizeGB": 1024,
-      "diskIOPSReadWrite": 5000, "diskMBpsReadWrite": 200, "encryption": {"type":
-      "EncryptionAtRestWithPlatformKey"}, "networkAccessPolicy": "AllowAll", "tier":
-      "P30", "burstingEnabled": true}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '339'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n --enable-bursting
-      User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"location\": \"centraluseuap\",\r\n
-        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n
-        \ \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n    \"encryption\": {\r\n
-        \     \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"provisioningState\": \"Updating\",\r\n    \"isArmResource\":
-        true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n
+        \ \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\":
+        {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true\r\n
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/84810e2a-7079-46f0-8900-d282b217c5b5?api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/597e009d-693f-45bb-9402-a1c6f92c1b33?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '462'
+      - '325'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:09:07 GMT
+      - Mon, 15 Nov 2021 12:05:35 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/84810e2a-7079-46f0-8900-d282b217c5b5?monitor=true&api-version=2020-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/597e009d-693f-45bb-9402-a1c6f92c1b33?p=157f1a74-df5f-47b0-a815-476d8af3dce4&monitor=true&api-version=2021-04-01
       pragma:
       - no-cache
       server:
@@ -605,7 +303,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;996,Microsoft.Compute/CreateUpdateDisks30Min;7995
+      - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7993
       x-ms-ratelimit-remaining-subscription-writes:
       - '1194'
     status:
@@ -619,42 +317,41 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - disk update
+      - disk create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --enable-bursting
+      - -g -n --size-gb --location
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/84810e2a-7079-46f0-8900-d282b217c5b5?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/597e009d-693f-45bb-9402-a1c6f92c1b33?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2021-04-08T03:09:08.1316147+00:00\",\r\n  \"endTime\":
-        \"2021-04-08T03:09:08.3416637+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n  \"endTime\":
+        \"2021-11-15T12:05:36.0884293+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"mydisk2\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:09:08.251633+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\":
-        \"84810e2a-7079-46f0-8900-d282b217c5b5\"\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"597e009d-693f-45bb-9402-a1c6f92c1b33\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1229'
+      - '1205'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:09:09 GMT
+      - Mon, 15 Nov 2021 12:05:38 GMT
       expires:
       - '-1'
       pragma:
@@ -671,7 +368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49985,Microsoft.Compute/GetOperation30Min;399975
+      - Microsoft.Compute/GetOperation3Min;49986,Microsoft.Compute/GetOperation30Min;399962
     status:
       code: 200
       message: OK
@@ -683,38 +380,38 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - disk update
+      - disk create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --enable-bursting
+      - -g -n --size-gb --location
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:09:08.251633+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1004'
+      - '980'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:09:10 GMT
+      - Mon, 15 Nov 2021 12:05:38 GMT
       expires:
       - '-1'
       pragma:
@@ -731,7 +428,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14978,Microsoft.Compute/LowCostGet30Min;119968
+      - Microsoft.Compute/LowCostGet3Min;14982,Microsoft.Compute/LowCostGet30Min;119947
     status:
       code: 200
       message: OK
@@ -749,32 +446,32 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-compute/21.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2020-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
   response:
     body:
       string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
-        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
-        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
-        \   \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\": 200,\r\n    \"encryption\":
-        {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"burstingEnabled\":
-        true,\r\n    \"timeCreated\": \"2021-04-08T03:09:00.1403461+00:00\",\r\n    \"burstingEnabledTime\":
-        \"2021-04-08T03:09:08.251633+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 1099511627776,\r\n
-        \   \"uniqueId\": \"84e8369d-95e9-453f-abec-91ef9717cf73\",\r\n    \"networkAccessPolicy\":
-        \"AllowAll\",\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1004'
+      - '980'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 08 Apr 2021 03:09:12 GMT
+      - Mon, 15 Nov 2021 12:05:41 GMT
       expires:
       - '-1'
       pragma:
@@ -791,7 +488,319 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;14976,Microsoft.Compute/LowCostGet30Min;119966
+      - Microsoft.Compute/LowCostGet3Min;14981,Microsoft.Compute/LowCostGet30Min;119946
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-bursting
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n    \"publicNetworkAccess\":
+        \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '980'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:05:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;14980,Microsoft.Compute/LowCostGet30Min;119945
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "tags": {}, "sku": {"name": "Premium_LRS"},
+      "properties": {"hyperVGeneration": "V1", "creationData": {"createOption": "Empty"},
+      "diskSizeGB": 1024, "diskIOPSReadWrite": 5000, "diskMBpsReadWrite": 200, "encryption":
+      {"type": "EncryptionAtRestWithPlatformKey"}, "networkAccessPolicy": "AllowAll",
+      "tier": "P30", "burstingEnabled": true, "publicNetworkAccess": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '399'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --enable-bursting
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n
+        \ \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\":
+        {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 1024,\r\n
+        \   \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"isArmResource\": true,\r\n    \"tier\": \"P30\"\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/723acaf0-a0c1-4a9e-b073-286dc435023c?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '532'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:05:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/723acaf0-a0c1-4a9e-b073-286dc435023c?p=157f1a74-df5f-47b0-a815-476d8af3dce4&monitor=true&api-version=2021-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateDisks3Min;997,Microsoft.Compute/CreateUpdateDisks30Min;7992
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-bursting
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/centraluseuap/DiskOperations/723acaf0-a0c1-4a9e-b073-286dc435023c?p=157f1a74-df5f-47b0-a815-476d8af3dce4&api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-11-15T12:05:46.7760269+00:00\",\r\n  \"endTime\":
+        \"2021-11-15T12:05:46.8854472+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"mydisk2\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:46.8385033+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"723acaf0-a0c1-4a9e-b073-286dc435023c\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1300'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:05:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;49984,Microsoft.Compute/GetOperation30Min;399960
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-bursting
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:46.8385033+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1075'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:05:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;14976,Microsoft.Compute/LowCostGet30Min;119941
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"mydisk2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_busrting_000001/providers/Microsoft.Compute/disks/mydisk2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"centraluseuap\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
+        \   \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 1024,\r\n    \"diskIOPSReadWrite\": 5000,\r\n    \"diskMBpsReadWrite\":
+        200,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"burstingEnabled\": true,\r\n    \"networkAccessPolicy\": \"AllowAll\",\r\n
+        \   \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\": \"2021-11-15T12:05:35.9634544+00:00\",\r\n
+        \   \"burstingEnabledTime\": \"2021-11-15T12:05:46.8385033+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        1099511627776,\r\n    \"uniqueId\": \"415c1ae0-3ab6-406a-90e1-f3cdfc670040\",\r\n
+        \   \"tier\": \"P30\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1075'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:05:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;14975,Microsoft.Compute/LowCostGet30Min;119940
     status:
       code: 200
       message: OK

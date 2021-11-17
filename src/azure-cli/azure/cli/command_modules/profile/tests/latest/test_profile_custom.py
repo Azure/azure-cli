@@ -2,11 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import os
 import unittest
 from unittest import mock
 
-from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token, login
+from azure.cli.command_modules.profile.custom import (
+    list_subscriptions, get_access_token, login, logout, account_clear, _remove_adal_token_cache)
+
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
@@ -134,3 +136,52 @@ class ProfileCommandTest(unittest.TestCase):
         namespace.tenant = "non-existing-tenant.onmicrosoft.com"
         with self.assertRaisesRegex(CLIError, 'Failed to resolve tenant'):
             validate_tenant(cmd, namespace)
+
+    @mock.patch('azure.cli.command_modules.profile.custom._remove_adal_token_cache', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_logout(self, profile_mock, remove_adal_token_cache_mock):
+        cmd = mock.MagicMock()
+
+        profile_instance = mock.MagicMock()
+        profile_instance.get_current_account_user.return_value = "user1"
+        profile_mock.return_value = profile_instance
+
+        # Log out without username
+        logout(cmd)
+        remove_adal_token_cache_mock.assert_called_once()
+        profile_instance.get_current_account_user.assert_called_once()
+
+        # Reset mock for next test
+        remove_adal_token_cache_mock.reset_mock()
+        profile_instance.get_current_account_user.reset_mock()
+
+        # Log out with username
+        logout(cmd, username='user2')
+        remove_adal_token_cache_mock.assert_called_once()
+        profile_instance.get_current_account_user.assert_not_called()
+        profile_instance.logout.assert_called_with('user2')
+
+    @mock.patch('azure.cli.command_modules.profile.custom._remove_adal_token_cache', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_account_clear(self, profile_mock, remove_adal_token_cache_mock):
+        cmd = mock.MagicMock()
+
+        profile_instance = mock.MagicMock()
+        profile_mock.return_value = profile_instance
+
+        account_clear(cmd)
+
+        remove_adal_token_cache_mock.assert_called_once()
+        profile_instance.logout_all.assert_called_once()
+
+    def test_remove_adal_token_cache(self):
+        # If accessTokens.json doesn't exist
+        assert not _remove_adal_token_cache()
+
+        # If accessTokens.json exists
+        from azure.cli.core._environment import get_config_dir
+        adal_token_cache = os.path.join(get_config_dir(), 'accessTokens.json')
+        with open(adal_token_cache, 'w') as f:
+            f.write("test_token_cache")
+        assert _remove_adal_token_cache()
+        assert not os.path.exists(adal_token_cache)
