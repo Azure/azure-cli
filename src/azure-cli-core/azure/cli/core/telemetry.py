@@ -45,7 +45,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.module_correlation = None
         self.extension_name = None
         self.extension_version = None
-        self._event_id = None
+        self.event_id = str(uuid.uuid4())
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -224,14 +224,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     @property
     def product_version(self):
         return _get_core_version()
-
-    @property
-    def event_id(self):
-        # Some CLI scenarios can use the Event ID to correlate events on the server and client. Such as matching errors.
-        # This can be used to improve the CLI experience. Though it should only shared when telemetry is enabled.
-        if self._event_id is None:
-            self._event_id = str(uuid.uuid4())
-        return self._event_id
 
 
 _session = TelemetrySession()
