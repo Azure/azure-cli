@@ -15,7 +15,7 @@ from azure.cli.command_modules.appservice.custom import (
     remove_remote_build_app_settings,
     validate_app_settings_in_scm)
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import (AzureInternalError)
+from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -218,7 +218,7 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # action
         with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
-            with self.assertRaises(CLIError):
+            with self.assertRaises(UnclassifiedUserFault):
                 enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
 
         # assert

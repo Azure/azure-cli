@@ -529,12 +529,13 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # check if there's an ongoing process
     if res.status_code == 409:
-        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
-                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
-                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
-                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
-                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(deployment_status_url))
 
     # check if an error occured during deployment
     if res.status_code:
