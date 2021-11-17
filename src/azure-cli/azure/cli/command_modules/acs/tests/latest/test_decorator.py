@@ -7486,6 +7486,60 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             dec_1.context.get_intermediate("virtual_node_addon_enabled"), True
         )
 
+    def test_update_nodepool_labels(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_nodepool_labels(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_nodepool_labels(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": {"key1": "value1", "key2": "value2"},
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                )
+            ],
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_nodepool_labels(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                    node_labels={"key1": "value1", "key2": "value2"},
+                )
+            ],
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_update_default_mc_profile(self):
         pass
 
