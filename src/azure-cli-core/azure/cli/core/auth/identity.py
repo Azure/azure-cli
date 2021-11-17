@@ -16,7 +16,7 @@ from knack.util import CLIError
 from .msal_authentication import _CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _CLIENT_ASSERTION, \
     _USE_CERT_SN_ISSUER
 from .msal_authentication import UserCredential, ServicePrincipalCredential
-from .persistence import load_persisted_token_cache, file_extensions
+from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
@@ -31,10 +31,19 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         - service principal
         - TODO: managed identity
     """
-    # HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
-    # It must follow singleton pattern. Otherwise, a new dbm.dumb http_cache can read out-of-sync dat and dir.
+
+    # MSAL token cache.
+    # It follows singleton pattern so that all MSAL app instances share the same token cache.
+    _msal_token_cache = None
+
+    # MSAL HTTP cache for MSAL's tenant discovery, retry-after error cache, etc.
+    # It *must* follow singleton pattern so that all MSAL app instances share the same HTTP cache.
     # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
-    http_cache = None
+    _msal_http_cache = None
+
+    # Instance of ServicePrincipalStore.
+    # It follows singleton pattern so that _secret_file is read only once.
+    _service_principal_store_instance = None
 
     def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False):
         """
@@ -57,35 +66,53 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         config_dir = get_config_dir()
         self._token_cache_file = os.path.join(config_dir, "msal_token_cache")
         self._secret_file = os.path.join(config_dir, "service_principal_entries")
-        self._http_cache_file = os.path.join(config_dir, "msal_http_cache")
+        self._http_cache_file = os.path.join(config_dir, "msal_http_cache.bin")
 
-        # Prepare HTTP cache.
-        # https://github.com/AzureAD/microsoft-authentication-library-for-python/pull/407
-        # if not Identity.http_cache:
-        #     Identity.http_cache = self._load_http_cache()
-
+        # We make _msal_app_instance an instance attribute, instead of a class attribute,
+        # because MSAL apps can have different tenant IDs.
         self._msal_app_instance = None
-        # Store for Service principal credential persistence
-        self._msal_secret_store = ServicePrincipalStore(self._secret_file, self.encrypt)
-        self._msal_app_kwargs = {
+
+    @property
+    def _msal_app_kwargs(self):
+        """kwargs for creating UserCredential or ServicePrincipalCredential.
+        MSAL token cache and HTTP cache are lazily created.
+        """
+        if not Identity._msal_token_cache:
+            Identity._msal_token_cache = self._load_msal_token_cache()
+
+        if not Identity._msal_http_cache:
+            Identity._msal_http_cache = self._load_msal_http_cache()
+
+        return {
             "authority": self._msal_authority,
-            "token_cache": self._load_msal_cache()
-            # "http_cache": Identity.http_cache
+            "token_cache": Identity._msal_token_cache,
+            "http_cache": Identity._msal_http_cache
         }
 
-    def _load_msal_cache(self):
+    @property
+    def _msal_app(self):
+        """A PublicClientApplication instance for user login/logout.
+        The instance is lazily created.
+        """
+        if not self._msal_app_instance:
+            self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
+        return self._msal_app_instance
+
+    def _load_msal_token_cache(self):
         # Store for user token persistence
         cache = load_persisted_token_cache(self._token_cache_file, self.encrypt)
         return cache
 
-    def _load_http_cache(self):
+    def _load_msal_http_cache(self):
         import atexit
         import pickle
 
+        logger.debug("_load_msal_http_cache: %s", self._http_cache_file)
         try:
             with open(self._http_cache_file, 'rb') as f:
-                persisted_http_cache = pickle.load(f)  # Take a snapshot
-        except:  # pylint: disable=bare-except
+                persisted_http_cache = pickle.load(f)
+        except (pickle.UnpicklingError, FileNotFoundError) as ex:
+            logger.debug("Failed to load MSAL HTTP cache: %s", ex)
             persisted_http_cache = {}  # Ignore a non-exist or corrupted http_cache
         atexit.register(lambda: pickle.dump(
             # When exit, flush it back to the file.
@@ -95,45 +122,44 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         return persisted_http_cache
 
-    def _build_persistent_msal_app(self):
-        # Initialize _msal_app for login and logout
-        msal_app = PublicClientApplication(self.client_id, **self._msal_app_kwargs)
-        return msal_app
-
     @property
-    def msal_app(self):
-        if not self._msal_app_instance:
-            self._msal_app_instance = self._build_persistent_msal_app()
-        return self._msal_app_instance
+    def _service_principal_store(self):
+        """A ServicePrincipalStore instance for service principal entries persistence.
+        The instance is lazily created.
+        """
+        if not Identity._service_principal_store_instance:
+            store = load_secret_store(self._secret_file, self.encrypt)
+            Identity._service_principal_store_instance = ServicePrincipalStore(store)
+        return Identity._service_principal_store_instance
 
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
         logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
-                       "with `az login --use-device-code`.", self.msal_app.authority.authorization_endpoint)
+                       "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
 
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
 
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
-        result = self.msal_app.acquire_token_interactive(
+        result = self._msal_app.acquire_token_interactive(
             scopes, prompt='select_account', port=8400 if self._is_adfs else None,
             success_template=success_template, error_template=error_template, **kwargs)
         return check_result(result)
 
     def login_with_device_code(self, scopes, **kwargs):
-        flow = self.msal_app.initiate_device_flow(scopes, **kwargs)
+        flow = self._msal_app.initiate_device_flow(scopes, **kwargs)
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
         logger.warning(flow["message"])
-        result = self.msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
+        result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
         return check_result(result)
 
     def login_with_username_password(self, username, password, scopes, **kwargs):
-        result = self.msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
+        result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
         return check_result(result)
 
     def login_with_service_principal(self, client_id, credential, scopes):
@@ -149,7 +175,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # Only persist the service principal after a successful login
         entry = sp_auth.get_entry_to_persist()
-        self._msal_secret_store.save_entry(entry)
+        self._service_principal_store.save_entry(entry)
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
         raise NotImplementedError
@@ -158,9 +184,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError
 
     def logout_user(self, user):
-        accounts = self.msal_app.get_accounts(user)
+        accounts = self._msal_app.get_accounts(user)
         for account in accounts:
-            self.msal_app.remove_account(account)
+            self._msal_app.remove_account(account)
 
     def logout_all_users(self):
         for e in file_extensions.values():
@@ -168,27 +194,28 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def logout_service_principal(self, sp):
         # remove service principal secrets
-        self._msal_secret_store.remove_entry(sp)
+        self._service_principal_store.remove_entry(sp)
 
     def logout_all_service_principal(self):
         # remove service principal secrets
-        self._msal_secret_store.remove_all_entries()
+        for e in file_extensions.values():
+            _try_remove(self._secret_file + e)
 
     def get_user(self, user=None):
-        accounts = self.msal_app.get_accounts(user) if user else self.msal_app.get_accounts()
+        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
         return accounts
 
     def get_user_credential(self, username):
         return UserCredential(self.client_id, username, **self._msal_app_kwargs)
 
     def get_service_principal_credential(self, client_id):
-        entry = self._msal_secret_store.load_entry(client_id, self.tenant_id)
+        entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
     def get_service_principal_entry(self, client_id):
         """This method is only used by --sdk-auth. DO NOT use it elsewhere."""
-        return self._msal_secret_store.load_entry(client_id, self.tenant_id)
+        return self._service_principal_store.load_entry(client_id, self.tenant_id)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
@@ -255,10 +282,8 @@ class ServicePrincipalStore:
     """Save secrets in MSAL custom secret store for Service Principal authentication.
     """
 
-    def __init__(self, secret_file, encrypt):
-        from .persistence import load_secret_store
-        self._secret_store = load_secret_store(secret_file, encrypt)
-        self._secret_file = secret_file
+    def __init__(self, secret_store):
+        self._secret_store = secret_store
         self._entries = []
 
     def load_entry(self, sp_id, tenant):
@@ -304,10 +329,6 @@ class ServicePrincipalStore:
 
         if state_changed:
             self._save_persistence()
-
-    def remove_all_entries(self):
-        for e in file_extensions.values():
-            _try_remove(self._secret_file + e)
 
     def _save_persistence(self):
         self._secret_store.save(self._entries)

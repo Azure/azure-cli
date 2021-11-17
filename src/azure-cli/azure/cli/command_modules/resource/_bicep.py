@@ -35,6 +35,8 @@ _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1
 # See: https://docs.microsoft.com/azure/azure-resource-manager/templates/template-syntax#template-format
 _template_schema_pattern = r"https?://schema\.management\.azure\.com/schemas/[0-9a-zA-Z-]+/(?P<templateType>[a-zA-Z]+)Template\.json#?"  # pylint: disable=line-too-long
 
+_bicep_diagnostic_warning_pattern = r"^([^\s].*)\((\d+)(?:,\d+|,\d+,\d+)?\)\s+:\s+(Warning)\s+([a-zA-Z-\d]+):\s*(.*?)\s+\[(.*?)\]$"  # pylint: disable=line-too-long
+
 _config_dir = get_config_dir()
 _bicep_installation_dir = os.path.join(_config_dir, "bin")
 _bicep_version_check_file_path = os.path.join(_config_dir, "bicepVersionCheck.json")
@@ -83,7 +85,7 @@ def run_bicep_command(args, auto_install=True, check_version=True):
     return _run_command(installation_path, args)
 
 
-def ensure_bicep_installation(release_tag=None, stdout=True):
+def ensure_bicep_installation(release_tag=None, target_platform=None, stdout=True):
     system = platform.system()
     installation_path = _get_bicep_installation_path(system)
 
@@ -108,7 +110,7 @@ def ensure_bicep_installation(release_tag=None, stdout=True):
             else:
                 print("Installing Bicep CLI...")
         ca_file = certifi.where()
-        request = urlopen(_get_bicep_download_url(system, release_tag), cafile=ca_file)
+        request = urlopen(_get_bicep_download_url(system, release_tag, target_platform=target_platform), cafile=ca_file)
         with open(installation_path, "wb") as f:
             f.write(request.read())
 
@@ -192,8 +194,12 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_semver(installed_version_output)
 
 
-def _get_bicep_download_url(system, release_tag):
+def _get_bicep_download_url(system, release_tag, target_platform=None):
     download_url = f"https://github.com/Azure/bicep/releases/download/{release_tag}/{{}}"
+
+    if target_platform:
+        executable_name = "bicep-win-x64.exe" if target_platform == "win-x64" else f"bicep-{target_platform}"
+        return download_url.format(executable_name)
 
     if system == "Windows":
         return download_url.format("bicep-win-x64.exe")
@@ -204,7 +210,7 @@ def _get_bicep_download_url(system, release_tag):
     if system == "Darwin":
         return download_url.format("bicep-osx-x64")
 
-    raise ValidationError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{system}" is not supported.')
 
 
 def _get_bicep_installation_path(system):
@@ -213,7 +219,7 @@ def _get_bicep_installation_path(system):
     if system in ("Linux", "Darwin"):
         return os.path.join(_bicep_installation_dir, "bicep")
 
-    raise ValidationError(f'The platform "{format(system)}" is not supported.')
+    raise ValidationError(f'The platform "{system}" is not supported.')
 
 
 def _extract_semver(text):
@@ -231,7 +237,17 @@ def _run_command(bicep_installation_path, args):
             _logger.warning(command_warnings)
         return process.stdout.decode("utf-8")
     except subprocess.CalledProcessError:
-        raise UnclassifiedUserFault(process.stderr.decode("utf-8"))
+        stderr_output = process.stderr.decode("utf-8")
+        errors = []
+
+        for line in stderr_output.splitlines():
+            if re.match(_bicep_diagnostic_warning_pattern, line):
+                _logger.warning(line)
+            else:
+                errors.append(line)
+
+        error_msg = os.linesep.join(errors)
+        raise UnclassifiedUserFault(error_msg)
 
 
 def _template_schema_to_target_scope(template_schema):
