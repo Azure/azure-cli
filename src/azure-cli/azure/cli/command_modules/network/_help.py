@@ -1463,6 +1463,38 @@ type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
+helps['network application-gateway waf-policy managed-rule exclusion rule-set'] = """
+type: group
+short-summary: Define a managed rule set for exclusions.
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set add'] = """
+type: command
+short-summary: Add a managed rule set to an exclusion.
+examples:
+  - name: Add a managed rule set to an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set add -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup --rule-ids 921140 921150
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set remove'] = """
+type: command
+short-summary: Remove managed rule set within an exclusion.
+examples:
+  - name: Remove managed rule set within an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set remove -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set list'] = """
+type: command
+short-summary: List all managed rule sets of an exclusion.
+examples:
+  - name: List all managed rule sets of an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set list -g MyResourceGroup --policy-name MyPolicy
+"""
+
 helps['network application-gateway waf-policy show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy.
