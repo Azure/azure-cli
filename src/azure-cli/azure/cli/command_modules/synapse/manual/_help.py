@@ -1563,7 +1563,7 @@ examples:
   - name: Create a notebook.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb
+          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook set'] = """
@@ -1573,7 +1573,7 @@ examples:
   - name: Set an exist notebook.
     text: |-
         az synapse notebook set --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb
+          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook import'] = """
@@ -1583,7 +1583,7 @@ examples:
   - name: Import a notebook.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb
+          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook show'] = """
@@ -1993,7 +1993,7 @@ examples:
   - name: Create a spark job definition.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json
+          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition update'] = """
@@ -2003,7 +2003,7 @@ examples:
   - name: Update a spark job definition.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json
+          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition wait'] = """
