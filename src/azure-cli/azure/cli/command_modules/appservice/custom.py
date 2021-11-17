@@ -18,6 +18,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
@@ -59,7 +60,9 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     _rename_server_farm_props,
-                    _get_location_from_webapp, _normalize_location)
+                    _get_location_from_webapp,
+                    _normalize_location,
+                    get_pool_manager)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -329,11 +332,15 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
 def parse_docker_image_name(deployment_container_image_name):
     if not deployment_container_image_name:
         return None
-    slash_ix = deployment_container_image_name.rfind('/')
-    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
-    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+    non_url = "/" not in deployment_container_image_name
+    non_url = non_url or ("." not in deployment_container_image_name and ":" not in deployment_container_image_name)
+    if non_url:
         return None
-    return docker_registry_server_url
+    parsed_url = urlparse(deployment_container_image_name)
+    if parsed_url.scheme:
+        return parsed_url.hostname
+    hostname = urlparse("https://{}".format(deployment_container_image_name)).hostname
+    return "https://{}".format(hostname)
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -2407,7 +2414,6 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 
 def _get_log(url, user_name, password, log_file=None):
-    import certifi
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2415,7 +2421,7 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    http = get_pool_manager(url)
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
@@ -4445,7 +4451,11 @@ def _start_ssh_session(hostname, port, username, password):
             logger.warning('.')
             time.sleep(1)
     try:
-        c.run('cat /etc/motd', pty=True)
+        try:
+            c.run('cat /etc/motd', pty=True)
+        except invoke.exceptions.UnexpectedExit:
+            # Don't crash over a non-existing /etc/motd.
+            pass
         c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
