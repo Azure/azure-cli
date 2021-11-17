@@ -8,7 +8,6 @@ import os
 import traceback
 import json
 import re
-from distutils.sysconfig import get_python_lib
 
 import pkginfo
 from knack.config import CLIConfig
@@ -22,7 +21,7 @@ _CUSTOM_EXT_SYS_DIR = az_config.get('extension', 'sys_dir', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
-EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join(get_python_lib(), 'azure-cli-extensions')
+EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join('/', 'usr', 'lib', 'python3', 'dist-packages', 'azure-cli-extensions')
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
