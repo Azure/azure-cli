@@ -7,10 +7,10 @@ import json
 import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
-                                            Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties, synapseSQLscript
+                                            Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
                                             NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
-                                            SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection
-                                            NotebookResource, SparkJobDefinition, NotebookFolder)
+                                            SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
+                                            NotebookFolder)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,

@@ -986,8 +986,8 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse sql-script export') as c:
         c.argument('output_folder', help='The SQL script export path')
-            c.argument('folder_path',
-                       help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
+        c.argument('folder_path',
+                   help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
 
     # kusto pool
     with self.argument_context('synapse kusto pool create') as c:
