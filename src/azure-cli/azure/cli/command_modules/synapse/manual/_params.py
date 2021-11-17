@@ -964,6 +964,8 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
             c.argument('definition_file', arg_type=definition_file_arg_type)
+            c.argument('folder_path',
+                       help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
 
     # synapse artifacts sql script
     for scope in ['create', 'show', 'wait', 'delete', 'export', 'import']:
