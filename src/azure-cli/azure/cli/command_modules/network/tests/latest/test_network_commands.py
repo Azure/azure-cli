@@ -3677,28 +3677,24 @@ class NetworkVNetScenarioTest(ScenarioTest):
         })
         # only create with --enable-encryption and --encryption-enforcement-policy
         self.cmd('network vnet create --address-prefixes 10.0.0.0/16 -n MyVnet1 -g {rg} --subnet-name Mysubnet --subnet-prefixes 10.0.0.0/24 --enable-encryption true --encryption-enforcement-policy allowUnencrypted')
-        self.cmd('network vnet create --address-prefixes 10.1.0.0/16 -n MyVnet2 -g {rg} --subnet-name MySubnet --subnet-prefixes 10.1.0.0/24 --enable-encryption false --encryption-enforcement-policy dropUnencrypted')
+        self.cmd('network vnet create --address-prefixes 10.1.0.0/16 -n MyVnet2 -g {rg} --subnet-name MySubnet --subnet-prefixes 10.1.0.0/24 --enable-encryption true --encryption-enforcement-policy dropUnencrypted')
         self.cmd('network vnet show -n MyVnet1 -g {rg}', checks=[
             self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{allowUnencrypted}'),
         ])
         self.cmd('network vnet show -n MyVnet2 -g {rg}', checks=[
-            self.check('encryption.enabled', False),
+            self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
         # only create with --enable-encryption
         self.cmd('network vnet create --address-prefixes 10.2.0.0/16 --name MyVnet3 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.2.0.0/24 --enable-encryption false')
-        self.cmd('network vnet create --address-prefixes 10.3.0.0/16 --name MyVnet4 --resource-group {rg} --subnet-name MySubnet --subnet-prefixes 10.3.0.0/24 --enable-encryption true')
-        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption false', checks=[
-            self.check('encryption.enabled', False),
-        ])
-        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption true', checks=[
+        self.cmd('network vnet create --address-prefixes 10.3.0.0/16 --name MyVnet4 --resource-group {rg} --subnet-name MySubnet --subnet-prefixes 10.3.0.0/24 --enable-encryption true', expect_failure=True)
+        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy allowUnencrypted', checks=[
             self.check('encryption.enabled', True),
-        ])
-        self.cmd('network vnet update --name MyVnet4 --resource-group {rg} --encryption-enforcement-policy allowUnencrypted', checks=[
             self.check('encryption.enforcement', '{allowUnencrypted}'),
         ])
-        self.cmd('network vnet update --name MyVnet4 --resource-group {rg} --encryption-enforcement-policy dropUnencrypted', checks=[
+        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy dropUnencrypted', checks=[
+            self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
         # only create with --encryption-enforcement-policy
@@ -3708,15 +3704,18 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet create --address-prefixes 10.6.0.0/16 --name MyVnet7 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.6.0.0/24')
         self.cmd('network vnet create --address-prefixes 10.7.0.0/16 --name MyVnet8 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.7.0.0/24')
         # update
-        self.cmd('network vnet update --name MyVnet6 --resource-group {rg} --enable-encryption true', checks=[
-            self.check('encryption.enabled', True),
-        ])
+        self.cmd('network vnet update --name MyVnet6 --resource-group {rg} --enable-encryption true', expect_failure=True)
         self.cmd('network vnet update --name MyVnet7 --resource-group {rg} --encryption-enforcement-policy dropUnencrypted', expect_failure=True)
         self.cmd('network vnet update --name MyVnet8 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy dropUnencrypted', checks=[
             self.check('encryption.enabled', True),
             self.check('encryption.enforcement', '{dropUnencrypted}'),
         ])
-
+        # vnet peering
+        self.cmd('network vnet peering create --name MyVnet1ToMyVnet2 --remote-vnet MyVnet2 --resource-group {rg} --vnet-name MyVnet1')
+        self.cmd('network vnet peering show --name MyVnet1ToMyVnet2 --vnet-name MyVnet1 -g {rg}', checks=[
+            self.check('remoteVirtualNetworkEncryption.enabled', True),
+            self.check('remoteVirtualNetworkEncryption.enforcement', '{dropUnencrypted}'),
+        ])
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
