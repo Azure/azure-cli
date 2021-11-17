@@ -1954,6 +1954,58 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('exclusions | length(@)', 0)
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_app_gateway_waf_policy_exclusion_rule_set_")
+    def test_network_app_gateway_waf_policy_exclusion_rule_set(self, resource_group):
+        self.kwargs.update({
+            "waf": "agp",
+            "rule_group1": "REQUEST-921-PROTOCOL-ATTACK",
+            "rule_group2": "REQUEST-931-APPLICATION-ATTACK-RFI",
+        })
+        # create a waf-policy
+        self.cmd("network application-gateway waf-policy create -g {rg} -n {waf}")
+        # add an exclusion rule
+        self.cmd("network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} \
+                 --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing")
+        # add one rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group1} --rule-ids 921140 921150",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group1"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "921140"),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[1].ruleId", "921150"),
+            ]
+        )
+        # add another rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group2} --rule-ids 931100",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].rules[0].ruleId", "931100"),
+            ]
+        )
+        # remove the first rule group
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set remove -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 --group-name {rule_group1}"
+        )
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set list -g {rg} --policy-name {waf}",
+            checks=[
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 1),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "931100"),
+            ]
+        )
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 

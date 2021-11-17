@@ -508,7 +508,7 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
                    help='The version of the web application firewall rule set type. '
                         '0.1 is used for Microsoft_BotManagerRuleSet')
 
@@ -584,11 +584,19 @@ def load_arguments(self, _):
                    help='The variable to be excluded.')
         c.argument('selector_match_operator',
                    arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   options_list=['--selector-match-operator', '--match-operator'],
                    help='When matchVariable is a collection, operate on the selector to '
                         'specify which elements in the collection this exclusion applies to.')
         c.argument('selector',
                    help='When matchVariable is a collection, operator used to '
                         'specify which elements in the collection this exclusion applies to.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion rule-set',
+                               min_api='2021-05-01') as c:
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='The managed rule group for exclusion.')
+        c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
     # region
 
     # region ApplicationSecurityGroups

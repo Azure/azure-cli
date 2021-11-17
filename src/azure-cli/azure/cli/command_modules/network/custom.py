@@ -1957,6 +1957,74 @@ def remove_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_n
 def list_waf_managed_rule_exclusion(cmd, client, resource_group_name, policy_name):
     waf_policy = client.get(resource_group_name, policy_name)
     return waf_policy.managed_rules
+
+
+# pylint: disable=line-too-long
+# pylint: disable=too-many-nested-blocks
+def add_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name,
+                               rule_set_type, rule_set_version,
+                               match_variable, selector_match_operator, selector,
+                               rule_group_name=None, rule_ids=None):
+    ExclusionManagedRuleSet, ExclusionManagedRuleGroup, ExclusionManagedRule = \
+        cmd.get_models('ExclusionManagedRuleSet', 'ExclusionManagedRuleGroup', 'ExclusionManagedRule')
+    waf_policy = client.get(resource_group_name, policy_name)
+    # build current rules from ids
+    rules = [ExclusionManagedRule(rule_id=rule_id) for rule_id in rule_ids] if rule_ids is not None else []
+    # build current rule group from rules
+    curr_rule_group = None
+    if rule_group_name is not None:
+        curr_rule_group = ExclusionManagedRuleGroup(rule_group_name=rule_group_name,
+                                                    rules=rules)
+    # build current rule set from rule group
+    curr_rule_set = ExclusionManagedRuleSet(rule_set_type=rule_set_type,
+                                            rule_set_version=rule_set_version,
+                                            rule_groups=[curr_rule_group] if curr_rule_group is not None else [])
+    for exclusion in waf_policy.managed_rules.exclusions:
+        if exclusion.match_variable == match_variable and exclusion.selector_match_operator == selector_match_operator and exclusion.selector == selector:
+            for rule_set in exclusion.exclusion_managed_rule_sets:
+                if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+                    for rule_group in rule_set.rule_groups:
+                        # add rules when rule group exists
+                        if rule_group.rule_group_name == rule_group_name:
+                            rule_group.rules.extend(rules)
+                            break
+                    else:
+                        # add a new rule group
+                        if curr_rule_group is not None:
+                            rule_set.rule_groups.append(curr_rule_group)
+                    break
+            else:
+                # add a new rule set
+                exclusion.exclusion_managed_rule_sets.append(curr_rule_set)
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+# pylint: disable=line-too-long
+def remove_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name,
+                                  rule_set_type, rule_set_version,
+                                  match_variable, selector_match_operator, selector,
+                                  rule_group_name=None):
+    waf_policy = client.get(resource_group_name, policy_name)
+    to_be_deleted = None
+    for exclusion in waf_policy.managed_rules.exclusions:
+        if exclusion.match_variable == match_variable and exclusion.selector_match_operator == selector_match_operator and exclusion.selector == selector:
+            for rule_set in exclusion.exclusion_managed_rule_sets:
+                if rule_group_name is None:
+                    to_be_deleted = rule_set
+                    break
+                rule_group = next((rule_group for rule_group in rule_set.rule_groups if rule_group.rule_group_name == rule_group_name), None)
+                if rule_group is None:
+                    err_msg = f"Rule set group [{rule_group_name}] is not found."
+                    raise ResourceNotFoundError(err_msg)
+                rule_set.rule_groups.remove(rule_group)
+            if to_be_deleted:
+                exclusion.exclusion_managed_rule_sets.remove(to_be_deleted)
+    return client.create_or_update(resource_group_name, policy_name, waf_policy)
+
+
+def list_waf_exclusion_rule_set(cmd, client, resource_group_name, policy_name):
+    waf_policy = client.get(resource_group_name, policy_name)
+    return waf_policy.managed_rules
 # endregion
 
 
