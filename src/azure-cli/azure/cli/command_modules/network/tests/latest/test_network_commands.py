@@ -1954,6 +1954,58 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('exclusions | length(@)', 0)
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_app_gateway_waf_policy_exclusion_rule_set_")
+    def test_network_app_gateway_waf_policy_exclusion_rule_set(self, resource_group):
+        self.kwargs.update({
+            "waf": "agp",
+            "rule_group1": "REQUEST-921-PROTOCOL-ATTACK",
+            "rule_group2": "REQUEST-931-APPLICATION-ATTACK-RFI",
+        })
+        # create a waf-policy
+        self.cmd("network application-gateway waf-policy create -g {rg} -n {waf}")
+        # add an exclusion rule
+        self.cmd("network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} \
+                 --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing")
+        # add one rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group1} --rule-ids 921140 921150",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group1"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "921140"),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[1].ruleId", "921150"),
+            ]
+        )
+        # add another rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group2} --rule-ids 931100",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].rules[0].ruleId", "931100"),
+            ]
+        )
+        # remove the first rule group
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set remove -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 --group-name {rule_group1}"
+        )
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set list -g {rg} --policy-name {waf}",
+            checks=[
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 1),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "931100"),
+            ]
+        )
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
@@ -2881,6 +2933,18 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet}',
                  checks=self.check('name', 'bap2'))
+
+        # update backendpool
+        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} '
+                 '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
+                 '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
+                 '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet}',
+                 checks=[
+                     self.check('loadBalancerBackendAddresses[0].ipAddress', '10.0.0.3'),
+                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
+                     self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5')
+                 ])
+
         self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
