@@ -112,6 +112,3 @@ def load_command_table(self, _):
 
     with self.command_group('backup recoveryconfig', backup_custom_base, client_factory=recovery_points_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('show', 'show_recovery_config')
-
-    with self.command_group('backup', is_preview=True):
-        pass

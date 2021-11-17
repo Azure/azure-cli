@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack~=0.9.0',
     'msal-extensions>=0.3.0,<0.4',
-    'msal>=1.15.0,<2.0.0',
+    'msal>=1.16.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',

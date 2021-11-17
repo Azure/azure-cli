@@ -2836,6 +2836,31 @@ examples:
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
 """
 
+helps['network express-route peering connection ipv6-config'] = """
+type: group
+short-summary: Manage ExpressRoute circuit connection configs.
+"""
+
+helps['network express-route peering connection ipv6-config set'] = """
+type: command
+short-summary: Set connection config to ExpressRoute circuit connection.
+examples:
+  - name: Set connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config set -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125
+"""
+
+helps['network express-route peering connection ipv6-config remove'] = """
+type: command
+short-summary: Remove connection config to ExpressRoute circuit connection.
+examples:
+  - name: Remove connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config remove -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection
+"""
+
 helps['network express-route peering create'] = """
 type: command
 short-summary: Create peering settings for an ExpressRoute circuit.
