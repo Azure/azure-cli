@@ -2083,10 +2083,13 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
+def create_deployment_stack_at_subscription(cmd, name, location, update_behavior, deployment_scope = None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
-        if rcf.deployment_stacks.get_at_subscription(name):
+        get_subscription_response = rcf.deployment_stacks.get_at_subscription(name)
+        if get_subscription_response:
+            if get_subscription_response.location != location:
+                raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             from knack.prompting import prompt_y_n
             confirmation = prompt_y_n("The DeploymentStack {} you're trying to create already exists in the current subscription. Do you want to overwrite it?".format(name))
             if not confirmation:
@@ -2098,7 +2101,6 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     if not deployment_scope:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx)
     else:
-        #Verify this get with Gokul
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_scope
     
     t_spec, t_uri, t_file = None, None, None
@@ -2111,23 +2113,20 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     elif template_uri:
         t_uri = template_uri
     else:
-        # we assume this will end the code
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     if parameters:
         parameters = json.load(open(parameters))
     elif param_uri:
-        #confirm with someone about this
         p_uri = "'" + param_uri + "'"
     
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
+    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
         deployment_stack_model.template_link = deployment_stacks_template_link
     elif t_uri:
-        #need to validate
         deployment_stacks_template_link.uri = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
     else:
@@ -2161,26 +2160,22 @@ def list_deployment_stack_at_subscription(cmd):
 def delete_deployment_stack_at_subscription(cmd, name=None, stack=None):
     if name or stack:
         rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
-        if name:
-            try:
-                rcf.deployment_stacks.get_at_subscription(name)
-            except:
-                raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current subscription scope.")
-            return rcf.deployment_stacks.begin_delete_at_subscription(name)
-        stack_name = stack.split('/')[-1]
+        delete_name = None
         try:
+            if name:
+                delete_name = name
+                rcf.deployment_stacks.get_at_subscription(name)
+            else:
+                stack_name = stack.split('/')[-1]
+                delete_name = stack_name
                 rcf.deployment_stacks.get_at_subscription(stack_name)
         except:
-            raise ResourceNotFoundError("DeploymentStack " + stack_name + " not found in the current subscription scope.")
-        return rcf.deployment_stacks.begin_delete_at_subscription(stack_name)
+            raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
+        return rcf.deployment_stacks.begin_delete_at_subscription(delete_name)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, deployment_scope=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
-    if not deployment_scope:
-        #fix this
-        deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
-    
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
@@ -2201,7 +2196,6 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     elif template_uri:
         t_uri = template_uri
     else:
-        # we assume this will end the code
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
     if parameters:
@@ -2209,18 +2203,16 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     elif param_uri:
         p_uri = param_uri
     
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, update_behavior = update_behavior, deployment_scope = deployment_scope)
+    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, update_behavior = update_behavior)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
         deployment_stack_model.template_link = deployment_stacks_template_link
     elif t_uri:
-        #need to validate
         deployment_stacks_template_link.uri = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
     else:
-        # deployment_stack_model.template = json.load(open(t_file))
         if is_bicep_file(t_file):
             template_content = run_bicep_command(["build", "--stdout", t_file])
             input_content = _remove_comments_from_json(template_content, file_path=t_file)
@@ -2230,9 +2222,6 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
 
         deployment_stack_model.template = input_template
 
-
-    #new code start
-    #need to validate uri
     if p_uri:
         parameters_link = rcf.deployment_stacks.models.DeploymentStacksParametersLink(uri = param_uri)
         deployment_stack_model.parameters_link = parameters_link

@@ -183,12 +183,6 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS
     )
 
-    resource_deploymentstacks_snapshots_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.resource.deploymentstacks.snapshots.operations#ResourceLinksOperations.{}',
-        client_factory=cf_resource_deploymentstacks,
-        resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS
-    )
-
     with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
         g.custom_command('create', 'create_lock')
         g.custom_command('delete', 'delete_lock')
@@ -350,12 +344,12 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_deployment_stack_at_resource_group', confirmation = True)
         g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files)
     
-    with self.command_group('stacks snapshot sub', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+    with self.command_group('stacks snapshot sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_snapshot_at_subscription')
         g.custom_command('list', 'list_deployment_stack_snapshot_at_subscription')
         g.custom_command('delete', 'delete_deployment_stack_snapshot_at_subscription', confirmation = True)
     
-    with self.command_group('stacks snapshot group', resource_deploymentstacks_snapshots_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
+    with self.command_group('stacks snapshot group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
         g.custom_command('show', 'show_deployment_stack_snapshot_at_resource_group')
         g.custom_command('list', 'list_deployment_stack_snapshot_at_resource_group')
         g.custom_command('delete', 'delete_deployment_stack_snapshot_at_resource_group', confirmation = True)

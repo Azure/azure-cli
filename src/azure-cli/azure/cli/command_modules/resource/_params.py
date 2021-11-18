@@ -660,7 +660,6 @@ def load_arguments(self, _):
     with self.argument_context('stacks group create') as c:
         c.argument('name', arg_type=stacks_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
-        c.argument('deployment_scope', arg_type=stacks_deployment_scope_type)
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
