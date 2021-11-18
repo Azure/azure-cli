@@ -1846,12 +1846,12 @@ class AKSContext:
         # validation
         if self.decorator_mode == DecoratorMode.CREATE and attach_acr:
             if self._get_enable_managed_identity(enable_validation=False):
+                # Attach acr operation will be handled after the cluster is created
                 if self.get_no_wait():
                     raise MutuallyExclusiveArgumentError(
                         "When --attach-acr and --enable-managed-identity are both specified, "
                         "--no-wait is not allowed, please wait until the whole operation succeeds."
                     )
-                    # Attach acr operation will be handled after the cluster is created
             else:
                 # newly added check, check whether client_id exists before creating role assignment
                 service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
