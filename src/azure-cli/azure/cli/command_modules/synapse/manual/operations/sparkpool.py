@@ -36,16 +36,17 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
     big_data_pool_info.auto_pause = AutoPauseProperties(enabled=enable_auto_pause,
                                                         delay_in_minutes=delay)
 
-    filename = Path(spark_config_file_path).stem
-    try:
-        with open(spark_config_file_path, 'r') as stream:
-            content = stream.read()
-    except:
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        err_msg = 'Spark config file path is invalid'
-        raise InvalidArgumentValueError(err_msg)
-    big_data_pool_info.spark_config_properties = SparkConfigProperties(content=content,
-                                                                       filename=filename)
+    if spark_config_file_path:
+        filename = Path(spark_config_file_path).stem
+        try:
+            with open(spark_config_file_path, 'r') as stream:
+                content = stream.read()
+        except:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            err_msg = 'Spark config file path is invalid'
+            raise InvalidArgumentValueError(err_msg)
+        big_data_pool_info.spark_config_properties = SparkConfigProperties(content=content,
+                                                                           filename=filename)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, workspace_name, spark_pool_name,
                        big_data_pool_info)
