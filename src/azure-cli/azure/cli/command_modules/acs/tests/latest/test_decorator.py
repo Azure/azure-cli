@@ -1641,7 +1641,19 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        ctx_4.get_attach_acr()
+        self.assertEqual(ctx_4.get_attach_acr(), "test_attach_acr")
+
+        # custom value
+        ctx_5 = AKSContext(
+            self.cmd,
+            {
+                "attach_acr": "test_attach_acr",
+                "enable_managed_identity": True,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_5.get_attach_acr(), "test_attach_acr")
 
     def test_get_detach_acr(self):
         # default
