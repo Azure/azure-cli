@@ -1954,18 +1954,20 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if self.decorator_mode == DecoratorMode.CREATE and attach_acr:
-            if self._get_enable_managed_identity(enable_validation=False) and self.get_no_wait():
-                raise MutuallyExclusiveArgumentError(
-                    "When --attach-acr and --enable-managed-identity are both specified, "
-                    "--no-wait is not allowed, please wait until the whole operation succeeds."
-                )
-                # Attach acr operation will be handled after the cluster is created
-            # newly added check, check whether client_id exists before creating role assignment
-            service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
-            if not service_principal:
-                raise RequiredArgumentMissingError(
-                    "No service principal provided to create the acrpull role assignment for acr."
-                )
+            if self._get_enable_managed_identity(enable_validation=False):
+                if self.get_no_wait():
+                    raise MutuallyExclusiveArgumentError(
+                        "When --attach-acr and --enable-managed-identity are both specified, "
+                        "--no-wait is not allowed, please wait until the whole operation succeeds."
+                    )
+                    # Attach acr operation will be handled after the cluster is created
+            else:
+                # newly added check, check whether client_id exists before creating role assignment
+                service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+                if not service_principal:
+                    raise RequiredArgumentMissingError(
+                        "No service principal provided to create the acrpull role assignment for acr."
+                    )
         return attach_acr
 
     def get_detach_acr(self) -> Union[str, None]:
