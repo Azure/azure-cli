@@ -8,6 +8,7 @@
 
 import json
 import sys
+import time
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
@@ -60,13 +61,21 @@ class SecretStore:
         with CrossPlatLock(self._lock_file):
             self._persistence.save(json.dumps(content, indent=4))
 
+    def _load(self):
+        try:
+            return json.loads(self._persistence.load())
+        except PersistenceNotFound:
+            return []
+
     def load(self):
-        with CrossPlatLock(self._lock_file):
+        # Use optimistic locking rather than CrossPlatLock, so that multiple processes can
+        # read the same file at the same time.
+        retry = 3
+        for attempt in range(1, retry + 1):
             try:
-                return json.loads(self._persistence.load())
-            except PersistenceNotFound:
-                return []
-            except Exception as ex:
-                raise CLIError("Failed to load token files. If you can reproduce, please log an issue at "
-                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
-                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+                return self._load()
+            except Exception:  # pylint: disable=broad-except
+                # Presumably other processes are writing the file, causing dirty read
+                logger.debug(f"Unable to load token cache file in No. {attempt} attempt")
+                time.sleep(0.5)
+        raise RuntimeError(f"Unable to load token cache file in {retry} attempts")
