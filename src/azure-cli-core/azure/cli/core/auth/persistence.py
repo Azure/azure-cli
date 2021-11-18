@@ -14,7 +14,6 @@ from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersiste
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
 from msal_extensions.persistence import PersistenceNotFound
 
-from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -76,6 +75,6 @@ class SecretStore:
                 return self._load()
             except Exception:  # pylint: disable=broad-except
                 # Presumably other processes are writing the file, causing dirty read
-                logger.debug(f"Unable to load token cache file in No. {attempt} attempt")
+                logger.debug("Unable to load token cache file in No. %d attempt", attempt)
                 time.sleep(0.5)
         raise RuntimeError(f"Unable to load token cache file in {retry} attempts")
