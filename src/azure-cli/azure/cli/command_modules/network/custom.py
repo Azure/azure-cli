@@ -3624,8 +3624,9 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
 
 
 def create_lb_inbound_nat_rule(
-        cmd, resource_group_name, load_balancer_name, item_name, protocol, frontend_port,
-        backend_port, frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
+        frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
+        frontend_port_range_start=None, frontend_port_range_end=None):
     InboundNatRule = cmd.get_models('InboundNatRule')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
@@ -3639,6 +3640,10 @@ def create_lb_inbound_nat_rule(
         enable_floating_ip=floating_ip,
         idle_timeout_in_minutes=idle_timeout,
         enable_tcp_reset=enable_tcp_reset)
+    if frontend_port_range_end and cmd.supported_api_version('2021-03-01'):
+        new_rule.frontend_port_range_end = frontend_port_range_end
+    if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
+        new_rule.frontend_port_range_start = frontend_port_range_start
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)
@@ -3661,13 +3666,18 @@ def lb_get_operation(lb):
 
 def set_lb_inbound_nat_rule(
         cmd, instance, parent, item_name, protocol=None, frontend_port=None,
-        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+        frontend_ip_name=None, backend_port=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
+        frontend_port_range_start=None, frontend_port_range_end=None):
     if frontend_ip_name:
         instance.frontend_ip_configuration = \
             get_property(parent.frontend_ip_configurations, frontend_ip_name)
 
     if enable_tcp_reset is not None:
         instance.enable_tcp_reset = enable_tcp_reset
+    if frontend_port_range_start is not None and cmd.supported_api_version('2021-03-01'):
+        instance.frontend_port_range_start = frontend_port_range_start
+    if frontend_port_range_end is not None and cmd.supported_api_version('2021-03-01'):
+        instance.frontend_port_range_end = frontend_port_range_end
 
     with cmd.update_context(instance) as c:
         c.set_param('protocol', protocol)
