@@ -7190,11 +7190,19 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('supportedCapabilities.acceleratedNetwork', True)
         ])
 
-    # TODO
-    # @ResourceGroupPreparer(name_prefix='cli_test_completion_percent')
-    # def test_completion_percent(self, resource_group):
-    #     pass
-
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent2_', location='eastus', key='rg2')
+    def test_completion_percent(self, resource_group):
+        # Create a random empty disk
+        self.cmd('disk create -g {rg} -n disk1 --size-gb 200 -l westus')
+        # Create a snapshot A from a empty disk with createOption as "Copy"
+        self.kwargs['source'] = self.cmd('snapshot create -g {rg} -n snapa --source disk1 -l westus --incremental true').get_output_in_json()['id']
+        # Create a snapshot B in different region with createOption as "CopyStart" with snapshot A as source
+        self.cmd('snapshot create -g {rg2} -n snapb --copy-start true --incremental true --source {source} -l eastus')
+        # show snapshot B, check completionPercent
+        self.cmd('snapshot show -g {rg2} -n snapb', checks=[
+            self.check_pattern('completionPercent', '\d?.\d?')
+        ])
 
 if __name__ == '__main__':
     unittest.main()
