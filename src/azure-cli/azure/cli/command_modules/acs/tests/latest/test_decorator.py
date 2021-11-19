@@ -263,6 +263,18 @@ class AKSParamDictTestCase(unittest.TestCase):
         param_dict = AKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
 
+    def test_keys(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.keys()), ["abc"])
+
+    def test_values(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.values()), ["xyz"])
+
+    def test_items(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.items()), [("abc", "xyz")])
+
     def test_print_usage_statistics(self):
         param_dict = AKSParamDict({"abc": "xyz", "def": 100})
         param_dict.print_usage_statistics()
@@ -7541,7 +7553,96 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
     def test_update_default_mc_profile(self):
-        pass
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_update
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_update).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "name",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "name": "test_name",
+        }
+        raw_param_dict.update(optional_params)
+        raw_param_dict = AKSParamDict(raw_param_dict)
+
+        # default value in `update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
+        mock_existing_mc = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[self.models.ManagedClusterAgentPoolProfile(
+                name="nodepool1",
+            )],
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+            ),
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            identity_profile={
+                'kubeletidentity': self.models.UserAssignedIdentity(
+                    resource_id="test_resource_id",
+                    client_id="test_client_id",
+                    object_id="test_object_id",
+                )
+            },
+            windows_profile="fake_windows_profile",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch("azure.cli.command_modules.acs.decorator.AKSUpdateDecorator.check_raw_parameters", return_value=True), patch.object(self.client, "get", return_value=mock_existing_mc):
+            dec_mc_1 = dec_1.update_default_mc_profile()
+
+        ground_truth_agent_pool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
+            name="nodepool1",
+        )
+        ground_truth_network_profile_1 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku="standard",
+        )
+        ground_truth_identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
+        ground_truth_identity_profile_1 = {
+            'kubeletidentity': self.models.UserAssignedIdentity(
+                resource_id="test_resource_id",
+                client_id="test_client_id",
+                object_id="test_object_id",
+            )
+        }
+        ground_truth_windows_profile_1 = "fake_windows_profile"
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agent_pool_profile_1],
+            network_profile=ground_truth_network_profile_1,
+            identity=ground_truth_identity_1,
+            identity_profile=ground_truth_identity_profile_1,
+            windows_profile=ground_truth_windows_profile_1,
+        )
+        raw_param_dict.print_usage_statistics()
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_update_mc(self):
         pass
