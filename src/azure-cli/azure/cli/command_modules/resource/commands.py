@@ -57,6 +57,19 @@ def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [transform_deployment(r) for r in sort_list]
 
+def transform_stacks(result):
+    r = result
+    return OrderedDict([('Name', r['name']),
+                        ('State', r['provisioningState']),
+                        ('Last Modified', r['systemData']['lastModifiedAt']),
+                        ('Id', r['id'])])
+
+def transform_stacks_list(result):
+    transformed = []
+    for r in result:
+        res = OrderedDict([('Name', r['name']),('State', r['provisioningState']), ('Last Modified', r['systemData']['lastModifiedAt']), ('Id', r['id'])])
+        transformed.append(res)
+    return transformed
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
@@ -333,25 +346,25 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_template_spec', validator=_validate_template_spec, confirmation=True)
     
     with self.command_group('stacks sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_subscription')
-        g.custom_command('list', 'list_deployment_stack_at_subscription')
+        g.custom_command('show', 'show_deployment_stack_at_subscription', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_at_subscription', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_subscription', confirmation = True)
-        g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files)
+        g.custom_command('create', 'create_deployment_stack_at_subscription', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
 
     with self.command_group('stacks group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_at_resource_group')
-        g.custom_command('list', 'list_deployment_stack_at_resource_group')
+        g.custom_command('show', 'show_deployment_stack_at_resource_group', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_at_resource_group', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_at_resource_group', confirmation = True)
-        g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files)
+        g.custom_command('create', 'create_deployment_stack_at_resource_group', validator=validate_deployment_stack_files, table_transformer=transform_stacks)
     
     with self.command_group('stacks snapshot sub', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_snapshot_at_subscription')
-        g.custom_command('list', 'list_deployment_stack_snapshot_at_subscription')
+        g.custom_command('show', 'show_deployment_stack_snapshot_at_subscription', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_snapshot_at_subscription', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_snapshot_at_subscription', confirmation = True)
     
     with self.command_group('stacks snapshot group', resource_deploymentstacks_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS) as g:
-        g.custom_command('show', 'show_deployment_stack_snapshot_at_resource_group')
-        g.custom_command('list', 'list_deployment_stack_snapshot_at_resource_group')
+        g.custom_command('show', 'show_deployment_stack_snapshot_at_resource_group', table_transformer=transform_stacks)
+        g.custom_command('list', 'list_deployment_stack_snapshot_at_resource_group', table_transformer=transform_stacks_list)
         g.custom_command('delete', 'delete_deployment_stack_snapshot_at_resource_group', confirmation = True)
     
     # az deployment group
