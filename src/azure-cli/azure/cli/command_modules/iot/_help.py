@@ -862,10 +862,10 @@ long-summary: |
 examples:
   - name: Create an IoT Central application in the region of the resource group using the default pricing SKU.
     text: >
-        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates
-  - name: Create an IoT Central application the in the 'United States' region with the 'ST1' pricing plan and an industry template.
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app
+  - name: Create an IoT Central application the in the 'East US' region with the 'ST1' pricing plan and an industry template.
     text: >
-        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates -p ST1 -t iotc-distribution
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l eastus -p ST1 -t iotc-distribution
 """
 
 helps['iot central app delete'] = """
