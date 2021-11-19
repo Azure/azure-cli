@@ -8,7 +8,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, validate_vnet_integration, validate_asp_create
+from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
+                          validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create)
 
 
 def output_slots_in_table(slots):
@@ -366,7 +367,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
-        g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp_app_service_plan',
+                         exception_handler=ex_handler_factory(creating_plan=True),
+                         validator=validate_functionapp_asp_create)
         g.generic_update_command('update', setter_name='begin_create_or_update',
                                  custom_func_name='update_functionapp_app_service_plan',
                                  setter_arg_name='app_service_plan', exception_handler=ex_handler_factory())
