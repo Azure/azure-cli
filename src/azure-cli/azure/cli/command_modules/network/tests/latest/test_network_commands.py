@@ -2858,6 +2858,20 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb inbound-nat-rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules_v2', location='eastus2')
+    def test_network_lb_nat_rules_v2(self, resource_group):
+        self.kwargs['lb'] = 'lb1'
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp  --backend-port 3 '
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3', checks=[
+                 self.check('name', 'rule3'),
+                 self.check('frontendPortRangeStart', 0),
+                 self.check('frontendPortRangeEnd', 3)])
+        self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule3 --floating-ip true --idle-timeout 10 --frontend-port-range-end 5',
+                 checks=self.check('frontendPortRangeEnd', 5))
+        self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools', location='eastus2')
     def test_network_lb_nat_pools(self, resource_group):
 
