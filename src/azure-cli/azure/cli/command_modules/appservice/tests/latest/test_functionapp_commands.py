@@ -588,7 +588,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime dotnet-isolated --functions-version 3'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --runtime dotnet-isolated --functions-version 3 --runtime-version 5.0'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -598,8 +598,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'dotnet-isolated')])
 
-        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('netFrameworkVersion', 'v5.0')])
+        print(self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).json_value)
+        0/0
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
