@@ -995,7 +995,7 @@ class SynapseScenarioTests(ScenarioTest):
             'database': self.create_random_name(prefix='testdtabase', length=15),
             'scriptName': self.create_random_name(prefix='scriptname', length=15),
             'scriptName2': self.create_random_name(prefix='scriptname2', length=15),
-            'fileName': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'kqlScript.txt')
+            'fileName': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'kqlScript.kql')
         })
 
         # create a workspace
@@ -1066,6 +1066,10 @@ class SynapseScenarioTests(ScenarioTest):
                  checks=[
                      self.check("resourceGroup", self.kwargs['rg'], case_sensitive=False),
                      self.check("name", self.kwargs['scriptName2'], case_sensitive=False),
+                     self.check("properties.content.currentConnection.poolName", self.kwargs['kustoPool'],
+                                case_sensitive=False),
+                     self.check("properties.content.currentConnection.databaseName", self.kwargs['database'],
+                                case_sensitive=False),
                      self.check("type", "Microsoft.Synapse/workspaces/kqlscripts", case_sensitive=False),
                  ])
 

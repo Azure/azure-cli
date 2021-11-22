@@ -2143,7 +2143,7 @@ helps['synapse kql-script'] = """
 
 helps['synapse kql-script show'] = """
     type: command
-    short-summary: "Gets a KQL scripts."
+    short-summary: "Gets a KQL script."
     examples:
       - name: KustoScriptsGet
         text: |-
@@ -2152,7 +2152,7 @@ helps['synapse kql-script show'] = """
 
 helps['synapse kql-script list'] = """
     type: command
-    short-summary: "list KQL scripts."
+    short-summary: "List KQL scripts."
     examples:
       - name: KustoScriptsList
         text: |-
@@ -2172,7 +2172,7 @@ helps['synapse kql-script create'] = """
 
 helps['synapse kql-script import'] = """
     type: command
-    short-summary: "Creates a KQL scripts."
+    short-summary: "Creates a KQL script."
     examples:
       - name: KustoScriptsCreateOrUpdate
         text: |-
@@ -2183,7 +2183,7 @@ helps['synapse kql-script import'] = """
 
 helps['synapse kql-script export'] = """
     type: command
-    short-summary: "export a KQL scripts."
+    short-summary: "Export KQL scripts."
     examples:
       - name: KustoScriptsExport
         text: |-
@@ -2192,7 +2192,7 @@ helps['synapse kql-script export'] = """
 
 helps['synapse kql-script delete'] = """
     type: command
-    short-summary: "Deletes a KQL scripts"
+    short-summary: "Deletes a KQL script"
     examples:
       - name: KustoScriptsDelete
         text: |-
