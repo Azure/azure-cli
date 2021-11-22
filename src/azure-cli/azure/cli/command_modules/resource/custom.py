@@ -2290,10 +2290,15 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
 def _build_identities_info(cmd, identities):
     identities = identities or []
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
     identity_type = ResourceIdentityType.none
     if not identities or MSI_LOCAL_ID in identities:
-        identity_type = ResourceIdentityType.system_assigned
-    ResourceIdentity = cmd.get_models('Identity')
+        return ResourceIdentity(type=ResourceIdentityType.system_assigned)
+
+    user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if user_assigned_identities:
+        return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=user_assigned_identities)
+
     return ResourceIdentity(type=identity_type)
 
 
@@ -2438,16 +2443,18 @@ def _is_non_compliance_message_equivalent(first, second):
     return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
 
 
-def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+def set_identity(cmd, name, scope=None, resource_group_name=None, assign_identity=None, identity_role='Contributor', identity_scope=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    if assign_identity is None:
+        assign_identity = [MSI_LOCAL_ID]
 
     def getter():
         return policy_client.policy_assignments.get(scope, name)
 
     def setter(policyAssignment):
-        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        policyAssignment.identity = _build_identities_info(cmd, assign_identity)
         return policy_client.policy_assignments.create(scope, name, policyAssignment)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper

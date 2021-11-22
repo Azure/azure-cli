@@ -210,12 +210,47 @@ def validate_metadata(namespace):
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
 
 
-def validate_msi(namespace):
-    if namespace.assign_identity is not None:
+def process_assign_identity_namespace(cmd, namespace):
+    validate_msi(cmd, namespace, from_set_command=True)
+
+
+def process_assignment_create_namespace(cmd, namespace):
+    validate_msi(cmd, namespace)
+
+
+def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if is_valid_resource_id(val):
+        return val
+
+    kwargs = {
+        'name': val,
+        'resource_group': resource_group,
+        'namespace': resource_namespace,
+        'type': resource_type,
+        'subscription': get_subscription_id(cli_ctx)
+    }
+    missing_kwargs = {k: v for k, v in kwargs.items() if not v}
+
+    return resource_id(**kwargs) if not missing_kwargs else None
+
+
+def validate_msi(cmd, namespace, from_set_command=False):
+    if from_set_command or namespace.assign_identity is not None:
         identities = namespace.assign_identity or []
-        if any(identity != MSI_LOCAL_ID for identity in identities):
-            raise CLIError("usage error: 'User assigned identities are not supported "
-                           "with --assign-identity and policy assignments'")
+        user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+        if user_assigned_identities and not cmd.supported_api_version(min_api='2021-06-01'):
+            raise CLIError('usage error: user assigned identity is only available under profile '
+                           'with minimum Authorization API version of 2021-06-01')
+
+        if len(identities) > 1:
+            raise CLIError('usage error: only one type of managed identity is allowed')
+
+        for i, _ in enumerate(identities):
+            if identities[i] != MSI_LOCAL_ID:
+                identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
+                                                 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
 
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
             raise CLIError("usage error: '--role {}' is not applicable as the '--identity-scope' is not provided"
