@@ -5769,6 +5769,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('disableLocalAccounts', False)
         ])
 
+         # update to disable local accounts
+        self.cmd('aks update --resource-group={resource_group} --name={name} --disable-local-accounts', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('disableLocalAccounts', True)
+        ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
