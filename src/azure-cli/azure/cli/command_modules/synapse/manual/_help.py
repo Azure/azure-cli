@@ -2198,3 +2198,8 @@ helps['synapse kql-script delete'] = """
         text: |-
                az synapse kql-script delete --workspace-name "kustoWorkspaceName" --name "kustoScript1"
 """
+
+helps['synapse kql-script wait'] = """
+    type: command
+    short-summary: "Place the CLI in a waiting state until a condition of a KQL script is met."
+"""

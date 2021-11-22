@@ -6,9 +6,7 @@
 from azure.cli.core.util import sdk_no_wait, read_file_content, CLIError
 from .._client_factory import cf_synapse_client_workspace_factory, cf_kusto_script, cf_kusto_scripts
 from azure.synapse.artifacts.models import KqlScriptResource, KqlScript, KqlScriptContent, KqlScriptContentMetadata, KqlScriptContentCurrentConnection
-from azure.cli.core.commands.client_factory import get_subscription_id
 import os
-import json
 
 
 # Synapse kustopool
@@ -173,7 +171,7 @@ def synapse_kusto_script_create(cmd,
     query = read_file_content(definition_file)
     metadata = KqlScriptContentMetadata(language="kql")
     current_connection = KqlScriptContentCurrentConnection(pool_name=kusto_pool_name,
-                                                         database_name=kusto_database_name)
+                                                           database_name=kusto_database_name)
     script_content = KqlScriptContent(query=query, metadata=metadata, current_connection=current_connection)
     properties = KqlScript(content=script_content)
     kql_script = KqlScriptResource(name=script_name, properties=properties)
