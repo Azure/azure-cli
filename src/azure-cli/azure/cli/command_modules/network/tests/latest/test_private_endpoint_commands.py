@@ -2472,6 +2472,10 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.assertEqual(redis['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
 
         self.kwargs['red_pec_id'] = redis['privateEndpointConnections'][0]['id']
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '1'),
+        ])
         
         self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
 
@@ -2479,6 +2483,10 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '0'),
+        ])
 
 
 class AzureWebPubSubServicePrivateEndpointScenarioTest(ScenarioTest):
