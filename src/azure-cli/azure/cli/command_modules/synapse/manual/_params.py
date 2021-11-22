@@ -1042,9 +1042,9 @@ def load_arguments(self, _):
 
     for scope in ['import', 'create']:
         with self.argument_context('synapse kql-script ' + scope) as c:
-            c.argument('workspace_name', type=str, help='The name of the workspace')
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
             c.argument('kusto_pool_name', type=str, help='The name of the Kusto pool.')
-            c.argument('kusto_database_name', type=str, help='The name of the Kusto database.')
+            c.argument('kusto_database_name', type=str, help='The name of the Kust o database.')
             c.argument('script_name', arg_type=name_type,
                        help='The name of the KQL script.')
             c.argument('definition_file', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -1052,14 +1052,14 @@ def load_arguments(self, _):
 
     for scope in ['show', 'wait', 'delete']:
         with self.argument_context('synapse kql-script '+ scope) as c:
-            c.argument('workspace_name', type=str, help='The name of the workspace')
-            c.argument('script_name', type=str,
-                        help='The name of the Kusto database script.')
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('script_name', arg_type=name_type,
+                        help='The name of the KQL scripts.')
 
     with self.argument_context('synapse kql-script list') as c:
-        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
 
     with self.argument_context('synapse kql-script export') as c:
-        c.argument('workspace_name', type=str, help='The name of the workspace')
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
-        c.argument('script_name', type=str, help='The name of the Kusto database script.')
+        c.argument('script_name', arg_type=name_type, help='The name of the KQL scripts.')

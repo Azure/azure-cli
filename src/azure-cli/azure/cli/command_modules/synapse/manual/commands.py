@@ -553,11 +553,12 @@ def load_command_table(self, _):
         g.custom_command('remove-language-extension', 'synapse_kusto_pool_remove_language_extension', supports_no_wait=True)
 
     with self.command_group('synapse kql-script', command_type=synapse_kusto_script_sdk,
-                            custom_command_type=get_custom_sdk('kustopool', cf_kusto_script)) as g:
+                            custom_command_type=get_custom_sdk('kustopool', cf_kusto_script),
+                            client_factory=cf_kusto_script) as g:
         g.custom_show_command('show', 'synapse_kusto_script_show')
         g.custom_command('create', 'synapse_kusto_script_create', supports_no_wait=True)
         g.custom_command('import', 'synapse_kusto_script_create', supports_no_wait=True)
         g.custom_command('delete', 'synapse_kusto_script_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('list', 'synapse_kusto_script_list', supports_no_wait=True)
-        g.custom_command('export', 'synapse_kusto_script_export', supports_no_wait=True)
+        g.custom_command('list', 'synapse_kusto_script_list')
+        g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')

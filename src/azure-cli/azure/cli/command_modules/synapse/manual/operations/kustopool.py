@@ -10,6 +10,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 import os
 import json
 
+
 # Synapse kustopool
 def synapse_kusto_pool_create(cmd,
                               client,
@@ -162,20 +163,20 @@ def synapse_kusto_script_show(cmd,
 def synapse_kusto_script_create(cmd,
                                 resource_group_name,
                                 workspace_name,
-                                kusto_pool_name,
-                                kusto_database_name,
                                 script_name,
                                 definition_file,
+                                kusto_pool_name=None,
+                                kusto_database_name=None,
                                 no_wait=False):
 
     client = cf_kusto_script(cmd.cli_ctx, workspace_name)
     query = read_file_content(definition_file)
     metadata = KqlScriptContentMetadata(language = "kql")
-    current_connection=KqlScriptContentCurrentConnection(name=script_name, pool_name=kusto_pool_name,
-                                                         database_name=kusto_pool_name)
+    current_connection=KqlScriptContentCurrentConnection(pool_name=kusto_pool_name,
+                                                         database_name=kusto_database_name)
     script_content = KqlScriptContent(query=query,metadata=metadata,current_connection=current_connection)
     properties = KqlScript(content=script_content)
-    kql_script = KqlScriptResource(id='', type='', name=script_name, properties=properties)
+    kql_script = KqlScriptResource(name=script_name, properties=properties)
     return sdk_no_wait(no_wait,
                        client.begin_create_or_update,
                        kql_script_name=script_name,
@@ -222,6 +223,6 @@ def write_to_file(kql_script, path):
         if hasattr(kql_script.properties.content, 'query'):
             query = kql_script.properties.content.query;
         with open(path, 'w') as f:
-            json.dump(query, f, indent=4)
+            f.write(query)
     except IOError:
         raise CLIError('Unable to export to file: {}'.format(path))

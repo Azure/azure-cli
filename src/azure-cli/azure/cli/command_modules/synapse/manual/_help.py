@@ -2136,65 +2136,65 @@ helps['synapse kusto'] = """
     short-summary: "Manage synapse kusto"
 """
 
-helps['kql-script'] = """
+helps['synapse kql-script'] = """
     type: group
     short-summary: Manage script with kusto
 """
 
-helps['kql-script show'] = """
+helps['synapse kql-script show'] = """
     type: command
-    short-summary: "Gets a Kusto pool script."
+    short-summary: "Gets a KQL scripts."
     examples:
       - name: KustoScriptsGet
         text: |-
                az synapse kql-script show --workspace-name "kustoWorkspaceName" --name "kustoScript1"
 """
 
-helps['kql-script list'] = """
+helps['synapse kql-script list'] = """
     type: command
-    short-summary: "list a Kusto pool script."
+    short-summary: "list KQL scripts."
     examples:
       - name: KustoScriptsList
         text: |-
                az synapse kql-script list --workspace-name "kustoWorkspaceName"
 """
 
-helps['kql-script create'] = """
+helps['synapse kql-script create'] = """
     type: command
-    short-summary: "Creates a Kusto pool script."
+    short-summary: "Creates a KQL script."
     examples:
       - name: KustoScriptsCreateOrUpdate
         text: |-
                az synapse kql-script create --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
-               --kusto-pool-name kustopooltest --kusto-database kustodbtest --file C:\\samples\\KqlScript.kql 
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql 
                --name "kustoScript1"
 """
 
-helps['kql-script import'] = """
+helps['synapse kql-script import'] = """
     type: command
-    short-summary: "Creates a Kusto pool script."
+    short-summary: "Creates a KQL scripts."
     examples:
       - name: KustoScriptsCreateOrUpdate
         text: |-
                az synapse kql-script import --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
-               --kusto-pool-name kustopooltest --kusto-database kustodbtest --file C:\\samples\\KqlScript.kql 
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql 
                --name "kustoScript1"
 """
 
-helps['kql-script export'] = """
+helps['synapse kql-script export'] = """
     type: command
-    short-summary: "export a Kusto pool script."
+    short-summary: "export a KQL scripts."
     examples:
       - name: KustoScriptsExport
         text: |-
                az synapse kql-script export --workspace-name "kustoWorkspaceName" --output-folder "C:\\KqlScirpt"
 """
 
-helps['kql-script delete'] = """
+helps['synapse kql-script delete'] = """
     type: command
-    short-summary: "Deletes a Kusto pool script"
+    short-summary: "Deletes a KQL scripts"
     examples:
       - name: KustoScriptsDelete
         text: |-
-               az synapse kql-script delete --workspace-name "kustoWorkspaceName" --script-name "kustoScript1"
+               az synapse kql-script delete --workspace-name "kustoWorkspaceName" --name "kustoScript1"
 """
