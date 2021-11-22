@@ -935,7 +935,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(aux_tokens[0].token, MOCK_ACCESS_TOKEN)
 
         # test input aux_tenants and aux_subscriptions
-        with self.assertRaisesRegexp(CLIError,
+        with self.assertRaisesRegex(CLIError,
                                      "Please specify only one of aux_subscriptions and aux_tenants, not both"):
             cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id1,
                                                                      aux_subscriptions=[test_subscription_id2],
@@ -1164,7 +1164,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for MSI account
-        with self.assertRaisesRegexp(CLIError, "Tenant shouldn't be specified"):
+        with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
@@ -1211,7 +1211,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for Cloud Shell account
-        with self.assertRaisesRegexp(CLIError, 'Cloud Shell'):
+        with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
