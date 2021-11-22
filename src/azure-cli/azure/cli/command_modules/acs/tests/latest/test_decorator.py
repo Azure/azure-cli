@@ -6962,9 +6962,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
         )
         dec_1.context.attach_mc(mc_1)
-        # fail on incomplete mc object (no windows profile)
-        with self.assertRaises(UnknownError):
-            dec_1.update_windows_profile(mc_1)
+        dec_mc_1 = dec_1.update_windows_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         # custom value
         dec_2 = AKSUpdateDecorator(
@@ -7035,6 +7037,25 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             windows_profile=ground_truth_windows_profile_3,
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # custom value
+        dec_4 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_ahub": True,
+                "disable_ahub": False,
+                "windows_admin_password": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_4.context.attach_mc(mc_4)
+        # fail on incomplete mc object (no windows profile)
+        with self.assertRaises(UnknownError):
+            dec_4.update_windows_profile(mc_4)
 
     def test_update_aad_profile(self):
         # default value in `aks_update`
@@ -7635,7 +7656,6 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                     object_id="test_object_id",
                 )
             },
-            windows_profile="fake_windows_profile",
         )
         with patch(
             "azure.cli.command_modules.acs.decorator._get_rg_location",
@@ -7671,14 +7691,12 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 object_id="test_object_id",
             )
         }
-        ground_truth_windows_profile_1 = "fake_windows_profile"
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
             agent_pool_profiles=[ground_truth_agent_pool_profile_1],
             network_profile=ground_truth_network_profile_1,
             identity=ground_truth_identity_1,
             identity_profile=ground_truth_identity_profile_1,
-            windows_profile=ground_truth_windows_profile_1,
         )
         raw_param_dict.print_usage_statistics()
         self.assertEqual(dec_mc_1, ground_truth_mc_1)

@@ -5627,14 +5627,15 @@ class AKSUpdateDecorator:
         """
         self._ensure_mc(mc)
 
-        if not mc.windows_profile:
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+
+        if any([enable_ahub, disable_ahub, windows_admin_password]) and not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
 
-        enable_ahub = self.context.get_enable_ahub()
-        disable_ahub = self.context.get_disable_ahub()
-        windows_admin_password = self.context.get_windows_admin_password()
         if enable_ahub:
             mc.windows_profile.license_type = 'Windows_Server'
         if disable_ahub:
