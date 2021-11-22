@@ -5616,7 +5616,6 @@ class AKSUpdateDecorator:
         """
         self._ensure_mc(mc)
 
-        # TODO: discuss whether we need to create one if not exist
         if not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
@@ -5880,7 +5879,7 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
-        self._ensure_mc()
+        self._ensure_mc(mc)
 
         return _put_managed_cluster_ensuring_permission(
             self.cmd,
