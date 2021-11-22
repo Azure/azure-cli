@@ -7593,15 +7593,17 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         )
         mock_existing_mc = self.models.ManagedCluster(
             location="test_location",
-            agent_pool_profiles=[self.models.ManagedClusterAgentPoolProfile(
-                name="nodepool1",
-            )],
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                )
+            ],
             network_profile=self.models.ContainerServiceNetworkProfile(
                 load_balancer_sku="standard",
             ),
             identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
             identity_profile={
-                'kubeletidentity': self.models.UserAssignedIdentity(
+                "kubeletidentity": self.models.UserAssignedIdentity(
                     resource_id="test_resource_id",
                     client_id="test_client_id",
                     object_id="test_object_id",
@@ -7615,18 +7617,29 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         ), patch(
             "azure.cli.command_modules.acs.decorator.Profile",
             return_value=mock_profile,
-        ), patch("azure.cli.command_modules.acs.decorator.AKSUpdateDecorator.check_raw_parameters", return_value=True), patch.object(self.client, "get", return_value=mock_existing_mc):
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.AKSUpdateDecorator.check_raw_parameters",
+            return_value=True,
+        ), patch.object(
+            self.client, "get", return_value=mock_existing_mc
+        ):
             dec_mc_1 = dec_1.update_default_mc_profile()
 
-        ground_truth_agent_pool_profile_1 = self.models.ManagedClusterAgentPoolProfile(
-            name="nodepool1",
+        ground_truth_agent_pool_profile_1 = (
+            self.models.ManagedClusterAgentPoolProfile(
+                name="nodepool1",
+            )
         )
-        ground_truth_network_profile_1 = self.models.ContainerServiceNetworkProfile(
-            load_balancer_sku="standard",
+        ground_truth_network_profile_1 = (
+            self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+            )
         )
-        ground_truth_identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
+        ground_truth_identity_1 = self.models.ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
         ground_truth_identity_profile_1 = {
-            'kubeletidentity': self.models.UserAssignedIdentity(
+            "kubeletidentity": self.models.UserAssignedIdentity(
                 resource_id="test_resource_id",
                 client_id="test_client_id",
                 object_id="test_object_id",

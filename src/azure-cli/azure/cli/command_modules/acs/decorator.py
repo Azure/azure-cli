@@ -5820,6 +5820,8 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
+        self._ensure_mc(mc)
+
         nodepool_labels = self.context.get_nodepool_labels()
         if nodepool_labels is not None:
             for agent_profile in mc.agent_pool_profiles:
