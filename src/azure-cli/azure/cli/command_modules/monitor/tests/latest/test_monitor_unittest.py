@@ -143,11 +143,11 @@ class MonitorMetricAlertActionTest(unittest.TestCase):
         self.check_condition(ns, 'Average', 'ns', 'foo/bar_doo', 'GreaterThan', '90', None)
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg blah"what > 90')
 
         ns = self._build_namespace()
-        with self.assertRaisesRegexp(CLIError, 'usage error: --condition'):
+        with self.assertRaisesRegex(CLIError, 'usage error: --condition'):
             self.call_condition(ns, 'avg Wra!!ga * woo')
 
         ns = self._build_namespace()

@@ -310,7 +310,7 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace show -g {rg} -n {name}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_saved_search', location='eastus')
@@ -374,7 +374,7 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
 
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
@@ -417,22 +417,22 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+        with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpResponseError, 'Table ABC does not exist in the workspace'):
+        with self.assertRaisesRegex(HttpResponseError, 'Table ABC does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+        with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
@@ -469,5 +469,5 @@ class TestLogProfileScenarios(ScenarioTest):
             ])
 
         self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
