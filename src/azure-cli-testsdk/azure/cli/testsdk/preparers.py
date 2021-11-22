@@ -201,8 +201,8 @@ class CommunicationResourcePreparer(NoTrafficRecordingPreparer, SingleValueRepla
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
-            template = 'To create a storage account a resource group is required. Please add ' \
-                       'decorator @{} in front of this storage account preparer.'
+            template = 'To create a communication resource a resource group is required. Please add ' \
+                       'decorator @{} in front of this communication resource preparer.'
             raise CliTestError(template.format(ResourceGroupPreparer.__name__))
 
 
