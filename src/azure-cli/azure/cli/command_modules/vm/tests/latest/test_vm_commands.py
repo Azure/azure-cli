@@ -852,7 +852,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # in different region, it should default copyStart as True
         # TODO: should not throw exception after feature GA
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+        with self.assertRaisesRegex(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
             self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
@@ -3117,7 +3117,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
@@ -3151,7 +3151,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
                   'vaultCertificate index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
@@ -6985,7 +6985,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
+        with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
@@ -7071,7 +7071,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
+        with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
