@@ -25,13 +25,26 @@ from ._validators import (
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
     validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity)
-from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
-    CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
-    CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL
+from ._consts import (
+    CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+    CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
+    CONST_SCALE_SET_PRIORITY_SPOT,
+    CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_OS_DISK_TYPE_MANAGED,
+    CONST_OS_DISK_TYPE_EPHEMERAL,
+    CONST_RAPID_UPGRADE_CHANNEL,
+    CONST_STABLE_UPGRADE_CHANNEL,
+    CONST_PATCH_UPGRADE_CHANNEL,
+    CONST_NODE_IMAGE_UPGRADE_CHANNEL,
+    CONST_NONE_UPGRADE_CHANNEL,
+    CONST_NODEPOOL_MODE_SYSTEM,
+    CONST_NODEPOOL_MODE_USER,
+)
 
+# candidates for enumeration, no longer maintained
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
-
 regions_in_preview = [
     "canadacentral",
     "canadaeast",
@@ -45,7 +58,6 @@ regions_in_preview = [
     "westindia",
     "westus2",
 ]
-
 regions_in_prod = [
     "australiaeast",
     "australiasoutheast",
@@ -63,17 +75,26 @@ regions_in_prod = [
     "westeurope",
     "westus",
 ]
+storage_profile_types = ["StorageAccount", "ManagedDisks"]
+
+# candidates for enumeration, under support
+node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER]
+node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT]
+node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
+node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
+
+network_plugins = ['azure', 'kubenet']
+outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]
 
 auto_upgrade_channels = [
-    "rapid",
-    "stable",
-    "patch",
-    "node-image",
-    "none"
+    CONST_RAPID_UPGRADE_CHANNEL,
+    CONST_STABLE_UPGRADE_CHANNEL,
+    CONST_PATCH_UPGRADE_CHANNEL,
+    CONST_NODE_IMAGE_UPGRADE_CHANNEL,
+    CONST_NONE_UPGRADE_CHANNEL,
 ]
 
-storage_profile_types = ["StorageAccount", "ManagedDisks"]
-nodepool_mode_type = ["System", "User"]
+dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 
 def load_arguments(self, _):
@@ -210,8 +231,7 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int,
                    validator=validate_load_balancer_idle_timeout)
-        c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
-                                                            CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
+        c.argument('outbound_type', arg_type=get_enum_type(outbound_types))
         c.argument('auto_upgrade_channel', arg_type=get_enum_type(auto_upgrade_channels))
         c.argument('enable_cluster_autoscaler', action='store_true')
         # TODO: replace "validate_cluster_autoscaler_profile" with "_extract_cluster_autoscaler_params"
@@ -228,8 +248,7 @@ def load_arguments(self, _):
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
                    deprecate_info=c.deprecate(redirect="--disable-rbac", hide="2.0.45"))
         c.argument('max_pods', type=int, options_list=['--max-pods', '-m'])
-        c.argument('network_plugin', arg_type=get_enum_type(
-            ['azure', 'kubenet']))
+        c.argument('network_plugin', arg_type=get_enum_type(network_plugins))
         c.argument('network_policy')
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
@@ -417,21 +436,18 @@ def load_arguments(self, _):
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
-            c.argument('priority', arg_type=get_enum_type(
-                [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT]), validator=validate_priority)
-            c.argument('eviction_policy', arg_type=get_enum_type(
-                [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]), validator=validate_eviction_policy)
+            c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
+            c.argument('eviction_policy', arg_type=get_enum_type(node_eviction_policies), validator=validate_eviction_policy)
             c.argument('spot_max_price', type=float,
                        validator=validate_spot_max_price)
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
-            c.argument('mode', get_enum_type(nodepool_mode_type))
+            c.argument('mode', get_enum_type(node_mode_types))
             c.argument('enable_node_public_ip', action='store_true')
             c.argument('node_public_ip_prefix_id', type=str)
             c.argument('ppg', type=str, validator=validate_ppg)
             c.argument('max_surge', type=str, validator=validate_max_surge)
-            c.argument('node_os_disk_type', arg_type=get_enum_type(
-                [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
+            c.argument('node_os_disk_type', arg_type=get_enum_type(node_os_disk_types))
             c.argument('enable_encryption_at_host', options_list=[
                        '--enable-encryption-at-host'], action='store_true')
             c.argument('enable_ultra_ssd', options_list=[
@@ -450,7 +466,7 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
-        c.argument('mode', get_enum_type(nodepool_mode_type))
+        c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', type=str, validator=validate_max_surge)
         c.argument('labels', nargs='*', validator=validate_nodepool_labels)
 
@@ -467,8 +483,7 @@ def load_arguments(self, _):
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')
         c.argument('space_name', options_list=['--space', '-s'])
-        c.argument('endpoint_type', get_enum_type(
-            ['Public', 'Private', 'None'], default='Public'), options_list=['--endpoint', '-e'])
+        c.argument('endpoint_type', get_enum_type(dev_space_endpoint_types, default='Public'), options_list=['--endpoint', '-e'])
         c.argument('prompt', options_list=[
                    '--yes', '-y'], action='store_true', help='Do not prompt for confirmation. Requires --space.')
 

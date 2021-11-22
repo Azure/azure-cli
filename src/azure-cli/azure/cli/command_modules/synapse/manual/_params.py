@@ -834,6 +834,8 @@ def load_arguments(self, _):
                        help='Number of core and memory to be used for executors allocated in the specified Spark pool for the job.')
             c.argument('executor_count',
                        help='Number of executors to be allocated in the specified Spark pool for the job.')
+            c.argument('folder_path',
+                       help='The folder that this notebook is in. If not specified, this notebook will appear at the root level. Eg: folder/subfolder1')
 
     with self.argument_context('synapse notebook list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
@@ -962,7 +964,8 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
             c.argument('definition_file', arg_type=definition_file_arg_type)
-
+            c.argument('folder_path',
+                       help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
 
 # kusto pool
     with self.argument_context('synapse kusto pool create') as c:

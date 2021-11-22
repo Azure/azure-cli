@@ -2395,6 +2395,11 @@ network lb address-pool create:
     backend_addresses_config_file:
       rule_exclusions:
       - option_length_too_long
+network lb address-pool update:
+  parameters:
+    backend_addresses_config_file:
+      rule_exclusions:
+      - option_length_too_long
 network lb create:
   parameters:
     private_ip_address_version:
@@ -2420,6 +2425,22 @@ network lb inbound-nat-pool create:
       rule_exclusions:
       - option_length_too_long
 network lb inbound-nat-pool update:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule create:
+  parameters:
+    frontend_port_range_end:
+      rule_exclusions:
+      - option_length_too_long
+    frontend_port_range_start:
+      rule_exclusions:
+      - option_length_too_long
+network lb inbound-nat-rule update:
   parameters:
     frontend_port_range_end:
       rule_exclusions:

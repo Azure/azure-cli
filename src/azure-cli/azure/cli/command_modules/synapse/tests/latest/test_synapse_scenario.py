@@ -2554,7 +2554,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
@@ -2563,6 +2562,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
@@ -2589,9 +2589,10 @@ class SynapseScenarioTests(ScenarioTest):
         # create notebook
         self.cmd(
             'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
-            '--spark-pool-name {spark-pool}',
+            '--spark-pool-name {spark-pool} --folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # get notebook
@@ -2847,6 +2848,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
@@ -2872,9 +2874,11 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create a spark job definition
         self.cmd(
-            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" '
+            '--folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # Get a spark job definition

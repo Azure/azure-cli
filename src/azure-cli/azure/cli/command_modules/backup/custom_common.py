@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 
-import azure.cli.command_modules.backup.custom_help as custom_help
+from azure.cli.command_modules.backup import custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
-    protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
+    protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.mgmt.recoveryservicesbackup.models import RecoveryPointTierStatus, RecoveryPointTierType
@@ -41,8 +41,6 @@ def show_container(cmd, client, name, resource_group_name, vault_name, backup_ma
                 Please either remove the flag or query for any other container type.
                 """)
 
-    if custom_help.is_native_name(name):
-        return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
     containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name,
                                  use_secondary_region)
     return custom_help.get_none_one_or_many(containers)
@@ -282,7 +280,7 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
     containers = custom_help.get_list_from_paged_response(paged_containers)
 
     if container_name and custom_help.is_native_name(container_name):
-        return [container for container in containers if container.name == container_name]
+        return [container for container in containers if container.name.lower() == container_name.lower()]
 
     return containers
 
