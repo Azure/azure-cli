@@ -37,6 +37,7 @@ from ._roleassignments import add_role_assignment
 logger = get_logger(__name__)
 
 
+# pylint: disable=too-many-locals
 def ensure_default_log_analytics_workspace_for_monitoring(
     cmd, subscription_id, resource_group_name
 ):
@@ -244,6 +245,7 @@ def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def ensure_container_insights_for_monitoring(
     cmd,
     addon,
@@ -311,12 +313,12 @@ def ensure_container_insights_for_monitoring(
     if aad_route:
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
-            "providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
+            f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
         dataCollectionRuleName = f"DCR-{workspace_name}"
         dcr_resource_id = (
             f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
-            "providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+            f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
         )
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -372,7 +374,7 @@ def ensure_container_insights_for_monitoring(
                     raise ClientRequestError(
                         f"Data Collection Rules are not supported for LA workspace region {location}"
                     )
-                elif (
+                if (
                     resource["resourceType"].lower() == "datacollectionruleassociations" and
                     cluster_region not in region_ids
                 ):
@@ -465,7 +467,7 @@ def ensure_container_insights_for_monitoring(
             )
             association_url = (
                 f"https://management.azure.com/{cluster_resource_id}/providers/Microsoft.Insights/"
-                "dataCollectionRuleAssociations/send-to-{workspace_name}?api-version=2019-11-01-preview"
+                f"dataCollectionRuleAssociations/send-to-{workspace_name}?api-version=2019-11-01-preview"
             )
             for _ in range(3):
                 try:
@@ -486,10 +488,9 @@ def ensure_container_insights_for_monitoring(
         # legacy auth with LA workspace solution
         unix_time_in_millis = int(
             (
-                datetime.datetime.utcnow()
-                - datetime.datetime.utcfromtimestamp(0)
-            ).total_seconds()
-            * 1000.0
+                datetime.datetime.utcnow() -
+                datetime.datetime.utcfromtimestamp(0)
+            ).total_seconds() * 1000.0
         )
 
         solution_deployment_name = "ContainerInsights-{}".format(
