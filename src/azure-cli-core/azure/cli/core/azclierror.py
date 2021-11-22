@@ -5,7 +5,7 @@
 
 import sys
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from knack.util import CLIError
 from knack.log import get_logger
 

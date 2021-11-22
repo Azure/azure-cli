@@ -61,19 +61,22 @@ def patch_load_cached_subscriptions(unit_test):
 
 def patch_retrieve_token_for_user(unit_test):
 
-    class UserCredentialMock:
+    def get_user_credential_mock(*args, **kwargs):
+        class UserCredentialMock:
 
-        def __init__(self, *args, **kwargs):
-            pass
+            def __init__(self, *args, **kwargs):
+                super().__init__()
 
-        def get_token(*args, **kwargs):  # pylint: disable=unused-argument
-            from azure.core.credentials import AccessToken
-            import time
-            fake_raw_token = 'top-secret-token-for-you'
-            now = int(time.time())
-            return AccessToken(fake_raw_token, now + 3600)
+            def get_token(*args, **kwargs):  # pylint: disable=unused-argument
+                from azure.core.credentials import AccessToken
+                import time
+                fake_raw_token = 'top-secret-token-for-you'
+                now = int(time.time())
+                return AccessToken(fake_raw_token, now + 3600)
 
-    mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.UserCredential', UserCredentialMock)
+        return UserCredentialMock()
+
+    mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.Identity.get_user_credential', get_user_credential_mock)
 
 
 def patch_long_run_operation_delay(unit_test):

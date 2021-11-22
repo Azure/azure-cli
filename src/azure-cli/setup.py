@@ -95,7 +95,7 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=9.0.0b1',
     'azure-mgmt-iothub==2.1.0',
     'azure-mgmt-iothubprovisioningservices~=0.3.0',
-    'azure-mgmt-keyvault==9.2.0',
+    'azure-mgmt-keyvault==9.3.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=11.0.0',
     'azure-mgmt-managedservices~=1.0',
@@ -133,7 +133,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.8.0',
+    'azure-synapse-artifacts~=0.9.0',
     'azure-synapse-managedprivateendpoints~=0.3.0',
     'azure-synapse-spark~=0.2.0',
     'chardet~=3.0.4',
@@ -148,6 +148,7 @@ DEPENDENCIES = [
     'semver==2.13.0',
     'six>=1.10.0',  # six is still used by countless extensions
     'sshtunnel~=0.1.4',
+    'urllib3[secure]',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12'
 ]

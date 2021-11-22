@@ -3697,14 +3697,45 @@ class BicepScenarioTest(ScenarioTest):
         ])
 
 
-class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
-        super.setup()
-        self._remove_bicep_cli()
+        super().setup()
+        self.cmd('az bicep uninstall')
 
     def tearDown(self):
         super().tearDown()
-        self._remove_bicep_cli()
+        self.cmd('az bicep uninstall')
+        
+    def test_install_and_upgrade(self):
+        self.cmd('az bicep install')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --target-platform win-x64')
+        self.cmd('az bicep version')
+
+        self.cmd('az bicep uninstall')
+
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade')
+        self.cmd('az bicep version')
+        
+        self.cmd('az bicep uninstall')
+        
+        self.cmd('az bicep install --version v0.4.63')
+        self.cmd('az bicep upgrade -t win-x64')
+        self.cmd('az bicep version')
+
+
+class DeploymentWithBicepScenarioTest(LiveScenarioTest):
+    def setup(self):
+        super.setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicep')
     def test_resource_group_level_deployment_with_bicep(self):
@@ -3807,18 +3838,6 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
-
-    def _remove_bicep_cli(self):
-        bicep_cli_path = self._get_bicep_cli_path()
-        if os.path.isfile(bicep_cli_path):
-            os.remove(bicep_cli_path)
-
-    def _get_bicep_cli_path(self):
-        installation_folder = os.path.join(str(Path.home()), ".azure", "bin")
-
-        if platform.system() == "Windows":
-            return os.path.join(installation_folder, "bicep.exe")
-        return os.path.join(installation_folder, "bicep")
 
 
 if __name__ == '__main__':
