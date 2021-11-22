@@ -2165,8 +2165,8 @@ helps['synapse kql-script create'] = """
     examples:
       - name: KustoScriptsCreateOrUpdate
         text: |-
-               az synapse kql-script create --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
-               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql 
+               az synapse kql-script create --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
                --name "kustoScript1"
 """
 
@@ -2176,8 +2176,8 @@ helps['synapse kql-script import'] = """
     examples:
       - name: KustoScriptsCreateOrUpdate
         text: |-
-               az synapse kql-script import --resource-group "kustorptest" --workspace-name "kustoWorkspaceName"  
-               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql 
+               az synapse kql-script import --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
                --name "kustoScript1"
 """
 

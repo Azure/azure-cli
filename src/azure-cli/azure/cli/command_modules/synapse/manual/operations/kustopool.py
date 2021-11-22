@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.core.util import sdk_no_wait, read_file_content
+from azure.cli.core.util import sdk_no_wait, read_file_content, CLIError
 from .._client_factory import cf_synapse_client_workspace_factory, cf_kusto_script, cf_kusto_scripts
 from azure.synapse.artifacts.models import KqlScriptResource, KqlScript, KqlScriptContent, KqlScriptContentMetadata, KqlScriptContentCurrentConnection
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -171,10 +171,10 @@ def synapse_kusto_script_create(cmd,
 
     client = cf_kusto_script(cmd.cli_ctx, workspace_name)
     query = read_file_content(definition_file)
-    metadata = KqlScriptContentMetadata(language = "kql")
-    current_connection=KqlScriptContentCurrentConnection(pool_name=kusto_pool_name,
+    metadata = KqlScriptContentMetadata(language="kql")
+    current_connection = KqlScriptContentCurrentConnection(pool_name=kusto_pool_name,
                                                          database_name=kusto_database_name)
-    script_content = KqlScriptContent(query=query,metadata=metadata,current_connection=current_connection)
+    script_content = KqlScriptContent(query=query, metadata=metadata, current_connection=current_connection)
     properties = KqlScript(content=script_content)
     kql_script = KqlScriptResource(name=script_name, properties=properties)
     return sdk_no_wait(no_wait,
@@ -219,9 +219,9 @@ def synapse_kusto_script_export(cmd, workspace_name, output_folder, script_name=
 
 def write_to_file(kql_script, path):
     try:
-        query=''
+        query = ''
         if hasattr(kql_script.properties.content, 'query'):
-            query = kql_script.properties.content.query;
+            query = kql_script.properties.content.query
         with open(path, 'w') as f:
             f.write(query)
     except IOError:
