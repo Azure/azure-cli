@@ -864,6 +864,7 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
 
     # Only enable encryption for Windows (for now).
     fallback = sys.platform.startswith('win32')
-    encrypt = cli_ctx.config.getboolean('core', 'token_encryption', fallback=fallback)
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
     return Identity(*args, encrypt=encrypt, **kwargs)
