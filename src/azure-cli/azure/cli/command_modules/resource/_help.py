@@ -2588,7 +2588,7 @@ type: command
 short-summary: Get specified deployment stack from subscription scope
 examples:
   - name: Get stack by name.
-    text: az stacks sub show --name "StackName"
+    text: az stacks sub show --stack-name "StackName"
   - name: Get stack by stack resource id.
     text: az stacks sub show --stack "StackResourceID"
 """
@@ -2598,7 +2598,7 @@ type: command
 short-summary: Delete specified deployment stack from subscription scope
 examples:
   - name: Delete stack by name.
-    text: az stacks sub delete --name "StackName"
+    text: az stacks sub delete --stack-name "StackName"
   - name: Delete stack by stack resource id.
     text: az stacks sub delete --stack "StackResourceID"
 """
@@ -2630,7 +2630,7 @@ type: command
 short-summary: Get specified deployment stack from resource group scope
 examples:
   - name: Get stack by name.
-    text: az stacks group show --name "StackName" --resource-group "ResourceGroup"
+    text: az stacks group show --stack-name "StackName" --resource-group "ResourceGroup"
   - name: Get stack by stack resource id.
     text: az stacks group show --stack "StackResourceID"
 """
@@ -2640,7 +2640,7 @@ type: command
 short-summary: Delete specified deployment stack from resource group scope
 examples:
   - name: Delete stack by name.
-    text: az stacks group delete --name "StackName" --resource-group "ResourceGroup"
+    text: az stacks group delete --stack-name "StackName" --resource-group "ResourceGroup"
   - name: Delete stack by stack resource id.
     text: az stacks group delete --stack "StackResourceID"
 """
@@ -2650,7 +2650,7 @@ type: command
 short-summary: List all snapshots in specified deployment stack at subscription scope
 examples:
   - name: List all snapshots using stack name
-    text: az stacks snapshot sub list --name "StackName"
+    text: az stacks snapshot sub list --stack-name "StackName"
   - name: List all snapshots using stack id
     text: az stacks snapshot sub list --stack "StackResourceID"
 """
@@ -2660,7 +2660,7 @@ type: command
 short-summary: Get specified snapshot in deployment stack at subscription scope
 examples:
   - name: Get snapshot with stack name and snapshot name.
-    text: az stacks snapshot sub show --name "SnapshotName" --stack-name "StackName"
+    text: az stacks snapshot sub show --snapshot-name "SnapshotName" --stack-name "StackName"
   - name: Get snapshot by snapshot resource id.
     text: az stacks snapshot sub show --snapshot "SnapshotResourceID"
 """
@@ -2670,7 +2670,7 @@ type: command
 short-summary: Delete specified snapshot in deployment stack at subscription scope
 examples:
   - name: Delete snapshot with stack name and snapshot name.
-    text: az stacks snapshot sub delete --name "SnapshotName" --stack-name "StackName"
+    text: az stacks snapshot sub delete --snapshot-name "SnapshotName" --stack-name "StackName"
   - name: Delete snapshot by snapshot resource id.
     text: az stacks snapshot sub delete --snapshot "SnapshotResourceID"
 """
@@ -2680,7 +2680,7 @@ type: command
 short-summary: List all snapshots in specified deployment stack at resource group scope
 examples:
   - name: List all snapshots using stack name
-    text: az stacks snapshot group list --name "StackName" --resource-group "ResourceGroup"
+    text: az stacks snapshot group list --stack-name "StackName" --resource-group "ResourceGroup"
   - name: List all snapshots using stack id
     text: az stacks snapshot group list --stack "StackResourceID"
 """
@@ -2690,7 +2690,7 @@ type: command
 short-summary: Get specified snapshot in deployment stack at resource group scope
 examples:
   - name: Get snapshot with stack name and snapshot name.
-    text: az stacks snapshot group show --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+    text: az stacks snapshot group show --snapshot-name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
   - name: Get snapshot by snapshot resource id.
     text: az stacks snapshot group show --snapshot "SnapshotResourceID"
 """
@@ -2700,7 +2700,7 @@ type: command
 short-summary: Delete specified snapshot in deployment stack at resource group scope
 examples:
   - name: Delete snapshot with stack name and snapshot name.
-    text: az stacks snapshot group delete --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+    text: az stacks snapshot group delete --snapshot-name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
   - name: Delete snapshot by snapshot resource id.
     text: az stacks snapshot group delete --snapshot "SnapshotResourceID"
 """

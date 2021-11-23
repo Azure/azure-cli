@@ -20,6 +20,7 @@ from azure.cli.command_modules.resource._client_factory import (
 from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out, validate_deployment_stack_files
 
 from ._exception_handler import managementgroups_exception_handler
+import json
 
 
 logger = get_logger(__name__)
@@ -62,12 +63,16 @@ def transform_stacks(result):
     return OrderedDict([('Name', r['name']),
                         ('State', r['provisioningState']),
                         ('Last Modified', r['systemData']['lastModifiedAt']),
-                        ('Id', r['id'])])
+                        ('Managed Resources Id', r['managedResources'][0]['id'])])
 
 def transform_stacks_list(result):
     transformed = []
     for r in result:
-        res = OrderedDict([('Name', r['name']),('State', r['provisioningState']), ('Last Modified', r['systemData']['lastModifiedAt']), ('Id', r['id'])])
+        res = OrderedDict([('Name', r['name']),('State', r['provisioningState']), ('Last Modified', r['systemData']['lastModifiedAt'])])
+        try:
+            res['Managed Resources Id'] = r['managedResources'][0]['id']
+        except:
+            res['Managed Resources Id'] = ' '
         transformed.append(res)
     return transformed
 

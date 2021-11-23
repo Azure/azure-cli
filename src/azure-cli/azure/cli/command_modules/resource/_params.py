@@ -98,14 +98,13 @@ def load_arguments(self, _):
                                                    help="A path to a uiFormDefinition file in the file system")
 
     stacks_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The name of the deployment stack.')
-    stacks_deployment_scope_type = CLIArgumentType(options_list=['--deployment-scope'], help='Scope of deployment stack: either resource group or subscription.')
     stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
     stacks_update_behavior_type = CLIArgumentType(options_list=['--update-behavior'], help='The update behavior of deployment stacks: either detachResources or purgeResources.')
     stacks_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], help='The parameter file path for template.')
-    stacks_stack_type = CLIArgumentType(options_list=['--stack'], help='The deployment stack resource id.')
+    stacks_stack_type = CLIArgumentType(options_list=['--stack', '-h'], help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(options_list=['--stack-name'], help='The deployment stack name')
-    stacks_snapshot_type = CLIArgumentType(options_list=['--snapshot'], help='The deployment stack snapshot resource id.')
-    stacks_snapshot_name_type = CLIArgumentType(options_list=['--name'], help='The deployment stack snapshot name.')
+    stacks_snapshot_type = CLIArgumentType(options_list=['--snapshot', '-h'], help='The deployment stack snapshot resource id.')
+    stacks_snapshot_name_type = CLIArgumentType(options_list=['--snapshot-name'], help='The deployment stack snapshot name.')
 
 
 
@@ -639,7 +638,7 @@ def load_arguments(self, _):
     
     with self.argument_context('stacks sub create') as c:
         c.argument('name', arg_type=stacks_name_type)
-        c.argument('deployment_scope', arg_type=stacks_deployment_scope_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, help='[Optional] The resource group where the deployment stack will be created.')
         c.argument('location', options_list=['--location', '-l'], help='The location to store deployment stack.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
@@ -650,11 +649,11 @@ def load_arguments(self, _):
         c.argument('description', arg_type=stacks_description_type)
     
     with self.argument_context('stacks sub show') as c:
-        c.argument('name', arg_type=stacks_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('stack', arg_type=stacks_stack_type)
     
     with self.argument_context('stacks sub delete') as c:
-        c.argument('name', arg_type=stacks_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('stack', arg_type=stacks_stack_type)
     
     with self.argument_context('stacks group create') as c:
@@ -669,7 +668,7 @@ def load_arguments(self, _):
         c.argument('description', arg_type=stacks_description_type)
     
     with self.argument_context('stacks group show') as c:
-        c.argument('name', arg_type=stacks_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('stack', arg_type=stacks_stack_type)
     
@@ -677,37 +676,37 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
     
     with self.argument_context('stacks group delete') as c:
-        c.argument('name', arg_type=stacks_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('stack', arg_type=stacks_stack_type)
     
     with self.argument_context('stacks snapshot sub show') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('snapshot_name', arg_type=stacks_snapshot_name_type)
         c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('snapshot', arg_type=stacks_snapshot_type)
     
     with self.argument_context('stacks snapshot sub list') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('stack', arg_type=stacks_stack_type)
     
     with self.argument_context('stacks snapshot sub delete') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('snapshot_name', arg_type=stacks_snapshot_name_type)
         c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('snapshot', arg_type=stacks_snapshot_type)
     
     with self.argument_context('stacks snapshot group show') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('snapshot_name', arg_type=stacks_snapshot_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('snapshot', arg_type=stacks_snapshot_type)
     
     with self.argument_context('stacks snapshot group list') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('stack', arg_type=stacks_stack_type)
     
     with self.argument_context('stacks snapshot group delete') as c:
-        c.argument('name', arg_type=stacks_snapshot_name_type)
+        c.argument('snapshot_name', arg_type=stacks_snapshot_name_type)
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
         c.argument('stack_name', arg_type=stacks_stack_name_type)
         c.argument('snapshot', arg_type=stacks_snapshot_type)
