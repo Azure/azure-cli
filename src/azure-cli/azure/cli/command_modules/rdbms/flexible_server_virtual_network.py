@@ -175,7 +175,7 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     private_dns_zone_suffix = dns_suffix_client.execute()
     if db_context.command_group == 'mysql':
         private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
-    
+
     # suffix should start with .
     if private_dns_zone_suffix[0] != '.':
         private_dns_zone_suffix = '.' + private_dns_zone_suffix
