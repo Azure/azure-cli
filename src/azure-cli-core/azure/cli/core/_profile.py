@@ -633,7 +633,7 @@ class Profile:
                 if not subscriptions:
                     continue
 
-            consolidated = self._normalize_properties(subscription_finder.user_id,
+            consolidated = self._normalize_properties(user_name,
                                                       subscriptions,
                                                       is_service_principal)
             result += consolidated
@@ -731,8 +731,6 @@ class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
     def __init__(self, cli_ctx):
-
-        self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
