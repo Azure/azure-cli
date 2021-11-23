@@ -384,7 +384,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            ssl_profile=None, firewall_policy=None, no_wait=False, host_names=None):
+                            ssl_profile_id=None, firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -405,7 +405,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
 
     if cmd.supported_api_version(min_api='2020-06-01'):
-        new_listener.ssl_profile = SubResource(id=ssl_profile) if ssl_profile else None
+        new_listener.ssl_profile = SubResource(id=ssl_profile_id) if ssl_profile_id else None
 
     upsert_to_collection(ag, 'http_listeners', new_listener, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update,
@@ -413,7 +413,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, ssl_profile=None, firewall_policy=None, host_names=None):
+                            host_name=None, ssl_cert=None, ssl_profile_id=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -434,8 +434,8 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
             instance.firewall_policy = SubResource(id=firewall_policy)
 
     if cmd.supported_api_version(min_api='2020-06-01'):
-        if ssl_profile is not None:
-            instance.ssl_profile = SubResource(id=ssl_profile)
+        if ssl_profile_id is not None:
+            instance.ssl_profile = SubResource(id=ssl_profile_id)
 
     if host_names is not None:
         instance.host_names = host_names or None
