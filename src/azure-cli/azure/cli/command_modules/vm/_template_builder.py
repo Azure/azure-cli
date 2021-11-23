@@ -837,7 +837,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                        enable_auto_update=None, patch_mode=None, enable_agent=None):
+                        enable_auto_update=None, patch_mode=None, enable_agent=None, automatic_repairs_action=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1162,6 +1162,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
             'gracePeriod': automatic_repairs_grace_period
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
+        if automatic_repairs_action:
+            automatic_repairs_policy['repairAction'] = automatic_repairs_action
 
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
