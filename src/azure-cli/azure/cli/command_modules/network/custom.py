@@ -16,7 +16,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt
 
 from azure.cli.core.util import CLIError, sdk_no_wait, find_child_item, find_child_collection
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError
+    UnrecognizedArgumentError, ResourceNotFoundError, CLIInternalError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
 from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -6581,7 +6581,8 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None, bgp_community=None,
-                ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None):
+                ddos_protection_plan=None, network_security_group=None, edge_zone=None, flowtimeout=None,
+                enable_encryption=None, encryption_enforcement_policy=None):
     AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
         cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
                        'SubResource', 'NetworkSecurityGroup')
@@ -6613,11 +6614,21 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
     if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
         VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
         vnet.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
+    if enable_encryption is not None:
+        if not vnet.encryption:
+            vnet.encryption = {}
+        vnet.encryption["enabled"] = enable_encryption
+    if encryption_enforcement_policy is not None:
+        if not vnet.encryption:
+            raise ArgumentUsageError('usage error: --encryption--enforcement--policy is only configurable when '
+                                     '--enable-encryption is specified.')
+        vnet.encryption["enforcement"] = encryption_enforcement_policy
     return cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name)
 
 
 def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
-                ddos_protection_plan=None, flowtimeout=None, bgp_community=None):
+                ddos_protection_plan=None, flowtimeout=None, bgp_community=None, enable_encryption=None,
+                encryption_enforcement_policy=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
     AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
@@ -6646,6 +6657,16 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
     if bgp_community is not None and cmd.supported_api_version(min_api='2020-06-01'):
         VirtualNetworkBgpCommunities = cmd.get_models('VirtualNetworkBgpCommunities')
         instance.bgp_communities = VirtualNetworkBgpCommunities(virtual_network_community=bgp_community)
+    if enable_encryption is not None:
+        if not instance.encryption:
+            VirtualNetworkEncryption = cmd.get_models('VirtualNetworkEncryption')
+            instance.encryption = VirtualNetworkEncryption(enabled=enable_encryption)
+        instance.encryption.enabled = enable_encryption
+    if encryption_enforcement_policy is not None:
+        if not instance.encryption:
+            raise ArgumentUsageError('usage error: --encryption--enforcement--policy is only configurable when '
+                                     '--enable-encryption is specified.')
+        instance.encryption.enforcement = encryption_enforcement_policy
     return instance
 
 
