@@ -43,14 +43,18 @@ def transform_resource_list(result):
     return transformed
 
 
-# Resource group deployment commands
 def transform_deployment(result):
     r = result
-    return OrderedDict([('Name', r['name']),
-                        ('ResourceGroup', r['resourceGroup']),
-                        ('State', r['properties']['provisioningState']),
-                        ('Timestamp', r['properties']['timestamp']),
-                        ('Mode', r['properties']['mode'])])
+    format_result = OrderedDict([('Name', r['name']),
+                                 ('State', r['properties']['provisioningState']),
+                                 ('Timestamp', r['properties']['timestamp']),
+                                 ('Mode', r['properties']['mode'])])
+
+    # For deployments that are not under the resource group level, the return data does not contain 'resourceGroup'
+    if 'resourceGroup' in r and r['resourceGroup']:
+        format_result['ResourceGroup'] = r['resourceGroup']
+
+    return format_result
 
 
 def transform_deployments_list(result):
@@ -473,5 +477,6 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')

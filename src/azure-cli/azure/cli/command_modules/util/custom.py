@@ -38,7 +38,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     import platform
     import sys
     import subprocess
-    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import telemetry
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension

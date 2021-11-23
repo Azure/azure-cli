@@ -1,0 +1,153 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "properties": {"tenantSettings": {}, "sku": {"name":
+      "Basic", "family": "c", "capacity": 0}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '116'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --location --name --resource-group --sku --vm-size
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-redis/13.0.0 Python/3.9.6 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002?api-version=2020-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002","location":"East
+        US","name":"cli-test-acfr-plr000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":{"primaryKey":"aaaaaa","secondaryKey":"aaaaaa"},"hostName":"cli-test-acfr-plr000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '952'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 18 Nov 2021 09:22:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002?api-version=2020-12-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 813ce424-a354-4dd1-8e97-500396621e81
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --location --name --resource-group --sku --vm-size
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-redis/13.0.0 Python/3.9.6 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002?api-version=2020-12-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002","location":"East
+        US","name":"cli-test-acfr-plr000002","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000,"isMaster":false,"isPrimary":false}],"publicNetworkAccess":"Enabled","tenantSettings":{},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cli-test-acfr-plr000002.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '833'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 18 Nov 2021 09:23:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 813ce424-a354-4dd1-8e97-500396621e81
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --type
+      User-Agent:
+      - python/3.9.6 (Windows-10-10.0.22000-SP0) AZURECLI/2.30.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/Redis/cli-test-acfr-plr000002/privateLinkResources?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_acfr_plr000001/providers/Microsoft.Cache/redis/cli-test-acfr-plr000002/privateLinkResources/redisCache","name":"redisCache","type":"Microsoft.Cache/Redis/privateLinkResources","properties":{"groupId":"redisCache","requiredMembers":["redisCache"],"requiredZoneNames":["privatelink.redis.cache.windows.net"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '459'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 18 Nov 2021 09:23:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 813ce424-a354-4dd1-8e97-500396621e81
+    status:
+      code: 200
+      message: OK
+version: 1

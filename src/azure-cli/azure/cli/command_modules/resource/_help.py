@@ -2504,6 +2504,8 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+  - name: Install Bicep CLI and specify the target platform.
+    text: az bicep install --target-platform linux-x64
 """
 
 helps['bicep uninstall'] = """
@@ -2514,6 +2516,11 @@ short-summary: Uninstall Bicep CLI.
 helps['bicep upgrade'] = """
 type: command
 short-summary: Upgrade Bicep CLI to the latest version.
+examples:
+  - name: Upgrade Bicep CLI.
+    text: az bicep upgrade
+  - name: Upgrade Bicep CLI and specify the target platform.
+    text: az bicep upgrade --target-platform linux-x64
 """
 
 helps['bicep build'] = """
@@ -2536,6 +2543,14 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file {json_template_file}
+"""
+
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
 """
 
 helps['bicep version'] = """

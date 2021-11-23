@@ -5,7 +5,7 @@
 
 import os
 import platform
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from urllib.request import urlopen
 
 from knack.util import CLIError
 from knack.log import get_logger

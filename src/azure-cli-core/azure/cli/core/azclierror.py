@@ -5,7 +5,7 @@
 
 import sys
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -76,7 +76,7 @@ class AzCLIError(CLIError):
                 print(recommendation, file=sys.stderr)
 
         if self.aladdin_recommendations:
-            print('\nTRY THIS:', file=sys.stderr)
+            print('\nExamples from AI knowledge base:', file=sys.stderr)
             for recommendation, description in self.aladdin_recommendations:
                 print_styled_text(recommendation, file=sys.stderr)
                 print_styled_text(description, file=sys.stderr)

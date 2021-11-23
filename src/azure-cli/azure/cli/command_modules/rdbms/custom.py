@@ -12,7 +12,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import todict
-from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
+from urllib.request import urlretrieve
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -707,6 +707,7 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
     '''
 
     parameters = {
+        'administratorType': 'ActiveDirectory',
         'login': login,
         'sid': sid,
         'tenant_id': _get_tenant_id()
