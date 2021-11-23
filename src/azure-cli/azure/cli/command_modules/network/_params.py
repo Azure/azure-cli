@@ -1888,6 +1888,7 @@ def load_arguments(self, _):
     # endregion
 
     # region VirtualNetworks
+    encryption_policy_types = ['dropUnencrypted', 'allowUnencrypted']
     with self.argument_context('network vnet') as c:
         c.argument('virtual_network_name', virtual_network_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list='--address-prefixes', metavar='PREFIX')
@@ -1897,6 +1898,8 @@ def load_arguments(self, _):
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
         c.argument('flowtimeout', type=int, help='The FlowTimeout value (in minutes) for the Virtual Network', min_api='2021-02-01', is_preview=True)
         c.argument('bgp_community', help='The BGP community associated with the virtual network.')
+        c.argument('enable_encryption', arg_type=get_three_state_flag(), help='Enable encryption on the virtual network.', min_api='2021-05-01', is_preview=True)
+        c.argument('encryption_enforcement_policy', options_list=['--encryption-enforcement-policy', '--encryption-policy'], arg_type=get_enum_type(encryption_policy_types), help='To control if the Virtual Machine without encryption is allowed in encrypted Virtual Network or not.', min_api='2021-05-01', is_preview=True)
 
     with self.argument_context('network vnet check-ip-address') as c:
         c.argument('ip_address', required=True)
