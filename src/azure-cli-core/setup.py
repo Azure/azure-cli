@@ -48,7 +48,7 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.6.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
-    'humanfriendly>=4.7,<10.0',
+    'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.9.0',
     'msal-extensions>=0.3.0,<0.4',
