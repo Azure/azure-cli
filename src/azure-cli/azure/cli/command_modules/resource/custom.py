@@ -2296,8 +2296,10 @@ def _build_identities_info(cmd, identities):
         return ResourceIdentity(type=ResourceIdentityType.system_assigned)
 
     user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
-    if user_assigned_identities:
-        return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=user_assigned_identities)
+    if user_assigned_identities and len(user_assigned_identities) > 0:
+        UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+        userAssignedIdentity = {user_assigned_identities[0]: UserAssignedIdentitiesValue()}
+        return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=userAssignedIdentity)
 
     return ResourceIdentity(type=identity_type)
 

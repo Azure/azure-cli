@@ -258,8 +258,7 @@ def validate_msi(cmd, namespace, from_set_command=False):
 
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError(
-                    "usage error: '--identity-scope'/'--role' is only applicable when assigning a system identity")
+                raise CLIError("usage error: '--identity-scope'/'--role' is only applicable when assigning a system identity")
 
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError(
