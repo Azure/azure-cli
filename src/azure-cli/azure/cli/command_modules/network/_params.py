@@ -272,7 +272,6 @@ def load_arguments(self, _):
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
-        c.argument('ssl_profile', min_api='2020-06-01', help='SSL profile resource of the application gateway.', completer=get_ag_subresource_completion_list('ssl_profiles'))
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
