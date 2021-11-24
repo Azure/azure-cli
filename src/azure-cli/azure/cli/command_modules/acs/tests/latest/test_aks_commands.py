@@ -4757,10 +4757,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         })
 
         # create
-        # the content specified by the custom header is deprecated, we are only testing the option
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--enable-managed-identity --auto-upgrade-channel rapid ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview ' \
                      '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -4768,9 +4766,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update upgrade channel
-        # the content specified by the custom header is deprecated, we are only testing the option
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview ' \
                      '--auto-upgrade-channel stable'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6019,3 +6015,38 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
             self.check('agentPoolProfiles[0].nodeLabels.label2', None),
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_custom_headers(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        # the content specified by the custom header is deprecated, we are only testing the option
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --auto-upgrade-channel rapid ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
+        ])
+
+        # update
+        # the content specified by the custom header is deprecated, we are only testing the option
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--auto-upgrade-channel stable ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'stable')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
