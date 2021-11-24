@@ -106,7 +106,6 @@ def validate_import_key(key):
     else:
         logger.warning("Ignoring invalid key ''. Key cannot be empty.")
         return False
-
     return True
 
 
@@ -1027,11 +1026,11 @@ def __import_kvset_from_file(client, path, yes):
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
 
-    kvset_to_import = [ConfigurationSetting(key=kv['key'],
-                                            label=kv['label'],
-                                            content_type=kv['content_type'],
-                                            value=kv['value'],
-                                            tags=kv['tags'])
+    kvset_to_import = [ConfigurationSetting(key=kv['key'] if 'key' in kv else None,
+                                            label=kv['label'] if 'label' in kv else None,
+                                            content_type=kv['content_type'] if 'content_type' in kv else None,
+                                            value=kv['value'] if 'value' in kv else None,
+                                            tags=kv['tags'] if 'tags' in kv else None)
                        for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
 
     if not yes:
@@ -1064,8 +1063,9 @@ def __import_kvset_from_file(client, path, yes):
                 continue
         elif not validate_import_key(config_setting.key):
             continue
-
+        __validate_import_tags(config_setting)
         # All validations successful
+
         __write_configuration_setting_to_config_store(client, config_setting)
 
 
@@ -1101,6 +1101,14 @@ def __validate_import_feature_flag(kv):
         except JSONDecodeError as exception:
             logger.warning("The feature flag with key '{%s}' is not in a valid JSON format. It will not be imported.\n{%s}", kv.id, str(exception))
     return False
+
+
+def __validate_import_tags(kv):
+    if kv.tags:
+        for tag_key, tag_value in kv.tags.items():
+            if not isinstance(tag_value, str):
+                logger.warning("The value for the tag '{0}' for key '{1}' is not a string. It will be converted to a string.".format(tag_key, kv.key))
+                return
 
 
 def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
