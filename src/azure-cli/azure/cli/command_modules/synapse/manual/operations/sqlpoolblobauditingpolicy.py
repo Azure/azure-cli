@@ -69,6 +69,7 @@ def sqlserver_blob_auditing_policy_update(
         instance,
         workspace_name,
         resource_group_name,
+        blob_auditing_policy_name='Default',
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -84,8 +85,7 @@ def sqlserver_blob_auditing_policy_update(
         storage_account_subscription_id=None,
         is_storage_secondary_key_in_use=None,
         is_azure_monitor_target_enabled=None,
-        queue_delay_milliseconds=None,
-        blob_auditing_policy_name='Default'):
+        queue_delay_milliseconds=None):
     _audit_policy_update(
         cmd=cmd,
         instance=instance,
