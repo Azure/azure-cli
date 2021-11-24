@@ -114,6 +114,11 @@ from ._consts import CONST_CANIPULL_IMAGE
 from ._consts import CONST_PRIVATE_DNS_ZONE_NONE
 from ._consts import CONST_MANAGED_IDENTITY_OPERATOR_ROLE, CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID
 from ._consts import DecoratorEarlyExitException
+from .addonconfiguration import (
+    add_monitoring_role_assignment,
+    add_ingress_appgw_addon_role_assignment,
+    add_virtual_node_role_assignment,
+)
 
 logger = get_logger(__name__)
 
@@ -1883,136 +1888,6 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
                 'Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
-def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
-    service_principal_msi_id = None
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id.lower() != 'msi'
-    ):
-        logger.info('valid service principal exists, using it')
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
-            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], 'identity')) and
-            (hasattr(
-                result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity, 'object_id'))
-    ):
-        logger.info('omsagent MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd, 'Monitoring Metrics Publisher',
-                                    service_principal_msi_id, is_service_principal, scope=cluster_resource_id):
-            logger.warning('Could not create a role assignment for Monitoring addon. '
-                           'Are you an Owner on this subscription?')
-    else:
-        logger.warning('Could not find service principal or user assigned MSI for role'
-                       'assignment')
-
-
-def _add_ingress_appgw_addon_role_assignment(result, cmd):
-    service_principal_msi_id = None
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id != 'msi'
-    ):
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (CONST_INGRESS_APPGW_ADDON_NAME in result.addon_profiles) and
-            (hasattr(result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME], 'identity')) and
-            (hasattr(
-                result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].identity, 'object_id'))
-    ):
-        service_principal_msi_id = result.addon_profiles[
-            CONST_INGRESS_APPGW_ADDON_NAME].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        config = result.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].config
-        from msrestazure.tools import parse_resource_id, resource_id
-        if CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID in config:
-            appgw_id = config[CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID]
-            parsed_appgw_id = parse_resource_id(appgw_id)
-            appgw_group_id = resource_id(subscription=parsed_appgw_id["subscription"],
-                                         resource_group=parsed_appgw_id["resource_group"])
-            if not _add_role_assignment(cmd, 'Contributor',
-                                        service_principal_msi_id, is_service_principal, scope=appgw_group_id):
-                logger.warning('Could not create a role assignment for application gateway: %s '
-                               'specified in %s addon. '
-                               'Are you an Owner on this subscription?', appgw_id, CONST_INGRESS_APPGW_ADDON_NAME)
-        if CONST_INGRESS_APPGW_SUBNET_ID in config:
-            subnet_id = config[CONST_INGRESS_APPGW_SUBNET_ID]
-            if not _add_role_assignment(cmd, 'Network Contributor',
-                                        service_principal_msi_id, is_service_principal, scope=subnet_id):
-                logger.warning('Could not create a role assignment for subnet: %s '
-                               'specified in %s addon. '
-                               'Are you an Owner on this subscription?', subnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
-        if CONST_INGRESS_APPGW_SUBNET_CIDR in config:
-            if result.agent_pool_profiles[0].vnet_subnet_id is not None:
-                parsed_subnet_vnet_id = parse_resource_id(
-                    result.agent_pool_profiles[0].vnet_subnet_id)
-                vnet_id = resource_id(subscription=parsed_subnet_vnet_id["subscription"],
-                                      resource_group=parsed_subnet_vnet_id["resource_group"],
-                                      namespace="Microsoft.Network",
-                                      type="virtualNetworks",
-                                      name=parsed_subnet_vnet_id["name"])
-                if not _add_role_assignment(cmd, 'Contributor',
-                                            service_principal_msi_id, is_service_principal, scope=vnet_id):
-                    logger.warning('Could not create a role assignment for virtual network: %s '
-                                   'specified in %s addon. '
-                                   'Are you an Owner on this subscription?', vnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
-
-
-def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
-    # Remove trailing "/subnets/<SUBNET_NAME>" to get the vnet id
-    vnet_id = vnet_subnet_id.rpartition('/')[0]
-    vnet_id = vnet_id.rpartition('/')[0]
-
-    service_principal_msi_id = None
-    is_service_principal = False
-    os_type = 'Linux'
-    addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + os_type
-    # Check if service principal exists, if it does, assign permissions to service principal
-    # Else, provide permissions to MSI
-    if (
-            hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id.lower() != 'msi'
-    ):
-        logger.info('valid service principal exists, using it')
-        service_principal_msi_id = result.service_principal_profile.client_id
-        is_service_principal = True
-    elif (
-            (hasattr(result, 'addon_profiles')) and
-            (addon_name in result.addon_profiles) and
-            (hasattr(result.addon_profiles[addon_name], 'identity')) and
-            (hasattr(result.addon_profiles[addon_name].identity, 'object_id'))
-    ):
-        logger.info('virtual node MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles[addon_name].identity.object_id
-        is_service_principal = False
-
-    if service_principal_msi_id is not None:
-        if not _add_role_assignment(cmd, 'Contributor',
-                                    service_principal_msi_id, is_service_principal, scope=vnet_id):
-            logger.warning('Could not create a role assignment for virtual node addon. '
-                           'Are you an Owner on this subscription?')
-    else:
-        logger.warning('Could not find service principal or user assigned MSI for role'
-                       'assignment')
-
-
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -2198,18 +2073,18 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                     namespace='Microsoft.ContainerService', type='managedClusters',
                     name=name
                 )
-                _add_monitoring_role_assignment(
+                add_monitoring_role_assignment(
                     result, cluster_resource_id, cmd)
 
         if ingress_appgw_addon_enabled:
-            _add_ingress_appgw_addon_role_assignment(result, cmd)
+            add_ingress_appgw_addon_role_assignment(result, cmd)
 
         if enable_virtual_node:
             # All agent pool will reside in the same vnet, we will grant vnet level Contributor role
             # in later function, so using a random agent pool here is OK
             random_agent_pool = result.agent_pool_profiles[0]
             if random_agent_pool.vnet_subnet_id != "":
-                _add_virtual_node_role_assignment(
+                add_virtual_node_role_assignment(
                     cmd, result, random_agent_pool.vnet_subnet_id)
             # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP,
             # we don't need to handle it in client side in this case.
@@ -4585,11 +4460,11 @@ def _put_managed_cluster_ensuring_permission(
                 namespace='Microsoft.ContainerService', type='managedClusters',
                 name=name
             )
-            _add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
+            add_monitoring_role_assignment(cluster, cluster_resource_id, cmd)
         if ingress_appgw_addon_enabled:
-            _add_ingress_appgw_addon_role_assignment(cluster, cmd)
+            add_ingress_appgw_addon_role_assignment(cluster, cmd)
         if virtual_node_addon_enabled:
-            _add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
+            add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
         if need_grant_vnet_permission_to_cluster_identity:
             if not _create_role_assignment(cmd, 'Network Contributor',
                                            cluster.identity.principal_id, scope=vnet_subnet_id,
