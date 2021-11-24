@@ -206,12 +206,8 @@ def ensure_default_log_analytics_workspace_for_monitoring(
             if ex.status_code != 404:
                 raise ex
     else:
-        ResourceGroup = cmd.get_models(
-            "ResourceGroup", resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
-        )
-        resource_group = ResourceGroup(location=workspace_region)
         resource_groups.create_or_update(
-            default_workspace_resource_group, resource_group
+            default_workspace_resource_group, {"location": workspace_region}
         )
 
     GenericResource = cmd.get_models(

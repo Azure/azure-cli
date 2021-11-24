@@ -118,7 +118,10 @@ from .addonconfiguration import (
     add_monitoring_role_assignment,
     add_ingress_appgw_addon_role_assignment,
     add_virtual_node_role_assignment,
+    ensure_default_log_analytics_workspace_for_monitoring,
+    ensure_container_insights_for_monitoring,
 )
+from ._resourcegroup import get_rg_location
 
 logger = get_logger(__name__)
 
@@ -942,7 +945,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
         dns_name_prefix = _get_default_dns_prefix(
             name, resource_group_name, subscription_id)
 
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
         location = rg_location
 
@@ -2055,8 +2058,15 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            _ensure_container_insights_for_monitoring(
-                cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
+            ensure_container_insights_for_monitoring(
+                cmd,
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                subscription_id,
+                resource_group_name,
+                name,
+                instance.location,
+                aad_route=False,
+            )
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
@@ -2957,7 +2967,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                                    'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
                                    'before enabling it again.')
                 if not workspace_resource_id:
-                    workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+                    workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
                         cmd,
                         subscription_id,
                         resource_group_name)
@@ -3096,7 +3106,7 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'monitoring' in addons:
         if not workspace_resource_id:
             # use default workspace if exists else create default workspace
-            workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
+            workspace_resource_id = ensure_default_log_analytics_workspace_for_monitoring(
                 cmd, subscription_id, resource_group_name)
 
         workspace_resource_id = workspace_resource_id.strip()
@@ -3206,197 +3216,6 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
-
-
-def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, resource_group_name):
-    # mapping for azure public cloud
-    # log analytics workspaces cannot be created in WCUS region due to capacity limits
-    # so mapped to EUS per discussion with log analytics team
-    AzureCloudLocationToOmsRegionCodeMap = {
-        "australiasoutheast": "ASE",
-        "australiaeast": "EAU",
-        "australiacentral": "CAU",
-        "canadacentral": "CCA",
-        "centralindia": "CIN",
-        "centralus": "CUS",
-        "eastasia": "EA",
-        "eastus": "EUS",
-        "eastus2": "EUS2",
-        "eastus2euap": "EAP",
-        "francecentral": "PAR",
-        "japaneast": "EJP",
-        "koreacentral": "SE",
-        "northeurope": "NEU",
-        "southcentralus": "SCUS",
-        "southeastasia": "SEA",
-        "uksouth": "SUK",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "westeurope": "WEU",
-        "westus": "WUS",
-        "westus2": "WUS2",
-        "brazilsouth": "CQ",
-        "brazilsoutheast": "BRSE",
-        "norwayeast": "NOE",
-        "southafricanorth": "JNB",
-        "northcentralus": "NCUS",
-        "uaenorth": "DXB",
-        "germanywestcentral": "DEWC",
-        "ukwest": "WUK",
-        "switzerlandnorth": "CHN",
-        "switzerlandwest": "CHW",
-        "uaecentral": "AUH"
-    }
-    AzureCloudRegionToOmsRegionMap = {
-        "australiacentral": "australiacentral",
-        "australiacentral2": "australiacentral",
-        "australiaeast": "australiaeast",
-        "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "brazilsouth",
-        "canadacentral": "canadacentral",
-        "canadaeast": "canadacentral",
-        "centralus": "centralus",
-        "centralindia": "centralindia",
-        "eastasia": "eastasia",
-        "eastus": "eastus",
-        "eastus2": "eastus2",
-        "francecentral": "francecentral",
-        "francesouth": "francecentral",
-        "japaneast": "japaneast",
-        "japanwest": "japaneast",
-        "koreacentral": "koreacentral",
-        "koreasouth": "koreacentral",
-        "northcentralus": "northcentralus",
-        "northeurope": "northeurope",
-        "southafricanorth": "southafricanorth",
-        "southafricawest": "southafricanorth",
-        "southcentralus": "southcentralus",
-        "southeastasia": "southeastasia",
-        "southindia": "centralindia",
-        "uksouth": "uksouth",
-        "ukwest": "ukwest",
-        "westcentralus": "eastus",
-        "westeurope": "westeurope",
-        "westindia": "centralindia",
-        "westus": "westus",
-        "westus2": "westus2",
-        "norwayeast": "norwayeast",
-        "norwaywest": "norwayeast",
-        "switzerlandnorth": "switzerlandnorth",
-        "switzerlandwest": "switzerlandwest",
-        "uaenorth": "uaenorth",
-        "germanywestcentral": "germanywestcentral",
-        "germanynorth": "germanywestcentral",
-        "uaecentral": "uaecentral",
-        "eastus2euap": "eastus2euap",
-        "brazilsoutheast": "brazilsoutheast"
-    }
-
-    # mapping for azure china cloud
-    # currently log analytics supported only China East 2 region
-    AzureChinaLocationToOmsRegionCodeMap = {
-        "chinaeast": "EAST2",
-        "chinaeast2": "EAST2",
-        "chinanorth": "EAST2",
-        "chinanorth2": "EAST2"
-    }
-    AzureChinaRegionToOmsRegionMap = {
-        "chinaeast": "chinaeast2",
-        "chinaeast2": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "chinanorth2": "chinaeast2"
-    }
-
-    # mapping for azure us governmner cloud
-    AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV",
-        "usgovarizona": "PHX"
-    }
-    AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia",
-        "usgovtexas": "usgovvirginia",
-        "usgovarizona": "usgovarizona"
-    }
-
-    rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
-    cloud_name = cmd.cli_ctx.cloud.name
-
-    workspace_region = "eastus"
-    workspace_region_code = "EUS"
-
-    # sanity check that locations and clouds match.
-    if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'azurechinacloud' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurechinacloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azurechinacloud) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if ((cloud_name.lower() == 'azureusgovernment' and AzureCloudRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azureusgovernment' and AzureChinaRegionToOmsRegionMap.get(rg_location, False))):
-        raise CLIError('Wrong cloud (azureusgovernment) setting for region {}, please use "az cloud set ..."'
-                       .format(rg_location))
-
-    if cloud_name.lower() == 'azurecloud':
-        workspace_region = AzureCloudRegionToOmsRegionMap.get(
-            rg_location, "eastus")
-        workspace_region_code = AzureCloudLocationToOmsRegionCodeMap.get(
-            workspace_region, "EUS")
-    elif cloud_name.lower() == 'azurechinacloud':
-        workspace_region = AzureChinaRegionToOmsRegionMap.get(
-            rg_location, "chinaeast2")
-        workspace_region_code = AzureChinaLocationToOmsRegionCodeMap.get(
-            workspace_region, "EAST2")
-    elif cloud_name.lower() == 'azureusgovernment':
-        workspace_region = AzureFairfaxRegionToOmsRegionMap.get(
-            rg_location, "usgovvirginia")
-        workspace_region_code = AzureFairfaxLocationToOmsRegionCodeMap.get(
-            workspace_region, "USGV")
-    else:
-        workspace_region = rg_location
-        workspace_region_code = rg_location.upper()
-
-    default_workspace_resource_group = 'DefaultResourceGroup-' + workspace_region_code
-    default_workspace_name = 'DefaultWorkspace-{0}-{1}'.format(
-        subscription_id, workspace_region_code)
-    default_workspace_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.OperationalInsights' \
-        '/workspaces/{2}'.format(subscription_id,
-                                 default_workspace_resource_group, default_workspace_name)
-    resource_groups = cf_resource_groups(cmd.cli_ctx, subscription_id)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-
-    # check if default RG exists
-    if resource_groups.check_existence(default_workspace_resource_group):
-        try:
-            resource = resources.get_by_id(
-                default_workspace_resource_id, '2015-11-01-preview')
-            return resource.id
-        except CloudError as ex:
-            if ex.status_code != 404:
-                raise ex
-    else:
-        # TODO: track2/replace create_or_update with begin_create_or_update, depends on 'azure.mgmt.resource.resources'
-        resource_groups.create_or_update(default_workspace_resource_group, {
-                                         'location': workspace_region})
-    GenericResource = cmd.get_models(
-        'GenericResource', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    generic_resource = GenericResource(location=workspace_region, properties={
-        'sku': {'name': 'standalone'}})
-
-    async_poller = resources.begin_create_or_update_by_id(default_workspace_resource_id, '2015-11-01-preview',
-                                                          generic_resource)
-
-    ws_resource_id = ''
-    while True:
-        result = async_poller.result(15)
-        if async_poller.done():
-            ws_resource_id = result.id
-            break
-
-    return ws_resource_id
 
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
@@ -4247,7 +4066,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     if location is None:
-        location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+        location = get_rg_location(cmd.cli_ctx, resource_group_name)
     agent_pool_profiles = []
     agent_node_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='compute',  # Must be 12 chars or less before ACS RP adds to it
