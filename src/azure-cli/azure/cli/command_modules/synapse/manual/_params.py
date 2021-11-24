@@ -381,6 +381,8 @@ def load_arguments(self, _):
                        )
 
     with self.argument_context('synapse sql audit-policy update') as c:
+        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
+                   help='Name of the blob auditing policy name.')
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
