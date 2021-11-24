@@ -69,7 +69,7 @@ def sqlserver_blob_auditing_policy_update(
         instance,
         workspace_name,
         resource_group_name,
-        blob_auditing_policy_name='bapn',
+        blob_auditing_policy_name='default',
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
