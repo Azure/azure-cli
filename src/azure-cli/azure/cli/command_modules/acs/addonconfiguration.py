@@ -310,7 +310,7 @@ def ensure_container_insights_for_monitoring(
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/"
             f"providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         )
-        dataCollectionRuleName = f"DCR-{workspace_name}"
+        dataCollectionRuleName = f"MSCI-{workspace_name}"
         dcr_resource_id = (
             f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
             f"providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
