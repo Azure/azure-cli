@@ -18,7 +18,6 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, send_raw_request
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, resource_id
 
 from ._client_factory import cf_resource_groups, cf_resources
@@ -203,7 +202,7 @@ def ensure_default_log_analytics_workspace_for_monitoring(
                 default_workspace_resource_id, "2015-11-01-preview"
             )
             return resource.id
-        except (CloudError, HttpResponseError) as ex:
+        except HttpResponseError as ex:
             if ex.status_code != 404:
                 raise ex
     else:
@@ -307,7 +306,7 @@ def ensure_container_insights_for_monitoring(
                 workspace_resource_id, "2015-11-01-preview"
             )
             location = resource.location
-        except (CloudError, HttpResponseError) as ex:
+        except HttpResponseError as ex:
             raise ex
 
     if aad_route:
