@@ -101,9 +101,9 @@ def load_arguments(self, _):
     stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
     stacks_update_behavior_type = CLIArgumentType(options_list=['--update-behavior'], help='The update behavior of deployment stacks: either detachResources or purgeResources.')
     stacks_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], help='The parameter file path for template.')
-    stacks_stack_type = CLIArgumentType(options_list=['--stack', '-h'], help='The deployment stack resource id.')
+    stacks_stack_type = CLIArgumentType(options_list=['--stack'], help='The deployment stack resource id.')
     stacks_stack_name_type = CLIArgumentType(options_list=['--stack-name'], help='The deployment stack name')
-    stacks_snapshot_type = CLIArgumentType(options_list=['--snapshot', '-h'], help='The deployment stack snapshot resource id.')
+    stacks_snapshot_type = CLIArgumentType(options_list=['--snapshot'], help='The deployment stack snapshot resource id.')
     stacks_snapshot_name_type = CLIArgumentType(options_list=['--snapshot-name'], help='The deployment stack snapshot name.')
 
 

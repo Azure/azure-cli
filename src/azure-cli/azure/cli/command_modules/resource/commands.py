@@ -60,10 +60,15 @@ def transform_deployments_list(result):
 
 def transform_stacks(result):
     r = result
+    try:
+        managed_resources_id = r['managedResources'][0]['id']
+    except:
+        managed_resources_id = ' '
+
     return OrderedDict([('Name', r['name']),
                         ('State', r['provisioningState']),
                         ('Last Modified', r['systemData']['lastModifiedAt']),
-                        ('Managed Resources Id', r['managedResources'][0]['id'])])
+                        ('Managed Resources Id', managed_resources_id)])
 
 def transform_stacks_list(result):
     transformed = []
