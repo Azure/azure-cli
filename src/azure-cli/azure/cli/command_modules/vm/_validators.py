@@ -1645,7 +1645,7 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                         source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
                                                                     result['resource_group'],
                                                                     result['name'])
-                    except ResourceNotFoundError:
+                    except Exception:  # pylint: disable=broad-except
                         # There's a chance that the source doesn't exist, eg, vmss os disk.
                         # You can get the id of vmss os disk by
                         #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
