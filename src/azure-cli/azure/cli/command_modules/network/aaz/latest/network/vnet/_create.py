@@ -23,4 +23,7 @@ class Create(AAZCommand):
         --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
     """
-    pass
+
+    class Arguments:
+        pass
+
