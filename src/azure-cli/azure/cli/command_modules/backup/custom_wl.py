@@ -266,7 +266,8 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
         filtered_items = [item for item in items if item.properties.friendly_name.lower() == name.lower()]
 
     # Server Name filter
-    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
+                      item.properties.server_name.lower() == server_name.lower()]
 
     # Protectable Item Type filter
     filtered_items = [item for item in filtered_items if item.properties.protectable_item_type is not None and
@@ -294,7 +295,8 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     filtered_items = [item for item in items if item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     # Server Name filter
-    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
+                      item.properties.server_name.lower() == server_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
@@ -321,7 +323,7 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
                        item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if server_name is not None:
         # Server Name filter
-        paged_items = [item for item in paged_items if
+        paged_items = [item for item in paged_items if hasattr(item.properties, 'server_name') and
                        item.properties.server_name.lower() == server_name.lower()]
     if container_uri:
         return [item for item in paged_items if
