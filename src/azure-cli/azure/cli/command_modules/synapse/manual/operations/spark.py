@@ -29,7 +29,7 @@ def list_spark_batch_jobs(cmd, workspace_name, spark_pool_name, from_index=None,
 
 
 def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_definition_file,
-                           main_class_name, executor_size, executors, language=SparkBatchLanguage.Scala,
+                           executor_size, executors, main_class_name=None, language=None,
                            command_line_arguments=None,
                            reference_files=None, archives=None, configuration=None,
                            tags=None):
@@ -38,6 +38,11 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
     file = main_definition_file
     class_name = main_class_name
     final_command_line_arguments = []
+    if main_class_name is None:
+        if language == SparkBatchLanguage.SparkDotNet or language == SparkBatchLanguage.Spark:
+            raise CLIError('Cannot perform the requested operation because main class name'
+                           ' is not provided. Please specify -main_class_name for Spark job or '
+                           ' .NET Spark job')
     if command_line_arguments:
         for item in command_line_arguments:
             final_command_line_arguments.append(' '.join(item))
