@@ -212,7 +212,8 @@ def _get_resource_group_name_from_ase(ase_client, ase_name):
     ase_found = False
     for ase in ase_list:
         if ase.name.lower() == ase_name.lower():
-            resource_group = ase.resource_group
+            ase_id_parts = parse_resource_id(ase.id)
+            resource_group = ase_id_parts['resource_group']
             ase_found = True
             break
     if not ase_found:
