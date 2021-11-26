@@ -747,6 +747,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+        # Get Recommended for Archive Recovery Points
+        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
+            self.check("length(@)", 0)
+        ])
+
 
     @ResourceGroupPreparer()
     @VaultPreparer()
