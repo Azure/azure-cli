@@ -437,7 +437,7 @@ class AKSContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ):
             self.assertEqual(ctx_1._get_location(read_only=True), None)
@@ -1342,7 +1342,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -1370,7 +1370,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -1417,7 +1417,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -2489,13 +2489,13 @@ class AKSContextTestCase(unittest.TestCase):
             begin_create_or_update_by_id=Mock(return_value=async_poller)
         )
         with patch(
-            "azure.cli.command_modules.acs.custom._get_rg_location",
+            "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.cf_resource_groups",
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
             return_value=cf_resource_groups,
         ), patch(
-            "azure.cli.command_modules.acs.custom.cf_resources",
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
             return_value=cf_resources,
         ):
             self.assertEqual(
@@ -4602,7 +4602,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -5042,14 +5042,21 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
+                "location": "test_location",
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.ensure_container_insights_for_monitoring",
             return_value=None,
         ):
             self.assertEqual(dec_1.context.get_intermediate("monitoring"), None)
@@ -5343,6 +5350,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
+                "location": "test_location",
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh,azure-keyvault-secrets-provider",
                 "workspace_resource_id": "test_workspace_resource_id",
@@ -5359,8 +5367,14 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.ensure_container_insights_for_monitoring",
             return_value=None,
         ):
             dec_mc_2 = dec_2.set_up_addon_profiles(mc_2)
@@ -6059,7 +6073,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             get_subscription_id=Mock(return_value="1234-5678-9012")
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.decorator.Profile",

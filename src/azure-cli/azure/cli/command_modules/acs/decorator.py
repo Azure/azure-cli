@@ -23,17 +23,21 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
+from azure.cli.command_modules.acs._resourcegroup import (
+    get_rg_location,
+)
 from azure.cli.command_modules.acs._validators import (
     extract_comma_separated_string,
+)
+from azure.cli.command_modules.acs.addonconfiguration import (
+    ensure_default_log_analytics_workspace_for_monitoring,
+    ensure_container_insights_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
     _ensure_aks_service_principal,
     _ensure_cluster_identity_permission_on_kubelet_identity,
-    _ensure_container_insights_for_monitoring,
-    _ensure_default_log_analytics_workspace_for_monitoring,
-    _get_rg_location,
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
@@ -558,7 +562,7 @@ class AKSContext:
     def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -580,7 +584,7 @@ class AKSContext:
 
         # dynamic completion
         if not read_from_mc and location is None:
-            location = _get_rg_location(
+            location = get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
 
@@ -590,7 +594,7 @@ class AKSContext:
     def get_location(self) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -2691,7 +2695,7 @@ class AKSContext:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
@@ -2733,7 +2737,7 @@ class AKSContext:
             if workspace_resource_id is None:
                 # use default workspace if exists else create default workspace
                 workspace_resource_id = (
-                    _ensure_default_log_analytics_workspace_for_monitoring(
+                    ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
                         self.get_subscription_id(),
                         self.get_resource_group_name(),
@@ -2756,7 +2760,7 @@ class AKSContext:
         """Dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         :return: string or None
@@ -4410,7 +4414,7 @@ class AKSCreateDecorator:
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with several parameters and attach it to internal context.
 
-        When location is not assigned, function "_get_rg_location" will be called to get the location of the provided
+        When location is not assigned, function "get_rg_location" will be called to get the location of the provided
         resource group, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -4781,9 +4785,9 @@ class AKSCreateDecorator:
     def build_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build monitoring addon profile.
 
-        The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
+        The function "ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
-        When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
+        When workspace_resource_id is not assigned, function "ensure_default_log_analytics_workspace_for_monitoring"
         will be called to create a workspace, which internally used ResourceManagementClient to send the request.
 
         :return: a ManagedClusterAddonProfile object
@@ -4802,8 +4806,13 @@ class AKSCreateDecorator:
             },
         )
         # post-process, create a deployment
-        _ensure_container_insights_for_monitoring(
-            self.cmd, monitoring_addon_profile
+        ensure_container_insights_for_monitoring(
+            self.cmd, monitoring_addon_profile,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            self.context.get_location(),
+            aad_route=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
