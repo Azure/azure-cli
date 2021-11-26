@@ -1,4 +1,4 @@
-from ._base import AAZBaseType, AAZValuePatch, AAZUndefined
+from ._base import AAZBaseType
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError
 from ._field_value import AAZModelValue, AAZDictValue, AAZListValue, AAZSimpleValue
 
@@ -7,17 +7,12 @@ from ._field_value import AAZModelValue, AAZDictValue, AAZListValue, AAZSimpleVa
 class AAZSimpleType(AAZBaseType):
     _data_type = None
 
-    def __init__(self):
-        super().__init__()
+    ValueCls = AAZSimpleValue
 
-    @staticmethod
-    def new_patch():
-        return AAZValuePatch(data=AAZUndefined)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def value(self, name, data):
-        return AAZSimpleValue(name=name, schema=self, data=data)
-
-    def process(self, name, data):
+    def process_data(self, data, **kwargs):
         if isinstance(data, AAZSimpleValue):
             data = data._data
         assert isinstance(data, self._data_type)
@@ -39,7 +34,7 @@ class AAZBoolType(AAZSimpleType):
 class AAZFloatType(AAZSimpleType):
     _data_type = float
 
-    def process(self, name, data):
+    def process_data(self, data, **kwargs):
         if isinstance(data, AAZSimpleValue):
             data = data._data
         if isinstance(data, int):
@@ -54,54 +49,79 @@ class AAZFloatType(AAZSimpleType):
 # compound types
 
 class AAZModelType(AAZBaseType):
+    _PROTECTED_KEYWORDS = ("ValueCls", "PatchDataCls", "get_attr_name", "process_data")
 
-    def __init__(self):
-        super().__init__()
+    ValueCls = AAZModelValue
+    PatchDataCls = dict
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._fields = {}
+        self._fields_alias_map = {}  # key is the option, value is field
 
     def __getattr__(self, key):
-        if key in self._fields:
-            return self._fields[key]
-        else:
+        name = self.get_attr_name(key)
+        if name not in self._fields:
             raise AAZUnknownFieldError(self, key)
+        return self._fields[name]
 
     def __setattr__(self, key, value):
         if key.startswith('_'):
             assert not isinstance(value, AAZBaseType)
             self.__dict__[key] = value
         elif isinstance(value, AAZBaseType):
-            self._fields[key] = value
+            if self.get_attr_name(key):
+                # key should not be defined before
+                raise AAZConflictFieldDefinitionError(f"{key}")
+            assert key not in self._PROTECTED_KEYWORDS
+            name = key
+            value._name = name
+            self._fields[name] = value
+
+            # update alias map
+            aliases = [*value._options] if value._options else []
+            if value._serialized_name:
+                aliases.append(value._serialized_name)
+
+            for alias in aliases:
+                if alias == name:
+                    continue
+                assert not alias.startswith('_')
+                assert alias not in self._PROTECTED_KEYWORDS
+                if alias in self._fields_alias_map and self._fields_alias_map[alias] != name:
+                    raise AAZConflictFieldDefinitionError(f"{name}")
+                self._fields_alias_map[alias] = name
         else:
             raise AAZUnknownFieldError(self, key)
 
-    @property
-    def fields(self):
-        return self._fields
+    def get_attr_name(self, key):
+        if key in self._fields:
+            return key
+        elif key in self._fields_alias_map:
+            return self._fields_alias_map[key]
+        return None
 
-    @staticmethod
-    def new_patch():
-        return AAZValuePatch(data={})
-
-    def value(self, name, data):
-        assert isinstance(data, (AAZValuePatch, dict))
-        return AAZModelValue(name=name, schema=self, data=data)
-
-    def process(self, name, data):
-        value = AAZModelValue(name=name, schema=self, data={})
+    def process_data(self, data, **kwargs):
+        result = {}
+        value = AAZModelValue(schema=self, data=result)
         if isinstance(data, AAZModelValue):
             data = data._data
         else:
             assert isinstance(data, (dict, ))
 
         for key, sub_data in data.items():
-            setattr(value, key, sub_data)
-        return value._data
+            name = self.get_attr_name(key)
+            setattr(value, name, sub_data)
+        return result
 
 
 class AAZDictType(AAZBaseType):
 
-    def __init__(self):
-        super().__init__()
+    ValueCls = AAZDictValue
+    PatchDataCls = dict
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._element = None
 
     @property
@@ -115,22 +135,18 @@ class AAZDictType(AAZBaseType):
         if self._element is None:
             assert isinstance(value, AAZBaseType)
             self._element = value
+            assert self._element._name is None
+            assert not self._element._options
+            assert self._element._serialized_name is None
         elif self._element != value:
             raise AAZConflictFieldDefinitionError("Element")
 
     def __getitem__(self, key):
         return self.Element
 
-    @staticmethod
-    def new_patch():
-        return AAZValuePatch(data={})
-
-    def value(self, name, data):
-        assert isinstance(data, (AAZValuePatch, dict))
-        return AAZDictValue(name=name, schema=self, data=data)
-
-    def process(self, name, data):
-        value = AAZDictValue(name, schema=self, data={})
+    def process_data(self, data, **kwargs):
+        result = {}
+        value = AAZDictValue(schema=self, data=result)
         if isinstance(data, AAZDictValue):
             data = data._data
         else:
@@ -138,13 +154,16 @@ class AAZDictType(AAZBaseType):
 
         for key, sub_data in data.items():
             value[key] = sub_data
-        return value._data
+        return result
 
 
 class AAZListType(AAZBaseType):
 
-    def __init__(self):
-        super().__init__()
+    ValueCls = AAZListValue
+    PatchDataCls = dict
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._element = None
 
     @property
@@ -158,31 +177,25 @@ class AAZListType(AAZBaseType):
         if self._element is None:
             assert isinstance(value, AAZBaseType)
             self._element = value
+            assert self._element._name is None
+            assert not self._element._options
+            assert self._element._serialized_name is None
         elif self._element != value:
             raise AAZConflictFieldDefinitionError("element")
 
     def __getitem__(self, key):
         return self.Element
 
-    @staticmethod
-    def new_patch():
-        return AAZValuePatch(data={})
-
-    def value(self, name, data):
-        assert isinstance(data, (AAZValuePatch, dict))
-        return AAZListValue(name=name, schema=self, data=data)
-
-    def process(self, name, data):
-        value = AAZListValue(name, schema=self, data={})
+    def process_data(self, data, **kwargs):
+        result = {}
+        value = AAZListValue(schema=self, data=result)
 
         if isinstance(data, AAZListValue):
             data = data._data
-            assert isinstance(data, dict)
+            for idx, sub_data in data.items():
+                value[idx] = sub_data
         else:
             assert isinstance(data, list)
-            data = dict([(idx, sub_data) for idx, sub_data in enumerate(data)])
-
-        for idx, sub_data in data.items():
-            value[idx] = sub_data
-
-        return value._data
+            for idx, sub_data in enumerate(data):
+                value[idx] = sub_data
+        return result

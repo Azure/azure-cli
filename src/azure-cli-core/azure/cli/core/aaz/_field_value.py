@@ -1,4 +1,4 @@
-from ._base import AAZBaseValue
+from ._base import AAZBaseValue, AAZValuePatch
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -43,52 +43,54 @@ class AAZSimpleValue(AAZBaseValue):
 
 class AAZModelValue(AAZBaseValue):
 
-    def __init__(self, name, schema, data):
-        from ._field_type import AAZModelType
-        assert isinstance(schema, AAZModelType)
-        super().__init__(name, schema, data)
+    def __init__(self, schema, data):
+        super().__init__(schema, data)
         assert isinstance(self._data, dict)
 
     def __getattr__(self, key) -> AAZBaseValue:
-        key_schema = getattr(self._schema, key)
-        if key not in self._data:
+        attr_schema = getattr(self._schema, key)
+        name = self._schema.get_attr_name(key)
+        if name not in self._data:
             # is key is not set before, then create a patch, and value updated in patch will be partial updated
-            self._data[key] = key_schema.new_patch()
-        return key_schema.value(key, self._data[key])
+            self._data[name] = AAZValuePatch.build(attr_schema)
+        return attr_schema.ValueCls(attr_schema, self._data[name])
 
     def __setattr__(self, key, data):
         if key.startswith('_'):
             self.__dict__[key] = data
         else:
-            key_schema = getattr(self._schema, key)
-            self._data[key] = key_schema.process(key, data)
+            attr_schema = getattr(self._schema, key)
+            name = self._schema.get_attr_name(key)
+            self._data[name] = attr_schema.process_data(data, key=name)
 
     def __delattr__(self, key):
         if key.startswith('_'):
             del self.__dict__[key]
-        elif key in self._data:
-            del self._data[key]
-        elif key not in self._schema.fields:
-            raise KeyError(f"Attribute {key} not exist")
+        else:
+            name = self._schema.get_attr_name(key)
+            if name in self._data:
+                del self._data[name]
+            elif name is None:
+                raise KeyError(f"Attribute {key} not exist")
 
 
 class AAZDictValue(AAZBaseValue):
 
-    def __init__(self, name, schema, data):
+    def __init__(self, schema, data):
         from ._field_type import AAZDictType
         assert isinstance(schema, AAZDictType)
-        super().__init__(name, schema, data)
+        super().__init__(schema, data)
         assert isinstance(self._data, dict)
 
     def __getitem__(self, key) -> AAZBaseValue:
-        schema = self._schema.Element
+        item_schema = self._schema.Element
         if key not in self._data:
-            self._data[key] = schema.new_patch()
-        return schema.value(key, self._data[key])
+            self._data[key] = AAZValuePatch.build(item_schema)
+        return item_schema.ValueCls(item_schema, self._data[key])
 
     def __setitem__(self, key, data):
-        schema = self._schema.Element
-        self._data[key] = schema.process(key, data)
+        item_schema = self._schema.Element
+        self._data[key] = item_schema.process_data(data, key=key)
 
     def __delitem__(self, key):
         del self._data[key]
@@ -110,22 +112,20 @@ class AAZDictValue(AAZBaseValue):
         return self._data.keys()
 
     def values(self):
-        schema = self._schema.Element
-        for key, data in self._data.items():
-            yield schema.value(key, data)
+        for key in self._data:
+            yield self[key]
 
     def items(self):
-        schema = self._schema.Element
-        for key, data in self._data.items():
-            yield key, schema.value(key, data)
+        for key in self._data:
+            yield key, self[key]
 
 
 class AAZListValue(AAZBaseValue):
 
-    def __init__(self, name, schema, data):
+    def __init__(self, schema, data):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
-        super().__init__(name, schema, data)
+        super().__init__(schema, data)
         assert isinstance(self._data, dict) # the key is the idx
         self._len = 0
         for idx in self._data:
@@ -140,12 +140,14 @@ class AAZListValue(AAZBaseValue):
         if idx < 0:
             idx += self._len
 
-        schema = self._schema.Element
+        item_schema = self._schema.Element
         if idx not in self._data:
-            self._data[idx] = schema.new_patch()
+            self._data[idx] = AAZValuePatch.build(item_schema)
+
             if idx + 1 > self._len:
                 self._len = idx + 1
-        return schema.value(idx, self._data[idx])
+
+        return item_schema.ValueCls(item_schema, self._data[idx])
 
     def __setitem__(self, idx, data):
         if not isinstance(idx, int):
@@ -156,7 +158,8 @@ class AAZListValue(AAZBaseValue):
             idx += self._len
 
         schema = self._schema.Element
-        self._data[idx] = schema.process(idx, data)
+        self._data[idx] = schema.process_data(data, key=idx)
+
         if idx + 1 > self._len:
             self._len = idx + 1
 
@@ -173,6 +176,7 @@ class AAZListValue(AAZBaseValue):
                 del self._data[i]
             if i + 1 in self._data:
                 self._data[i] = self._data[i+1]
+
         if self._len - 1 in self._data:
             del self._data[self._len-1]
         self._len -= 1

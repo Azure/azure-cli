@@ -1,45 +1,6 @@
 import abc
 
 
-class AAZValuePatch:
-
-    def __init__(self, data):
-        self.data = data
-
-
-class AAZBaseType:
-    __metaclass__ = abc.ABCMeta
-
-    @staticmethod
-    def new_patch():
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def value(self, name, data):
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def process(self, name, data):
-        raise NotImplementedError()
-
-
-class AAZBaseValue:
-
-    def __init__(self, name, schema, data):
-        self._name = name
-        self._schema = schema
-        if isinstance(data, AAZValuePatch):
-            self._data = data.data
-            self._is_patch = True
-        else:
-            self._data = data
-            self._is_patch = False
-
-    @property
-    def is_patch(self):
-        return self._is_patch
-
-
 class _AAZUndefinedType:
 
     def __str__(self):
@@ -74,3 +35,45 @@ class _AAZUndefinedType:
 
 
 AAZUndefined = _AAZUndefinedType()
+
+
+class AAZValuePatch:
+
+    @classmethod
+    def build(cls, schema):
+        if schema.PatchDataCls:
+            return cls(data=schema.PatchDataCls())
+        else:
+            return cls(data=AAZUndefined)
+
+    def __init__(self, data):
+        self.data = data
+
+
+class AAZBaseValue:
+
+    def __init__(self, schema, data):
+        self._schema = schema
+        if isinstance(data, AAZValuePatch):
+            self._data = data.data
+            self._is_patch = True
+        else:
+            self._data = data
+            self._is_patch = False
+
+
+class AAZBaseType:
+    ValueCls = None
+    PatchDataCls = None
+
+    def __init__(self, options=None, serialized_name=None):
+        assert issubclass(self.ValueCls, AAZBaseValue)
+        self._serialized_name = serialized_name
+        self._options = options
+        self._name = None
+
+    @abc.abstractmethod
+    def process_data(self, data, **kwargs):
+        raise NotImplementedError()
+
+

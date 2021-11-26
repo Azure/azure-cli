@@ -1,6 +1,6 @@
-from ._field_type import AAZModelType
-from ._base import AAZBaseType
-from ._field_type import AAZModelValue
+from ._base import AAZBaseType, AAZUndefined
+from ._field_type import AAZModelType, AAZStrType, AAZIntType, AAZBoolType
+from ._field_value import AAZModelValue
 
 
 def metaclass(metaclass):
@@ -22,7 +22,7 @@ class _AAZArgumentsMeta(type):
         schema = AAZModelType()
         for base in reversed(bases):
             if hasattr(base, '_schema'):
-                for name, field in base._schema.fields.items():
+                for name, field in base._schema._fields.items():
                     setattr(schema, name, field)
         new_attrs = {}
         for name, field in attrs.items():
@@ -40,21 +40,28 @@ class _AAZArgumentsMeta(type):
 class AAZArguments(AAZModelValue):
 
     def __init__(self):
-        super(AAZArguments, self).__init__(
-            name="",
-            schema=self._schema,
-            data={}
-        )
+        super(AAZArguments, self).__init__(schema=self._schema, data={})
 
 
-# class AAZBaseArg:
-#     pass
-#
-#
-# class AAZStringArg(AAZBaseArg):
-#     pass
-#
-#
+class AAZBaseArg:
+
+    def __init__(self, options, help, required=False, arg_group=None, is_preview=False, is_experimental=False,
+                 id_part=None, default=AAZUndefined, blank=AAZUndefined):
+        self._options = options
+        self._help = help
+        self._required = required
+        self._arg_group = arg_group
+        self._is_preview = is_preview
+        self._is_experimental = is_experimental
+        self._id_part = id_part
+        self._default = default
+        self._blank = blank
+
+
+class AAZStringArg(AAZBaseArg, AAZStrType):
+    pass
+
+
 # class AAZIntegerArg(AAZBaseArg):
 #     pass
 #
