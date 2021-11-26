@@ -326,6 +326,15 @@ class AKSParamDict:
         self.__increase(key)
         return self.__store.get(key)
 
+    def keys(self):
+        return self.__store.keys()
+
+    def values(self):
+        return self.__store.values()
+
+    def items(self):
+        return self.__store.items()
+
     def __format_count(self):
         untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
         for k in untouched_keys:
@@ -893,21 +902,15 @@ class AKSContext:
         :return: dictionary or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("nodepool_labels")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.node_labels
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            nodepool_labels = value_obtained_from_mc
-        else:
-            nodepool_labels = raw_value
+        nodepool_labels = self.raw_param.get("nodepool_labels")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.agent_pool_profiles:
+                agent_pool_profile = safe_list_get(
+                    self.mc.agent_pool_profiles, 0, None
+                )
+                if agent_pool_profile:
+                    nodepool_labels = agent_pool_profile.node_labels
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -3995,14 +3998,15 @@ class AKSContext:
         """
         # read the original value passed by the command
         assign_kubelet_identity = self.raw_param.get("assign_kubelet_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.identity_profile and
-            self.mc.identity_profile.get("kubeletidentity", None) and
-            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
-        ):
-            assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.identity_profile and
+                self.mc.identity_profile.get("kubeletidentity", None) and
+                getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
+            ):
+                assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
         # validation
@@ -5821,6 +5825,19 @@ class AKSUpdateDecorator:
         self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
         return mc
 
+    def update_nodepool_labels(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update nodepool labels for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nodepool_labels = self.context.get_nodepool_labels()
+        if nodepool_labels is not None:
+            for agent_profile in mc.agent_pool_profiles:
+                agent_profile.node_labels = nodepool_labels
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5860,14 +5877,12 @@ class AKSUpdateDecorator:
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
-
+        # update nodepool labels
+        mc = self.update_nodepool_labels(mc)
         return mc
 
-    def update_mc(self) -> ManagedCluster:
+    def update_mc(self, mc: ManagedCluster) -> ManagedCluster:
         """Send request to update the existing managed cluster.
-
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
-        implemented gradually.
 
         The function "_put_managed_cluster_ensuring_permission" will be called to use the ContainerServiceClient to
         send a reqeust to update the existing managed cluster, and also add necessary role assignments for some optional
@@ -5875,3 +5890,22 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
+        self._ensure_mc(mc)
+
+        return _put_managed_cluster_ensuring_permission(
+            self.cmd,
+            self.client,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            mc,
+            self.context.get_intermediate("monitoring"),
+            self.context.get_intermediate("ingress_appgw_addon_enabled"),
+            self.context.get_intermediate("enable_virtual_node"),
+            False,
+            mc.agent_pool_profiles[0].vnet_subnet_id,
+            check_is_msi_cluster(mc),
+            self.context.get_attach_acr(),
+            self.context.get_aks_custom_headers(),
+            self.context.get_no_wait()
+        )
