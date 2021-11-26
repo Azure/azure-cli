@@ -204,14 +204,12 @@ def synapse_kusto_script_export(cmd, workspace_name, output_folder, script_name=
         kusto_script_client = cf_kusto_script(cmd.cli_ctx, workspace_name)
         kql_script = kusto_script_client.get_by_name(script_name)
         path = os.path.join(output_folder, script_name + '.kql')
-        print(kql_script.properties.as_dict())
         write_to_file(kql_script, path)
     else:
         kusto_script_client = cf_kusto_scripts(cmd.cli_ctx, workspace_name)
         kql_scripts = kusto_script_client.get_all()
         for kql_script in kql_scripts:
             path = os.path.join(output_folder, kql_script.name + '.kql')
-            print(kql_script.properties.as_dict())
             write_to_file(kql_script, path)
 
 
