@@ -1056,7 +1056,7 @@ def load_arguments(self, _):
         with self.argument_context('synapse kql-script ' + scope) as c:
             c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
             c.argument('script_name', arg_type=name_type,
-                       help='The name of the KQL scripts.')
+                       help='The name of the KQL script.')
 
     with self.argument_context('synapse kql-script list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
@@ -1064,4 +1064,4 @@ def load_arguments(self, _):
     with self.argument_context('synapse kql-script export') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
         c.argument('output_folder', type=str, help='The name of the output folder')
-        c.argument('script_name', arg_type=name_type, help='The name of the KQL scripts.')
+        c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')

@@ -31,6 +31,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_integrationruntimestatus_factory
     from ._client_factory import cf_kusto_pool
     from ._client_factory import cf_kusto_script
+    from ._client_factory import cf_kusto_scripts
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -559,6 +560,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'synapse_kusto_script_create', supports_no_wait=True)
         g.custom_command('import', 'synapse_kusto_script_create', supports_no_wait=True)
         g.custom_command('delete', 'synapse_kusto_script_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('list', 'synapse_kusto_script_list')
+        g.custom_command('list', 'synapse_kusto_script_list', client_factory=cf_kusto_scripts)
         g.custom_command('export', 'synapse_kusto_script_export')
         g.custom_wait_command('wait', 'synapse_kusto_script_show')

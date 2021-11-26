@@ -151,14 +151,14 @@ def synapse_kusto_pool_detach_follower_database(client,
                        follower_database_to_remove=follower_database_to_remove)
 
 
-def synapse_kusto_script_show(cmd,
+def synapse_kusto_script_show(cmd, client,
                               workspace_name,
                               script_name):
     client = cf_kusto_script(cmd.cli_ctx, workspace_name)
     return client.get_by_name(kql_script_name=script_name)
 
 
-def synapse_kusto_script_create(cmd,
+def synapse_kusto_script_create(cmd, client,
                                 resource_group_name,
                                 workspace_name,
                                 script_name,
@@ -182,7 +182,7 @@ def synapse_kusto_script_create(cmd,
                        )
 
 
-def synapse_kusto_script_delete(cmd,
+def synapse_kusto_script_delete(cmd, client,
                                 workspace_name,
                                 script_name,
                                 no_wait=False):
@@ -193,7 +193,7 @@ def synapse_kusto_script_delete(cmd,
                        kql_script_name=script_name)
 
 
-def synapse_kusto_script_list(cmd,
+def synapse_kusto_script_list(cmd, client,
                               workspace_name):
     client = cf_kusto_scripts(cmd.cli_ctx, workspace_name)
     return client.get_all()
