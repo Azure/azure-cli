@@ -29,7 +29,7 @@ def list_spark_batch_jobs(cmd, workspace_name, spark_pool_name, from_index=None,
 
 
 def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_definition_file,
-                           executor_size, executors, main_class_name=None, language=None,
+                           executor_size, executors, language=SparkBatchLanguage.Scala, main_class_name=None,
                            command_line_arguments=None,
                            reference_files=None, archives=None, configuration=None,
                            tags=None):
