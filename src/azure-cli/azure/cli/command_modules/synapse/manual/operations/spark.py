@@ -38,11 +38,12 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
     file = main_definition_file
     class_name = main_class_name
     final_command_line_arguments = []
-    for item in command_line_arguments:
-        final_command_line_arguments.append(' '.join(item))
-    # e.g --arguments a b; command_line_arguments =[['a', 'b']]
-    if len(command_line_arguments) == 1 and len(command_line_arguments[0]) != 1:
-        final_command_line_arguments = split(final_command_line_arguments[0])
+    if command_line_arguments:
+        for item in command_line_arguments:
+            final_command_line_arguments.append(' '.join(item))
+        # e.g --arguments a b; command_line_arguments =[['a', 'b']]
+        if len(command_line_arguments) == 1 and len(command_line_arguments[0]) != 1:
+            final_command_line_arguments = split(final_command_line_arguments[0])
     arguments = final_command_line_arguments
     # dotnet spark
     if language.upper() == SparkBatchLanguage.SparkDotNet.upper() or language.upper() == SparkBatchLanguage.CSharp.upper():
