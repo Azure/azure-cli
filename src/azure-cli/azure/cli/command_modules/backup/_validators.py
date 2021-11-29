@@ -5,6 +5,7 @@
 
 from datetime import datetime
 from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError, ArgumentUsageError
+from azure.mgmt.recoveryservicesbackup.models import StorageType
 # Argument types
 
 
@@ -42,3 +43,23 @@ def validate_crr(target_rg_id, rehydration_priority):
 
     if rehydration_priority is not None:
         raise MutuallyExclusiveArgumentError("Archive restore isn't supported for secondary region.")
+
+
+def validate_czr(backup_config_response, recovery_point):
+    backup_storage_redundancy = backup_config_response.properties.storage_type
+    cross_region_restore_flag = backup_config_response.properties.cross_region_restore_flag
+    if (cross_region_restore_flag or backup_storage_redundancy == StorageType.ZONE_REDUNDANT):
+        if recovery_point.tier_type is not None and recovery_point.tier_type == "VaultStandard":
+            if recovery_point.properties.zones is None:
+                raise ArgumentUsageError("""
+                Please ensure that the recovery point is zone pinned or remove --target-zone argument.
+                """)
+        else:
+            raise ArgumentUsageError("""
+            Please ensure that the given RP tier type is 'VaultStandard' or remove --target-zone argument.
+            """)
+    else:
+        raise ArgumentUsageError("""
+        Please ensure either the vault storage redundancy is ZoneRedundant or the vault has CRR enabled or try
+        removing --target-zone argument.
+        """)

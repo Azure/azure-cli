@@ -133,50 +133,55 @@ def list_associated_items_for_policy(client, resource_group_name, vault_name, na
     return custom_help.get_list_from_paged_response(items)
 
 
+def fetch_tier_for_rp(rp):
+    isRehydrated = False
+    isInstantRecoverable = False
+    isHardenedRP = False
+    isArchived = False
+
+    if rp.properties.recovery_point_tier_details is None:
+        setattr(rp, "tier_type", None)
+        return
+
+    for i in range(len(rp.properties.recovery_point_tier_details)):
+        currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+        if (currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP") and
+                currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Rehydrated")):
+            isRehydrated = True
+
+        if currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Valid"):
+            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "InstantRP"):
+                isInstantRecoverable = True
+
+            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "HardenedRP"):
+                isHardenedRP = True
+
+            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP"):
+                isArchived = True
+
+    if (isHardenedRP and isArchived) or (isRehydrated):
+        setattr(rp, "tier_type", "VaultStandardRehydrated")
+
+    elif isInstantRecoverable and isHardenedRP:
+        setattr(rp, "tier_type", "SnapshotAndVaultStandard")
+
+    elif isInstantRecoverable and isArchived:
+        setattr(rp, "tier_type", "SnapshotAndVaultArchive")
+
+    elif isArchived:
+        setattr(rp, "tier_type", "VaultArchive")
+
+    elif isInstantRecoverable:
+        setattr(rp, "tier_type", "Snapshot")
+
+    elif isHardenedRP:
+        setattr(rp, "tier_type", "VaultStandard")
+
+
 def fetch_tier(paged_recovery_points):
 
     for rp in paged_recovery_points:
-        isRehydrated = False
-        isInstantRecoverable = False
-        isHardenedRP = False
-        isArchived = False
-
-        if rp.properties.recovery_point_tier_details is None:
-            continue
-
-        for i in range(len(rp.properties.recovery_point_tier_details)):
-            currRpTierDetails = rp.properties.recovery_point_tier_details[i]
-            if (currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP") and
-                    currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Rehydrated")):
-                isRehydrated = True
-
-            if currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Valid"):
-                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "InstantRP"):
-                    isInstantRecoverable = True
-
-                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "HardenedRP"):
-                    isHardenedRP = True
-
-                if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP"):
-                    isArchived = True
-
-        if (isHardenedRP and isArchived) or (isRehydrated):
-            setattr(rp, "tier_type", "VaultStandardRehydrated")
-
-        elif isInstantRecoverable and isHardenedRP:
-            setattr(rp, "tier_type", "SnapshotAndVaultStandard")
-
-        elif isInstantRecoverable and isArchived:
-            setattr(rp, "tier_type", "SnapshotAndVaultArchive")
-
-        elif isArchived:
-            setattr(rp, "tier_type", "VaultArchive")
-
-        elif isInstantRecoverable:
-            setattr(rp, "tier_type", "Snapshot")
-
-        elif isHardenedRP:
-            setattr(rp, "tier_type", "VaultStandard")
+        fetch_tier_for_rp(rp)
 
 
 def check_rp_move_readiness(paged_recovery_points, target_tier, is_ready_for_move):
