@@ -1107,7 +1107,7 @@ def __validate_import_tags(kv):
     if kv.tags:
         for tag_key, tag_value in kv.tags.items():
             if not isinstance(tag_value, str):
-                logger.warning("The value for the tag '{0}' for key '{1}' is not a string. It will be converted to a string.".format(tag_key, kv.key))
+                logger.warning("The value for the tag '{%s}' for key '{%s}' is not a string. It will be converted to a string.", tag_key, kv.key)
                 return
 
 
