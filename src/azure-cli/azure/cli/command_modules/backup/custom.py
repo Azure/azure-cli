@@ -19,7 +19,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest
+    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest, ListRecoveryPointsRecommendedForMoveRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -761,7 +761,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                 """)
 
         client = recovery_points_recommended_cf(cmd.cli_ctx)
-        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                      ListRecoveryPointsRecommendedForMoveRequest(excluded_rp_list=[]))
 
     else:
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
