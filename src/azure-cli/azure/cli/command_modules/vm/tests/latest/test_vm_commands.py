@@ -852,7 +852,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # in different region, it should default copyStart as True
         # TODO: should not throw exception after feature GA
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
+        with self.assertRaisesRegex(ResourceExistsError, 'CopyStart creation is not supported for this subscription'):
             self.cmd('snapshot create -g {rg} -n {snapshot2} --source {disk} -l eastus')
 
     """ Disable temporarily
@@ -3117,7 +3117,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
@@ -3151,7 +3151,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
         message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
                   'vaultCertificate index 0'
-        with self.assertRaisesRegexp(CLIError, message):
+        with self.assertRaisesRegex(CLIError, message):
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
         vault_out = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()
@@ -6985,7 +6985,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
+        with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
 
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
@@ -7071,7 +7071,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
-        with self.assertRaisesRegexp(ArgumentUsageError, message):
+        with self.assertRaisesRegex(ArgumentUsageError, message):
             self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides {config}')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --app-config-overrides null {config}', checks=[
@@ -7081,6 +7081,128 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
 
+
+class DiskRPTestScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_public_network_access')
+    def test_public_network_access(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'disk1',
+            'disk2': 'disk2',
+            'disk3': 'disk3',
+            'snapshot1': 'snapshot1',
+            'snapshot2': 'snapshot2',
+            'snapshot3': 'snapshot3',
+        })
+
+        self.cmd('disk create --public-network-access Enabled --size-gb 5 -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
+        self.cmd('disk update --public-network-access Disabled -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('disk create --network-access-policy AllowAll --public-network-access Disabled --size-gb 5 -n {disk2} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('disk-access create -g {rg} -n diskaccess')
+        self.cmd('snapshot create --network-access-policy AllowPrivate --disk-access diskaccess --public-network-access Enabled --size-gb 5 -n {disk3} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {disk3}', checks=[
+            self.check('name', '{disk3}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
+
+        self.cmd('snapshot create --public-network-access Enabled --size-gb 5 -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+            self.check('name', '{snapshot1}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
+        self.cmd('snapshot update --public-network-access Disabled -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+            self.check('name', '{snapshot1}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('snapshot create --network-access-policy AllowAll --public-network-access Disabled --size-gb 5 -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+            self.check('name', '{snapshot2}'),
+            self.check('publicNetworkAccess', 'Disabled')
+        ])
+        self.cmd('disk-access create -g {rg} -n diskaccess')
+        self.cmd('snapshot create --network-access-policy AllowPrivate --disk-access diskaccess --public-network-access Enabled --size-gb 5 -n {snapshot3} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot3}', checks=[
+            self.check('name', '{snapshot3}'),
+            self.check('publicNetworkAccess', 'Enabled')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_accelerated_network')
+    def test_accelerated_network(self, resource_group):
+        self.kwargs.update({
+            'disk1': 'disk1',
+            'disk2': 'disk2',
+            'snapshot1': 'snapshot1',
+            'snapshot2': 'snapshot2',
+        })
+
+        self.cmd('disk create --accelerated-network true --size-gb 5 -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
+        ])
+        self.cmd('disk update --accelerated-network false -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', False)
+        ])
+        self.cmd('disk create --size-gb 5 -n {disk2} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk2}', checks=[
+            self.check('name', '{disk2}'),
+            self.check('supportedCapabilities', None)
+        ])
+        self.cmd('disk update --accelerated-network true -n {disk1} -g {rg}')
+        self.cmd('disk show -g {rg} -n {disk1}', checks=[
+            self.check('name', '{disk1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
+        ])
+
+        self.cmd('snapshot create --accelerated-network true --size-gb 5 -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+            self.check('name', '{snapshot1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
+        ])
+        self.cmd('snapshot update --accelerated-network false -n {snapshot1} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+            self.check('name', '{snapshot1}'),
+            self.check('supportedCapabilities.acceleratedNetwork', False)
+        ])
+        self.cmd('snapshot create --size-gb 5 -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+            self.check('name', '{snapshot2}'),
+            self.check('supportedCapabilities', None)
+        ])
+        self.cmd('snapshot update --accelerated-network true -n {snapshot2} -g {rg}')
+        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+            self.check('name', '{snapshot2}'),
+            self.check('supportedCapabilities.acceleratedNetwork', True)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent1_', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_completion_percent2_', location='eastus', key='rg2')
+    def test_completion_percent(self, resource_group):
+        # Create a random empty disk
+        self.cmd('disk create -g {rg} -n disk1 --size-gb 200 -l westus')
+        # Create a snapshot A from a empty disk with createOption as "Copy"
+        self.kwargs['source'] = self.cmd('snapshot create -g {rg} -n snapa --source disk1 -l westus --incremental true').get_output_in_json()['id']
+        # Create a snapshot B in different region with createOption as "CopyStart" with snapshot A as source
+        self.cmd('snapshot create -g {rg2} -n snapb --copy-start true --incremental true --source {source} -l eastus')
+        # show snapshot B, check completionPercent
+        self.cmd('snapshot show -g {rg2} -n snapb', checks=[
+            self.check_pattern('completionPercent', '\d?.\d?')
+        ])
 
 if __name__ == '__main__':
     unittest.main()

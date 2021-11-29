@@ -256,7 +256,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_streaming_endpoint_name': nonexits_streaming_endpoint_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {nonexits_streaming_endpoint_name}')
 
         self.cmd('az ams streaming-endpoint delete -g {rg} -a {amsname} -n {streamingEndpointName}')
