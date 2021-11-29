@@ -2,7 +2,7 @@ from knack.arguments import CLICommandArgument, CaseInsensitiveList
 from ._base import AAZBaseType, AAZUndefined
 from ._field_type import AAZModelType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, AAZSimpleType
 from ._field_value import AAZModel
-from ._arg_action import AAZSimpleTypeArgAction, AAZBoolArgAction
+from ._arg_action import AAZSimpleTypeArgAction
 from azure.cli.core import azclierror
 
 
@@ -32,13 +32,18 @@ class AAZArgEnum:
             choices = CaseInsensitiveList(choices)
         return choices
 
-    def get_value(self, data):
+    def __getitem__(self, data):
         key = data
-        if not self._case_sensitive:
-            for k in self.items:
-                if k.lower() == key.lower():
+        # if not self._case_sensitive:
+        if isinstance(self.items, dict):
+            for k, v in self.items.items():
+                if v == data:
                     key = k
                     break
+                elif k == data or not self._case_sensitive and k.lower() == data.lower():
+                    key = k
+                    break
+
         if key in self.items:
             if isinstance(self.items, (list, tuple, set)):
                 return key
@@ -88,13 +93,13 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
 
     def __init__(self, enum=None, fmt=None, **kwargs):
         super().__init__(**kwargs)
-        self._enum = enum
+        self.enum = enum
         self._fmt = fmt
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name=name)
-        if self._enum:
-            arg.choices = self._enum.to_choices()
+        if self.enum:
+            arg.choices = self.enum.to_choices()
         arg.action = self._build_cmd_action()
         return arg
 
@@ -114,17 +119,12 @@ class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
 
 class AAZBoolArg(AAZSimpleTypeArg, AAZBoolType):
 
-    def __init__(self, blank=True, **kwargs):
-        super(AAZBoolArg, self).__init__(blank=blank, **kwargs)
-
-    def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name)
-        return arg
-
-    def _build_cmd_action(self):
-        class Action(AAZBoolArgAction):
-            _schema = self
-        return Action
+    def __init__(self, blank=True, enum=None, **kwargs):
+        enum = enum or AAZArgEnum({
+            'true': True, 't': True, 'yes': True, 'y': True, '1': True,
+            "false": False, 'f': False, 'no': False, 'n': False, '0': False,
+        })
+        super(AAZBoolArg, self).__init__(blank=blank, enum=enum, **kwargs)
 
 
 class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):

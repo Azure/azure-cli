@@ -5,7 +5,7 @@ from ._field_value import AAZModel, AAZDict, AAZList, AAZSimpleValue
 
 # build in types
 class AAZSimpleType(AAZBaseType):
-    _data_type = None
+    DataType = None
 
     ValueCls = AAZSimpleValue
 
@@ -21,24 +21,24 @@ class AAZSimpleType(AAZBaseType):
 
         if isinstance(data, AAZSimpleValue):
             data = data._data
-        assert isinstance(data, self._data_type)
+        assert isinstance(data, self.DataType)
         return data
 
 
 class AAZIntType(AAZSimpleType):
-    _data_type = int
+    DataType = int
 
 
 class AAZStrType(AAZSimpleType):
-    _data_type = str
+    DataType = str
 
 
 class AAZBoolType(AAZSimpleType):
-    _data_type = bool
+    DataType = bool
 
 
 class AAZFloatType(AAZSimpleType):
-    _data_type = float
+    DataType = float
 
     def process_data(self, data, **kwargs):
         if data is None:
@@ -54,7 +54,7 @@ class AAZFloatType(AAZSimpleType):
             if float(data) != data:
                 raise AAZValuePrecisionLossError(data, float(data))
             data = float(data)
-        assert isinstance(data, self._data_type)
+        assert isinstance(data, self.DataType)
         return data
 
 

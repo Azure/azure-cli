@@ -48,6 +48,15 @@ class Create(AAZCommand):
             options=["--float", "-f"],
             help="Float argument"
         )
+        schema.encrypt_type = AAZStrArg(
+            options=["--encrypt-type", "--et"],
+            enum=AAZArgEnum({
+                "AS": "a-secret",
+                "BS": "b-secret"
+            }),
+            help="Encrypt Type"
+        )
+
         schema.tags = AAZDictArg(
             options=["--tags"],
             help="Resource tags."
@@ -63,9 +72,7 @@ class Create(AAZCommand):
         )
         schema.extended_location.type = AAZStrArg(
             help="The type of the extended location.",
-            enum=AAZArgEnum({
-                "EdgeZone": "EdgeZone"
-            })
+            enum=AAZArgEnum(["EdgeZone", "CoreZone"])
         )
 
         schema.address_space = AAZObjectArg(
