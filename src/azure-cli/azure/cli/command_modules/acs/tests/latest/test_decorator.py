@@ -2244,7 +2244,7 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_3.get_network_plugin()
 
-    def test_get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def test_get_networking_configuration(
         self,
     ):
         # default
@@ -2261,8 +2261,8 @@ class AKSContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         self.assertEqual(
-            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(),
-            (None, None, None, None, None),
+            ctx_1.get_networking_configuration(),
+            (None, None, None, None, None, None, None, None),
         )
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             pod_cidr="test_pod_cidr",
@@ -2276,15 +2276,20 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
-            ctx_1.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(),
+            ctx_1.get_networking_configuration(),
             (
                 "test_pod_cidr",
                 "test_service_cidr",
                 "test_dns_service_ip",
                 "test_docker_bridge_address",
                 "test_network_policy",
+                None,
+                None,
+                None,
             ),
         )
+
+        
 
         # invalid parameter
         ctx_2 = AKSContext(
@@ -2298,7 +2303,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on invalid network_plugin (azure) when pod_cidr is specified
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_2.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_2.get_networking_configuration()
 
         # invalid parameter
         ctx_3 = AKSContext(
@@ -2311,7 +2316,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_3.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_3.get_networking_configuration()
 
         # invalid parameter
         ctx_4 = AKSContext(
@@ -2327,7 +2332,62 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on network_plugin not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx_4.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            ctx_4.get_networking_configuration()
+        
+        # dual-stack
+        ctx_5 = AKSContext(
+            self.cmd,
+            {},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        network_profile_2 = self.models.ContainerServiceNetworkProfile(
+            pod_cidr="test_pod_cidr_1",
+            service_cidr="test_service_cidr_1",
+            dns_service_ip="test_dns_service_ip",
+            docker_bridge_cidr="test_docker_bridge_address",
+            network_policy="test_network_policy",
+            pod_cidrs = [
+                "test_pod_cidr_1",
+                "test_pod_cidr_2"
+            ],
+            service_cidrs = [
+                "test_service_cidr_1",
+                "test_service_cidr_2"
+            ],
+            ip_families = [
+                "IPv4",
+                "IPv6"
+            ]
+        )
+
+        mc2 = self.models.ManagedCluster(
+            location="test_loc", network_profile=network_profile_2
+        )
+
+        ctx_5.attach_mc(mc2)
+        self.assertEqual(
+            ctx_5.get_networking_configuration(),
+            (
+                "test_pod_cidr_1",
+                "test_service_cidr_1",
+                "test_dns_service_ip",
+                "test_docker_bridge_address",
+                "test_network_policy",
+                [
+                    "test_pod_cidr_1",
+                    "test_pod_cidr_2"
+                ],
+                [
+                    "test_service_cidr_1",
+                    "test_service_cidr_2"
+                ],
+                [
+                    "IPv4",
+                    "IPv6"
+                ],
+            )
+        )
 
     def test_get_addon_consts(self):
         # default

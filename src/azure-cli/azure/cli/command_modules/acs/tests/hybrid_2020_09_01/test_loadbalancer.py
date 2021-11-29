@@ -14,6 +14,7 @@ class TestLoadBalancer(unittest.TestCase):
 
     def test_configure_load_balancer_profile(self):
         managed_outbound_ip_count = 5
+        managed_outbound_ipv6_count = 3
         outbound_ips = None
         outbound_ip_prefixes = None
         outbound_ports = 80
@@ -64,6 +65,7 @@ class TestLoadBalancer(unittest.TestCase):
 
         p = loadbalancer.configure_load_balancer_profile(
             managed_outbound_ip_count,
+            managed_outbound_ipv6_count,
             outbound_ips,
             outbound_ip_prefixes,
             outbound_ports,
