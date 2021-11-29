@@ -481,7 +481,7 @@ class AKSContext:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
 
         On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
-        enabled, it will check whether both min_count and max_count are  assigned, if not, raise the
+        enabled, it will check whether both min_count and max_count are assigned, if not, raise the
         RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
         create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
         InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
@@ -1852,10 +1852,11 @@ class AKSContext:
                         "--assign-identity can only be specified when --enable-managed-identity is specified"
                     )
             else:
-                if self._get_assign_kubelet_identity(enable_validation=False):
-                    raise RequiredArgumentMissingError(
-                        "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-                    )
+                if self.decorator_mode == DecoratorMode.CREATE:
+                    if self._get_assign_kubelet_identity(enable_validation=False):
+                        raise RequiredArgumentMissingError(
+                            "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                        )
         return assign_identity
 
     def get_assign_identity(self) -> Union[str, None]:
@@ -3998,15 +3999,14 @@ class AKSContext:
         """
         # read the original value passed by the command
         assign_kubelet_identity = self.raw_param.get("assign_kubelet_identity")
-        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
-        if self.decorator_mode == DecoratorMode.CREATE:
-            if (
-                self.mc and
-                self.mc.identity_profile and
-                self.mc.identity_profile.get("kubeletidentity", None) and
-                getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
-            ):
-                assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if (
+            self.mc and
+            self.mc.identity_profile and
+            self.mc.identity_profile.get("kubeletidentity", None) and
+            getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id") is not None
+        ):
+            assign_kubelet_identity = getattr(self.mc.identity_profile.get("kubeletidentity"), "resource_id")
 
         # this parameter does not need dynamic completion
         # validation
@@ -5410,7 +5410,8 @@ class AKSUpdateDecorator:
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
                 '"--disable-public-fqdn" or '
-                '"--tags"'
+                '"--tags" or '
+                '"--nodepool-labels"'
             )
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
@@ -5627,14 +5628,15 @@ class AKSUpdateDecorator:
         """
         self._ensure_mc(mc)
 
-        if not mc.windows_profile:
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+
+        if any([enable_ahub, disable_ahub, windows_admin_password]) and not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
 
-        enable_ahub = self.context.get_enable_ahub()
-        disable_ahub = self.context.get_disable_ahub()
-        windows_admin_password = self.context.get_windows_admin_password()
         if enable_ahub:
             mc.windows_profile.license_type = 'Windows_Server'
         if disable_ahub:
@@ -5899,9 +5901,9 @@ class AKSUpdateDecorator:
             self.context.get_resource_group_name(),
             self.context.get_name(),
             mc,
-            self.context.get_intermediate("monitoring"),
-            self.context.get_intermediate("ingress_appgw_addon_enabled"),
-            self.context.get_intermediate("enable_virtual_node"),
+            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
+            self.context.get_intermediate("enable_virtual_node", default_value=False),
             False,
             mc.agent_pool_profiles[0].vnet_subnet_id,
             check_is_msi_cluster(mc),
