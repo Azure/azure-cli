@@ -5410,7 +5410,7 @@ class AKSUpdateDecorator:
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
                 '"--disable-public-fqdn" or '
-                '"--tags or '
+                '"--tags" or '
                 '"--nodepool-labels"'
             )
 
