@@ -137,7 +137,7 @@ class AmsAssetFilterTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_asset_filter_name': nonexits_asset_filter_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams asset-filter show -a {amsname} --asset-name {asset_name} -g {rg} -n {nonexits_asset_filter_name}')
 
     @ResourceGroupPreparer()

@@ -73,7 +73,7 @@ class AmsAccountFilterTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_filter_name': nonexits_filter_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams account-filter show -a {amsname} -g {rg} -n {nonexits_filter_name}')
 
     @ResourceGroupPreparer()
