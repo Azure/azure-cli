@@ -1487,11 +1487,9 @@ def update_key_rotation_policy(cmd, client, value, name=None):
                                                         time_after_create=time_after_create,
                                                         time_before_expiry=time_before_expiry)
             lifetime_actions.append(lifetime_action)
-    expires_in = policy.get('expires_in', None)
+    expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
     if policy.get('attributes', None):
-        expires_in = policy['attributes'].get('expires_in')\
-            if policy['attributes'].get('expires_in', None)\
-            else policy['attributes'].get('expiry_time', None)
+        expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
     return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
