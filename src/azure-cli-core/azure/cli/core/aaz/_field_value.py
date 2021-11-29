@@ -50,36 +50,46 @@ class AAZModel(AAZBaseValue):
         super().__init__(schema, data)
         assert isinstance(self._data, dict)
 
-    def __getattr__(self, key) -> AAZBaseValue:
-        attr_schema = getattr(self._schema, key)
+    def __getitem__(self, key):
+        attr_schema = self._schema[key]
         name = self._schema.get_attr_name(key)
         if name not in self._data:
             # is key is not set before, then create a patch, and value updated in patch will be partial updated
             self._data[name] = AAZValuePatch.build(attr_schema)
         return attr_schema.ValueCls(attr_schema, self._data[name])
 
+    def __setitem__(self, key, data):
+        assert not key.startswith('_')
+        attr_schema = self._schema[key]
+        name = self._schema.get_attr_name(key)
+        self._data[name] = attr_schema.process_data(data, key=name)
+
+    def __delitem__(self, key):
+        name = self._schema.get_attr_name(key)
+        if name in self._data:
+            del self._data[name]
+        elif name is None:
+            raise KeyError(f"Attribute {key} not exist")
+
+    def __getattr__(self, key) -> AAZBaseValue:
+        return self[key]
+
     def __setattr__(self, key, data):
         if key.startswith('_'):
             self.__dict__[key] = data
         else:
-            attr_schema = getattr(self._schema, key)
-            name = self._schema.get_attr_name(key)
-            self._data[name] = attr_schema.process_data(data, key=name)
+            self[key] = data
 
     def __delattr__(self, key):
         if key.startswith('_'):
             del self.__dict__[key]
         else:
-            name = self._schema.get_attr_name(key)
-            if name in self._data:
-                del self._data[name]
-            elif name is None:
-                raise KeyError(f"Attribute {key} not exist")
+            del self[key]
 
     def to_serialized_data(self):
         results = {}
         for name, field_schema in self._schema._fields.items():
-            v = getattr(self, name).to_serialized_data()
+            v = self[name].to_serialized_data()
             if v == AAZUndefined:
                 continue
             if field_schema._serialized_name:

@@ -71,17 +71,16 @@ class AAZModelType(AAZBaseType):
         self._fields = {}
         self._fields_alias_map = {}  # key is the option, value is field
 
-    def __getattr__(self, key):
+    def __getitem__(self, key):
         name = self.get_attr_name(key)
         if name not in self._fields:
             raise AAZUndefinedValueError(self, key)
         return self._fields[name]
 
-    def __setattr__(self, key, value):
-        if key.startswith('_'):
-            assert not isinstance(value, AAZBaseType)
-            self.__dict__[key] = value
-        elif isinstance(value, AAZBaseType):
+    def __setitem__(self, key, value):
+        assert not key.startswith('_')
+
+        if isinstance(value, AAZBaseType):
             if self.get_attr_name(key):
                 # key should not be defined before
                 raise AAZConflictFieldDefinitionError(f"{key}")
@@ -106,6 +105,16 @@ class AAZModelType(AAZBaseType):
         else:
             raise AAZUndefinedValueError(self, key)
 
+    def __getattr__(self, key):
+        return self[key]
+
+    def __setattr__(self, key, value):
+        if key.startswith('_'):
+            assert not isinstance(value, AAZBaseType)
+            self.__dict__[key] = value
+        else:
+            self[key] = value
+
     def get_attr_name(self, key):
         if key in self._fields:
             return key
@@ -129,7 +138,7 @@ class AAZModelType(AAZBaseType):
 
         for key, sub_data in data.items():
             name = self.get_attr_name(key)
-            setattr(value, name, sub_data)
+            value[name] = sub_data
         return result
 
 
