@@ -44,7 +44,7 @@ class AAZSimpleValue(AAZBaseValue):
         return self._data
 
 
-class AAZModel(AAZBaseValue):
+class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)

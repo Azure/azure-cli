@@ -4,17 +4,17 @@ import unittest
 class TestAAZField(unittest.TestCase):
 
     def test_aaz_model_and_simple_types(self):
-        from azure.cli.core.aaz._field_type import AAZModelType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
-        from azure.cli.core.aaz._field_value import AAZModel
-        model_schema = AAZModelType()
-        v = AAZModel(model_schema, data={})
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
+        v = AAZObject(model_schema, data={})
 
-        model_schema.properties = AAZModelType(options=["prop", "pr"])
+        model_schema.properties = AAZObjectType(options=["prop", "pr"])
 
         # test int type
         model_schema.properties.count = AAZIntType()
         v.properties.count = 10
-        assert isinstance(v.properties, AAZModel)
+        assert isinstance(v.properties, AAZObject)
         assert v.properties._is_patch
         assert not v.properties.count._is_patch
         assert v.properties.count._data == 10
@@ -95,16 +95,16 @@ class TestAAZField(unittest.TestCase):
         assert v.properties.height._data == 111
 
     def test_aaz_dict_type(self):
-        from azure.cli.core.aaz._field_type import AAZModelType, AAZDictType, AAZStrType
-        from azure.cli.core.aaz._field_value import AAZModel
-        model_schema = AAZModelType()
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZDictType, AAZStrType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
         model_schema.tags = AAZDictType()
         model_schema.tags.Element = AAZStrType()
         model_schema.additional = AAZDictType()
-        model_schema.additional.Element = AAZModelType()
+        model_schema.additional.Element = AAZObjectType()
         model_schema.additional.Element.name = AAZStrType()
 
-        v = AAZModel(schema=model_schema, data={})
+        v = AAZObject(schema=model_schema, data={})
         assert v.tags["p"]._is_patch
         del v.tags["p"]
         with self.assertRaises(KeyError):
@@ -158,14 +158,14 @@ class TestAAZField(unittest.TestCase):
             assert False
 
     def test_aaz_list_type(self):
-        from azure.cli.core.aaz._field_type import AAZModelType, AAZListType, AAZStrType
-        from azure.cli.core.aaz._field_value import AAZModel
-        model_schema = AAZModelType()
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZListType, AAZStrType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
         model_schema.sub_nets = AAZListType()
-        model_schema.sub_nets.Element = AAZModelType()
+        model_schema.sub_nets.Element = AAZObjectType()
         model_schema.sub_nets.Element.id = AAZStrType()
 
-        v = AAZModel(schema=model_schema, data={})
+        v = AAZObject(schema=model_schema, data={})
         v.sub_nets[0].id = "/0/"
         assert len(v.sub_nets) == 1
         assert v.sub_nets[0]._is_patch
@@ -217,18 +217,18 @@ class TestAAZField(unittest.TestCase):
             assert False
 
     def test_aaz_types_with_alias(self):
-        from azure.cli.core.aaz._field_type import AAZModelType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType, AAZDictType, AAZListType
-        from azure.cli.core.aaz._field_value import AAZModel
-        model_schema = AAZModelType()
-        model_schema.sub_properties = AAZModelType(options=["sub-properties"], serialized_name="subProperties")
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZIntType, AAZStrType, AAZBoolType, AAZFloatType, AAZDictType, AAZListType
+        from azure.cli.core.aaz._field_value import AAZObject
+        model_schema = AAZObjectType()
+        model_schema.sub_properties = AAZObjectType(options=["sub-properties"], serialized_name="subProperties")
         model_schema.sub_properties.vnet_id = AAZStrType(options=["vnet-id"], serialized_name="vnetId")
         model_schema.sub_properties.sub_tags = AAZDictType(options=["sub-tags"], serialized_name="subTags")
         model_schema.sub_properties.sub_tags.Element = AAZStrType()
         model_schema.sub_properties.sub_nets = AAZListType(options=["sub-nets"], serialized_name="subNets")
-        model_schema.sub_properties.sub_nets.Element = AAZModelType()
+        model_schema.sub_properties.sub_nets.Element = AAZObjectType()
         model_schema.sub_properties.sub_nets.Element.address_id = AAZStrType(options=["address-id"], serialized_name="addressId")
 
-        v = AAZModel(model_schema, data={})
+        v = AAZObject(model_schema, data={})
 
         v.sub_properties = {
             "vnetId": "vnetId",

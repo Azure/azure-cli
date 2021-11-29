@@ -58,8 +58,24 @@ class AAZCommand(CLICommand):
 
     def setup_command_args(self, command_args):
         schema = self.get_arguments_schema()
-        data = {name: value for name, value in command_args.items() if hasattr(schema, name)}
-        self._args = schema(data)
+
+        self._args = schema(data={})
+
+        for name, value in command_args.items():
+            parts = name.replace('[', '.[').split('.')
+            if hasattr(schema, parts[0]):
+                i = 0
+                arg = self._args
+                part = parts[i]
+                while i < len(parts):
+                    if part.startswith('['):
+                        assert part.endswith(']')
+                        part = int(part[1:-1])
+                    i += 1
+                    if i < len(parts):
+                        arg = arg[part]
+                        part = parts[i]
+                arg[part] = value
         return self._args
 
     def _handler(self, command_args):

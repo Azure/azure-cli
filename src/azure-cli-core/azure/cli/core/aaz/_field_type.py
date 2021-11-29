@@ -1,6 +1,6 @@
 from ._base import AAZBaseType, AAZValuePatch
 from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, AAZUndefinedValueError
-from ._field_value import AAZModel, AAZDict, AAZList, AAZSimpleValue
+from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
 
 
 # build in types
@@ -60,10 +60,10 @@ class AAZFloatType(AAZSimpleType):
 
 # compound types
 
-class AAZModelType(AAZBaseType):
+class AAZObjectType(AAZBaseType):
     _PROTECTED_KEYWORDS = ("ValueCls", "PatchDataCls", "get_attr_name", "process_data", "to_serialized_data")
 
-    ValueCls = AAZModel
+    ValueCls = AAZObject
     PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
@@ -130,8 +130,8 @@ class AAZModelType(AAZBaseType):
                 return AAZValuePatch.build(self)
 
         result = {}
-        value = AAZModel(schema=self, data=result)
-        if isinstance(data, AAZModel):
+        value = AAZObject(schema=self, data=result)
+        if isinstance(data, AAZObject):
             data = data._data
         else:
             assert isinstance(data, (dict, ))

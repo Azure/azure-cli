@@ -1,12 +1,12 @@
 from knack.arguments import CLICommandArgument, CaseInsensitiveList
 from ._base import AAZBaseType, AAZUndefined
-from ._field_type import AAZModelType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, AAZSimpleType
-from ._field_value import AAZModel
-from ._arg_action import AAZSimpleTypeArgAction
+from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, AAZSimpleType
+from ._field_value import AAZObject
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction
 from azure.cli.core import azclierror
 
 
-class AAZArgumentsSchema(AAZModelType):
+class AAZArgumentsSchema(AAZObjectType):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,7 +14,7 @@ class AAZArgumentsSchema(AAZModelType):
     def __call__(self, data=None):
         if data is None:
             data = {}
-        return AAZModel(
+        return AAZObject(
             schema=self,
             data=self.process_data(data=data)
         )
@@ -131,7 +131,9 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
     pass
 
 
-class AAZObjectArg(AAZBaseArg, AAZModelType):
+#
+
+class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):
         super(AAZObjectArg, self).__init__(**kwargs)
@@ -139,8 +141,16 @@ class AAZObjectArg(AAZBaseArg, AAZModelType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
         return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZObjectArgAction):
+            _schema = self
+        return Action
 
 
 class AAZDictArg(AAZBaseArg, AAZDictType):
@@ -151,8 +161,16 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
         return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZDictArgAction):
+            _schema = self
+        return Action
 
 
 class AAZListArg(AAZBaseArg, AAZListType):
@@ -163,5 +181,13 @@ class AAZListArg(AAZBaseArg, AAZListType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-
+        if self._blank != AAZUndefined:
+            arg.nargs = '*'
+        else:
+            arg.nargs = '+'
         return arg
+
+    def _build_cmd_action(self):
+        class Action(AAZListArgAction):
+            _schema = self
+        return Action

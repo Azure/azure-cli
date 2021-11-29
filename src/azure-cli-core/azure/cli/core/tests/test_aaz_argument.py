@@ -5,15 +5,15 @@ class TestAAZArgument(unittest.TestCase):
 
     def test_aaz_arguments(self):
         from azure.cli.core.aaz._arg import AAZArguments
-        from azure.cli.core.aaz._field_type import AAZModelType, AAZBoolType, AAZIntType, AAZStrType, AAZFloatType
+        from azure.cli.core.aaz._field_type import AAZObjectType, AAZBoolType, AAZIntType, AAZStrType, AAZFloatType
 
         class Arguments(AAZArguments):
             name = AAZStrType(options=["--name", "-n"])
 
-            properties = AAZModelType(options=["--properties"])
+            properties = AAZObjectType(options=["--properties"])
             properties.enable = AAZBoolType(options=["enable"])
             properties.count = AAZIntType(options=["count"])
-            properties.vnet = AAZModelType(options=["vnet"])
+            properties.vnet = AAZObjectType(options=["vnet"])
             properties.vnet.address = AAZStrType(options=["address"])
             properties.vnet.threshold = AAZFloatType(options=["threshold"])
 

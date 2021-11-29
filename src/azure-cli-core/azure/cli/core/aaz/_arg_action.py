@@ -36,18 +36,20 @@ class AAZSimpleTypeArgAction(AAZArgAction):
             raise ArgumentTypeError(f"{self._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
-# class AAZBoolArgAction(AAZArgAction):
-#
-#     def format_data(self, data):
-#         data = super().format_data(data)
-#         if isinstance(data, bool) or data is None:
-#             return data
-#         else:
-#             if not isinstance(data, str):
-#                 raise ArgumentTypeError(f"bool type value expected, got '{data}'({type(data)})")
-#             if data.lower() in ('true', 't', 'yes', 'y', '1'):
-#                 return True
-#             elif data.lower() in ('false',  'f', 'no', 'n', '0'):
-#                 return False
-#             else:
-#                 raise ArgumentTypeError(f"bool type value expected, got '{data}'({type(data)})")
+class AAZObjectArgAction(AAZArgAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        pass
+
+
+class AAZDictArgAction(AAZArgAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        pass
+
+
+class AAZListArgAction(AAZArgAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        pass
+
