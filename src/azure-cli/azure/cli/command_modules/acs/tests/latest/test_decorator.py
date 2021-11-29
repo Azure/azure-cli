@@ -7665,7 +7665,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             },
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.decorator.Profile",
