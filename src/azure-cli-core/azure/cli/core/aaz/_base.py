@@ -61,16 +61,21 @@ class AAZBaseValue:
             self._data = data
             self._is_patch = False
 
+    @abc.abstractmethod
+    def to_serialized_data(self):
+        raise NotImplementedError()
+
 
 class AAZBaseType:
     ValueCls = None
     PatchDataCls = None
 
-    def __init__(self, options=None, serialized_name=None):
+    def __init__(self, options=None, nullable=False, serialized_name=None):
         assert issubclass(self.ValueCls, AAZBaseValue)
         self._serialized_name = serialized_name
         self._options = options
         self._name = None
+        self._nullable = nullable   # when true, specifies that null is a valid value
 
     @abc.abstractmethod
     def process_data(self, data, **kwargs):

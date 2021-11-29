@@ -1,7 +1,7 @@
 # Resources:
 #   - /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}
 
-from azure.cli.core.aaz import AAZCommand, register_command
+from azure.cli.core.aaz import AAZCommand, register_command, AAZStrArg, AAZDictArg, AAZObjectArg, AAZListArg, AAZIntArg, AAZArgEnum, AAZBoolArg, AAZFloatArg
 
 
 @register_command("network vnet create")
@@ -24,6 +24,99 @@ class Create(AAZCommand):
 
     """
 
-    class Arguments:
-        pass
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        schema = super()._build_arguments_schema(*args, **kwargs)
+
+        schema.virtual_network_name = AAZStrArg(
+            options=["--virtual-network-name", "--name", "-n"], required=True, id_part="name",
+            help="The name of the virtual network.",
+        )
+        schema.location = AAZStrArg(
+            options=["--location", "-l"], required=True,
+            help="Resource location.",
+        )
+        schema.count = AAZIntArg(
+            options=["--count", '-c'],
+            help="Integer argument"
+        )
+        schema.enable = AAZBoolArg(
+            options=["--enable", "-e"],
+            help="Boolean argument"
+        )
+        schema.float = AAZFloatArg(
+            options=["--float", "-f"],
+            help="Float argument"
+        )
+        schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Resource tags."
+        )
+        schema.tags.Element = AAZStrArg()
+
+        schema.extended_location = AAZObjectArg(
+            options=["--extended-location"],
+            help="The extended location of the virtual network."
+        )
+        schema.extended_location.name = AAZStrArg(
+            help="The name of the extended location."
+        )
+        schema.extended_location.type = AAZStrArg(
+            help="The type of the extended location.",
+            enum=AAZArgEnum({
+                "EdgeZone": "EdgeZone"
+            })
+        )
+
+        schema.address_space = AAZObjectArg(
+            options=["--address-space"],
+            help="The AddressSpace that contains an array of IP address ranges that can be used by subnets."
+        )
+        schema.address_space.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+            help="A list of address blocks reserved for this virtual network in CIDR notation.",
+        )
+        schema.address_space.address_prefixes.Element = AAZStrArg()
+
+        schema.dhcp_options = AAZObjectArg(
+            options=["--dhcp-options"],
+            help="The dhcpOptions that contains an array of DNS servers available to VMs deployed in the virtual network."
+        )
+        schema.dhcp_options.dns_servers = AAZListArg(
+            options=["dns-servers"],
+            help="The list of DNS servers IP addresses."
+        )
+        schema.dhcp_options.dns_servers.Element = AAZStrArg()
+
+        schema.flow_timeout_in_minutes = AAZIntArg(
+            options=["--flow-timeout-in-minutes"],
+            help="The FlowTimeout value (in minutes) for the Virtual Network"
+        )
+
+        schema.subnets = AAZListArg(
+            options=["--subnets"],
+            help="A list of subnets in a Virtual Network.",
+        )
+        schema.subnets.Element = AAZObjectArg()
+        schema.subnets.Element.address_prefix = AAZStrArg(
+            options=["address-prefix"],
+            help="The address prefix for the subnet."
+        )
+        schema.subnets.Element.address_prefixes = AAZListArg(
+            options=["address-prefixes"],
+            help="List of address prefixes for the subnet.",
+        )
+        schema.subnets.Element.address_prefixes.Element = AAZStrArg()
+        schema.subnets.Element.network_security_group = AAZObjectArg(
+            options=["network-security-group"],
+            help="The reference to the NetworkSecurityGroup resource.",
+        )
+        schema.subnets.Element.network_security_group.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID."
+        )
+
+        return schema
+
+
 

@@ -1,6 +1,6 @@
-from ._base import AAZBaseType
-from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError
-from ._field_value import AAZModelValue, AAZDictValue, AAZListValue, AAZSimpleValue
+from ._base import AAZBaseType, AAZValuePatch
+from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, AAZUndefinedValueError
+from ._field_value import AAZModel, AAZDict, AAZList, AAZSimpleValue
 
 
 # build in types
@@ -13,6 +13,12 @@ class AAZSimpleType(AAZBaseType):
         super().__init__(*args, **kwargs)
 
     def process_data(self, data, **kwargs):
+        if data is None:
+            if self._nullable:
+                return None
+            else:
+                return AAZValuePatch.build(self)
+
         if isinstance(data, AAZSimpleValue):
             data = data._data
         assert isinstance(data, self._data_type)
@@ -35,6 +41,12 @@ class AAZFloatType(AAZSimpleType):
     _data_type = float
 
     def process_data(self, data, **kwargs):
+        if data is None:
+            if self._nullable:
+                return None
+            else:
+                return AAZValuePatch.build(self)
+
         if isinstance(data, AAZSimpleValue):
             data = data._data
         if isinstance(data, int):
@@ -49,9 +61,9 @@ class AAZFloatType(AAZSimpleType):
 # compound types
 
 class AAZModelType(AAZBaseType):
-    _PROTECTED_KEYWORDS = ("ValueCls", "PatchDataCls", "get_attr_name", "process_data")
+    _PROTECTED_KEYWORDS = ("ValueCls", "PatchDataCls", "get_attr_name", "process_data", "to_serialized_data")
 
-    ValueCls = AAZModelValue
+    ValueCls = AAZModel
     PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
@@ -62,7 +74,7 @@ class AAZModelType(AAZBaseType):
     def __getattr__(self, key):
         name = self.get_attr_name(key)
         if name not in self._fields:
-            raise AAZUnknownFieldError(self, key)
+            raise AAZUndefinedValueError(self, key)
         return self._fields[name]
 
     def __setattr__(self, key, value):
@@ -92,7 +104,7 @@ class AAZModelType(AAZBaseType):
                     raise AAZConflictFieldDefinitionError(f"{name}")
                 self._fields_alias_map[alias] = name
         else:
-            raise AAZUnknownFieldError(self, key)
+            raise AAZUndefinedValueError(self, key)
 
     def get_attr_name(self, key):
         if key in self._fields:
@@ -102,9 +114,15 @@ class AAZModelType(AAZBaseType):
         return None
 
     def process_data(self, data, **kwargs):
+        if data is None:
+            if self._nullable:
+                return None
+            else:
+                return AAZValuePatch.build(self)
+
         result = {}
-        value = AAZModelValue(schema=self, data=result)
-        if isinstance(data, AAZModelValue):
+        value = AAZModel(schema=self, data=result)
+        if isinstance(data, AAZModel):
             data = data._data
         else:
             assert isinstance(data, (dict, ))
@@ -117,7 +135,7 @@ class AAZModelType(AAZBaseType):
 
 class AAZDictType(AAZBaseType):
 
-    ValueCls = AAZDictValue
+    ValueCls = AAZDict
     PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
@@ -145,9 +163,15 @@ class AAZDictType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
+        if data is None:
+            if self._nullable:
+                return None
+            else:
+                return AAZValuePatch.build(self)
+
         result = {}
-        value = AAZDictValue(schema=self, data=result)
-        if isinstance(data, AAZDictValue):
+        value = AAZDict(schema=self, data=result)
+        if isinstance(data, AAZDict):
             data = data._data
         else:
             assert isinstance(data, (dict,))
@@ -159,7 +183,7 @@ class AAZDictType(AAZBaseType):
 
 class AAZListType(AAZBaseType):
 
-    ValueCls = AAZListValue
+    ValueCls = AAZList
     PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
@@ -187,10 +211,16 @@ class AAZListType(AAZBaseType):
         return self.Element
 
     def process_data(self, data, **kwargs):
-        result = {}
-        value = AAZListValue(schema=self, data=result)
+        if data is None:
+            if self._nullable:
+                return None
+            else:
+                return AAZValuePatch.build(self)
 
-        if isinstance(data, AAZListValue):
+        result = {}
+        value = AAZList(schema=self, data=result)
+
+        if isinstance(data, AAZList):
             data = data._data
             for idx, sub_data in data.items():
                 value[idx] = sub_data

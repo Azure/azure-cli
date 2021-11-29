@@ -2,6 +2,7 @@ import importlib
 import os
 from ._utils import _get_profile_pkg
 from knack.commands import CLICommand, CommandGroup
+from ._arg import AAZArgumentsSchema
 
 _DOC_EXAMPLE_FLAG = ':example:'
 
@@ -31,20 +32,47 @@ class AAZCommand(CLICommand):
         super(AAZCommand, self).__init__(
             cli_ctx=loader.cli_ctx,
             name=self.AZ_NAME,
+            arguments_loader=self._cli_arguments_loader,
             handler=self._handler,
-            arguments_loader=self._arguments_loader,
         )
         self.command_kwargs = {}
         self.help = self.AZ_HELP
         # help property will be assigned as help_file for command parser https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
         # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
 
-    def _handler(self, *args, **kwargs):
-        return None
+        # additional properties
+        self.supports_no_wait = False
+        self.no_wait_param = None
+        self.exception_handler = None
+        self._args = None
 
-    def _arguments_loader(self):
+    @classmethod
+    def get_arguments_schema(cls):
+        if not hasattr(cls, "_arguments_schema"):
+            cls._arguments_schema = cls._build_arguments_schema()
+        return cls._arguments_schema
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return AAZArgumentsSchema(*args, **kwargs)
+
+    def setup_command_args(self, command_args):
+        schema = self.get_arguments_schema()
+        data = {name: value for name, value in command_args.items() if hasattr(schema, name)}
+        self._args = schema(data)
+        return self._args
+
+    def _handler(self, command_args):
+        self.setup_command_args(command_args)
+        return self._args.to_serialized_data()
+
+    def _cli_arguments_loader(self):
         """load arguments"""
-        return {}
+        schema = self.get_arguments_schema()
+        args = {}
+        for name, field in schema._fields.items():
+            args[name] = field.to_cmd_arg(name)
+        return args
 
     def __call__(self, *args, **kwargs):
         return self.handler(*args, **kwargs)

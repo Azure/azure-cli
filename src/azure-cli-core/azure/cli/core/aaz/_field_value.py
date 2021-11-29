@@ -1,4 +1,4 @@
-from ._base import AAZBaseValue, AAZValuePatch
+from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -40,8 +40,11 @@ class AAZSimpleValue(AAZBaseValue):
             other = other._data
         return self._data >= other
 
+    def to_serialized_data(self):
+        return self._data
 
-class AAZModelValue(AAZBaseValue):
+
+class AAZModel(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)
@@ -73,8 +76,21 @@ class AAZModelValue(AAZBaseValue):
             elif name is None:
                 raise KeyError(f"Attribute {key} not exist")
 
+    def to_serialized_data(self):
+        results = {}
+        for name, field_schema in self._schema._fields.items():
+            v = getattr(self, name).to_serialized_data()
+            if v == AAZUndefined:
+                continue
+            if field_schema._serialized_name:
+                name = field_schema._serialized_name
+            results[name] = v
+        if not results and self._is_patch:
+            return AAZUndefined
+        return results
 
-class AAZDictValue(AAZBaseValue):
+
+class AAZDict(AAZBaseValue):
 
     def __init__(self, schema, data):
         from ._field_type import AAZDictType
@@ -119,8 +135,19 @@ class AAZDictValue(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
+    def to_serialized_data(self):
+        results = {}
+        for key, v in self.items():
+            v = v.to_serialized_data()
+            if v == AAZUndefined:
+                continue
+            results[key] = v
+        if not results and self._is_patch:
+            return AAZUndefined
+        return results
 
-class AAZListValue(AAZBaseValue):
+
+class AAZList(AAZBaseValue):
 
     def __init__(self, schema, data):
         from ._field_type import AAZListType
@@ -198,3 +225,12 @@ class AAZListValue(AAZBaseValue):
     def clear(self):
         self._data.clear()
         self._len = 0
+
+    def to_serialized_data(self):
+        results = []
+        for v in self:
+            v = v.to_serialized_data()
+            results.append(v)
+        if not results and self._is_patch:
+            return AAZUndefined
+        return results
