@@ -223,6 +223,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_sku', type=str,
                    validator=validate_load_balancer_sku)
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str,
                    validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str,
@@ -253,6 +254,9 @@ def load_arguments(self, _):
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
+        c.argument('pod_cidrs')
+        c.argument('service_cidrs')
+        c.argument('ip_families')
         c.argument('ppg', type=str, validator=validate_ppg)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
@@ -323,6 +327,7 @@ def load_arguments(self, _):
         c.argument('uptime_sla', action='store_true')
         c.argument('no_uptime_sla', action='store_true')
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
+        c.argument('load_balancer_managed_outbound_ipv6_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str,
                    validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str,

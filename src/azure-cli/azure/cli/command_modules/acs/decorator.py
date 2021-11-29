@@ -2097,6 +2097,34 @@ class AKSContext:
         # this parameter does not need validation
         return load_balancer_managed_outbound_ip_count
 
+    def get_load_balancer_managed_outbound_ipv6_count(self) -> Union[int, None]:
+        """Obtain the value of load_balancer_managed_outbound_ipv6_count.
+
+        Note: SDK performs the following validation {'maximum': 100, 'minimum': 0}.
+
+        :return: int or None
+        """
+        # read the original value passed by the command
+        load_balancer_managed_outbound_ip_count_ipv6 = self.raw_param.get(
+            "load_balancer_managed_outbound_ip_count_ipv6"
+        )
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.network_profile and
+                self.mc.network_profile.load_balancer_profile and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps and
+                self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6 is not None
+            ):
+                load_balancer_managed_outbound_ip_count_ipv6 = (
+                    self.mc.network_profile.load_balancer_profile.managed_outbound_i_ps.count_ipv6
+                )
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return load_balancer_managed_outbound_ip_count_ipv6
+
     def get_load_balancer_outbound_ips(self) -> Union[str, List[ResourceReference], None]:
         """Obtain the value of load_balancer_outbound_ips.
 
@@ -2350,7 +2378,10 @@ class AKSContext:
                 dns_service_ip,
                 docker_bridge_address,
                 network_policy,
-            ) = self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+                pod_cidrs,
+                service_cidrs,
+                ip_families
+            ) = self._get_networking_configuration(
                 enable_validation=False
             )
             if network_plugin:
@@ -2364,7 +2395,10 @@ class AKSContext:
                     service_cidr or
                     dns_service_ip or
                     docker_bridge_address or
-                    network_policy
+                    network_policy or
+                    pod_cidrs or
+                    service_cidrs or
+                    ip_families
                 ):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
@@ -2387,7 +2421,7 @@ class AKSContext:
         return self._get_network_plugin(enable_validation=True)
 
     # pylint: disable=unused-argument
-    def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def _get_networking_configuration(
         self, enable_validation: bool = False, **kwargs
     ) -> Tuple[
         Union[str, None],
@@ -2395,9 +2429,12 @@ class AKSContext:
         Union[str, None],
         Union[str, None],
         Union[str, None],
+        Union[List[str], None],
+        Union[List[str], None],
+        Union[List[str], None],
     ]:
-        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and
-        network_policy.
+        """Internal function to obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address,
+        network_policy, pod_cidrs, service_cidrs, and ip_families.
 
         Note: SDK provides default value "10.244.0.0/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for pod_cidr.
@@ -2409,7 +2446,7 @@ class AKSContext:
         Note: SDK provides default value "172.17.0.1/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
-        This function supports the option of enable_validation. When enabled, if pod_cidr is assigned and the value of
+        This function supports the option of enable_validation. When enabled, if pod_cidr or pod_cidrs is assigned and the value of
         network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
         service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
         RequiredArgumentMissingError will be raised.
@@ -2422,6 +2459,7 @@ class AKSContext:
         network_profile = None
         if self.mc:
             network_profile = self.mc.network_profile
+            print(network_profile)
 
         # pod_cidr
         # read the original value passed by the command
@@ -2430,12 +2468,26 @@ class AKSContext:
         if network_profile and network_profile.pod_cidr is not None:
             pod_cidr = network_profile.pod_cidr
 
+        # pod_cidrs
+        # read the original value passed by the command
+        pod_cidrs = self.raw_param.get("pod_cidrs")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if network_profile and network_profile.pod_cidrs is not None:
+            pod_cidrs = network_profile.pod_cidrs
+
         # service_cidr
         # read the original value passed by the command
         service_cidr = self.raw_param.get("service_cidr")
         # try to read the property value corresponding to the parameter from the `mc` object
         if network_profile and network_profile.service_cidr is not None:
             service_cidr = network_profile.service_cidr
+
+        # service_cidrs
+        # read the original value passed by the command
+        service_cidrs = self.raw_param.get("service_cidrs")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if network_profile and network_profile.service_cidrs is not None:
+            service_cidrs = network_profile.service_cidrs
 
         # dns_service_ip
         # read the original value passed by the command
@@ -2458,30 +2510,40 @@ class AKSContext:
         if network_profile and network_profile.network_policy is not None:
             network_policy = network_profile.network_policy
 
+        # ip_families
+        # read the original value passed by the command
+        ip_families = self.raw_param.get("ip_families")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if network_profile and network_profile.ip_families is not None:
+            ip_families = network_profile.ip_families
+
         # these parameters do not need dynamic completion
 
         # validation
         if enable_validation:
             network_plugin = self._get_network_plugin(enable_validation=False)
             if network_plugin:
-                if network_plugin == "azure" and pod_cidr:
+                if network_plugin == "azure" and (pod_cidr or pod_cidrs):
                     raise InvalidArgumentValueError(
-                        "Please use kubenet as the network plugin type when pod_cidr is specified"
+                        "Please use kubenet as the network plugin type when pod_cidr or pod_cidrs is specified"
                     )
             else:
                 if (
                     pod_cidr or
+                    pod_cidrs or
                     service_cidr or
+                    service_cidrs or
                     dns_service_ip or
                     docker_bridge_address or
-                    network_policy
+                    network_policy or
+                    ip_families
                 ):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
-        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy
+        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy, pod_cidrs, service_cidrs, ip_families
 
-    def get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+    def get_networking_configuration(
         self,
     ) -> Tuple[
         Union[str, None],
@@ -2489,6 +2551,9 @@ class AKSContext:
         Union[str, None],
         Union[str, None],
         Union[str, None],
+        Union[List[str], None],
+        Union[List[str], None],
+        Union[List[str], None],
     ]:
         """Obtain the value of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address and network_policy.
 
@@ -2511,7 +2576,7 @@ class AKSContext:
         dns_service_ip of string type or None, docker_bridge_address of string type or None, network_policy of
         string type or None.
         """
-        return self._get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
+        return self._get_networking_configuration(
             enable_validation=True
         )
 
@@ -4696,6 +4761,7 @@ class AKSCreateDecorator:
         # build load balancer profile, which is part of the network profile
         load_balancer_profile = create_load_balancer_profile(
             self.context.get_load_balancer_managed_outbound_ip_count(),
+            self.context.get_load_balancer_managed_outbound_ipv6_count(),
             self.context.get_load_balancer_outbound_ips(),
             self.context.get_load_balancer_outbound_ip_prefixes(),
             self.context.get_load_balancer_outbound_ports(),
@@ -4721,8 +4787,11 @@ class AKSCreateDecorator:
             dns_service_ip,
             docker_bridge_address,
             network_policy,
+            pod_cidrs,
+            service_cidrs,
+            ip_families
         ) = (
-            self.context.get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy()
+            self.context.get_networking_configuration()
         )
         network_profile = None
         if any(
@@ -4742,7 +4811,10 @@ class AKSCreateDecorator:
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
                 pod_cidr=pod_cidr,
+                pod_cidrs=pod_cidrs,
                 service_cidr=service_cidr,
+                service_cidrs=service_cidrs,
+                ip_families=ip_families,
                 dns_service_ip=dns_service_ip,
                 docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
@@ -5558,6 +5630,7 @@ class AKSUpdateDecorator:
             )
 
         load_balancer_managed_outbound_ip_count = self.context.get_load_balancer_managed_outbound_ip_count()
+        load_balancer_managed_outbound_ipv6_count = self.context.get_load_balancer_managed_outbound_ipv6_count()
         load_balancer_outbound_ips = self.context.get_load_balancer_outbound_ips()
         load_balancer_outbound_ip_prefixes = self.context.get_load_balancer_outbound_ip_prefixes()
         load_balancer_outbound_ports = self.context.get_load_balancer_outbound_ports()
@@ -5567,6 +5640,7 @@ class AKSUpdateDecorator:
         # remain unchanged.
         mc.network_profile.load_balancer_profile = _update_load_balancer_profile(
             managed_outbound_ip_count=load_balancer_managed_outbound_ip_count,
+            managed_outbound_ipv6_count=load_balancer_managed_outbound_ipv6_count,
             outbound_ips=load_balancer_outbound_ips,
             outbound_ip_prefixes=load_balancer_outbound_ip_prefixes,
             outbound_ports=load_balancer_outbound_ports,
