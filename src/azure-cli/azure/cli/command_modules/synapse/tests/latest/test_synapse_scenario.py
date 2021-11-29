@@ -1208,7 +1208,8 @@ class SynapseScenarioTests(ScenarioTest):
                     self.check('tags.key1', 'value1'),
                     self.check('name', self.kwargs['spark-pool']),
                     self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                    self.check('provisioningState', 'Succeeded')
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sparkConfigProperties.filename','sparkconfigfile')
                  ])
 
         # delete spark pool with spark pool name

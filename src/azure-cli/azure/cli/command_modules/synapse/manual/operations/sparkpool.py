@@ -21,6 +21,7 @@ def create_spark_pool(cmd, client, resource_group_name, workspace_name, spark_po
                       min_node_count=None, max_node_count=None, spark_config_file_path=None,
                       enable_auto_pause=None, delay=None, spark_events_folder="/events",
                       spark_log_folder="/logs", tags=None, no_wait=False):
+
     workspace_client = cf_synapse_client_workspace_factory(cmd.cli_ctx)
     workspace_object = workspace_client.get(resource_group_name, workspace_name)
     location = workspace_object.location
