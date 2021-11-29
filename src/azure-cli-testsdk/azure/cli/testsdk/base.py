@@ -139,7 +139,14 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
-        moniker = '{}{:06}'.format(prefix, self.test_resources_count)
+        # The moniker's length must match the specified `length` argument, otherwise in recordings' response,
+        # Content-Length header's value won't match the length of the body, causing failure due to the
+        # azure-core check: https://github.com/Azure/azure-sdk-for-python/pull/20888
+
+        # For example, for prefix='vnetwebapp', length=24
+        replacement_length = length - len(prefix)  # 14
+        moniker_template = '{}{:0' + str(replacement_length) + '}'  # '{}{:014}'
+        moniker = moniker_template.format(prefix, self.test_resources_count)  # 'vnetwebapp00000000000002'
 
         if self.in_recording:
             name = create_random_name(prefix, length)
