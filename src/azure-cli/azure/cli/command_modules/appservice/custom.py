@@ -46,7 +46,7 @@ from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
                                        CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       ArgumentUsageError)
+                                       AzureInternalError, ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -528,19 +528,26 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
+    # check the status of async deployment
+    if res.status_code == 202:
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                authorization, timeout)
+        return response
+
     # check if there's an ongoing process
     if res.status_code == 409:
-        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
-                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
-                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
-                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
-                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(deployment_status_url))
 
-    # check the status of async deployment
-    response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                            authorization, timeout)
-    return response
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
