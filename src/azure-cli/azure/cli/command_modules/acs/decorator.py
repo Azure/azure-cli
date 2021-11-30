@@ -2390,7 +2390,7 @@ class AKSContext:
                         "Please use kubenet as the network plugin type when pod_cidr is specified"
                     )
             else:
-                if any[
+                if any([
                     pod_cidr,
                     service_cidr,
                     dns_service_ip,
@@ -2399,7 +2399,7 @@ class AKSContext:
                     pod_cidrs,
                     service_cidrs,
                     ip_families,
-                ]:
+                ]):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
@@ -2533,7 +2533,7 @@ class AKSContext:
                         "Please use kubenet as the network plugin type when pod_cidr or pod_cidrs is specified"
                     )
             else:
-                if any[
+                if any([
                     pod_cidr,
                     pod_cidrs,
                     service_cidr,
@@ -2542,7 +2542,7 @@ class AKSContext:
                     docker_bridge_address,
                     network_policy,
                     ip_families
-                ]:
+                ]):
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
