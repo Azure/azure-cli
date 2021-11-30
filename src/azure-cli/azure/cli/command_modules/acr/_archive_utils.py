@@ -57,10 +57,12 @@ def upload_source_code(cmd, client,
     BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     BlockBlobService(account_name=account_name,
                      sas_token=sas_token,
-                     endpoint_suffix=endpoint_suffix).create_blob_from_path(
+                     endpoint_suffix=endpoint_suffix,
+                     socket_timeout=300).create_blob_from_path(
                          container_name=container_name,
                          blob_name=blob_name,
-                         file_path=tar_file_path)
+                         file_path=tar_file_path,
+                         timeout=30)
     logger.warning("Sending context ({0:.3f} {1}) to registry: {2}...".format(
         size, unit, registry_name))
     return relative_path
