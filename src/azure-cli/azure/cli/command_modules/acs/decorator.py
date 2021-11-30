@@ -2546,7 +2546,8 @@ class AKSContext:
                     raise RequiredArgumentMissingError(
                         "Please explicitly specify the network plugin type"
                     )
-        return pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy, pod_cidrs, service_cidrs, ip_families
+        return (pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy,
+                pod_cidrs, service_cidrs, ip_families)
 
     def get_networking_configuration(
         self,
