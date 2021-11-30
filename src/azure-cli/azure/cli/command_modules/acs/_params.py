@@ -254,9 +254,9 @@ def load_arguments(self, _):
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
-        c.argument('pod_cidrs')
-        c.argument('service_cidrs')
-        c.argument('ip_families')
+        c.argument('pod_cidrs', type=str)
+        c.argument('service_cidrs', type=str)
+        c.argument('ip_families', type=str)
         c.argument('ppg', type=str, validator=validate_ppg)
         c.argument('vnet_subnet_id', type=str,
                    validator=validate_vnet_subnet_id)
