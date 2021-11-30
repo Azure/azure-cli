@@ -200,7 +200,7 @@ def load_arguments(self, _):
         c.argument('package', arg_group='Custom Libraries', nargs='+', help='List of workspace packages name.')
 
         # Spark config file
-        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Spark pool properties configuration file.')
+        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
