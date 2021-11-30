@@ -4315,7 +4315,7 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_local_accounts()
 
-    def test_get_client_id_from_identity_or_sp_profile(self):
+    def test_get_assignee_from_identity_or_sp_profile(self):
         # default
         ctx_1 = AKSContext(
             self.cmd,
@@ -4325,7 +4325,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on no mc attached and no client id found
         with self.assertRaises(UnknownError):
-            ctx_1.get_client_id_from_identity_or_sp_profile()
+            ctx_1.get_assignee_from_identity_or_sp_profile()
 
         # custom value
         ctx_2 = AKSContext(
@@ -4341,7 +4341,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc_2)
         # fail on kubelet identity not found
         with self.assertRaises(UnknownError):
-            ctx_2.get_client_id_from_identity_or_sp_profile()
+            ctx_2.get_assignee_from_identity_or_sp_profile()
 
         # custom value
         ctx_3 = AKSContext(
@@ -4355,13 +4355,14 @@ class AKSContextTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="UserAssigned"),
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id"
+                    client_id="test_client_id",
+                    object_id = "test_object_id"
                 )
             },
         )
         ctx_3.attach_mc(mc_3)
         self.assertEqual(
-            ctx_3.get_client_id_from_identity_or_sp_profile(), "test_client_id"
+            ctx_3.get_assignee_from_identity_or_sp_profile(), ("test_object_id", False)
         )
 
         # custom value
@@ -4379,7 +4380,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_4.attach_mc(mc_4)
         self.assertEqual(
-            ctx_4.get_client_id_from_identity_or_sp_profile(), "test_client_id"
+            ctx_4.get_assignee_from_identity_or_sp_profile(), ("test_client_id", True)
         )
 
 
@@ -4925,7 +4926,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ) as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(
-            self.cmd, "test_service_principal", "test_registry_id", False
+            self.cmd, "test_service_principal", "test_registry_id", False, True
         )
 
     def test_set_up_network_profile(self):
@@ -6528,6 +6529,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6556,6 +6558,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6571,16 +6574,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 [
                     call(
                         self.cmd,
-                        client_id="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_attach_acr",
                         subscription_id="test_subscription_id",
+                        is_service_principal=False,
                     ),
                     call(
                         self.cmd,
-                        client_id="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_detach_acr",
                         subscription_id="test_subscription_id",
                         detach=True,
+                        is_service_principal=False,
                     ),
                 ]
             )
@@ -7829,3 +7834,4 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             {},
             False,
         )
+

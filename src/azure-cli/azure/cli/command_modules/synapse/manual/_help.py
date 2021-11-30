@@ -118,7 +118,7 @@ examples:
   - name: Create a Spark pool.
     text: |-
         az synapse spark pool create --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --spark-version 2.4 --node-count 3 --node-size Medium
+        --spark-version 2.4 --node-count 3 --node-size Medium --spark-config-file-path 'path/configfile.txt'
 """
 
 helps['synapse spark pool list'] = """
@@ -155,6 +155,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --package-action Add --package package1.jar package2.jar
+  - name: Update the Spark pool's configuration file.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --spark-config-file-path 'path/configfile.txt'
 """
 
 helps['synapse spark pool delete'] = """
@@ -2134,72 +2138,4 @@ true --workspace-uid "11111111-2222-3333-444444444444" --sku name="Storage optim
 helps['synapse kusto'] = """
     type: group
     short-summary: "Manage synapse kusto"
-"""
-
-helps['synapse kql-script'] = """
-    type: group
-    short-summary: Manage script with kusto
-"""
-
-helps['synapse kql-script show'] = """
-    type: command
-    short-summary: "Gets a KQL script."
-    examples:
-      - name: KustoScriptsGet
-        text: |-
-               az synapse kql-script show --workspace-name "kustoWorkspaceName" --name "kustoScript1"
-"""
-
-helps['synapse kql-script list'] = """
-    type: command
-    short-summary: "List KQL scripts."
-    examples:
-      - name: KustoScriptsList
-        text: |-
-               az synapse kql-script list --workspace-name "kustoWorkspaceName"
-"""
-
-helps['synapse kql-script create'] = """
-    type: command
-    short-summary: "Creates a KQL script."
-    examples:
-      - name: KustoScriptsCreateOrUpdate
-        text: |-
-               az synapse kql-script create --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
-               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
-               --name "kustoScript1"
-"""
-
-helps['synapse kql-script import'] = """
-    type: command
-    short-summary: "Creates a KQL script."
-    examples:
-      - name: KustoScriptsCreateOrUpdate
-        text: |-
-               az synapse kql-script import --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
-               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
-               --name "kustoScript1"
-"""
-
-helps['synapse kql-script export'] = """
-    type: command
-    short-summary: "Export KQL scripts."
-    examples:
-      - name: KustoScriptsExport
-        text: |-
-               az synapse kql-script export --workspace-name "kustoWorkspaceName" --output-folder "C:\\KqlScirpt"
-"""
-
-helps['synapse kql-script delete'] = """
-    type: command
-    short-summary: "Deletes a KQL script"
-    examples:
-      - name: KustoScriptsDelete
-        text: |-
-               az synapse kql-script delete --workspace-name "kustoWorkspaceName" --name "kustoScript1"
-"""
-
-helps['synapse kql-script wait'] = """
-    type: command
-    short-summary: "Place the CLI in a waiting state until a condition of a KQL script is met."
 """
