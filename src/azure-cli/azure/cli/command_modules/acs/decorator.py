@@ -23,17 +23,21 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
+from azure.cli.command_modules.acs._resourcegroup import (
+    get_rg_location,
+)
 from azure.cli.command_modules.acs._validators import (
     extract_comma_separated_string,
+)
+from azure.cli.command_modules.acs.addonconfiguration import (
+    ensure_default_log_analytics_workspace_for_monitoring,
+    ensure_container_insights_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
     _ensure_aks_service_principal,
     _ensure_cluster_identity_permission_on_kubelet_identity,
-    _ensure_container_insights_for_monitoring,
-    _ensure_default_log_analytics_workspace_for_monitoring,
-    _get_rg_location,
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
@@ -322,6 +326,15 @@ class AKSParamDict:
         self.__increase(key)
         return self.__store.get(key)
 
+    def keys(self):
+        return self.__store.keys()
+
+    def values(self):
+        return self.__store.values()
+
+    def items(self):
+        return self.__store.items()
+
     def __format_count(self):
         untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
         for k in untouched_keys:
@@ -468,7 +481,7 @@ class AKSContext:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
 
         On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
-        enabled, it will check whether both min_count and max_count are  assigned, if not, raise the
+        enabled, it will check whether both min_count and max_count are assigned, if not, raise the
         RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
         create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
         InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
@@ -558,7 +571,7 @@ class AKSContext:
     def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -580,7 +593,7 @@ class AKSContext:
 
         # dynamic completion
         if not read_from_mc and location is None:
-            location = _get_rg_location(
+            location = get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
 
@@ -590,7 +603,7 @@ class AKSContext:
     def get_location(self) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -889,21 +902,15 @@ class AKSContext:
         :return: dictionary or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("nodepool_labels")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.node_labels
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            nodepool_labels = value_obtained_from_mc
-        else:
-            nodepool_labels = raw_value
+        nodepool_labels = self.raw_param.get("nodepool_labels")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.agent_pool_profiles:
+                agent_pool_profile = safe_list_get(
+                    self.mc.agent_pool_profiles, 0, None
+                )
+                if agent_pool_profile:
+                    nodepool_labels = agent_pool_profile.node_labels
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1845,10 +1852,11 @@ class AKSContext:
                         "--assign-identity can only be specified when --enable-managed-identity is specified"
                     )
             else:
-                if self._get_assign_kubelet_identity(enable_validation=False):
-                    raise RequiredArgumentMissingError(
-                        "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-                    )
+                if self.decorator_mode == DecoratorMode.CREATE:
+                    if self._get_assign_kubelet_identity(enable_validation=False):
+                        raise RequiredArgumentMissingError(
+                            "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                        )
         return assign_identity
 
     def get_assign_identity(self) -> Union[str, None]:
@@ -2691,7 +2699,7 @@ class AKSContext:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
@@ -2733,7 +2741,7 @@ class AKSContext:
             if workspace_resource_id is None:
                 # use default workspace if exists else create default workspace
                 workspace_resource_id = (
-                    _ensure_default_log_analytics_workspace_for_monitoring(
+                    ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
                         self.get_subscription_id(),
                         self.get_resource_group_name(),
@@ -2756,7 +2764,7 @@ class AKSContext:
         """Dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         :return: string or None
@@ -4410,7 +4418,7 @@ class AKSCreateDecorator:
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with several parameters and attach it to internal context.
 
-        When location is not assigned, function "_get_rg_location" will be called to get the location of the provided
+        When location is not assigned, function "get_rg_location" will be called to get the location of the provided
         resource group, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -4781,9 +4789,9 @@ class AKSCreateDecorator:
     def build_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build monitoring addon profile.
 
-        The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
+        The function "ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
-        When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
+        When workspace_resource_id is not assigned, function "ensure_default_log_analytics_workspace_for_monitoring"
         will be called to create a workspace, which internally used ResourceManagementClient to send the request.
 
         :return: a ManagedClusterAddonProfile object
@@ -4802,8 +4810,13 @@ class AKSCreateDecorator:
             },
         )
         # post-process, create a deployment
-        _ensure_container_insights_for_monitoring(
-            self.cmd, monitoring_addon_profile
+        ensure_container_insights_for_monitoring(
+            self.cmd, monitoring_addon_profile,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            self.context.get_location(),
+            aad_route=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -5397,7 +5410,8 @@ class AKSUpdateDecorator:
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
                 '"--disable-public-fqdn" or '
-                '"--tags"'
+                '"--tags" or '
+                '"--nodepool-labels"'
             )
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
@@ -5614,14 +5628,15 @@ class AKSUpdateDecorator:
         """
         self._ensure_mc(mc)
 
-        if not mc.windows_profile:
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+
+        if any([enable_ahub, disable_ahub, windows_admin_password]) and not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
 
-        enable_ahub = self.context.get_enable_ahub()
-        disable_ahub = self.context.get_disable_ahub()
-        windows_admin_password = self.context.get_windows_admin_password()
         if enable_ahub:
             mc.windows_profile.license_type = 'Windows_Server'
         if disable_ahub:
@@ -5812,6 +5827,19 @@ class AKSUpdateDecorator:
         self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
         return mc
 
+    def update_nodepool_labels(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update nodepool labels for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nodepool_labels = self.context.get_nodepool_labels()
+        if nodepool_labels is not None:
+            for agent_profile in mc.agent_pool_profiles:
+                agent_profile.node_labels = nodepool_labels
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5851,14 +5879,12 @@ class AKSUpdateDecorator:
         mc = self.update_identity(mc)
         # update addon profiles
         mc = self.update_addon_profiles(mc)
-
+        # update nodepool labels
+        mc = self.update_nodepool_labels(mc)
         return mc
 
-    def update_mc(self) -> ManagedCluster:
+    def update_mc(self, mc: ManagedCluster) -> ManagedCluster:
         """Send request to update the existing managed cluster.
-
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
-        implemented gradually.
 
         The function "_put_managed_cluster_ensuring_permission" will be called to use the ContainerServiceClient to
         send a reqeust to update the existing managed cluster, and also add necessary role assignments for some optional
@@ -5866,3 +5892,22 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
+        self._ensure_mc(mc)
+
+        return _put_managed_cluster_ensuring_permission(
+            self.cmd,
+            self.client,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            mc,
+            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
+            self.context.get_intermediate("enable_virtual_node", default_value=False),
+            False,
+            mc.agent_pool_profiles[0].vnet_subnet_id,
+            check_is_msi_cluster(mc),
+            self.context.get_attach_acr(),
+            self.context.get_aks_custom_headers(),
+            self.context.get_no_wait()
+        )
