@@ -5519,7 +5519,7 @@ class AKSUpdateDecorator:
                             assignee=assignee,
                             acr_name_or_id=attach_acr,
                             subscription_id=subscription_id,
-                            is_service_principal = is_service_principal)
+                            is_service_principal=is_service_principal)
 
         if detach_acr:
             _ensure_aks_acr(self.cmd,
@@ -5527,7 +5527,7 @@ class AKSUpdateDecorator:
                             acr_name_or_id=detach_acr,
                             subscription_id=subscription_id,
                             detach=True,
-                            is_service_principal = is_service_principal)
+                            is_service_principal=is_service_principal)
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
