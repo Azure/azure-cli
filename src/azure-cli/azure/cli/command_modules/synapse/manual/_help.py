@@ -118,7 +118,7 @@ examples:
   - name: Create a Spark pool.
     text: |-
         az synapse spark pool create --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
-        --spark-version 2.4 --node-count 3 --node-size Medium
+        --spark-version 2.4 --node-count 3 --node-size Medium --spark-config-file-path 'path/configfile.txt'
 """
 
 helps['synapse spark pool list'] = """
@@ -155,6 +155,10 @@ examples:
     text: |-
         az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
         --package-action Add --package package1.jar package2.jar
+  - name: Update the Spark pool's configuration file.
+    text: |-
+        az synapse spark pool update --name testpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --spark-config-file-path 'path/configfile.txt'
 """
 
 helps['synapse spark pool delete'] = """
