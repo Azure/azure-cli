@@ -8,8 +8,8 @@ from unittest import mock
 from azure.cli.command_modules.appservice.static_sites import \
     list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError, disconnect_staticsite, \
     reconnect_staticsite, list_staticsite_environments, show_staticsite_environment, list_staticsite_domains, \
-    set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_function_app_settings, \
-    set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users, \
+    set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_app_settings, \
+    set_staticsite_app_settings, delete_staticsite_app_settings, list_staticsite_users, \
     invite_staticsite_users, update_staticsite_users, update_staticsite, list_staticsite_secrets, \
     reset_staticsite_api_key, delete_staticsite_environment, link_user_function, unlink_user_function, get_user_function, \
     assign_identity, remove_identity, show_identity
@@ -311,75 +311,75 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.list_static_site_build_functions.assert_called_once_with(
             self.rg1, self.name1, self.environment1)
 
-    def test_list_staticsite_function_app_settings_with_resourcegroup(self):
-        list_staticsite_function_app_settings(self.mock_cmd, self.name1, self.rg1)
+    def test_list_staticsite_app_settings_with_resourcegroup(self):
+        list_staticsite_app_settings(self.mock_cmd, self.name1, self.rg1)
 
-        self.staticapp_client.list_static_site_function_app_settings.assert_called_once_with(
+        self.staticapp_client.list_static_site_app_settings.assert_called_once_with(
             self.rg1, self.name1)
 
-    def test_list_staticsite_function_app_settings_without_resourcegroup(self):
+    def test_list_staticsite_app_settings_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
-        list_staticsite_function_app_settings(self.mock_cmd, self.name1)
+        list_staticsite_app_settings(self.mock_cmd, self.name1)
 
-        self.staticapp_client.list_static_site_function_app_settings.assert_called_once_with(
+        self.staticapp_client.list_static_site_app_settings.assert_called_once_with(
             self.rg1, self.name1)
 
-    def test_set_staticsite_function_app_settings_with_resourcegroup(self):
+    def test_set_staticsite_app_settings_with_resourcegroup(self):
+        from azure.mgmt.web.models import StringDictionary
+
         app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
-        app_settings1_dict = {'key1': 'val1', 'key2': 'val2==', 'key3': 'val3='}
 
-        set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1)
+        self.staticapp_client.list_static_site_app_settings.return_value = StringDictionary(properties={})
 
-        self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, app_settings=app_settings1_dict)
+        set_staticsite_app_settings(self.mock_cmd, self.name1, app_settings1_input, self.rg1)
 
-    def test_set_staticsite_function_app_settings_without_resourcegroup(self):
+        self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
+
+    def test_set_staticsite_app_settings_without_resourcegroup(self):
+        from azure.mgmt.web.models import StringDictionary
+
         app_settings1_input = ['key1=val1', 'key2=val2==', 'key3=val3=']
-        app_settings1_dict = {'key1': 'val1', 'key2': 'val2==', 'key3': 'val3='}
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
-        set_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings1_input)
+        self.staticapp_client.list_static_site_app_settings.return_value = StringDictionary(properties={})
 
-        self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, app_settings=app_settings1_dict)
+        set_staticsite_app_settings(self.mock_cmd, self.name1, app_settings1_input)
 
-    def test_delete_staticsite_function_app_settings_with_resourcegroup(self):
+        self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
+
+    def test_delete_staticsite_app_settings_with_resourcegroup(self):
         # setup
         current_app_settings = {'key1': 'val1', 'key2': 'val2'}
         app_settings_keys_to_delete = ['key1']
-        updated_app_settings = {'key2': 'val2'}
 
         class AppSettings:
             properties = current_app_settings
 
-        self.staticapp_client.list_static_site_function_app_settings.return_value = AppSettings
+        self.staticapp_client.list_static_site_app_settings.return_value = AppSettings
 
         # action
-        delete_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete, self.rg1)
+        delete_staticsite_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete, self.rg1)
 
         # validate
-        self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, app_settings=updated_app_settings)
+        self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
 
-    def test_delete_staticsite_function_app_settings_without_resourcegroup(self):
+    def test_delete_staticsite_app_settings_without_resourcegroup(self):
         # setup
         current_app_settings = {'key1': 'val1', 'key2': 'val2'}
         app_settings_keys_to_delete = ['key1']
-        updated_app_settings = {'key2': 'val2'}
 
         class AppSettings:
             properties = current_app_settings
 
-        self.staticapp_client.list_static_site_function_app_settings.return_value = AppSettings
+        self.staticapp_client.list_static_site_app_settings.return_value = AppSettings
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
         # action
-        delete_staticsite_function_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete)
+        delete_staticsite_app_settings(self.mock_cmd, self.name1, app_settings_keys_to_delete)
 
         # validate
-        self.staticapp_client.create_or_update_static_site_function_app_settings.assert_called_once_with(
-            self.rg1, self.name1, app_settings=updated_app_settings)
+        self.staticapp_client.create_or_update_static_site_app_settings.assert_called_once()
 
     def test_list_staticsite_users_with_resourcegroup(self):
         authentication_provider = 'GitHub'
