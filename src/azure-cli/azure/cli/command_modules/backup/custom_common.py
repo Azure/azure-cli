@@ -243,7 +243,10 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
         paged_rps = custom_help.get_list_from_paged_response(recovery_points)
         filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
-        return custom_help.get_none_one_or_many(filtered_rps)
+        recovery_point = custom_help.get_none_one_or_many(filtered_rps)
+        if recovery_point is None:
+            raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
+        return recovery_point
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
