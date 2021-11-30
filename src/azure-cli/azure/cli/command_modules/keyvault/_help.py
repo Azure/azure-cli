@@ -359,11 +359,11 @@ examples:
         az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
         A valid example for policy.json is:
         {
-          "lifetime_actions": [
+          "lifetimeActions": [
             {
               "trigger": {
-                "time_after_create": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
-                "time_before_expiry" : null
+                "timeAfterCreate": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "timeBeforeExpiry" : null
               },
               "action": {
                 "type": "Rotate"
@@ -371,7 +371,7 @@ examples:
             },
             {
               "trigger": {
-                "time_before_expiry" : "P30D" // ISO 8601 duration.
+                "timeBeforeExpiry" : "P30D" // ISO 8601 duration.
               },
               "action": {
                 "type": "Notify"
@@ -379,7 +379,7 @@ examples:
             }
           ],
           "attributes": {
-            "expires_in": "P2Y" // ISO 8601 duration.
+            "expiryTime": "P2Y" // ISO 8601 duration.
           }
         }
 """
