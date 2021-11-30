@@ -165,6 +165,9 @@ def load_arguments(self, _):
         # Component Version
         c.argument('spark_version', arg_group='Component Version', help='The supported Spark version is 2.4 now.')
 
+        # Spark config file
+        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse spark pool update') as c:
@@ -195,6 +198,9 @@ def load_arguments(self, _):
         c.argument('package_action', arg_group='Custom Libraries', arg_type=get_enum_type(['Add', 'Remove']),
                    help='Package action must be specified when you add or remove a workspace package from a Apache Spark pool.')
         c.argument('package', arg_group='Custom Libraries', nargs='+', help='List of workspace packages name.')
+
+        # Spark config file
+        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
 
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:

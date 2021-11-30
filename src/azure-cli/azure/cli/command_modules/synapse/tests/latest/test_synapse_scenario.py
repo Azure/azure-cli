@@ -1047,7 +1047,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
-            'spark-version': '2.4'
+            'spark-version': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt')
         })
 
         # create a workspace
@@ -1060,11 +1061,13 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
                                   self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                                  self.check('provisioningState', 'Succeeded')
+                                  self.check('provisioningState', 'Succeeded'),
+                                  self.check('sparkConfigProperties.filename','sparkconfigfile')
                               ]).get_output_in_json()
 
         self.kwargs['pool-id'] = spark_pool['id']
@@ -1083,12 +1086,15 @@ class SynapseScenarioTests(ScenarioTest):
         ])
 
         # update spark pool
-        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1', checks=[
-            self.check('tags.key1', 'value1'),
-            self.check('name', self.kwargs['spark-pool']),
-            self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-            self.check('provisioningState', 'Succeeded')
-        ])
+        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
+                 ' --spark-config-file-path "{file}"',
+                 checks=[
+                    self.check('tags.key1', 'value1'),
+                    self.check('name', self.kwargs['spark-pool']),
+                    self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                 ])
 
         # delete spark pool with spark pool name
         self.cmd(
