@@ -2446,9 +2446,9 @@ class AKSContext:
         Note: SDK provides default value "172.17.0.1/16" and performs the following validation
         {'pattern': r'^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$'} for docker_bridge_address.
 
-        This function supports the option of enable_validation. When enabled, if pod_cidr or pod_cidrs is assigned and the value of
-        network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise, if any of pod_cidr,
-        service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
+        This function supports the option of enable_validation. When enabled, if pod_cidr or pod_cidrs is assigned
+        and the value of network_plugin is azure, an InvalidArgumentValueError will be raised; otherwise,
+        if any of pod_cidr, service_cidr, dns_service_ip, docker_bridge_address or network_policy is assigned, a
         RequiredArgumentMissingError will be raised.
 
         :return: a tuple of five elements: pod_cidr of string type or None, service_cidr of string type or None,
