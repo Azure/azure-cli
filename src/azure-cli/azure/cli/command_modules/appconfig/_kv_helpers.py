@@ -97,6 +97,9 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 
 def validate_import_key(key):
     if key:
+        if not isinstance(key, str):
+            logger.warning("Ignoring invalid key '%s'. Key must be a string.", key)
+            return False
         if key == '.' or key == '..' or '%' in key:
             logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
             return False
@@ -379,13 +382,13 @@ def __write_kv_and_features_to_config_store(azconfig_client,
 
 
 def __is_feature_flag(kv):
-    if kv and kv.key and kv.content_type:
+    if kv and kv.key and isinstance(kv.key, str) and kv.content_type and isinstance(kv.content_type, str):
         return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
 
 
 def __is_key_vault_ref(kv):
-    return kv and kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
+    return kv and kv.content_type and isinstance(kv.content_type, str) and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE
 
 
 def __discard_features_from_retrieved_kv(src_kvs):
@@ -1063,10 +1066,10 @@ def __import_kvset_from_file(client, path, yes):
                 continue
         elif not validate_import_key(config_setting.key):
             continue
-        __validate_import_tags(config_setting)
-        # All validations successful
 
-        __write_configuration_setting_to_config_store(client, config_setting)
+        if __validate_import_config_setting(config_setting):
+            # All validations successful
+            __write_configuration_setting_to_config_store(client, config_setting)
 
 
 def __validate_import_keyvault_ref(kv):
@@ -1103,12 +1106,27 @@ def __validate_import_feature_flag(kv):
     return False
 
 
+def __validate_import_config_setting(config_setting):
+    if config_setting.value and not isinstance(config_setting.value, str):
+        logger.warning("The 'value' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+    if config_setting.content_type and not isinstance(config_setting.content_type, str):
+        logger.warning("The 'content_type' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+    if config_setting.label and not isinstance(config_setting.label, str):
+        logger.warning("The 'label' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+
+    return __validate_import_tags(config_setting)
+
+
 def __validate_import_tags(kv):
+    if kv.tags and not isinstance(kv.tags, dict):
+        logger.warning("The value of the 'tags' for key '{%s}' is not an object. This key-value will not be imported.", kv.key)
+        return False
+
     if kv.tags:
         for tag_key, tag_value in kv.tags.items():
             if not isinstance(tag_value, str):
                 logger.warning("The value for the tag '{%s}' for key '{%s}' is not a string. It will be converted to a string.", tag_key, kv.key)
-                return
+    return True
 
 
 def __write_configuration_setting_to_config_store(azconfig_client, configuration_setting):
