@@ -6469,6 +6469,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6497,6 +6498,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6512,16 +6514,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 [
                     call(
                         self.cmd,
-                        assignee="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_attach_acr",
                         subscription_id="test_subscription_id",
+                        is_service_principal=False,
                     ),
                     call(
                         self.cmd,
-                        assignee="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_detach_acr",
                         subscription_id="test_subscription_id",
                         detach=True,
+                        is_service_principal=False,
                     ),
                 ]
             )
@@ -7770,3 +7774,4 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             {},
             False,
         )
+
