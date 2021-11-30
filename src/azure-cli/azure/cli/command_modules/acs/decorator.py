@@ -2459,7 +2459,6 @@ class AKSContext:
         network_profile = None
         if self.mc:
             network_profile = self.mc.network_profile
-            print(network_profile)
 
         # pod_cidr
         # read the original value passed by the command
@@ -2471,6 +2470,8 @@ class AKSContext:
         # pod_cidrs
         # read the original value passed by the command
         pod_cidrs = self.raw_param.get("pod_cidrs")
+
+        pod_cidrs = pod_cidrs.split(',') if pod_cidrs else None
         # try to read the property value corresponding to the parameter from the `mc` object
         if network_profile and network_profile.pod_cidrs is not None:
             pod_cidrs = network_profile.pod_cidrs
@@ -2485,6 +2486,8 @@ class AKSContext:
         # service_cidrs
         # read the original value passed by the command
         service_cidrs = self.raw_param.get("service_cidrs")
+
+        service_cidrs = service_cidrs.split(',') if service_cidrs else None
         # try to read the property value corresponding to the parameter from the `mc` object
         if network_profile and network_profile.service_cidrs is not None:
             service_cidrs = network_profile.service_cidrs
@@ -2513,6 +2516,8 @@ class AKSContext:
         # ip_families
         # read the original value passed by the command
         ip_families = self.raw_param.get("ip_families")
+
+        ip_families = ip_families.split(',') if ip_families else None
         # try to read the property value corresponding to the parameter from the `mc` object
         if network_profile and network_profile.ip_families is not None:
             ip_families = network_profile.ip_families
