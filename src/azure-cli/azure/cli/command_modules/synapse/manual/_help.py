@@ -1926,8 +1926,7 @@ examples:
     text: |-
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
           --pe-name testendpointname \\
-          --resource-id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
-          --group-Id blob
+          --file @path/test.json
 """
 
 helps['synapse managed-private-endpoints list'] = """
