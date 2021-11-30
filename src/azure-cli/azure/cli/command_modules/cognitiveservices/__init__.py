@@ -5,10 +5,6 @@
 
 from azure.cli.core import AzCommandsLoader
 
-import azure.cli.command_modules.cognitiveservices._help  # pylint: disable=unused-import
-
-from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts
-
 
 class CognitiveServicesCommandsLoader(AzCommandsLoader):
 
@@ -16,8 +12,7 @@ class CognitiveServicesCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         custom_type = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.cognitiveservices.custom#{}',
-            client_factory=cf_accounts)
+            operations_tmpl='azure.cli.command_modules.cognitiveservices.custom#{}')
         super(CognitiveServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                               custom_command_type=custom_type,
                                                               resource_type=ResourceType.MGMT_COGNITIVESERVICES)
