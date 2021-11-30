@@ -553,8 +553,10 @@ def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_princip
             if ex.message == 'The role assignment already exists.':
                 break
             logger.info(ex.message)
-        except:  # pylint: disable=bare-except
-            pass
+        except CLIError as ex:
+            logger.warning(str(ex))
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
         return False
@@ -564,7 +566,7 @@ def _add_role_assignment(cmd, role, service_principal_msi_id, is_service_princip
 
 
 def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resource_group_name=None,
-                            scope=None, include_inherited=False, yes=None):
+                            scope=None, include_inherited=False, yes=None, is_service_principal=True):
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -585,14 +587,14 @@ def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resourc
                               assignments_client.config.subscription_id)
     assignments = _search_role_assignments(cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
-                                           include_groups=False)
+                                           include_groups=False, is_service_principal=is_service_principal)
 
     if assignments:
         for a in assignments:
             assignments_client.delete_by_id(a.id)
 
 
-def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None):
+def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=None, is_service_principal=True):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to delete', value=0, total_val=1.0)
@@ -604,7 +606,8 @@ def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=No
             delete_role_assignments(cli_ctx,
                                     role=role,
                                     assignee=service_principal,
-                                    scope=scope)
+                                    scope=scope,
+                                    is_service_principal=is_service_principal)
             break
         except CLIError as ex:
             raise ex
@@ -619,10 +622,14 @@ def _delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=No
 
 
 def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
-                             scope, assignee, role, include_inherited, include_groups):
+                             scope, assignee, role, include_inherited, include_groups,
+                             is_service_principal=True):
     assignee_object_id = None
     if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+        if is_service_principal:
+            assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+        else:
+            assignee_object_id = assignee
 
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
@@ -1471,8 +1478,30 @@ def _create_role_assignment(cmd, role, assignee,
 
     # If the cluster has service principal resolve the service principal client id to get the object id,
     # if not use MSI object id.
-    object_id = _resolve_object_id(
-        cmd.cli_ctx, assignee) if resolve_assignee else assignee
+    object_id = assignee
+    if resolve_assignee:
+        from azure.graphrbac.models import GraphErrorException
+        error_msg = "Failed to resolve service principal object ID: "
+        try:
+            object_id = _resolve_object_id(cmd.cli_ctx, assignee)
+        except GraphErrorException as ex:
+            if ex.response is not None:
+                error_code = getattr(ex.response, "status_code", None)
+                error_reason = getattr(ex.response, "reason", None)
+                internal_error = ""
+                if error_code:
+                    internal_error += str(error_code)
+                if error_reason:
+                    if internal_error:
+                        internal_error += " - "
+                    internal_error += str(error_reason)
+                if internal_error:
+                    error_msg += "({}) ".format(internal_error)
+            error_msg += ex.message
+            # this should be UserFault or ServiceError, but it is meaningless to distinguish them here
+            raise CLIError(error_msg)
+        except Exception as ex:  # pylint: disable=bare-except
+            raise CLIError(error_msg + str(ex))
 
     assignment_name = uuid.uuid4()
     custom_headers = None
@@ -2968,10 +2997,11 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
 
 
 def _ensure_aks_acr(cmd,
-                    client_id,
+                    assignee,
                     acr_name_or_id,
                     subscription_id,
-                    detach=False):
+                    detach=False,
+                    is_service_principal=True):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     # Check if the ACR exists by resource ID.
     if is_valid_resource_id(acr_name_or_id):
@@ -2984,7 +3014,7 @@ def _ensure_aks_acr(cmd,
         except CloudError as ex:
             raise CLIError(ex.message)
         _ensure_aks_acr_role_assignment(
-            cmd, client_id, registry.id, detach)
+            cmd, assignee, registry.id, detach, is_service_principal)
         return
 
     # Check if the ACR exists by name accross all resource groups.
@@ -2998,7 +3028,7 @@ def _ensure_aks_acr(cmd,
             raise CLIError(
                 "ACR {} not found. Have you provided the right ACR name?".format(registry_name))
         raise CLIError(ex.message)
-    _ensure_aks_acr_role_assignment(cmd, client_id, registry.id, detach)
+    _ensure_aks_acr_role_assignment(cmd, assignee, registry.id, detach, is_service_principal)
     return
 
 
@@ -3296,22 +3326,25 @@ def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_
 
 
 def _ensure_aks_acr_role_assignment(cmd,
-                                    client_id,
+                                    assignee,
                                     registry_id,
-                                    detach=False):
+                                    detach=False,
+                                    is_service_principal=True):
     if detach:
         if not _delete_role_assignments(cmd.cli_ctx,
                                         'acrpull',
-                                        client_id,
-                                        scope=registry_id):
+                                        assignee,
+                                        scope=registry_id,
+                                        is_service_principal=is_service_principal):
             raise CLIError('Could not delete role assignments for ACR. '
                            'Are you an Owner on this subscription?')
         return
 
     if not _add_role_assignment(cmd,
                                 'acrpull',
-                                client_id,
-                                scope=registry_id):
+                                assignee,
+                                scope=registry_id,
+                                is_service_principal=is_service_principal):
         raise CLIError('Could not create a role assignment for ACR. '
                        'Are you an Owner on this subscription?')
     return
@@ -3928,11 +3961,12 @@ def _put_managed_cluster_ensuring_permission(
                                'named <ClUSTER_NAME>-agentpool in MC_ resource group to give '
                                'it permission to pull from ACR.')
             else:
-                kubelet_identity_client_id = cluster.identity_profile["kubeletidentity"].client_id
+                kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
                 _ensure_aks_acr(cmd,
-                                client_id=kubelet_identity_client_id,
+                                assignee=kubelet_identity_object_id,
                                 acr_name_or_id=attach_acr,
-                                subscription_id=subscription_id)
+                                subscription_id=subscription_id,
+                                is_service_principal=False)
     else:
         cluster = sdk_no_wait(no_wait, client.begin_create_or_update,
                               resource_group_name=resource_group_name,

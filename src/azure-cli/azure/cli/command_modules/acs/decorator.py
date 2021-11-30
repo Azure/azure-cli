@@ -4366,16 +4366,17 @@ class AKSContext:
         """
         return self._get_enable_local_accounts(enable_validation=True)
 
-    def get_client_id_from_identity_or_sp_profile(self) -> str:
-        """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
+    def get_assignee_from_identity_or_sp_profile(self) -> (str, bool):
+        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
 
         Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
 
-        If client_id cannot be obtained, raise an UnknownError.
+        If assignee cannot be obtained, raise an UnknownError.
 
-        :return: string
+        :return: string, bool
         """
-        client_id = None
+        assignee = None
+        is_service_principal = False
         if check_is_msi_cluster(self.mc):
             if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
                 raise UnknownError(
@@ -4384,13 +4385,15 @@ class AKSContext:
                     "You can manually grant or revoke permission to the identity named "
                     "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
                 )
-            client_id = self.mc.identity_profile["kubeletidentity"].client_id
+            assignee = self.mc.identity_profile["kubeletidentity"].object_id
+            is_service_principal = False
         elif self.mc and self.mc.service_principal_profile is not None:
-            client_id = self.mc.service_principal_profile.client_id
+            assignee = self.mc.service_principal_profile.client_id
+            is_service_principal = True
 
-        if not client_id:
+        if not assignee:
             raise UnknownError('Cannot get the AKS cluster\'s service principal.')
-        return client_id
+        return assignee, is_service_principal
 
 
 class AKSCreateDecorator:
@@ -4675,7 +4678,7 @@ class AKSCreateDecorator:
                 service_principal_profile = mc.service_principal_profile
                 _ensure_aks_acr(
                     self.cmd,
-                    client_id=service_principal_profile.client_id,
+                    assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
                     # not actually used
                     subscription_id=self.context.get_subscription_id(),
@@ -5507,22 +5510,24 @@ class AKSUpdateDecorator:
         self._ensure_mc(mc)
 
         subscription_id = self.context.get_subscription_id()
-        client_id = self.context.get_client_id_from_identity_or_sp_profile()
+        assignee, is_service_principal = self.context.get_assignee_from_identity_or_sp_profile()
         attach_acr = self.context.get_attach_acr()
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
             _ensure_aks_acr(self.cmd,
-                            client_id=client_id,
+                            assignee=assignee,
                             acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id)
+                            subscription_id=subscription_id,
+                            is_service_principal=is_service_principal)
 
         if detach_acr:
             _ensure_aks_acr(self.cmd,
-                            client_id=client_id,
+                            assignee=assignee,
                             acr_name_or_id=detach_acr,
                             subscription_id=subscription_id,
-                            detach=True)
+                            detach=True,
+                            is_service_principal=is_service_principal)
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
