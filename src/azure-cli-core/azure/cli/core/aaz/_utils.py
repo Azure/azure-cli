@@ -13,6 +13,8 @@ def _get_profile_pkg(aaz_module_name, cloud):
 
 class AAZShortHandSyntaxParser:
 
+    NULL_EXPRESSIONS = ('null', 'None')
+
     def __call__(self, data):
         assert isinstance(data, str)
         result, length = self.parse_shorthand(data)
@@ -128,7 +130,7 @@ class AAZShortHandSyntaxParser:
             idx += 1
         if idx == 0:
             raise AAZInvalidShorthandSyntaxError(remain, idx, "Cannot parse empty")
-        elif remain[:idx] in ('null', 'None'):
+        elif remain[:idx] in self.NULL_EXPRESSIONS:
             return None, idx
         return remain[:idx], idx
 

@@ -2,6 +2,7 @@ import re
 import os
 from argparse import Action, ArgumentTypeError
 from azure.cli.core import azclierror
+from collections import OrderedDict
 from ._utils import AAZShortHandSyntaxParser
 from knack.log import get_logger
 
@@ -12,27 +13,32 @@ class AAZArgAction(Action):
 
     _schema = None
 
+    _shorthand_parser = AAZShortHandSyntaxParser()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        data = self.format_data(values)
-        setattr(namespace, self.dest, data)
 
     @classmethod
     def format_data(cls, data):
         """format input data"""
-        # fill blank argument
-        if data is None:
-            return cls._schema._blank
-        return data
+        raise NotImplementedError()
 
 
 class AAZSimpleTypeArgAction(AAZArgAction):
 
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values is None:
+            data = self._schema._blank
+        else:
+            if isinstance(values, str) and values in self._shorthand_parser.NULL_EXPRESSIONS:
+                data = None
+            else:
+                data = values
+            data = self.format_data(data)
+        setattr(namespace, self.dest, data)
+
     @classmethod
     def format_data(cls, data):
-        data = super().format_data(data)
         if isinstance(data, str):
             if cls._schema.enum:
                 return cls._schema.enum[data]
@@ -50,7 +56,19 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         r'^(((\[[0-9]+])|(([a-zA-Z0-9_\-]+)(\[[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[[0-9]+])?)*)=(.*)$'
     )
 
-    _shorthand_parser = AAZShortHandSyntaxParser()
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest_dict = getattr(namespace, self.dest, OrderedDict())
+        if values is None:
+            key_parts = tuple()
+            dest_dict[key_parts] = self._schema._blank
+        else:
+            for key, key_parts, data in self.decode_values(values):
+                schema = self._schema
+                for k in key_parts:
+                    schema = schema[k]
+                action = schema.to_cmd_arg(name=key)
+                dest_dict[key_parts] = action.format_data(data)
+        setattr(namespace, self.dest, dest_dict)
 
     @classmethod
     def decode_values(cls, values):
@@ -63,9 +81,9 @@ class AAZCompoundTypeArgAction(AAZArgAction):
             else:
                 key = match[1]
                 body = match[len(match.regs) - 1]
-            key_items = cls._split_key(key)
-            body = cls._decode_body(key, key_items, body)
-            yield key_items, body
+            key_parts = cls._split_key(key)
+            body = cls._decode_body(key_parts, body)
+            yield key, key_parts, body
 
     @staticmethod
     def _split_key(key):
@@ -80,7 +98,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         return tuple(key_items)
 
     @classmethod
-    def _decode_body(cls, key, key_items, body):
+    def _decode_body(cls, key_items, body):
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -88,7 +106,6 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         for item in key_items:
             schema = schema[item]
 
-        action = schema.to_cmd_arg(name=key)
         if isinstance(schema, AAZSimpleTypeArg):
             # simple type
             try:
@@ -112,31 +129,34 @@ class AAZCompoundTypeArgAction(AAZArgAction):
                         logger.debug(ex)
                         msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
                         raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
-        return action.format_data(data=data)
+        return data
 
 
-class AAZObjectArgAction(AAZArgAction):
+class AAZObjectArgAction(AAZCompoundTypeArgAction):
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        print(values, option_string)
-
-
-class AAZDictArgAction(AAZArgAction):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
+    @classmethod
+    def format_data(cls, data):
+        # TODO:
         pass
 
 
-class AAZListArgAction(AAZArgAction):
+class AAZDictArgAction(AAZCompoundTypeArgAction):
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        print(values, option_string)
+    @classmethod
+    def format_data(cls, data):
+        # TODO:
+        pass
 
 
-class AAZListElementArgAction(AAZArgAction):
+class AAZListArgAction(AAZCompoundTypeArgAction):
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        print(values, option_string)
+    @classmethod
+    def format_data(cls, data):
+        # TODO:
+        pass
+
+
+# class AAZListElementArgAction(AAZArgAction):
+#
+#     def __call__(self, parser, namespace, values, option_string=None):
+#         print(values, option_string)
