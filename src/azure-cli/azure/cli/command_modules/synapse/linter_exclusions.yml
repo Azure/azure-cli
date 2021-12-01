@@ -134,4 +134,16 @@ synapse kusto attached-database-configuration create:
         table_level_sharing_properties:
             rule_exclusions:
             - option_length_too_long
+synapse sql audit-policy update:
+    parameters:
+        blob_auditing_policy_name:
+            rule_exclusions:
+                - option_length_too_long
+                - missing_parameter_help
+                - no_parameter_defaults_for_update_commands
+synapse sql audit-policy wait:
+    parameters:
+        blob_auditing_policy_name:
+            rule_exclusions:
+                - option_length_too_long
 ...

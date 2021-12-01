@@ -239,8 +239,7 @@ short-summary: Get a SQL's auditing policy.
 examples:
   - name: Get a SQL's auditing policy.
     text: |-
-        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg \\
-        --blob-auditing-policy-name bapolicyname
+        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql audit-policy update'] = """
@@ -251,49 +250,47 @@ examples:
   - name: Enable by storage account name.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg --state Enabled \\
-            --blob-storage-target-state Enabled --storage-account mystorage --blob-auditing-policy-name bapname
+            --blob-storage-target-state Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg --state Enabled \\
             --blob-storage-target-state Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
-            --storage-key MYKEY== --blob-auditing-policy-name bapname
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
-        --blob-auditing-policy-name bapolicyname
+        --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
   - name: Disable an auditing policy.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --state Disabled --blob-auditing-policy-name bapolicyname
+        --state Disabled
   - name: Disable a blob storage auditing policy.
     text: |-
         az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
-        --blob-storage-target-state Disabled --blob-auditing-policy-name bapname
+        --blob-storage-target-state Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
-            --log-analytics-target-state Enabled --log-analytics-workspace-resource-id myworkspaceresourceid \\
-            --blob-auditing-policy-name bapname
+            --log-analytics-target-state Enabled --log-analytics-workspace-resource-id myworkspaceresourceid
   - name: Disable a log analytics auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled
-            --log-analytics-target-state Disabled --blob-auditing-policy-name bapname
+            --log-analytics-target-state Disabled
   - name: Enable an event hub auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
             --event-hub-target-state Enabled \\
             --event-hub-authorization-rule-id eventhubauthorizationruleid \\
-            --event-hub eventhubname --blob-auditing-policy-name bapname
+            --event-hub eventhubname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws --state Enabled \\
             --event-hub-target-state Enabled \\
-            --event-hub-authorization-rule-id eventhubauthorizationruleid --blob-auditing-policy-name bapname
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
   - name: Disable an event hub auditing policy.
     text: |
         az synapse sql audit-policy update --resource-group mygroup --workspace-name myws
-           --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapname
+           --state Enabled --event-hub-target-state Disabled
 """
 
 helps['synapse sql audit-policy wait'] = """
@@ -586,51 +583,47 @@ examples:
   - name: Enable by storage account name.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Enabled --blob-storage-target-state Enabled --storage-account mystorage \\
-        --blob-auditing-policy-name bapname
+        --resource-group rg --state Enabled --blob-storage-target-state Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --blob-storage-target-state Enabled \\
-        --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY== \\
-        --blob-auditing-policy-name bapname
+        --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public' \\
-        --blob-auditing-policy-name bapname
+        --resource-group rg --actions SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
   - name: Disable an auditing policy.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --state Disabled --blob-auditing-policy-name bapname
+        --resource-group rg --state Disabled
   - name: Disable a blob storage auditing policy.
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --blob-storage-target-state Disabled --blob-auditing-policy-name bapname
+        --resource-group rg --blob-storage-target-state Disabled
   - name: Enable a log analytics auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --log-analytics-target-state Enabled \\
-        --log-analytics-workspace-resource-id myworkspaceresourceid --blob-auditing-policy-name bapname
+        --log-analytics-workspace-resource-id myworkspaceresourceid
   - name: Disable a log analytics auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg --log-analytics-target-state Disabled --blob-auditing-policy-name bapname
+        --resource-group rg --log-analytics-target-state Disabled
   - name: Enable an event hub auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
-        --event-hub-authorization-rule-id eventhubauthorizationruleid --event-hub eventhubname \\
-        --blob-auditing-policy-name bapname
+        --event-hub-authorization-rule-id eventhubauthorizationruleid --event-hub eventhubname
   - name: Enable an event hub auditing policy for default event hub.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
         --resource-group rg --state Enabled --event-hub-target-state Enabled \\
-        --event-hub-authorization-rule-id eventhubauthorizationruleid --blob-auditing-policy-name bapname
+        --event-hub-authorization-rule-id eventhubauthorizationruleid
   - name: Disable an event hub auditing policy.
     text: |
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace \\
-        --resource-group rg  --event-hub-target-state Disabled --blob-auditing-policy-name bapname
+        --resource-group rg  --event-hub-target-state Disabled
 """
 
 helps['synapse workspace key'] = """
