@@ -83,6 +83,10 @@ class AAZBaseArg(AAZBaseType):
         if self._blank != AAZUndefined:
             arg.nargs = '?'
 
+        action = self._build_cmd_action()
+        if action:
+            arg.action = action
+
         return arg
 
     def _build_cmd_action(self):
@@ -100,7 +104,6 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
         arg = super().to_cmd_arg(name=name)
         if self.enum:
             arg.choices = self.enum.to_choices()
-        arg.action = self._build_cmd_action()
         return arg
 
     def _build_cmd_action(self):
@@ -141,7 +144,8 @@ class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-        if self._blank != AAZUndefined:
+        if self._blank != AAZUndefined and self._blank is None and self._nullable:
+            # only support to parse object as None value when blank
             arg.nargs = '*'
         else:
             arg.nargs = '+'
@@ -161,7 +165,8 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-        if self._blank != AAZUndefined:
+        if self._blank != AAZUndefined and self._blank is None and self._nullable:
+            # only support to parse dict as None value when blank
             arg.nargs = '*'
         else:
             arg.nargs = '+'
@@ -181,7 +186,8 @@ class AAZListArg(AAZBaseArg, AAZListType):
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
-        if self._blank != AAZUndefined:
+        if self._blank != AAZUndefined and self._blank is None and self._nullable:
+            # only support to parse list as None value when blank.
             arg.nargs = '*'
         else:
             arg.nargs = '+'

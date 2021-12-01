@@ -28,3 +28,14 @@ class AAZValuePrecisionLossError(ValueError):
         super().__init__(
             f"Precision Loss from '{old}'({type(old)}) to '{value}'({type(value)})"
         )
+
+
+class AAZInvalidShorthandSyntaxError(ValueError):
+
+    def __init__(self, error_data, error_at, msg):
+        self.error_data = error_data
+        self.error_at = error_at
+        self.msg = msg
+
+    def __str__(self):
+        return f"{self.msg}:\n\t{self.error_data[:self.error_at]}\n\t" + ' ' * self.error_at + "^^^"
