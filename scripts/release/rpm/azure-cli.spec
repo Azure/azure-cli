@@ -54,18 +54,12 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 # Create executable
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
-
 printf "#!/usr/bin/env bash
 bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
 python_cmd=%{python_cmd}
 if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; fi
-%if 0%{?cblmariner}
-AZ_INSTALLER=RPM PYTHONPATH=\"%{_libdir}/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
-%else
 AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir\"/../%{_lib}/az/lib/${python_version}/site-packages \$python_cmd -sm azure.cli \"\$@\"
-%endif
 " > %{buildroot}%{_bindir}/az
-
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 
 # Remove unused Network SDK API versions
