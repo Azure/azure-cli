@@ -2677,18 +2677,17 @@ class SynapseScenarioTests(ScenarioTest):
         return self.cmd('az storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @record_only()
+   # @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     def test_managed_private_endpoints(self):
         self.kwargs.update({
             'workspace': 'testsynapseworkspacepe',
             'name': 'AzureDataLakeStoragePE',
-            'privateLinkResourceId': '/subscriptions/051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3/resourceGroups/bigdataqa/providers/Microsoft.Storage/storageAccounts/hozhao0917gen2',
-            'groupId': 'dfs'})
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
 
         # create managed private endpoint
         self.cmd(
-            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --resource-id {privateLinkResourceId} --group-Id {groupId}',
+            'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --file @"{file}"',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
