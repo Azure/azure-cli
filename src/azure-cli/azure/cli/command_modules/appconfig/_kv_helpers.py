@@ -1029,12 +1029,18 @@ def __import_kvset_from_file(client, path, yes):
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
 
-    kvset_to_import = [ConfigurationSetting(key=kv['key'] if 'key' in kv else None,
+    kvset_from_file = [ConfigurationSetting(key=kv['key'] if 'key' in kv else None,
                                             label=kv['label'] if 'label' in kv else None,
                                             content_type=kv['content_type'] if 'content_type' in kv else None,
                                             value=kv['value'] if 'value' in kv else None,
                                             tags=kv['tags'] if 'tags' in kv else None)
                        for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
+
+    kvset_to_import = []
+
+    for config_setting in kvset_from_file:
+        if __validate_import_config_setting(config_setting):
+            kvset_to_import.append(config_setting)
 
     if not yes:
         existing_kvset = __read_kv_from_config_store(client,
@@ -1058,18 +1064,7 @@ def __import_kvset_from_file(client, path, yes):
         user_confirmation('Do you want to continue?\n')
 
     for config_setting in kvset_to_import:
-        if __is_key_vault_ref(kv=config_setting):
-            if not __validate_import_keyvault_ref(kv=config_setting):
-                continue
-        elif __is_feature_flag(kv=config_setting):
-            if not __validate_import_feature_flag(kv=config_setting):
-                continue
-        elif not validate_import_key(config_setting.key):
-            continue
-
-        if __validate_import_config_setting(config_setting):
-            # All validations successful
-            __write_configuration_setting_to_config_store(client, config_setting)
+        __write_configuration_setting_to_config_store(client, config_setting)
 
 
 def __validate_import_keyvault_ref(kv):
@@ -1107,6 +1102,15 @@ def __validate_import_feature_flag(kv):
 
 
 def __validate_import_config_setting(config_setting):
+    if __is_key_vault_ref(kv=config_setting):
+        if not __validate_import_keyvault_ref(kv=config_setting):
+            return False
+    elif __is_feature_flag(kv=config_setting):
+        if not __validate_import_feature_flag(kv=config_setting):
+            return False
+    elif not validate_import_key(config_setting.key):
+        return False
+
     if config_setting.value and not isinstance(config_setting.value, str):
         logger.warning("The 'value' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
     if config_setting.content_type and not isinstance(config_setting.content_type, str):
