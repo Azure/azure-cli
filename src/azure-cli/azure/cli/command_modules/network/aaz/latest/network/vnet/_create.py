@@ -63,6 +63,12 @@ class Create(AAZCommand):
         )
         schema.tags.Element = AAZStrArg()
 
+        schema.flags = AAZListArg(
+            options=["--flags"],
+            help="Flags"
+        )
+        schema.flags.Element = AAZIntArg()
+
         schema.extended_location = AAZObjectArg(
             options=["--extended-location"],
             help="The extended location of the virtual network."

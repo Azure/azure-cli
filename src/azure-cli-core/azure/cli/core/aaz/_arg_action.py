@@ -172,6 +172,38 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest_dict = getattr(namespace, self.dest)
+        if dest_dict is None:
+            dest_dict = OrderedDict()
+
+        if values is None:
+            key_parts = tuple()
+            dest_dict[key_parts] = self._schema._blank
+        else:
+            inputs = [*self.decode_values(values)]
+            try:
+                # standard expression
+                for key, key_parts, value in inputs:
+                    schema = self._schema
+                    for k in key_parts:
+                        schema = schema[k]
+                    action = schema._build_cmd_action()
+                    dest_dict[key_parts] = action.format_data(value)
+            except Exception as ex:
+                for key, _, _ in inputs:
+                    if key:
+                        raise ex
+                # separate element expression
+                elements = []
+                element_action = self._schema.Element._build_cmd_action()
+                for _, _, value in inputs:
+                    elements.append(element_action.format_data(value))
+                key_parts = tuple()
+                dest_dict[key_parts] = elements
+
+        setattr(namespace, self.dest, dest_dict)
+
     @classmethod
     def format_data(cls, data):
         if data is None:
