@@ -13,7 +13,7 @@ WORKDIR /azure-cli
 COPY . .
 
 RUN dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version rpmbuild --define "cblmariner 1" --define "dist $dist" -v -bb --clean scripts/release/rpm/azure-cli.spec && \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version rpmbuild --define "dist $dist" -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /usr/src/mariner/RPMS/x86_64/azure-cli-${cli_version}-1${dist}.x86_64.rpm /azure-cli-dev-1${dist}.rpm
 
 FROM cblmariner.azurecr.io/base/core:${tag} AS execution-env
