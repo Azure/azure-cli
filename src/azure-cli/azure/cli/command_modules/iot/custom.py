@@ -8,7 +8,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
+from azure.cli.core.azclierror import AzCLIError, RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -578,19 +578,32 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
-    # if setting a fileupload storage identity or changing fileupload to identity-based
-    if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
-        _validate_fileupload_identity(instance, fileupload_storage_identity)
+    # only bother with $default storage endpoint checking if modifying fileupload params
+    if any([
+            fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
+            fileupload_storage_authentication_type, fileupload_storage_container_uri, fileupload_storage_identity]):
+        default_storage_endpoint = instance.properties.storage_endpoints.get('$default', {})
+        # no default storage endpoint, either recreate with existing params or throw an error
+        if not default_storage_endpoint:
+            if not fileupload_storage_connectionstring and not fileupload_storage_container_name:
+                raise AzCLIError('This hub has no default storage endpoint for file upload.\n'
+                                 'Please recreate your default storage endpoint by running '
+                                 '`az iot hub update --name hub_name --fcs {connection_string} --fc {container_name}`')
+            default_storage_endpoint = StorageEndpointProperties(container_name=fileupload_storage_container_name, connection_string=fileupload_storage_connectionstring)
 
-    default_storage_endpoint = _process_fileupload_args(
-        instance.properties.storage_endpoints['$default'],
-        fileupload_storage_connectionstring,
-        fileupload_storage_container_name,
-        fileupload_sas_ttl,
-        fileupload_storage_authentication_type,
-        fileupload_storage_container_uri,
-        fileupload_storage_identity,
-    )
+        # if setting a fileupload storage identity or changing fileupload to identity-based
+        if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
+            _validate_fileupload_identity(instance, fileupload_storage_identity)
+
+        instance.properties.storage_endpoints['$default'] = _process_fileupload_args(
+            default_storage_endpoint,
+            fileupload_storage_connectionstring,
+            fileupload_storage_container_name,
+            fileupload_sas_ttl,
+            fileupload_storage_authentication_type,
+            fileupload_storage_container_uri,
+            fileupload_storage_identity,
+        )
 
     # sas token authentication switches
     if disable_local_auth is not None:
@@ -599,8 +612,6 @@ def update_iot_hub_custom(instance,
         instance.properties.disable_device_sas = disable_device_sas
     if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
-
-    instance.properties.storage_endpoints['$default'] = default_storage_endpoint
 
     return instance
 
