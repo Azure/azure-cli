@@ -678,7 +678,7 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     def test_hub_file_upload(self, resource_group, resource_group_location, storage_account):
         from time import sleep
-
+        from azure.cli.core.azclierror import AzCLIError
         hub = self.create_random_name(prefix='cli-file-upload-hub', length=32)
         user_identity_name = self.create_random_name(prefix='hub-user-identity', length=32)
         rg = resource_group
@@ -708,6 +708,24 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3} --fsi [system]'
                  .format(hub, rg, containerName, storageConnectionString),
                  expect_failure=True)
+
+        # Testing hub update without $default storage endpoint
+        self.kwargs.update({
+            'hub': hub,
+            'rg': rg
+        })
+        self.cmd('iot hub update -n {hub} -g {rg} --set "properties.storageEndpoints={{}}"',
+                 checks=[self.not_exists('properties.storageEndpoints')])
+        # update with fileUpload args (not container and cstring) should error
+        with self.assertRaises(AzCLIError) as ex:
+            # configure fileupload SAS TTL
+            self.cmd('iot hub update -n {0} -g {1} --fst 2'.format(hub, rg))
+        self.assertTrue('This hub has no default storage endpoint' in str(ex.exception))
+
+        # update with non-fileupload args should succeed (c2d TTL)
+        self.cmd('iot hub update -n {0} -g {1} --ct 13'
+                 .format(hub, rg),
+                 checks=[self.check('properties.cloudToDevice.defaultTtlAsIso8601', '13:00:00')])
 
         # File upload - add connection string and containername - keybased
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3}'
