@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.30.0
+++++++
+* [BREAKING CHANGE] ADAL to MSAL migration (#19853)
+
 2.29.1
 ++++++
 * No changes

@@ -12,11 +12,15 @@ import tempfile
 from azure_devtools.scenario_tests.utilities import create_random_name
 import requests
 import datetime
+import urllib3
+from knack.util import CLIError
+import certifi
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+from azure.cli.command_modules.appservice.utils import get_pool_manager
 
 from azure.cli.core.azclierror import ResourceNotFoundError
 
@@ -368,6 +372,22 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_zone_redundant_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', True)])
+
+        # test with unsupported SKU
+        plan2 = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # test with unsupported location
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+
 
 class WebappConfigureTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -680,8 +700,8 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config set -g {} -n {} --generic-configurations "@{}"'.format(resource_group, webapp_name, settings_file)).assert_with_checks([
             JMESPathCheck("requestTracingEnabled", True),
             JMESPathCheck("alwaysOn", True),
-        ])        
-        
+        ])
+
 
 
 class WebappScaleTest(ScenarioTest):
@@ -727,6 +747,7 @@ class WebappScaleTest(ScenarioTest):
         ])
 
 
+@unittest.skip("Test needs to re-done to match the errors")
 class AppServiceBadErrorPolishTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1508,6 +1529,32 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         self.assertEqual(asp_F1, result)
 
 
+class ContainerWebappE2ETest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_long_server_url(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+        self.cmd('appservice plan create --hyper-v -n {} -g {} --sku p1v3 -l westus2'.format(plan, resource_group))
+        container = "mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_docker_image_name(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container', length=24)
+        plan = self.create_random_name(prefix='webapp-plan', length=24)
+        self.cmd('appservice plan create --is-linux -n {} -g {} -l westus2'.format(plan, resource_group))
+        container = "nginx"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+
 @unittest.skip("Known issue with creating windows containers")
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
     @AllowLargeResponse()
@@ -1701,6 +1748,169 @@ class WebappNetworkConnectionTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_vnetE2E(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_by_subnet_rid(self, webapp_rg, vnet_rg):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["subnets"][0]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --subnet {}'.format(webapp_rg, webapp_name, plan, subnet_id))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_by_vnet_rid(self, webapp_rg, vnet_rg):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        vnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg, webapp_name, plan, vnet_id, subnet_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name)
+        ])
+        self.cmd(
+            'webapp vnet-integration remove -g {} -n {}'.format(webapp_rg, webapp_name))
+        self.cmd('webapp vnet-integration list -g {} -n {}'.format(webapp_rg, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_wrong_sku(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku FREE'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_wrong_location(self, webapp_rg, vnet_rg):
+        self.assertNotEqual(WINDOWS_ASP_LOCATION_WEBAPP, LINUX_ASP_LOCATION_WEBAPP)
+
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        vnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name)).get_output_in_json()["newVNet"]["id"]
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg, webapp_name, plan, vnet_id, subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_no_vnet(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, parameter_name="webapp_rg")
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP, parameter_name="vnet_rg")
+    def test_webapp_create_with_vnet_wrong_rg(self, webapp_rg, vnet_rg):
+        self.assertNotEqual(WINDOWS_ASP_LOCATION_WEBAPP, LINUX_ASP_LOCATION_WEBAPP)
+
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            vnet_rg, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(webapp_rg, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {} --subnet {}'.format(webapp_rg,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_vnet_no_subnet(self, resource_group):
+        webapp_name = self.create_random_name('vnetwebapp', 24)
+        plan = self.create_random_name('vnetplan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} --vnet {}'.format(resource_group,
+                                                                               webapp_name, plan, vnet_name,
+                                                                               subnet_name), expect_failure=True)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_vnetDelegation(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -1828,7 +2038,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd('webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
-       
+
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -1932,6 +2142,81 @@ class DomainScenarioTest(ScenarioTest):
         ).assert_with_checks([
             JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
         ])
+
+
+class TunnelProxyTest(unittest.TestCase):
+    def setUp(self):
+        # Clean pre-existing proxy env vars
+        for env_var in [
+            'NO_PROXY',
+            'no_proxy',
+            'HTTPS_PROXY',
+            'https_proxy',
+            'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION',
+            'REQUESTS_CA_BUNDLE',
+        ]:
+            if env_var in os.environ:
+                del os.environ[env_var]
+        os.environ['HTTPS_PROXY'] = 'http://myproxy.local:8888'
+
+    def test_with_proxy(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.proxy.netloc, 'myproxy.local:8888')
+        with self.assertRaises(KeyError):
+            http.proxy_headers['proxy-authorization']
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_REQUIRED')
+        self.assertIsInstance(http, urllib3.ProxyManager)
+
+    def test_without_proxy(self):
+        del os.environ['HTTPS_PROXY']
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_no_proxy(self):
+        os.environ['NO_PROXY'] = 'azurewebsites.net'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_proxy_auth(self):
+        os.environ['HTTPS_PROXY'] = 'http://test_user:secret_p@ss@myproxy.local:8888'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(
+            http.proxy_headers['proxy-authorization'],
+            'Basic dGVzdF91c2VyOnNlY3JldF9wQHNz',
+        )
+
+    def test_proxy_custom_ca_bundle(self):
+        with tempfile.TemporaryFile() as file:
+            file = tempfile.NamedTemporaryFile(suffix='-ca-certificates.crt')
+            os.environ['REQUESTS_CA_BUNDLE'] = file.name
+            http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], file.name)
+
+    def test_proxy_custom_ca_bundle_incorrect(self):
+        with tempfile.TemporaryDirectory() as empty_folder:
+            os.environ['REQUESTS_CA_BUNDLE'] = f'{empty_folder}/ca-certificates.crt'
+
+            self.assertRaises(CLIError, get_pool_manager, 'https://scm.azurewebsites.net')
+
+    def test_proxy_default_ca_bundle(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], certifi.where())
+
+    def test_proxy_unsafe_ssl(self):
+        os.environ['AZURE_CLI_DISABLE_CONNECTION_VERIFICATION'] = '1'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_NONE')
 
 
 if __name__ == '__main__':

@@ -31,7 +31,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-import azure.cli.command_modules.backup.custom as custom
+from azure.cli.command_modules.backup import custom
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
@@ -266,7 +266,8 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
         filtered_items = [item for item in items if item.properties.friendly_name.lower() == name.lower()]
 
     # Server Name filter
-    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
+                      item.properties.server_name.lower() == server_name.lower()]
 
     # Protectable Item Type filter
     filtered_items = [item for item in filtered_items if item.properties.protectable_item_type is not None and
@@ -294,7 +295,8 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     filtered_items = [item for item in items if item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     # Server Name filter
-    filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
+    filtered_items = [item for item in filtered_items if hasattr(item.properties, 'server_name') and
+                      item.properties.server_name.lower() == server_name.lower()]
 
     return cust_help.get_none_one_or_many(filtered_items)
 
@@ -321,7 +323,7 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
                        item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if server_name is not None:
         # Server Name filter
-        paged_items = [item for item in paged_items if
+        paged_items = [item for item in paged_items if hasattr(item.properties, 'server_name') and
                        item.properties.server_name.lower() == server_name.lower()]
     if container_uri:
         return [item for item in paged_items if
@@ -609,15 +611,12 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
             Specified recovery point not found. Please check the recovery config file
             or try removing --use-secondary-region if provided""")
 
-        rp_list = [recovery_point]
-        common.fetch_tier(rp_list)
+        common.fetch_tier_for_rp(recovery_point)
 
-        if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
-                rehydration_priority is None):
-            raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
-            parameters of rehydration duration and rehydration priority.""")
-
-        if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
+        if (recovery_point.tier_type is not None and recovery_point.tier_type == 'VaultArchive'):
+            if rehydration_priority is None:
+                raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+                parameters of rehydration duration and rehydration priority.""")
             # normal rehydrated restore
             trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time,
                                                                        rehydration_priority)

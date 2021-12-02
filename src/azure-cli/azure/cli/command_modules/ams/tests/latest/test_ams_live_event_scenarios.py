@@ -424,7 +424,7 @@ class AmsLiveEventTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_live_event_name': nonexits_live_event_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams live-event show -a {amsname} -n {nonexits_live_event_name} -g {rg}')
 
         self.cmd('az ams live-event delete -a {amsname} -n {liveEventName} -g {rg}')

@@ -50,7 +50,7 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_transform_name': nonexits_transform_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams transform show -a {amsname} -n {nonexits_transform_name} -g {rg}')
 
         self.cmd('az ams transform update --description mydesc -a {amsname} -n {transformName} -g {rg}', checks=[

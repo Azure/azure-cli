@@ -72,5 +72,5 @@ class SubscriptionSuppressionTest(ScenarioTest):
         self.cmd('az cloud list')
 
         # this should fail with an "unrecognized argument" error
-        with self.assertRaisesRegexp(SystemExit, '2'):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd('az cloud list --subscription foo')

@@ -76,3 +76,34 @@ def split_resource_id(resource_id):
         return subscription_scope, relative_resource_id
 
     return "/", relative_resource_id
+
+
+def _build_preflight_error_message(preflight_error):
+    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
+    for detail in preflight_error.details or []:
+        err_messages.append(_build_preflight_error_message(detail))
+    return '\n'.join(err_messages)
+
+
+def _build_http_response_error_message(http_error):
+    error_txt = http_error.response.internal_response.text
+
+    import json
+    error_info = json.loads(error_txt)['error']
+    error_details = error_info.pop('details') if 'details' in error_info else []
+    err_messages = [f'{error_info}']
+
+    for detail in error_details:
+        err_messages.append(_build_error_details(detail))
+
+    return '\n\n'.join(err_messages)
+
+
+def _build_error_details(error_detail):
+    nested_error_details = error_detail.pop('details') if 'details' in error_detail else []
+    err_messages = [f'Inner Errors: \n{error_detail}']
+
+    for detail in nested_error_details:
+        err_messages.append(_build_error_details(detail))
+
+    return '\n\n'.join(err_messages)
