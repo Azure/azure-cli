@@ -1112,11 +1112,14 @@ def __validate_import_config_setting(config_setting):
         return False
 
     if config_setting.value and not isinstance(config_setting.value, str):
-        logger.warning("The 'value' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+        logger.warning("The 'value' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
     if config_setting.content_type and not isinstance(config_setting.content_type, str):
-        logger.warning("The 'content_type' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+        logger.warning("The 'content_type' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
     if config_setting.label and not isinstance(config_setting.label, str):
-        logger.warning("The 'label' for the key '{%s}' is not a string. It will be converted to a string.", config_setting.key)
+        logger.warning("The 'label' for the key '{%s}' is not a string. This key-value will not be imported.", config_setting.key)
+        return False
 
     return __validate_import_tags(config_setting)
 
@@ -1129,7 +1132,8 @@ def __validate_import_tags(kv):
     if kv.tags:
         for tag_key, tag_value in kv.tags.items():
             if not isinstance(tag_value, str):
-                logger.warning("The value for the tag '{%s}' for key '{%s}' is not a string. It will be converted to a string.", tag_key, kv.key)
+                logger.warning("The value for the tag '{%s}' for key '{%s}' is not in a valid format. This key-value will not be imported.", tag_key, kv.key)
+                return False
     return True
 
 
