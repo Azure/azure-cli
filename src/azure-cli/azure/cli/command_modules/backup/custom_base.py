@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.backup.custom as custom
-import azure.cli.command_modules.backup.custom_afs as custom_afs
-import azure.cli.command_modules.backup.custom_help as custom_help
+from azure.cli.command_modules.backup import custom
+from azure.cli.command_modules.backup import custom_afs
+from azure.cli.command_modules.backup import custom_help
 import azure.cli.command_modules.backup.custom_common as common
-import azure.cli.command_modules.backup.custom_wl as custom_wl
+from azure.cli.command_modules.backup import custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
@@ -402,7 +402,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
-                  mi_user_assigned=None):
+                  mi_user_assigned=None, target_zone=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
@@ -417,7 +417,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
                                 restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region,
                                 rehydration_duration, rehydration_priority, disk_encryption_set_id,
-                                mi_system_assigned, mi_user_assigned)
+                                mi_system_assigned, mi_user_assigned, target_zone)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,

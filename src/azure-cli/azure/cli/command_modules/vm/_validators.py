@@ -22,7 +22,7 @@ from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default
 from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
@@ -1469,78 +1469,26 @@ def process_vmss_create_namespace(cmd, namespace):
 
         namespace.load_balancer_sku = 'Standard'  # lb sku MUST be standard
         # namespace.public_ip_per_vm = True  # default to true for VMSS Flex
-        # namespace.disable_overprovision = True  # overprovisioning must be false for vmss flex preview
-        # namespace.single_placement_group = False  # SPG must be false for VMSS flex
+
+        if namespace.single_placement_group:
+            raise ArgumentUsageError('usage error: --single-placement-group can only be set to False for Flex mode')
+        namespace.single_placement_group = False
+
         namespace.upgrade_policy_mode = None
         namespace.use_unmanaged_disk = None
 
-        banned_params = [
-            # namespace.accelerated_networking,
-            # namespace.admin_password,
-            # namespace.admin_username,
-            # namespace.application_gateway,
-            # namespace.app_gateway_capacity,
-            # namespace.app_gateway_sku,
-            # namespace.app_gateway_subnet_address_prefix,
-            # namespace.application_security_groups,
-            # namespace.assign_identity,
-            # namespace.authentication_type,
-            # namespace.backend_pool_name,
-            # namespace.backend_port,
-            # namespace.computer_name_prefix,
-            # namespace.custom_data,
-            # namespace.data_caching,
-            # namespace.data_disk_sizes_gb,
-            # namespace.disable_overprovision,
-            # namespace.dns_servers,
-            # namespace.ephemeral_os_disk,
-            # namespace.eviction_policy,
-            # namespace.generate_ssh_keys,
-            namespace.health_probe,
-            namespace.host_group,
-            # namespace.image,
-            # namespace.instance_count,
-            # namespace.load_balancer,
-            namespace.nat_pool_name,
-            # namespace.load_balancer_sku,
-            # namespace.license_type,
-            # namespace.max_price,
-            # namespace.nsg,
-            # namespace.os_caching,
-            # namespace.os_disk_name,
-            # namespace.os_type,
-            # namespace.plan_name,
-            # namespace.plan_product,
-            # namespace.plan_promotion_code,
-            # namespace.plan_publisher,
-            # namespace.priority,
-            # namespace.public_ip_address,
-            # namespace.public_ip_address_allocation,
-            # namespace.public_ip_address_dns_name,
-            # namespace.public_ip_per_vm,
-            # namespace.identity_role,
-            # namespace.identity_scope,
-            namespace.scale_in_policy,
-            # namespace.secrets,
-            # namespace.ssh_dest_key_path,
-            # namespace.ssh_key_value,
-            # namespace.storage_container_name,
-            # namespace.storage_sku,
-            # namespace.subnet,
-            # namespace.subnet_address_prefix,
-            # namespace.terminate_notification_time,
-            # namespace.ultra_ssd_enabled,
-            # namespace.upgrade_policy_mode,
-            # namespace.use_unmanaged_disk,
-            # namespace.vm_domain_name,
-            # namespace.vm_sku,
-            # namespace.vnet_address_prefix,
-            # namespace.vnet_name,
-            namespace.user_data
-        ]
-        if any(param is not None for param in banned_params):
-            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+        banned_params = {
+            '--disable-overprovision': namespace.disable_overprovision,
+            '--health-probe': namespace.health_probe,
+            '--host-group': namespace.host_group,
+            '--nat-pool-name': namespace.nat_pool_name,
+            '--scale-in-policy': namespace.scale_in_policy,
+            '--user-data': namespace.user_data
+        }
+
+        for param, value in banned_params.items():
+            if value is not None:
+                raise ArgumentUsageError(f'usage error: {param} is not supported for Flex mode')
 
         if namespace.image:
 
@@ -1550,11 +1498,6 @@ def process_vmss_create_namespace(cmd, namespace):
                     namespace.vm_sku = 'Standard_DS1_v2'
                 else:
                     namespace.vm_sku = 'Standard_D1_v2'
-
-            if namespace.single_placement_group:
-                raise ArgumentUsageError(
-                    'usage error: single placement group can only be set to False in Flexible VMSS')
-            namespace.single_placement_group = False
 
             if namespace.network_api_version is None:
                 namespace.network_api_version = '2020-11-01'
@@ -1646,10 +1589,10 @@ def process_vmss_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise ArgumentUsageError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise ArgumentUsageError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
 
     _validate_capacity_reservation_group(cmd, namespace)
 
@@ -1698,12 +1641,21 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not source_info:
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
-                    source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
-                source_location = source_info.location
-                target_location = namespace.location if namespace.location \
-                    else get_default_location_from_resource_group(cmd, namespace)
+                    try:
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
+                    except Exception:  # pylint: disable=broad-except
+                        # There's a chance that the source doesn't exist, eg, vmss os disk.
+                        # You can get the id of vmss os disk by
+                        #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
+                        # But `az disk show --ids {}` will return ResourceNotFound error
+                        # We don't autodetect copy_start in this situation
+                        return
+                if not namespace.location:
+                    get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
-                namespace.copy_start = source_location != target_location
+                namespace.copy_start = source_info.location != namespace.location
         except CloudError:
             raise CLIError(usage_error)
 

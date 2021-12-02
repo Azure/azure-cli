@@ -682,11 +682,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -737,7 +737,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, rejection_description))
 
@@ -787,7 +787,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(HttpResponseError, expectedError):
+        with self.assertRaisesRegex(HttpResponseError, expectedError):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
                      .format(database_engine, server, resource_group, server_pec_name, approval_description))
 

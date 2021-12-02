@@ -124,14 +124,14 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.custom_command('update', 'cli_domain_update')
 
-    with self.command_group('eventgrid system-topic', system_topics_mgmt_util, client_factory=system_topics_factory, is_preview=True) as g:
+    with self.command_group('eventgrid system-topic', system_topics_mgmt_util, client_factory=system_topics_factory) as g:
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_system_topic_list')
         g.custom_command('create', 'cli_system_topic_create_or_update')
         g.custom_command('update', 'cli_system_topic_update')
 
-    with self.command_group('eventgrid system-topic event-subscription', system_topic_event_subscriptions_mgmt_util, client_factory=system_topic_event_subscriptions_factory, is_preview=True) as g:
+    with self.command_group('eventgrid system-topic event-subscription', system_topic_event_subscriptions_mgmt_util, client_factory=system_topic_event_subscriptions_factory) as g:
         g.custom_show_command('show', 'cli_system_topic_event_subscription_get')
         g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'cli_system_topic_event_subscription_list')

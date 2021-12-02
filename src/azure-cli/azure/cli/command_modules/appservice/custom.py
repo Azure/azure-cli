@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import ast
 import threading
 import time
-import ast
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -18,6 +18,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
@@ -45,7 +46,7 @@ from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
                                        CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
+                                       AzureInternalError, ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -59,7 +60,9 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     _rename_server_farm_props,
-                    _get_location_from_webapp)
+                    _get_location_from_webapp,
+                    _normalize_location,
+                    get_pool_manager)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -83,9 +86,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None):
-    SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
-        'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
+                  role='Contributor', scope=None, vnet=None, subnet=None):
+    from azure.mgmt.web.models import Site
+    SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
+        'SiteConfig', 'SkuDescription', 'NameValuePair')
+
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
@@ -128,8 +133,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
+
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        site_config.vnet_route_all_enabled = True
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=using_webapp_up)
+                      https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
     helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
@@ -230,6 +253,74 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
+def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location):
+    vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
+    vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
+                                    virtual_network_name=vnet_name).location
+
+    vnet_location = _normalize_location(cmd, vnet_location)
+    asp_location = _normalize_location(cmd, webapp_location)
+    if vnet_location != asp_location:
+        raise ArgumentUsageError("Unable to create webapp: vnet and App Service Plan must be in the same location. "
+                                 "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
+
+
+def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subnet_info = {"vnet_name": None,
+                   "subnet_name": None,
+                   "resource_group_name": None,
+                   "subnet_resource_id": None,
+                   "subnet_subscription_id": None,
+                   "vnet_resource_id": None}
+
+    if is_valid_resource_id(subnet):
+        if vnet:
+            logger.warning("--subnet argument is a resource ID. Ignoring --vnet argument.")
+
+        parsed_sub_rid = parse_resource_id(subnet)
+
+        subnet_info["vnet_name"] = parsed_sub_rid["name"]
+        subnet_info["subnet_name"] = parsed_sub_rid["resource_name"]
+        subnet_info["resource_group_name"] = parsed_sub_rid["resource_group"]
+        subnet_info["subnet_resource_id"] = subnet
+        subnet_info["subnet_subscription_id"] = parsed_sub_rid["subscription"]
+
+        vnet_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}"
+        subnet_info["vnet_resource_id"] = vnet_fmt.format(parsed_sub_rid["subscription"],
+                                                          parsed_sub_rid["resource_group"],
+                                                          parsed_sub_rid["name"])
+        return subnet_info
+    subnet_name = subnet
+
+    if is_valid_resource_id(vnet):
+        parsed_vnet = parse_resource_id(vnet)
+        subnet_rg = parsed_vnet["resource_group"]
+        vnet_name = parsed_vnet["name"]
+        subscription_id = parsed_vnet["subscription"]
+        subnet_info["vnet_resource_id"] = vnet
+    else:
+        logger.warning("Assuming subnet resource group is the same as webapp. "
+                       "Use a resource ID for --subnet or --vnet to use a different resource group.")
+        subnet_rg = resource_group_name
+        vnet_name = vnet
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        vnet_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}"
+        subnet_info["vnet_resource_id"] = vnet_fmt.format(subscription_id,
+                                                          subnet_rg,
+                                                          vnet)
+
+    subnet_id_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}"
+    subnet_rid = subnet_id_fmt.format(subscription_id, subnet_rg, vnet_name, subnet_name)
+
+    subnet_info["vnet_name"] = vnet_name
+    subnet_info["subnet_name"] = subnet_name
+    subnet_info["resource_group_name"] = subnet_rg
+    subnet_info["subnet_resource_id"] = subnet_rid
+    subnet_info["subnet_subscription_id"] = subscription_id
+    return subnet_info
+
+
 def validate_container_app_create_options(runtime=None, deployment_container_image_name=None,
                                           multicontainer_config_type=None, multicontainer_config_file=None):
     if bool(multicontainer_config_type) != bool(multicontainer_config_file):
@@ -241,11 +332,15 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
 def parse_docker_image_name(deployment_container_image_name):
     if not deployment_container_image_name:
         return None
-    slash_ix = deployment_container_image_name.rfind('/')
-    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
-    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+    non_url = "/" not in deployment_container_image_name
+    non_url = non_url or ("." not in deployment_container_image_name and ":" not in deployment_container_image_name)
+    if non_url:
         return None
-    return docker_registry_server_url
+    parsed_url = urlparse(deployment_container_image_name)
+    if parsed_url.scheme:
+        return parsed_url.hostname
+    hostname = urlparse("https://{}".format(deployment_container_image_name)).hostname
+    return "https://{}".format(hostname)
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -389,15 +484,12 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
             break
         time.sleep(retry_delay)
 
-    if build_remote and not app.reserved:
-        raise CLIError('Remote build is only available on Linux function apps')
-
     is_consumption = is_plan_consumption(cmd, plan_info)
     if (not build_remote) and is_consumption and app.reserved:
         return upload_zip_to_storage(cmd, resource_group_name, name, src, slot)
-    if build_remote:
+    if build_remote and app.reserved:
         add_remote_build_app_settings(cmd, resource_group_name, name, slot)
-    else:
+    elif app.reserved:
         remove_remote_build_app_settings(cmd, resource_group_name, name, slot)
 
     return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot)
@@ -436,19 +528,26 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
+    # check the status of async deployment
+    if res.status_code == 202:
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                authorization, timeout)
+        return response
+
     # check if there's an ongoing process
     if res.status_code == 409:
-        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
-                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
-                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
-                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
-                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(deployment_status_url))
 
-    # check the status of async deployment
-    response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                            authorization, timeout)
-    return response
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
@@ -731,8 +830,9 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     app_type = _kind_to_app_type(app.kind) if app else None
     if app_type != cmd_app_type:
         raise ResourceNotFoundError(
-            "Unable to find {} '{}', in RG '{}'".format(cmd_app_type.value, name, resource_group_name),
-            "Use 'az {} show' to show {}s".format(app_type.value, app_type.value))
+            "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
+                app_type=cmd_app_type, name=name, resource_group=resource_group_name),
+            "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
@@ -761,7 +861,7 @@ def _list_app(cli_ctx, resource_group_name=None):
 def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     client = web_client_factory(cli_ctx)
     locations = _get_deleted_apps_locations(cli_ctx)
-    result = list()
+    result = []
     for location in locations:
         result = result + list(client.deleted_web_apps.list_by_location(location))
     if resource_group_name:
@@ -1678,13 +1778,9 @@ def list_app_service_plans(cmd, resource_group_name=None):
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False):
+                            tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
-    sku = _normalize_sku(sku)
-    _validate_asp_sku(app_service_environment, sku)
-    if is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
@@ -1712,6 +1808,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+    if zone_redundant:
+        plan_def.enable_additional_properties_sending()
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+        plan_def.additional_properties["properties"]["zoneRedundant"] = True
+        if number_of_workers is None:
+            sku_def.capacity = 3
+        else:
+            sku_def.capacity = max(3, number_of_workers)
+
     return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
@@ -2306,7 +2414,6 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 
 def _get_log(url, user_name, password, log_file=None):
-    import certifi
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2314,7 +2421,7 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    http = get_pool_manager(url)
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
@@ -2813,14 +2920,14 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
     return value
 
 
-def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None, os_type=None,
-                       functions_version=None, runtime=None, runtime_version=None,
+def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
+                       os_type=None, functions_version=None, runtime=None, runtime_version=None,
                        consumption_plan_location=None, app_insights=None, app_insights_key=None,
                        disable_app_insights=None, deployment_source_url=None,
                        deployment_source_branch='master', deployment_local_git=None,
                        docker_registry_server_password=None, docker_registry_server_user=None,
                        deployment_container_image_name=None, tags=None, assign_identities=None,
-                       role='Contributor', scope=None):
+                       role='Contributor', scope=None, vnet=None, subnet=None):
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 3. In the future, specifying a version will "
@@ -2830,14 +2937,44 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
         raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
-    SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
+    from azure.mgmt.web.models import Site
+    SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
     disable_app_insights = (disable_app_insights == "true")
 
     site_config = SiteConfig(app_settings=[])
-    functionapp_def = Site(location=None, site_config=site_config, tags=tags)
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
     client = web_client_factory(cmd.cli_ctx)
+
+    if vnet or subnet:
+        if plan:
+            if is_valid_resource_id(plan):
+                parse_result = parse_resource_id(plan)
+                plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+            else:
+                plan_info = client.app_service_plans.get(resource_group_name, plan)
+            webapp_location = plan_info.location
+        else:
+            webapp_location = consumption_plan_location
+
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        site_config.vnet_route_all_enabled = True
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    functionapp_def = Site(location=None, site_config=site_config, tags=tags,
+                           virtual_network_subnet_id=subnet_resource_id)
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
@@ -3566,74 +3703,96 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
     return mod_list
 
 
-def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
-    SwiftVirtualNetwork = cmd.get_models('SwiftVirtualNetwork')
-    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, True)
+
+
+def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
+                                     skip_delegation_check=False):
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, False)
+
+
+def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False,
+                          is_webapp=True):
+    from azure.mgmt.web.models import SitePatchResource
+
+    subnet_info = _get_subnet_info(cmd=cmd,
+                                   resource_group_name=resource_group_name,
+                                   subnet=subnet,
+                                   vnet=vnet)
     client = web_client_factory(cmd.cli_ctx)
-    vnet_client = network_client_factory(cmd.cli_ctx)
 
-    subnet_resource_id = _validate_subnet(cmd.cli_ctx, subnet, vnet, resource_group_name)
-
-    if slot is None:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection(resource_group_name, name)
+    if is_webapp:
+        app = show_webapp(cmd, resource_group_name, name, slot)
     else:
-        swift_connection_info = client.web_apps.get_swift_virtual_network_connection_slot(resource_group_name,
-                                                                                          name, slot)
-    # check to see if the connection would be supported
-    if swift_connection_info.swift_supported is not True:
-        return logger.warning("""Your app must be in an Azure App Service deployment that is
-              capable of scaling up to Premium v2\nLearn more:
-              https://go.microsoft.com/fwlink/?linkid=2060115&clcid=0x409""")
+        app = show_functionapp(cmd, resource_group_name, name, slot)
 
-    subnet_id_parts = parse_resource_id(subnet_resource_id)
-    subnet_subscription_id = subnet_id_parts['subscription']
-    vnet_name = subnet_id_parts['name']
-    vnet_resource_group = subnet_id_parts['resource_group']
-    subnet_name = subnet_id_parts['child_name_1']
+    parsed_plan = parse_resource_id(app.app_service_plan_id)
+    plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
+
+    _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
+                                        subnet_resource_group=subnet_info["resource_group_name"],
+                                        vnet_name=subnet_info["vnet_name"])
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
                        ' Missing delegation can cause "Bad Request" error.')
     else:
-        from azure.cli.core.commands.client_factory import get_subscription_id
-        if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
-            logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
-                           ' Missing delegation can cause "Bad Request" error.')
-        else:
-            subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-            delegations = subnetObj.delegations
-            delegated = False
-            for d in delegations:
-                if d.service_name.lower() == "microsoft.web/serverfarms".lower():
-                    delegated = True
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
 
-            if not delegated:
-                subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-                vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
-                                                           subnet_parameters=subnetObj)
+    subnet_id = subnet_info["subnet_resource_id"]
+    if not slot:
+        client.web_apps.update(resource_group_name=resource_group_name,
+                               name=name,
+                               site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    else:
+        client.web_apps.update_slot(resource_group_name=resource_group_name,
+                                    name=name,
+                                    slot=slot,
+                                    site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
 
-    swiftVnet = SwiftVirtualNetwork(subnet_resource_id=subnet_resource_id,
-                                    swift_supported=True)
-    return_vnet = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                          'create_or_update_swift_virtual_network_connection', slot, swiftVnet)
-
-    # Enalbe Route All configuration
+    # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
     if config.vnet_route_all_enabled is not True:
         config = update_site_configs(cmd, resource_group_name, name, slot=slot, vnet_route_all_enabled='true')
 
-    # reformats the vnet entry, removing unnecessary information
-    id_strings = return_vnet.id.split('/')
-    resourceGroup = id_strings[4]
-    mod_vnet = {
-        "id": return_vnet.id,
-        "location": return_vnet.additional_properties["location"],
-        "name": return_vnet.name,
-        "resourceGroup": resourceGroup,
-        "subnetResourceId": return_vnet.subnet_resource_id
+    return {
+        "id": subnet_info["vnet_resource_id"],
+        "location": plan_info.location,  # must be the same as vnet location bc of validation check
+        "name": subnet_info["vnet_name"],
+        "resourceGroup": subnet_info["resource_group_name"],
+        "subnetResourceId": subnet_info["subnet_resource_id"]
     }
 
-    return mod_vnet
+
+def _vnet_delegation_check(cmd, subnet_subscription_id, vnet_resource_group, vnet_name, subnet_name):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    Delegation = cmd.get_models('Delegation', resource_type=ResourceType.MGMT_NETWORK)
+    vnet_client = network_client_factory(cmd.cli_ctx)
+
+    if get_subscription_id(cmd.cli_ctx).lower() != subnet_subscription_id.lower():
+        logger.warning('Cannot validate subnet in other subscription for delegation to Microsoft.Web/serverFarms.'
+                       ' Missing delegation can cause "Bad Request" error.')
+        logger.warning('To manually add a delegation, use the command: az network vnet subnet update '
+                       '--resource-group %s '
+                       '--name %s '
+                       '--vnet-name %s '
+                       '--delegations Microsoft.Web/serverFarms', vnet_resource_group, subnet_name, vnet_name)
+    else:
+        subnetObj = vnet_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+        delegations = subnetObj.delegations
+        delegated = False
+        for d in delegations:
+            if d.service_name.lower() == "microsoft.web/serverfarms".lower():
+                delegated = True
+
+        if not delegated:
+            subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
+            vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet_name, subnet_name,
+                                                       subnet_parameters=subnetObj)
 
 
 def _validate_subnet(cli_ctx, subnet, vnet, resource_group_name):
@@ -3801,11 +3960,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("The webapp '%s' doesn't exist", name)
         sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
-        rg_name = get_rg_to_use(user, loc, os_name, resource_group_name)
+        rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
-                               os_name=os_name,
                                loc=loc,
                                sku=sku,
                                create_rg=_create_new_rg,
@@ -4293,7 +4451,11 @@ def _start_ssh_session(hostname, port, username, password):
             logger.warning('.')
             time.sleep(1)
     try:
-        c.run('cat /etc/motd', pty=True)
+        try:
+            c.run('cat /etc/motd', pty=True)
+        except invoke.exceptions.UnexpectedExit:
+            # Don't crash over a non-existing /etc/motd.
+            pass
         c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
@@ -4341,18 +4503,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         namespace='Microsoft.Web',
         type='hostingEnvironments',
         name=ase)
-
-
-def _validate_asp_sku(app_service_environment, sku):
-    # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
-        if not app_service_environment:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
-    else:
-        if app_service_environment:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):

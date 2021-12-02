@@ -14,6 +14,12 @@ _Fedora:_
 docker build --target build-env -f ./scripts/release/rpm/Dockerfile.fedora -t azure/azure-cli:fedora29-builder .
 ```
 
+_Mariner:_
+
+```bash
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.mariner -t azure/azure-cli:mariner-builder .
+```
+
 After several minutes, this will have created a Docker image named `azure/azure-cli:centos7-builder` containing an
 unsigned `.rpm` built from the current contents of your azure-cli directory. To extract the build product from the image
 you can run the following command:
@@ -26,6 +32,11 @@ docker run azure/azure-cli:centos7-builder cat /root/rpmbuild/RPMS/x86_64/azure-
 _Fedora:_
 ``` bash
 docker run azure/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.fc29.x86_64.rpm > ./bin/azure-cli-dev-1.fc29.x86_64.rpm
+```
+
+_Mariner:_
+``` bash
+docker run azure/azure-cli:mariner-builder cat /usr/src/mariner/RPMS/x86_64/azure-cli-dev-1.cm1.x86_64.rpm > ./bin/azure-cli-dev-1.cm1.x86_64.rpm
 ```
 
 This launches a container running from the image built and tagged by the previous command, prints the contents of the
