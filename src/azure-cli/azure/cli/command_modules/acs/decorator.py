@@ -4388,7 +4388,7 @@ class AKSContext:
         """
         return self._get_enable_local_accounts(enable_validation=True)
 
-    def get_assignee_from_identity_or_sp_profile(self) -> (str, bool):
+    def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
         """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
 
         Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
