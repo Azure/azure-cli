@@ -1233,13 +1233,13 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
 
 def iot_central_app_create(
         cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
-        location=None, template=None, display_name=None, no_wait=False, identity=None
+        location=None, template=None, display_name=None, no_wait=False, mi_system_assigned=False
 ):
     cli_ctx = cmd.cli_ctx
     location = _ensure_location(cli_ctx, resource_group_name, location)
     display_name = _ensure_display_name(app_name, display_name)
     appSku = AppSkuInfo(name=sku)
-    appid = _build_iotc_identity(identity)
+    appid = {"type": "SystemAssigned"} if mi_system_assigned else None
 
     app = App(subdomain=subdomain,
               location=location,
@@ -1395,10 +1395,3 @@ def _build_identity(system=False, identities=None):
         identity.user_assigned_identities = {i: {} for i in user_identities}  # pylint: disable=not-an-iterable
 
     return identity
-
-def _build_iotc_identity(identity=None):
-    if identity is None:
-        return None
-    else:
-        return { "type": str(identity) }
-

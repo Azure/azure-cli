@@ -866,6 +866,9 @@ examples:
   - name: Create an IoT Central application the in the 'East US' region with the 'ST1' pricing plan and an industry template.
     text: >
         az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l eastus -p ST1 -t iotc-distribution
+  - name: Create an IoT Central application using system-assigned managed identity.
+    text: >
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app --mi-system-assigned
 """
 
 helps['iot central app delete'] = """
