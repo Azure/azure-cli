@@ -71,8 +71,8 @@ class AAZCommand(CLICommand):
 
                 for parts, data in cmd_arg.items():
                     args = self._args
-                    part = parts[0]
-                    i = 1
+                    part = name
+                    i = 0
                     while i < len(parts):
                         args = args[part]
                         part = parts[i]

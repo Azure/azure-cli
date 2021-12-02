@@ -57,33 +57,35 @@ class AAZCompoundTypeArgAction(AAZArgAction):
     )
 
     def __call__(self, parser, namespace, values, option_string=None):
-        dest_dict = getattr(namespace, self.dest, OrderedDict())
+        dest_dict = getattr(namespace, self.dest)
+        if dest_dict is None:
+            dest_dict = OrderedDict()
+
         if values is None:
             key_parts = tuple()
             dest_dict[key_parts] = self._schema._blank
         else:
-            for key, key_parts, data in self.decode_values(values):
+            for key, key_parts, value in self.decode_values(values):
                 schema = self._schema
                 for k in key_parts:
                     schema = schema[k]
-                action = schema.to_cmd_arg(name=key)
-                dest_dict[key_parts] = action.format_data(data)
+                action = schema._build_cmd_action()
+                dest_dict[key_parts] = action.format_data(value)
         setattr(namespace, self.dest, dest_dict)
 
     @classmethod
     def decode_values(cls, values):
-        for value in values:
-            assert isinstance(value, str)
-            match = cls.key_pattern.fullmatch(value)
+        for v in values:
+            assert isinstance(v, str)
+            match = cls.key_pattern.fullmatch(v)
             if not match:
                 key = None
-                body = value
             else:
                 key = match[1]
-                body = match[len(match.regs) - 1]
+                v = match[len(match.regs) - 1]
             key_parts = cls._split_key(key)
-            body = cls._decode_body(key_parts, body)
-            yield key, key_parts, body
+            v = cls._decode_value(key_parts, v)
+            yield key, key_parts, v
 
     @staticmethod
     def _split_key(key):
@@ -98,7 +100,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         return tuple(key_items)
 
     @classmethod
-    def _decode_body(cls, key_items, body):
+    def _decode_value(cls, key_items, value):
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -106,59 +108,82 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         for item in key_items:
             schema = schema[item]
 
-        if len(body) == 0:
+        if len(value) == 0:
             # the express "a=" will return the blank value of schema a
             return schema._blank
 
         if isinstance(schema, AAZSimpleTypeArg):
             # simple type
             try:
-                data = cls._str_parser(body, is_simple=True)
+                v = cls._str_parser(value, is_simple=True)
             except Exception as shorthand_ex:
                 msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
                 raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
         else:
             # compound type
             # read from file
-            path = os.path.expanduser(body)
+            path = os.path.expanduser(value)
             if os.path.exists(path):
-                data = get_file_json(path, preserve_order=True)
+                v = get_file_json(path, preserve_order=True)
             else:
                 try:
-                    data = cls._str_parser(body)
+                    v = cls._str_parser(value)
                 except ValueError as shorthand_ex:
                     try:
-                        data = shell_safe_json_parse(body, True)
+                        v = shell_safe_json_parse(value, True)
                     except Exception as ex:
                         logger.debug(ex)
                         msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
                         raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
-        return data
+        return v
 
 
 class AAZObjectArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
-        # TODO:
-        pass
+        if data is None:
+            return None
+        elif isinstance(data, dict):
+            result = OrderedDict()
+            for key, value in data.items():
+                action = cls._schema[key]._build_cmd_action()
+                result[key] = action.format_data(value)
+            return result
+        else:
+            raise ArgumentTypeError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZDictArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
-        # TODO:
-        pass
+        if data is None:
+            return None
+        elif isinstance(data, dict):
+            result = OrderedDict()
+            action = cls._schema.Element._build_cmd_action()
+            for key, value in data.items():
+                result[key] = action.format_data(value)
+            return result
+        else:
+            raise ArgumentTypeError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     @classmethod
     def format_data(cls, data):
-        # TODO:
-        pass
-
+        if data is None:
+            return None
+        elif isinstance(data, dict):
+            result = []
+            action = cls._schema.Element._build_cmd_action()
+            for idx, value in enumerate(data):
+                result.append(action.format_data(value))
+            return result
+        else:
+            raise ArgumentTypeError(f"list type value expected, got '{data}'({type(data)})")
 
 # class AAZListElementArgAction(AAZArgAction):
 #
