@@ -26,8 +26,8 @@ docker build \
 # Extract the built RPM so that it can be distributed independently.
 docker run \
     azure/azure-cli:mariner-builder \
-    cat /usr/src/mariner/RPMS/x86_64/azure-cli-${CLI_VERSION}-1.cm1.x86_64.rpm \
-    > ${BUILD_STAGINGDIRECTORY}/azure-cli-${CLI_VERSION}-1.cm1.x86_64.rpm
+    cat /usr/src/mariner/RPMS/x86_64/azure-cli-${CLI_VERSION}-1.x86_64.rpm \
+    > ${BUILD_STAGINGDIRECTORY}/azure-cli-${CLI_VERSION}-1.x86_64.rpm
 
 # Save these too a staging directory so that later build phases can choose to save them as Artifacts or publish them to
 # a registry.
