@@ -389,7 +389,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
+        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
             self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
@@ -472,7 +472,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
         ])
 
         # Check with unsupported IP address version: IPv5
-        with self.assertRaisesRegexp(SystemExit, '2'):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
@@ -1398,7 +1398,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd(
             'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
             '--paths /mypath122/* --address-pool {pool} --http-settings {settings}')
-        with self.assertRaisesRegexp(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
+        with self.assertRaisesRegex(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
             self.cmd(
                 'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                 '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
@@ -2239,7 +2239,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
-        with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
+        with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
     @unittest.skip('Test is wrong, please fix. rg not found')
@@ -2411,7 +2411,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
+        with self.assertRaisesRegex(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
@@ -2435,7 +2435,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # cannot create it, so this test will fail due to resource is not found.
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
         self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
 
@@ -2456,11 +2456,11 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
+        with self.assertRaisesRegex(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
-        with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
+        with self.assertRaisesRegex(HttpResponseError, 'ParentResourceIsInFailedState'):
             self.cmd('network express-route peering connection ipv6-config set -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --address-prefix .../125')
-        with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
+        with self.assertRaisesRegex(HttpResponseError, 'ParentResourceIsInFailedState'):
             self.cmd('network express-route peering connection ipv6-config remove -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
@@ -3237,7 +3237,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
-        with self.assertRaisesRegexp(HttpResponseError, 'not supported for secondary IpConfigurations'):
+        with self.assertRaisesRegex(HttpResponseError, 'not supported for secondary IpConfigurations'):
             self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
@@ -3684,14 +3684,14 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             # ensure vnet has not been created
             self.cmd('network vnet show -g {rg} -n {vnet}')
         self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
         self.cmd('network vnet show -g {rg} -n {vnet}',
                  checks=self.check('length(subnets)', 3))
-        with self.assertRaisesRegexp(CLIError, 'Not found in cache'):
+        with self.assertRaisesRegex(CLIError, 'Not found in cache'):
             self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
 
         # test that generic update works with caching
@@ -4397,7 +4397,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         output = self.cmd('network vpn-connection packet-capture start -g {rg} -n {conn12}').output.strip()
         self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
         # currently we cannot create traffic by cli command. So it will return an error when stop.
-        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+        with self.assertRaisesRegex(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vpn-connection packet-capture stop -g {rg} -n {conn12} --sas-url {sas_url}')
 
 
@@ -4439,7 +4439,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        with self.assertRaisesRegexp(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
+        with self.assertRaisesRegex(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
@@ -4607,7 +4607,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         output = self.cmd('network vnet-gateway packet-capture start -g {rg} -n {gw1}').output.strip()
         self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
         # currently we cannot create traffic by cli command. So it will return an error when stop.
-        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+        with self.assertRaisesRegex(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
 
@@ -4952,7 +4952,7 @@ class NetworkProfileScenarioTest(ScenarioTest):
         # no e2e scenario without create. Testing path to service only.
         self.cmd('network profile list')
         self.cmd('network profile list -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network profile show -g {rg} -n dummy')
         self.cmd('network profile delete -g {rg} -n dummy -y')
 
