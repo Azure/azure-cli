@@ -193,6 +193,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             except Exception as ex:
                 for key, _, _ in inputs:
                     if key:
+                        # it's not a valid separate expression.
                         raise ex
                 # separate element expression
                 elements = []
