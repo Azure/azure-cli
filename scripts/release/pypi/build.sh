@@ -22,7 +22,13 @@ pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 
-if [[ "$branch" != "release" ]]; then
+# A postfix like 'post20211202065946' is added to version number, so that during tests, pip installs the built wheel.
+# https://github.com/Azure/azure-cli/pull/19079
+# If you want to keep the version number while building, make your branch name start with 'release',
+# such as 'release-mariner'.
+
+# https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value
+if [[ "$branch" != release* ]]; then
     . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
 
