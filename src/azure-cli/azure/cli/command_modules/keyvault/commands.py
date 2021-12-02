@@ -12,7 +12,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients, is_azure_stack_profile)
 
 from azure.cli.command_modules.keyvault._transformers import (
-    extract_subresource_name, filter_out_managed_resources,
+    extract_subresource_name, force_json_output, filter_out_managed_resources,
     multi_transformers, transform_key_decryption_output, keep_max_results,
     transform_key_output, transform_key_encryption_output)
 
@@ -259,7 +259,7 @@ def load_command_table(self, _):
         g.keyvault_command('set-attributes', 'update_certificate', transform=extract_subresource_name())
         g.keyvault_custom('import', 'import_certificate', transform=extract_subresource_name())
         g.keyvault_custom('download', 'download_certificate')
-        g.keyvault_custom('get-default-policy', 'get_default_policy')
+        g.keyvault_custom('get-default-policy', 'get_default_policy', transform=force_json_output)
 
     with self.command_group('keyvault certificate pending', data_entity.command_type) as g:
         g.keyvault_command('merge', 'merge_certificate', transform=extract_subresource_name())

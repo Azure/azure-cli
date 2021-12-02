@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from collections.abc import Iterable
 from azure.cli.command_modules.keyvault._validators import KeyEncryptionDataType
+from azure.cli.core._output import (get_output_format, set_output_format)
 
 
 def multi_transformers(*transformers):
@@ -19,6 +20,20 @@ def keep_max_results(output, **command_args):
     if maxresults:
         return list(output)[:maxresults]
     return output
+
+
+def force_json_output(result, **command_args):
+    if 'cmd' not in command_args:
+        return result
+
+    ctx = command_args['cmd'].cli_ctx
+
+    output_format = get_output_format(ctx)
+
+    if output_format == 'table' or output_format == 'tsv':
+        set_output_format(ctx, 'json')
+
+    return result
 
 
 def filter_out_managed_resources(output, **command_args):  # pylint: disable=unused-argument
