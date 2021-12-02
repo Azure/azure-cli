@@ -690,11 +690,11 @@ jobs:
     displayName: 'Build Rpm Package: Mariner'
     inputs:
       targetType: 'filePath'
-      filePath: scripts/release/rpm/mariner_pipeline.sh
+      filePath: scripts/release/rpm/pipeline_mariner.sh
 
 
   - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact Mariner: yum'
+    displayName: 'Publish Artifact: yum-mariner'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum-mariner
