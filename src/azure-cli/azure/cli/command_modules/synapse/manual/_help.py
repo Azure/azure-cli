@@ -2132,3 +2132,75 @@ helps['synapse kusto'] = """
     type: group
     short-summary: "Manage synapse kusto"
 """
+
+helps['synapse sql-script'] = """
+type: group
+short-summary: Manage SQL scripts in a synapse workspace.
+"""
+
+helps['synapse sql-script list'] = """
+type: command
+short-summary: List SQL scripts in a synapse workspace.
+examples:
+  - name: List SQL scripts.
+    text: |-
+        az synapse sql-script list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse sql-script show'] = """
+type: command
+short-summary: Get a SQL script.
+examples:
+  - name: Get a SQL script.
+    text: |-
+        az synapse sql-script show --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname
+"""
+
+helps['synapse sql-script delete'] = """
+type: command
+short-summary: Delete a SQL script.
+examples:
+  - name: Delete a SQL script.
+    text: |-
+        az synapse sql-script delete --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname
+"""
+
+helps['synapse sql-script create'] = """
+type: command
+short-summary: Create or update a SQL script.
+examples:
+  - name: Create a SQL script.
+    text: |-
+        az synapse sql-script create --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname \\
+          --file 'path/test.sql'
+"""
+
+helps['synapse sql-script export'] = """
+type: command
+short-summary: Export a SQL script.
+examples:
+  - name: Export a SQL script.
+    text: |-
+        az synapse sql-script export --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname \\
+          --output-folder 'path/folder'
+"""
+
+helps['synapse sql-script wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a sql script is met.
+"""
+
+helps['synapse sql-script import'] = """
+type: command
+short-summary: Import a SQL script.
+examples:
+  - name: Import a SQL script.
+    text: |-
+        az synapse sql-script import --workspace-name testsynapseworkspace \\
+          --name testsqlscriptname \\
+          --file 'path/test.sql'
+"""
