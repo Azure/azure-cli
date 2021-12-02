@@ -151,6 +151,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       new_addon=False, no_wait=False,
                       site=None,                                             # Resource.WebApp
                       spring=None, app=None, deployment=None,                # Resource.SpringCloud
+                      cluster=None,                                          # Resource.ContainerService
                       server=None, database=None,                            # Resource.*Postgres, Resource.*Sql*
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
