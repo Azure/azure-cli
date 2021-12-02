@@ -1889,7 +1889,7 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
 
 
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.automatic_repairs_grace_period is not None:
+    if namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise CLIError("usage error: --load-balancer and --health-probe are required "
                            "when creating vmss with automatic repairs")
@@ -1897,10 +1897,12 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
 
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
-    if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
+    if namespace.enable_automatic_repairs is False and \
+            (namespace.automatic_repairs_grace_period is not None or namespace.automatic_repairs_action is not None):
         raise CLIError("usage error: please enable --enable-automatic-repairs")
-    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None\
+            and namespace.automatic_repairs_action is None:
+        raise CLIError("usage error: please set --automatic-repairs-grace-period or --automatic-repairs-action")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 

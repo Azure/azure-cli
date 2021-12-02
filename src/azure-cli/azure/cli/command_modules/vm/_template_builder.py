@@ -1156,14 +1156,13 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
-    if automatic_repairs_grace_period is not None:
+    if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
             'enabled': 'true',
-            'gracePeriod': automatic_repairs_grace_period
+            'gracePeriod': automatic_repairs_grace_period or 'PT10M',
+            'repairAction': automatic_repairs_action or 'Replcae'
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
-        if automatic_repairs_action:
-            automatic_repairs_policy['repairAction'] = automatic_repairs_action
 
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}
