@@ -27,7 +27,7 @@ script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 # If you want to keep the version number while building, make your branch name start with 'release',
 # such as 'release-mariner'.
 
-# https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value
+# https://stackoverflow.com/a/2172367/2199657
 if [[ "$branch" != release* ]]; then
     . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
