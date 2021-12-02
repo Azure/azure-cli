@@ -2709,6 +2709,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper:
+    # TODO replace the stacks with a list of these objects for a clearer interface
     class Runtime:
         def __init__(self, display_name=None, configs=dict(), github_actions_properties=None, linux=False):
             self.display_name = display_name
@@ -2826,22 +2827,22 @@ class _StackRuntimeHelper:
                                                         "app_runtime_version": gh_actions_runtime
                                                         }
                 parsed_results.append(runtime)
-            else:
-                minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
-                for minor_version in minor_versions:
-                    settings = minor_version.stack_settings.windows_runtime_settings
-                    runtime_name = self.__format_windows_display_text(minor_version.display_text)
-                    runtime = {"displayName": runtime_name}
-                    lang_name = runtime_name.split("|")[0].lower()
-                    config_key = config_mappings.get(lang_name)
-                    runtime["configs"] = {}
-                    if config_key:
-                        runtime["configs"][config_key] = settings.runtime_version
-                    gh_properties = settings.git_hub_action_settings
-                    if gh_properties.is_supported:
-                        runtime["github_actions_properties"] = {"github_actions_version":
-                            gh_properties.supported_version}
-                    parsed_results.append(runtime)
+        else:
+            minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            for minor_version in minor_versions:
+                settings = minor_version.stack_settings.windows_runtime_settings
+                runtime_name = self.__format_windows_display_text(minor_version.display_text)
+                runtime = {"displayName": runtime_name}
+                lang_name = runtime_name.split("|")[0].lower()
+                config_key = config_mappings.get(lang_name)
+                runtime["configs"] = {}
+                if config_key:
+                    runtime["configs"][config_key] = settings.runtime_version
+                gh_properties = settings.git_hub_action_settings
+                if gh_properties.is_supported:
+                    runtime["github_actions_properties"] = {"github_actions_version":
+                        gh_properties.supported_version}
+                parsed_results.append(runtime)
 
     def _parse_major_version_linux(self, major_version, parsed_results):
         minor_java_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
@@ -2873,7 +2874,6 @@ class _StackRuntimeHelper:
         stacks = list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
         parsed_stacks = {"windows": [], "linux": []}  # emulates the form of the old hardcoded JSON for ease of use
-        # for windows stacks
         # TODO try and get API support for this so it isn't hardcoded
         windows_config_mappings = {
                 'node': 'WEBSITE_NODE_DEFAULT_VERSION',
@@ -2888,8 +2888,10 @@ class _StackRuntimeHelper:
             if lang.display_text.lower() == "java":
                 continue  # info on java stacks is taken from the "java containers" stacks
             for major_version in lang.major_versions:
-                self._parse_major_version_linux(major_version, parsed_stacks["linux"])
-                self._parse_major_version_windows(major_version, parsed_stacks["windows"], windows_config_mappings)
+                if self._linux:
+                    self._parse_major_version_linux(major_version, parsed_stacks["linux"])
+                if self._windows:
+                    self._parse_major_version_windows(major_version, parsed_stacks["windows"], windows_config_mappings)
 
         self._stacks = parsed_stacks
 
