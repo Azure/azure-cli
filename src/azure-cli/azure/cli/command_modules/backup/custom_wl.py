@@ -611,15 +611,12 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
             Specified recovery point not found. Please check the recovery config file
             or try removing --use-secondary-region if provided""")
 
-        rp_list = [recovery_point]
-        common.fetch_tier(rp_list)
+        common.fetch_tier_for_rp(recovery_point)
 
-        if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
-                rehydration_priority is None):
-            raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
-            parameters of rehydration duration and rehydration priority.""")
-
-        if rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive':
+        if (recovery_point.tier_type is not None and recovery_point.tier_type == 'VaultArchive'):
+            if rehydration_priority is None:
+                raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
+                parameters of rehydration duration and rehydration priority.""")
             # normal rehydrated restore
             trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time,
                                                                        rehydration_priority)
