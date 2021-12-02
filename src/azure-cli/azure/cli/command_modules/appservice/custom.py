@@ -90,7 +90,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
@@ -101,7 +101,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
     if not plan_info:
-        raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
+        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
+                                                                                                   resource_group_name))
     is_linux = plan_info.reserved
     node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
@@ -109,17 +110,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     name_validation = get_site_availability(cmd, name)
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
-            raise CLIError(name_validation.message)
+            raise ValidationError(name_validation.message)
         logger.warning("Webapp '%s' already exists. The command will use the existing app's settings.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that "
-                           "the app is a part of the current subscription".format(name))
+            raise ResourceNotFoundError("Unable to retrieve details of the existing app '{}'. Please check that "
+                                        "the app is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp '{}' exists in resource group '{}' and does not "
-                           "match the value entered '{}'. Please re-run command with the "
-                           "correct parameters.". format(name, current_rg, resource_group_name))
+            raise ValidationError("The webapp '{}' exists in resource group '{}' and does not "
+                                  "match the value entered '{}'. Please re-run command with the "
+                                  "correct parameters.". format(name, current_rg, resource_group_name))
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
         settings = []
@@ -151,7 +152,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
-    helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
 
@@ -159,17 +160,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
-            raise CLIError("usage error: --runtime | --deployment-container-image-name |"
-                           " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
+            raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
+                                     " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
         if startup_file:
             site_config.app_command_line = startup_file
 
         if runtime:
-            match = helper.resolve(runtime)
+            match = helper.resolve(runtime, is_linux)
             if not match:
-                raise CLIError("Linux Runtime '{}' is not supported."
-                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
-            match['setter'](cmd=cmd, stack=match, site_config=site_config)
+                raise ValidationError("Linux Runtime '{}' is not supported."
+                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -193,14 +194,14 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
-            raise CLIError("usage error: --startup-file or --deployment-container-image-name or "
-                           "--multicontainer-config-type and --multicontainer-config-file is "
-                           "only appliable on linux webapp")
-        match = helper.resolve(runtime)
+            raise ArgumentUsageError("usage error: --startup-file or --deployment-container-image-name or "
+                                     "--multicontainer-config-type and --multicontainer-config-file is "
+                                     "only appliable on linux webapp")
+        match = helper.resolve(runtime, linux=is_linux)
         if not match:
-            raise CLIError("Windows runtime '{}' is not supported. "
-                           "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
-        match['setter'](cmd=cmd, stack=match, site_config=site_config)
+            raise ValidationError("Windows runtime '{}' is not supported. "
+                                  "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+        helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
 
         # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
         # portal uses the current_stack propety in metadata to display stack for windows apps
@@ -1043,8 +1044,7 @@ def list_instances(cmd, resource_group_name, name, slot=None):
 def list_runtimes(cmd, linux=False, windows=False):
     if not linux and not windows:
         raise ArgumentUsageError("Use one or both of the --linux/--windows options")
-    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
-    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux, windows=windows)
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     return runtime_helper.get_stack_names_only()
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -2705,9 +2705,9 @@ class _StackRuntimeHelper:
             self.github_actions_properties = github_actions_properties
             self.linux = linux
 
-    def __init__(self, cmd, client, linux=False, windows=False):
+    def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = client
+        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
         self._linux = linux
         self._windows = windows
         self._stacks = []
@@ -2724,10 +2724,19 @@ class _StackRuntimeHelper:
             runtime = [runtime]
         return '|'.join(filter(None, runtime))
 
-    def resolve(self, display_name):
+    def resolve(self, display_name, linux=False):
+        os_type = "windows" if not linux else "linux"
         self._load_stacks()
-        return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
+        return next((s for s in self._stacks[os_type] if s['displayName'].lower() == display_name.lower()),
                     None)
+
+    @classmethod
+    def get_site_config_setter(cls, runtime, linux=False):
+        if linux:
+            return cls.update_site_config
+        else:
+            return (cls.update_site_appsettings if 'node' in
+                    runtime['displayName'] else cls.update_site_config)
 
     @property
     def stacks(self):
@@ -3920,18 +3929,18 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _is_linux = os_name.lower() == 'linux'
 
     if runtime and html:
-        raise CLIError('Conflicting parameters: cannot have both --runtime and --html specified.')
+        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
 
     if runtime:
-        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
+        helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
         runtime = helper.remove_delimiters(runtime)
-        match = helper.resolve(runtime)
+        match = helper.resolve(runtime, _is_linux)
         if not match:
             if _is_linux:
-                raise CLIError("Linux runtime '{}' is not supported."
-                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
-            raise CLIError("Windows runtime '{}' is not supported."
-                           " Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+                raise ValidationError("Linux runtime '{}' is not supported."
+                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            raise ValidationError("Windows runtime '{}' is not supported."
+                                  " Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
 
         language = runtime.split('|')[0]
         version_used_create = '|'.join(runtime.split('|')[1:])
@@ -3950,7 +3959,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if not _create_new_app:  # App exists, or App name unavailable
         if _site_availability.reason == 'Invalid':
-            raise CLIError(_site_availability.message)
+            raise ValidationError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
@@ -4050,8 +4059,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
-        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
-        match = helper.resolve(runtime_version)
+        helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
+        match = helper.resolve(runtime_version, _is_linux)
 
         if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
             if match and site_config.linux_fx_version != match['configs']['linux_fx_version']:
