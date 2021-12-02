@@ -1040,24 +1040,12 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-# Currently using hardcoded values instead of this function. This function calls the stacks API;
-# Stacks API is updated with Antares deployments,
-# which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False, windows=False):
-
+    if not linux and not windows:
+        raise ArgumentUsageError("Use one or both of the --linux/--windows options")
     client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
-
     runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux, windows=windows)
-
-    return runtime_helper.stacks
-
-    # endpoint = "/providers/Microsoft.Web/webAppStacks"
-    # url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{endpoint}?api-version=2020-12-01"
-
-    # res = send_raw_request(cmd.cli_ctx, "GET", url).json()
-
-    # return res
-
+    return runtime_helper.get_stack_names_only()
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
@@ -2746,6 +2734,15 @@ class _StackRuntimeHelper:
         self._load_stacks()
         return self._stacks
 
+    def get_stack_names_only(self):
+        windows_stacks = [s["displayName"] for s in self.stacks["windows"]]
+        linux_stacks = [s["displayName"] for s in self.stacks["linux"]]
+        if self._linux and not self._windows:
+            return linux_stacks
+        if self._windows and not self._linux:
+            return windows_stacks
+        return {"linux": linux_stacks, "windows": windows_stacks}
+
     @staticmethod
     def update_site_config(stack, site_config, cmd=None):
         for k, v in stack['configs'].items():
@@ -2831,7 +2828,7 @@ class _StackRuntimeHelper:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
-                runtime_name = self.__format_windows_display_text(minor_version.display_text)
+                runtime_name = self._format_windows_display_text(minor_version.display_text)
                 runtime = {"displayName": runtime_name}
                 lang_name = runtime_name.split("|")[0].lower()
                 config_key = config_mappings.get(lang_name)
