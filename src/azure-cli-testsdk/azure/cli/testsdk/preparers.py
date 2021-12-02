@@ -174,7 +174,7 @@ class CommunicationResourcePreparer(NoTrafficRecordingPreparer, SingleValueRepla
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            
+
             template = 'az communication create --name {} --location {} --data-location "{}" --resource-group {} '
             self.live_only_execute(self.cli_ctx, template.format(
                 name, self.location, self.data_location, group))
