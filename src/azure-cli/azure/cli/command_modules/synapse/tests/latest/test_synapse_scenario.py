@@ -2521,10 +2521,6 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse trigger-run rerun --workspace-name {workspace} --name {tumbling-window-trigger} --run-id {run-id}')
 
-        # cancel a trigger
-        self.cmd(
-            'az synapse trigger-run cancel --workspace-name {workspace} --name {tumbling-window-trigger} --run-id {run-id}')
-
         # stop a trigger
         self.cmd(
             'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
