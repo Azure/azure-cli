@@ -682,7 +682,7 @@ jobs:
   displayName: Build Yum Package Mariner
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule', 'PullRequest'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
