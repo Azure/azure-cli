@@ -13,7 +13,7 @@ class AAZArgAction(Action):
 
     _schema = None
 
-    _shorthand_parser = AAZShortHandSyntaxParser()
+    _str_parser = AAZShortHandSyntaxParser()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,8 +30,8 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         if values is None:
             data = self._schema._blank
         else:
-            if isinstance(values, str) and values in self._shorthand_parser.NULL_EXPRESSIONS:
-                data = None
+            if isinstance(values, str):
+                data = self._str_parser(values, is_simple=True)
             else:
                 data = values
             data = self.format_data(data)
@@ -106,10 +106,14 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         for item in key_items:
             schema = schema[item]
 
+        if len(body) == 0:
+            # the express "a=" will return the blank value of schema a
+            return schema._blank
+
         if isinstance(schema, AAZSimpleTypeArg):
             # simple type
             try:
-                data = cls._shorthand_parser(body)
+                data = cls._str_parser(body, is_simple=True)
             except Exception as shorthand_ex:
                 msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
                 raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
@@ -121,7 +125,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
                 data = get_file_json(path, preserve_order=True)
             else:
                 try:
-                    data = cls._shorthand_parser(body)
+                    data = cls._str_parser(body)
                 except ValueError as shorthand_ex:
                     try:
                         data = shell_safe_json_parse(body, True)

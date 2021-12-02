@@ -65,82 +65,84 @@ class TestAAZArg(unittest.TestCase):
         parser = AAZShortHandSyntaxParser()
 
         # test null value
-        assert parser("null") is None
-        assert parser("None") is None
-        assert parser("'null'") == 'null'
-        assert parser("'None'") == 'None'
+        assert parser("null", is_simple=True) is None
+        assert parser("'null'", is_simple=True) == 'null'
 
-        # test quota
-        assert parser('"\'"') == "'"
-        assert parser("'\"'") == '"'
+        assert parser("None", is_simple=True) is None
+        assert parser("'None'", is_simple=True) == 'None'
+
+        # test single quota
+        assert parser("'/''", is_simple=True) == "'"
+        assert parser("'\"'", is_simple=True) == '"'
+
+        assert parser('"\'"', is_simple=True) == '"\'"'
+        assert parser('"\""', is_simple=True) == '"\""'
 
         # test escape character
-        assert parser("'\\\"'") == "\""
-        assert parser("'\\\''") == "\'"
-        assert parser("'\\\\'") == "\\"
-        assert parser("'\\b'") == "\b"
-        assert parser("'\\f'") == "\f"
-        assert parser("'\\n'") == "\n"
-        assert parser("'\\r'") == "\r"
-        assert parser("'\\t'") == "\t"
+        assert parser("'\"'", is_simple=True) == "\""
+        assert parser("'/\''", is_simple=True) == "\'"
 
-        assert parser('"\\\""') == "\""
-        assert parser('"\\\'"') == "\'"
-        assert parser('"\\\\"') == "\\"
-        assert parser('"\\b"') == "\b"
-        assert parser('"\\f"') == "\f"
-        assert parser('"\\n"') == "\n"
-        assert parser('"\\r"') == "\r"
-        assert parser('"\\t"') == "\t"
+        assert parser("'\b'", is_simple=True) == "\b"
+        assert parser("'\f'", is_simple=True) == "\f"
+        assert parser("'\n'", is_simple=True) == "\n"
+        assert parser("'\r'", is_simple=True) == "\r"
+        assert parser("'\t'", is_simple=True) == "\t"
+
+        assert parser('\b', is_simple=True) == '\b'
+        assert parser('\f', is_simple=True) == '\f'
+        assert parser('\n', is_simple=True) == '\n'
+        assert parser('\r', is_simple=True) == '\r'
+        assert parser('\t', is_simple=True) == '\t'
+
+        assert parser('"\b"', is_simple=True) == '"\b"'
+        assert parser('"\f"', is_simple=True) == '"\f"'
+        assert parser('"\n"', is_simple=True) == '"\n"'
+        assert parser('"\r"', is_simple=True) == '"\r"'
+        assert parser('"\t"', is_simple=True) == '"\t"'
+
+        # whitespace character should be warped in single quotes
 
         # test normal string
-        assert parser("abc") == "abc"
-        assert parser("1") == "1"
-        assert parser("_") == "_"
-        assert parser("''") == ""
-        assert parser('""') == ""
-        assert parser("'{'") == "{"
-        assert parser('"{"') == "{"
-        assert parser("'}'") == "}"
-        assert parser('"}"') == "}"
+        assert parser("abc", is_simple=True) == "abc"
+        assert parser("1", is_simple=True) == "1"
+        assert parser("_", is_simple=True) == "_"
+        assert parser("''", is_simple=True) == ''
+        assert parser('""', is_simple=True) == '""'
+        assert parser("'{'", is_simple=True) == "{"
+        assert parser('"{"', is_simple=True) == '"{"'
+        assert parser("'}'", is_simple=True) == "}"
+        assert parser('"}"', is_simple=True) == '"}"'
+        assert parser(' ', is_simple=True) == ' '
+        assert parser("' '", is_simple=True) == ' '
 
-        assert parser("'{abc'") == "{abc"
-        assert parser('"abc{"') == "abc{"
-        assert parser("'abc}'") == "abc}"
-        assert parser('"}abc"') == "}abc"
-        assert parser('"{a:1, b:2}"') == "{a:1, b:2}"
+        assert parser("'{abc'", is_simple=True) == "{abc"
+        assert parser("'abc}'", is_simple=True) == "abc}"
+        assert parser("'abc{'", is_simple=True) == "abc{"
+        assert parser("'}abc'", is_simple=True) == "}abc"
+        assert parser("'{a:1, b:2}'", is_simple=True) == "{a:1, b:2}"
 
-        assert parser("'['") == "["
-        assert parser('"["') == "["
-        assert parser("']'") == "]"
-        assert parser('"]"') == "]"
+        assert parser("'['", is_simple=True) == "["
+        assert parser('"["', is_simple=True) == '"["'
+        assert parser("']'", is_simple=True) == "]"
+        assert parser('"]"', is_simple=True) == '"]"'
 
-        assert parser("'[abc'") == "[abc"
-        assert parser('"abc["') == "abc["
-        assert parser("'abc]'") == "abc]"
-        assert parser('"]abc"') == "]abc"
-        assert parser('"[1, 2, 3]"') == "[1, 2, 3]"
-
-        with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("")
-
-        with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("'\\")
+        assert parser("'[abc'", is_simple=True) == "[abc"
+        assert parser("'abc['", is_simple=True) == "abc["
+        assert parser("'abc]'", is_simple=True) == "abc]"
+        assert parser("']abc'", is_simple=True) == "]abc"
+        assert parser("'[1, 2, 3]'", is_simple=True) == "[1, 2, 3]"
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("'\\x'")
+            parser("", is_simple=True)
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("'")
+            parser("'", is_simple=True)
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser('"')
+            parser("'No", is_simple=True)
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("{")
-
-        with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("[")
+            parser("'A'bc", is_simple=True)
 
     def test_aaz_shorthand_syntax_dict_value(self):
         from azure.cli.core.aaz._utils import AAZShortHandSyntaxParser
@@ -159,6 +161,20 @@ class TestAAZArg(unittest.TestCase):
             "c": None,
             "d": ''
         }
+        assert parser("{a:1,b:'/''}") == {
+            "a": "1",
+            "b": "'"
+        }
+
+        assert parser("{a:1,b:'//'}") == {
+            "a": "1",
+            "b": "/"
+        }
+
+        assert parser("{a:1,b:/}") == {
+            "a": "1",
+            "b": "/"
+        }
 
         assert parser("{a:1,b:2,c:Null,d:''}") == {
             "a": "1",
@@ -171,6 +187,13 @@ class TestAAZArg(unittest.TestCase):
             "b": "2",
             "c": "none",
             "d": ''
+        }
+
+        assert parser("{a:{a1:' \n /\'',a2:2}}") == {
+            "a": {
+                "a1": " \n '",
+                "a2": "2",
+            }
         }
 
         assert parser("{a:{a1:1,a2:2}}") == {
@@ -193,7 +216,7 @@ class TestAAZArg(unittest.TestCase):
             }
         }
 
-        dt = {
+        assert parser("{a:[{prop1:1,prop2:2},{a1:[b,null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}") == {
             "a": [
                 {
                     "prop1": "1",
@@ -209,10 +232,18 @@ class TestAAZArg(unittest.TestCase):
             "e": "f",
             "g": None,
         }
-        assert parser("{a:[{prop1:1,prop2:2},{a1:[b,null,c,'d:e \"]'],a2:'2 3\t\"}',a4:'',a3:null,}],e:f,g:null}") == dt
+
+        # compare with json
+        dt = {}
         s = json.dumps(dt, separators=(',', ':'))
         assert parser(s) == dt
 
+        dt = {"a": 1}
+        s = json.dumps(dt, separators=(',', ':'))
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser(s)
+
+        # other forbidden expression
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("{a:1,b:}")
 
@@ -238,7 +269,7 @@ class TestAAZArg(unittest.TestCase):
             parser("{a:1,a:2}")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
-            parser("{a:1,b:'\\'}")
+            parser("{a:1,b:'/'}")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("{a:1,:1}")
@@ -249,6 +280,42 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("{a:1,b:{}}{")
 
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1:1',a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1:1'2,a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1:1\",a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1:1\"2,a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1: 1,a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a:{a1:1 ,a2:2}}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a'1:1}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a\"1:1}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a'1:1}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{'a\"1':1}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{a'1:1}")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("{'a/'1':1}")
+
     def test_aaz_shorthand_syntax_list_value(self):
         from azure.cli.core.aaz._utils import AAZShortHandSyntaxParser
         from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
@@ -258,7 +325,20 @@ class TestAAZArg(unittest.TestCase):
 
         assert parser("[c]") == ["c"]
 
+        assert parser("['c']") == ["c"]
+
         assert parser("[c,]") == ["c"]
+
+        assert parser("[null]") == [None]
+        assert parser("[null,]") == [None]
+        assert parser("[None]") == [None]
+        assert parser("[None,]") == [None]
+
+        assert parser("['null',]") == ['null']
+
+        assert parser("['None',]") == ['None']
+
+        assert parser("[' ',]") == [' ']
 
         assert parser("[a,b,c,d]") == [
             "a", "b", "c", "d"
@@ -273,8 +353,41 @@ class TestAAZArg(unittest.TestCase):
             "a", [], {}, ["b", "c", "d"]
         ]
 
+        # compare with json
+        ls = []
+        s = json.dumps(ls, separators=(',', ':'))
+        assert parser(s) == ls
+
+        ls = [None, {}]
+        s = json.dumps(ls, separators=(',', ':'))
+        assert parser(s) == ls
+
+        ls = [1, 2, 3, 4]
+        s = json.dumps(ls, separators=(',', ':'))
+        assert parser(s) == ['1', '2', '3', '4']
+
+        ls = ["1", "2"]
+        s = json.dumps(ls, separators=(',', ':'))
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser(s)
+
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("[,]")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("[',]")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("[ ]")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("[a'b,]")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("[a\"b,]")
+
+        with self.assertRaises(AAZInvalidShorthandSyntaxError):
+            parser("[a b,]")
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("[a,b")

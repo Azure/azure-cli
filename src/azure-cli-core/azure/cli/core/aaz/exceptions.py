@@ -32,10 +32,11 @@ class AAZValuePrecisionLossError(ValueError):
 
 class AAZInvalidShorthandSyntaxError(ValueError):
 
-    def __init__(self, error_data, error_at, msg):
+    def __init__(self, error_data, error_at, error_range, msg):
         self.error_data = error_data
         self.error_at = error_at
+        self.error_range = error_range
         self.msg = msg
 
     def __str__(self):
-        return f"{self.msg}:\n\t{self.error_data[:self.error_at]}\n\t" + ' ' * self.error_at + "^^^"
+        return f"{self.msg}:\n\t{self.error_data[:self.error_at + self.error_range]}\n\t" + ' ' * self.error_at + "^"*self.error_range

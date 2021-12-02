@@ -21,7 +21,7 @@ class AAZSimpleType(AAZBaseType):
 
         if isinstance(data, AAZSimpleValue):
             data = data._data
-        assert isinstance(data, self.DataType)
+        assert isinstance(data, self.DataType), f'Expect {self.DataType}, got {data} ({type(data)}'
         return data
 
 
