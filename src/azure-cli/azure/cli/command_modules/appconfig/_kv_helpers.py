@@ -1029,11 +1029,11 @@ def __import_kvset_from_file(client, path, yes):
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
 
-    kvset_from_file = [ConfigurationSetting(key=kv['key'] if 'key' in kv else None,
-                                            label=kv['label'] if 'label' in kv else None,
-                                            content_type=kv['content_type'] if 'content_type' in kv else None,
-                                            value=kv['value'] if 'value' in kv else None,
-                                            tags=kv['tags'] if 'tags' in kv else None)
+    kvset_from_file = [ConfigurationSetting(key=kv.get('key', None),
+                                            label=kv.get('label', None),
+                                            content_type=kv.get('content_type', None),
+                                            value=kv.get('value', None),
+                                            tags=kv.get('tags', None))
                        for kv in new_kvset[KVSetConstants.KVSETRootElementName]]
 
     kvset_to_import = []
