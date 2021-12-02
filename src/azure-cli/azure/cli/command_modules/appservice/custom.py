@@ -1045,22 +1045,11 @@ def list_instances(cmd, resource_group_name, name, slot=None):
 # which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
 
-    client = web_client_factory(cmd.cli_ctx, api_version="2020-12-01")
-    # API returns malformed ISO timestamps -- this prevents a DeserializationError
+    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
 
-    # print(client.provider._deserialize.deserialize_type["iso-8601"])
-    # client.provider._deserialize.deserialize_type.update({"iso-8601": lambda s: datetime.datetime.utcnow()})
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
-    # print(client.provider._deserialize.deserialize_type["iso-8601"])
-
-    # runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
-
-    # return [s['displayName'] for s in runtime_helper.stacks]
-
-    stacks = client.provider.get_web_app_stacks()
-    stack = stacks.next()
-
-    return stack
+    return runtime_helper.stacks
 
     # endpoint = "/providers/Microsoft.Web/webAppStacks"
     # url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{endpoint}?api-version=2020-12-01"
@@ -1068,13 +1057,6 @@ def list_runtimes(cmd, linux=False):
     # res = send_raw_request(cmd.cli_ctx, "GET", url).json()
 
     # return res
-
-
-
-def list_runtimes_hardcoded(linux=False):
-    if linux:
-        return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
-    return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
 
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -2727,6 +2709,12 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper:
+    class Runtime:
+        def __init__(self, display_name=None, configs=dict(), github_actions_properties=None, linux=False):
+            self.display_name = display_name
+            self.configs = configs
+            self.github_actions_properties = github_actions_properties
+            self.linux = linux
 
     def __init__(self, cmd, client, linux=False):
         self._cmd = cmd
@@ -2747,13 +2735,12 @@ class _StackRuntimeHelper:
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
-        self._load_stacks_hardcoded()
+        self._load_stacks()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
                     None)
 
     @property
     def stacks(self):
-        #self._load_stacks_hardcoded()
         self._load_stacks()
         return self._stacks
 
@@ -2779,88 +2766,170 @@ class _StackRuntimeHelper:
                 site_config.app_settings.append(NameValuePair(name=k, value=v))
         return site_config
 
-    def _load_stacks_hardcoded(self):
-        if self._stacks:
-            return
-        result = []
-        if self._linux:
-            result = get_file_json(RUNTIME_STACKS)['linux']
-            for r in result:
-                r['setter'] = _StackRuntimeHelper.update_site_config
-        else:  # Windows stacks
-            result = get_file_json(RUNTIME_STACKS)['windows']
-            for r in result:
-                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
-                               r['displayName'] else _StackRuntimeHelper.update_site_config)
-        self._stacks = result
 
-    # Currently using hardcoded values instead of this function. This function calls the stacks API;
-    # Stacks API is updated with Antares deployments,
-    # which are infrequent and don't line up with stacks EOL schedule.
     def _load_stacks(self):
         if self._stacks:
             return
-        self._linux = False # TODO remove
         os_type = ('Linux' if self._linux else 'Windows')
-        stacks = list(self._client.provider.get_available_stacks(os_type_selected=os_type))
+        stacks = list(self._client.provider.get_web_app_stacks(stack_os_type=None))#os_type))
 
-        result = []
-        if self._linux:
-            for properties in stacks:
-                for major in properties.major_versions:
-                    if not major.is_deprecated:
-                        default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
-                                            None)
-                        result.append({
-                            'displayName': (default_minor.runtime_version
-                                            if default_minor else major.runtime_version)
-                        })
-        else:  # Windows stacks
-            config_mappings = {
+        stack_json = {"windows": [], "linux": []}
+        # for windows stacks
+        # TODO try and get API support for this so it isn't hardcoded
+        config_mappings = {
                 'node': 'WEBSITE_NODE_DEFAULT_VERSION',
                 'python': 'python_version',
                 'php': 'php_version',
-                'aspnet': 'net_framework_version'
+                'aspnet': 'net_framework_version',
+                'dotnet': 'net_framework_version',
+                'dotnetcore': None
             }
 
-            # get all stack version except 'java'
-            for stack in stacks:
-                if stack.name not in config_mappings:
-                    print(stack.name)
-                    continue
-                name, properties = stack.name, stack
-                for major in properties.major_versions:
-                    default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
-                                         None)
-                    result.append({
-                        'displayName': name + '|' + major.display_version,
-                        'configs': {
-                            config_mappings[name]: (default_minor.runtime_version
-                                                    if default_minor else major.runtime_version)
-                        }
-                    })
+        java_runtimes = None
+        java_containers_runtimes = None
+        for lang in stacks:
+            if lang.display_text.lower() == "java":
+                java_runtimes = lang.major_versions
+                continue
+            # if lang.display_text.lower() == "java containers":
+            #     java_containers_runtimes = lang.major_versions
+            #     continue
+            for major_version in lang.major_versions:
+                minor_java_versions_linux = [m for m in major_version.minor_versions if m.stack_settings.linux_container_settings is not None and not m.stack_settings.linux_container_settings.is_hidden and not m.stack_settings.linux_container_settings.is_deprecated]
+                default_java_version_linux = next(iter(minor_java_versions_linux), None)
+                if default_java_version_linux:
+                    linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
+                    for runtime_name in [r for r in (linux_container_settings.java11_runtime, linux_container_settings.java8_runtime) if r is not None]:
+                        runtime = {"displayName": runtime_name,
+                                    "configs": {"linux_fx_version": runtime_name}}
+                        # TODO get GH action settings from the other java info
+                        # gh_properties = linux_container_settings.git_hub_action_settings
+                        # if gh_properties.is_supported:
+                        #     runtime["github_actions_properties"] = {"github_actions_version":
+                        #         gh_properties.supported_version}
+                        stack_json["linux"].append(runtime)
+                minor_versions_linux = [m for m in major_version.minor_versions if m.stack_settings.linux_runtime_settings is not None and not m.stack_settings.linux_runtime_settings.is_hidden and not m.stack_settings.linux_runtime_settings.is_deprecated]
+                for minor_version in minor_versions_linux:
+                    linux_settings = minor_version.stack_settings.linux_runtime_settings
+                    # linux_container_settings = minor_version.stack_settings.linux_container_settings
+                    linux_runtime_name = linux_settings.runtime_version
+                    runtime = {"displayName": linux_runtime_name,
+                                "configs": {"linux_fx_version": linux_runtime_name}}
+                    gh_properties = linux_settings.git_hub_action_settings
+                    if gh_properties.is_supported:
+                        runtime["github_actions_properties"] = {"github_actions_version":
+                            gh_properties.supported_version}
+                    stack_json["linux"].append(runtime)
 
-            # deal with java, which pairs with java container version
-            java_stack = next((s for s in stacks if s.name == 'java'))
-            java_container_stack = next((s for s in stacks if s.name == 'javaContainers'))
-            for java_version in java_stack.major_versions:
-                for fx in java_container_stack.frameworks:
-                    for fx_version in fx.major_versions:
-                        result.append({
-                            'displayName': 'java|{}|{}|{}'.format(java_version.display_version,
-                                                                  fx.display,
-                                                                  fx_version.display_version),
-                            'configs': {
-                                'java_version': java_version.runtime_version,
-                                'java_container': fx.name,
-                                'java_container_version': fx_version.runtime_version
-                            }
-                        })
+                minor_versions_windows = [m for m in major_version.minor_versions if m.stack_settings.windows_runtime_settings is not None and not m.stack_settings.windows_runtime_settings.is_hidden and not m.stack_settings.windows_runtime_settings.is_deprecated]
+                for minor_version in minor_versions_windows:
+                    windows_settings = minor_version.stack_settings.windows_runtime_settings
+                    windows_runtime_name = minor_version.display_text.upper().replace(".NET CORE", "DOTNETCORE").replace("ASP.NET", "ASPNET").replace(".NET", "DOTNET").replace(" ", "|", 1).replace(" ", "")
+                    runtime = {"displayName": windows_runtime_name}
+                    lang_name = windows_runtime_name.split("|")[0].lower()
+                    config_key = config_mappings.get(lang_name)
+                    if config_key:
+                        runtime["configs"] = {config_key: windows_settings.runtime_version}
+                    gh_properties = windows_settings.git_hub_action_settings
+                    if gh_properties.is_supported:
+                        runtime["github_actions_properties"] = {"github_actions_version":
+                            gh_properties.supported_version}
+                    stack_json["windows"].append(runtime)
 
-            for r in result:
-                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
-                               r['displayName'] else _StackRuntimeHelper.update_site_config)
-        self._stacks = result
+                minor_java_versions_windows = [m for m in major_version.minor_versions if m.stack_settings.windows_container_settings is not None and not m.stack_settings.windows_container_settings.is_hidden and not m.stack_settings.windows_container_settings.is_deprecated]
+                default_java_version_windows = next(iter(minor_java_versions_windows), None)
+                if default_java_version_windows:
+                    windows_container_settings = default_java_version_windows.stack_settings.windows_container_settings
+                    for java_version in ["1.8", "11"]:
+                        java_container = windows_container_settings.java_container
+                        container_version = windows_container_settings.java_container_version
+                        if container_version.upper() == "SE":
+                            java_container = "Java SE"
+                            if java_version == "1.8":
+                                container_version = "8"
+                            else:
+                                container_version = "11"
+                        runtime_name = "{}|{}|{}|{}".format("java",
+                                                            java_version,
+                                                            java_container,
+                                                            container_version)
+                        runtime = {"displayName": runtime_name}
+                        runtime["configs"] = {"java_version": java_version,
+                                              "java_container": java_container,
+                                              "java_container_version": container_version}
+                        # TODO get GH action settings from the other java info
+                        # gh_properties = linux_container_settings.git_hub_action_settings
+                        # if gh_properties.is_supported:
+                        #     runtime["github_actions_properties"] = {"github_actions_version":
+                        #         gh_properties.supported_version}
+                        stack_json["windows"].append(runtime)
+
+
+
+        self._stacks = stack_json
+
+            # for minor_version in java_runtimes:
+            #     pass
+
+        # result = []
+        # if self._linux:
+        #     for lang in stacks:
+        #         for major_version in lang.major_versions:
+        #             if not major_version.is_deprecated:
+        #                 default_minor = next((m for m in (major.minor_versions or []) if not m.is_deprecated), None)
+        #                 print(len(major.minor_versions))
+        #                 # default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
+        #                 #                     None)
+        #                 result.append({
+        #                     'displayName': (default_minor.runtime_version
+        #                                     if default_minor else major.runtime_version)
+        #                 })
+        # else:  # Windows stacks
+        #     config_mappings = {
+        #         'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+        #         'python': 'python_version',
+        #         'php': 'php_version',
+        #         'aspnet': 'net_framework_version'
+        #     }
+
+        #     # get all stack version except 'java'
+        #     for stack in stacks:
+        #         if stack.name not in config_mappings:
+        #             print(stack.name)
+        #             continue
+        #         name, properties = stack.name, stack
+        #         for major in properties.major_versions:
+        #             default_minor = next((m for m in (major.minor_versions or []) if m.is_default),
+        #                                  None)
+        #             result.append({
+        #                 'displayName': name + '|' + major.display_version,
+        #                 'configs': {
+        #                     config_mappings[name]: (default_minor.runtime_version
+        #                                             if default_minor else major.runtime_version)
+        #                 }
+        #             })
+
+        #     # deal with java, which pairs with java container version
+        #     java_stack = next((s for s in stacks if s.name == 'java'))
+        #     java_container_stack = next((s for s in stacks if s.name == 'javaContainers'))
+        #     for java_version in java_stack.major_versions:
+        #         for fx in java_container_stack.frameworks:
+        #             for fx_version in fx.major_versions:
+        #                 result.append({
+        #                     'displayName': 'java|{}|{}|{}'.format(java_version.display_version,
+        #                                                           fx.display,
+        #                                                           fx_version.display_version),
+        #                     'configs': {
+        #                         'java_version': java_version.runtime_version,
+        #                         'java_container': fx.name,
+        #                         'java_container_version': fx_version.runtime_version
+        #                     }
+        #                 })
+
+        #     for r in result:
+        #         r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+        #                        r['displayName'] else _StackRuntimeHelper.update_site_config)
+        # self._stacks = result
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -5029,6 +5098,7 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
     requests.delete(store_secret_url, headers=headers)
 
 
+# TODO replace
 def _runtime_supports_github_actions(runtime_string, is_linux):
     if is_linux:
         stacks = get_file_json(RUNTIME_STACKS)['linux']
@@ -5082,6 +5152,7 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
         return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
 
 
+# TODO replace
 def _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux):
     if is_linux:
         stacks = get_file_json(RUNTIME_STACKS)['linux']
