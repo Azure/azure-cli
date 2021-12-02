@@ -1123,7 +1123,7 @@ def __validate_import_config_setting(config_setting):
 
 def __validate_import_tags(kv):
     if kv.tags and not isinstance(kv.tags, dict):
-        logger.warning("The value of the 'tags' for key '{%s}' is not an object. This key-value will not be imported.", kv.key)
+        logger.warning("The format of 'tags' for key '%s' is not valid. This key-value will not be imported.", kv.key)
         return False
 
     if kv.tags:
