@@ -565,6 +565,48 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "score")
         assert v.score == None
 
+        # credit argument
+        schema.credit = AAZIntArg(options=["--credit", "-c"])
+        arg = schema.credit.to_cmd_arg("credit")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "-100")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "credit")
+        assert v.credit == -100
+
+        action.setup_operations(dest_ops, "0")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "credit")
+        assert v.credit == 0
+
+        action.setup_operations(dest_ops, "100")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "credit")
+        assert v.credit == 100
+
+        action.setup_operations(dest_ops, "'10'")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "credit")
+        assert v.credit == 10
+
+        # test blank
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
+
+        # test null
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+
+        with self.assertRaises(ValueError):
+            action.setup_operations(dest_ops, "100.123")
+
+        with self.assertRaises(ValueError):
+            action.setup_operations(dest_ops, " ")
+
 
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments
