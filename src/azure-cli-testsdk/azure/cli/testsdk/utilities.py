@@ -202,7 +202,7 @@ class GeneralNameReplacer(_BuggyGeneralNameReplacer):
 
 class AADAuthRequestFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording.
-    This is a patch for azure_devtools.scenario_tests.recording_processors.OAuthRequestResponsesFilter
+    This is derived from OAuthRequestResponsesFilter.
     """
     def process_request(self, request):
         # filter AAD requests like:

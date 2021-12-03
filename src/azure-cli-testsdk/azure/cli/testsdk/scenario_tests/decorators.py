@@ -29,7 +29,7 @@ class AllowLargeResponse(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, fn):
         def _preparer_wrapper(test_class_instance, **kwargs):
-            from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+            from .recording_processors import LargeResponseBodyProcessor
             large_resp_body = next((r for r in test_class_instance.recording_processors
                                     if isinstance(r, LargeResponseBodyProcessor)), None)
             if large_resp_body:
