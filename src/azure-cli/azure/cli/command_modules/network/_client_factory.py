@@ -290,3 +290,7 @@ def cf_virtual_appliance_sites(cli_ctx, _):
 
 def cf_custom_ip_prefixes(cli_ctx, _):
     return network_client_factory(cli_ctx).custom_ip_prefixes
+
+
+def cf_inbound_nat_rules(cli_ctx, _):
+    return network_client_factory(cli_ctx).inbound_nat_rules

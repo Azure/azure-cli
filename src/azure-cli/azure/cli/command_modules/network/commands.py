@@ -30,7 +30,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
     cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools,
     cf_network_virtual_appliances, cf_virtual_appliance_skus, cf_virtual_appliance_sites, cf_virtual_hub,
-    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes)
+    cf_virtual_hub_bgp_connection, cf_virtual_hub_bgp_connections, cf_custom_ip_prefixes, cf_inbound_nat_rules)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry,
     delete_lb_resource_property_entry)
@@ -448,6 +448,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#CustomIPPrefixesOperations.{}',
         client_factory=cf_custom_ip_prefixes,
         min_api='2020-06-01'
+    )
+
+    network_inbound_nat_rule = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#.InboundNatRulesOperations.{}',
+        client_factory=cf_inbound_nat_rules
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -931,8 +936,16 @@ def load_command_table(self, _):
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
 
-    with self.command_group('network lb inbound-nat-rule', network_lb_sdk) as g:
+    with self.command_group('network lb inbound-nat-rule', network_lb_sdk, max_api='2021-02-01') as g:
         g.custom_command('create', 'create_lb_inbound_nat_rule')
+        g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
+                                 getter_name='lb_get',
+                                 getter_type=network_load_balancers_custom,
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_inbound_nat_rule')
+
+    with self.command_group('network lb inbound-nat-rule', network_inbound_nat_rule, min_api='2021-05-01') as g:
+        g.custom_command('create', 'create_lb_inbound_nat_rule_v2')
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
                                  getter_name='lb_get',
                                  getter_type=network_load_balancers_custom,

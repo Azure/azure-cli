@@ -3649,6 +3649,31 @@ def create_lb_inbound_nat_rule(
     return get_property(poller.result().inbound_nat_rules, item_name)
 
 
+def create_lb_inbound_nat_rule_v2(
+        cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
+        frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
+        frontend_port_range_start=None, frontend_port_range_end=None, backend_address_pool_name=None):
+    InboundNatRule = cmd.get_models('InboundNatRule')
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
+    frontend_ip = get_property(lb.frontend_ip_configurations, frontend_ip_name)  # pylint: disable=no-member
+    new_rule = InboundNatRule(
+        name=item_name, protocol=protocol,
+        frontend_port=frontend_port, backend_port=backend_port,
+        frontend_ip_configuration=frontend_ip,
+        enable_floating_ip=floating_ip,
+        idle_timeout_in_minutes=idle_timeout,
+        enable_tcp_reset=enable_tcp_reset,
+        frontend_port_range_start=frontend_port_range_start,
+        frontend_port_range_end=frontend_port_range_end,
+    )
+    if backend_address_pool_name:
+        new_rule.backend_address_pool = get_property(lb.backend_address_pools, backend_address_pool_name)  # pylint: disable=no-member
+    return ncf.inbound_nat_rules.begin_create_or_update(resource_group_name, load_balancer_name, item_name, new_rule)
+
+
 # workaround for : https://github.com/Azure/azure-cli/issues/17071
 def lb_get(client, resource_group_name, load_balancer_name):
     lb = client.get(resource_group_name, load_balancer_name)
