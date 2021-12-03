@@ -24,7 +24,21 @@ class AAZArgAction(Action):
         raise NotImplementedError()
 
 
+class AAZArgActionOperations:
+
+    def apply(self, args, dest):
+        raise NotImplementedError()
+
+
 class AAZSimpleTypeArgAction(AAZArgAction):
+
+    class Operations(AAZArgActionOperations):
+
+        def __init__(self, data):
+            self._data = data
+
+        def apply(self, args, dest):
+            args[dest] = self._data
 
     def __call__(self, parser, namespace, values, option_string=None):
         if values is None:
@@ -35,7 +49,8 @@ class AAZSimpleTypeArgAction(AAZArgAction):
             else:
                 data = values
             data = self.format_data(data)
-        setattr(namespace, self.dest, data)
+        op = self.Operations(data)
+        setattr(namespace, self.dest, op)
 
     @classmethod
     def format_data(cls, data):
@@ -52,26 +67,44 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
 class AAZCompoundTypeArgAction(AAZArgAction):
 
+    class Operations(AAZArgActionOperations):
+
+        def __init__(self):
+            self._ops = []
+
+        def add(self, key_parts, data):
+            self._ops.append((key_parts, data))
+
+        def apply(self, args, dest):
+            for key_parts, data in self._ops:
+                arg = args
+                key = dest
+                i = 0
+                while i < len(key_parts):
+                    arg = arg[key]
+                    key = key_parts[i]
+                    i += 1
+                arg[key] = data
+
     key_pattern = re.compile(
         r'^(((\[[0-9]+])|(([a-zA-Z0-9_\-]+)(\[[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[[0-9]+])?)*)=(.*)$'
     )
 
     def __call__(self, parser, namespace, values, option_string=None):
-        dest_dict = getattr(namespace, self.dest)
-        if dest_dict is None:
-            dest_dict = OrderedDict()
+        if getattr(namespace, self.dest) is None:
+            setattr(namespace, self.dest, self.Operations())
+        dest_ops = getattr(namespace, self.dest)
 
         if values is None:
-            key_parts = tuple()
-            dest_dict[key_parts] = self._schema._blank
+            dest_ops.add(tuple(), self._schema._blank)
         else:
             for key, key_parts, value in self.decode_values(values):
                 schema = self._schema
                 for k in key_parts:
                     schema = schema[k]
                 action = schema._build_cmd_action()
-                dest_dict[key_parts] = action.format_data(value)
-        setattr(namespace, self.dest, dest_dict)
+                data = action.format_data(value)
+                dest_ops.add(key_parts, data)
 
     @classmethod
     def decode_values(cls, values):
@@ -173,43 +206,49 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        dest_dict = getattr(namespace, self.dest)
-        if dest_dict is None:
-            dest_dict = OrderedDict()
+        if getattr(namespace, self.dest) is None:
+            setattr(namespace, self.dest, self.Operations())
+        dest_ops = getattr(namespace, self.dest)
 
         if values is None:
-            key_parts = tuple()
-            dest_dict[key_parts] = self._schema._blank
+            dest_ops.add(tuple(), self._schema._blank)
         else:
             inputs = [*self.decode_values(values)]
             try:
                 # standard expression
+                ops = []
                 for key, key_parts, value in inputs:
                     schema = self._schema
                     for k in key_parts:
                         schema = schema[k]
                     action = schema._build_cmd_action()
-                    dest_dict[key_parts] = action.format_data(value)
+                    data = action.format_data(value)
+                    ops.append((key_parts, data))
+                for key_parts, data in ops:
+                    dest_ops.add(key_parts, data)
             except Exception as ex:
                 for key, _, _ in inputs:
                     if key:
                         # it's not a valid separate expression.
                         raise ex
-                # separate element expression
+
+                # This part of logic is to support separate element expression which is widely used in current command,
+                # such as:
+                #       --args val1 val2 val3.
+                # The standard expression of it should be:
+                #       --args [val1,val2,val3]
+
                 elements = []
                 element_action = self._schema.Element._build_cmd_action()
                 for _, _, value in inputs:
                     elements.append(element_action.format_data(value))
-                key_parts = tuple()
-                dest_dict[key_parts] = elements
-
-        setattr(namespace, self.dest, dest_dict)
+                dest_ops.add(tuple(), elements)
 
     @classmethod
     def format_data(cls, data):
         if data is None:
             return None
-        elif isinstance(data, dict):
+        elif isinstance(data, list):
             result = []
             action = cls._schema.Element._build_cmd_action()
             for idx, value in enumerate(data):
@@ -218,7 +257,19 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         else:
             raise ArgumentTypeError(f"list type value expected, got '{data}'({type(data)})")
 
+
 # class AAZListElementArgAction(AAZArgAction):
 #
 #     def __call__(self, parser, namespace, values, option_string=None):
-#         print(values, option_string)
+#         dest_dict = getattr(namespace, self.dest)
+#         if dest_dict is None:
+#             dest_dict = OrderedDict()
+#
+#         key_parts = tuple()
+#         if key_parts not in dest_dict:
+#             dest_dict[key_parts] = []
+#         elements = dest_dict[key_parts]
+#
+#         # if values is None:
+#         #
+

@@ -3,6 +3,7 @@ import os
 from ._utils import _get_profile_pkg
 from knack.commands import CLICommand, CommandGroup
 from ._arg import AAZArgumentsSchema
+from ._arg_action import AAZArgActionOperations
 from collections import OrderedDict
 
 
@@ -63,21 +64,12 @@ class AAZCommand(CLICommand):
 
         self._args = schema(data={})
 
-        for name, cmd_arg in command_args.items():
-            if hasattr(schema, name):
-                if not isinstance(cmd_arg, OrderedDict):
-                    self._args[name] = cmd_arg
-                    continue
-
-                for parts, data in cmd_arg.items():
-                    args = self._args
-                    part = name
-                    i = 0
-                    while i < len(parts):
-                        args = args[part]
-                        part = parts[i]
-                        i += 1
-                    args[part] = data
+        for dest, cmd_arg in command_args.items():
+            if hasattr(schema, dest):
+                if isinstance(cmd_arg, AAZArgActionOperations):
+                    cmd_arg.apply(self._args, dest)
+                else:
+                    self._args[dest] = cmd_arg
         return self._args
 
     def _handler(self, command_args):
