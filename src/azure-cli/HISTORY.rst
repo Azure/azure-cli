@@ -77,7 +77,7 @@ Release History
 * `az disk create/update`: Add `--accelerated-network` argument to support the accelerated networking (#20251)
 * `az snapshot create/update`: Add `--public-network-access` argument to control the policy for export on the disk (#20251)
 * `az snapshot create/update`: Add `--accelerated-network` argument support the accelerated networking (#20251)
-* Fix #20258: `az snapshot create`: Fix creating a snapshot of a Uniform VMSS OS disk (#20306)
+* `az snapshot create`: Fix #20258: Fix creating a snapshot of a Uniform VMSS OS disk (#20306)
 
 **EventGrid**
 
