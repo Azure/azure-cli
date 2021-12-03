@@ -98,7 +98,6 @@ Release History
 
 **Network**
 
-* Bump network to 2021-05-01 (#20212)
 * Add new command set: `az network express-route peering connection ipv6-config set/remove` (#19887)
 * `az network application-gateway waf-policy managed-rule exclusion`: Add new subgroup `rule-set` to support per rule exclusions (#20360)
 * Fix #20289: `az network bastion create` invalid validator when `--scale-units` is None (#20305)
