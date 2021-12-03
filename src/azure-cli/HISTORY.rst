@@ -64,9 +64,9 @@ Release History
 
 **Cognitive Services**
 
-* Add new commands `cognitiveservices account deployment [show,list,create,delete]` (#20551)
-* Add new commands `cognitiveservices account commitment-plan [show,list,create,delete]` (#20551)
-* Add new commands `cognitiveservices commitment-tier [list]` (#20551)
+* `az cognitiveservices account deployment`: Add new commands `show`, `list`, `create`, `delete` (#20551)
+*  `az cognitiveservices account commitment-plan`: Add new commands `show`, `list`, `create`, `delete` (#20551)
+*  `az cognitiveservices commitment-tier`: Add new command `list` (#20551)
 
 **Compute **
 
