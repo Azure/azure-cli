@@ -607,6 +607,91 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(ValueError):
             action.setup_operations(dest_ops, " ")
 
+    def test_aaz_float_arg(self):
+        from azure.cli.core.aaz._arg import AAZFloatArg, AAZArgumentsSchema, AAZArgEnum
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.score = AAZFloatArg(
+            options=["--score", "-s"],
+            enum=AAZArgEnum(items={
+                "A": 100.0,
+                "B": 90.0,
+                "C": 80.0,
+                "D": 0.0,
+            }),
+            nullable=True,
+            blank=0.0
+        )
+        arg = schema.score.to_cmd_arg("score")
+        assert len(arg.choices) == 4
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "A")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "score")
+        assert v.score == 100.0
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "score")
+        assert v.score == None
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "score")
+        assert v.score == 0.0
+
+        # null value
+        action.setup_operations(dest_ops, "None")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "score")
+        assert v.score == None
+
+        # credit argument
+        schema.credit = AAZFloatArg(options=["--credit", "-c"])
+        arg = schema.credit.to_cmd_arg("credit")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "-100")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "credit")
+        assert v.credit == -100.0
+
+        action.setup_operations(dest_ops, "0.23")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "credit")
+        assert v.credit == 0.23
+
+        action.setup_operations(dest_ops, "100.1")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "credit")
+        assert v.credit == 100.1
+
+        action.setup_operations(dest_ops, "'10.123'")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "credit")
+        assert v.credit == 10.123
+
+        # test blank
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
+
+        # test null
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+
+        with self.assertRaises(ValueError):
+            action.setup_operations(dest_ops, " ")
 
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments
