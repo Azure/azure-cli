@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.31.0
+++++++
+* Support managed identity in App Service container (#20215)
+* Use MSAL HTTP cache (#20234)
+
 2.30.0
 ++++++
 * [BREAKING CHANGE] ADAL to MSAL migration (#19853)
