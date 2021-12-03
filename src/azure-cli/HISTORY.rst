@@ -44,7 +44,7 @@ Release History
 
 **ARM**
 
-* `az resource\group list`:  Support querying data only by passing the tag name to `--tag` parameter (#20169)
+* `az resource\group list`: Support querying data only by passing the tag name to `--tag` parameter (#20169)
 * `az account management-group`: Add new parameters `--no-register` to skip RP registration for `Microsoft.Management` (#20166)
 * `az deployment`: Prettify error output for ARM deployment (#20238)
 * `az bicep install`: Add a new parameter `--target-platform/-t` to specify the running platform of Bicep CLI (#20250)
