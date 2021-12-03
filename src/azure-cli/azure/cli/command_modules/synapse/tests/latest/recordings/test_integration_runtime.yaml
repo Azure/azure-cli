@@ -9,7 +9,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse integration-runtime create
+      - synapse integration-runtime managed create
       Connection:
       - keep-alive
       Content-Length:
@@ -17,14 +17,14 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - --resource-group --workspace-name --name --type
+      - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime","recordId":517794,"state":"Updating","created":"2021-05-26T08:43:19.3666667Z","changed":"2021-05-26T08:43:50.8166667Z","type":"IntegrationRuntime","name":"integrationruntime","operationId":"7666e150-bf62-4fa1-940b-2491f1f43950","artifactId":"E077BBBB-DB6E-4273-B37A-D3E9C7A03B61"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime","recordId":2667875,"state":"Creating","created":"2021-11-04T11:46:35.29Z","changed":"2021-11-04T11:46:35.29Z","type":"IntegrationRuntime","name":"integrationruntime","operationId":"1ce1f4f7-dea1-4c8a-87dc-8adbbea87baa","artifactId":"065A177A-D75C-42AE-AB19-1C0A93A6EA99"}'
     headers:
       access-control-allow-headers:
       - Location
@@ -35,15 +35,15 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '461'
+      - '458'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:44:30 GMT
+      - Thu, 04 Nov 2021 11:46:35 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/operationResults/7666e150-bf62-4fa1-940b-2491f1f43950?api-version=2021-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/1ce1f4f7-dea1-4c8a-87dc-8adbbea87baa?api-version=2021-06-01-preview
       pragma:
       - no-cache
       server:
@@ -53,7 +53,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -65,39 +65,33 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse integration-runtime create
+      - synapse integration-runtime managed create
       Connection:
       - keep-alive
       ParameterSetName:
-      - --resource-group --workspace-name --name --type
+      - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/operationResults/7666e150-bf62-4fa1-940b-2491f1f43950?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/1ce1f4f7-dea1-4c8a-87dc-8adbbea87baa?api-version=2021-06-01-preview
   response:
     body:
-      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.DataFactory/factories/zes0219test/integrationruntimes/integrationruntime\",\n
-        \ \"name\": \"integrationruntime\",\n  \"type\": \"Microsoft.DataFactory/factories/integrationruntimes\",\n
-        \ \"properties\": {\n    \"type\": \"Managed\",\n    \"typeProperties\": {\n
-        \     \"computeProperties\": {\n        \"location\": \"AutoResolve\",\n        \"dataFlowProperties\":
-        {\n          \"computeType\": \"General\",\n          \"coreCount\": 8,\n
-        \         \"timeToLive\": 0\n        }\n      }\n    }\n  },\n  \"etag\":
-        \"10005595-0000-3400-0000-60ae0a280000\"\n}"
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/integrationruntime","name":"integrationruntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve","dataFlowProperties":{"computeType":"General","coreCount":8,"timeToLive":0}}}},"etag":"19032e07-0000-0100-0000-6183c81c0000"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '614'
+      - '493'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:44:40 GMT
+      - Thu, 04 Nov 2021 11:46:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -107,6 +101,113 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"type": "SelfHosted"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime self-hosted create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '38'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/selfhostedir?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/selfhostedir","recordId":2666860,"state":"Updating","created":"2021-11-04T07:46:37.2433333Z","changed":"2021-11-04T11:39:26.5766667Z","type":"IntegrationRuntime","name":"selfhostedir","operationId":"544962c2-1c10-4885-98db-a9814c10e0ff","artifactId":"70B6F800-CF67-4B7C-AFC0-49CFDD579B7C"}'
+    headers:
+      access-control-allow-headers:
+      - Location
+      - Retry-After
+      access-control-expose-headers:
+      - Location
+      - Retry-After
+      cache-control:
+      - no-cache
+      content-length:
+      - '456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:46:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/544962c2-1c10-4885-98db-a9814c10e0ff?api-version=2021-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime self-hosted create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/544962c2-1c10-4885-98db-a9814c10e0ff?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/selfhostedir","name":"selfhostedir","type":"Microsoft.Synapse/workspaces/integrationruntimes","properties":{"type":"SelfHosted"},"etag":"02035a21-0000-0100-0000-61838fe10000"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '342'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:46:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
     status:
       code: 200
       message: OK
@@ -124,21 +225,21 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/integrationruntime","name":"integrationruntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve","dataFlowProperties":{"computeType":"General","coreCount":8,"timeToLive":0}}}},"etag":"10005595-0000-3400-0000-60ae0a280000"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/integrationruntime","name":"integrationruntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve","dataFlowProperties":{"computeType":"General","coreCount":8,"timeToLive":0}}}},"etag":"19032e07-0000-0100-0000-6183c81c0000"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '487'
+      - '493'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:44:42 GMT
+      - Thu, 04 Nov 2021 11:47:02 GMT
       expires:
       - '-1'
       pragma:
@@ -173,21 +274,21 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/AutoResolveIntegrationRuntime","name":"AutoResolveIntegrationRuntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"00000297-0000-3400-0000-602f759b0000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve"}},"provisioningState":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/testintrunzes0219testselfhosted0428","name":"testintrunzes0219testselfhosted0428","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"00000a27-0000-3400-0000-608905640000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/testintrunzes0219testselfhosted0400","name":"testintrunzes0219testselfhosted0400","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"00000729-0000-3400-0000-6089090a0000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/testintrunzes0219testselfhosted0401","name":"testintrunzes0219testselfhosted0401","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"0000b22b-0000-3400-0000-60890df00000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/testintrunzes0219testselfhosted0406","name":"testintrunzes0219testselfhosted0406","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"03002502-0000-3400-0000-608a203c0000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/IntegrationRuntime0219selfhosted0507","name":"IntegrationRuntime0219selfhosted0507","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"1100f7cd-0000-3400-0000-60a3b42f0000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/IntegrationRuntime0219selfhosted0501","name":"IntegrationRuntime0219selfhosted0501","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"1e009081-0000-3400-0000-60992e5d0000","properties":{"type":"SelfHosted","description":"test","typeProperties":{}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/IntegrationRuntime0219selfhosted0518","name":"IntegrationRuntime0219selfhosted0518","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"110028d4-0000-3400-0000-60a3b5780000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationruntimes/integrationruntime","name":"integrationruntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"10005595-0000-3400-0000-60ae0a280000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve","dataFlowProperties":{"computeType":"General","coreCount":8,"timeToLive":0}}}}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/AutoResolveIntegrationRuntime","name":"AutoResolveIntegrationRuntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"fc0292a7-0000-0100-0000-61837d4a0000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve"}},"provisioningState":null}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/SelfHostedIntegrationRuntime","name":"SelfHostedIntegrationRuntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"0003d83c-0000-0100-0000-618389400000","properties":{"type":"SelfHosted","typeProperties":{}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/selfhostedir","name":"selfhostedir","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"02035a21-0000-0100-0000-61838fe10000","properties":{"type":"SelfHosted"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/adfssisirzes","name":"adfssisirzes","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"1803cc13-0000-0100-0000-6183c5c10000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"EastUS","nodeSize":"Standard_D8_v3","numberOfNodes":2,"maxParallelExecutionsPerNode":4},"ssisProperties":{"licenseType":"LicenseIncluded","edition":"Standard"}},"description":"testforluossisirps","state":"Stopped"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/testssisir","name":"testssisir","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"1803cce6-0000-0100-0000-6183c7c60000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"EastUS","nodeSize":"Standard_D8_v3","numberOfNodes":2,"maxParallelExecutionsPerNode":4},"ssisProperties":{"licenseType":"LicenseIncluded","edition":"Standard"}},"description":"testforluossisirps","state":"Stopped"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationruntimes/integrationruntime","name":"integrationruntime","type":"Microsoft.Synapse/workspaces/integrationruntimes","etag":"19032e07-0000-0100-0000-6183c81c0000","properties":{"type":"Managed","typeProperties":{"computeProperties":{"location":"AutoResolve","dataFlowProperties":{"computeType":"General","coreCount":8,"timeToLive":0}}}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3686'
+      - '2914'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:44:44 GMT
+      - Thu, 04 Nov 2021 11:47:04 GMT
       expires:
       - '-1'
       pragma:
@@ -221,12 +322,12 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name -y
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime","recordId":0,"state":"Deleting","created":"0001-01-01T00:00:00","changed":"0001-01-01T00:00:00","type":"IntegrationRuntime","name":"integrationruntime","operationId":"86fd945f-ee32-413a-9699-f7d5b98df308"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime","recordId":0,"state":"Deleting","created":"0001-01-01T00:00:00","changed":"0001-01-01T00:00:00","type":"IntegrationRuntime","name":"integrationruntime","operationId":"fda0d250-5baf-4d24-8bdb-a44bafbd6d2d"}'
     headers:
       access-control-allow-headers:
       - Location
@@ -235,15 +336,15 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '386'
+      - '392'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:44:46 GMT
+      - Thu, 04 Nov 2021 11:47:06 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/operationResults/86fd945f-ee32-413a-9699-f7d5b98df308?api-version=2021-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/fda0d250-5baf-4d24-8bdb-a44bafbd6d2d?api-version=2021-06-01-preview
       pragma:
       - no-cache
       server:
@@ -271,9 +372,9 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name -y
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/operationResults/86fd945f-ee32-413a-9699-f7d5b98df308?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/operationResults/fda0d250-5baf-4d24-8bdb-a44bafbd6d2d?api-version=2021-06-01-preview
   response:
     body:
       string: ''
@@ -283,7 +384,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 26 May 2021 08:45:17 GMT
+      - Thu, 04 Nov 2021 11:47:37 GMT
       expires:
       - '-1'
       pragma:
@@ -311,33 +412,35 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/integrationruntime?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/integrationruntime?api-version=2021-06-01-preview
   response:
     body:
       string: '{"code":"NotFound","message":"The document could not be retrieved because
-        it does not exist.","target":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.DataFactory/factories/zes0219test/integrationruntimes/integrationruntime","details":null,"error":null}'
+        it does not exist.","target":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.DataFactory/factories/testingsynapseworkspace/integrationruntimes/integrationruntime","details":null,"error":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '309'
+      - '315'
       content-type:
-      - application/json; charset=UTF-8
+      - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:45:18 GMT
+      - Thu, 04 Nov 2021 11:47:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-powered-by:
+      - ASP.NET
     status:
       code: 404
       message: Not Found
@@ -357,9 +460,9 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/upgrade?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/upgrade?api-version=2021-06-01-preview
   response:
     body:
       string: ''
@@ -369,20 +472,22 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 26 May 2021 08:45:20 GMT
+      - Thu, 04 Nov 2021 11:47:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
+      x-powered-by:
+      - ASP.NET
     status:
       code: 200
       message: OK
@@ -402,27 +507,27 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/listAuthKeys?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/listAuthKeys?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"authKey1":"authKey1","authKey2":"authKey2"}'
+      string: '{"authKey1":"authkey1"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '246'
+      - '251'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:45:21 GMT
+      - Thu, 04 Nov 2021 11:47:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -434,6 +539,8 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1196'
+      x-powered-by:
+      - ASP.NET
     status:
       code: 200
       message: OK
@@ -455,27 +562,27 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name --key-name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/regenerateAuthKey?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/regenerateAuthKey?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"authKey1":"authKey1"}'
+      string: "{\n \"authKey1\": \"authKey1\"\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '124'
+      - '126'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:45:22 GMT
+      - Thu, 04 Nov 2021 11:47:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       server:
-      - Kestrel
+      - Microsoft-IIS/10.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -487,6 +594,8 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-powered-by:
+      - ASP.NET
     status:
       code: 200
       message: OK
@@ -506,134 +615,21 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/monitoringData?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/monitoringData?api-version=2021-06-01-preview
   response:
     body:
-      string: "{\n  \"name\": \"IntegrationRuntime0219selfhosted0507\",\n  \"queueLength\":
-        0,\n  \"averageQueueDuration\": 0.0,\n  \"nodes\": [\n    {\n      \"nodeName\":
-        \"MININT-Q3EGQJ8\",\n      \"availableMemoryInMB\": 42003,\n      \"cpuUtilization\":
-        1,\n      \"concurrentJobsLimit\": 28,\n      \"concurrentJobsRunning\": 0,\n
-        \     \"sentBytes\": 6.005834102630615,\n      \"receivedBytes\": 652.6889038085938\n
-        \   }\n  ]\n}"
+      string: '{"name":"SelfHostedIntegrationRuntime","queueLength":0,"averageQueueDuration":0.0,"nodes":[{"nodeName":"MININT-Q3EGQJ8","availableMemoryInMB":33941,"cpuUtilization":10,"concurrentJobsLimit":28,"concurrentJobsRunning":0,"sentBytes":0.1499708890914917,"receivedBytes":3.8882861137390137}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '378'
+      - '287'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:45:24 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse integration-runtime-node show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-group --workspace-name --name --node-name
-      User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/nodes/MININT-Q3EGQJ8?api-version=2021-03-01
-  response:
-    body:
-      string: "{\n  \"nodeName\": \"MININT-Q3EGQJ8\",\n  \"machineName\": \"MININT-Q3EGQJ8\",\n
-        \ \"hostServiceUri\": \"net.pipe://minint-q3egqj8.redmond.corp.microsoft.com/InternalService.svc/\",\n
-        \ \"status\": \"Online\",\n  \"capabilities\": {\n    \"serviceBusConnected\":
-        \"True\",\n    \"httpsPortEnabled\": \"True\",\n    \"credentialInSync\":
-        \"True\",\n    \"connectedToResourceManager\": \"True\",\n    \"nodeEnabled\":
-        \"True\",\n    \"noEnoughDiskSpace\": \"False\",\n    \"dotNetVersion\": \"528372\"\n
-        \ },\n  \"versionStatus\": \"UpToDate\",\n  \"version\": \"5.5.7762.1\",\n
-        \ \"registerTime\": \"2021-05-07T08:37:13.5659616Z\",\n  \"lastConnectTime\":
-        \"2021-05-26T08:45:25.7403032Z\",\n  \"lastStartTime\": \"2021-05-24T03:19:31.8573389Z\",\n
-        \ \"lastUpdateResult\": \"None\",\n  \"isActiveDispatcher\": true,\n  \"maxConcurrentJobs\":
-        112\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '745'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 May 2021 08:45:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Kestrel
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse integration-runtime-node update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '2'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --resource-group --workspace-name --name --node-name --auto-update --update-delay-offset
-      User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/nodes/MININT-Q3EGQJ8?api-version=2021-03-01
-  response:
-    body:
-      string: '{"nodeName":"MININT-Q3EGQJ8","machineName":"MININT-Q3EGQJ8","hostServiceUri":"net.pipe://minint-q3egqj8.redmond.corp.microsoft.com/InternalService.svc/","status":"Online","capabilities":{"serviceBusConnected":"True","httpsPortEnabled":"True","credentialInSync":"True","connectedToResourceManager":"True","nodeEnabled":"True","noEnoughDiskSpace":"False","dotNetVersion":"528372"},"versionStatus":"UpToDate","version":"5.5.7762.1","registerTime":"2021-05-07T08:37:13.5659616Z","lastConnectTime":"2021-05-26T08:45:25.7403032Z","lastStartTime":"2021-05-24T03:19:31.8573389Z","lastUpdateResult":"None","isActiveDispatcher":true,"maxConcurrentJobs":112}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '647'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 May 2021 08:45:27 GMT
+      - Thu, 04 Nov 2021 11:47:50 GMT
       expires:
       - '-1'
       pragma:
@@ -649,61 +645,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse integration-runtime-node get-ip-address
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --resource-group --workspace-name --name --node-name
-      User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/nodes/MININT-Q3EGQJ8/ipAddress?api-version=2021-03-01
-  response:
-    body:
-      string: '{"ipAddress":"167.220.232.101"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '31'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 May 2021 08:45:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -725,9 +666,9 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/syncCredentials?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/syncCredentials?api-version=2021-06-01-preview
   response:
     body:
       string: ''
@@ -737,7 +678,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 26 May 2021 08:45:32 GMT
+      - Thu, 04 Nov 2021 11:47:52 GMT
       expires:
       - '-1'
       pragma:
@@ -750,60 +691,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse integration-runtime get-connection-info
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --resource-group --workspace-name --name
-      User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/getConnectionInfo?api-version=2021-03-01
-  response:
-    body:
-      string: '{"version":"5.5.7762.1","publicKey":"PD94bWwgdmVyc2lvbj0iMS4wIj8+DQo8UlNBUGFyYW1ldGVycyB4bWxuczp4c2Q9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hIiB4bWxuczp4c2k9Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvWE1MU2NoZW1hLWluc3RhbmNlIj4NCiAgPEV4cG9uZW50PkFRQUI8L0V4cG9uZW50Pg0KICA8TW9kdWx1cz4wUkx5bXFpMW1UUkVRbUh6SFpLUk80UXRIaEJmTUwyUFJ2L251Q1NRNzBWZk9rYVo5UjE0NnRFS2M1dkhJU1VKMGsxWktSYTF0b09MMGRHTFJneHZUS2luQzRNWWxxdERpUXZsRWdsWWpKanB2bmZNMGZTZnhRcGlyMDJXWlEwTWh0emlRS2NlVkJUYXRnaTk3VExLQWZneGREL2lKdVVXTkUrMGZZN3Q3NWs9PC9Nb2R1bHVzPg0KPC9SU0FQYXJhbWV0ZXJzPg==","serviceToken":"MIICHwYJKoZIhvcNAQcCoIICEDCCAgwCAQExDzANBglghkgBZQMEAgEFADBsBgkqhkiG9w0BBwGgXwRdeyJFeHBpcmVzT24iOiI2Mzc1NzYxNzMzMzg2MTk3MTgiLCJHYXRld2F5SW5zdGFuY2VJZCI6ImNlMTQ5YWJjLTYwZGEtNDg5Ny04YTVlLTdjYzYwYzM1YzE1NSJ9MYIBhjCCAYICAQEwWzBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDMCExYAFAinNT2skqFSwYcAAAAUCKcwDQYJYIZIAWUDBAIBBQAwDQYJKoZIhvcNAQEBBQAEggEAIyheHnPEMRpOmU3lwkmXI94I9Qx+JgWBTL1wc+3Yza1UHYlOLfxmJLH6jsJALRwIxpv8eA/TosG80Kkc1Jo+hBZUuZSe0dMOHdyw1O7n+w/c4SNN7lbu5DWVihp24UhSXfH52TiIik4Nd3JUuF/g+T33bSarvW7qHASj/WrcgxeMs3FeoPM8oyNK52+rDsk5xLDL3blRyuwtae62qGzu7HJ3qezHrvawzgB3+r6do1Aau83PnvvMy4m18LLvsXCjgEAaVU0tErFKWbSO0I2liLV21oPjit6yUQP3M6mST1WQ+YDaolZujdHvMFl/0z4gOKt82I+xWWAZMSLFxoLxRA==","identityCertThumbprint":"","hostServiceUri":"net.pipe://minint-q3egqj8.redmond.corp.microsoft.com/InternalService.svc/","isIdentityCertExprired":false}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1449'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 26 May 2021 08:45:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -825,21 +713,21 @@ interactions:
       ParameterSetName:
       - --resource-group --workspace-name --name
       User-Agent:
-      - AZURECLI/2.24.0 azsdk-python-mgmt-synapse/2.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chayang-test-rg/providers/Microsoft.Synapse/workspaces/zes0219test/integrationRuntimes/IntegrationRuntime0219selfhosted0507/getStatus?api-version=2021-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/SelfHostedIntegrationRuntime/getStatus?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"name":"IntegrationRuntime0219selfhosted0507","properties":{"dataFactoryName":"zes0219test","state":"Online","type":"SelfHosted","typeProperties":{"serviceRegion":"eu2euap","autoUpdate":"On","nodeCommunicationChannelEncryptionMode":"None","internalChannelEncryption":"NotSet","taskQueueId":"01e2f186-220d-45a9-a3a2-0dcef955dea2","version":"5.5.7762.1","nodes":[{"nodeName":"MININT-Q3EGQJ8","machineName":"MININT-Q3EGQJ8","hostServiceUri":"net.pipe://minint-q3egqj8.redmond.corp.microsoft.com/InternalService.svc/","status":"Online","capabilities":{"serviceBusConnected":"True","httpsPortEnabled":"True","credentialInSync":"True","connectedToResourceManager":"True","nodeEnabled":"True","noEnoughDiskSpace":"False","dotNetVersion":"528372"},"versionStatus":"UpToDate","version":"5.5.7762.1","registerTime":"2021-05-07T08:37:13.5659616Z","lastConnectTime":"2021-05-26T08:45:25.7403032Z","lastStartTime":"2021-05-24T03:19:31.8573389Z","lastUpdateResult":"None","isActiveDispatcher":true,"maxConcurrentJobs":112}],"updateDelayOffset":"PT23H","localTimeZoneOffset":"PT8H","serviceUrls":[null,"amsprodeu2euap.servicebus.windows.net","g0-prod-cbn04-001-sb.servicebus.windows.net","g1-prod-cbn04-001-sb.servicebus.windows.net","g2-prod-cbn04-001-sb.servicebus.windows.net","g3-prod-cbn04-001-sb.servicebus.windows.net","g4-prod-cbn04-001-sb.servicebus.windows.net","g5-prod-cbn04-001-sb.servicebus.windows.net","g6-prod-cbn04-001-sb.servicebus.windows.net","g7-prod-cbn04-001-sb.servicebus.windows.net","g8-prod-cbn04-001-sb.servicebus.windows.net","g9-prod-cbn04-001-sb.servicebus.windows.net","g10-prod-cbn04-001-sb.servicebus.windows.net","g11-prod-cbn04-001-sb.servicebus.windows.net","g12-prod-cbn04-001-sb.servicebus.windows.net","g13-prod-cbn04-001-sb.servicebus.windows.net","g14-prod-cbn04-001-sb.servicebus.windows.net","g15-prod-cbn04-001-sb.servicebus.windows.net","g16-prod-cbn04-001-sb.servicebus.windows.net","g17-prod-cbn04-001-sb.servicebus.windows.net","g18-prod-cbn04-001-sb.servicebus.windows.net","g19-prod-cbn04-001-sb.servicebus.windows.net","g20-prod-cbn04-001-sb.servicebus.windows.net","g21-prod-cbn04-001-sb.servicebus.windows.net","g22-prod-cbn04-001-sb.servicebus.windows.net","g23-prod-cbn04-001-sb.servicebus.windows.net","g24-prod-cbn04-001-sb.servicebus.windows.net","g25-prod-cbn04-001-sb.servicebus.windows.net","g26-prod-cbn04-001-sb.servicebus.windows.net","g27-prod-cbn04-001-sb.servicebus.windows.net","g28-prod-cbn04-001-sb.servicebus.windows.net","g29-prod-cbn04-001-sb.servicebus.windows.net","g30-prod-cbn04-001-sb.servicebus.windows.net","g31-prod-cbn04-001-sb.servicebus.windows.net","g32-prod-cbn04-001-sb.servicebus.windows.net","g33-prod-cbn04-001-sb.servicebus.windows.net","g34-prod-cbn04-001-sb.servicebus.windows.net","g35-prod-cbn04-001-sb.servicebus.windows.net","g36-prod-cbn04-001-sb.servicebus.windows.net","g37-prod-cbn04-001-sb.servicebus.windows.net","g38-prod-cbn04-001-sb.servicebus.windows.net","g39-prod-cbn04-001-sb.servicebus.windows.net","g40-prod-cbn04-001-sb.servicebus.windows.net","g41-prod-cbn04-001-sb.servicebus.windows.net","g42-prod-cbn04-001-sb.servicebus.windows.net","g43-prod-cbn04-001-sb.servicebus.windows.net","g44-prod-cbn04-001-sb.servicebus.windows.net","g45-prod-cbn04-001-sb.servicebus.windows.net","g46-prod-cbn04-001-sb.servicebus.windows.net","g47-prod-cbn04-001-sb.servicebus.windows.net","g48-prod-cbn04-001-sb.servicebus.windows.net","g49-prod-cbn04-001-sb.servicebus.windows.net","g50-prod-cbn04-001-sb.servicebus.windows.net","g51-prod-cbn04-001-sb.servicebus.windows.net","g52-prod-cbn04-001-sb.servicebus.windows.net","g53-prod-cbn04-001-sb.servicebus.windows.net","g54-prod-cbn04-001-sb.servicebus.windows.net","g55-prod-cbn04-001-sb.servicebus.windows.net","g56-prod-cbn04-001-sb.servicebus.windows.net","g57-prod-cbn04-001-sb.servicebus.windows.net","g58-prod-cbn04-001-sb.servicebus.windows.net","g59-prod-cbn04-001-sb.servicebus.windows.net","g60-prod-cbn04-001-sb.servicebus.windows.net","g61-prod-cbn04-001-sb.servicebus.windows.net","g62-prod-cbn04-001-sb.servicebus.windows.net","g63-prod-cbn04-001-sb.servicebus.windows.net","g64-prod-cbn04-001-sb.servicebus.windows.net","g65-prod-cbn04-001-sb.servicebus.windows.net","g66-prod-cbn04-001-sb.servicebus.windows.net","g67-prod-cbn04-001-sb.servicebus.windows.net","g68-prod-cbn04-001-sb.servicebus.windows.net","g69-prod-cbn04-001-sb.servicebus.windows.net","g70-prod-cbn04-001-sb.servicebus.windows.net","g71-prod-cbn04-001-sb.servicebus.windows.net","g72-prod-cbn04-001-sb.servicebus.windows.net","g73-prod-cbn04-001-sb.servicebus.windows.net","g74-prod-cbn04-001-sb.servicebus.windows.net","g75-prod-cbn04-001-sb.servicebus.windows.net","g76-prod-cbn04-001-sb.servicebus.windows.net","g77-prod-cbn04-001-sb.servicebus.windows.net","g78-prod-cbn04-001-sb.servicebus.windows.net","g79-prod-cbn04-001-sb.servicebus.windows.net","g80-prod-cbn04-001-sb.servicebus.windows.net","g81-prod-cbn04-001-sb.servicebus.windows.net","g82-prod-cbn04-001-sb.servicebus.windows.net","g83-prod-cbn04-001-sb.servicebus.windows.net","g84-prod-cbn04-001-sb.servicebus.windows.net","g85-prod-cbn04-001-sb.servicebus.windows.net","g86-prod-cbn04-001-sb.servicebus.windows.net","g87-prod-cbn04-001-sb.servicebus.windows.net","g88-prod-cbn04-001-sb.servicebus.windows.net","g89-prod-cbn04-001-sb.servicebus.windows.net","g90-prod-cbn04-001-sb.servicebus.windows.net","g91-prod-cbn04-001-sb.servicebus.windows.net","g92-prod-cbn04-001-sb.servicebus.windows.net","g93-prod-cbn04-001-sb.servicebus.windows.net","g94-prod-cbn04-001-sb.servicebus.windows.net","g95-prod-cbn04-001-sb.servicebus.windows.net","g96-prod-cbn04-001-sb.servicebus.windows.net","g97-prod-cbn04-001-sb.servicebus.windows.net","g98-prod-cbn04-001-sb.servicebus.windows.net","g99-prod-cbn04-001-sb.servicebus.windows.net","g100-prod-cbn04-001-sb.servicebus.windows.net","g101-prod-cbn04-001-sb.servicebus.windows.net","g102-prod-cbn04-001-sb.servicebus.windows.net","g103-prod-cbn04-001-sb.servicebus.windows.net","g104-prod-cbn04-001-sb.servicebus.windows.net","g105-prod-cbn04-001-sb.servicebus.windows.net","g106-prod-cbn04-001-sb.servicebus.windows.net","g107-prod-cbn04-001-sb.servicebus.windows.net","g108-prod-cbn04-001-sb.servicebus.windows.net","g109-prod-cbn04-001-sb.servicebus.windows.net","g110-prod-cbn04-001-sb.servicebus.windows.net","g111-prod-cbn04-001-sb.servicebus.windows.net","g112-prod-cbn04-001-sb.servicebus.windows.net","g113-prod-cbn04-001-sb.servicebus.windows.net","g114-prod-cbn04-001-sb.servicebus.windows.net","g115-prod-cbn04-001-sb.servicebus.windows.net","g116-prod-cbn04-001-sb.servicebus.windows.net","g117-prod-cbn04-001-sb.servicebus.windows.net","g118-prod-cbn04-001-sb.servicebus.windows.net","g119-prod-cbn04-001-sb.servicebus.windows.net","g120-prod-cbn04-001-sb.servicebus.windows.net","g121-prod-cbn04-001-sb.servicebus.windows.net","g122-prod-cbn04-001-sb.servicebus.windows.net","g123-prod-cbn04-001-sb.servicebus.windows.net","g124-prod-cbn04-001-sb.servicebus.windows.net","g125-prod-cbn04-001-sb.servicebus.windows.net","g126-prod-cbn04-001-sb.servicebus.windows.net","g127-prod-cbn04-001-sb.servicebus.windows.net","amsprodeu2euap-1-s.servicebus.windows.net","g0-prod-cdm03-001-sb.servicebus.windows.net","g1-prod-cdm03-001-sb.servicebus.windows.net","g2-prod-cdm03-001-sb.servicebus.windows.net","g3-prod-cdm03-001-sb.servicebus.windows.net","g4-prod-cdm03-001-sb.servicebus.windows.net","g5-prod-cdm03-001-sb.servicebus.windows.net","g6-prod-cdm03-001-sb.servicebus.windows.net","g7-prod-cdm03-001-sb.servicebus.windows.net","g8-prod-cdm03-001-sb.servicebus.windows.net","g9-prod-cdm03-001-sb.servicebus.windows.net","g10-prod-cdm03-001-sb.servicebus.windows.net","g11-prod-cdm03-001-sb.servicebus.windows.net","g12-prod-cdm03-001-sb.servicebus.windows.net","g13-prod-cdm03-001-sb.servicebus.windows.net","g14-prod-cdm03-001-sb.servicebus.windows.net","g15-prod-cdm03-001-sb.servicebus.windows.net","g16-prod-cdm03-001-sb.servicebus.windows.net","g17-prod-cdm03-001-sb.servicebus.windows.net","g18-prod-cdm03-001-sb.servicebus.windows.net","g19-prod-cdm03-001-sb.servicebus.windows.net","g20-prod-cdm03-001-sb.servicebus.windows.net","g21-prod-cdm03-001-sb.servicebus.windows.net","g22-prod-cdm03-001-sb.servicebus.windows.net","g23-prod-cdm03-001-sb.servicebus.windows.net","g24-prod-cdm03-001-sb.servicebus.windows.net","g25-prod-cdm03-001-sb.servicebus.windows.net","g26-prod-cdm03-001-sb.servicebus.windows.net","g27-prod-cdm03-001-sb.servicebus.windows.net","g28-prod-cdm03-001-sb.servicebus.windows.net","g29-prod-cdm03-001-sb.servicebus.windows.net","g30-prod-cdm03-001-sb.servicebus.windows.net","g31-prod-cdm03-001-sb.servicebus.windows.net","g32-prod-cdm03-001-sb.servicebus.windows.net","g33-prod-cdm03-001-sb.servicebus.windows.net","g34-prod-cdm03-001-sb.servicebus.windows.net","g35-prod-cdm03-001-sb.servicebus.windows.net","g36-prod-cdm03-001-sb.servicebus.windows.net","g37-prod-cdm03-001-sb.servicebus.windows.net","g38-prod-cdm03-001-sb.servicebus.windows.net","g39-prod-cdm03-001-sb.servicebus.windows.net","g40-prod-cdm03-001-sb.servicebus.windows.net","g41-prod-cdm03-001-sb.servicebus.windows.net","g42-prod-cdm03-001-sb.servicebus.windows.net","g43-prod-cdm03-001-sb.servicebus.windows.net","g44-prod-cdm03-001-sb.servicebus.windows.net","g45-prod-cdm03-001-sb.servicebus.windows.net","g46-prod-cdm03-001-sb.servicebus.windows.net","g47-prod-cdm03-001-sb.servicebus.windows.net","g48-prod-cdm03-001-sb.servicebus.windows.net","g49-prod-cdm03-001-sb.servicebus.windows.net","g50-prod-cdm03-001-sb.servicebus.windows.net","g51-prod-cdm03-001-sb.servicebus.windows.net","g52-prod-cdm03-001-sb.servicebus.windows.net","g53-prod-cdm03-001-sb.servicebus.windows.net","g54-prod-cdm03-001-sb.servicebus.windows.net","g55-prod-cdm03-001-sb.servicebus.windows.net","g56-prod-cdm03-001-sb.servicebus.windows.net","g57-prod-cdm03-001-sb.servicebus.windows.net","g58-prod-cdm03-001-sb.servicebus.windows.net","g59-prod-cdm03-001-sb.servicebus.windows.net","g60-prod-cdm03-001-sb.servicebus.windows.net","g61-prod-cdm03-001-sb.servicebus.windows.net","g62-prod-cdm03-001-sb.servicebus.windows.net","g63-prod-cdm03-001-sb.servicebus.windows.net","g64-prod-cdm03-001-sb.servicebus.windows.net","g65-prod-cdm03-001-sb.servicebus.windows.net","g66-prod-cdm03-001-sb.servicebus.windows.net","g67-prod-cdm03-001-sb.servicebus.windows.net","g68-prod-cdm03-001-sb.servicebus.windows.net","g69-prod-cdm03-001-sb.servicebus.windows.net","g70-prod-cdm03-001-sb.servicebus.windows.net","g71-prod-cdm03-001-sb.servicebus.windows.net","g72-prod-cdm03-001-sb.servicebus.windows.net","g73-prod-cdm03-001-sb.servicebus.windows.net","g74-prod-cdm03-001-sb.servicebus.windows.net","g75-prod-cdm03-001-sb.servicebus.windows.net","g76-prod-cdm03-001-sb.servicebus.windows.net","g77-prod-cdm03-001-sb.servicebus.windows.net","g78-prod-cdm03-001-sb.servicebus.windows.net","g79-prod-cdm03-001-sb.servicebus.windows.net","g80-prod-cdm03-001-sb.servicebus.windows.net","g81-prod-cdm03-001-sb.servicebus.windows.net","g82-prod-cdm03-001-sb.servicebus.windows.net","g83-prod-cdm03-001-sb.servicebus.windows.net","g84-prod-cdm03-001-sb.servicebus.windows.net","g85-prod-cdm03-001-sb.servicebus.windows.net","g86-prod-cdm03-001-sb.servicebus.windows.net","g87-prod-cdm03-001-sb.servicebus.windows.net","g88-prod-cdm03-001-sb.servicebus.windows.net","g89-prod-cdm03-001-sb.servicebus.windows.net","g90-prod-cdm03-001-sb.servicebus.windows.net","g91-prod-cdm03-001-sb.servicebus.windows.net","g92-prod-cdm03-001-sb.servicebus.windows.net","g93-prod-cdm03-001-sb.servicebus.windows.net","g94-prod-cdm03-001-sb.servicebus.windows.net","g95-prod-cdm03-001-sb.servicebus.windows.net","g96-prod-cdm03-001-sb.servicebus.windows.net","g97-prod-cdm03-001-sb.servicebus.windows.net","g98-prod-cdm03-001-sb.servicebus.windows.net","g99-prod-cdm03-001-sb.servicebus.windows.net","g100-prod-cdm03-001-sb.servicebus.windows.net","g101-prod-cdm03-001-sb.servicebus.windows.net","g102-prod-cdm03-001-sb.servicebus.windows.net","g103-prod-cdm03-001-sb.servicebus.windows.net","g104-prod-cdm03-001-sb.servicebus.windows.net","g105-prod-cdm03-001-sb.servicebus.windows.net","g106-prod-cdm03-001-sb.servicebus.windows.net","g107-prod-cdm03-001-sb.servicebus.windows.net","g108-prod-cdm03-001-sb.servicebus.windows.net","g109-prod-cdm03-001-sb.servicebus.windows.net","g110-prod-cdm03-001-sb.servicebus.windows.net","g111-prod-cdm03-001-sb.servicebus.windows.net","g112-prod-cdm03-001-sb.servicebus.windows.net","g113-prod-cdm03-001-sb.servicebus.windows.net","g114-prod-cdm03-001-sb.servicebus.windows.net","g115-prod-cdm03-001-sb.servicebus.windows.net","g116-prod-cdm03-001-sb.servicebus.windows.net","g117-prod-cdm03-001-sb.servicebus.windows.net","g118-prod-cdm03-001-sb.servicebus.windows.net","g119-prod-cdm03-001-sb.servicebus.windows.net","g120-prod-cdm03-001-sb.servicebus.windows.net","g121-prod-cdm03-001-sb.servicebus.windows.net","g122-prod-cdm03-001-sb.servicebus.windows.net","g123-prod-cdm03-001-sb.servicebus.windows.net","g124-prod-cdm03-001-sb.servicebus.windows.net","g125-prod-cdm03-001-sb.servicebus.windows.net","g126-prod-cdm03-001-sb.servicebus.windows.net","g127-prod-cdm03-001-sb.servicebus.windows.net"],"links":[],"versionStatus":"UpToDate","capabilities":{"serviceBusConnected":"True","httpsPortEnabled":"True","credentialInSync":"True","connectedToResourceManager":"True","nodeEnabled":"True","noEnoughDiskSpace":"False"},"latestVersion":"5.6.7795.1","newerVersions":[],"createTime":"2021-05-07T08:34:34.4255433Z"}}}'
+      string: '{"name":"SelfHostedIntegrationRuntime","properties":{"dataFactoryName":"testingsynapseworkspace","state":"Online","type":"SelfHosted","typeProperties":{"serviceRegion":"eu","autoUpdate":"On","nodeCommunicationChannelEncryptionMode":"None","internalChannelEncryption":"NotSet","taskQueueId":"2154c2da-2c90-4d53-a578-6f9007020144","version":"5.10.7949.4","nodes":[{"nodeName":"MININT-Q3EGQJ8","machineName":"MININT-Q3EGQJ8","hostServiceUri":"net.pipe://minint-q3egqj8.redmond.corp.microsoft.com/InternalService.svc/","status":"Online","capabilities":{"serviceBusConnected":"True","httpsPortEnabled":"True","credentialInSync":"True","connectedToResourceManager":"True","nodeEnabled":"True","noEnoughDiskSpace":"False","dotNetVersion":"528372"},"versionStatus":"UpToDate","version":"5.10.7949.4","registerTime":"2021-11-04T07:26:31.5016366Z","lastConnectTime":"2021-11-04T11:47:28.0213346Z","lastStartTime":"2021-11-04T07:27:02.5973649Z","lastUpdateResult":"None","isActiveDispatcher":true,"maxConcurrentJobs":112}],"updateDelayOffset":"PT19H","localTimeZoneOffset":"PT8H","serviceUrls":[null,"asgardprodeastus-48.servicebus.windows.net","g0-prod-bl3-011-sb.servicebus.windows.net","g1-prod-bl3-011-sb.servicebus.windows.net","g2-prod-bl3-011-sb.servicebus.windows.net","g3-prod-bl3-011-sb.servicebus.windows.net","g4-prod-bl3-011-sb.servicebus.windows.net","g5-prod-bl3-011-sb.servicebus.windows.net","g6-prod-bl3-011-sb.servicebus.windows.net","g7-prod-bl3-011-sb.servicebus.windows.net","g8-prod-bl3-011-sb.servicebus.windows.net","g9-prod-bl3-011-sb.servicebus.windows.net","g10-prod-bl3-011-sb.servicebus.windows.net","g11-prod-bl3-011-sb.servicebus.windows.net","g12-prod-bl3-011-sb.servicebus.windows.net","g13-prod-bl3-011-sb.servicebus.windows.net","g14-prod-bl3-011-sb.servicebus.windows.net","g15-prod-bl3-011-sb.servicebus.windows.net","g16-prod-bl3-011-sb.servicebus.windows.net","g17-prod-bl3-011-sb.servicebus.windows.net","g18-prod-bl3-011-sb.servicebus.windows.net","g19-prod-bl3-011-sb.servicebus.windows.net","g20-prod-bl3-011-sb.servicebus.windows.net","g21-prod-bl3-011-sb.servicebus.windows.net","g22-prod-bl3-011-sb.servicebus.windows.net","g23-prod-bl3-011-sb.servicebus.windows.net","g24-prod-bl3-011-sb.servicebus.windows.net","g25-prod-bl3-011-sb.servicebus.windows.net","g26-prod-bl3-011-sb.servicebus.windows.net","g27-prod-bl3-011-sb.servicebus.windows.net","g28-prod-bl3-011-sb.servicebus.windows.net","g29-prod-bl3-011-sb.servicebus.windows.net","g30-prod-bl3-011-sb.servicebus.windows.net","g31-prod-bl3-011-sb.servicebus.windows.net","g32-prod-bl3-011-sb.servicebus.windows.net","g33-prod-bl3-011-sb.servicebus.windows.net","g34-prod-bl3-011-sb.servicebus.windows.net","g35-prod-bl3-011-sb.servicebus.windows.net","g36-prod-bl3-011-sb.servicebus.windows.net","g37-prod-bl3-011-sb.servicebus.windows.net","g38-prod-bl3-011-sb.servicebus.windows.net","g39-prod-bl3-011-sb.servicebus.windows.net","g40-prod-bl3-011-sb.servicebus.windows.net","g41-prod-bl3-011-sb.servicebus.windows.net","g42-prod-bl3-011-sb.servicebus.windows.net","g43-prod-bl3-011-sb.servicebus.windows.net","g44-prod-bl3-011-sb.servicebus.windows.net","g45-prod-bl3-011-sb.servicebus.windows.net","g46-prod-bl3-011-sb.servicebus.windows.net","g47-prod-bl3-011-sb.servicebus.windows.net","g48-prod-bl3-011-sb.servicebus.windows.net","g49-prod-bl3-011-sb.servicebus.windows.net","g50-prod-bl3-011-sb.servicebus.windows.net","g51-prod-bl3-011-sb.servicebus.windows.net","g52-prod-bl3-011-sb.servicebus.windows.net","g53-prod-bl3-011-sb.servicebus.windows.net","g54-prod-bl3-011-sb.servicebus.windows.net","g55-prod-bl3-011-sb.servicebus.windows.net","g56-prod-bl3-011-sb.servicebus.windows.net","g57-prod-bl3-011-sb.servicebus.windows.net","g58-prod-bl3-011-sb.servicebus.windows.net","g59-prod-bl3-011-sb.servicebus.windows.net","g60-prod-bl3-011-sb.servicebus.windows.net","g61-prod-bl3-011-sb.servicebus.windows.net","g62-prod-bl3-011-sb.servicebus.windows.net","g63-prod-bl3-011-sb.servicebus.windows.net","g64-prod-bl3-011-sb.servicebus.windows.net","g65-prod-bl3-011-sb.servicebus.windows.net","g66-prod-bl3-011-sb.servicebus.windows.net","g67-prod-bl3-011-sb.servicebus.windows.net","g68-prod-bl3-011-sb.servicebus.windows.net","g69-prod-bl3-011-sb.servicebus.windows.net","g70-prod-bl3-011-sb.servicebus.windows.net","g71-prod-bl3-011-sb.servicebus.windows.net","g72-prod-bl3-011-sb.servicebus.windows.net","g73-prod-bl3-011-sb.servicebus.windows.net","g74-prod-bl3-011-sb.servicebus.windows.net","g75-prod-bl3-011-sb.servicebus.windows.net","g76-prod-bl3-011-sb.servicebus.windows.net","g77-prod-bl3-011-sb.servicebus.windows.net","g78-prod-bl3-011-sb.servicebus.windows.net","g79-prod-bl3-011-sb.servicebus.windows.net","g80-prod-bl3-011-sb.servicebus.windows.net","g81-prod-bl3-011-sb.servicebus.windows.net","g82-prod-bl3-011-sb.servicebus.windows.net","g83-prod-bl3-011-sb.servicebus.windows.net","g84-prod-bl3-011-sb.servicebus.windows.net","g85-prod-bl3-011-sb.servicebus.windows.net","g86-prod-bl3-011-sb.servicebus.windows.net","g87-prod-bl3-011-sb.servicebus.windows.net","g88-prod-bl3-011-sb.servicebus.windows.net","g89-prod-bl3-011-sb.servicebus.windows.net","g90-prod-bl3-011-sb.servicebus.windows.net","g91-prod-bl3-011-sb.servicebus.windows.net","g92-prod-bl3-011-sb.servicebus.windows.net","g93-prod-bl3-011-sb.servicebus.windows.net","g94-prod-bl3-011-sb.servicebus.windows.net","g95-prod-bl3-011-sb.servicebus.windows.net","g96-prod-bl3-011-sb.servicebus.windows.net","g97-prod-bl3-011-sb.servicebus.windows.net","g98-prod-bl3-011-sb.servicebus.windows.net","g99-prod-bl3-011-sb.servicebus.windows.net","g100-prod-bl3-011-sb.servicebus.windows.net","g101-prod-bl3-011-sb.servicebus.windows.net","g102-prod-bl3-011-sb.servicebus.windows.net","g103-prod-bl3-011-sb.servicebus.windows.net","g104-prod-bl3-011-sb.servicebus.windows.net","g105-prod-bl3-011-sb.servicebus.windows.net","g106-prod-bl3-011-sb.servicebus.windows.net","g107-prod-bl3-011-sb.servicebus.windows.net","g108-prod-bl3-011-sb.servicebus.windows.net","g109-prod-bl3-011-sb.servicebus.windows.net","g110-prod-bl3-011-sb.servicebus.windows.net","g111-prod-bl3-011-sb.servicebus.windows.net","g112-prod-bl3-011-sb.servicebus.windows.net","g113-prod-bl3-011-sb.servicebus.windows.net","g114-prod-bl3-011-sb.servicebus.windows.net","g115-prod-bl3-011-sb.servicebus.windows.net","g116-prod-bl3-011-sb.servicebus.windows.net","g117-prod-bl3-011-sb.servicebus.windows.net","g118-prod-bl3-011-sb.servicebus.windows.net","g119-prod-bl3-011-sb.servicebus.windows.net","g120-prod-bl3-011-sb.servicebus.windows.net","g121-prod-bl3-011-sb.servicebus.windows.net","g122-prod-bl3-011-sb.servicebus.windows.net","g123-prod-bl3-011-sb.servicebus.windows.net","g124-prod-bl3-011-sb.servicebus.windows.net","g125-prod-bl3-011-sb.servicebus.windows.net","g126-prod-bl3-011-sb.servicebus.windows.net","g127-prod-bl3-011-sb.servicebus.windows.net","asgardprodeastus-48-s.servicebus.windows.net","g0-prod-by3-010-sb.servicebus.windows.net","g1-prod-by3-010-sb.servicebus.windows.net","g2-prod-by3-010-sb.servicebus.windows.net","g3-prod-by3-010-sb.servicebus.windows.net","g4-prod-by3-010-sb.servicebus.windows.net","g5-prod-by3-010-sb.servicebus.windows.net","g6-prod-by3-010-sb.servicebus.windows.net","g7-prod-by3-010-sb.servicebus.windows.net","g8-prod-by3-010-sb.servicebus.windows.net","g9-prod-by3-010-sb.servicebus.windows.net","g10-prod-by3-010-sb.servicebus.windows.net","g11-prod-by3-010-sb.servicebus.windows.net","g12-prod-by3-010-sb.servicebus.windows.net","g13-prod-by3-010-sb.servicebus.windows.net","g14-prod-by3-010-sb.servicebus.windows.net","g15-prod-by3-010-sb.servicebus.windows.net","g16-prod-by3-010-sb.servicebus.windows.net","g17-prod-by3-010-sb.servicebus.windows.net","g18-prod-by3-010-sb.servicebus.windows.net","g19-prod-by3-010-sb.servicebus.windows.net","g20-prod-by3-010-sb.servicebus.windows.net","g21-prod-by3-010-sb.servicebus.windows.net","g22-prod-by3-010-sb.servicebus.windows.net","g23-prod-by3-010-sb.servicebus.windows.net","g24-prod-by3-010-sb.servicebus.windows.net","g25-prod-by3-010-sb.servicebus.windows.net","g26-prod-by3-010-sb.servicebus.windows.net","g27-prod-by3-010-sb.servicebus.windows.net","g28-prod-by3-010-sb.servicebus.windows.net","g29-prod-by3-010-sb.servicebus.windows.net","g30-prod-by3-010-sb.servicebus.windows.net","g31-prod-by3-010-sb.servicebus.windows.net","g32-prod-by3-010-sb.servicebus.windows.net","g33-prod-by3-010-sb.servicebus.windows.net","g34-prod-by3-010-sb.servicebus.windows.net","g35-prod-by3-010-sb.servicebus.windows.net","g36-prod-by3-010-sb.servicebus.windows.net","g37-prod-by3-010-sb.servicebus.windows.net","g38-prod-by3-010-sb.servicebus.windows.net","g39-prod-by3-010-sb.servicebus.windows.net","g40-prod-by3-010-sb.servicebus.windows.net","g41-prod-by3-010-sb.servicebus.windows.net","g42-prod-by3-010-sb.servicebus.windows.net","g43-prod-by3-010-sb.servicebus.windows.net","g44-prod-by3-010-sb.servicebus.windows.net","g45-prod-by3-010-sb.servicebus.windows.net","g46-prod-by3-010-sb.servicebus.windows.net","g47-prod-by3-010-sb.servicebus.windows.net","g48-prod-by3-010-sb.servicebus.windows.net","g49-prod-by3-010-sb.servicebus.windows.net","g50-prod-by3-010-sb.servicebus.windows.net","g51-prod-by3-010-sb.servicebus.windows.net","g52-prod-by3-010-sb.servicebus.windows.net","g53-prod-by3-010-sb.servicebus.windows.net","g54-prod-by3-010-sb.servicebus.windows.net","g55-prod-by3-010-sb.servicebus.windows.net","g56-prod-by3-010-sb.servicebus.windows.net","g57-prod-by3-010-sb.servicebus.windows.net","g58-prod-by3-010-sb.servicebus.windows.net","g59-prod-by3-010-sb.servicebus.windows.net","g60-prod-by3-010-sb.servicebus.windows.net","g61-prod-by3-010-sb.servicebus.windows.net","g62-prod-by3-010-sb.servicebus.windows.net","g63-prod-by3-010-sb.servicebus.windows.net","g64-prod-by3-010-sb.servicebus.windows.net","g65-prod-by3-010-sb.servicebus.windows.net","g66-prod-by3-010-sb.servicebus.windows.net","g67-prod-by3-010-sb.servicebus.windows.net","g68-prod-by3-010-sb.servicebus.windows.net","g69-prod-by3-010-sb.servicebus.windows.net","g70-prod-by3-010-sb.servicebus.windows.net","g71-prod-by3-010-sb.servicebus.windows.net","g72-prod-by3-010-sb.servicebus.windows.net","g73-prod-by3-010-sb.servicebus.windows.net","g74-prod-by3-010-sb.servicebus.windows.net","g75-prod-by3-010-sb.servicebus.windows.net","g76-prod-by3-010-sb.servicebus.windows.net","g77-prod-by3-010-sb.servicebus.windows.net","g78-prod-by3-010-sb.servicebus.windows.net","g79-prod-by3-010-sb.servicebus.windows.net","g80-prod-by3-010-sb.servicebus.windows.net","g81-prod-by3-010-sb.servicebus.windows.net","g82-prod-by3-010-sb.servicebus.windows.net","g83-prod-by3-010-sb.servicebus.windows.net","g84-prod-by3-010-sb.servicebus.windows.net","g85-prod-by3-010-sb.servicebus.windows.net","g86-prod-by3-010-sb.servicebus.windows.net","g87-prod-by3-010-sb.servicebus.windows.net","g88-prod-by3-010-sb.servicebus.windows.net","g89-prod-by3-010-sb.servicebus.windows.net","g90-prod-by3-010-sb.servicebus.windows.net","g91-prod-by3-010-sb.servicebus.windows.net","g92-prod-by3-010-sb.servicebus.windows.net","g93-prod-by3-010-sb.servicebus.windows.net","g94-prod-by3-010-sb.servicebus.windows.net","g95-prod-by3-010-sb.servicebus.windows.net","g96-prod-by3-010-sb.servicebus.windows.net","g97-prod-by3-010-sb.servicebus.windows.net","g98-prod-by3-010-sb.servicebus.windows.net","g99-prod-by3-010-sb.servicebus.windows.net","g100-prod-by3-010-sb.servicebus.windows.net","g101-prod-by3-010-sb.servicebus.windows.net","g102-prod-by3-010-sb.servicebus.windows.net","g103-prod-by3-010-sb.servicebus.windows.net","g104-prod-by3-010-sb.servicebus.windows.net","g105-prod-by3-010-sb.servicebus.windows.net","g106-prod-by3-010-sb.servicebus.windows.net","g107-prod-by3-010-sb.servicebus.windows.net","g108-prod-by3-010-sb.servicebus.windows.net","g109-prod-by3-010-sb.servicebus.windows.net","g110-prod-by3-010-sb.servicebus.windows.net","g111-prod-by3-010-sb.servicebus.windows.net","g112-prod-by3-010-sb.servicebus.windows.net","g113-prod-by3-010-sb.servicebus.windows.net","g114-prod-by3-010-sb.servicebus.windows.net","g115-prod-by3-010-sb.servicebus.windows.net","g116-prod-by3-010-sb.servicebus.windows.net","g117-prod-by3-010-sb.servicebus.windows.net","g118-prod-by3-010-sb.servicebus.windows.net","g119-prod-by3-010-sb.servicebus.windows.net","g120-prod-by3-010-sb.servicebus.windows.net","g121-prod-by3-010-sb.servicebus.windows.net","g122-prod-by3-010-sb.servicebus.windows.net","g123-prod-by3-010-sb.servicebus.windows.net","g124-prod-by3-010-sb.servicebus.windows.net","g125-prod-by3-010-sb.servicebus.windows.net","g126-prod-by3-010-sb.servicebus.windows.net","g127-prod-by3-010-sb.servicebus.windows.net"],"links":[],"versionStatus":"UpToDate","capabilities":{"serviceBusConnected":"True","httpsPortEnabled":"True","credentialInSync":"True","connectedToResourceManager":"True","nodeEnabled":"True","noEnoughDiskSpace":"False"},"pushedVersion":"5.9.7949.2","latestVersion":"5.10.7949.4","newerVersions":[],"osType":1,"targetFramework":0,"createTime":"2021-11-04T07:18:23.1781474Z"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '13556'
+      - '13114'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 May 2021 08:45:34 GMT
+      - Thu, 04 Nov 2021 11:47:54 GMT
       expires:
       - '-1'
       pragma:
@@ -853,6 +741,751 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime start
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start?api-version=2021-06-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-headers:
+      - Location
+      - Retry-After
+      access-control-expose-headers:
+      - Location
+      - Retry-After
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start/operationstatuses/2ae2284abff04e229fc2109e5ac2362d?api-version=2021-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 11:48:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start/operationresults/2ae2284abff04e229fc2109e5ac2362d?api-version=2021-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start/operationstatuses/2ae2284abff04e229fc2109e5ac2362d?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"2ae2284abff04e229fc2109e5ac2362d","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:48:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start/operationstatuses/2ae2284abff04e229fc2109e5ac2362d?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded","name":"2ae2284abff04e229fc2109e5ac2362d","properties":{"name":"testssisir","properties":{"dataFactoryName":"testingsynapseworkspace","state":"Started","type":"Managed","dataFactoryLocation":null,"resourceUri":null,"typeProperties":{"nodes":[],"otherErrors":[],"createTime":"2021-11-04T11:48:00.4313181Z"},"dataFactoryTags":null,"managedVirtualNetwork":null}},"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '395'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:48:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/start/operationresults/2ae2284abff04e229fc2109e5ac2362d?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"name":"testssisir","properties":{"dataFactoryName":"testingsynapseworkspace","state":"Started","type":"Managed","dataFactoryLocation":null,"resourceUri":null,"typeProperties":{"nodes":[],"otherErrors":[],"createTime":"2021-11-04T11:48:00.4313181Z"},"dataFactoryTags":null,"managedVirtualNetwork":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:48:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop?api-version=2021-06-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      access-control-allow-headers:
+      - Location
+      - Retry-After
+      access-control-expose-headers:
+      - Location
+      - Retry-After
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 11:48:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationresults/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:49:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:49:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:50:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:50:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:51:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:51:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:52:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:52:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationstatuses/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded","name":"59fcc345138c4b5fa98140eae49e18d5","properties":null,"error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '95'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 11:53:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse integration-runtime stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --workspace-name --name -y
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/integrationRuntimes/testssisir/stop/operationresults/59fcc345138c4b5fa98140eae49e18d5?api-version=2021-06-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 11:53:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
       x-powered-by:

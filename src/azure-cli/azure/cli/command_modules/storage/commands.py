@@ -124,6 +124,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         """
         g.command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
                   confirmation=failover_confirmation)
+        g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
+                  supports_no_wait=True, min_api='2021-06-01')
+        g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',
+                  supports_no_wait=True, min_api='2021-06-01')
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
@@ -323,6 +327,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('query', 'query_blob',
                                        is_preview=True, min_api='2019-12-12')
         g.storage_custom_command_oauth('rewrite', 'rewrite_blob', is_preview=True, min_api='2020-04-08')
+        g.storage_command_oauth('set-legal-hold', 'set_legal_hold', min_api='2020-10-02')
+        g.storage_custom_command_oauth('immutability-policy set', 'set_immutability_policy', min_api='2020-10-02')
+        g.storage_command_oauth('immutability-policy delete', 'delete_immutability_policy', min_api='2020-10-02')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
@@ -505,9 +512,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.MGMT_STORAGE),
                             min_api='2018-02-01') as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
+
+        from ._validators import validate_allow_protected_append_writes_all
+
         g.show_command('show', 'get_immutability_policy',
                        transform=transform_immutability_policy)
-        g.custom_command('create', 'create_or_update_immutability_policy')
+        g.custom_command('create', 'create_or_update_immutability_policy',
+                         validator=validate_allow_protected_append_writes_all)
         g.command('delete', 'delete_immutability_policy',
                   transform=lambda x: None)
         g.command('lock', 'lock_immutability_policy')
@@ -585,6 +596,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('metadata show', 'get_share_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_share_metadata')
+        g.storage_command('list-handle', 'list_handles')
+        g.storage_custom_command('close-handle', 'close_handle')
 
     with self.command_group('storage share policy', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('acl', file_data_service_factory)) as g:

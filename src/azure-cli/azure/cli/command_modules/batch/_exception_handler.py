@@ -25,6 +25,4 @@ def batch_exception_handler(ex):
     elif isinstance(ex, CloudError):
         raise CLIError(ex)
     else:
-        import sys
-        from six import reraise
-        reraise(*sys.exc_info())
+        raise ex

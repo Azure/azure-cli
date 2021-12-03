@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core._debug as _debug
+from azure.cli.core import _debug
+from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.util import get_az_user_agent, is_track2
-
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -167,21 +167,26 @@ def _prepare_mgmt_client_kwargs_track2(cli_ctx, cred):
     """Prepare kwargs for Track 2 SDK mgmt client."""
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
 
-    from azure.cli.core.util import resource_to_scopes
+    # Enable CAE support in mgmt SDK
+    from azure.core.pipeline.policies import BearerTokenCredentialPolicy
+
     # Track 2 SDK maintains `scopes` and passes `scopes` to get_token.
     scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    policy = BearerTokenCredentialPolicy(cred, *scopes)
 
     client_kwargs['credential_scopes'] = scopes
+    client_kwargs['authentication_policy'] = policy
 
     # Track 2 currently lacks the ability to take external credentials.
     #   https://github.com/Azure/azure-sdk-for-python/issues/8313
     # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
     #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
-    if getattr(cred, "_external_tenant_token_retriever", None):
-        *_, external_tenant_tokens = cred.get_all_tokens(*scopes)
-        # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
-        client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
-            ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
+    if hasattr(cred, "get_auxiliary_tokens"):
+        aux_tokens = cred.get_auxiliary_tokens(*scopes)
+        if aux_tokens:
+            # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+            client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+                ', '.join("Bearer {}".format(token.token) for token in aux_tokens)
 
     return client_kwargs
 
@@ -199,6 +204,9 @@ def _get_mgmt_service_client(cli_ctx,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
+
+    # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to
+    # get_login_credentials.
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,

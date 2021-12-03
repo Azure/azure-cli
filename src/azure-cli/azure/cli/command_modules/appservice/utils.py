@@ -4,8 +4,23 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+import os
+import urllib
+import urllib3
+import certifi
+
 from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.azclierror import (RequiredArgumentMissingError)
+from azure.cli.core.commands.parameters import get_subscription_locations
+from azure.cli.core.util import should_disable_connection_verify
+
+from ._client_factory import web_client_factory
+
+logger = get_logger(__name__)
+
+REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
 
 
 def str2bool(v):
@@ -84,3 +99,78 @@ def raise_missing_token_suggestion():
                                        "If you need to create a Github Personal Access Token, "
                                        "please run with the '--login-with-github' flag or follow "
                                        "the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def _get_location_from_resource_group(cli_ctx, resource_group_name):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    group = client.resource_groups.get(resource_group_name)
+    return group.location
+
+
+def _list_app(cli_ctx, resource_group_name=None):
+    client = web_client_factory(cli_ctx)
+    if resource_group_name:
+        result = list(client.web_apps.list_by_resource_group(resource_group_name))
+    else:
+        result = list(client.web_apps.list())
+    for webapp in result:
+        _rename_server_farm_props(webapp)
+    return result
+
+
+def _rename_server_farm_props(webapp):
+    # Should be renamed in SDK in a future release
+    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
+    del webapp.server_farm_id
+    return webapp
+
+
+def _get_location_from_webapp(client, resource_group_name, webapp):
+    webapp = client.web_apps.get(resource_group_name, webapp)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(webapp))
+    return webapp.location
+
+
+def _normalize_location(cmd, location):
+    location = location.lower()
+    locations = get_subscription_locations(cmd.cli_ctx)
+    for loc in locations:
+        if loc.display_name.lower() == location or loc.name.lower() == location:
+            return loc.name
+    return location
+
+
+def get_pool_manager(url):
+    proxies = urllib.request.getproxies()
+    bypass_proxy = urllib.request.proxy_bypass(urllib.parse.urlparse(url).hostname)
+
+    if 'https' in proxies and not bypass_proxy:
+        proxy = urllib.parse.urlparse(proxies['https'])
+
+        if proxy.username and proxy.password:
+            proxy_headers = urllib3.util.make_headers(proxy_basic_auth='{0}:{1}'.format(proxy.username, proxy.password))
+            logger.debug('Setting proxy-authorization header for basic auth')
+        else:
+            proxy_headers = None
+
+        logger.info('Using proxy for app service tunnel connection')
+        http = urllib3.ProxyManager(proxy.geturl(), proxy_headers=proxy_headers)
+    else:
+        http = urllib3.PoolManager()
+
+    if should_disable_connection_verify():
+        http.connection_pool_kw['cert_reqs'] = 'CERT_NONE'
+    else:
+        http.connection_pool_kw['cert_reqs'] = 'CERT_REQUIRED'
+        if REQUESTS_CA_BUNDLE in os.environ:
+            ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
+            logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
+            if not os.path.isfile(ca_bundle_file):
+                raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
+        else:
+            ca_bundle_file = certifi.where()
+        http.connection_pool_kw['ca_certs'] = ca_bundle_file
+    return http

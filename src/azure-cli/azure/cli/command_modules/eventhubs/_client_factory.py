@@ -28,3 +28,11 @@ def disaster_recovery_mgmt_client_factory(cli_ctx, _):
 
 def cluster_mgmt_client_factory(cli_ctx, _):
     return cf_eventhub(cli_ctx).clusters
+
+
+def private_endpoint_connections_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).private_endpoint_connections
+
+
+def private_link_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).private_link_resources

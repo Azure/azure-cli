@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
-from six.moves import configparser
+from urllib.parse import urlsplit
+import configparser
 
 from knack.log import get_logger
 

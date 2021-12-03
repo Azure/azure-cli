@@ -22,16 +22,19 @@ from azure.core.exceptions import (HttpResponseError,
                                    ResourceModifiedError)
 
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
-                         SearchFilterOptions, StatusCodes)
+                         SearchFilterOptions, StatusCodes, ImportExportProfiles)
 from ._models import (convert_configurationsetting_to_keyvalue,
                       convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding
 
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
-                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
-                          __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+                          __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv,
+                          __read_kv_from_app_service, __write_kv_to_app_service, __print_restore_preview,
+                          __serialize_kv_list_to_comparable_json_object, __print_preview,
+                          __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview,
+                          __import_kvset_from_file)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -53,6 +56,7 @@ def import_config(cmd,
                   format_=None,
                   separator=None,
                   depth=None,
+                  profile=ImportExportProfiles.DEFAULT,
                   # from-configstore parameters
                   src_name=None,
                   src_connection_string=None,
@@ -67,12 +71,16 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # fetch key values from source
     if source == 'file':
+        if profile == ImportExportProfiles.KVSET:
+            __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
+            return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
             # Error out if user has provided JSON content type with any other format.
@@ -189,6 +197,7 @@ def export_config(cmd,
                   separator=None,
                   naming_convention='pascal',
                   resolve_keyvault=False,
+                  profile=ImportExportProfiles.DEFAULT,
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
@@ -202,11 +211,11 @@ def export_config(cmd,
     dest_features = []
     dest_kvs = []
     destination = destination.lower()
+    profile = profile.lower()
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
-
     dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
@@ -228,8 +237,14 @@ def export_config(cmd,
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
-    # We need to separate KV from feature flags
-    __discard_features_from_retrieved_kv(src_kvs)
+    # We need to separate KV from feature flags for the default export profile and only need to discard
+    # if skip_features is true for the appconfig/kvset export profile.
+    if profile == ImportExportProfiles.DEFAULT or (profile == ImportExportProfiles.KVSET and skip_features):
+        __discard_features_from_retrieved_kv(src_kvs)
+
+    if profile == ImportExportProfiles.KVSET:
+        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
+        return
 
     if not skip_features:
         # Get all Feature flags with matching label

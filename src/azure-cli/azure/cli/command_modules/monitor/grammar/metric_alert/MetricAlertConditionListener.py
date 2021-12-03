@@ -217,3 +217,30 @@ class MetricAlertConditionListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MetricAlertConditionParser#options_.
+    def enterOptions_(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#options_.
+    def exitOptions_(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#with_.
+    def enterWith_(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#with_.
+    def exitWith_(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#option.
+    def enterOption(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#option.
+    def exitOption(self, ctx):
+        pass
+
+

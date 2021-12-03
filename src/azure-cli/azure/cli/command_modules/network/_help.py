@@ -1385,7 +1385,7 @@ helps['network application-gateway waf-policy managed-rule'] = """
 type: group
 short-summary: >
     Manage managed rules of a waf-policy.
-    Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview
+    Visit: https://docs.microsoft.com/azure/web-application-firewall/afds/afds-overview
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set'] = """
@@ -1397,7 +1397,7 @@ helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Disable an attack protection rule
     text: |
@@ -1413,7 +1413,7 @@ type: command
 short-summary: >
   Manage rules of a WAF policy.
   If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
-  For rule set and rules, please visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  For rule set and rules, please visit: https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
     text: |
@@ -1461,6 +1461,38 @@ short-summary: Remove all OWASP CRS exclusion rules that are applied on a Waf po
 helps['network application-gateway waf-policy managed-rule exclusion list'] = """
 type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set'] = """
+type: group
+short-summary: Define a managed rule set for exclusions.
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set add'] = """
+type: command
+short-summary: Add a managed rule set to an exclusion.
+examples:
+  - name: Add a managed rule set to an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set add -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup --rule-ids 921140 921150
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set remove'] = """
+type: command
+short-summary: Remove managed rule set within an exclusion.
+examples:
+  - name: Remove managed rule set within an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set remove -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set list'] = """
+type: command
+short-summary: List all managed rule sets of an exclusion.
+examples:
+  - name: List all managed rule sets of an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set list -g MyResourceGroup --policy-name MyPolicy
 """
 
 helps['network application-gateway waf-policy show'] = """
@@ -1513,12 +1545,28 @@ examples:
     text: az network application-gateway client-cert add --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
 """
 
+helps['network application-gateway client-cert update'] = """
+type: command
+short-summary: Update trusted client certificate of the application gateway.
+examples:
+  - name: Update trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert update --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
+"""
+
 helps['network application-gateway client-cert remove'] = """
 type: command
 short-summary: Remove an existing trusted client certificate of the application gateway.
 examples:
   - name: Remove a trusted client certificate for an existing application gateway.
     text: az network application-gateway client-cert remove --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
+"""
+
+helps['network application-gateway client-cert show'] = """
+type: command
+short-summary: Show an existing trusted client certificate of the application gateway.
+examples:
+  - name: Show a trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert show --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
 """
 
 helps['network application-gateway client-cert list'] = """
@@ -1542,12 +1590,28 @@ examples:
     text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
+helps['network application-gateway ssl-profile update'] = """
+type: command
+short-summary: Update ssl profiles of the application gateway.
+examples:
+  - name: Update ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
+"""
+
 helps['network application-gateway ssl-profile remove'] = """
 type: command
 short-summary: Remove an existing ssl profiles of the application gateway.
 examples:
   - name: Remove ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+"""
+
+helps['network application-gateway ssl-profile show'] = """
+type: command
+short-summary: Show an existing ssl profiles of the application gateway.
+examples:
+  - name: Show ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile show --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
 helps['network application-gateway ssl-profile list'] = """
@@ -2804,6 +2868,31 @@ examples:
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
 """
 
+helps['network express-route peering connection ipv6-config'] = """
+type: group
+short-summary: Manage ExpressRoute circuit connection configs.
+"""
+
+helps['network express-route peering connection ipv6-config set'] = """
+type: command
+short-summary: Set connection config to ExpressRoute circuit connection.
+examples:
+  - name: Set connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config set -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125
+"""
+
+helps['network express-route peering connection ipv6-config remove'] = """
+type: command
+short-summary: Remove connection config to ExpressRoute circuit connection.
+examples:
+  - name: Remove connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config remove -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection
+"""
+
 helps['network express-route peering create'] = """
 type: command
 short-summary: Create peering settings for an ExpressRoute circuit.
@@ -3465,6 +3554,55 @@ examples:
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
 """
 
+helps['network lb address-pool update'] = """
+type: command
+short-summary: Update an address pool.
+parameters:
+  - name: --backend-address
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
+    long-summary: |
+        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
+        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
+
+        name: Required. The name of the backend address.
+        ip-address: Required. Ip Address within the Virtual Network.
+        subnet: Name or Id of the subnet.
+
+        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
+  - name: --backend-addresses-config-file
+    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
+    long-summary: |
+        Usage: --backend-addresses-config-file @"{config_file.json}"
+
+        A example config file is
+        [
+          {
+            "name": "address1",
+            "virtualNetwork": "clitestvnet",
+            "ipAddress": "10.0.0.4"
+          },
+          {
+            "name": "address2",
+            "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
+            "ipAddress": "10.0.0.5"
+          },
+          {
+            "name": "address3",
+            "subnet": "subnet3",
+            "ipAddress": "10.0.0.6"
+          },
+          {
+            "name": "address4",
+            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
+            "ipAddress": "10.0.0.7"
+          }
+        ]
+examples:
+  - name: Update an address pool with several backend addresses using key-value arguments.
+    text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
+"""
+
 helps['network lb address-pool delete'] = """
 type: command
 short-summary: Delete an address pool.
@@ -3953,7 +4091,7 @@ type: command
 short-summary: List all service tags which are below to different resources
 long-summary: >
     A service tag represents a group of IP address prefixes to help minimize complexity for security rule creation.
-    To learn more about list-service-tags, visit https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#service-tags. \\
+    To learn more about list-service-tags, visit https://docs.microsoft.com/azure/virtual-network/security-overview#service-tags. \\
     Note that the location parameter is used as a reference for version (not as a filter based on location).
     For example, even if you specify --location eastus2 you will get the list of service tags with prefix details across all regions but limited to the cloud that your subscription belongs to (i.e. Public, US government, China or Germany).
 examples:
@@ -4718,6 +4856,15 @@ examples:
   - name: Create a custom IP prefix resource.
     text: |
         az network custom-ip prefix create --location westus2 --name MyCustomIpPrefix --resource-group MyResourceGroup
+"""
+
+helps['network custom-ip prefix wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the custom ip prefix is met.
+examples:
+  - name: Wait for custom ip prefix to return as created.
+    text: |
+        az network custom-ip prefix wait --name MyCustomIpPrefix --resource-group MyResourceGroup --created
 """
 
 helps['network custom-ip prefix delete'] = """
@@ -5794,6 +5941,11 @@ type: group
 short-summary: Manage packet capture on a virtual network gateway.
 """
 
+helps['network vnet-gateway packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway packet capture is met.
+"""
+
 helps['network vnet-gateway packet-capture start'] = """
 type: command
 short-summary: Start packet capture on a virtual network gateway.
@@ -5850,6 +6002,11 @@ examples:
 helps['network vnet-gateway vpn-client ipsec-policy'] = """
 type: group
 short-summary: Manage the VPN client connection ipsec-policy for P2S client connection of the virtual network gateway.
+"""
+
+helps['network vnet-gateway vpn-client ipsec-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway vpn client ipsec policy is met.
 """
 
 helps['network vnet-gateway vpn-client ipsec-policy show'] = """
@@ -5921,6 +6078,11 @@ examples:
 helps['network vnet-gateway nat-rule'] = """
 type: group
 short-summary: Manage nat rule in a virtual network gateway
+"""
+
+helps['network vnet-gateway nat-rule wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vnet gateway nat rule is met.
 """
 
 helps['network vnet-gateway nat-rule add'] = """
@@ -6127,6 +6289,11 @@ examples:
 helps['network vpn-connection packet-capture'] = """
 type: group
 short-summary: Manage packet capture on a VPN connection.
+"""
+
+helps['network vpn-connection packet-capture wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the vpn connection packet capture is met.
 """
 
 helps['network vpn-connection packet-capture start'] = """
@@ -7104,7 +7271,7 @@ examples:
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type password --username xyz
   - name: SSH to virtual machine using Azure Bastion using ssh key file.
     text: |
-        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key-file --username xyz --ssh-key C:/filepath/sshkey.pem
+        az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type ssh-key --username xyz --ssh-key C:/filepath/sshkey.pem
   - name: SSH to virtual machine using Azure Bastion using AAD.
     text: |
         az network bastion ssh --name MyBastionHost --resource-group MyResourceGroup --target-resource-id vmResourceId --auth-type AAD

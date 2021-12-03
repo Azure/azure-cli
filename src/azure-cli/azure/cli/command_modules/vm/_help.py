@@ -30,15 +30,7 @@ long-summary: >4
     The operating system disk is created from an image, and both the operating system disk and the image are actually virtual hard disks (VHDs)
     stored in an Azure storage account. Virtual machines also can have one or more data disks, that are also stored as VHDs.
 
-    Azure Managed and Unmanaged Data Disks have a maximum size of 4095 GB (with the exception of larger disks in preview). Azure Unmanaged Disks also have a maximum capacity of 4095 GB.
-
-    For more information, see:
-
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
-
-    - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
-
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    Azure Unmanaged Data Disks have a maximum size of 4095 GB. To use didks larger than 4095 GB use [Azure Managed Disks](https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview)
 
 """
 
@@ -1054,6 +1046,57 @@ examples:
         --permissions groups
 """
 
+helps['sig gallery-application'] = """
+    type: group
+    short-summary: Manage gallery application
+"""
+
+helps['sig gallery-application create'] = """
+    type: command
+    short-summary: "Create a gallery Application Definition."
+    examples:
+      - name: Create a simple gallery Application.
+        text: |-
+               az sig gallery-application create --gallery-name MyGallery --name AppName -g MyResourceGroup --os-type windows
+"""
+
+helps['sig gallery-application update'] = """
+    type: command
+    short-summary: "Update a gallery Application Definition."
+    examples:
+      - name: Update a simple gallery Application.
+        text: |-
+               az sig gallery-application update --gallery-name GalleryName --name AppName -g MyResourceGroup --description Description --tags tag=MyTag
+"""
+
+helps['sig gallery-application wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the sig gallery-application is met.
+"""
+
+helps['sig gallery-application version'] = """
+    type: group
+    short-summary: Manage gallery application version
+"""
+
+helps['sig gallery-application version create'] = """
+    type: command
+    short-summary: "Create a gallery Application Version."
+    examples:
+      - name: Create a simple gallery Application Version.
+        text: |-
+               az sig gallery-application version create --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob}  --install-command installCommand  --remove-command removeCommand
+"""
+
+helps['sig gallery-application version update'] = """
+    type: command
+    short-summary: "Update a gallery Application Version."
+    examples:
+      - name: Update a simple gallery Application Version.
+        text: |-
+               az sig gallery-application version update --gallery-name myGalleryName --application-name myGalleryApplicationName -n 1.0.0 -g myResourceGroup --package-file-link https://{myStorageAccount}.blob.core.windows.net/{myStorageContainer}/{myStorageBlob} --end-of-life-date "2050-07-01T07:00:00Z"
+"""
+
 helps['snapshot'] = """
 type: group
 short-summary: Manage point-in-time copies of managed disks, native blobs, or other snapshots.
@@ -1183,7 +1226,7 @@ examples:
 helps['vm availability-set create'] = """
 type: command
 short-summary: Create an Azure Availability Set.
-long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-manage-availability.'
+long-summary: 'For more information, see https://docs.microsoft.com/azure/virtual-machines/availability.'
 examples:
   - name: Create an availability set.
     text: az vm availability-set create -n MyAvSet -g MyResourceGroup --platform-fault-domain-count 2 --platform-update-domain-count 2
@@ -1298,7 +1341,7 @@ examples:
 helps['vm capture'] = """
 type: command
 short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 parameters:
   - name: --vhd-name-prefix
     type: string
@@ -1429,7 +1472,7 @@ examples:
 helps['vm deallocate'] = """
 type: command
 short-summary: Deallocate a VM.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -1559,11 +1602,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -1595,7 +1638,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 """
 
 helps['vm encryption disable'] = """
@@ -1617,7 +1660,7 @@ short-summary: "Enable disk encryption on the OS disk and/or data disks. Encrypt
 long-summary: |
     Note that Azure Active Directory / service principal arguments are unnecessary for vm encryption. The older version of Azure Disk Encryption required AAD arguments.
     For more information, see:
-    https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview
+    ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 parameters:
   - name: --aad-client-id
     short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
@@ -1795,7 +1838,7 @@ examples:
 helps['vm generalize'] = """
 type: command
 short-summary: Mark a VM as generalized, allowing it to be imaged for multiple deployments.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/capture-image'
 examples:
   - name: Deallocate, generalize, and capture a stopped virtual machine.
     text: |
@@ -1971,6 +2014,32 @@ examples:
     text: |
         az vm identity show --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vm application'] = """
+type: group
+short-summary: Manage appliations for VM
+"""
+
+helps['vm application set'] = """
+type: command
+short-summary: Set appliations for VM.
+examples:
+  - name: Set applications for vm
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications of a vm with config
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+--app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vm application list'] = """
+type: command
+short-summary: List applications for VM
+examples:
+  - name: List applications for vm
+    text: az vm application list -g MyResourceGroup -n MyVm
 """
 
 helps['vm image'] = """
@@ -2332,18 +2401,100 @@ examples:
 """
 
 helps['vm run-command show'] = """
-type: command
-parameters:
-  - name: --command-id
-    type: string
-    short-summary: The command id
-    populator-commands:
-      - az vm run-command list
-examples:
-  - name: vm run-command show (autogenerated)
-    text: |
-        az vm run-command show --command-id RunShellScript --location westus2
-    crafted: true
+    type: command
+    short-summary: "The operation to get the run command. And Gets specific run command for a subscription in a \
+location."
+    examples:
+      - name: Get the run commands in the virtual machine.
+        text: |-
+               az vm run-command show --resource-group "myResourceGroup" --run-command-name \
+"myRunCommand" --vm-name "myVM"
+      - name: Get specific run command for a subscription in a location.
+        text: |-
+               az vm run-command show --command-id "RunPowerShellScript" --location "SoutheastAsia"
+"""
+
+
+helps['vm run-command create'] = """
+    type: command
+    short-summary: "The operation to create the run command."
+    parameters:
+      - name: --script
+        short-summary: "Specify the script content to be executed on the VM."
+      - name: --script-uri
+        short-summary: "Specify the script download location."
+      - name: --command-id
+        short-summary: "Specify a commandId of predefined built-in script."
+      - name: --parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --parameters arg1=XX arg2=XX
+      - name: --protected-parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --protected-parameters credentials=somefoo secret=somebar
+    examples:
+      - name: Create a run command.
+        text: |-
+               az vm run-command create --resource-group "myResourceGroup" --location "West US" \
+--async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
+--run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
+--run-command-name "myRunCommand" --vm-name "myVM"
+"""
+
+helps['vm run-command update'] = """
+    type: command
+    short-summary: "The operation to update the run command."
+    parameters:
+      - name: --script
+        short-summary: "Specify the script content to be executed on the VM."
+      - name: --script-uri
+        short-summary: "Specify the script download location."
+      - name: --command-id
+        short-summary: "Specify a commandId of predefined built-in script."
+      - name: --parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --parameters arg1=XX arg2=XX
+      - name: --protected-parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --protected-parameters credentials=somefoo secret=somebar
+    examples:
+      - name: Update a run command.
+        text: |-
+               az vm run-command update --resource-group "myResourceGroup" --location "West US" \
+--async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
+--run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
+--run-command-name "myRunCommand" --vm-name "myVM"
+"""
+
+helps['vm run-command delete'] = """
+    type: command
+    short-summary: "The operation to delete the run command."
+    examples:
+      - name: Delete a run command.
+        text: |-
+               az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
+"myRunCommand" --vm-name "myVM"
+"""
+
+helps['vm run-command wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
+"""
+
+helps['vm run-command list'] = """
+    type: command
+    short-summary: "The operation to get all run commands of a Virtual Machine. And Lists all available run commands \
+for a subscription in a location."
+    examples:
+      - name: List run commands in a Virtual Machine.
+        text: |-
+               az vm run-command list --resource-group "myResourceGroup" --vm-name "myVM"
+      - name: List all available run commands for a subscription in a location.
+        text: |-
+               az vm run-command list --location "SoutheastAsia"
 """
 
 helps['vm secret'] = """
@@ -2467,11 +2618,11 @@ long-summary: >4
 
     For more information, see:
 
-    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/linux/about-disks-and-vhds and https://docs.microsoft.com/azure/virtual-machines/windows/about-disks-and-vhds.
+    - Azure Disks - https://docs.microsoft.com/azure/virtual-machines/managed-disks-overview.
 
     - Larger Managed Disks in Public Preview - https://azure.microsoft.com/blog/introducing-the-public-preview-of-larger-managed-disks-sizes/
 
-    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/windows/disks-ultra-ssd
+    - Ultra SSD Managed Disks in Public Preview - https://docs.microsoft.com/azure/virtual-machines/disks-types
 
 
 """
@@ -2529,6 +2680,16 @@ examples:
     text: az vm update -n name -g group --add networkProfile.networkInterfaces primary=false id={NIC_ID}
   - name: Remove the fourth NIC from a VM.
     text: az vm update -n name -g group --remove networkProfile.networkInterfaces 3
+  - name: Add an existing VM to a dedicated host
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host my-host
+        az vm start -n name -g group
+  - name: Add an existing VM to a dedicated host group
+    text: |-
+        az vm deallocate -n name -g group
+        az vm update -n name -g group --host-group my-host-group
+        az vm start -n name -g group
 """
 
 helps['vm user'] = """
@@ -2676,6 +2837,9 @@ examples:
   - name: Create a VMSS from shared gallery image. (private preview feature, please contact shared image gallery team by email sigpmdev@microsoft.com to register for preview if you're interested in using this feature).
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image /SharedGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
+  - name: Create a Windows VMSS with patch mode 'Manual' (Currently patch mode 'AutomaticByPlatform' is not supported during VMSS creation as health extension which is required for 'AutomaticByPlatform' mode cannot be set during VMSS creation).
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible
 """
 
 helps['vmss deallocate'] = """
@@ -2750,7 +2914,7 @@ examples:
 helps['vmss encryption'] = """
 type: group
 short-summary: "Manage encryption of VMSS."
-long-summary: "For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 """
 
 helps['vmss encryption disable'] = """
@@ -2765,7 +2929,7 @@ examples:
 helps['vmss encryption enable'] = """
 type: command
 short-summary: "Encrypt a VMSS with managed disks."
-long-summary: "For more information, see: For more information, see: https://docs.microsoft.com/azure/security/azure-security-disk-encryption-overview"
+long-summary: "For more information, see: For more information, see: ttps://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
 examples:
   - name: encrypt a VM scale set using a key vault in the same resource group
     text: >
@@ -2925,6 +3089,32 @@ examples:
     crafted: true
 """
 
+helps['vmss application'] = """
+type: group
+short-summary: manage applications for VM scale set.
+"""
+
+helps['vmss application set'] = """
+type: command
+short-summary: Set applications for VMSS.
+examples:
+  - name: Set applications for vmss
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1
+  - name: Set applications for vmss with config
+    text: az vmss application set -g MyResourceGroup -n MyVmss --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
+--app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+"""
+
+helps['vmss application list'] = """
+type: command
+short-summary: List applications for VMSS
+examples:
+  - name: List applications for vmss
+    text: az vmss application list -g MyResourceGroup --name MyVmss
+"""
+
 helps['vmss list'] = """
 type: command
 short-summary: List VMSS.
@@ -3037,19 +3227,87 @@ examples:
             --scripts @script.ps1 --parameters "arg1=somefoo" "arg2=somebar" --instance-id 5
 """
 
+helps['vmss run-command create'] = """
+    type: command
+    short-summary: "The operation to Create the VMSS VM run command."
+    parameters:
+      - name: --script
+        short-summary: "Specify the script content to be executed on the VM."
+      - name: --script-uri
+        short-summary: "Specify the script download location."
+      - name: --command-id
+        short-summary: "Specify a commandId of predefined built-in script."
+      - name: --parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --parameters arg1=XX arg2=XX
+      - name: --protected-parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --protected-parameters credentials=somefoo secret=somebar
+    examples:
+      - name: Create VMSS run command.
+        text: |-
+               az vmss run-command create --resource-group "myResourceGroup" --instance-id "0" --location "West US" \
+--async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
+--run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
+--run-command-name "myRunCommand" --vmss-name "myVMSS"
+"""
+
+helps['vmss run-command update'] = """
+    type: command
+    short-summary: "The operation to update the VMSS run command."
+    parameters:
+      - name: --script
+        short-summary: "Specify the script content to be executed on the VM."
+      - name: --script-uri
+        short-summary: "Specify the script download location."
+      - name: --command-id
+        short-summary: "Specify a commandId of predefined built-in script."
+      - name: --parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --parameters arg1=XX arg2=XX
+      - name: --protected-parameters
+        short-summary: "The parameters used by the script."
+        long-summary: |
+            Usage: --protected-parameters credentials=somefoo secret=somebar
+    examples:
+      - name: Update VMSS run command.
+        text: |-
+               az vmss run-command update --resource-group "myResourceGroup" --instance-id "0" --location "West US" \
+--async-execution false --parameters arg1=param1 arg2=value1 --run-as-password "<runAsPassword>" \
+--run-as-user "user1" --script "Write-Host Hello World!" --timeout-in-seconds 3600 \
+--run-command-name "myRunCommand" --vmss-name "myVMSS"
+"""
+
+helps['vmss run-command delete'] = """
+    type: command
+    short-summary: "The operation to delete the run command."
+    examples:
+      - name: The operation to delete the VMSS run command..
+        text: |-
+               az vmss run-command delete --resource-group "myResourceGroup" --instance-id "0" --run-command-name \
+"myRunCommand" --vmss-name "myVMSS"
+"""
+
+helps['vmss run-command list'] = """
+    type: command
+    short-summary: "The operation to get all run commands of an instance in Virtual Machine Scaleset."
+    examples:
+      - name: List run commands in Vmss instance.
+        text: |-
+               az vmss run-command list --resource-group "myResourceGroup" --vmss-name "myVMSS" --instance-id "0"
+"""
+
 helps['vmss run-command show'] = """
-type: command
-parameters:
-  - name: --command-id
-    type: string
-    short-summary: The command id
-    populator-commands:
-      - az vmss run-command list
-examples:
-  - name: Gets specific run command for a subscription in a location. (autogenerated)
-    text: |
-        az vmss run-command show --command-id RunShellScript --location westus2 --subscription mysubscription
-    crafted: true
+    type: command
+    short-summary: "The operation to get the VMSS run command."
+    examples:
+      - name: Get VMSS run commands.
+        text: |-
+               az vmss run-command show --instance-id "0" --resource-group \
+"myResourceGroup" --run-command-name "myRunCommand" --vmss-name "myVMSS"
 """
 
 helps['vmss scale'] = """
@@ -3125,6 +3383,8 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66
   - name: Update a VM to use a custom image.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
+  - name: Update a Linux VMSS to patch mode 'AutomaticByPlatform'.
+    text: az vmss update -n MyVmss -g MyResourceGroup --set virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.patchMode=AutomaticByPlatform
 """
 
 helps['vmss update-instances'] = """
@@ -3373,4 +3633,10 @@ short-summary: List capacity reservation.
 examples:
   - name: List the capacity reservations.
     text: az capacity reservation list -c ReservationGroupName -g MyResourceGroup
+"""
+
+helps['vmss list-instances'] = """
+type: command
+short-summary: Get a list of all virtual machines in a VM scale sets.
+long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
 """

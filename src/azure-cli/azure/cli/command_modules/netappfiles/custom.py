@@ -89,15 +89,23 @@ def patch_account(instance, account_name, resource_group_name, tags=None, encryp
     return body
 
 
+# list accounts by subscription or resource group
+def list_accounts(client, resource_group_name=None):
+    if resource_group_name is None:
+        return client.list_by_subscription()
+    return client.list(resource_group_name)
+
+
 # ---- POOL ----
 def create_pool(client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None,
-                qos_type=None, cool_access=None):
+                qos_type=None, cool_access=None, encryption_type=None):
     body = CapacityPool(service_level=service_level,
                         size=int(size) * tib_scale,
                         location=location,
                         tags=tags,
                         qos_type=qos_type,
-                        cool_access=cool_access)
+                        cool_access=cool_access,
+                        encryption_type=encryption_type)
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, body)
 
 
@@ -123,7 +131,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   smb_encryption=None, smb_continuously_avl=None, encryption_key_source=None,
                   rule_index=None, unix_read_only=None, unix_read_write=None, cifs=None,
                   allowed_clients=None, ldap_enabled=None, chown_mode=None, cool_access=None, coolness_period=None,
-                  unix_permissions=None):
+                  unix_permissions=None, is_def_quota_enabled=None, default_user_quota=None,
+                  default_group_quota=None, avs_data_store=None, network_features=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # default the resource group of the subnet to the volume's rg unless the subnet is specified by id
@@ -143,16 +152,23 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
-    if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
+    if protocol_types is not None:
         rules = []
-        if allowed_clients is None:
-            raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
-        if rule_index is None:
-            raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+        isNfs41 = False
+        isNfs3 = False
+
+        if "NFSv4.1" in protocol_types:
+            isNfs41 = True
+            if allowed_clients is None:
+                raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+            if rule_index is None:
+                raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+        if "NFSv3" in protocol_types:
+            isNfs3 = True
 
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,
-                                         nfsv3=False, nfsv41=True, allowed_clients=allowed_clients,
+                                         nfsv3=isNfs3, nfsv41=isNfs41, allowed_clients=allowed_clients,
                                          kerberos5_read_only=kerberos5_r,
                                          kerberos5_read_write=kerberos5_rw,
                                          kerberos5i_read_only=kerberos5i_r,
@@ -211,14 +227,20 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         ldap_enabled=ldap_enabled,
         cool_access=cool_access,
         coolness_period=coolness_period,
-        unix_permissions=unix_permissions)
+        unix_permissions=unix_permissions,
+        is_default_quota_enabled=is_def_quota_enabled,
+        default_user_quota_in_ki_bs=default_user_quota,
+        default_group_quota_in_ki_bs=default_group_quota,
+        avs_data_store=avs_data_store,
+        network_features=network_features)
 
     return client.begin_create_or_update(resource_group_name, account_name, pool_name, volume_name, body)
 
 
 # -- volume update
 def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, vault_id=None, backup_enabled=False,
-                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None):
+                 backup_policy_id=None, policy_enforced=False, throughput_mibps=None, snapshot_policy_id=None,
+                 is_def_quota_enabled=None, default_user_quota=None, default_group_quota=None):
     data_protection = None
     backup = None
     snapshot = None
@@ -235,7 +257,10 @@ def patch_volume(instance, usage_threshold=None, service_level=None, tags=None, 
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
         data_protection=data_protection,
-        tags=tags)
+        tags=tags,
+        is_default_quota_enabled=is_def_quota_enabled,
+        default_user_quota_in_ki_bs=default_user_quota,
+        default_group_quota_in_ki_bs=default_group_quota)
     if throughput_mibps is not None:
         params.throughput_mibps = throughput_mibps
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
@@ -375,28 +400,24 @@ def update_backup(client, resource_group_name, account_name, pool_name, volume_n
 
 # ---- BACKUP POLICIES ----
 def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
-                         daily_backups=None, weekly_backups=None, monthly_backups=None,
-                         yearly_backups=None, enabled=False, tags=None):
+                         daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
     body = BackupPolicy(
         location=location,
         daily_backups_to_keep=daily_backups,
         weekly_backups_to_keep=weekly_backups,
         monthly_backups_to_keep=monthly_backups,
-        yearly_backups_to_keep=yearly_backups,
         enabled=enabled,
         tags=tags)
     return client.begin_create(resource_group_name, account_name, backup_policy_name, body)
 
 
 def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location=None,
-                        daily_backups=None, weekly_backups=None, monthly_backups=None,
-                        yearly_backups=None, enabled=False, tags=None):
+                        daily_backups=None, weekly_backups=None, monthly_backups=None, enabled=False, tags=None):
     body = BackupPolicyPatch(
         location=location,
         daily_backups_to_keep=daily_backups,
         weekly_backups_to_keep=weekly_backups,
         monthly_backups_to_keep=monthly_backups,
-        yearly_backups_to_keep=yearly_backups,
         enabled=enabled,
         tags=tags)
     return client.begin_update(resource_group_name, account_name, backup_policy_name, body)

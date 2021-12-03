@@ -38,7 +38,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     import platform
     import sys
     import subprocess
-    import azure.cli.core.telemetry as telemetry
+    from azure.cli.core import telemetry
     from azure.cli.core import __version__ as local_version
     from azure.cli.core._environment import _ENV_AZ_INSTALLER
     from azure.cli.core.extension import get_extensions, WheelExtension
@@ -292,7 +292,7 @@ def demo_style(cmd, theme=None):  # pylint: disable=unused-argument
         (Style.ACTION, "--resource-group"),
         (Style.PRIMARY, " MyResourceGroup\n"),
         (Style.SECONDARY, "Create a storage account. For more detail, see "),
-        (Style.HYPERLINK, "https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?"
+        (Style.HYPERLINK, "https://docs.microsoft.com/azure/storage/common/storage-account-create?"
                           "tabs=azure-cli#create-a-storage-account-1"),
         (Style.SECONDARY, "\n"),
     ]

@@ -19,7 +19,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application-type delete -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf application-type show -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
     def _app_type_version_test(self):
@@ -33,7 +33,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application-type version delete -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf application-type version show -g {rg} -c {cluster_name} --application-type-name {app_type_name} --version {v1}')
 
     def _app_service_test(self):
@@ -84,7 +84,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
         self.cmd('az sf application-type delete -g {rg} -c {cluster_name} --application-type-name {app_type_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf application show -g {rg} -c {cluster_name} --application-name {app_name}')
 
     @ResourceGroupPreparer()
