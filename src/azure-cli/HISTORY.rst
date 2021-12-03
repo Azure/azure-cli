@@ -90,7 +90,7 @@ Release History
 
 **NetAppFiles**
 
-* `netappfiles volume create`: fix volume export policy (#20535)
+* `az netappfiles volume create`: Fix volume export policy (#20535)
 
 **Network**
 
