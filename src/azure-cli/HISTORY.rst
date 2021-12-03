@@ -14,8 +14,8 @@ Release History
 
 **AMS**
 
-* Removing deprecated variable 'identifier_uri' from create sp method (#20281)
-* Updating api version for AMS and AVA private link registration (#20266)
+* Remove deprecated variable 'identifier_uri' from creating sp method (#20281)
+* Update api version for AMS and AVA private link registration (#20266)
 
 **App Service**
 
@@ -115,21 +115,17 @@ Release History
 
 * Fix private DNS zone suffix bug (#20483)
 * Fix #20124: `az mysql/postgres flexible-server db create`: Make resource group and server name required (#20162)
-* Remove preview tag (#20426)
+* `az postgres flexible-server`: Remove preview tag (#20426)
 
 **Storage**
 
-* : add `az storage share list-handle` and `az storage share close-handle` (#20144)
+* `az storage share list-handle/close-handle`: New commands for share handle (#20144)
 * GA account level and blob version level immutable storage (#20233)
-* `az disk create`: Fixes typo and clarifies where images originate (#20593)
 
 **Synapse**
 
 * [BREAKING CHANGE] `az synapse sql/pool audit-policy`: Remove `--blob-auditing-policy-name` (#20494)
-* Move test folder under Synapse folder (#20161)
 * `az synapse notebook/spark-job-definition`: Add `--folder-path` argument (#20288)
-* `az synapse kql-script`: New command group to support Kusto script (#20459)
-* Revert `az synapse kql-script`: New command group to support Kusto script (#20534)
 * `az synapse spark pool create/update`: Add `--spark-config-file-path` (#20381)
 * `az synapse spark job submit`: Fix for `--main-class-name` (#20537)
 * `az synapse sql-script`: New command group to support sql script management (#20044)
