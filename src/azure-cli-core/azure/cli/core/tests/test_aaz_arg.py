@@ -1,63 +1,10 @@
 import unittest
 import json
+from azure.cli.core import azclierror
+from azure.cli.core.aaz import exceptions as aazerror
 
 
-class TestAAZArg(unittest.TestCase):
-
-    def test_aaz_compound_type_action_key_pattern(self):
-        from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction
-        key_pattern = AAZCompoundTypeArgAction.key_pattern
-
-        test_value = "a.b.c="
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a.b.c'
-        assert match[len(match.regs) - 1] == ''
-
-        test_value = "a_b-C=aaa"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a_b-C'
-        assert match[len(match.regs) - 1] == 'aaa'
-
-        test_value = "[10]=aaa"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == '[10]'
-        assert match[len(match.regs) - 1] == 'aaa'
-
-        test_value = "a_b.C[10]=aaa"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a_b.C[10]'
-        assert match[len(match.regs) - 1] == 'aaa'
-
-        test_value = "a_b.C[10].D-e_f=aaa"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a_b.C[10].D-e_f'
-        assert match[len(match.regs) - 1] == 'aaa'
-
-        test_value = "a_b-C={aaa:b}"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a_b-C'
-        assert match[len(match.regs) - 1] == '{aaa:b}'
-
-        test_value = "a_b-C=[aaa,b]"
-        match = key_pattern.fullmatch(test_value)
-        assert match[1] == 'a_b-C'
-        assert match[len(match.regs) - 1] == '[aaa,b]'
-
-        test_value = "{a_b:aaa}"
-        match = key_pattern.fullmatch(test_value)
-        assert match is None
-
-        test_value = "[aaa,bbb]"
-        match = key_pattern.fullmatch(test_value)
-        assert match is None
-
-        test_value = "a_b.C[abc]=aaa"
-        match = key_pattern.fullmatch(test_value)
-        assert match is None
-
-        test_value = "a_b.C[10].D-e_f"
-        match = key_pattern.fullmatch(test_value)
-        assert match is None
+class TestAAZArgShorthandSyntax(unittest.TestCase):
 
     def test_aaz_shorthand_syntax_simple_value(self):
         from azure.cli.core.aaz._utils import AAZShortHandSyntaxParser
@@ -400,6 +347,171 @@ class TestAAZArg(unittest.TestCase):
 
         with self.assertRaises(AAZInvalidShorthandSyntaxError):
             parser("[a,]]")
+
+
+class TestAAZArg(unittest.TestCase):
+
+    def test_aaz_compound_type_action_key_pattern(self):
+        from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction
+        key_pattern = AAZCompoundTypeArgAction.key_pattern
+
+        test_value = "a.b.c="
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a.b.c'
+        assert match[len(match.regs) - 1] == ''
+
+        test_value = "a_b-C=aaa"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a_b-C'
+        assert match[len(match.regs) - 1] == 'aaa'
+
+        test_value = "[10]=aaa"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == '[10]'
+        assert match[len(match.regs) - 1] == 'aaa'
+
+        test_value = "a_b.C[10]=aaa"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a_b.C[10]'
+        assert match[len(match.regs) - 1] == 'aaa'
+
+        test_value = "a_b.C[10].D-e_f=aaa"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a_b.C[10].D-e_f'
+        assert match[len(match.regs) - 1] == 'aaa'
+
+        test_value = "a_b-C={aaa:b}"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a_b-C'
+        assert match[len(match.regs) - 1] == '{aaa:b}'
+
+        test_value = "a_b-C=[aaa,b]"
+        match = key_pattern.fullmatch(test_value)
+        assert match[1] == 'a_b-C'
+        assert match[len(match.regs) - 1] == '[aaa,b]'
+
+        test_value = "{a_b:aaa}"
+        match = key_pattern.fullmatch(test_value)
+        assert match is None
+
+        test_value = "[aaa,bbb]"
+        match = key_pattern.fullmatch(test_value)
+        assert match is None
+
+        test_value = "a_b.C[abc]=aaa"
+        match = key_pattern.fullmatch(test_value)
+        assert match is None
+
+        test_value = "a_b.C[10].D-e_f"
+        match = key_pattern.fullmatch(test_value)
+        assert match is None
+
+    def test_aaz_str_arg(self):
+        from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZArgEnum, AAZUndefined
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.work_day = AAZStrArg(
+            options=["--work-day", "-d"],
+            enum=AAZArgEnum(items={
+                "1": "Monday",
+                "2": "Tuesday",
+                "3": "Wednesday",
+                "4": "Thursday",
+                "5": "Friday",
+                "6": "Saturday",
+                "7": "Sunday",
+                "Mon": "Monday",
+                "Tue": "Tuesday",
+                "Wed": "Wednesday",
+                "Thu": "Thursday",
+                "Fri": "Friday",
+                "Sat": "Saturday",
+                "Sun": "Sunday",
+            }),
+            nullable=True,
+            blank="Sunday"
+        )
+        arg = schema.work_day.to_cmd_arg("work_day")
+        assert len(arg.choices) == 14
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "1")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == "Monday"
+
+        action.setup_operations(dest_ops, "2")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == "Tuesday"
+
+        action.setup_operations(dest_ops, "Thu")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == "Thursday"
+
+        action.setup_operations(dest_ops, "fri")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == "Friday"
+
+        action.setup_operations(dest_ops, 'null')
+        assert len(dest_ops._ops) == 5
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == None   # must use '== None', because 'is None' will not work
+
+        # try blank value
+        action.setup_operations(dest_ops, None)
+        assert len(dest_ops._ops) == 6
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == "Sunday"
+
+        action.setup_operations(dest_ops, 'None')
+        assert len(dest_ops._ops) == 7
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == None
+
+        # test invalid operations
+        with self.assertRaises(azclierror.InvalidArgumentValueError):
+            action.setup_operations(dest_ops, '1234')
+        assert len(dest_ops._ops) == 7
+        dest_ops.apply(v, "work_day")
+        assert v.work_day == None
+
+        schema.name = AAZStrArg(options=["--name", "-n"])
+        arg = schema.name.to_cmd_arg("work_day")
+        action = arg.type.settings["action"]
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "test name")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "name")
+        assert v.name == "test name"
+
+        action.setup_operations(dest_ops, "")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "name")
+        assert v.name == ""
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+        with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
+            action.setup_operations(dest_ops, "'l")
+
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "name")
+        assert v.name == ""
+
+        action.setup_operations(dest_ops, " aa' l_;{]'")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "name")
+        assert v.name == " aa' l_;{]'"
 
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments

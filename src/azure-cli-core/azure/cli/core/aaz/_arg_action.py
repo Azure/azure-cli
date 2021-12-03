@@ -3,8 +3,9 @@ import os
 from argparse import Action
 from azure.cli.core import azclierror
 from collections import OrderedDict
-from ._utils import AAZShortHandSyntaxParser, AAZInvalidShorthandSyntaxError
+from ._utils import AAZShortHandSyntaxParser
 from knack.log import get_logger
+from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
 
 logger = get_logger(__name__)
 
@@ -73,10 +74,10 @@ class AAZSimpleTypeArgAction(AAZArgAction):
             if isinstance(values, list):
                 assert prefix_keys  # the values will be input as an list when parse singular option of a list argument
                 if len(values) != 1:
-                    raise ValueError(f"only support 1 value, got {len(values)}: {values}")
+                    raise AAZInvalidValueError(f"only support 1 value, got {len(values)}: {values}")
                 values = values[0]
 
-            if isinstance(values, str):
+            if isinstance(values, str) and len(values) > 0:
                 data = cls._str_parser(values, is_simple=True)
             else:
                 data = values
@@ -90,10 +91,15 @@ class AAZSimpleTypeArgAction(AAZArgAction):
                 return cls._schema.enum[data]
             else:
                 return cls._schema.DataType(data)
-        elif isinstance(data, cls._schema.DataType) or data is None:
+        elif isinstance(data, cls._schema.DataType):
             return data
+        elif data is None:
+            if cls._schema._nullable:
+                return data
+            else:
+                raise AAZInvalidValueError(f"is not nullable")
         else:
-            raise ValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
+            raise AAZInvalidValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):
@@ -186,10 +192,13 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
             result = OrderedDict()
             for key, value in data.items():
                 action = cls._schema[key]._build_cmd_action()
-                result[key] = action.format_data(value)
+                try:
+                    result[key] = action.format_data(value)
+                except AAZInvalidValueError as ex:
+                    raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
             return result
         else:
-            raise ValueError(f"dict type value expected, got '{data}'({type(data)})")
+            raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZDictArgAction(AAZCompoundTypeArgAction):
@@ -202,10 +211,13 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
             result = OrderedDict()
             action = cls._schema.Element._build_cmd_action()
             for key, value in data.items():
-                result[key] = action.format_data(value)
+                try:
+                    result[key] = action.format_data(value)
+                except AAZInvalidValueError as ex:
+                    raise AAZInvalidValueError(f"Invalid '{key}' : {ex}") from ex
             return result
         else:
-            raise ValueError(f"dict type value expected, got '{data}'({type(data)})")
+            raise AAZInvalidValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
@@ -270,7 +282,11 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             result = []
             action = cls._schema.Element._build_cmd_action()
             for idx, value in enumerate(data):
-                result.append(action.format_data(value))
+                try:
+                    result.append(action.format_data(value))
+                except AAZInvalidValueError as ex:
+                    raise AAZInvalidValueError(f"Invalid at [{idx}] : {ex}") from ex
+
             return result
         else:
-            raise ValueError(f"list type value expected, got '{data}'({type(data)})")
+            raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
