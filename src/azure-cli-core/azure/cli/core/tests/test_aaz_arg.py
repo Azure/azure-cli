@@ -460,17 +460,19 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "work_day")
         assert v.work_day == "Friday"
 
+        # null value
         action.setup_operations(dest_ops, 'null')
         assert len(dest_ops._ops) == 5
         dest_ops.apply(v, "work_day")
         assert v.work_day == None   # must use '== None', because 'is None' will not work
 
-        # try blank value
+        # blank value
         action.setup_operations(dest_ops, None)
         assert len(dest_ops._ops) == 6
         dest_ops.apply(v, "work_day")
         assert v.work_day == "Sunday"
 
+        # null value
         action.setup_operations(dest_ops, 'None')
         assert len(dest_ops._ops) == 7
         dest_ops.apply(v, "work_day")
@@ -483,6 +485,7 @@ class TestAAZArg(unittest.TestCase):
         dest_ops.apply(v, "work_day")
         assert v.work_day == None
 
+        # New argument
         schema.name = AAZStrArg(options=["--name", "-n"])
         arg = schema.name.to_cmd_arg("work_day")
         action = arg.type.settings["action"]
@@ -503,6 +506,8 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, "null")
         with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
             action.setup_operations(dest_ops, "'l")
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
 
         assert len(dest_ops._ops) == 2
         dest_ops.apply(v, "name")
@@ -512,6 +517,54 @@ class TestAAZArg(unittest.TestCase):
         assert len(dest_ops._ops) == 3
         dest_ops.apply(v, "name")
         assert v.name == " aa' l_;{]'"
+
+    def test_aaz_int_arg(self):
+        from azure.cli.core.aaz._arg import AAZIntArg, AAZArgumentsSchema, AAZArgEnum, AAZUndefined
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.score = AAZIntArg(
+            options=["--score", "-s"],
+            enum=AAZArgEnum(items={
+                "A": 100,
+                "B": 90,
+                "C": 80,
+                "D": 0,
+            }),
+            nullable=True,
+            blank=0
+        )
+        arg = schema.score.to_cmd_arg("score")
+        assert len(arg.choices) == 4
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, "A")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "score")
+        assert v.score == 100
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "score")
+        assert v.score == None
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "score")
+        assert v.score == 0
+
+        # null value
+        action.setup_operations(dest_ops, "None")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "score")
+        assert v.score == None
+
 
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments

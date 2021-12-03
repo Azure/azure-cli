@@ -4,6 +4,7 @@ from argparse import Action
 from azure.cli.core import azclierror
 from collections import OrderedDict
 from ._utils import AAZShortHandSyntaxParser
+from ._base import AAZUndefined
 from knack.log import get_logger
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
 
@@ -69,6 +70,8 @@ class AAZSimpleTypeArgAction(AAZArgAction):
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument cannot be blank")
             data = cls._schema._blank
         else:
             if isinstance(values, list):
@@ -111,6 +114,8 @@ class AAZCompoundTypeArgAction(AAZArgAction):
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument cannot be blank")
             dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
             assert isinstance(values, list)
@@ -187,7 +192,10 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
     @classmethod
     def format_data(cls, data):
         if data is None:
-            return None
+            if cls._schema._nullable:
+                return data
+            else:
+                raise AAZInvalidValueError(f"is not nullable")
         elif isinstance(data, dict):
             result = OrderedDict()
             for key, value in data.items():
@@ -206,7 +214,10 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
     @classmethod
     def format_data(cls, data):
         if data is None:
-            return None
+            if cls._schema._nullable:
+                return data
+            else:
+                raise AAZInvalidValueError(f"is not nullable")
         elif isinstance(data, dict):
             result = OrderedDict()
             action = cls._schema.Element._build_cmd_action()
@@ -239,6 +250,8 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
     @classmethod
     def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
+            if cls._schema._blank == AAZUndefined:
+                raise AAZInvalidValueError("argument cannot be blank")
             dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
             assert isinstance(values, list)
@@ -277,7 +290,10 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
     @classmethod
     def format_data(cls, data):
         if data is None:
-            return None
+            if cls._schema._nullable:
+                return data
+            else:
+                raise AAZInvalidValueError(f"is not nullable")
         elif isinstance(data, list):
             result = []
             action = cls._schema.Element._build_cmd_action()
@@ -286,7 +302,6 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                     result.append(action.format_data(value))
                 except AAZInvalidValueError as ex:
                     raise AAZInvalidValueError(f"Invalid at [{idx}] : {ex}") from ex
-
             return result
         else:
             raise AAZInvalidValueError(f"list type value expected, got '{data}'({type(data)})")
