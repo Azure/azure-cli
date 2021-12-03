@@ -233,7 +233,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             inputs = [*cls.decode_values(values)]
             ops = []
             try:
-                # standard expression
+                # Standard Expression
                 for key, key_parts, value in inputs:
                     schema = cls._schema
                     for k in key_parts:
@@ -243,19 +243,18 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                     ops.append((key_parts, data))
 
             except Exception as ex:
-                for key, _, _ in inputs:
-                    if key:
-                        # it's not a valid separate expression.
-                        raise ex
-
-                # This part of logic is to support separate element expression which is widely used in current command,
+                # This part of logic is to support Separate Elements Expression which is widely used in current command,
                 # such as:
                 #       --args val1 val2 val3.
                 # The standard expression of it should be:
                 #       --args [val1,val2,val3]
 
-                elements = []
                 element_action = cls._schema.Element._build_cmd_action()
+                if not issubclass(element_action, AAZSimpleTypeArgAction):
+                    # Separate Elements Expression only supported for simple type element array
+                    raise ex
+
+                elements = []
                 for _, _, value in inputs:
                     elements.append(element_action.format_data(value))
                 ops = [([], elements)]
