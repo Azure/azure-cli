@@ -1,12 +1,41 @@
 import re
 import os
-from argparse import Action, ArgumentTypeError
+from argparse import Action
 from azure.cli.core import azclierror
 from collections import OrderedDict
-from ._utils import AAZShortHandSyntaxParser
+from ._utils import AAZShortHandSyntaxParser, AAZInvalidShorthandSyntaxError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
+
+_ELEMENT_APPEND_KEY = "_+_"  # used for list append
+
+
+class AAZArgActionOperations:
+
+    def __init__(self):
+        self._ops = []
+
+    def add(self, data, *keys):
+        self._ops.append((keys, data))
+
+    def apply(self, args, dest):
+        for keys, data in self._ops:
+            self._assign_data(args, data, dest, *keys)
+
+    def _assign_data(self, args, data, dest, *keys):
+        from ._field_value import AAZList
+        arg = args
+        key = dest
+        i = 0
+        while i < len(keys):
+            arg = arg[key]
+            key = keys[i]
+            if key == _ELEMENT_APPEND_KEY:
+                assert isinstance(arg, AAZList)
+                key = len(arg)
+            i += 1
+        arg[key] = data
 
 
 class AAZArgAction(Action):
@@ -15,8 +44,18 @@ class AAZArgAction(Action):
 
     _str_parser = AAZShortHandSyntaxParser()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __call__(self, parser, namespace, values, option_string=None):
+        if getattr(namespace, self.dest) is None:
+            setattr(namespace, self.dest, AAZArgActionOperations())
+        dest_ops = getattr(namespace, self.dest)
+        try:
+            self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
+
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
+        raise NotImplementedError()
 
     @classmethod
     def format_data(cls, data):
@@ -24,33 +63,25 @@ class AAZArgAction(Action):
         raise NotImplementedError()
 
 
-class AAZArgActionOperations:
-
-    def apply(self, args, dest):
-        raise NotImplementedError()
-
-
 class AAZSimpleTypeArgAction(AAZArgAction):
 
-    class Operations(AAZArgActionOperations):
-
-        def __init__(self, data):
-            self._data = data
-
-        def apply(self, args, dest):
-            args[dest] = self._data
-
-    def __call__(self, parser, namespace, values, option_string=None):
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
-            data = self._schema._blank
+            data = cls._schema._blank
         else:
+            if isinstance(values, list):
+                assert prefix_keys  # the values will be input as an list when parse singular option of a list argument
+                if len(values) != 1:
+                    raise ValueError(f"only support 1 value, got {len(values)}: {values}")
+                values = values[0]
+
             if isinstance(values, str):
-                data = self._str_parser(values, is_simple=True)
+                data = cls._str_parser(values, is_simple=True)
             else:
                 data = values
-            data = self.format_data(data)
-        op = self.Operations(data)
-        setattr(namespace, self.dest, op)
+            data = cls.format_data(data)
+        dest_ops.add(data, *prefix_keys)
 
     @classmethod
     def format_data(cls, data):
@@ -62,49 +93,28 @@ class AAZSimpleTypeArgAction(AAZArgAction):
         elif isinstance(data, cls._schema.DataType) or data is None:
             return data
         else:
-            raise ArgumentTypeError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
+            raise ValueError(f"{cls._schema.DataType} type value expected, got '{data}'({type(data)})")
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):
-
-    class Operations(AAZArgActionOperations):
-
-        def __init__(self):
-            self._ops = []
-
-        def add(self, key_parts, data):
-            self._ops.append((key_parts, data))
-
-        def apply(self, args, dest):
-            for key_parts, data in self._ops:
-                arg = args
-                key = dest
-                i = 0
-                while i < len(key_parts):
-                    arg = arg[key]
-                    key = key_parts[i]
-                    i += 1
-                arg[key] = data
 
     key_pattern = re.compile(
         r'^(((\[[0-9]+])|(([a-zA-Z0-9_\-]+)(\[[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[[0-9]+])?)*)=(.*)$'
     )
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None:
-            setattr(namespace, self.dest, self.Operations())
-        dest_ops = getattr(namespace, self.dest)
-
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
-            dest_ops.add(tuple(), self._schema._blank)
+            dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
-            for key, key_parts, value in self.decode_values(values):
-                schema = self._schema
+            assert isinstance(values, list)
+            for key, key_parts, value in cls.decode_values(values):
+                schema = cls._schema
                 for k in key_parts:
                     schema = schema[k]
                 action = schema._build_cmd_action()
                 data = action.format_data(value)
-                dest_ops.add(key_parts, data)
+                dest_ops.add(data, *prefix_keys, *key_parts)
 
     @classmethod
     def decode_values(cls, values):
@@ -147,11 +157,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
 
         if isinstance(schema, AAZSimpleTypeArg):
             # simple type
-            try:
-                v = cls._str_parser(value, is_simple=True)
-            except Exception as shorthand_ex:
-                msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
-                raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
+            v = cls._str_parser(value, is_simple=True)
         else:
             # compound type
             # read from file
@@ -161,13 +167,12 @@ class AAZCompoundTypeArgAction(AAZArgAction):
             else:
                 try:
                     v = cls._str_parser(value)
-                except ValueError as shorthand_ex:
+                except AAZInvalidShorthandSyntaxError as shorthand_ex:
                     try:
                         v = shell_safe_json_parse(value, True)
                     except Exception as ex:
-                        logger.debug(ex)
-                        msg = f"Failed to parse Shorthand Syntax: \nError detail: {shorthand_ex}"
-                        raise azclierror.InvalidArgumentValueError(msg) from shorthand_ex
+                        logger.debug(ex)    # log parse json failed expression
+                        raise shorthand_ex  # raise shorthand syntax exception
         return v
 
 
@@ -184,7 +189,7 @@ class AAZObjectArgAction(AAZCompoundTypeArgAction):
                 result[key] = action.format_data(value)
             return result
         else:
-            raise ArgumentTypeError(f"dict type value expected, got '{data}'({type(data)})")
+            raise ValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZDictArgAction(AAZCompoundTypeArgAction):
@@ -200,32 +205,43 @@ class AAZDictArgAction(AAZCompoundTypeArgAction):
                 result[key] = action.format_data(value)
             return result
         else:
-            raise ArgumentTypeError(f"dict type value expected, got '{data}'({type(data)})")
+            raise ValueError(f"dict type value expected, got '{data}'({type(data)})")
 
 
 class AAZListArgAction(AAZCompoundTypeArgAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         if getattr(namespace, self.dest) is None:
-            setattr(namespace, self.dest, self.Operations())
+            setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
+        try:
+            if self._schema.singular_options and option_string in self._schema.singular_options:
+                # if singular option is used then parsed values by element action
+                action =self._schema.Element._build_cmd_action()
+                action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
+            else:
+                self.setup_operations(dest_ops, values)
+        except (ValueError, KeyError) as ex:
+            raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
 
+    @classmethod
+    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
         if values is None:
-            dest_ops.add(tuple(), self._schema._blank)
+            dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
-            inputs = [*self.decode_values(values)]
+            assert isinstance(values, list)
+            inputs = [*cls.decode_values(values)]
+            ops = []
             try:
                 # standard expression
-                ops = []
                 for key, key_parts, value in inputs:
-                    schema = self._schema
+                    schema = cls._schema
                     for k in key_parts:
                         schema = schema[k]
                     action = schema._build_cmd_action()
                     data = action.format_data(value)
                     ops.append((key_parts, data))
-                for key_parts, data in ops:
-                    dest_ops.add(key_parts, data)
+
             except Exception as ex:
                 for key, _, _ in inputs:
                     if key:
@@ -239,10 +255,13 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 #       --args [val1,val2,val3]
 
                 elements = []
-                element_action = self._schema.Element._build_cmd_action()
+                element_action = cls._schema.Element._build_cmd_action()
                 for _, _, value in inputs:
                     elements.append(element_action.format_data(value))
-                dest_ops.add(tuple(), elements)
+                ops = [([], elements)]
+
+            for key_parts, data in ops:
+                dest_ops.add(data, *prefix_keys, *key_parts)
 
     @classmethod
     def format_data(cls, data):
@@ -255,21 +274,4 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 result.append(action.format_data(value))
             return result
         else:
-            raise ArgumentTypeError(f"list type value expected, got '{data}'({type(data)})")
-
-
-# class AAZListElementArgAction(AAZArgAction):
-#
-#     def __call__(self, parser, namespace, values, option_string=None):
-#         dest_dict = getattr(namespace, self.dest)
-#         if dest_dict is None:
-#             dest_dict = OrderedDict()
-#
-#         key_parts = tuple()
-#         if key_parts not in dest_dict:
-#             dest_dict[key_parts] = []
-#         elements = dest_dict[key_parts]
-#
-#         # if values is None:
-#         #
-
+            raise ValueError(f"list type value expected, got '{data}'({type(data)})")

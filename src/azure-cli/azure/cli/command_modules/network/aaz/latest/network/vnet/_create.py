@@ -65,6 +65,7 @@ class Create(AAZCommand):
 
         schema.flags = AAZListArg(
             options=["--flags"],
+            singular_options=["--flag"],
             help="Flags"
         )
         schema.flags.Element = AAZIntArg()

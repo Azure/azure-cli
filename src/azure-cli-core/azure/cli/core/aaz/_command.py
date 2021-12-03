@@ -4,7 +4,6 @@ from ._utils import _get_profile_pkg
 from knack.commands import CLICommand, CommandGroup
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
-from collections import OrderedDict
 
 
 _DOC_EXAMPLE_FLAG = ':example:'

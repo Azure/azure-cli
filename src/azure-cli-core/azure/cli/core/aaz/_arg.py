@@ -178,12 +178,17 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
 
 class AAZListArg(AAZBaseArg, AAZListType):
 
-    def __init__(self, fmt=None, **kwargs):
+    def __init__(self, fmt=None, singular_options=None, **kwargs):
         super().__init__(**kwargs)
         self._fmt = fmt
+        self.singular_options = singular_options
 
     def to_cmd_arg(self, name):
         arg = super().to_cmd_arg(name)
+        if self.singular_options:
+            assert arg.options_list
+            arg.options_list.extend(self.singular_options)
+
         if self._blank != AAZUndefined:
             arg.nargs = '*'
         else:
