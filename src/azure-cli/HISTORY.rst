@@ -20,7 +20,7 @@ Release History
 **App Service**
 
 * `az functionapp create`: Add support for creating a webapp joined to a vnet (#20008)
-* `az webapp up` : Fix failure to detect dotnet 6.0 web apps (#20157)
+* `az webapp up`: Fix failure to detect dotnet 6.0 web apps (#20157)
 * `az appservice ase update`: Support for allowing new private endpoint connections on ASEv3 (#20084)
 * `az appservice ase list-addresses`: Support ASEv3 (#20084)
 * `az staticwebapp identity assign`: Assign managed service identity to the static web app (#20140)
