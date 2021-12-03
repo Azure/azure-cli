@@ -89,7 +89,6 @@ Release History
 **Key Vault**
 
 * `az keyvault key encrypt/decrypt`: Support AES algorithm for MHSM (#20189)
-* `az keyvault`: Revise --id argument help text (#20369)
 * `az keyvault key rotation-policy update`: Support both camel case and snake case json for `--value` (#20530)
 
 **NetAppFiles**
