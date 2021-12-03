@@ -97,7 +97,7 @@ Release History
 
 **Network**
 
-* Add new command set: `az network express-route peering connection ipv6-config set/remove` (#19887)
+* `az network express-route peering connection ipv6-config`: Add new commands `set`, `remove` (#19887)
 * `az network application-gateway waf-policy managed-rule exclusion`: Add new subgroup `rule-set` to support per rule exclusions (#20360)
 * `az network bastion create`: Fix invalid validator when `--scale-units` is None (#20305)
 * `az network vnet create`: Add `--enable-encryption` argument to support enable encryption on virtual network (#20355)
