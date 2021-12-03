@@ -63,5 +63,5 @@ class TestIntegrationTestBase(unittest.TestCase):
 
             def sample_test(self):
                 pass
-
-        self.assertIsNone(MockTest().run(), 'The live test is not skipped as expected')
+        result = MockTest().run()
+        self.assertTrue(result.skipped)

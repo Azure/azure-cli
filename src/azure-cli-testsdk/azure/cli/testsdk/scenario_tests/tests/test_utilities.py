@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import os
 import unittest
 import mock
-from azure.cli.testsdk.scenario_tests.utilities import (create_random_name, get_sha1_hash,
-                                                     is_text_payload, is_json_payload)
+from azure.cli.testsdk.scenario_tests.utilities import (
+    create_random_name, get_sha1_hash, is_text_payload, is_json_payload)
 
 
 class TestUtilityFunctions(unittest.TestCase):
@@ -45,7 +45,10 @@ class TestUtilityFunctions(unittest.TestCase):
 
     def test_get_sha1_hash(self):
         import tempfile
-        with tempfile.NamedTemporaryFile() as f:
+        # https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile
+        # delete=False must be set for Windows, because Windows doesn't allow opening a temporary file
+        # that is already opened.
+        with tempfile.NamedTemporaryFile(delete=False) as f:
             content = b"""
 All the world's a stage,
 And all the men and women merely players;
@@ -79,9 +82,11 @@ Sans teeth, sans eyes, sans taste, sans everything.
 William Shakespeare
             """
             f.write(content)
-            f.seek(0)
-            hash_value = get_sha1_hash(f.name)
-            self.assertEqual('1a9ea462ce80aac3f1cacbdf59d3a630df01b933593a2c53bccc25ecc2569e31', hash_value)
+
+        hash_value = get_sha1_hash(f.name)
+        self.assertEqual('1a9ea462ce80aac3f1cacbdf59d3a630df01b933593a2c53bccc25ecc2569e31', hash_value)
+
+        os.remove(f.name)
 
     def test_text_payload(self):
         http_entity = mock.MagicMock()
