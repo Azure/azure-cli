@@ -3,6 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+"""
+This module is vendored from
+https://github.com/Azure/azure-python-devtools/tree/1.2.0/src/azure_devtools/scenario_tests
+
+More info: https://github.com/Azure/azure-cli/pull/20601
+"""
+
 from .base import IntegrationTestBase, ReplayableTest, LiveTest
 from .exceptions import AzureTestError
 from .decorators import live_only, record_only, AllowLargeResponse
