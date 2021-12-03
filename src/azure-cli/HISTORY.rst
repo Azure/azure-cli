@@ -40,6 +40,7 @@ Release History
 * `az staticwebapp appsettings set`: Make set functional (#18468)
 * `az staticwebapp appsettings`: Switch to the new SWA app settings SDK methods (#20320)
 * `az functionapp plan create` : Add `--zone-redundant` parameter to give the option to create a zone redundant app service plan (#20450)
+* Support managed identity in App Service container (#20215)
 
 **ARM**
 
