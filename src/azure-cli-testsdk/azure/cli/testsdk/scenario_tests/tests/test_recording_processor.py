@@ -12,7 +12,7 @@ except ImportError:
 import unittest
 import uuid
 
-from azure_devtools.scenario_tests.recording_processors import (
+from azure.cli.testsdk.scenario_tests.recording_processors import (
     RecordingProcessor, SubscriptionRecordingProcessor, AccessTokenReplacer
 )
 

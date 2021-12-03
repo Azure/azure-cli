@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure_devtools.scenario_tests.base import IntegrationTestBase, LiveTest
+from azure.cli.testsdk.scenario_tests.base import IntegrationTestBase, LiveTest
 
 
 class TestIntegrationTestBase(unittest.TestCase):

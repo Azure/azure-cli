@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 
 
 class TimeSpanProcessor(RecordingProcessor):

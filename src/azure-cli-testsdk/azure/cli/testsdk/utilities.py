@@ -6,9 +6,9 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
-                                           GeneralNameReplacer as _BuggyGeneralNameReplacer)
-from azure_devtools.scenario_tests.utilities import is_text_payload
+from .scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
+                             GeneralNameReplacer as _BuggyGeneralNameReplacer)
+from .scenario_tests.utilities import is_text_payload
 
 
 def create_random_name(prefix='clitest', length=24):

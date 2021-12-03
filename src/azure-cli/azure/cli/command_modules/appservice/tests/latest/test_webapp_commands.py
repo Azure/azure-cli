@@ -9,14 +9,14 @@ from unittest import mock
 import os
 import time
 import tempfile
-from azure_devtools.scenario_tests.utilities import create_random_name
+from azure.cli.testsdk.scenario_tests.utilities import create_random_name
 import requests
 import datetime
 import urllib3
 from knack.util import CLIError
 import certifi
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists

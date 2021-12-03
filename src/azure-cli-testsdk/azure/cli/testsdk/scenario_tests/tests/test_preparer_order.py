@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from azure_devtools.scenario_tests.preparers import AbstractPreparer
+from azure.cli.testsdk.scenario_tests.preparers import AbstractPreparer
 
 traces = []
 
