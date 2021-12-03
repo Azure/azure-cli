@@ -51,16 +51,13 @@ Release History
 * `az bicep upgrade`: Add a new parameter `--target-platform/-t` to specify the running platform of Bicep CLI (#20250)
 * `az deployment sub/tenant/mg create`: Fix the `KeyError: 'resourceGroup'` in outputting results in table format when deploying non-resource group level resources (#20455)
 * `az policy assignment create` and `az policy assignment identity assign` support adding user assigned identity (#20480)
+* `az bicep install`: works now behind a corporate proxy (#20183)
 
 **Backup**
 
 * GA `az backup` and some bug fixes (#20291)
 * `az backup protectable-item list/show`: Fix AttributeError for server_name (#20513)
 * `az backup restore restore-disks`: Add support for Cross Zonal Restore (#20539)
-
-**Bicep**
-
-* `az bicep install`: works now behind a corporate proxy (#20183)
 
 **Cognitive Services**
 
