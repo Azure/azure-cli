@@ -22,11 +22,27 @@ from .utils import _normalize_sku, get_sku_name
 logger = get_logger(__name__)
 
 
+def validate_and_convert_to_int(flag, val):
+    try:
+        return int(val)
+    except ValueError:
+        raise ArgumentUsageError("{} is expected to have an int value.".format(flag))
+
+
+def validate_range_of_int_flag(flag_name, value, min_val, max_val):
+    value = validate_and_convert_to_int(flag_name, value)
+    if min_val > value or value > max_val:
+        raise ArgumentUsageError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name,
+                                                                                                          min_val,
+                                                                                                          max_val))
+    return value
+
+
 def validate_timeout_value(namespace):
     """Validates that zip deployment timeout is set to a reasonable min value"""
     if isinstance(namespace.timeout, int):
         if namespace.timeout <= 29:
-            raise CLIError('--timeout value should be a positive value in seconds and should be at least 30')
+            raise ArgumentUsageError('--timeout value should be a positive value in seconds and should be at least 30')
 
 
 def validate_site_create(cmd, namespace):
@@ -89,6 +105,20 @@ def validate_asp_create(namespace):
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
     if namespace.is_linux and namespace.hyper_v:
         raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
+
+
+def validate_functionapp_asp_create(namespace):
+    validate_tags(namespace)
+    sku = _normalize_sku(namespace.sku)
+    tier = get_sku_name(sku)
+    _validate_asp_sku(sku=sku, app_service_environment=None, zone_redundant=namespace.zone_redundant)
+    if namespace.max_burst is not None:
+        if tier.lower() != "elasticpremium":
+            raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
+        namespace.max_burst = validate_range_of_int_flag('--max-burst', namespace.max_burst, min_val=0, max_val=20)
+    if namespace.number_of_workers is not None:
+        namespace.number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
+                                                                 namespace.number_of_workers, min_val=0, max_val=20)
 
 
 def validate_app_or_slot_exists_in_rg(cmd, namespace):
