@@ -20,7 +20,7 @@ examples:
       text: az login
     - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login -u johndoe@contoso.com -p VerySecret
-    - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
+    - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'. For some special characters, including double quotes in the password string is required; in PowerShell this would be -p ``"`"abc[?>def`""``.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
     - name: Log in with a service principal using client certificate.
       text: az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
