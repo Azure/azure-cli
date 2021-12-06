@@ -380,7 +380,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     if client_version == 'latest':
         logger.warning(
             "To avoid incompatibility, it is recommended to specify the same version number "
-            "as the server side through the '--client-version' option"
+            "as the server side through the '--client-version' option for kubectl."
         )
         context = _ssl_context()
         version = urlopen(source_url + '/stable.txt', context=context).read()
@@ -457,8 +457,8 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
 
     if client_version == 'latest':
         logger.warning(
-            "To avoid throttling caused by querying the version number, "
-            "it is recommended to specify the version number explicitly"
+            "To avoid throttling caused by querying the version number, it is recommended to specify "
+            "the version number through the '--kubelogin-version' option for kubelogin."
         )
         context = _ssl_context()
         latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
