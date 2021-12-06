@@ -693,6 +693,121 @@ class TestAAZArg(unittest.TestCase):
         with self.assertRaises(ValueError):
             action.setup_operations(dest_ops, " ")
 
+    def test_aaz_bool_arg(self):
+        from azure.cli.core.aaz._arg import AAZBoolArg, AAZArgumentsSchema, AAZArgEnum
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.enable = AAZBoolArg(options=["--enable", "-e"])
+        arg = schema.enable.to_cmd_arg("enable")
+        assert len(arg.choices) == 10
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, None)
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        action.setup_operations(dest_ops, "false")
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "enable")
+        assert v.enable == False
+
+        action.setup_operations(dest_ops, "true")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        action.setup_operations(dest_ops, "f")
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "enable")
+        assert v.enable == False
+
+        action.setup_operations(dest_ops, "t")
+        assert len(dest_ops._ops) == 5
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        action.setup_operations(dest_ops, "no")
+        assert len(dest_ops._ops) == 6
+        dest_ops.apply(v, "enable")
+        assert v.enable == False
+
+        action.setup_operations(dest_ops, "yes")
+        assert len(dest_ops._ops) == 7
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        action.setup_operations(dest_ops, "n")
+        assert len(dest_ops._ops) == 8
+        dest_ops.apply(v, "enable")
+        assert v.enable == False
+
+        action.setup_operations(dest_ops, "y")
+        assert len(dest_ops._ops) == 9
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        action.setup_operations(dest_ops, "0")
+        assert len(dest_ops._ops) == 10
+        dest_ops.apply(v, "enable")
+        assert v.enable == False
+
+        action.setup_operations(dest_ops, "1")
+        assert len(dest_ops._ops) == 11
+        dest_ops.apply(v, "enable")
+        assert v.enable == True
+
+        # null value
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "null")
+
+        # null value
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, "None")
+
+        schema.started = AAZBoolArg(
+            options=["--started", "-s"],
+            nullable=True,
+            blank=False,
+        )
+        arg = schema.started.to_cmd_arg("started")
+        assert len(arg.choices) == 10
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        # null value
+        action.setup_operations(dest_ops, "null")
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "started")
+        assert v.started == None
+
+        # blank value
+        action.setup_operations(dest_ops, None)
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "started")
+        assert v.started == False
+
+        action.setup_operations(dest_ops, "TRUE")
+        assert len(dest_ops._ops) == 3
+        dest_ops.apply(v, "started")
+        assert v.started == True
+
+        # assert len(dest_ops._ops) == 12
+        # dest_ops.apply(v, "enable")
+        # assert v.enable == False
+        #
+        # action.setup_operations(dest_ops, "true")
+        # assert len(dest_ops._ops) == 3
+        # dest_ops.apply(v, "enable")
+        # assert v.enable == True
+
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments
     #     from azure.cli.core.aaz._field_type import AAZObjectType, AAZBoolType, AAZIntType, AAZStrType, AAZFloatType
