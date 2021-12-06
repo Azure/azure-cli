@@ -71,7 +71,7 @@ class CLIENT_TYPE(Enum):
 SOURCE_RESOURCES_IN_EXTENSION = [RESOURCE.SpringCloud]
 
 # The target resources using user token
-TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault, RESOURCE.Mysql]
+TARGET_RESOURCES_USERTOKEN = [RESOURCE.PostgresFlexible, RESOURCE.MysqlFlexible, RESOURCE.KeyVault]
 
 # The dict defines the resource id pattern of source resources.
 SOURCE_RESOURCES = {

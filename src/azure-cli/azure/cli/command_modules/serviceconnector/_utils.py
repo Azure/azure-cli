@@ -87,3 +87,19 @@ def set_user_token_header(client, cli_ctx):
     client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
 
     return client
+
+
+
+def set_test_token_header(client, cli_ctx):
+    '''Set user token header to work around OBO'''
+    from azure.cli.core._profile import Profile
+
+    # pylint: disable=protected-access
+    # HACK: set custom header to work around OBO
+    profile = Profile(cli_ctx=cli_ctx)
+    creds, _, _ = profile.get_raw_token()
+    client._client._config.headers_policy._headers['x-ms-cupertino-test-token'] = creds[1]
+    # HACK: hide token header
+    client._config.logging_policy.headers_to_redact.append('x-ms-cupertino-test-token')
+
+    return client

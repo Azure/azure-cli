@@ -12,4 +12,6 @@ def cf_connection_cl(cli_ctx, *_):
 
 
 def cf_linker(cli_ctx, *_):
-    return cf_connection_cl(cli_ctx).linker
+    from ._utils import set_test_token_header
+    client = cf_connection_cl(cli_ctx).linker
+    return set_test_token_header(client, cli_ctx)
