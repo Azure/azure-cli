@@ -775,7 +775,13 @@ def load_arguments(self, _):
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
-        c.argument('sku', required=True, help='The SKU of the app service plan.')
+        c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Cannot be changed after plan creation. Minimum instance count is 3.')
+        c.argument('sku', required=True, help='The SKU of the app service plan. e.g., F1(Free), D1(Shared), B1(Basic Small), '
+                                              'B2(Basic Medium), B3(Basic Large), S1(Standard Small), '
+                                              'P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 '
+                                              '(Premium Container Medium), PC4 (Premium Container Large), I1 '
+                                              '(Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), K1 '
+                                              '(Kubernetes).')
 
     with self.argument_context('functionapp plan update') as c:
         c.argument('sku', required=False, help='The SKU of the app service plan.')

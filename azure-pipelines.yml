@@ -702,9 +702,6 @@ jobs:
 
 - job: BuildYumPackage
   displayName: Build Yum Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
