@@ -1094,6 +1094,8 @@ def load_arguments(self, _):
     with self.argument_context('sig list-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('shared_to', shared_to_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     with self.argument_context('sig show-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1145,8 +1147,6 @@ def load_arguments(self, _):
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
         c.argument('shared_to', shared_to_type)
-        c.argument('marker', arg_type=marker_type)
-        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     with self.argument_context('sig image-definition show-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
