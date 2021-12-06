@@ -4,7 +4,7 @@ FROM cblmariner.azurecr.io/base/core:${tag} AS build-env
 ARG cli_version=dev
 
 RUN tdnf update -y
-RUN tdnf install -y rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix python3-virtualenv perl
+RUN tdnf install -y binutils file rpm-build gcc libffi-devel python3-devel openssl-devel make diffutils patch dos2unix python3-virtualenv perl
 
 WORKDIR /azure-cli
 
