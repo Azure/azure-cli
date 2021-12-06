@@ -48,7 +48,7 @@ class AAZObject(AAZBaseValue):
 
     def __init__(self, schema, data):
         super().__init__(schema, data)
-        assert isinstance(self._data, dict)
+        assert isinstance(self._data, dict) or self._data is None
 
     def __getitem__(self, key):
         attr_schema = self._schema[key]
@@ -86,6 +86,22 @@ class AAZObject(AAZBaseValue):
         else:
             del self[key]
 
+    def __eq__(self, other):
+        if isinstance(other, AAZBaseValue):
+            other = other._data
+        if other is None:
+            return self._data is None
+        elif (not isinstance(other, dict)) or len(other) != len(self._data):
+            return False
+        else:
+            for key, v in other.items():
+                if other[key] != self[key]:
+                    return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+
     def to_serialized_data(self):
         results = {}
         for name, field_schema in self._schema._fields.items():
@@ -106,7 +122,7 @@ class AAZDict(AAZBaseValue):
         from ._field_type import AAZDictType
         assert isinstance(schema, AAZDictType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict)
+        assert isinstance(self._data, dict) or self._data is None
 
     def __getitem__(self, key) -> AAZBaseValue:
         item_schema = self._schema.Element
@@ -179,11 +195,12 @@ class AAZList(AAZBaseValue):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict)  # the key is the idx
+        assert isinstance(self._data, dict) or self._data is None  # the key is the idx
         self._len = 0
-        for idx in self._data:
-            if idx + 1 > self._len:
-                self._len = idx + 1
+        if self._data is not None:
+            for idx in self._data:
+                if idx + 1 > self._len:
+                    self._len = idx + 1
 
     def __getitem__(self, idx) -> AAZBaseValue:
         if not isinstance(idx, int):

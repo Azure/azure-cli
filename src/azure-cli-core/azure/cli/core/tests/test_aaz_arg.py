@@ -973,41 +973,91 @@ class TestAAZArg(unittest.TestCase):
             action.setup_operations(dest_ops, ["{c:}"])
 
     def test_aaz_object_arg(self):
-        pass
+        from azure.cli.core.aaz._arg import AAZDictArg, AAZListArg, AAZObjectArg, AAZIntArg, AAZBoolArg, AAZFloatArg,\
+            AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
 
-    # def test_aaz_arguments(self):
-    #     from azure.cli.core.aaz._arg import AAZArguments
-    #     from azure.cli.core.aaz._field_type import AAZObjectType, AAZBoolType, AAZIntType, AAZStrType, AAZFloatType
-    #
-    #     class Arguments(AAZArguments):
-    #         name = AAZStrType(options=["--name", "-n"])
-    #
-    #         properties = AAZObjectType(options=["--properties"])
-    #         properties.enable = AAZBoolType(options=["enable"])
-    #         properties.count = AAZIntType(options=["count"])
-    #         properties.vnet = AAZObjectType(options=["vnet"])
-    #         properties.vnet.address = AAZStrType(options=["address"])
-    #         properties.vnet.threshold = AAZFloatType(options=["threshold"])
-    #
-    #     arguments = Arguments()
-    #     arguments.name = "test"
-    #     arguments.properties = {
-    #         "enable": True,
-    #         "count": 10,
-    #         "vnet": {
-    #             "address": "10.10.10.10",
-    #             "threshold": 1,
-    #         }
-    #     }
-    #
-    #     assert arguments.name == "test"
-    #     assert arguments.properties.enable == True
-    #     assert arguments.properties.count == 10
-    #     assert arguments.properties.vnet.address == "10.10.10.10"
-    #     assert arguments.properties.vnet.threshold == 1
-    #
-    #     assert arguments.name._data == "test"
-    #     assert arguments.properties.enable._data == True
-    #     assert arguments.properties.count._data == 10
-    #     assert arguments.properties.vnet.address._data == "10.10.10.10"
-    #     assert arguments.properties.vnet.threshold._data == 1
+        schema.properties = AAZObjectArg(
+            options=["--prop", "-p"],
+            nullable=True
+        )
+
+        schema.properties.enable = AAZBoolArg(
+            options=["enable"],
+            nullable=True,
+        )
+        schema.properties.tags = AAZDictArg(
+            options=["tags"],
+            nullable=True
+        )
+        schema.properties.tags.Element = AAZIntArg()
+        schema.properties.vnets = AAZListArg(
+            options=["vnets"],
+            nullable=True
+        )
+        schema.properties.vnets.Element = AAZObjectArg()
+        schema.properties.vnets.Element.id = AAZStrArg(
+            options=["id"],
+        )
+
+        schema.properties.pt = AAZFloatArg(
+            options=["pt"],
+            nullable=True,
+            blank="0.1"
+        )
+
+        arg = schema.properties.to_cmd_arg("properties")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        action.setup_operations(dest_ops, ["{enable:false,tags:{a:1,3:2},vnets:[{id:/123}],pt:12.123}"])
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "properties")
+        assert v.properties == {
+            "enable": False,
+            "tags": {
+                "a": 1,
+                "3": 2,
+            },
+            "vnets": [
+                {"id": "/123"},
+            ],
+            "pt": 12.123
+        }
+
+        action.setup_operations(dest_ops, ["pt=", "enable=null", "vnets=[]"])
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "properties")
+        assert v.properties == {
+            "enable": None,
+            "tags": {
+                "a": 1,
+                "3": 2,
+            },
+            "vnets": [],
+            "pt": 0.1
+        }
+
+        action.setup_operations(dest_ops, ["{}"])
+        assert len(dest_ops._ops) == 5
+        dest_ops.apply(v, "properties")
+        assert v.properties == {}
+
+        action.setup_operations(dest_ops, ["null"])
+        assert len(dest_ops._ops) == 6
+        dest_ops.apply(v, "properties")
+        assert v.properties == None
+
+        action.setup_operations(dest_ops, ["{enable:True,tags:null,vnets:null,pt:12.123}"])
+        assert len(dest_ops._ops) == 7
+        dest_ops.apply(v, "properties")
+        assert v.properties == {
+            "enable": True,
+            "tags": None,
+            "vnets": None,
+            "pt": 12.123
+        }
