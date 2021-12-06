@@ -2574,6 +2574,9 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
             self.check('scaleInPolicy.rules[0]', 'OldestVM')
         ])
+        self.cmd('vmss update -g {rg} -n {vmss} --force-deletion true', checks=[
+            self.check('scaleInPolicy.forceDeletion', True)
+        ])
 
 
 class VMSSCreateOptions(ScenarioTest):
