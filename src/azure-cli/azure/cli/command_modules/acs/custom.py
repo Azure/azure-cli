@@ -366,22 +366,33 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     Install kubectl, a command-line interface for Kubernetes clusters.
     """
 
+    enable_cdn = None
     if not source_url:
         source_url = "https://storage.googleapis.com/kubernetes-release/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
+            enable_cdn = False
+    else:
+        enable_cdn = False
 
     if client_version == 'latest':
+        logger.warning(
+            "To avoid incompatibility, it is recommended to specify the same version number "
+            "as the server side through the '--client-version' option"
+        )
         context = _ssl_context()
         version = urlopen(source_url + '/stable.txt', context=context).read()
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
+        if enable_cdn is None:
+            enable_cdn = True
 
     file_url = ''
     system = platform.system()
     base_url = source_url + '/{}/bin/{}/amd64/{}'
+    cdn_base_url = "https://acs-mirror.azureedge.net/kubernetes/{}/binaries/client/{}/amd64/{}"
 
     # ensure installation directory exists
     install_dir, cli = os.path.dirname(
@@ -391,9 +402,13 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
     if system == 'Windows':
         file_url = base_url.format(client_version, 'windows', 'kubectl.exe')
+        if enable_cdn:
+            file_url = cdn_base_url.format(client_version, 'windows', 'kubectl.exe')
     elif system == 'Linux':
         # TODO: Support ARM CPU here
         file_url = base_url.format(client_version, 'linux', 'kubectl')
+        if enable_cdn:
+            file_url = cdn_base_url.format(client_version, 'linux', 'kubectl')
     elif system == 'Darwin':
         file_url = base_url.format(client_version, 'darwin', 'kubectl')
     else:
