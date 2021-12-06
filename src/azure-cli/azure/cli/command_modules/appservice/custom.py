@@ -72,6 +72,7 @@ from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_K
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token)
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 logger = get_logger(__name__)
 
@@ -1776,6 +1777,18 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
+# TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
+    plan_def.enable_additional_properties_sending()
+    existing_properties = plan_def.serialize()["properties"]
+    plan_def.additional_properties["properties"] = existing_properties
+    plan_def.additional_properties["properties"]["zoneRedundant"] = True
+    if number_of_workers is None:
+        sku_def.capacity = 3
+    else:
+        sku_def.capacity = max(3, number_of_workers)
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False):
@@ -1804,21 +1817,13 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
             location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     # the api is odd on parameter naming, have to live with it for now
-    sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
+    sku_def = SkuDescription(tier=get_sku_name(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
 
-    # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
     if zone_redundant:
-        plan_def.enable_additional_properties_sending()
-        existing_properties = plan_def.serialize()["properties"]
-        plan_def.additional_properties["properties"] = existing_properties
-        plan_def.additional_properties["properties"]["zoneRedundant"] = True
-        if number_of_workers is None:
-            sku_def.capacity = 3
-        else:
-            sku_def.capacity = max(3, number_of_workers)
+        _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
     return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
@@ -2867,18 +2872,12 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
-def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku,
-                                        number_of_workers=None, max_burst=None, location=None, tags=None):
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
+                                        max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     sku = _normalize_sku(sku)
     tier = get_sku_name(sku)
-    if max_burst is not None:
-        if tier.lower() != "elasticpremium":
-            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
-        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
-                                                       number_of_workers, min_val=0, max_val=20)
+
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
@@ -2886,6 +2885,10 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
                               hyper_v=None, name=name)
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, number_of_workers)
+
     return client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
 
@@ -2903,21 +2906,6 @@ def is_plan_elastic_premium(cmd, plan_info):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier == 'ElasticPremium'
     return False
-
-
-def validate_and_convert_to_int(flag, val):
-    try:
-        return int(val)
-    except ValueError:
-        raise CLIError("Usage error: {} is expected to have an int value.".format(flag))
-
-
-def validate_range_of_int_flag(flag_name, value, min_val, max_val):
-    value = validate_and_convert_to_int(flag_name, value)
-    if min_val > value or value > max_val:
-        raise CLIError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name, min_val,
-                                                                                                max_val))
-    return value
 
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
