@@ -75,6 +75,12 @@ class SecretStore:
                 return self._load()
             except Exception:  # pylint: disable=broad-except
                 # Presumably other processes are writing the file, causing dirty read
-                logger.debug("Unable to load token cache file in No. %d attempt", attempt)
-                time.sleep(0.5)
-        raise RuntimeError(f"Unable to load token cache file in {retry} attempts")
+                if attempt < retry:
+                    logger.debug("Unable to load secret store in No. %d attempt", attempt)
+                    import traceback
+                    logger.debug(traceback.format_exc())
+                    time.sleep(0.5)
+                else:
+                    raise  # End of retry. Re-raise the exception as-is.
+
+        return []  # Not really reachable here. Just to keep pylint happy.
