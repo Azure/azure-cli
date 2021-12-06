@@ -108,7 +108,7 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 class AAZCompoundTypeArgAction(AAZArgAction):
 
     key_pattern = re.compile(
-        r'^(((\[[0-9]+])|(([a-zA-Z0-9_\-]+)(\[[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[[0-9]+])?)*)=(.*)$'
+        r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
     )
 
     @classmethod
@@ -130,23 +130,30 @@ class AAZCompoundTypeArgAction(AAZArgAction):
     @classmethod
     def decode_values(cls, values):
         for v in values:
-            assert isinstance(v, str)
-            match = cls.key_pattern.fullmatch(v)
-            if not match:
-                key = None
-            else:
-                key = match[1]
-                v = match[len(match.regs) - 1]
-            key_parts = cls._split_key(key)
-            v = cls._decode_value(key_parts, v)
+            key, key_parts, v = cls._split_value_str(v)
+            v = cls._decode_value(key, key_parts, v)
             yield key, key_parts, v
+
+    @classmethod
+    def _split_value_str(cls, v):
+        assert isinstance(v, str)
+        match = cls.key_pattern.fullmatch(v)
+        if not match:
+            key = None
+        else:
+            key = match[1]
+            v = match[len(match.regs) - 1]
+        key_parts = cls._split_key(key)
+        return key, key_parts, v
 
     @staticmethod
     def _split_key(key):
         if key is None:
             return tuple()
         key_items = []
-        for part in key.replace('[', '.[').split('.'):
+        key = key[0] + key[1:].replace('[', '.[')   # transform 'ab[2]' to 'ab.[2]', keep '[1]' unchanged
+        for part in key.split('.'):
+            assert part
             if part.startswith('['):
                 assert part.endswith(']')
                 part = int(part[1:-1])
@@ -154,7 +161,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         return tuple(key_items)
 
     @classmethod
-    def _decode_value(cls, key_items, value):
+    def _decode_value(cls, key, key_items, value):
         from ._arg import AAZSimpleTypeArg
         from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -163,7 +170,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
             schema = schema[item]
 
         if len(value) == 0:
-            # the express "a=" will return the blank value of schema a
+            # the express "a=" will return the blank value of schema 'a'
             return schema._blank
 
         if isinstance(schema, AAZSimpleTypeArg):
@@ -255,18 +262,16 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             dest_ops.add(cls._schema._blank, *prefix_keys)
         else:
             assert isinstance(values, list)
-            inputs = [*cls.decode_values(values)]
             ops = []
             try:
                 # Standard Expression
-                for key, key_parts, value in inputs:
+                for key, key_parts, value in cls.decode_values(values):
                     schema = cls._schema
                     for k in key_parts:
                         schema = schema[k]
                     action = schema._build_cmd_action()
                     data = action.format_data(value)
                     ops.append((key_parts, data))
-
             except Exception as ex:
                 # This part of logic is to support Separate Elements Expression which is widely used in current command,
                 # such as:
@@ -274,14 +279,25 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
                 # The standard expression of it should be:
                 #       --args [val1,val2,val3]
 
+                for value in values:
+                    key, _, _ = cls._split_value_str(value)
+                    if key is not None:
+                        # key should always be None
+                        raise ex
+
                 element_action = cls._schema.Element._build_cmd_action()
                 if not issubclass(element_action, AAZSimpleTypeArgAction):
                     # Separate Elements Expression only supported for simple type element array
                     raise ex
 
+                # dest_ops
+                element_ops = AAZArgActionOperations()
+                for value in values:
+                    element_action.setup_operations(element_ops, value, prefix_keys=[_ELEMENT_APPEND_KEY])
+
                 elements = []
-                for _, _, value in inputs:
-                    elements.append(element_action.format_data(value))
+                for _, data in element_ops._ops:
+                    elements.append(data)
                 ops = [([], elements)]
 
             for key_parts, data in ops:

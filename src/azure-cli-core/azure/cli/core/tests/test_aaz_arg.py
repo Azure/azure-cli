@@ -406,6 +406,23 @@ class TestAAZArg(unittest.TestCase):
         match = key_pattern.fullmatch(test_value)
         assert match is None
 
+    def test_aaz_compound_type_split_key(self):
+        from azure.cli.core.aaz._arg_action import AAZCompoundTypeArgAction
+        split_key = AAZCompoundTypeArgAction._split_key
+        assert split_key("a.b.c") == ("a", "b", "c")
+        assert split_key("[1]") == (1, )
+        assert split_key("[-10]") == (-10, )
+        assert split_key("a1[5].b[2].c") == ("a1", 5, "b", 2, "c")
+
+        with self.assertRaises(AssertionError):
+            split_key(".a")
+
+        with self.assertRaises(AssertionError):
+            split_key(".[5]")
+
+        with self.assertRaises(AssertionError):
+            split_key("b.a.[5]")
+
     def test_aaz_str_arg(self):
         from azure.cli.core.aaz._arg import AAZStrArg, AAZArgumentsSchema, AAZArgEnum, AAZUndefined
         from azure.cli.core.aaz._arg_action import AAZArgActionOperations
@@ -807,6 +824,156 @@ class TestAAZArg(unittest.TestCase):
         # assert len(dest_ops._ops) == 3
         # dest_ops.apply(v, "enable")
         # assert v.enable == True
+
+    def test_aaz_list_arg(self):
+        from azure.cli.core.aaz._arg import AAZListArg, AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations, _ELEMENT_APPEND_KEY
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.names = AAZListArg(
+            options=["--names", "--ns"],
+            singular_options=["--name", "-n"]
+        )
+        schema.names.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+
+        arg = schema.names.to_cmd_arg("names")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        # null value
+        action.setup_operations(dest_ops, ["null"])
+        assert len(dest_ops._ops) == 1
+        dest_ops.apply(v, "names")
+        assert v.names == [None, ]
+
+        action.setup_operations(dest_ops, ["[a,b,'c',' ']"])
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "names")
+        assert v.names == ['a', 'b', 'c', ' ']
+
+        action.setup_operations(dest_ops, ["[2]=efg", "[-1]='null'", "[0]="])
+        assert len(dest_ops._ops) == 5
+        dest_ops.apply(v, "names")
+        assert v.names == ['a blank value', 'b', 'efg', 'null']
+
+        action.setup_operations(dest_ops, ["c", "d"])
+        assert len(dest_ops._ops) == 6
+        dest_ops.apply(v, "names")
+        assert v.names == ['c', 'd']
+
+        action.setup_operations(dest_ops, ["[]"])
+        assert len(dest_ops._ops) == 7
+        dest_ops.apply(v, "names")
+        assert v.names == []
+
+        action.setup_operations(dest_ops, ["a"])
+        assert len(dest_ops._ops) == 8
+        dest_ops.apply(v, "names")
+        assert v.names == ["a"]
+
+        action.setup_operations(dest_ops, ["", "''"])
+        assert len(dest_ops._ops) == 9
+        dest_ops.apply(v, "names")
+        assert v.names == ["", ""]
+
+        action.setup_operations(dest_ops, ["a", 'null', 'None', "b", ""])
+        assert len(dest_ops._ops) == 10
+        dest_ops.apply(v, "names")
+        assert v.names == ["a", None, None, "b", ""]
+
+        # blank value
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, None)
+
+        action.setup_operations(dest_ops, ["[]"])
+        assert len(dest_ops._ops) == 11
+        dest_ops.apply(v, "names")
+        assert v.names == []
+
+        # test singular action
+        singular_action = schema.names.Element._build_cmd_action()
+
+        singular_action.setup_operations(dest_ops, ["a"], prefix_keys=[_ELEMENT_APPEND_KEY])
+        assert len(dest_ops._ops) == 12
+        dest_ops.apply(v, "names")
+        assert v.names == ["a"]
+
+        singular_action.setup_operations(dest_ops, ["b"], prefix_keys=[_ELEMENT_APPEND_KEY])
+        assert len(dest_ops._ops) == 13
+        dest_ops.apply(v, "names")
+        assert v.names == ["a", "b"]
+
+        singular_action.setup_operations(dest_ops, None, prefix_keys=[_ELEMENT_APPEND_KEY])
+        assert len(dest_ops._ops) == 14
+        dest_ops.apply(v, "names")
+        assert v.names == ["a", "b", "a blank value"]
+
+        singular_action.setup_operations(dest_ops, [""], prefix_keys=[_ELEMENT_APPEND_KEY])
+        assert len(dest_ops._ops) == 15
+        dest_ops.apply(v, "names")
+        assert v.names == ["a", "b", "a blank value", ""]
+
+    def test_aaz_dict_arg(self):
+        from azure.cli.core.aaz._arg import AAZDictArg, AAZStrArg, AAZArgumentsSchema
+        from azure.cli.core.aaz._arg_action import AAZArgActionOperations
+        schema = AAZArgumentsSchema()
+        v = schema()
+
+        schema.tags = AAZDictArg(
+            options=["--tags", "-t"],
+        )
+        schema.tags.Element = AAZStrArg(
+            nullable=True,
+            blank="a blank value"
+        )
+
+        arg = schema.tags.to_cmd_arg("tags")
+        action = arg.type.settings["action"]
+
+        dest_ops = AAZArgActionOperations()
+        assert len(dest_ops._ops) == 0
+
+        # null value
+        action.setup_operations(dest_ops, ["a=null", "b=None"])
+        assert len(dest_ops._ops) == 2
+        dest_ops.apply(v, "tags")
+        assert v.tags == {"a": None, "b": None}
+
+        action.setup_operations(dest_ops, ["b=6", "c="])
+        assert len(dest_ops._ops) == 4
+        dest_ops.apply(v, "tags")
+        assert v.tags == {"a": None, "b": "6", "c": "a blank value"}
+
+        action.setup_operations(dest_ops, ["{ab:1,bc:2,cd:'null'}"])
+        assert len(dest_ops._ops) == 5
+        dest_ops.apply(v, "tags")
+        assert v.tags == {"ab": '1', "bc": '2', 'cd': 'null'}
+
+        action.setup_operations(dest_ops, ["{}"])
+        assert len(dest_ops._ops) == 6
+        dest_ops.apply(v, "tags")
+        assert v.tags == {}
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, ["=1"])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, ["null"])
+
+        with self.assertRaises(aazerror.AAZInvalidValueError):
+            action.setup_operations(dest_ops, ["None"])
+
+        with self.assertRaises(aazerror.AAZInvalidShorthandSyntaxError):
+            action.setup_operations(dest_ops, ["{c:}"])
+
+    def test_aaz_object_arg(self):
+        pass
 
     # def test_aaz_arguments(self):
     #     from azure.cli.core.aaz._arg import AAZArguments

@@ -131,6 +131,22 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key
 
+    def __eq__(self, other):
+        if isinstance(other, AAZBaseValue):
+            other = other._data
+        if other is None:
+            return self._data is None
+        elif (not isinstance(other, dict)) or len(other) != len(self._data):
+            return False
+        else:
+            for key, v in other.items():
+                if other[key] != self[key]:
+                    return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+
     def clear(self):
         self._data.clear()
 
@@ -163,7 +179,7 @@ class AAZList(AAZBaseValue):
         from ._field_type import AAZListType
         assert isinstance(schema, AAZListType)
         super().__init__(schema, data)
-        assert isinstance(self._data, dict) # the key is the idx
+        assert isinstance(self._data, dict)  # the key is the idx
         self._len = 0
         for idx in self._data:
             if idx + 1 > self._len:
@@ -224,6 +240,23 @@ class AAZList(AAZBaseValue):
     def __iter__(self):
         for i in range(self._len):
             yield self[i]
+
+    def __eq__(self, other):
+        if isinstance(other, AAZBaseValue):
+            return self._data == other._data
+
+        if other is None:
+            return self._data is None
+        elif (not isinstance(other, list)) or len(other) != self._len:
+            return False
+        else:
+            for idx, v in enumerate(other):
+                if self[idx] != v:
+                    return False
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def append(self, data):
         self[self._len] = data
