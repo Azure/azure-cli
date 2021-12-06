@@ -361,6 +361,7 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                           kubelogin_install_location, kubelogin_base_src_url)
 
 
+# pylint: disable=too-many-statements
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
     """
     Install kubectl, a command-line interface for Kubernetes clusters.
@@ -386,7 +387,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
         client_version = version.decode('UTF-8').strip()
     else:
         client_version = "v%s" % client_version
-        if enable_cdn is None:
+        if enable_cdn is None and client_version != "1.18.7":
             enable_cdn = True
 
     file_url = ''
@@ -455,6 +456,10 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
+        logger.warning(
+            "To avoid throttling caused by querying the version number, "
+            "it is recommended to specify the version number explicitly"
+        )
         context = _ssl_context()
         latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
         if cloud_name.lower() == 'azurechinacloud':
