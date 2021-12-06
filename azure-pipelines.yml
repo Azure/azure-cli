@@ -678,11 +678,9 @@ jobs:
 
     displayName: 'Test Homebrew Package'
 
+
 - job: BuildYumPackageMariner
   displayName: Build Yum Package Mariner
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule', 'PullRequest'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -691,8 +689,6 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
-
-
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum-mariner'
     inputs:
@@ -710,13 +706,12 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
-
-
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
+
 
 - job: TestYumPackage
   displayName: Test Yum Package
