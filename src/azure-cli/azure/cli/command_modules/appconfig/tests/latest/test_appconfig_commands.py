@@ -874,14 +874,14 @@ class AppConfigImportExportNamingConventionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'imported_file_path': import_multiple_feature_sections_path
         })
-        with self.assertRaisesRegexp(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
+        with self.assertRaisesRegex(CLIError, 'Unable to proceed because file contains multiple sections corresponding to "Feature Management".'):
             self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Error if imported file has "enabled for" in wrong format
         self.kwargs.update({
             'imported_file_path': import_wrong_enabledfor_format_path
         })
-        with self.assertRaisesRegexp(CLIError, 'definition or have a true/false value.'):
+        with self.assertRaisesRegex(CLIError, 'definition or have a true/false value.'):
             self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} -y')
 
         # Import/Export yaml file
@@ -1074,7 +1074,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
+        with self.assertRaisesRegex(CLIError, "Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'."):
             self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-label {src_label} --label {label} --preserve-labels -y')
 
         # Export tests from src config store to dest config store
@@ -1125,7 +1125,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         self.kwargs.update({
             'label': dest_label
         })
-        with self.assertRaisesRegexp(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
+        with self.assertRaisesRegex(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
             self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
 
 
@@ -1352,19 +1352,19 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'value': entry_value,
             'content_type': json_content_type_01
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': '[abc,def]'
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         self.kwargs.update({
             'value': 'True'
         })
-        with self.assertRaisesRegexp(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # Create a non-JSON key-value and update its content type in subsequent command
@@ -1375,7 +1375,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                  checks=[self.check('key', entry_key),
                          self.check('value', entry_value)])
 
-        with self.assertRaisesRegexp(CLIError, "Set the value again in valid JSON format."):
+        with self.assertRaisesRegex(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
         """
@@ -1538,7 +1538,7 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
             'imported_file_path': imported_file_path,
             'exported_file_path': exported_yaml_file_path
         })
-        with self.assertRaisesRegexp(CLIError, "Please provide JSON file format to match your content type."):
+        with self.assertRaisesRegex(CLIError, "Please provide JSON file format to match your content type."):
             self.cmd('appconfig kv import --connection-string {src_connection_string} -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} --content-type {content_type} -y')
 
         self.cmd(
@@ -1770,7 +1770,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': comma_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Comma separated feature names are not supported"):
+        with self.assertRaisesRegex(CLIError, "Comma separated feature names are not supported"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - contains invalid *
@@ -1779,7 +1779,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - starts with *
@@ -1788,7 +1788,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Invalid Pattern - contains multiple **
@@ -1797,7 +1797,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+        with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Delete Beta (label v2) feature flag using connection-string
@@ -1944,11 +1944,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'key': invalid_key
         })
 
-        with self.assertRaisesRegexp(CLIError, "Feature flag key must start with the reserved prefix"):
+        with self.assertRaisesRegex(CLIError, "Feature flag key must start with the reserved prefix"):
             self.cmd('appconfig feature set -n {config_store_name} --key {key}')
 
         # Missing key and feature
-        with self.assertRaisesRegexp(CLIError, "Please provide either `--key` or `--feature` value."):
+        with self.assertRaisesRegex(CLIError, "Please provide either `--key` or `--feature` value."):
             self.cmd('appconfig feature delete -n {config_store_name}')
 
 
@@ -2082,7 +2082,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                          self.check('state', conditional_state)])
 
         # Delete Filter without index should throw error when duplicates exist
-        with self.assertRaisesRegexp(CLIError, "contains multiple instances of filter"):
+        with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
             self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y')
 
         # Delete Filter with index succeeds when correct index is provided
@@ -2109,7 +2109,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_name': invalid_filter_name,
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, "Filter parameter value must be a JSON escaped string"):
+        with self.assertRaisesRegex(CLIError, "Filter parameter value must be a JSON escaped string"):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on adding duplicate filter parameters
@@ -2117,7 +2117,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
+        with self.assertRaisesRegex(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on filter parameter with empty name
@@ -2125,7 +2125,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'filter_parameters': invalid_filter_params
         })
-        with self.assertRaisesRegexp(CLIError, 'Parameter name cannot be empty.'):
+        with self.assertRaisesRegex(CLIError, 'Parameter name cannot be empty.'):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Test more inputs for filter param value
@@ -2199,19 +2199,19 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             'key': "Col%%or",
             'value': "Red"
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         self.kwargs.update({
             'key': ""
         })
-        with self.assertRaisesRegexp(CLIError, "Key cannot be empty."):
+        with self.assertRaisesRegex(CLIError, "Key cannot be empty."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key "{key}" --value {value} -y')
 
         self.kwargs.update({
             'key': "."
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
         # validate key for KeyVault ref
@@ -2219,20 +2219,20 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
             'key': "%KeyVault",
             'secret_identifier': "https://fake.vault.azure.net/secrets/fakesecret"
         })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
 
         # validate feature name
         self.kwargs.update({
             'feature': 'Beta%'
         })
-        with self.assertRaisesRegexp(CLIError, "Feature name cannot contain the '%' character."):
+        with self.assertRaisesRegex(CLIError, "Feature name cannot contain the '%' character."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y')
 
         self.kwargs.update({
             'feature': ''
         })
-        with self.assertRaisesRegexp(CLIError, "Feature name cannot be empty."):
+        with self.assertRaisesRegex(CLIError, "Feature name cannot be empty."):
             self.cmd('appconfig feature set --connection-string {connection_string} --feature "{feature}" -y')
 
         # validate keys and features during file import

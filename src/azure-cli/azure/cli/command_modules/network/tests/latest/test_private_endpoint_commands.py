@@ -608,7 +608,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('monitor private-link-scope delete -n {scope} -g {rg} -y')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor private-link-scope show -n {scope} -g {rg}')
 
 
@@ -699,11 +699,11 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
@@ -748,7 +748,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
@@ -793,7 +793,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
@@ -2472,6 +2472,10 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         self.assertEqual(redis['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
 
         self.kwargs['red_pec_id'] = redis['privateEndpointConnections'][0]['id']
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '1'),
+        ])
         
         self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
 
@@ -2479,6 +2483,10 @@ class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
         
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '0'),
+        ])
 
 
 class AzureWebPubSubServicePrivateEndpointScenarioTest(ScenarioTest):
