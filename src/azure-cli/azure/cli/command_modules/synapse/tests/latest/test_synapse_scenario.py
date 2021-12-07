@@ -1212,7 +1212,8 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW400c'
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1226,11 +1227,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.kwargs['pool-id'] = sql_pool['id']
@@ -1404,7 +1406,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW400c'
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1413,11 +1416,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.cmd(
@@ -1439,7 +1443,8 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
-            'threat-policy': 'threatpolicy'
+            'threat-policy': 'threatpolicy',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1448,11 +1453,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
@@ -1637,6 +1643,7 @@ class SynapseScenarioTests(ScenarioTest):
             'eventhub_name': self.create_random_name("ehsrv", 20),
             'eventhub_namespace':  self.create_random_name("ehnamespace", 20),
             'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1645,11 +1652,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
