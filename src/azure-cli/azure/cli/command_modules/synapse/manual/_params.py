@@ -221,6 +221,11 @@ def load_arguments(self, _):
         c.argument('source_database_id', help='The source database id.')
         c.argument('recoverable_database_id', help='The recoverable database id.')
         c.argument('tags', arg_type=tags_type)
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')
@@ -230,6 +235,12 @@ def load_arguments(self, _):
         c.argument('performance_level', help='The performance level.')
         c.argument('destination_name', options_list=['--dest-name', '--destination-name'],
                    help='Name of the sql pool that will be created as the restore destination.')
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('tags', arg_type=tags_type)
 
         restore_point_arg_group = 'Restore Point'
         c.argument('restore_point_in_time',
