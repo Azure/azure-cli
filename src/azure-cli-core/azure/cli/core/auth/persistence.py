@@ -21,6 +21,8 @@ logger = get_logger(__name__)
 # Files extensions for encrypted and plaintext persistence
 file_extensions = {True: '.bin', False: '.json'}
 
+KEYCHAIN_SERVICE_NAME = 'azure-cli'
+
 
 def load_persisted_token_cache(location, encrypt):
     persistence = build_persistence(location, encrypt)
@@ -38,16 +40,27 @@ def build_persistence(location, encrypt):
     logger.debug("build_persistence: location=%r, encrypt=%r", location, encrypt)
     if encrypt:
         if sys.platform.startswith('win'):
+            # For FilePersistenceWithDataProtection, location is where the credential is stored.
+            logger.debug("Initializing FilePersistenceWithDataProtection.")
             return FilePersistenceWithDataProtection(location)
         if sys.platform.startswith('darwin'):
-            return KeychainPersistence(location, "my_service_name", "my_account_name")
+            # For KeychainPersistence, location is only used as a signal for the credential's last modified time.
+            # The credential is stored in Keychain identified by (service_name, account_name) combination.
+            # msal-extensions automatically computes account_name from signal_location.
+            # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/103
+            logger.debug("Initializing KeychainPersistence")
+            return KeychainPersistence(location, service_name=KEYCHAIN_SERVICE_NAME)
         if sys.platform.startswith('linux'):
+            # TODO: Support token cache encryption on Linux
+            logger.debug("Initializing LibsecretPersistence.")
             return LibsecretPersistence(
                 location,
                 schema_name="my_schema_name",
                 attributes={"my_attr1": "foo", "my_attr2": "bar"}
             )
     else:
+        # For FilePersistence, location is where the credential is stored.
+        logger.debug("Initializing FilePersistence")
         return FilePersistence(location)
 
 
