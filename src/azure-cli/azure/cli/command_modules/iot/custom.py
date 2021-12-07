@@ -585,7 +585,7 @@ def update_iot_hub_custom(instance,
         default_storage_endpoint = instance.properties.storage_endpoints.get('$default', {})
         # no default storage endpoint, either recreate with existing params or throw an error
         if not default_storage_endpoint:
-            if not fileupload_storage_connectionstring and not fileupload_storage_container_name:
+            if not all([fileupload_storage_connectionstring, fileupload_storage_container_name]):
                 raise AzCLIError('This hub has no default storage endpoint for file upload.\n'
                                  'Please recreate your default storage endpoint by running '
                                  '`az iot hub update --name {hub_name} --fcs {storage_connection_string} --fc {storage_container_name}`')
