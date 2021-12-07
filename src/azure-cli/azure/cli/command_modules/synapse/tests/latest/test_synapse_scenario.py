@@ -2677,7 +2677,7 @@ class SynapseScenarioTests(ScenarioTest):
         return self.cmd('az storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-   # @record_only()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
