@@ -2679,11 +2679,21 @@ class SynapseScenarioTests(ScenarioTest):
 
    # @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_managed_private_endpoints(self):
         self.kwargs.update({
-            'workspace': 'testsynapseworkspacepe',
             'name': 'AzureDataLakeStoragePE',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'managedprivateendpoints.json')})
+
+        # create a workspace
+        self._create_workspace("--enable-managed-virtual-network")
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
 
         # create managed private endpoint
         self.cmd(
