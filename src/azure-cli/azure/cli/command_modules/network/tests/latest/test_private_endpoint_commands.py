@@ -344,6 +344,9 @@ class NetworkPrivateLinkAMLScenarioTest(ScenarioTest):
     def test_private_endpoint_connection_aml(self):
         self.kwargs.update({
             'workspace_name': self.create_random_name('testaml', 20),
+
+
+
             'vnet_name': self.create_random_name('testvnet', 20),
             'subnet_name': self.create_random_name('testsubnet', 20),
             'endpoint_name': self.create_random_name('priv_endpoint', 25),

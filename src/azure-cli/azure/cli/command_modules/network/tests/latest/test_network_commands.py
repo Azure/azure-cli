@@ -4801,7 +4801,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
-    def _mock_thread_count():
+    def _mock_thread_count(self):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
