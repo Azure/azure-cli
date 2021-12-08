@@ -2025,6 +2025,7 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
             'template-spec-name': template_spec_name,
             'template-spec-version': "v1",
@@ -2053,6 +2054,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub create --name {name} --update-behavior {update-behavior} --location {location} --template-file "{template-file}" --resource-group {resource-group} --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
+        self.cmd('stack sub delete --name {name} --yes')
+
+        # create deployment stack with bicep file and rg scope
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{bicep-file}" --parameters "{parameter-file}" -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
         self.cmd('stack sub delete --name {name} --yes')
 
 
@@ -2160,6 +2167,7 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
+            'bicep-file': os.path.join(curr_dir, 'bicep_simple_template.bicep').replace('\\', '\\\\'),
             'update-behavior': "detachResources",
             'template-spec-name': template_spec_name,
             'template-spec-version': "v1",
@@ -2181,6 +2189,12 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group create --name {name} --resource-group {resource-group} --update-behavior {update-behavior} --template-spec "{template-spec-id}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup 
+        self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
+
+        # create deployment stack with bicep file
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{bicep-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+
+        # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
     
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_stacks', location=location)
