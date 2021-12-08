@@ -8000,7 +8000,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     if auth_type.lower() == 'password':
         if username is None:
             raise RequiredArgumentMissingError("Please enter username with --username.")
-
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
@@ -8008,7 +8007,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         cert_folder = tempfile.mkdtemp(prefix="aadsshcert")
         if not os.path.isdir(cert_folder):
             os.makedirs(cert_folder)
-
         azssh.ssh_cert(cmd, cert_path=os.path.join(cert_folder, "id_rsa.pub-aadcert.pub"))
         private_key_file = os.path.join(cert_folder, "id_rsa")
         cert_file = os.path.join(cert_folder, "id_rsa.pub-aadcert.pub")
@@ -8018,7 +8016,6 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     elif auth_type.lower() == 'ssh-key':
         if username is None or ssh_key is None:
             raise RequiredArgumentMissingError("Please enter username --username and ssh cert location --ssh-key.")
-            
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, ssh_key)
     else:
