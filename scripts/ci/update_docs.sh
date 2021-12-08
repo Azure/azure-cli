@@ -10,7 +10,7 @@
 
 set -ev
 
-BOT_TOKEN=$(az keyvault secret show --vault-name REDACTED --name REDACTED --query value -otsv)
+BOT_TOKEN=$(az keyvault secret show --vault-name "${BOT_VAULT_NAME}" --name "${BOT_SECRET_NAME}" --query value -otsv)
 
 git clone https://github.com/Azure/azure-cli.git
 cd azure-cli
