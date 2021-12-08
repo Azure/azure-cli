@@ -356,7 +356,6 @@ class TestLogProfileScenarios(ScenarioTest):
             # self.check('length(tags)', 2)
         ])
         self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
-           # self.check('length(@)', 2)     /enable because just create 1 saved-search
             self.check('length(@)', 1)
         ])
 
@@ -424,9 +423,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        #with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
-        with self.assertRaisesRegex(HttpResponseError,
-                                        'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
@@ -436,9 +433,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-      #  with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
-        with self.assertRaisesRegex(HttpResponseError,
-                                        'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError,'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
