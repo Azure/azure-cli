@@ -8000,6 +8000,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     if auth_type.lower() == 'password':
         if username is None:
             raise RequiredArgumentMissingError("Please enter username with --username.")
+
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
@@ -8007,17 +8008,17 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         cert_folder = tempfile.mkdtemp(prefix="aadsshcert")
         if not os.path.isdir(cert_folder):
             os.makedirs(cert_folder)
+
         azssh.ssh_cert(cmd, cert_path=os.path.join(cert_folder, "id_rsa.pub-aadcert.pub"))
         private_key_file = os.path.join(cert_folder, "id_rsa")
         cert_file = os.path.join(cert_folder, "id_rsa.pub-aadcert.pub")
         username = azssh_utils.get_ssh_cert_principals(cert_file)[0]
-        #public_key_file, private_key_file, _ = azssh._check_or_create_public_private_files(None, None, None)  # pylint: disable=protected-access
-        #cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key':
         if username is None or ssh_key is None:
             raise RequiredArgumentMissingError("Please enter username --username and ssh cert location --ssh-key.")
+            
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(None, ssh_key)
     else:
