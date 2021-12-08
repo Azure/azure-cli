@@ -24,7 +24,6 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
 import threading
-import os
 import time
 import platform
 import subprocess
@@ -7985,6 +7984,7 @@ def _build_args(cert_file, private_key_file):
 
 
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
+    import os
 
     _test_extension(SSH_EXTENSION_NAME)
 
