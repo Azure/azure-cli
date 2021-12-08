@@ -7,7 +7,7 @@ import ipaddress
 
 from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageError, ValidationError,
                                        MutuallyExclusiveArgumentError)
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 
@@ -17,7 +17,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import _normalize_sku, get_sku_name
+from .utils import _normalize_sku, get_sku_name, _normalize_location
 
 logger = get_logger(__name__)
 
@@ -144,27 +144,55 @@ def validate_app_exists_in_rg(cmd, namespace):
 
 
 def validate_add_vnet(cmd, namespace):
+    from azure.core.exceptions import ResourceNotFoundError
+
     resource_group_name = namespace.resource_group_name
     from azure.cli.command_modules.network._client_factory import network_client_factory
-    vnet_client = network_client_factory(cmd.cli_ctx)
-    list_all_vnets = vnet_client.virtual_networks.list_all()
-    vnet = namespace.vnet
+
+    vnet_identifier = namespace.vnet
     name = namespace.name
     slot = namespace.slot
 
-    vnet_loc = ''
-    for v in list_all_vnets:
-        if vnet in (v.name, v.id):
-            vnet_loc = v.location
-            break
+    if is_valid_resource_id(vnet_identifier):
+        current_sub_id = get_subscription_id(cmd.cli_ctx)
+        parsed_vnet = parse_resource_id(vnet_identifier)
+
+        vnet_sub_id = parsed_vnet['subscription']
+        vnet_group = parsed_vnet['resource_group']
+        vnet_name = parsed_vnet['name']
+
+        cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
+        vnet_client = network_client_factory(cmd.cli_ctx)
+        vnet_loc = vnet_client.virtual_networks.get(resource_group_name=vnet_group,
+                                                    virtual_network_name=vnet_name).location
+        cmd.cli_ctx.data['subscription_id'] = current_sub_id
+    else:
+        vnet_client = network_client_factory(cmd.cli_ctx)
+
+        try:
+            vnet_loc = vnet_client.virtual_networks.get(resource_group_name=namespace.resource_group_name,
+                                                        virtual_network_name=vnet_identifier).location
+        except ResourceNotFoundError:
+            vnets = vnet_client.virtual_networks.list_all()
+            vnet_loc = ''
+            for v in vnets:
+                if vnet_identifier == v.name:
+                    vnet_loc = v.location
+                    break
+
+    if not vnet_loc:
+        # Fall back to back end validation
+        logger.warning("Failed to fetch vnet. Skipping location validation.")
+        return
 
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    # converting geo region to geo location
-    webapp_loc = webapp.location.lower().replace(" ", "")
+
+    webapp_loc = _normalize_location(cmd, webapp.location)
+    vnet_loc = _normalize_location(cmd, vnet_loc)
 
     if vnet_loc != webapp_loc:
-        raise CLIError("The app and the vnet resources are in different locations. \
-                        Cannot integrate a regional VNET to an app in a different region")
+        raise ValidationError("The app and the vnet resources are in different locations. "
+                              "Cannot integrate a regional VNET to an app in a different region")
 
 
 def validate_front_end_scale_factor(namespace):

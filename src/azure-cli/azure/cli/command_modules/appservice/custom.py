@@ -3718,10 +3718,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
     parsed_plan = parse_resource_id(app.app_service_plan_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
-    _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
-                                        subnet_resource_group=subnet_info["resource_group_name"],
-                                        vnet_name=subnet_info["vnet_name"])
-
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
                        ' Missing delegation can cause "Bad Request" error.')
