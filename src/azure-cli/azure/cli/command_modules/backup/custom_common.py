@@ -248,7 +248,12 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
             raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
         return recovery_point
 
-    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    try:
+        response = client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    except Exception as ex:
+        errorMessage = str(ex)
+        raise InvalidArgumentValueError("Specified recovery point can not be fetched - \n" + errorMessage)
+    return response
 
 
 def delete_policy(client, resource_group_name, vault_name, name):

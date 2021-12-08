@@ -23,7 +23,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSQLRestoreWithRehydrateRequest, CrossRegionRestoreRequest
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.backup._validators import datetime_type
+from azure.cli.command_modules.backup._validators import datetime_type, validate_wl_restore, validate_log_point_in_time
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
@@ -600,6 +600,11 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
 
+    item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                            container_uri, item_uri, "AzureWorkload")
+    cust_help.validate_item(item)
+    validate_wl_restore(item, item_type, restore_mode, recovery_mode)
+
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
     if log_point_in_time is None:
         recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
@@ -658,7 +663,10 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
             trigger_restore_properties.recovery_mode = recovery_mode
 
     if log_point_in_time is not None:
-        setattr(trigger_restore_properties, 'point_in_time', datetime_type(log_point_in_time))
+        log_point_in_time = datetime_type(log_point_in_time)
+        time_range_list = _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region)
+        validate_log_point_in_time(log_point_in_time, time_range_list)
+        setattr(trigger_restore_properties, 'point_in_time', log_point_in_time)
 
     if 'sql' in item_type.lower():
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
@@ -799,8 +807,25 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'alternate_directory_paths': alternate_directory_paths}
 
 
-def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
+def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
+    filter_string = cust_help.get_filter_string({
+        'restorePointQueryType': 'Log'})
+
+    client = recovery_points_cf(cmd.cli_ctx)
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+
+    # Get recovery points
+    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
+    paged_recovery_points = cust_help.get_none_one_or_many(cust_help.get_list_from_paged_response(recovery_points))
+    _check_none_and_many(paged_recovery_points, "Log time range")
+    return paged_recovery_points.properties.time_ranges
+
+
+def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
     if rehydration_priority is None:
         if item_type.lower() == "saphana":
             if log_point_in_time is not None:
@@ -868,10 +893,10 @@ def _get_protectable_container_name(cmd, resource_group_name, vault_name, resour
 
 def _check_none_and_many(item, item_name):
     if item is None:
-        error_text = "{} must be provided.".format(item_name)
+        error_text = "Could not find the {}.".format(item_name)
         az_error = ResourceNotFoundError(error_text)
         raise az_error
     if isinstance(item, list):
-        error_text = "Multiple {}s found. Please check if you have given correct target server type.".format(item_name)
+        error_text = "Multiple {}s found.".format(item_name)
         az_error = InvalidArgumentValueError(error_text)
         raise az_error
