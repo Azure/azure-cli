@@ -2573,6 +2573,8 @@ examples:
     text: az stack sub create --name "StackName" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --location "westus2" --description "description"
   - name: Create a deployment stack using bicep file.
     text: az stack sub create --name "StackName" --update-behavior "detachResources" --template-file simple.bicep --location "westus2" --description "description"
+  - name: Create a deployment stack at a different subscription.
+    text: az stack sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --location "westus2" --description "description --subscription "subscriptionId"
 """
 
 helps['stack sub list'] = """
@@ -2588,9 +2590,9 @@ type: command
 short-summary: Get specified deployment stack from subscription scope
 examples:
   - name: Get stack by name.
-    text: az stack sub show --stack-name "StackName"
+    text: az stack sub show --name "StackName"
   - name: Get stack by stack resource id.
-    text: az stack sub show --stack "StackResourceID"
+    text: az stack sub show --id "StackResourceID"
 """
 
 helps['stack sub delete'] = """
@@ -2598,9 +2600,9 @@ type: command
 short-summary: Delete specified deployment stack from subscription scope
 examples:
   - name: Delete stack by name.
-    text: az stack sub delete --stack-name "StackName"
+    text: az stack sub delete --name "StackName"
   - name: Delete stack by stack resource id.
-    text: az stack sub delete --stack "StackResourceID"
+    text: az stack sub delete --id "StackResourceID"
 """
 
 helps['stack group create'] = """
@@ -2615,6 +2617,8 @@ examples:
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-spec "TemplateSpecResourceIDWithVersion" --description "description"
   - name: Create a deployment stack using bicep file.
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simple.bicep --description "description"
+  - name: Create a deployment stack at a different subscription
+  text: az stack group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --description "description --subscription "subscriptionId"
 """
 
 helps['stack group list'] = """
@@ -2630,9 +2634,9 @@ type: command
 short-summary: Get specified deployment stack from resource group scope
 examples:
   - name: Get stack by name.
-    text: az stack group show --stack-name "StackName" --resource-group "ResourceGroup"
+    text: az stack group show --name "StackName" --resource-group "ResourceGroup"
   - name: Get stack by stack resource id.
-    text: az stack group show --stack "StackResourceID"
+    text: az stack group show --id "StackResourceID"
 """
 
 helps['stack group delete'] = """
@@ -2640,9 +2644,9 @@ type: command
 short-summary: Delete specified deployment stack from resource group scope
 examples:
   - name: Delete stack by name.
-    text: az stack group delete --stack-name "StackName" --resource-group "ResourceGroup"
+    text: az stack group delete --name "StackName" --resource-group "ResourceGroup"
   - name: Delete stack by stack resource id.
-    text: az stack group delete --stack "StackResourceID"
+    text: az stack group delete --id "StackResourceID"
 """
 
 helps['stack snapshot sub list'] = """
@@ -2660,9 +2664,9 @@ type: command
 short-summary: Get specified snapshot in deployment stack at subscription scope
 examples:
   - name: Get snapshot with stack name and snapshot name.
-    text: az stack snapshot sub show --snapshot-name "SnapshotName" --stack-name "StackName"
+    text: az stack snapshot sub show --name "SnapshotName" --stack-name "StackName"
   - name: Get snapshot by snapshot resource id.
-    text: az stack snapshot sub show --snapshot "SnapshotResourceID"
+    text: az stack snapshot sub show --id "SnapshotResourceID"
 """
 
 helps['stack snapshot sub delete'] = """
@@ -2670,9 +2674,9 @@ type: command
 short-summary: Delete specified snapshot in deployment stack at subscription scope
 examples:
   - name: Delete snapshot with stack name and snapshot name.
-    text: az stack snapshot sub delete --snapshot-name "SnapshotName" --stack-name "StackName"
+    text: az stack snapshot sub delete --name "SnapshotName" --stack-name "StackName"
   - name: Delete snapshot by snapshot resource id.
-    text: az stack snapshot sub delete --snapshot "SnapshotResourceID"
+    text: az stack snapshot sub delete --id "SnapshotResourceID"
 """
 
 helps['stack snapshot group list'] = """
@@ -2690,9 +2694,9 @@ type: command
 short-summary: Get specified snapshot in deployment stack at resource group scope
 examples:
   - name: Get snapshot with stack name and snapshot name.
-    text: az stack snapshot group show --snapshot-name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+    text: az stack snapshot group show --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
   - name: Get snapshot by snapshot resource id.
-    text: az stack snapshot group show --snapshot "SnapshotResourceID"
+    text: az stack snapshot group show --id "SnapshotResourceID"
 """
 
 helps['stack snapshot group delete'] = """
@@ -2700,7 +2704,7 @@ type: command
 short-summary: Delete specified snapshot in deployment stack at resource group scope
 examples:
   - name: Delete snapshot with stack name and snapshot name.
-    text: az stack snapshot group delete --snapshot-name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
+    text: az stack snapshot group delete --name "SnapshotName" --stack-name "StackName" "StackName" --resource-group "ResourceGroup"
   - name: Delete snapshot by snapshot resource id.
-    text: az stack snapshot group delete --snapshot "SnapshotResourceID"
+    text: az stack snapshot group delete --id "SnapshotResourceID"
 """
