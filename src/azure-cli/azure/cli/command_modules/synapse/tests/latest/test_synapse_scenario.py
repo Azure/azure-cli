@@ -2694,6 +2694,9 @@ class SynapseScenarioTests(ScenarioTest):
             ]
         )
 
+        import time
+        time.sleep(60)
+
         # create managed private endpoint
         self.cmd(
             'az synapse  managed-private-endpoints create --workspace-name {workspace} --pe-name {name} --file @"{file}"',
