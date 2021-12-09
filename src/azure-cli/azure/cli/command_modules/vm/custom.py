@@ -295,7 +295,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
                         tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
-                        public_network_access=None, accelerated_network=None):
+                        public_network_access=None, accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -413,6 +413,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk.supported_capabilities = supportedCapabilities
         else:
             disk.supported_capabilities.accelerated_network = accelerated_network
+    if architecture is not None:
+        if disk.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(architecture=architecture)
+            disk.supported_capabilities = supportedCapabilities
+        else:
+            disk.supported_capabilities.architecture = architecture
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -434,7 +440,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
                         disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
-                        accelerated_network=None):
+                        accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -481,6 +487,12 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
             instance.supported_capabilities = supportedCapabilities
         else:
             instance.supported_capabilities.accelerated_network = accelerated_network
+    if architecture is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(architecture=architecture)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.architecture = architecture
     return instance
 # endregion
 
@@ -563,7 +575,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
-                    public_network_access=None, accelerated_network=None):
+                    public_network_access=None, accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -626,6 +638,12 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             snapshot.supported_capabilities = supportedCapabilities
         else:
             snapshot.supported_capabilities.accelerated_network = accelerated_network
+    if architecture is not None:
+        if snapshot.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(architecture=architecture)
+            snapshot.supported_capabilities = supportedCapabilities
+        else:
+            snapshot.supported_capabilities.architecture = architecture
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -645,7 +663,7 @@ def list_snapshots(cmd, resource_group_name=None):
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
-                    accelerated_network=None):
+                    accelerated_network=None, architecture=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -677,6 +695,12 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
             instance.supported_capabilities = supportedCapabilities
         else:
             instance.supported_capabilities.accelerated_network = accelerated_network
+    if architecture is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(architecture=architecture)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.architecture = architecture
     return instance
 # endregion
 
