@@ -678,7 +678,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
-        c.argument('force_deletion', arg_type=get_three_state_flag(), is_preview=True, help='This property allow you to specify if virtual machines chosen for removal have to be force deleted when a virtual machine scale set is being scaled-in.')
+        c.argument('force_deletion', action='store_true', is_preview=True, help='This property allow you to specify if virtual machines chosen for removal have to be force deleted when a virtual machine scale set is being scaled-in.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
