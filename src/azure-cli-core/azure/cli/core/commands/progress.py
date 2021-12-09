@@ -5,7 +5,7 @@
 from __future__ import division
 import sys
 
-import humanfriendly
+from humanfriendly.terminal.spinners import Spinner
 
 BAR_LEN = 70
 EMPTY_LINE = ' ' * BAR_LEN
@@ -115,7 +115,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         :param args: dictionary containing key 'message'
         """
         if self.spinner is None:
-            self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
+            self.spinner = Spinner(  # pylint: disable=no-member
                 label='In Progress', stream=self.out, hide_cursor=False)
         msg = args.get('message', 'In Progress')
         try:
@@ -179,7 +179,7 @@ class IndeterminateProgressBar:
         self.message = message
         self.hook = self.cli_ctx.get_progress_controller(
             det=False,
-            spinner=humanfriendly.Spinner(  # pylint: disable=no-member
+            spinner=Spinner(  # pylint: disable=no-member
                 label='Running',
                 stream=sys.stderr,
                 hide_cursor=False))

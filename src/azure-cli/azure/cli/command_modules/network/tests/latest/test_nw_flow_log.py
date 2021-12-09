@@ -98,7 +98,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
 
         self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')

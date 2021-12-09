@@ -1047,7 +1047,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'spark-pool': self.create_random_name(prefix='testpool', length=15),
-            'spark-version': '2.4'
+            'spark-version': '2.4',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkconfigfile.txt')
         })
 
         # create a workspace
@@ -1060,11 +1061,13 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create spark pool
         spark_pool = self.cmd('az synapse spark pool create --name {spark-pool} --spark-version {spark-version}'
-                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium',
+                              ' --workspace {workspace} --resource-group {rg} --node-count 3 --node-size Medium'
+                              ' --spark-config-file-path "{file}"',
                               checks=[
                                   self.check('name', self.kwargs['spark-pool']),
                                   self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-                                  self.check('provisioningState', 'Succeeded')
+                                  self.check('provisioningState', 'Succeeded'),
+                                  self.check('sparkConfigProperties.filename','sparkconfigfile')
                               ]).get_output_in_json()
 
         self.kwargs['pool-id'] = spark_pool['id']
@@ -1083,12 +1086,15 @@ class SynapseScenarioTests(ScenarioTest):
         ])
 
         # update spark pool
-        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1', checks=[
-            self.check('tags.key1', 'value1'),
-            self.check('name', self.kwargs['spark-pool']),
-            self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
-            self.check('provisioningState', 'Succeeded')
-        ])
+        self.cmd('az synapse spark pool update --ids {pool-id} --tags key1=value1'
+                 ' --spark-config-file-path "{file}"',
+                 checks=[
+                    self.check('tags.key1', 'value1'),
+                    self.check('name', self.kwargs['spark-pool']),
+                    self.check('type', 'Microsoft.Synapse/workspaces/bigDataPools'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('sparkConfigProperties.filename','sparkconfigfile')
+                 ])
 
         # delete spark pool with spark pool name
         self.cmd(
@@ -1206,7 +1212,8 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW400c'
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1220,11 +1227,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.kwargs['pool-id'] = sql_pool['id']
@@ -1398,7 +1406,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
-            'performance-level': 'DW400c'
+            'performance-level': 'DW400c',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1407,11 +1416,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.cmd(
@@ -1433,7 +1443,8 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
             'performance-level': 'DW400c',
-            'threat-policy': 'threatpolicy'
+            'threat-policy': 'threatpolicy',
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1442,11 +1453,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.cmd('az synapse sql pool threat-policy update --state Enabled --storage-account {storage-account} '
@@ -1481,14 +1493,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # test show command
         self.cmd('az synapse sql audit-policy show '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 '--workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Disabled')
                  ])
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
-                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+                 ' --retention-days={retention-days} --actions {audit-actions-input}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -1498,7 +1510,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy
         self.cmd('az synapse sql audit-policy show '
-                 '--workspace-name {workspace} --resource-group {rg} --blob-auditing-policy-name bapname',
+                 '--workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -1508,7 +1520,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --bsts Enabled --storage-account {storage-account}'
-                 ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+                 ' --retention-days={retention-days} --actions {audit-actions-input}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -1517,7 +1529,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Disabled --blob-auditing-policy-name bapn',
+                 ' --state Disabled',
                  checks=[
                      self.check('state', 'Disabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -1533,16 +1545,14 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled'
-                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
-                 ' --blob-auditing-policy-name bapn',
+                 ' --lats Enabled --lawri {log_analytics_workspace_id}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -1552,16 +1562,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --lats Disabled'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --state Enabled --lats Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapname',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -1587,16 +1595,14 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --state Enabled --event-hub-target-state Enabled'
-                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('blobStorageTargetState', 'Enabled'),
@@ -1606,15 +1612,14 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable event hub target
         self.cmd('az synapse sql audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 ' --state Enabled --event-hub-target-state Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
                      self.check('auditActionsAndGroups', self.kwargs['audit-actions-expected'])])
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
-        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}'
-                 ' --blob-auditing-policy-name bapn',
+        self.cmd('az synapse sql audit-policy show --resource-group {rg} --workspace-name {workspace}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('isAzureMonitorTargetEnabled', False),
@@ -1638,6 +1643,7 @@ class SynapseScenarioTests(ScenarioTest):
             'eventhub_name': self.create_random_name("ehsrv", 20),
             'eventhub_namespace':  self.create_random_name("ehnamespace", 20),
             'eventhub_auth_rule': self.create_random_name("ehauthruledb", 20),
+            'storage-type': 'GRS'
         })
 
         # create a workspace
@@ -1646,11 +1652,12 @@ class SynapseScenarioTests(ScenarioTest):
         # create sql pool
         sql_pool = self.cmd(
             'az synapse sql pool create --name {sql-pool} --performance-level {performance-level} '
-            '--workspace {workspace} --resource-group {rg}', checks=[
+            '--workspace {workspace} --resource-group {rg} --storage-type {storage-type}', checks=[
                 self.check('name', self.kwargs['sql-pool']),
                 self.check('type', 'Microsoft.Synapse/workspaces/sqlPools'),
                 self.check('provisioningState', 'Succeeded'),
-                self.check('status', 'Online')
+                self.check('status', 'Online'),
+                self.check('storageAccountType', 'GRS')
             ]).get_output_in_json()
 
         self.kwargs['storage-endpoint'] = self._get_storage_endpoint(self.kwargs['storage-account'], self.kwargs['rg'])
@@ -1666,7 +1673,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace} --name {sql-pool} '
              ' --state Enabled --bsts Enabled --storage-key {storage-key} --storage-endpoint={storage-endpoint}'
-             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapname',
+             ' --retention-days={retention-days} --actions {audit-actions-input} ',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -1675,7 +1682,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # get audit policy
         self.cmd('az synapse sql pool audit-policy show '
-             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool} --blob-auditing-policy-name bapname',
+             '--workspace-name {workspace} --resource-group {rg} --name {sql-pool}',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('blobStorageTargetState', 'Enabled'),
@@ -1685,7 +1692,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
              ' --name {sql-pool} --state Enabled --bsts Enabled --storage-account {storage-account}'
-             ' --retention-days={retention-days} --actions {audit-actions-input} --blob-auditing-policy-name bapn',
+             ' --retention-days={retention-days} --actions {audit-actions-input}',
              checks=[
                  self.check('state', 'Enabled'),
                  self.check('storageEndpoint', self.kwargs['storage-endpoint']),
@@ -1694,7 +1701,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-             ' --name {sql-pool} --state Disabled --blob-auditing-policy-name bapn',
+             ' --name {sql-pool} --state Disabled',
              checks=[
                  self.check('state', 'Disabled'),
                  self.check('retentionDays', self.kwargs['retention-days']),
@@ -1711,8 +1718,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --name {sql-pool} --state Enabled'
-                 ' --lats Enabled --lawri {log_analytics_workspace_id} '
-                 ' --blob-auditing-policy-name bapn',
+                 ' --lats Enabled --lawri {log_analytics_workspace_id} ',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -1730,8 +1736,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable log analytics target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 ' --name {sql-pool} --state Enabled --lats Disabled'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --name {sql-pool} --state Enabled --lats Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -1766,8 +1771,7 @@ class SynapseScenarioTests(ScenarioTest):
         # update audit policy - enable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
                  ' --name {sql-pool} --state Enabled --event-hub-target-state Enabled'
-                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}'
-                 ' --blob-auditing-policy-name bapn',
+                 ' --ehari {eventhub_auth_rule_id} --event-hub {eventhub_name}',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -1785,7 +1789,7 @@ class SynapseScenarioTests(ScenarioTest):
 
         # update audit policy - disable event hub target
         self.cmd('az synapse sql pool audit-policy update --resource-group {rg} --workspace-name {workspace}'
-                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled --blob-auditing-policy-name bapn',
+                 '  --name {sql-pool} --state Enabled --event-hub-target-state Disabled',
                  checks=[
                      self.check('state', 'Enabled'),
                      self.check('retentionDays', self.kwargs['retention-days']),
@@ -2438,7 +2442,6 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse data-flow show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
     def test_notebook(self):
@@ -2447,6 +2450,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'notebook.ipynb')
         })
 
@@ -2473,9 +2477,10 @@ class SynapseScenarioTests(ScenarioTest):
         # create notebook
         self.cmd(
             'az synapse notebook create --workspace-name {workspace} --name {name} --file @"{file}" '
-            '--spark-pool-name {spark-pool}',
+            '--spark-pool-name {spark-pool} --folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # get notebook
@@ -2731,6 +2736,7 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'SparkAutoCreate1',
             'spark-pool': 'testpool',
             'spark-version': '2.4',
+            'folder_path':'testfolder/testsubfolder',
             'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sparkjobdefinition.json')
         })
 
@@ -2756,9 +2762,11 @@ class SynapseScenarioTests(ScenarioTest):
 
         # create a spark job definition
         self.cmd(
-            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" ',
+            'az synapse spark-job-definition create --workspace-name {workspace} --name {name} --file @"{file}" '
+            '--folder-path {folder_path}',
             checks=[
-                self.check('name', self.kwargs['name'])
+                self.check('name', self.kwargs['name']),
+                self.check('properties.folder.name', self.kwargs['folder_path'])
             ])
 
         # Get a spark job definition
@@ -2780,5 +2788,71 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse spark-job-definition delete --workspace-name {workspace} --name {name}')
         self.cmd(
             'az synapse spark-job-definition show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+        
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
+    def test_sqlscript(self):
+        self.kwargs.update({
+            'name': 'test_sqlscript1',
+            'sql_pool_name': 'testsqlpool',
+            'performance_level': 'DW100c',
+            'data_base_name': 'testsqlpool',
+            'folder_name':'folder1/subfolder1',
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'sqlscript.sql')
+        })
+
+        # create a workspace
+        self._create_workspace()
+
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # create sql pool
+        self.cmd(
+            'az synapse sql pool create --name {sql_pool_name} --performance-level {performance_level} '
+            '--workspace {workspace} --resource-group {rg}')
+        
+        # create sqlscript
+        self.cmd(
+            'az synapse sql-script create --workspace-name {workspace} --name {name} --file "{file}" '
+            '--sql-pool-name {sql_pool_name} --sql-database-name {data_base_name} --folder-name {folder_name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get sqlscript
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list sqlscript
+        self.cmd(
+            'az synapse sql-script list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/sqlscripts')
+            ])
+
+        # export sqlscript
+        self.kwargs['output_folder'] = os.getcwd()
+        self.cmd(
+            'az synapse sql-script export --workspace-name {workspace} --name {name} '
+            '--output-folder "{output_folder}"')
+        file_path = os.path.join(self.kwargs['output_folder'], self.kwargs['name'] + '.sql')
+        self.assertTrue(os.path.isfile(file_path))
+        os.remove(file_path)
+
+        # delete sqlscript
+        self.cmd(
+            'az synapse sql-script delete --workspace-name {workspace} --name {name}')
+        self.cmd(
+            'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 

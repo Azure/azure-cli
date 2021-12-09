@@ -13,7 +13,7 @@ from unittest import mock
 import unittest
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from ..util import retry
@@ -341,7 +341,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
+                with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
