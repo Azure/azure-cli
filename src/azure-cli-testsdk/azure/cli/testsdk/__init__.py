@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import live_only, record_only, get_sha1_hash
+from .scenario_tests import live_only, record_only, get_sha1_hash
 
 from .base import ScenarioTest, LiveScenarioTest, LocalContextScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
