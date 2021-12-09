@@ -207,6 +207,13 @@ long-summary: The ENCRYPT operation encrypts an arbitrary sequence of bytes usin
     the key. This operation is supported for asymmetric keys as a convenience for callers that
     have a key-reference but do not have access to the public key material. This operation
     requires the keys/encrypt permission.
+examples:
+  - name: Encrypt value(Base64 encoded string) with valut's key using RSA-OAEP.
+    text: |
+        az keyvault key encrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --value "YWJjZGVm" --data-type base64
+  - name: Encrypt value(plaintext) with MHSM's key using AES-GCM.
+    text: |
+        az keyvault key encrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "this is plaintext" --data-type plaintext --aad "101112131415161718191a1b1c1d1e1f"
 """
 
 helps['keyvault key decrypt'] = """
@@ -218,6 +225,14 @@ long-summary: The DECRYPT operation decrypts a well-formed block of ciphertext u
     and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys
     stored in Vault or HSM since it uses the private portion of the key. This operation
     requires the keys/decrypt permission.
+examples:
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with valut's key using RSA-OAEP and get result as base64 encoded.
+    text: |
+        az keyvault key decrypt --name mykey --vault-name myvault --algorithm RSA-OAEP --data-type base64 --value "CbFcCxHG7WTU+nbpFRrHoqSduwlPy8xpWxf1JxZ2y12BY/qFJirMSYq1i4SO9rvSmvmEMxFV5kw5s9Tc+YoKmv8X6oe+xXx+JytYV8obA5l3OQD9epuuQHWW0kir/mp88lzhcYWxYuF7mKDpPKDV4if+wnAZqQ4woB6t2JEZU5MVK3s+3E/EU4ehb5XrVxAl6xpYy8VYbyF33uJ5s+aUsYIrsVtXgrW99HQ3ic7tJtIOGuWqKhPCdQRezRkOcyxkJcmnDHOLjWA/9strzzx/dyg/t884gT7qrkmIHh8if9SFal/vi1h4XhoDqUleMTnKev2IFHyDNcYVYG3pftJiuA=="
+  - name: Decrypt value(Base64 encoded string returned by encrypt command) with MHSM's key using AES-GCM and get result as plaintext.
+    text: |
+        az keyvault key decrypt --name mykey --hsm-name myhsm --algorithm A256GCM --value "N5w02jS77xg536Ddzv/xPWQ=" --data-type plaintext
+        --aad "101112131415161718191a1b1c1d1e1f" --iv "727b26f78e55cf4cd8d34216" --tag "f7207d02cead35a77a1c7e5f8af959e9"
 """
 
 helps['keyvault key backup'] = """
@@ -323,6 +338,55 @@ long-summary: The Get Deleted Key operation is applicable for soft-delete enable
 helps['keyvault key get-policy-template'] = """
 type: command
 short-summary: Return policy template as JSON encoded policy definition.
+"""
+
+helps['keyvault key rotate'] = """
+type: command
+short-summary: Rotate the key based on the key policy by generating a new version of the key.
+"""
+
+helps['keyvault key rotation-policy'] = """
+type: group
+short-summary: Manage key's rotation policy.
+"""
+
+helps['keyvault key rotation-policy update'] = """
+type: command
+short-summary: Update the rotation policy of a Key Vault key.
+examples:
+  - name: Set rotation policy using json file
+    text: |
+        az keyvault key rotation-policy update -n mykey --vault-name mykeyvault --value path/to/policy.json
+        A valid example for policy.json is:
+        {
+          "lifetimeActions": [
+            {
+              "trigger": {
+                "timeAfterCreate": "P90D", // ISO 8601 duration. For example: 90 days is "P90D", 3 months is "P3M", and 48 hours is "PT48H".
+                "timeBeforeExpiry" : null
+              },
+              "action": {
+                "type": "Rotate"
+              }
+            },
+            {
+              "trigger": {
+                "timeBeforeExpiry" : "P30D" // ISO 8601 duration.
+              },
+              "action": {
+                "type": "Notify"
+              }
+            }
+          ],
+          "attributes": {
+            "expiryTime": "P2Y" // ISO 8601 duration.
+          }
+        }
+"""
+
+helps['keyvault key rotation-policy show'] = """
+type: command
+short-summary: Get the rotation policy of a Key Vault key.
 """
 
 helps['keyvault list'] = """

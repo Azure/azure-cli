@@ -14,7 +14,7 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -608,7 +608,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('monitor private-link-scope delete -n {scope} -g {rg} -y')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor private-link-scope show -n {scope} -g {rg}')
 
 
@@ -699,11 +699,11 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
@@ -748,7 +748,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
@@ -793,7 +793,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        with self.assertRaisesRegexp(CLIError, expectedError):
+        with self.assertRaisesRegex(CLIError, expectedError):
             self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
@@ -2408,6 +2408,188 @@ class NetworkPrivateLinkHDInsightScenarioTest(ScenarioTest):
         time.sleep(10)
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}', expect_failure=True)
 
+
+class NetworkPrivateLinkAzureCacheforRedisScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_acfr_plr')
+    def test_private_link_resource_acfr(self, resource_group):
+        self.kwargs.update({
+            'cache_name': self.create_random_name('cli-test-acfr-plr', 28),
+            'loc': 'eastus'
+        })
+        self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Basic --vm-size c0')
+
+        self.cmd('network private-link-resource list --name {cache_name} -g {rg} --type Microsoft.Cache/Redis' , checks=[
+            self.check('length(@)', 1)]) #####
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_acfr_pe')
+    def test_private_endpoint_connection_acfr(self,resource_group):
+        self.kwargs.update({
+            'cache_name': self.create_random_name('cli-test-acfr-pe-', 28),
+            'loc': 'westus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare Redis Cache and network
+        cache = self.cmd('az redis create --location {loc} --name {cache_name} --resource-group {rg} --sku Standard --vm-size c1').get_output_in_json()
+        self.kwargs['acfr_id'] = cache['id'] 
+    
+        self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+        
+        # Waiting for Cache creation
+        if self.is_live:
+            time.sleep(25 * 60)
+
+        # Creating Private Endpoint
+        pe = self.cmd('az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} --connection-name {pe_connection} --private-connection-resource-id {acfr_id} --group-id redisCache').get_output_in_json() 
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Test get details of private endpoint
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/privateEndpoints/{2}'.format(results[2], results[4], results[-1])
+        
+        self.cmd('az network private-endpoint show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+
+        self.cmd(
+            'az network private-endpoint show --resource-group {rg} --name {pe_name}',
+            checks=self.check('name', '{pe_name}'))
+
+    
+        # Show the connection at azure cache for redis
+
+        redis = self.cmd('az redis show -n {cache_name} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', redis)
+        self.assertEqual(len(redis['privateEndpointConnections']), 1)
+        self.assertEqual(redis['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+
+        self.kwargs['red_pec_id'] = redis['privateEndpointConnections'][0]['id']
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '1'),
+        ])
+        
+        self.cmd('az network private-endpoint-connection show --id {red_pec_id}', checks=self.check('id', '{red_pec_id}'))
+
+        self.cmd('az network private-endpoint-connection reject --id {red_pec_id}', checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+        
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {red_pec_id} -y')
+
+        self.cmd('az network private-endpoint-connection list --id {red_pec_id}', checks=[
+            self.check('length(@)', '0'),
+        ])
+
+
+class AzureWebPubSubServicePrivateEndpointScenarioTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_webpubsub_private_endpoint(self, resource_group):
+        webpubsub_name = self.create_random_name('webpubsub', 16)
+        sku = 'Standard_S1'
+        unit_count = 1
+        location = 'centraluseuap'
+
+        self.kwargs.update({
+            'location': location,
+            'webpubsub_name': webpubsub_name,
+            'sku': sku,
+            'unit_count': unit_count,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'private_endpoint': 'private_endpoint1',
+            'private_endpoint_connection': 'private_endpoint_connection1'
+        })
+
+        # install az webpubsub
+        self.cmd('extension add --name webpubsub')
+
+        webpubsub = self.cmd('az webpubsub create -n {webpubsub_name} -g {rg} --sku {sku} -l {location}', checks=[
+            self.check('name', '{webpubsub_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', '{sku}')
+        ]).get_output_in_json()
+
+        # Prepare network
+        self.cmd('network vnet create -g {rg} -n {vnet} -l {location} --subnet-name {subnet}')
+        self.cmd('network vnet subnet update --name {subnet} --resource-group {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true')
+
+        self.kwargs.update({
+            'webpubsub_id': webpubsub['id']
+        })
+
+        # Create a private endpoint connection
+        self.cmd('network private-endpoint create --resource-group {rg} --vnet-name {vnet} --subnet {subnet} --name {private_endpoint}  --private-connection-resource-id {webpubsub_id} --group-ids webpubsub --connection-name {private_endpoint_connection} --location {location} --manual-request')
+
+        # Test private link resource list
+        self.cmd('network private-link-resource list -n {webpubsub_name} -g {rg} --type Microsoft.SignalRService/webpubsub', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        s_r = self.cmd('webpubsub show -n {webpubsub_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'private_endpoint_connection_id': s_r['privateEndpointConnections'][0]['id']
+        })
+
+        # Test show private endpoint connection
+        self.cmd('network private-endpoint-connection show --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        ])
+
+        # Test list private endpoint connection
+        self.cmd('network private-endpoint-connection list --id {webpubsub_id}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test approve private endpoint connection
+        self.cmd('network private-endpoint-connection approve --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+        ])
+
+        # Test reject private endpoint connection
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+        ])
+
+        # Test update public network rules
+        self.cmd('webpubsub network-rule update --public-network -n {webpubsub_name} -g {rg} --allow RESTAPI', checks=[
+            self.check('networkAcLs.publicNetwork.allow[0]', 'RESTAPI'),
+            self.check('length(networkAcLs.publicNetwork.deny)', 0),
+        ])
+
+        # Test list network rules
+        n_r = self.cmd('webpubsub network-rule show -n {webpubsub_name} -g {rg}', checks=[
+            self.check('length(privateEndpoints)', 1)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'connection_name': n_r['privateEndpoints'][0]['name']
+        })
+
+        # Test update private network rules
+        self.cmd('webpubsub network-rule update --connection-name {connection_name} -n {webpubsub_name} -g {rg} --allow RESTAPI', checks=[
+            self.check('networkAcLs.privateEndpoints[0].allow[0]', 'RESTAPI'),
+            self.check('length(networkAcLs.privateEndpoints[0].deny)', 0),
+        ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private_endpoint_connection_id} -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list --id {webpubsub_id}', checks=[
+            self.check('length(@)', 0)
+        ])
 
 if __name__ == '__main__':
     unittest.main()

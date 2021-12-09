@@ -11,6 +11,10 @@ import os
 import re
 import requests
 import xml.etree.ElementTree as ET
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET):
@@ -20,12 +24,12 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     :param container_url:
     :return: a HTML string
     """
-    print('Enter generate()')
+    logger.warning('Enter generate()')
     # [{'name': name, 'url': url}]
     data = []
     url = container_url + '?restype=container&comp=list'
     content = requests.get(url).content
-    # print(content)
+    logger.warning(content)
     root = ET.fromstring(content)
     for blobs in root:
         for blob in blobs:
@@ -36,27 +40,27 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
                 if e.tag == 'Url':
                     url = e.text
             if name == '' or url == '':
-                print('[Warning] Blob\'s name or url is empty, name: {}, url: {}'.format(name, url))
+                logger.warning('[Warning] Blob\'s name or url is empty, name: {}, url: {}'.format(name, url))
             if name.endswith('.html'):
                 data.append({'name': name, 'url': url})
         break
-    print(data)
+    logger.warning(data)
     html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
     with open('index.html', 'w') as f:
         f.write(html)
 
     # Upload to storage account
     cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac'.format(container)
-    print('Running: ' + cmd)
+    logger.warning('Running: ' + cmd)
     os.system(cmd)
 
     # Upload to latest container if it is a full live test of official repo dev branch
     if USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_TARGET == '' and USER_LIVE == '--live':
         cmd = 'az storage blob upload -f index.html -c latest -n index.html --account-name clitestresultstac'
-        print('Running: ' + cmd)
+        logger.warning('Running: ' + cmd)
         os.system(cmd)
 
-    print('Exit generate()')
+    logger.warning('Exit generate()')
     return html
 
 
@@ -73,7 +77,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     :param USER_LIVE:
     :return:
     """
-    print('Enter render()')
+    logger.warning('Enter render()')
     content = """
     <!DOCTYPE html>
     <html>
@@ -163,7 +167,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
                     if number.isdigit():
                         display_name += '(' + number + ')'
                 except:
-                    traceback.print_exc()
+                    logger.exception(traceback.print_exc())
                 reports += '<a href="{}">{}</a> '.format(url, display_name)
         table += """
           <tr>
@@ -196,14 +200,18 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     </html>
     """
 
-    print(content)
-    print('Exit render()')
+    logger.warning(content)
+    logger.warning('Exit render()')
     return content
 
 
-if __name__ == '__main__':
+def main():
     url = 'https://clitestresultstac.blob.core.windows.net/20200919213646live'
     try:
         generate(url)
     except:
-        traceback.print_exc()
+        logger.exception(traceback.print_exc())
+
+
+if __name__ == '__main__':
+    main()

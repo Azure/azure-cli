@@ -25,14 +25,14 @@ from knack.util import CLIError
 from msrest.serialization import Deserializer
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
-from six.moves import urllib_parse
+from urllib.parse import urlparse
 
 from azure.cli.core import keys
 from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import ResourceNotFoundError
-import azure.mgmt.batchai.models as models
+from azure.mgmt.batchai import models
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
 # decision about which storage account to use instead of using his default account specified via AZURE_STORAGE_ACCOUNT
@@ -185,7 +185,7 @@ def _get_account_name_from_azure_file_url(azure_file_url):
     """
     if not azure_file_url:
         raise CLIError('Azure File URL cannot absent or be empty')
-    o = urllib_parse.urlparse(azure_file_url)
+    o = urlparse(azure_file_url)
     try:
         account, _ = o.netloc.split('.', 1)
         return account

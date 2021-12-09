@@ -20,7 +20,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller,\
     generate_password, parse_maintenance_window
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
-from .validators import pg_arguments_validator, validate_server_name
+from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -177,6 +177,8 @@ def flexible_server_restore(cmd, client,
     else:
         source_server_id = source_server
 
+    restore_point_in_time = validate_and_format_restore_point_in_time(restore_point_in_time)
+
     try:
         id_parts = parse_resource_id(source_server_id)
         source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
@@ -329,7 +331,7 @@ def flexible_server_restart(cmd, client, resource_group_name, server_name, fail_
         client.begin_restart(resource_group_name, server_name, parameters), cmd.cli_ctx, 'PostgreSQL Server Restart')
 
 
-def flexible_server_delete(cmd, client, resource_group_name=None, server_name=None, yes=False):
+def flexible_server_delete(cmd, client, resource_group_name, server_name, yes=False):
     result = None
     if not yes:
         user_confirmation(
@@ -428,7 +430,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
 
     if charset is None and collation is None:
         charset = 'utf8'

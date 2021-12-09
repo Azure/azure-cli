@@ -14,7 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -168,7 +168,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         local_dir = self.create_temp_dir()
         account_info = self.get_account_info(resource_group, storage_account)
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'File is expected, not a directory'):
+        with self.assertRaisesRegex(FileOperationError, 'File is expected, not a directory'):
             self.storage_cmd('storage blob download -c mycontainer -n myblob -f "{}"', account_info, local_dir)
 
     @ResourceGroupPreparer()
@@ -460,7 +460,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
         from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "NoPendingCopyOperation"):
+        with self.assertRaisesRegex(AzureException, "NoPendingCopyOperation"):
             self.storage_cmd('storage blob copy cancel -c {} -b {} --copy-id {}', account_info, c, b, copy_id)
 
     @ResourceGroupPreparer()
@@ -486,7 +486,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
-        with self.assertRaisesRegexp(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '
                      '--auth-mode login'.format(storage_account, b, c, expiry))
 
@@ -524,7 +524,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         # test 403
         from azure.core.exceptions import ClientAuthenticationError
-        with self.assertRaisesRegexp(ClientAuthenticationError, "Authentication failure"):
+        with self.assertRaisesRegex(ClientAuthenticationError, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
@@ -609,6 +609,42 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name2) \
             .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))
+
+
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')
+class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='version', kind='StorageV2', location='centraluseuap')
+    def test_storage_blob_vlm(self, resource_group, storage_account_info):
+        container = self.create_random_name(prefix='container', length=18)
+        blob = self.create_random_name(prefix='blob', length=18)
+        self.kwargs.update({
+            'container': container,
+            'blob': blob
+        })
+        # Enable blob versioning
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} --enable-versioning')
+        # Enable vlm on container creation
+        self.cmd('storage container-rm create -n {container} --storage-account {sa} -g {rg} --enable-vlw')
+        # Prepare blob resource
+        file = self.create_temp_file(10)
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} ', storage_account_info, container, file, blob)
+
+        # Test set immutability policy
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        result = self.storage_cmd('storage blob immutability-policy set -n {} -c {} '
+                                  '--expiry-time {} --policy-mode Unlocked',
+                                  storage_account_info, blob, container, expiry).get_output_in_json()
+        self.assertEqual(result.get('immutability_policy_mode'), 'unlocked')
+        self.assertIsNotNone(result.get('immutability_policy_until_date'))
+        # Test delete immutability policy
+        self.storage_cmd('storage blob immutability-policy delete -n {} -c {}', storage_account_info, blob, container)
+        # Test set legal hold
+        self.storage_cmd('storage blob set-legal-hold --legal-hold -n {} -c {}', storage_account_info, blob, container)\
+            .assert_with_checks(JMESPathCheck('legal_hold', True))
+        self.storage_cmd('storage blob set-legal-hold --legal-hold false -n {} -c {}', storage_account_info, blob, container) \
+            .assert_with_checks(JMESPathCheck('legal_hold', False))
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')

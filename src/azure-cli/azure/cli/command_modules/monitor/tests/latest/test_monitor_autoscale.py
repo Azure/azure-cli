@@ -5,7 +5,7 @@
 
 from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, record_only
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
@@ -99,7 +99,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         # verify order is stable
         list_1 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
-        with self.assertRaisesRegexp(CLIError, 'Please double check the name of the autoscale profile.'):
+        with self.assertRaisesRegex(CLIError, 'Please double check the name of the autoscale profile.'):
             self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name falseprofile')
 
         list_2 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()

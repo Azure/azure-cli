@@ -44,11 +44,11 @@ interactions:
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
-      [{"apiVersion": "2021-02-01", "type": "Microsoft.Network/publicIPAddresses",
+      [{"apiVersion": "2021-05-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "pubip1", "location": "eastus2", "tags": {}, "dependsOn": [], "properties":
       {"publicIPAllocationMethod": "Dynamic"}, "sku": {"name": "Basic"}, "zones":
       ["2"]}, {"type": "Microsoft.Network/loadBalancers", "name": "lb1", "location":
-      "eastus2", "tags": {}, "apiVersion": "2021-02-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/pubip1"],
+      "eastus2", "tags": {}, "apiVersion": "2021-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/pubip1"],
       "properties": {"backendAddressPools": [{"name": "lb1bepool"}], "frontendIPConfigurations":
       [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip1"},
       "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Basic"}}], "outputs":
@@ -200,7 +200,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
@@ -271,7 +271,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip1?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip1\",\r\n
@@ -364,7 +364,7 @@ interactions:
       "eastus2", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "subnet1", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type": "Microsoft.Network/loadBalancers",
-      "name": "lb2", "location": "eastus2", "tags": {}, "apiVersion": "2021-02-01",
+      "name": "lb2", "location": "eastus2", "tags": {}, "apiVersion": "2021-05-01",
       "dependsOn": ["Microsoft.Network/virtualNetworks/vnet1"], "properties": {"backendAddressPools":
       [{"name": "lb2bepool"}], "frontendIPConfigurations": [{"name": "LoadBalancerFrontEnd",
       "properties": {"privateIPAllocationMethod": "Dynamic", "privateIPAddress": null,
@@ -518,7 +518,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2\",\r\n
@@ -590,7 +590,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2\",\r\n
@@ -677,7 +677,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2\",\r\n
@@ -712,7 +712,7 @@ interactions:
         {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/79def482-93b6-4b90-b58a-0cf22f577291?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/79def482-93b6-4b90-b58a-0cf22f577291?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -759,7 +759,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/79def482-93b6-4b90-b58a-0cf22f577291?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/79def482-93b6-4b90-b58a-0cf22f577291?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -808,7 +808,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb2\",\r\n
@@ -917,11 +917,11 @@ interactions:
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
-      [{"apiVersion": "2021-02-01", "type": "Microsoft.Network/publicIPAddresses",
+      [{"apiVersion": "2021-05-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "PublicIPlb4", "location": "westcentralus", "tags": {}, "dependsOn":
       [], "properties": {"publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}},
       {"type": "Microsoft.Network/loadBalancers", "name": "lb4", "location": "westcentralus",
-      "tags": {}, "apiVersion": "2021-02-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb4"],
+      "tags": {}, "apiVersion": "2021-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb4"],
       "properties": {"backendAddressPools": [{"name": "lb4bepool"}], "frontendIPConfigurations":
       [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb4"},
       "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Standard"}}], "outputs":
@@ -1079,7 +1079,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2\",\r\n
@@ -1094,7 +1094,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0237d598-2aff-4cf2-a699-24e005575ed4?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0237d598-2aff-4cf2-a699-24e005575ed4?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -1137,7 +1137,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0237d598-2aff-4cf2-a699-24e005575ed4?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/0237d598-2aff-4cf2-a699-24e005575ed4?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1186,7 +1186,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/pubip2\",\r\n
@@ -1244,7 +1244,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb4\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4\",\r\n
@@ -1331,7 +1331,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb4\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4\",\r\n
@@ -1366,7 +1366,7 @@ interactions:
         \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/3d8045f2-e10f-499d-84fd-b27ee4cb345c?api-version=2021-02-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/3d8045f2-e10f-499d-84fd-b27ee4cb345c?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -1413,7 +1413,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/3d8045f2-e10f-499d-84fd-b27ee4cb345c?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/3d8045f2-e10f-499d-84fd-b27ee4cb345c?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1462,7 +1462,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.23.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"lb4\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/loadBalancers/lb4\",\r\n
@@ -1571,11 +1571,11 @@ interactions:
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
-      [{"apiVersion": "2021-02-01", "type": "Microsoft.Network/publicIPAddresses",
+      [{"apiVersion": "2021-05-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "PublicIPlb5", "location": "westcentralus", "tags": {}, "dependsOn":
       [], "properties": {"publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}},
       {"type": "Microsoft.Network/loadBalancers", "name": "lb5", "location": "westcentralus",
-      "tags": {}, "apiVersion": "2021-02-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb5"],
+      "tags": {}, "apiVersion": "2021-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb5"],
       "properties": {"backendAddressPools": [{"name": "lb5bepool"}], "frontendIPConfigurations":
       [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_lb_zone000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb5"},
       "privateIPAddressVersion": "IPv6"}}]}, "sku": {"name": "Standard"}}], "outputs":

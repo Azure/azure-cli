@@ -17,7 +17,9 @@ from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_feature_registrations, cf_tags, cf_deployments,
     cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_policy_exemptions, cf_resource_links,
     cf_resource_deploymentscripts, cf_resource_managedapplications, cf_resource_managedappdefinitions, cf_management_groups, cf_management_group_subscriptions, cf_resource_templatespecs)
-from azure.cli.command_modules.resource._validators import process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out
+from azure.cli.command_modules.resource._validators import (
+    process_deployment_create_namespace, process_ts_create_or_update_namespace, _validate_template_spec, _validate_template_spec_out,
+    process_assign_identity_namespace, process_assignment_create_namespace)
 
 from ._exception_handler import managementgroups_exception_handler
 
@@ -43,14 +45,18 @@ def transform_resource_list(result):
     return transformed
 
 
-# Resource group deployment commands
 def transform_deployment(result):
     r = result
-    return OrderedDict([('Name', r['name']),
-                        ('ResourceGroup', r['resourceGroup']),
-                        ('State', r['properties']['provisioningState']),
-                        ('Timestamp', r['properties']['timestamp']),
-                        ('Mode', r['properties']['mode'])])
+    format_result = OrderedDict([('Name', r['name']),
+                                 ('State', r['properties']['provisioningState']),
+                                 ('Timestamp', r['properties']['timestamp']),
+                                 ('Mode', r['properties']['mode'])])
+
+    # For deployments that are not under the resource group level, the return data does not contain 'resourceGroup'
+    if 'resourceGroup' in r and r['resourceGroup']:
+        format_result['ResourceGroup'] = r['resourceGroup']
+
+    return format_result
 
 
 def transform_deployments_list(result):
@@ -384,14 +390,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'get_deployment_operations_at_tenant_scope', client_factory=cf_deployment_operations)
 
     with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
-        g.custom_command('create', 'create_policy_assignment')
+        g.custom_command('create', 'create_policy_assignment', validator=process_assignment_create_namespace)
         g.custom_command('delete', 'delete_policy_assignment')
         g.custom_command('list', 'list_policy_assignment')
         g.custom_show_command('show', 'show_policy_assignment')
         g.custom_command('update', 'update_policy_assignment')
 
     with self.command_group('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as g:
-        g.custom_command('assign', 'set_identity')
+        g.custom_command('assign', 'set_identity', validator=process_assign_identity_namespace, min_api='2021-06-01')
         g.custom_show_command('show', 'show_identity')
         g.custom_command('remove', 'remove_identity')
 
@@ -473,5 +479,6 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'upgrade_bicep_cli')
         g.custom_command('build', 'build_bicep_file')
         g.custom_command('decompile', 'decompile_bicep_file')
+        g.custom_command('publish', 'publish_bicep_file')
         g.custom_command('version', 'show_bicep_cli_version')
         g.custom_command('list-versions', 'list_bicep_cli_versions')

@@ -513,7 +513,7 @@ class ImageTemplateTest(ScenarioTest):
     def test_defer_only_commands(self, resource_group, resource_group_location):
         def _ensure_cmd_raises_defer_error(self, cmds):
             for cmd in cmds:
-                with self.assertRaisesRegexp(CLIError, "This command requires --defer"):
+                with self.assertRaisesRegex(CLIError, "This command requires --defer"):
                     self.cmd(cmd)
 
         self._identity_role(resource_group)
