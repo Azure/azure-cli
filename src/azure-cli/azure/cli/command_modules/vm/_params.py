@@ -156,6 +156,8 @@ def load_arguments(self, _):
             c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable bursting beyond the provisioned performance target of the disk. Bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
+            # c.argument('architecture', min_api='2021-04-01', arg_type=get_enum_type(self.get_models('Architecture', operation_group=operation_group)), help='Set Architecture on Managed Disk or Snapshot', is_preview=True)
+            c.argument('architecture', min_api='2021-04-01', arg_type=get_enum_type(['x64', 'Arm64']), help='Set Architecture on Managed Disk or Snapshot', is_preview=True)
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
