@@ -32,7 +32,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
         storage = 'logicpplanstorage1'
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
 
@@ -190,10 +190,10 @@ class LogicAppOnLinux(ScenarioTest):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         logicapp_name = self.create_random_name(
             prefix='logicapp-linux', length=24)
-        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+        self.cmd('appservice plan create -g {} -n {} --sku WS1 --is-linux' .format(resource_group, plan), checks=[
             # this weird field means it is a linux
             JMESPathCheck('reserved', True),
-            JMESPathCheck('sku.name', 'S1'),
+            JMESPathCheck('sku.name', 'WS1'),
         ])
         self.cmd('logicapp create -g {} -n {} --plan {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[
             JMESPathCheck('name', logicapp_name)
