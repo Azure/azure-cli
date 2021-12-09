@@ -1,0 +1,30 @@
+parameters:
+  - name: CLIRepoPath
+    type: string
+    default: '.'
+  - name: CLIExtensionRepoPath
+    type: string
+    default: ''
+steps:
+  - bash: |
+      set -ev
+
+      python -m venv env
+      chmod +x env/bin/activate
+      . env/bin/activate
+      python -m pip install -U pip
+      wget https://zelin63azdev.blob.core.windows.net/test/azdev-0.1.37-py3-none-any.whl
+      pip install ./azdev-0.1.37-py3-none-any.whl
+      azdev --version
+
+      if [ -z "$CLI_EXT_REPO_PATH" ]; then
+        azdev setup -c $CLI_REPO_PATH --debug
+      else
+        azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH --debug
+      fi
+      # This helps detect issues in CI if a used SDK API version is deleted by the below script.
+      python $CLI_REPO_PATH/build_scripts/windows/scripts/remove_unused_api_versions.py
+    displayName: 'azdev setup'
+    env:
+      CLI_REPO_PATH: ${{ parameters.CLIRepoPath }}
+      CLI_EXT_REPO_PATH: ${{ parameters.CLIExtensionRepoPath }}
