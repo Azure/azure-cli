@@ -724,7 +724,7 @@ class IoTHubTest(ScenarioTest):
 
         with self.assertRaises(AzCLIError) as ex:
             # configure fileupload SAS TTL, with container name
-            self.cmd('iot hub update -n {0} -g {1} --fst 2 --fc {0}'.format(hub, rg, containerName))
+            self.cmd('iot hub update -n {0} -g {1} --fst 2 --fc {2}'.format(hub, rg, containerName))
         self.assertTrue('This hub has no default storage endpoint' in str(ex.exception))
 
         # update with non-fileupload args should succeed (c2d TTL)

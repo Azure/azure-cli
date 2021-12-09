@@ -582,7 +582,7 @@ def update_iot_hub_custom(instance,
     if any([
             fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
             fileupload_storage_authentication_type, fileupload_storage_container_uri, fileupload_storage_identity]):
-        default_storage_endpoint = instance.properties.storage_endpoints.get('$default', {})
+        default_storage_endpoint = instance.properties.storage_endpoints.get('$default', None)
         # no default storage endpoint, either recreate with existing params or throw an error
         if not default_storage_endpoint:
             if not all([fileupload_storage_connectionstring, fileupload_storage_container_name]):
