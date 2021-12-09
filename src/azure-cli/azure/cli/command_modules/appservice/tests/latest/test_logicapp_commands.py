@@ -15,6 +15,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathPatternCheck
+from msrestazure.tools import resource_id
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -26,7 +27,6 @@ LINUX_ASP_LOCATION_LOGICAPP = 'ukwest'
 DEFAULT_LOCATION = "westus"
 
 class LogicappBasicE2ETest(ScenarioTest):
-    
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
@@ -36,7 +36,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
 
-        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage), 
+        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
                  checks=[
                          JMESPathCheck('state', 'Running'),
                          JMESPathCheck('name', logicapp_name),
@@ -107,6 +107,66 @@ class LogicappBasicE2ETest(ScenarioTest):
         ])
 
 
+class LogicAppPlanTest(ScenarioTest):
+    def _create_app_service_plan(self, sku, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku {}'.format(resource_group, plan, sku))
+        return plan
+
+
+    def _create_logic_app(self, plan, resource_group, storage_account):
+        name = self.create_random_name('logicapp', 24)
+        self.cmd('logicapp create -g {} -n {} --plan {} --storage-account {}'.format(resource_group, name, plan, storage_account))
+        return name
+
+    def _validate_ws_plan(self, plan, resource_group, sku):
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.provisioningState', 'Succeeded'),
+            JMESPathCheck('properties.status', 'Ready'),
+            JMESPathCheck('sku.tier', 'WorkflowStandard'),
+            JMESPathCheck('kind', 'elastic'),
+            JMESPathCheck('sku.name', sku),
+            JMESPathCheck('sku.size', sku),
+        ])
+
+    def _validate_logicapp_create(self, name, resource_group, plan):
+        plan_id = resource_id(subscription=self.get_subscription_id(),
+                              resource_group=resource_group,
+                              namespace='Microsoft.Web',
+                              type='serverfarms',
+                              name=plan)
+
+        self.cmd('logicapp show -g {} -n {}'.format(resource_group, name), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('enabled', True),
+            JMESPathCheck('appServicePlanId', plan_id),
+            JMESPathCheck('kind', 'functionapp,workflowapp'),
+        ])
+
+    def _run_sku_test(self, sku, resource_group, storage_account):
+        plan = self._create_app_service_plan(sku, resource_group)
+        self._validate_ws_plan(plan, resource_group, sku)
+        name = self._create_logic_app(plan, resource_group, storage_account)
+        self._validate_logicapp_create(name, resource_group, plan)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_asp_ws1_create(self, resource_group, storage_account):
+        self._run_sku_test("WS1", resource_group, storage_account)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_asp_ws1_create(self, resource_group, storage_account):
+        self._run_sku_test("WS2", resource_group, storage_account)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_asp_ws1_create(self, resource_group, storage_account):
+        self._run_sku_test("WS3", resource_group, storage_account)
+
+
 class LogicAppOnWindows(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_LOGICAPP)
     @StorageAccountPreparer()
@@ -145,7 +205,7 @@ class LogicAppOnLinux(ScenarioTest):
         ]).get_output_in_json()
         # self.assertTrue('functionapp,workflowapp,linux' in result[0]['kind'])
 
-        
+
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
 

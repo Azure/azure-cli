@@ -1822,6 +1822,9 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
 
+    if sku.upper() in ['WS1', 'WS2', 'WS3']:
+        plan_def.type = "elastic"
+
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
