@@ -15,7 +15,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathPatternCheck
-from msrestazure.tools import resource_id
+from msrestazure.tools import resource_id, parse_resource_id
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -158,13 +158,24 @@ class LogicAppPlanTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    def test_asp_ws1_create(self, resource_group, storage_account):
+    def test_asp_ws2_create(self, resource_group, storage_account):
         self._run_sku_test("WS2", resource_group, storage_account)
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    def test_asp_ws1_create(self, resource_group, storage_account):
+    def test_asp_ws3_create(self, resource_group, storage_account):
         self._run_sku_test("WS3", resource_group, storage_account)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_autocreate_asp_for_logicapp(self, resource_group, storage_account):
+        name = self.create_random_name('logicapp', 24)
+        self.cmd('logicapp create -g {} -n {} --storage-account {}'.format(resource_group, name, storage_account))
+        show = self.cmd('logicapp show -g {} -n {}'.format(resource_group, name))
+        plan = parse_resource_id(show.get_output_in_json()["appServicePlanId"])
+        sku = "WS1"
+        self._validate_logicapp_create(name, resource_group, plan["name"])
+        self._validate_ws_plan(plan["name"], resource_group, sku)
 
 
 class LogicAppOnWindows(ScenarioTest):
