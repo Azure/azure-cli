@@ -72,6 +72,15 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
+# resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
+def get_resource_if_exists(resource, **kwargs):
+    from azure.core.exceptions import ResourceNotFoundError
+    try:
+        return resource.get(**kwargs)
+    except ResourceNotFoundError:
+        return None
+
+
 def normalize_sku_for_staticapp(sku):
     if sku.lower() == 'free':
         return 'Free'

@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"ukwest","tags":{"product":"azurecli","cause":"automation","date":"2021-12-09T01:09:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"ukwest","tags":{"product":"azurecli","cause":"automation","date":"2021-12-09T22:54:15Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Dec 2021 01:10:30 GMT
+      - Thu, 09 Dec 2021 22:54:46 GMT
       expires:
       - '-1'
       pragma:
@@ -41,6 +41,50 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --is-linux
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003?api-version=2020-09-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Web/serverFarms/funcapplinplan000003''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '297'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Dec 2021 22:54:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
 - request:
     body: '{"location": "ukwest", "sku": {"name": "WS1", "tier": "WorkflowStandard",
       "capacity": 1}, "properties": {"perSiteScaling": false, "reserved": true, "isXenon":
@@ -66,8 +110,8 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","name":"funcapplinplan000003","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"ukwest","properties":{"serverFarmId":3653,"name":"funcapplinplan000003","sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-UKWestwebspace-Linux","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"UK
-        West","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-cw1-021_3653","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","name":"funcapplinplan000003","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"ukwest","properties":{"serverFarmId":3701,"name":"funcapplinplan000003","sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-UKWestwebspace-Linux","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"UK
+        West","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-cw1-021_3701","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -76,9 +120,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:10:41 GMT
+      - Thu, 09 Dec 2021 22:54:58 GMT
       etag:
-      - '"1D7EC9994C663A0"'
+      - '"1D7ED4FC9C2B8E0"'
       expires:
       - '-1'
       pragma:
@@ -122,8 +166,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","name":"funcapplinplan000003","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"UK
-        West","properties":{"serverFarmId":3653,"name":"funcapplinplan000003","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-UKWestwebspace-Linux","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"UK
-        West","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-cw1-021_3653","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1}}'
+        West","properties":{"serverFarmId":3701,"name":"funcapplinplan000003","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-UKWestwebspace-Linux","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":20,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"UK
+        West","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":true,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-cw1-021_3701","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"WS1","tier":"WorkflowStandard","size":"WS1","family":"WS","capacity":1}}'
     headers:
       cache-control:
       - no-cache
@@ -132,7 +176,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:10:42 GMT
+      - Thu, 09 Dec 2021 22:54:59 GMT
       expires:
       - '-1'
       pragma:
@@ -173,7 +217,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-09T01:10:10.0818563Z","key2":"2021-12-09T01:10:10.0818563Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-09T01:10:10.0818563Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-09T01:10:10.0818563Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-09T01:10:09.9880784Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-09T22:54:25.1699610Z","key2":"2021-12-09T22:54:25.1699610Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-09T22:54:25.1699610Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-09T22:54:25.1699610Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-09T22:54:25.0918316Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -182,7 +226,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:10:43 GMT
+      - Thu, 09 Dec 2021 22:55:00 GMT
       expires:
       - '-1'
       pragma:
@@ -221,7 +265,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2021-12-09T01:10:10.0818563Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-09T01:10:10.0818563Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-12-09T22:54:25.1699610Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-09T22:54:25.1699610Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -230,7 +274,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:10:43 GMT
+      - Thu, 09 Dec 2021 22:55:00 GMT
       expires:
       - '-1'
       pragma:
@@ -255,7 +299,7 @@ interactions:
       {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003",
       "reserved": true, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
       "v4.6", "linuxFxVersion": "NODE|12", "appSettings": [{"name": "FUNCTIONS_WORKER_RUNTIME",
-      "value": "node"}, {"name": "MACHINEKEY_DecryptionKey", "value": "E2134DD1FFCFE69053DAB8A606C3DCD01AB73DD9EA873B576093A2B111B2AC77"},
+      "value": "node"}, {"name": "MACHINEKEY_DecryptionKey", "value": "0544E00B2600A8F051D5EB8009299C8DEEBEB106513440D89FC10CC6A5132C95"},
       {"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "value": "true"}, {"name": "FUNCTIONS_EXTENSION_VERSION",
       "value": "~3"}, {"name": "AzureWebJobsStorage", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
       {"name": "AzureWebJobsDashboard", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey=="},
@@ -285,7 +329,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/logicapp-linux000004","name":"logicapp-linux000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,workflowapp","location":"UK
-        West","properties":{"name":"logicapp-linux000004","state":"Running","hostNames":["logicapp-linux000004.azurewebsites.net"],"webSpace":"clitest.rg000001-UKWestwebspace-Linux","selfLink":"https://waws-prod-cw1-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-UKWestwebspace-Linux/sites/logicapp-linux000004","repositorySiteName":"logicapp-linux000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["logicapp-linux000004.azurewebsites.net","logicapp-linux000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"NODE|12"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"logicapp-linux000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"logicapp-linux000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-09T01:10:51.4166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        West","properties":{"name":"logicapp-linux000004","state":"Running","hostNames":["logicapp-linux000004.azurewebsites.net"],"webSpace":"clitest.rg000001-UKWestwebspace-Linux","selfLink":"https://waws-prod-cw1-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-UKWestwebspace-Linux/sites/logicapp-linux000004","repositorySiteName":"logicapp-linux000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["logicapp-linux000004.azurewebsites.net","logicapp-linux000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"NODE|12"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"logicapp-linux000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"logicapp-linux000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-09T22:55:08.5933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"logicapp-linux000004","slotName":null,"trafficManagerHostNames":null,"sku":"WorkflowStandard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp,linux,workflowapp","inboundIpAddress":"51.137.163.33","possibleInboundIpAddresses":"51.137.163.33","ftpUsername":"logicapp-linux000004\\$logicapp-linux000004","ftpsHostName":"ftps://waws-prod-cw1-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,51.137.163.33","possibleOutboundIpAddresses":"51.137.140.150,51.137.141.228,52.142.171.119,52.142.172.22,52.142.172.32,52.142.172.115,52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,52.142.173.232,52.142.172.106,52.142.172.107,52.142.172.120,52.142.172.121,52.142.172.146,51.104.32.136,51.104.38.37,51.104.35.241,51.104.38.184,51.104.39.24,51.104.39.35,51.137.163.33","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-cw1-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"logicapp-linux000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
     headers:
@@ -296,9 +340,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:11:08 GMT
+      - Thu, 09 Dec 2021 22:55:25 GMT
       etag:
-      - '"1D7EC999BF9246B"'
+      - '"1D7ED4FD0DC0B40"'
       expires:
       - '-1'
       pragma:
@@ -347,7 +391,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/components/logicapp-linux000004?api-version=2015-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/logicapp-linux000004","name":"logicapp-linux000004","type":"microsoft.insights/components","location":"ukwest","tags":{},"kind":"web","etag":"\"8c00b926-0000-1000-0000-61b157b70000\"","properties":{"Ver":"v2","ApplicationId":"logicapp-linux000004","AppId":"4039370a-e8fe-46dd-a76f-961fa566591e","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"7a94499b-ac8a-4e7d-9398-3b223fa8dee7","ConnectionString":"InstrumentationKey=7a94499b-ac8a-4e7d-9398-3b223fa8dee7;IngestionEndpoint=https://ukwest-0.in.applicationinsights.azure.com/","Name":"logicapp-linux000004","CreationDate":"2021-12-09T01:11:17.1750803+00:00","TenantId":"2edc29f4-b81f-494b-a624-cc619903b837","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/logicapp-linux000004","name":"logicapp-linux000004","type":"microsoft.insights/components","location":"ukwest","tags":{},"kind":"web","etag":"\"30004047-0000-1000-0000-61b289670000\"","properties":{"Ver":"v2","ApplicationId":"logicapp-linux000004","AppId":"e8eb4c8d-757d-45a8-8cd2-5d151969e121","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"ef57c87a-72b5-40ca-b46c-293f5d550145","ConnectionString":"InstrumentationKey=ef57c87a-72b5-40ca-b46c-293f5d550145;IngestionEndpoint=https://ukwest-0.in.applicationinsights.azure.com/","Name":"logicapp-linux000004","CreationDate":"2021-12-09T22:55:34.5270623+00:00","TenantId":"2edc29f4-b81f-494b-a624-cc619903b837","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
     headers:
       access-control-expose-headers:
       - Request-Context
@@ -358,7 +402,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 09 Dec 2021 01:11:26 GMT
+      - Thu, 09 Dec 2021 22:55:39 GMT
       expires:
       - '-1'
       pragma:
@@ -404,7 +448,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/logicapp-linux000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"UK
-        West","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"E2134DD1FFCFE69053DAB8A606C3DCD01AB73DD9EA873B576093A2B111B2AC77","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureFunctionsJobHost__extensionBundle__id":"Microsoft.Azure.Functions.ExtensionBundle.Workflows","AzureFunctionsJobHost__extensionBundle__version":"[1.*,
+        West","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"0544E00B2600A8F051D5EB8009299C8DEEBEB106513440D89FC10CC6A5132C95","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureFunctionsJobHost__extensionBundle__id":"Microsoft.Azure.Functions.ExtensionBundle.Workflows","AzureFunctionsJobHost__extensionBundle__version":"[1.*,
         2.0.0)","APP_KIND":"workflowApp"}}'
     headers:
       cache-control:
@@ -414,7 +458,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:11:27 GMT
+      - Thu, 09 Dec 2021 22:55:40 GMT
       expires:
       - '-1'
       pragma:
@@ -440,12 +484,12 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"FUNCTIONS_WORKER_RUNTIME": "node", "MACHINEKEY_DecryptionKey":
-      "E2134DD1FFCFE69053DAB8A606C3DCD01AB73DD9EA873B576093A2B111B2AC77", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
+      "0544E00B2600A8F051D5EB8009299C8DEEBEB106513440D89FC10CC6A5132C95", "WEBSITES_ENABLE_APP_SERVICE_STORAGE":
       "true", "FUNCTIONS_EXTENSION_VERSION": "~3", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
       "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
       "AzureFunctionsJobHost__extensionBundle__id": "Microsoft.Azure.Functions.ExtensionBundle.Workflows",
       "AzureFunctionsJobHost__extensionBundle__version": "[1.*, 2.0.0)", "APP_KIND":
-      "workflowApp", "APPINSIGHTS_INSTRUMENTATIONKEY": "7a94499b-ac8a-4e7d-9398-3b223fa8dee7"}}'
+      "workflowApp", "APPINSIGHTS_INSTRUMENTATIONKEY": "ef57c87a-72b5-40ca-b46c-293f5d550145"}}'
     headers:
       Accept:
       - application/json
@@ -468,8 +512,8 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/logicapp-linux000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"UK
-        West","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"E2134DD1FFCFE69053DAB8A606C3DCD01AB73DD9EA873B576093A2B111B2AC77","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureFunctionsJobHost__extensionBundle__id":"Microsoft.Azure.Functions.ExtensionBundle.Workflows","AzureFunctionsJobHost__extensionBundle__version":"[1.*,
-        2.0.0)","APP_KIND":"workflowApp","APPINSIGHTS_INSTRUMENTATIONKEY":"7a94499b-ac8a-4e7d-9398-3b223fa8dee7"}}'
+        West","properties":{"FUNCTIONS_WORKER_RUNTIME":"node","MACHINEKEY_DecryptionKey":"0544E00B2600A8F051D5EB8009299C8DEEBEB106513440D89FC10CC6A5132C95","WEBSITES_ENABLE_APP_SERVICE_STORAGE":"true","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==","AzureFunctionsJobHost__extensionBundle__id":"Microsoft.Azure.Functions.ExtensionBundle.Workflows","AzureFunctionsJobHost__extensionBundle__version":"[1.*,
+        2.0.0)","APP_KIND":"workflowApp","APPINSIGHTS_INSTRUMENTATIONKEY":"ef57c87a-72b5-40ca-b46c-293f5d550145"}}'
     headers:
       cache-control:
       - no-cache
@@ -478,9 +522,9 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:11:28 GMT
+      - Thu, 09 Dec 2021 22:55:41 GMT
       etag:
-      - '"1D7EC99B23CCF00"'
+      - '"1D7ED4FE4528C15"'
       expires:
       - '-1'
       pragma:
@@ -498,7 +542,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -524,16 +568,16 @@ interactions:
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/logicapp-linux000004","name":"logicapp-linux000004","type":"Microsoft.Web/sites","kind":"functionapp,linux,workflowapp","location":"UK
-        West","properties":{"name":"logicapp-linux000004","state":"Running","hostNames":["logicapp-linux000004.azurewebsites.net"],"webSpace":"clitest.rg000001-UKWestwebspace-Linux","selfLink":"https://waws-prod-cw1-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-UKWestwebspace-Linux/sites/logicapp-linux000004","repositorySiteName":"logicapp-linux000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["logicapp-linux000004.azurewebsites.net","logicapp-linux000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"NODE|12"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"logicapp-linux000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"logicapp-linux000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-09T01:11:29.52","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"NODE|12","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":1,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"logicapp-linux000004","slotName":null,"trafficManagerHostNames":null,"sku":"WorkflowStandard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp,linux,workflowapp","inboundIpAddress":"51.137.163.33","possibleInboundIpAddresses":"51.137.163.33","ftpUsername":"logicapp-linux000004\\$logicapp-linux000004","ftpsHostName":"ftps://waws-prod-cw1-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,51.137.163.33","possibleOutboundIpAddresses":"51.137.140.150,51.137.141.228,52.142.171.119,52.142.172.22,52.142.172.32,52.142.172.115,52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,52.142.173.232,52.142.172.106,52.142.172.107,52.142.172.120,52.142.172.121,52.142.172.146,51.104.32.136,51.104.38.37,51.104.35.241,51.104.38.184,51.104.39.24,51.104.39.35,51.137.163.33","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-cw1-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"logicapp-linux000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}],"nextLink":null,"id":null}'
+        West","properties":{"name":"logicapp-linux000004","state":"Running","hostNames":["logicapp-linux000004.azurewebsites.net"],"webSpace":"clitest.rg000001-UKWestwebspace-Linux","selfLink":"https://waws-prod-cw1-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-UKWestwebspace-Linux/sites/logicapp-linux000004","repositorySiteName":"logicapp-linux000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["logicapp-linux000004.azurewebsites.net","logicapp-linux000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":"NODE|12"},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"logicapp-linux000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"logicapp-linux000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/funcapplinplan000003","reserved":true,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-09T22:55:41.9533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"NODE|12","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":1,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"logicapp-linux000004","slotName":null,"trafficManagerHostNames":null,"sku":"WorkflowStandard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp,linux,workflowapp","inboundIpAddress":"51.137.163.33","possibleInboundIpAddresses":"51.137.163.33","ftpUsername":"logicapp-linux000004\\$logicapp-linux000004","ftpsHostName":"ftps://waws-prod-cw1-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,51.137.163.33","possibleOutboundIpAddresses":"51.137.140.150,51.137.141.228,52.142.171.119,52.142.172.22,52.142.172.32,52.142.172.115,52.142.172.128,52.142.172.145,51.137.141.177,52.142.173.42,52.142.173.71,52.142.173.133,52.142.173.232,52.142.172.106,52.142.172.107,52.142.172.120,52.142.172.121,52.142.172.146,51.104.32.136,51.104.38.37,51.104.35.241,51.104.38.184,51.104.39.24,51.104.39.35,51.137.163.33","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-cw1-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"logicapp-linux000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}],"nextLink":null,"id":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6383'
+      - '6388'
       content-type:
       - application/json
       date:
-      - Thu, 09 Dec 2021 01:11:30 GMT
+      - Thu, 09 Dec 2021 22:55:43 GMT
       expires:
       - '-1'
       pragma:
@@ -583,9 +627,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 09 Dec 2021 01:11:51 GMT
+      - Thu, 09 Dec 2021 22:56:06 GMT
       etag:
-      - '"1D7EC99B23CCF00"'
+      - '"1D7ED4FE4528C15"'
       expires:
       - '-1'
       pragma:

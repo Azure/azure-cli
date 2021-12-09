@@ -108,9 +108,12 @@ class LogicappBasicE2ETest(ScenarioTest):
 
 
 class LogicAppPlanTest(ScenarioTest):
-    def _create_app_service_plan(self, sku, resource_group):
-        plan = self.create_random_name('plan', 24)
-        self.cmd('appservice plan create -g {} -n {} --sku {}'.format(resource_group, plan, sku))
+    def _create_app_service_plan(self, sku, resource_group, plan_name=None, expect_failure=False):
+        if plan_name == None:
+            plan = self.create_random_name('plan', 24)
+        else:
+            plan = plan_name
+        self.cmd('appservice plan create -g {} -n {} --sku {}'.format(resource_group, plan, sku), expect_failure=expect_failure)
         return plan
 
 
@@ -176,6 +179,19 @@ class LogicAppPlanTest(ScenarioTest):
         sku = "WS1"
         self._validate_logicapp_create(name, resource_group, plan["name"])
         self._validate_ws_plan(plan["name"], resource_group, sku)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_update_asp_to_logicapp_sku_fails(self, resource_group):
+        plan_name = self._create_app_service_plan("F1", resource_group)
+        self._create_app_service_plan("WS1", resource_group, plan_name, expect_failure=True)
+        self._create_app_service_plan("WS2", resource_group, plan_name, expect_failure=True)
+        self._create_app_service_plan("WS3", resource_group, plan_name, expect_failure=True)
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_update_logicapp_asp_sku(self, resource_group):
+        plan_name = self._create_app_service_plan("WS1", resource_group)
+        self._create_app_service_plan("WS2", resource_group, plan_name)
+        self._create_app_service_plan("WS3", resource_group, plan_name)
 
 
 class LogicAppOnWindows(ScenarioTest):
