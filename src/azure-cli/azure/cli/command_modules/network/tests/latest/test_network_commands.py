@@ -70,6 +70,13 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('sku.name', 'Standard')
         ])
+
+        # test network lb update command
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=[
+            self.check('tags.CostCenter', 'MyTestGroup')
+        ])
+
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
             self.check('publicIpAllocationMethod', 'Static')
@@ -442,6 +449,11 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
                  checks=self.check('prefixLength', 30))
         self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
         self.cmd('network public-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
