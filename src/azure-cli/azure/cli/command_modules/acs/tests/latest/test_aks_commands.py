@@ -13,7 +13,7 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import CLIInternalError
 
 from azure.cli.testsdk import ScenarioTest, live_only
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringCheck,
     StringContainCheck,

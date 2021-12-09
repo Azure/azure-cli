@@ -13,7 +13,7 @@ from knack.log import get_logger
 from datetime import datetime
 from time import sleep
 from dateutil.tz import tzutc  # pylint: disable=import-error
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
@@ -57,11 +57,11 @@ class MigrationScenarioTest(ScenarioTest):
         target_server_name = "raganesa-t-m-pg-1-vnet"
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         properties_filepath = os.path.join(curr_dir, 'migrationVNet.json').replace('\\', '\\\\')
-         
+
         # test check migration name availability -success
         result = self.cmd('{} flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
-        
+
         # test create migration - success
         result = self.cmd('{} flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} '
                           .format(database_engine, target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath)).get_output_in_json()
