@@ -32,6 +32,9 @@ class KeyReplacer(RecordingProcessor):
         if 'secondaryKey' in val:
             val = re.sub(r'"secondaryKey":( ?)"([^"]+)"', r'"secondaryKey":"{}"'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
+        if 'SharedAccessKey=' in val:
+            val = re.sub(r'SharedAccessKey=([^\*].+=)', 'SharedAccessKey={}'
+                         .format(MOCK_KEY), val, flags=re.IGNORECASE)
         return val
 
     # pylint: disable=no-self-use
@@ -42,5 +45,8 @@ class KeyReplacer(RecordingProcessor):
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         if b'secondaryKey' in val:
             val = re.sub(b'"secondaryKey":( ?)"([^"]+)"', '"secondaryKey":"{}"'
+                         .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
+        if b'SharedAccessKey=' in val:
+            val = re.sub(br'SharedAccessKey=([^\*].+=)', 'SharedAccessKey={}'
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         return val

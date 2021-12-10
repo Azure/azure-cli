@@ -7,10 +7,16 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 from azure.cli.command_modules.iot.tests.latest._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
+from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
 import random
 
 
 class IoTDpsTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(IoTDpsTest, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+        )
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_lifecycle(self, group_name, group_location):
