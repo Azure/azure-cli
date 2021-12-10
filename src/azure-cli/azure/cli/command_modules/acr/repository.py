@@ -308,8 +308,8 @@ def acr_repository_list_references(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    image = repository + ':' + manifest
     if 'sha256:' not in manifest:
+        image = repository + ':' + manifest
         repository, tag, manifest = get_image_digest(cmd, registry_name, image)
 
     raw_result = _obtain_manifest_from_registry(
@@ -317,9 +317,6 @@ def acr_repository_list_references(cmd,
         path=_get_references_path(repository, manifest, artifact_type),
         username=username,
         password=password)
-
-   # if artifact_type and 'references' in raw_result:
-    #    raw_result['references'] = [x for x in raw_result['references'] if x['artifactType'] == artifact_type]
 
     return raw_result
 
@@ -342,8 +339,8 @@ def acr_repository_show_manifest(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    image = repository + ':' + manifest
     if 'sha256:' not in manifest:
+        image = repository + ':' + manifest
         repository, tag, manifest = get_image_digest(cmd, registry_name, image)
 
     raw_result = _obtain_manifest_from_registry(
@@ -364,8 +361,8 @@ def acr_repository_delete_manifests(cmd,
                                     password=None,
                                     yes=False):
 
-    image = repository + ':' + manifest
     if 'sha256:' not in manifest:
+        image = repository + ':' + manifest
         repository, tag, manifest = get_image_digest(cmd, registry_name, image)
 
     login_server, username, password = get_access_credentials(
