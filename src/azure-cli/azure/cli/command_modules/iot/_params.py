@@ -59,7 +59,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('iot dps create') as c:
         c.argument('location', get_location_type(self.cli_ctx),
-                   help='Location of your IoT Hub Device Provisioning Service. Default is the location of target resource group.')
+                   help='Location of your IoT Hub Device Provisioning Service. '
+                   'Default is the location of target resource group.')
         c.argument('sku', arg_type=get_enum_type(IotDpsSku),
                    help='Pricing tier for the IoT Hub Device Provisioning Service.')
         c.argument('unit', help='Units in your IoT Hub Device Provisioning Service.', type=int)
@@ -122,7 +123,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Connection string of the IoT hub. Required if hub name is not provided using --hub-name.',
                    arg_group='IoT Hub Identifier')
         c.argument('hub_name', help='IoT Hub name.', arg_group='IoT Hub Identifier')
-        c.argument('hub_resource_group_name',
+        c.argument('hub_resource_group',
                    options_list=['--hub-resource-group', '--hrg'],
                    help='IoT Hub resource group name.',
                    arg_group='IoT Hub Identifier')

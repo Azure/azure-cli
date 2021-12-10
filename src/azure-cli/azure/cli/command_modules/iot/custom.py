@@ -249,7 +249,7 @@ def iot_dps_linked_hub_create(
     client,
     dps_name,
     hub_name=None,
-    hub_resource_group_name=None,
+    hub_resource_group=None,
     connection_string=None,
     location=None,
     resource_group_name=None,
@@ -259,11 +259,11 @@ def iot_dps_linked_hub_create(
 ):
     if not any([connection_string, hub_name]):
         raise CLIError("Please provide the IoT Hub name or connection string.")
-    elif not connection_string:
+    if not connection_string:
         # Get the connection string for the hub
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
         connection_string = iot_hub_show_connection_string(
-            hub_client, hub_name=hub_name, resource_group_name=hub_resource_group_name
+            hub_client, hub_name=hub_name, resource_group_name=hub_resource_group
         )['connectionString']
 
     if not location:
@@ -275,7 +275,7 @@ def iot_dps_linked_hub_create(
                 raise CLIError("Please provide a valid IoT Hub connection string.")
 
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
-        location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group_name).location
+        location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
 
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
     dps_linked_hubs = []
@@ -1212,6 +1212,7 @@ def _get_iot_hub_hostname(client, hub_name):
     # Intermediate fix to support domains beyond azure-devices.net properly
     hub = _get_iot_hub_by_name(client, hub_name)
     return hub.properties.host_name
+
 
 def _ensure_resource_group_existence(cli_ctx, resource_group_name):
     resource_group_client = resource_service_factory(cli_ctx).resource_groups

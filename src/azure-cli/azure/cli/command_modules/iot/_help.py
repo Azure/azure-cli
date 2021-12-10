@@ -79,7 +79,7 @@ short-summary: Create a new shared access policy in an Azure IoT Hub Device Prov
 examples:
   - name: Create a new shared access policy in an Azure IoT Hub Device Provisioning Service instance with EnrollmentRead right
     text: >
-        az iot dps policy create --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentRead
+        az iot dps policy create --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --rights EnrollmentRead
 """
 
 helps['iot dps policy delete'] = """
@@ -88,7 +88,7 @@ short-summary: Delete a shared access policies in an Azure IoT Hub Device Provis
 examples:
   - name: Delete shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
     text: >
-        az iot dps policy delete --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
+        az iot dps policy delete --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy
 """
 
 helps['iot dps policy list'] = """
@@ -106,7 +106,7 @@ short-summary: Show details of a shared access policies in an Azure IoT Hub Devi
 examples:
   - name: Show details of shared access policy 'MyPolicy' in the Azure IoT Hub Device Provisioning Service instance 'MyDps'
     text: >
-        az iot dps policy show --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy
+        az iot dps policy show --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy
 """
 
 helps['iot dps policy update'] = """
@@ -115,7 +115,7 @@ short-summary: Update a shared access policy in an Azure IoT Hub Device Provisio
 examples:
   - name: Update shared access policy 'MyPolicy' in an Azure IoT Hub Device Provisioning Service instance with EnrollmentWrite right
     text: >
-        az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --name MyPolicy --rights EnrollmentWrite
+        az iot dps policy update --dps-name MyDps --resource-group MyResourceGroup --policy-name MyPolicy --rights EnrollmentWrite
 """
 
 helps['iot dps certificate'] = """
