@@ -14,6 +14,7 @@ import tempfile
 from .scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
                              LargeRequestBodyProcessor,
                              LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                             GeneralNameReplacer,
                              live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
 
 from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
@@ -22,7 +23,7 @@ from .patches import (patch_load_cached_subscriptions, patch_main_exception_hand
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
                       patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
-from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer,
+from .utilities import (find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer,
                         AADAuthRequestFilter)
 from .reverse_dependency import get_dummy_cli
 
