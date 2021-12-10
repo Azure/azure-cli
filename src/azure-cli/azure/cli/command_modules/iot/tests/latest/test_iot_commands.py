@@ -7,7 +7,7 @@
 from unittest import mock
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
 from .recording_processors import KeyReplacer

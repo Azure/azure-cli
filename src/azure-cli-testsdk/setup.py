@@ -26,7 +26,6 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'jmespath',
     'vcrpy>=1.10.3',
-    'azure-devtools==1.2.0',
     'pytest'
 ]
 
