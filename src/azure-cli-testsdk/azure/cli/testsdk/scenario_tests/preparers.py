@@ -97,7 +97,7 @@ class AbstractPreparer(object):
 class SingleValueReplacer(RecordingProcessor):
     # pylint: disable=no-member
     def process_request(self, request):
-        from urllib.parse import quote_plus  # pylint: disable=import-error, relative-import
+        from urllib.parse import quote_plus
         if self.random_name in request.uri:
             request.uri = request.uri.replace(self.random_name, self.moniker)
         elif quote_plus(self.random_name) in request.uri:
