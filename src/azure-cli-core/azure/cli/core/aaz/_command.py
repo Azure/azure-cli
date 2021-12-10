@@ -1,7 +1,8 @@
 import importlib
 import os
 from ._utils import _get_profile_pkg
-from knack.commands import CLICommand, CommandGroup
+from knack.commands import CLICommand
+from azure.cli.core._profile import Profile
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
 
@@ -24,29 +25,65 @@ class AAZCommandGroup:
         self.help = self.AZ_HELP  # TODO: change knack to load help directly
 
 
+class AAZCommandCtx:
+
+    def __init__(self, cli_ctx, schema, command_args):
+        self._cli_ctx = cli_ctx
+        self._profile = Profile(cli_ctx=cli_ctx)
+        self._subscription_id = None
+        self.args = schema(data={})
+        for dest, cmd_arg in command_args.items():
+            if hasattr(schema, dest):
+                if isinstance(cmd_arg, AAZArgActionOperations):
+                    cmd_arg.apply(self.args, dest)
+                else:
+                    self.args[dest] = cmd_arg
+        self._clients = {}
+
+    def get_login_credential(self):
+        credential, _, _ = self._profile.get_login_credentials(
+            subscription_id=self.subscription_id,
+            aux_subscriptions=self.aux_subscriptions,
+            aux_tenants=self.aux_tenants
+        )
+        return credential
+
+    def get_http_client(self, client_type):
+        from ._client import registered_clients
+
+        if client_type not in self._clients:
+            # if not client instance exist, then create a client instance
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+            assert client_type
+            client_cls = registered_clients[client_type]
+            credential = self.get_login_credential()
+            client_kwargs = _prepare_client_kwargs_track2(self._cli_ctx)
+            self._clients[client_type] = client_cls(self._cli_ctx, credential, **client_kwargs)
+
+        return self._clients[client_type]
+
+    @property
+    def subscription_id(self):
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        if self._subscription_id is None:
+            self._subscription_id = get_subscription_id(cli_ctx=self._cli_ctx)
+        return self._subscription_id
+
+    @property
+    def aux_subscriptions(self):
+        # TODO: fetch aux_subscription base on args
+        return None
+
+    @property
+    def aux_tenants(self):
+        # TODO: fetch aux_subscription base on args
+        return None
+
+
 class AAZCommand(CLICommand):
     """Atomic Layer Command"""
     AZ_NAME = None
     AZ_HELP = None
-
-    def __init__(self, loader):
-        self.loader = loader
-        super(AAZCommand, self).__init__(
-            cli_ctx=loader.cli_ctx,
-            name=self.AZ_NAME,
-            arguments_loader=self._cli_arguments_loader,
-            handler=self._handler,
-        )
-        self.command_kwargs = {}
-        self.help = self.AZ_HELP
-        # help property will be assigned as help_file for command parser https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
-        # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
-
-        # additional properties
-        self.supports_no_wait = False
-        self.no_wait_param = None
-        self.exception_handler = None
-        self._args = None
 
     @classmethod
     def get_arguments_schema(cls):
@@ -58,22 +95,32 @@ class AAZCommand(CLICommand):
     def _build_arguments_schema(cls, *args, **kwargs):
         return AAZArgumentsSchema(*args, **kwargs)
 
-    def setup_command_args(self, command_args):
-        schema = self.get_arguments_schema()
+    def __init__(self, loader):
+        self.loader = loader
+        super(AAZCommand, self).__init__(
+            cli_ctx=loader.cli_ctx,
+            name=self.AZ_NAME,
+            arguments_loader=self._cli_arguments_loader,
+            handler=None,
+        )
+        self.command_kwargs = {}
+        self.help = self.AZ_HELP
 
-        self._args = schema(data={})
+        self.ctx = None
 
-        for dest, cmd_arg in command_args.items():
-            if hasattr(schema, dest):
-                if isinstance(cmd_arg, AAZArgActionOperations):
-                    cmd_arg.apply(self._args, dest)
-                else:
-                    self._args[dest] = cmd_arg
-        return self._args
+        # help property will be assigned as help_file for command parser https://github.com/Azure/azure-cli/blob/d69eedd89bd097306b8579476ef8026b9f2ad63d/src/azure-cli-core/azure/cli/core/parser.py#L104
+        # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
+
+        # additional properties
+        self.supports_no_wait = False
+        self.no_wait_param = None
+        self.exception_handler = None
+
+    def __call__(self, *args, **kwargs):
+        return self._handler(*args, **kwargs)
 
     def _handler(self, command_args):
-        self.setup_command_args(command_args)
-        return self._args.to_serialized_data()
+        self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
 
     def _cli_arguments_loader(self):
         """load arguments"""
@@ -83,8 +130,11 @@ class AAZCommand(CLICommand):
             args[name] = field.to_cmd_arg(name)
         return args
 
-    def __call__(self, *args, **kwargs):
-        return self.handler(*args, **kwargs)
+    def update_argument(self, param_name, argtype):
+        # not support to overwrite arguments defined in schema
+        schema = self.get_arguments_schema()
+        if not hasattr(schema, param_name):
+            super().update_argument(param_name, argtype)
 
 
 def register_command_group(name):

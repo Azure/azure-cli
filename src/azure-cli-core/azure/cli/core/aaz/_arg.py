@@ -199,3 +199,32 @@ class AAZListArg(AAZBaseArg, AAZListType):
         class Action(AAZListArgAction):
             _schema = self
         return Action
+
+
+class AAZResourceGroupNameArg(AAZStrArg):
+
+    def __init__(self,
+                 options=['--resource-group', '-g'],
+                 id_part='resource_group',
+                 help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
+                 **kwargs,
+                 ):
+        super(AAZResourceGroupNameArg, self).__init__(
+            options=options,
+            id_part=id_part,
+            help=help,
+            **kwargs
+        )
+
+    def to_cmd_arg(self, name):
+        from azure.cli.core.commands.parameters import get_resource_group_completion_list
+        from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
+        arg = super().to_cmd_arg(name)
+        arg.completer = get_resource_group_completion_list
+        arg.configured_default = 'group'
+        arg.local_context_attribute = LocalContextAttribute(
+            name='resource_group_name',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        )
+        return arg
