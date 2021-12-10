@@ -32,8 +32,8 @@ class KeyReplacer(RecordingProcessor):
         if 'secondaryKey' in val:
             val = re.sub(r'"secondaryKey":( ?)"([^"]+)"', r'"secondaryKey":"{}"'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
-        if 'SharedAccessKey=' in val:
-            val = re.sub(r'SharedAccessKey=([^\*].+=)', 'SharedAccessKey={}'
+        if any(['SharedAccessKey=' in val, 'sharedaccesskey=' in val]):
+            val = re.sub(r'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
         return val
 
@@ -46,7 +46,7 @@ class KeyReplacer(RecordingProcessor):
         if b'secondaryKey' in val:
             val = re.sub(b'"secondaryKey":( ?)"([^"]+)"', '"secondaryKey":"{}"'
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
-        if b'SharedAccessKey=' in val:
-            val = re.sub(br'SharedAccessKey=([^\*].+=)', 'SharedAccessKey={}'
+        if any([b'SharedAccessKey=' in val, b'sharedaccesskey=' in val]):
+            val = re.sub(br'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         return val
