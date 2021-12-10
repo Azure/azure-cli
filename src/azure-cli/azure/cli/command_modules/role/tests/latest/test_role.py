@@ -34,7 +34,6 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
 
         try:
             sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
-            self.assertTrue(sp_info['name'] == sp_info['appId'])
             self.assertTrue(sp_info['displayName'] == sp_name)
             self.kwargs['app_id'] = sp_info['appId']
 
