@@ -24,6 +24,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'ConfigArgParse>=0.12.0',
     'jmespath',
     'vcrpy>=1.10.3',
     'pytest'

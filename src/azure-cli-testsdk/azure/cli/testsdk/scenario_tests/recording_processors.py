@@ -109,12 +109,11 @@ class LargeResponseBodyProcessor(RecordingProcessor):
 class LargeResponseBodyReplacer(RecordingProcessor):
     def process_response(self, response):
         if is_text_payload(response) and not is_json_payload(response):
-            import six
             body = response['body']['string']
 
             # backward compatibility. under 2.7 response body is unicode, under 3.5 response body is
             # bytes. when set the value back, the same type must be used.
-            body_is_string = isinstance(body, six.string_types)
+            body_is_string = isinstance(body, str)
 
             content_in_string = (response['body']['string'] or b'').decode('utf-8')
             index = content_in_string.find(LargeResponseBodyProcessor.control_flag)
@@ -179,7 +178,7 @@ class GeneralNameReplacer(RecordingProcessor):
             request.uri = request.uri.replace(old, new)
 
             if is_text_payload(request) and request.body:
-                body = str(request.body)
+                body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
                 if old in body:
                     request.body = body.replace(old, new)
 
@@ -203,3 +202,25 @@ class RequestUrlNormalizer(RecordingProcessor):
         import re
         request.uri = re.sub('(?<!:)//', '/', request.uri)
         return request
+
+
+class ContentLengthProcessor(RecordingProcessor):
+    # After replacing body content with processors like GeneralNameReplacer and SingleValueReplacer,
+    # Content-Length header will not match the actual length of body.
+    # We should re-compute Content-Length header with the new body.
+
+    def process_request(self, request):
+        # azure-core currently doesn't check request's Content-Length, but we fix it anyway.
+        if is_text_payload(request) and request.body and 'Content-Length' in request.headers:
+            body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
+            request.headers['Content-Length'] = str(len(body))
+        return request
+
+    def process_response(self, response):
+        # If Content-Length doesn't match the body,
+        # azure.core.pipeline.transport._requests_basic.StreamDownloadGenerator
+        # fails with azure.core.exceptions.IncompleteReadError:
+        # https://github.com/Azure/azure-sdk-for-python/pull/20888
+        if is_text_payload(response) and response['body']['string'] and 'content-length' in response['headers']:
+            response['headers']['content-length'][0] = str(len(response['body']['string']))
+        return response
