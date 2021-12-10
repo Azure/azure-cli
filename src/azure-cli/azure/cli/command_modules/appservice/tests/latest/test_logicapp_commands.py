@@ -11,7 +11,7 @@ import tempfile
 import requests
 import datetime
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathPatternCheck
@@ -26,7 +26,7 @@ LINUX_ASP_LOCATION_LOGICAPP = 'ukwest'
 DEFAULT_LOCATION = "westus"
 
 class LogicappBasicE2ETest(ScenarioTest):
-    
+
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
@@ -36,7 +36,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
 
-        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage), 
+        self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage),
                  checks=[
                          JMESPathCheck('state', 'Running'),
                          JMESPathCheck('name', logicapp_name),
@@ -145,7 +145,7 @@ class LogicAppOnLinux(ScenarioTest):
         ]).get_output_in_json()
         # self.assertTrue('functionapp,workflowapp,linux' in result[0]['kind'])
 
-        
+
         self.cmd('logicapp delete -g {} -n {} -y'.format(resource_group, logicapp_name))
 
 

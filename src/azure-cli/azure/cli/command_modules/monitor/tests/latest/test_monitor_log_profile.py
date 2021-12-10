@@ -11,6 +11,8 @@ class TestLogProfileScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_lp_create', location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_monitor_create_log_profile(self, resource_group, storage_account):
+        self.cmd("monitor log-profiles list --query [0].name -o tsv")
+        self.cmd("monitor log-profiles delete -n [0].name")
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20)
         })
