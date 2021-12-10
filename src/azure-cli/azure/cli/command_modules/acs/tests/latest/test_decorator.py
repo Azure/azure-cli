@@ -263,6 +263,18 @@ class AKSParamDictTestCase(unittest.TestCase):
         param_dict = AKSParamDict({"abc": "xyz"})
         self.assertEqual(param_dict.get("abc"), "xyz")
 
+    def test_keys(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.keys()), ["abc"])
+
+    def test_values(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.values()), ["xyz"])
+
+    def test_items(self):
+        param_dict = AKSParamDict({"abc": "xyz"})
+        self.assertEqual(list(param_dict.items()), [("abc", "xyz")])
+
     def test_print_usage_statistics(self):
         param_dict = AKSParamDict({"abc": "xyz", "def": 100})
         param_dict.print_usage_statistics()
@@ -437,7 +449,7 @@ class AKSContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ):
             self.assertEqual(ctx_1._get_location(read_only=True), None)
@@ -1283,6 +1295,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on mutually exclusive disable_ahub and enable_ahub
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_enable_ahub(), True)
 
@@ -1303,6 +1316,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on mutually exclusive disable_ahub and enable_ahub
         with self.assertRaises(MutuallyExclusiveArgumentError):
             self.assertEqual(ctx_2.get_disable_ahub(), True)
 
@@ -1342,7 +1356,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -1370,7 +1384,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -1417,7 +1431,7 @@ class AKSContextTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -2489,13 +2503,13 @@ class AKSContextTestCase(unittest.TestCase):
             begin_create_or_update_by_id=Mock(return_value=async_poller)
         )
         with patch(
-            "azure.cli.command_modules.acs.custom._get_rg_location",
+            "azure.cli.command_modules.acs.addonconfiguration.get_rg_location",
             return_value="test_location",
         ), patch(
-            "azure.cli.command_modules.acs.custom.cf_resource_groups",
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resource_groups",
             return_value=cf_resource_groups,
         ), patch(
-            "azure.cli.command_modules.acs.custom.cf_resources",
+            "azure.cli.command_modules.acs.addonconfiguration.cf_resources",
             return_value=cf_resources,
         ):
             self.assertEqual(
@@ -2732,6 +2746,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on azure keyvault secrets provider not enabled
         with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_enable_secret_rotation()
 
@@ -2756,6 +2771,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on azure keyvault secrets provider not enabled
         with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_disable_secret_rotation()
 
@@ -2791,6 +2807,7 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        # fail on azure keyvault secrets provider not enabled
         with self.assertRaises(InvalidArgumentValueError):
             ctx_2.get_rotation_poll_interval()
 
@@ -4238,7 +4255,7 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_enable_local_accounts()
 
-    def test_get_client_id_from_identity_or_sp_profile(self):
+    def test_get_assignee_from_identity_or_sp_profile(self):
         # default
         ctx_1 = AKSContext(
             self.cmd,
@@ -4248,7 +4265,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         # fail on no mc attached and no client id found
         with self.assertRaises(UnknownError):
-            ctx_1.get_client_id_from_identity_or_sp_profile()
+            ctx_1.get_assignee_from_identity_or_sp_profile()
 
         # custom value
         ctx_2 = AKSContext(
@@ -4264,7 +4281,7 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_2.attach_mc(mc_2)
         # fail on kubelet identity not found
         with self.assertRaises(UnknownError):
-            ctx_2.get_client_id_from_identity_or_sp_profile()
+            ctx_2.get_assignee_from_identity_or_sp_profile()
 
         # custom value
         ctx_3 = AKSContext(
@@ -4278,13 +4295,14 @@ class AKSContextTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="UserAssigned"),
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id"
+                    client_id="test_client_id",
+                    object_id = "test_object_id"
                 )
             },
         )
         ctx_3.attach_mc(mc_3)
         self.assertEqual(
-            ctx_3.get_client_id_from_identity_or_sp_profile(), "test_client_id"
+            ctx_3.get_assignee_from_identity_or_sp_profile(), ("test_object_id", False)
         )
 
         # custom value
@@ -4302,7 +4320,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_4.attach_mc(mc_4)
         self.assertEqual(
-            ctx_4.get_client_id_from_identity_or_sp_profile(), "test_client_id"
+            ctx_4.get_assignee_from_identity_or_sp_profile(), ("test_client_id", True)
         )
 
 
@@ -4602,7 +4620,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "subscription_id", "1234-5678", overwrite_exists=True
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.custom.get_graph_rbac_management_client",
@@ -4689,6 +4707,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.prompt_y_n",
             return_value=False,
         ):
+            # fail on user does not confirm
             with self.assertRaises(DecoratorEarlyExitException):
                 dec_3.process_add_role_assignment_for_vnet_subnet(mc_3)
         self.assertEqual(
@@ -4847,7 +4866,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ) as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(
-            self.cmd, "test_service_principal", "test_registry_id", False
+            self.cmd, "test_service_principal", "test_registry_id", False, True
         )
 
     def test_set_up_network_profile(self):
@@ -5042,14 +5061,21 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
+                "location": "test_location",
                 "enable_addons": "monitoring",
                 "workspace_resource_id": "test_workspace_resource_id",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.ensure_container_insights_for_monitoring",
             return_value=None,
         ):
             self.assertEqual(dec_1.context.get_intermediate("monitoring"), None)
@@ -5343,6 +5369,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             self.cmd,
             self.client,
             {
+                "location": "test_location",
                 "vnet_subnet_id": "test_vnet_subnet_id",
                 "enable_addons": "http_application_routing,monitoring,virtual-node,kube-dashboard,azure-policy,ingress-appgw,confcom,open-service-mesh,azure-keyvault-secrets-provider",
                 "workspace_resource_id": "test_workspace_resource_id",
@@ -5359,8 +5386,14 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
         with patch(
-            "azure.cli.command_modules.acs.decorator._ensure_container_insights_for_monitoring",
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.ensure_container_insights_for_monitoring",
             return_value=None,
         ):
             dec_mc_2 = dec_2.set_up_addon_profiles(mc_2)
@@ -6059,7 +6092,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             get_subscription_id=Mock(return_value="1234-5678-9012")
         )
         with patch(
-            "azure.cli.command_modules.acs.decorator._get_rg_location",
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
             return_value="test_location",
         ), patch(
             "azure.cli.command_modules.acs.decorator.Profile",
@@ -6436,6 +6469,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6464,6 +6498,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
                     client_id="test_client_id",
+                    object_id="test_object_id"
                 )
             },
         )
@@ -6479,16 +6514,18 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 [
                     call(
                         self.cmd,
-                        client_id="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_attach_acr",
                         subscription_id="test_subscription_id",
+                        is_service_principal=False,
                     ),
                     call(
                         self.cmd,
-                        client_id="test_client_id",
+                        assignee="test_object_id",
                         acr_name_or_id="test_detach_acr",
                         subscription_id="test_subscription_id",
                         detach=True,
+                        is_service_principal=False,
                     ),
                 ]
             )
@@ -6936,9 +6973,11 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
         )
         dec_1.context.attach_mc(mc_1)
-        # fail on incomplete mc object (no windows profile)
-        with self.assertRaises(UnknownError):
-            dec_1.update_windows_profile(mc_1)
+        dec_mc_1 = dec_1.update_windows_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
         # custom value
         dec_2 = AKSUpdateDecorator(
@@ -7009,6 +7048,25 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             windows_profile=ground_truth_windows_profile_3,
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # custom value
+        dec_4 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_ahub": True,
+                "disable_ahub": False,
+                "windows_admin_password": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_4.context.attach_mc(mc_4)
+        # fail on incomplete mc object (no windows profile)
+        with self.assertRaises(UnknownError):
+            dec_4.update_windows_profile(mc_4)
 
     def test_update_aad_profile(self):
         # default value in `aks_update`
@@ -7251,6 +7309,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             "azure.cli.command_modules.acs.decorator.prompt_y_n",
             return_value=False,
         ):
+            # fail on user does not confirm
             with self.assertRaises(DecoratorEarlyExitException):
                 dec_3.update_identity(mc_3)
 
@@ -7498,8 +7557,221 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             dec_1.context.get_intermediate("virtual_node_addon_enabled"), True
         )
 
+    def test_update_nodepool_labels(self):
+        # default value in `aks_update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_nodepool_labels(None)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_nodepool_labels(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # custom value
+        dec_2 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "nodepool_labels": {"key1": "value1", "key2": "value2"},
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                )
+            ],
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_nodepool_labels(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                    node_labels={"key1": "value1", "key2": "value2"},
+                )
+            ],
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_update_default_mc_profile(self):
-        pass
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_update
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_update).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "name",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "name": "test_name",
+        }
+        raw_param_dict.update(optional_params)
+        raw_param_dict = AKSParamDict(raw_param_dict)
+
+        # default value in `update`
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="1234-5678-9012")
+        )
+        mock_existing_mc = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                )
+            ],
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+            ),
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            identity_profile={
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_resource_id",
+                    client_id="test_client_id",
+                    object_id="test_object_id",
+                )
+            },
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.get_rg_location",
+            return_value="test_location",
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator.AKSUpdateDecorator.check_raw_parameters",
+            return_value=True,
+        ), patch.object(
+            self.client, "get", return_value=mock_existing_mc
+        ):
+            dec_mc_1 = dec_1.update_default_mc_profile()
+
+        ground_truth_agent_pool_profile_1 = (
+            self.models.ManagedClusterAgentPoolProfile(
+                name="nodepool1",
+            )
+        )
+        ground_truth_network_profile_1 = (
+            self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+            )
+        )
+        ground_truth_identity_1 = self.models.ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
+        ground_truth_identity_profile_1 = {
+            "kubeletidentity": self.models.UserAssignedIdentity(
+                resource_id="test_resource_id",
+                client_id="test_client_id",
+                object_id="test_object_id",
+            )
+        }
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agent_pool_profile_1],
+            network_profile=ground_truth_network_profile_1,
+            identity=ground_truth_identity_1,
+            identity_profile=ground_truth_identity_profile_1,
+        )
+        raw_param_dict.print_usage_statistics()
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
     def test_update_mc(self):
-        pass
+        dec_1 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "no_wait": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[
+                self.models.ManagedClusterAgentPoolProfile(
+                    name="nodepool1",
+                )
+            ],
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku="standard",
+            ),
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+            identity_profile={
+                "kubeletidentity": self.models.UserAssignedIdentity(
+                    resource_id="test_resource_id",
+                    client_id="test_client_id",
+                    object_id="test_object_id",
+                )
+            },
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_mc(None)
+        mock_profile = Mock(
+            get_subscription_id=Mock(return_value="test_subscription_id")
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission"
+        ) as put_mc:
+            dec_1.update_mc(mc_1)
+        put_mc.assert_called_with(
+            self.cmd,
+            self.client,
+            "test_subscription_id",
+            "test_rg_name",
+            "test_name",
+            mc_1,
+            False,
+            False,
+            False,
+            False,
+            None,
+            True,
+            None,
+            {},
+            False,
+        )
+

@@ -11,7 +11,7 @@ from knack.util import CLIError
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, VirtualNetworkPreparer, ScenarioTest, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
