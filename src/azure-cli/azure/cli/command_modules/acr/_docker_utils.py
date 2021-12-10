@@ -48,6 +48,9 @@ class RepoAccessTokenPermission(Enum):
     DELETE = 'delete'
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
+    PULL = 'pull'
+    PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
+    PULL_DELETE_META_READ = '{},{},{}'.format(PULL, DELETE, METADATA_READ)
 
 
 class HelmAccessTokenPermission(Enum):
@@ -484,6 +487,14 @@ def get_authorization_header(username, password):
     return {'Authorization': auth}
 
 
+def get_manifest_authorization_header(username, password):
+    if username == EMPTY_GUID:
+        auth = _get_bearer_auth_str(password)
+    else:
+        auth = _get_basic_auth_str(username, password)
+    return {'Authorization': auth, 'Accept': 'application/vnd.cncf.oras.artifact.manifest.v1+json'}
+
+
 def request_data_from_registry(http_method,
                                login_server,
                                path,
@@ -493,6 +504,7 @@ def request_data_from_registry(http_method,
                                json_payload=None,
                                file_payload=None,
                                params=None,
+                               manifest_headers=False,
                                retry_times=3,
                                retry_interval=5,
                                timeout=300):
@@ -509,7 +521,13 @@ def request_data_from_registry(http_method,
         raise ValueError("Non-empty payload is required for http method: {}".format(http_method))
 
     url = 'https://{}{}'.format(login_server, path)
-    headers = get_authorization_header(username, password)
+
+
+    if manifest_headers:
+        headers = get_manifest_authorization_header(username, password)
+
+    else:
+        headers = get_authorization_header(username, password)
 
     for i in range(0, retry_times):
         errorMessage = None

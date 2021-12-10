@@ -129,6 +129,89 @@ def connected_registry_list_output_format(result):
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
+def list_references_output_format(result):
+    manifests = []
+    for manifest in result['references']:
+        manifests.append(OrderedDict([
+            ('Digest',  _get_value(manifest, 'digest')),
+            ('ArtifactType', _get_value(manifest, 'artifactType')),
+            ('MediaType',  _get_value(manifest, 'mediaType')),
+            ('Size',  _get_value(manifest, 'size'))
+        ]))
+
+    return manifests
+
+
+def list_manifest_output_format(result):
+    manifests = []
+
+    # Not --full case
+    if _get_value(result[0], 'digest') != ' ':
+
+        #  --detail case
+        if _get_value(result[0], 'createdTime') != ' ':
+
+            for manifest in result:
+                manifests.append(OrderedDict([
+                    ('CreatedTime',  _get_value(manifest, 'createdTime')),
+                    ('Digest', _get_value(manifest, 'digest')),
+                    ('ImageSize',  _get_value(manifest, 'imageSize')),
+                    ('LastUpdateTime',  _get_value(manifest, 'lastUpdateTime')),
+                    ('MediaType',  _get_value(manifest, 'mediaType')),
+                    ('Architecture',  _get_value(manifest, 'architecture')),
+                    ('ConfigMediaType',  _get_value(manifest, 'configMediaType')),
+                    ('Os',  _get_value(manifest, 'os'))
+                ]))
+            return manifests
+
+        # base case, no --full and no --detail
+        else:
+            for manifest in result:
+                manifests.append(OrderedDict([
+                    ('Digest', _get_value(manifest, 'digest')),
+                    ('TimeStamp',  _get_value(manifest, 'timestamp'))
+                ]))
+            return manifests
+
+    else:
+        # --full case
+        hasDockerManifest = False
+        for manifest in result:
+            if  _get_value(manifest, 'artifactType') == ' ':
+                hasDockerManifest = True
+                break
+
+        # Both OCI and ORAS artifacts case
+        if hasDockerManifest:
+            for manifest in result:
+                manifests.append(OrderedDict([
+                ('ArtifactType',  _get_value(manifest, 'artifactType')),
+                ('SubjectDigest', _get_value(manifest, 'subject', 'digest')),
+                ('MediaType',  _get_value(manifest, 'mediaType'))
+            ]))
+            return manifests
+
+        # ORAS artifacts only case
+        else:
+            for manifest in result:
+                manifests.append(OrderedDict([
+                    ('ArtifactType',  _get_value(manifest, 'artifactType')),
+                    ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
+                ]))
+            return manifests
+
+
+def show_manifest_output_format(result):
+        if _get_value(result, 'artifactType') != ' ':
+            return OrderedDict([
+                ('ArtifactType',  _get_value(result, 'artifactType')),
+                ('SubjectDigest', _get_value(result, 'subject', 'digest'))
+            ])
+        return OrderedDict([
+            ('MediaType',  _get_value(result, 'mediaType'))
+        ])
+
+
 def _recursive_format_list_acr_childs(family_tree, connected_registry_id):
     connected_registry = family_tree[connected_registry_id]
     childs = connected_registry['childs']
