@@ -8,12 +8,12 @@
 
 import json
 import sys
+import time
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
 from msal_extensions.persistence import PersistenceNotFound
 
-from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -60,13 +60,27 @@ class SecretStore:
         with CrossPlatLock(self._lock_file):
             self._persistence.save(json.dumps(content, indent=4))
 
+    def _load(self):
+        try:
+            return json.loads(self._persistence.load())
+        except PersistenceNotFound:
+            return []
+
     def load(self):
-        with CrossPlatLock(self._lock_file):
+        # Use optimistic locking rather than CrossPlatLock, so that multiple processes can
+        # read the same file at the same time.
+        retry = 3
+        for attempt in range(1, retry + 1):
             try:
-                return json.loads(self._persistence.load())
-            except PersistenceNotFound:
-                return []
-            except Exception as ex:
-                raise CLIError("Failed to load token files. If you can reproduce, please log an issue at "
-                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
-                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+                return self._load()
+            except Exception:  # pylint: disable=broad-except
+                # Presumably other processes are writing the file, causing dirty read
+                if attempt < retry:
+                    logger.debug("Unable to load secret store in No. %d attempt", attempt)
+                    import traceback
+                    logger.debug(traceback.format_exc())
+                    time.sleep(0.5)
+                else:
+                    raise  # End of retry. Re-raise the exception as-is.
+
+        return []  # Not really reachable here. Just to keep pylint happy.
