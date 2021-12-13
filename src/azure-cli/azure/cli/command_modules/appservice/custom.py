@@ -1829,9 +1829,11 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None):
-    if number_of_workers is None and sku is None:
-        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
+def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+                            max_elastic_worker_count=None):
+    if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
+        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
@@ -1840,6 +1842,13 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None):
 
     if number_of_workers is not None:
         sku_def.capacity = number_of_workers
+
+    if elastic_scale is not None:
+        pass
+
+    if max_elastic_worker_count is not None:
+        pass
+
     instance.sku = sku_def
     return instance
 

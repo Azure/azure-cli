@@ -131,6 +131,8 @@ def load_arguments(self, _):
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
+        c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan')
+        c.argument('max_elastic_worker_count', type=int, help='')
         c.ignore('allow_pending_state')
 
     with self.argument_context('appservice plan delete') as c:
