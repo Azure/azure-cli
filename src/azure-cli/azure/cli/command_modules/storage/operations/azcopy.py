@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import shlex
 from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy, _generate_sas_token
 
 
@@ -10,7 +11,7 @@ from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy,
 def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=None,
                  preserve_s2s_access_tier=None, content_type=None, follow_symlinks=None,
                  exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
-                 cap_mbps=None, **kwargs):
+                 cap_mbps=None, extra_options=None, **kwargs):
 
     azcopy = AzCopy()
     flags = []
@@ -36,6 +37,8 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
         flags.append('--follow-symlinks=true')
     if cap_mbps is not None:
         flags.append('--cap-mbps=' + cap_mbps)
+    if extra_options is not None:
+        flags.extend(shlex.split(extra_options))
     azcopy.copy(source, destination, flags=flags)
 
 
