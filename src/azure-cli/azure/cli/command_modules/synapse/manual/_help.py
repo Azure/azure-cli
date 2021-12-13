@@ -2133,6 +2133,75 @@ helps['synapse kusto'] = """
     short-summary: "Manage synapse kusto"
 """
 
+
+helps['synapse kql-script'] = """
+    type: group
+    short-summary: Manage script with kusto
+"""
+
+helps['synapse kql-script show'] = """
+    type: command
+    short-summary: "Gets a KQL script."
+    examples:
+      - name: KustoScriptsGet
+        text: |-
+               az synapse kql-script show --workspace-name "kustoWorkspaceName" --name "kustoScript1"
+"""
+
+helps['synapse kql-script list'] = """
+    type: command
+    short-summary: "List KQL scripts."
+    examples:
+      - name: KustoScriptsList
+        text: |-
+               az synapse kql-script list --workspace-name "kustoWorkspaceName"
+"""
+
+helps['synapse kql-script create'] = """
+    type: command
+    short-summary: "Creates a KQL script."
+    examples:
+      - name: KustoScriptsCreateOrUpdate
+        text: |-
+               az synapse kql-script create --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
+               --name "kustoScript1"
+"""
+
+helps['synapse kql-script import'] = """
+    type: command
+    short-summary: "Creates a KQL script."
+    examples:
+      - name: KustoScriptsCreateOrUpdate
+        text: |-
+               az synapse kql-script import --resource-group "kustorptest" --workspace-name "kustoWorkspaceName" \
+               --kusto-pool-name kustopooltest --kusto-database-name kustodbtest --file C:\\samples\\KqlScript.kql \
+               --name "kustoScript1"
+"""
+
+helps['synapse kql-script export'] = """
+    type: command
+    short-summary: "Export KQL scripts."
+    examples:
+      - name: KustoScriptsExport
+        text: |-
+               az synapse kql-script export --workspace-name "kustoWorkspaceName" --output-folder "C:\\KqlScirpt"
+"""
+
+helps['synapse kql-script delete'] = """
+    type: command
+    short-summary: "Deletes a KQL script"
+    examples:
+      - name: KustoScriptsDelete
+        text: |-
+               az synapse kql-script delete --workspace-name "kustoWorkspaceName" --name "kustoScript1"
+"""
+
+helps['synapse kql-script wait'] = """
+    type: command
+    short-summary: "Place the CLI in a waiting state until a condition of a KQL script is met."
+"""
+
 helps['synapse sql-script'] = """
 type: group
 short-summary: Manage SQL scripts in a synapse workspace.
