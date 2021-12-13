@@ -11,8 +11,8 @@ from azure.cli.testsdk import (
     ScenarioTest,
     record_only
 )
-from azure_devtools.scenario_tests import RecordingProcessor
-from azure_devtools.scenario_tests.utilities import is_text_payload
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,
@@ -51,7 +51,7 @@ class CredentialReplacer(RecordingProcessor):
         # hide token in header
         if 'x-ms-cupertino-test-token' in request.headers:
             request.headers['x-ms-cupertino-test-token'] = 'hidden'
-        
+
         return request
 
     def process_response(self, response):
@@ -93,7 +93,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create appconfig --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --app-config {config_store} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app} ',
@@ -136,7 +136,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create cosmos-cassandra --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --key-space {key_space} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -180,7 +180,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create cosmos-gremlin --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --database {database} --graph {graph} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -223,7 +223,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create cosmos-mongo --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --database {database} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -266,7 +266,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create cosmos-sql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --database {database} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -309,7 +309,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create cosmos-table --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --table {table} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -344,14 +344,14 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
             'spring': 'servicelinker-springcloud',
             'app': 'eventhub',
             'deployment': 'default',
-            'namespace': 'servicelinkertesteventhub' 
+            'namespace': 'servicelinkertesteventhub'
         })
 
 
         # create connection
         self.cmd('spring-cloud connection create eventhub --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --namespace {namespace} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -394,14 +394,14 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # prepare password
         password = self.cmd('keyvault secret show --vault-name cupertino-kv-test -n TestDbPassword')\
             .get_output_in_json().get('value')
-        
+
         self.kwargs.update({'password': password})
 
 
         # create connection
         self.cmd('spring-cloud connection create postgres-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -443,7 +443,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create keyvault --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --vault {vault} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -492,7 +492,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create mysql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -544,7 +544,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create mysql-flexible --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -596,7 +596,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create postgres --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -647,7 +647,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create sql --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --server {server} --database {database} --secret name={user} secret={password} --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -688,7 +688,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create storage-blob --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --system-identity --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',
@@ -711,7 +711,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('spring-cloud connection delete --connection {name} -g {source_resource_group} --service {spring} --app {app} --yes')
-    
+
 
     # @record_only
     def test_springcloud_storagequeue_e2e(self):
@@ -729,7 +729,7 @@ class SpringCloudConnectionWithoutIdScenarioTest(ScenarioTest):
         # create connection
         self.cmd('spring-cloud connection create storage-queue --connection {name} -g {source_resource_group} --service {spring} --app {app} '
                  '--tg {target_resource_group} --account {account} --secret --client-type java')
-        
+
         # list connection
         connections = self.cmd(
             'spring-cloud connection list -g {source_resource_group} --service {spring} --app {app}',

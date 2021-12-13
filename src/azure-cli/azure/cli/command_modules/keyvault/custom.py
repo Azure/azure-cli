@@ -1462,11 +1462,11 @@ def get_policy_template():
 
 
 def update_key_rotation_policy(cmd, client, value, name=None):
-    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.cli.core.util import read_file_content, get_json_object
     if os.path.exists(value):
-        policy = get_file_json(value)
-    else:
-        policy = shell_safe_json_parse(value)
+        value = read_file_content(value)
+
+    policy = get_json_object(value)
     if not policy:
         raise InvalidArgumentValueError("Please specify a valid policy")
 
@@ -1475,17 +1475,21 @@ def update_key_rotation_policy(cmd, client, value, name=None):
     lifetime_actions = []
     if policy.get('lifetime_actions', None):
         for action in policy['lifetime_actions']:
-            action_type = action['action'].get('type', None) if action.get('action', None) else None
+            try:
+                action_type = action['action'].get('type', None) if action.get('action', None) else None
+            except AttributeError:
+                action_type = action.get('action', None)
             time_after_create = action['trigger'].get('time_after_create', None) \
-                if action.get('trigger', None) else None
+                if action.get('trigger', None) else action.get('time_after_create', None)
             time_before_expiry = action['trigger'].get('time_before_expiry', None) \
-                if action.get('trigger', None) else None
+                if action.get('trigger', None) else action.get('time_before_expiry', None)
             lifetime_action = KeyRotationLifetimeAction(action_type,
                                                         time_after_create=time_after_create,
                                                         time_before_expiry=time_before_expiry)
             lifetime_actions.append(lifetime_action)
-
-    expires_in = policy['attributes'].get('expires_in', None) if policy.get('attributes', None) else None
+    expires_in = policy.get('expires_in', None) or policy.get('expiry_time', None)
+    if policy.get('attributes', None):
+        expires_in = policy['attributes'].get('expires_in', None) or policy['attributes'].get('expiry_time', None)
     return client.update_key_rotation_policy(name=name, lifetime_actions=lifetime_actions, expires_in=expires_in)
 # endregion
 
