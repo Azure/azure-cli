@@ -11,13 +11,13 @@ import tempfile
 import shutil
 import logging
 import threading
-import six
 import vcr
 
 from .config import TestConfig
 from .const import ENV_TEST_DIAGNOSE
 from .utilities import create_random_name
 from .decorators import live_only
+from .recording_processors import ContentLengthProcessor
 
 
 class IntegrationTestBase(unittest.TestCase):
@@ -95,6 +95,8 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
         super(ReplayableTest, self).__init__(method_name)
 
         self.recording_processors = recording_processors or []
+        # Processors that will be called when all self.recording_processors finishes
+        self.recording_post_processors = [ContentLengthProcessor()]
         self.replay_processors = replay_processors or []
 
         self.recording_patches = recording_patches or []
@@ -159,7 +161,7 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
             return None
 
         if self.in_recording:
-            for processor in self.recording_processors:
+            for processor in self.recording_processors + self.recording_post_processors:
                 request = processor.process_request(request)
                 if not request:
                     break
@@ -182,10 +184,10 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
             response['headers'] = headers
 
             body = response['body']['string']
-            if is_text_payload(response) and body and not isinstance(body, six.string_types):
+            if is_text_payload(response) and body and not isinstance(body, str):
                 response['body']['string'] = body.decode('utf-8')
 
-            for processor in self.recording_processors:
+            for processor in self.recording_processors + self.recording_post_processors:
                 response = processor.process_response(response)
                 if not response:
                     break
@@ -200,7 +202,7 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
     @classmethod
     def _custom_request_query_matcher(cls, r1, r2):
         """ Ensure method, path, and query parameters match. """
-        from six.moves.urllib_parse import urlparse, parse_qs  # pylint: disable=import-error, relative-import
+        from urllib.parse import urlparse, parse_qs
 
         url1 = urlparse(r1.uri)
         url2 = urlparse(r2.uri)
