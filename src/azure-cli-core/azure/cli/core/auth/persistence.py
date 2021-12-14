@@ -15,6 +15,8 @@ from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersiste
 from msal_extensions.persistence import PersistenceNotFound
 
 from knack.log import get_logger
+from azure.cli.core.decorators import retry
+
 
 logger = get_logger(__name__)
 
@@ -60,27 +62,9 @@ class SecretStore:
         with CrossPlatLock(self._lock_file):
             self._persistence.save(json.dumps(content, indent=4))
 
-    def _load(self):
+    @retry()
+    def load(self):
         try:
             return json.loads(self._persistence.load())
         except PersistenceNotFound:
             return []
-
-    def load(self):
-        # Use optimistic locking rather than CrossPlatLock, so that multiple processes can
-        # read the same file at the same time.
-        retry = 3
-        for attempt in range(1, retry + 1):
-            try:
-                return self._load()
-            except Exception:  # pylint: disable=broad-except
-                # Presumably other processes are writing the file, causing dirty read
-                if attempt < retry:
-                    logger.debug("Unable to load secret store in No. %d attempt", attempt)
-                    import traceback
-                    logger.debug(traceback.format_exc())
-                    time.sleep(0.5)
-                else:
-                    raise  # End of retry. Re-raise the exception as-is.
-
-        return []  # Not really reachable here. Just to keep pylint happy.
