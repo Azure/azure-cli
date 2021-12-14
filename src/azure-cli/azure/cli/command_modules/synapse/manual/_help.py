@@ -1097,7 +1097,7 @@ examples:
   - name: Create a linked service.
     text: |-
         az synapse linked-service create --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service update'] = """
@@ -1107,7 +1107,7 @@ examples:
   - name: Update an exist linked service.
     text: |-
         az synapse linked-service update --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service set'] = """
@@ -1117,7 +1117,7 @@ examples:
   - name: Update an exist linked service.
     text: |-
         az synapse linked-service set --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service show'] = """
@@ -1161,7 +1161,7 @@ examples:
   - name: Create a dataset.
     text: |-
         az synapse dataset create --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset update'] = """
@@ -1171,7 +1171,7 @@ examples:
   - name: Update an exist dataset.
     text: |-
         az synapse dataset update --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset set'] = """
@@ -1181,7 +1181,7 @@ examples:
   - name: Update an exist dataset.
     text: |-
         az synapse dataset set --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset show'] = """
@@ -1225,7 +1225,7 @@ examples:
   - name: Create a pipeline.
     text: |-
         az synapse pipeline create --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline update'] = """
@@ -1235,7 +1235,7 @@ examples:
   - name: Update an exist pipeline.
     text: |-
         az synapse pipeline update --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline set'] = """
@@ -1245,7 +1245,7 @@ examples:
   - name: Update an exist pipeline.
     text: |-
         az synapse pipeline set --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline show'] = """
@@ -1351,7 +1351,7 @@ examples:
   - name: Create a trigger.
     text: |-
         az synapse trigger create --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger update'] = """
@@ -1361,7 +1361,7 @@ examples:
   - name: Update an exist trigger.
     text: |-
         az synapse trigger update --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger set'] = """
@@ -1371,7 +1371,7 @@ examples:
   - name: Update an exist trigger.
     text: |-
         az synapse trigger set --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger show'] = """
@@ -1506,7 +1506,7 @@ examples:
   - name: Create a data flow.
     text: |-
         az synapse data-flow create --workspace-name testsynapseworkspace \\
-          --name testdataflow --file @path/dataflow.json
+          --name testdataflow --file @"path/dataflow.json"
 """
 
 helps['synapse data-flow set'] = """
@@ -1516,7 +1516,7 @@ examples:
   - name: Set an exist data flow.
     text: |-
         az synapse data-flow set --workspace-name testsynapseworkspace \\
-          --name testdataflow --file @path/dataflow.json
+          --name testdataflow --file @"path/dataflow.json"
 """
 
 helps['synapse data-flow show'] = """
@@ -1990,7 +1990,7 @@ examples:
   - name: Create a spark job definition.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
+          --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition update'] = """
@@ -2000,7 +2000,7 @@ examples:
   - name: Update a spark job definition.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
+          --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition wait'] = """
