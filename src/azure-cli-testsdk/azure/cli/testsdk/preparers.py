@@ -189,7 +189,7 @@ class CommunicationResourcePreparer(NoTrafficRecordingPreparer, SingleValueRepla
 
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name,
-                self.parameter_name + '_info': (name, account_key or 'endpoint=https://sanitized.communication.azure.com/;accesskey=eyJhbG==')}
+                self.parameter_name + '_info': (name, account_key or 'endpoint=https://sanitized.communication.azure.com/;accesskey=fake===')}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
