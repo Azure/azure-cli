@@ -83,6 +83,11 @@ Release History
 
 * GA `az eventgrid system-topic` (#20531)
 
+**IoT Central**
+
+* `az iot central app create --mi-system-assigned`: New `--mi-system-assigned` parameter for app create to assign a system-assigned managed identity to the app (#20448)
+
+
 **Key Vault**
 
 * `az keyvault key encrypt/decrypt`: Support AES algorithm for MHSM (#20189)
