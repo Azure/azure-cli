@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
                                ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')

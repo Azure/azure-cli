@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.31.0
+++++++
+* Use MSAL HTTP cache (#20234)
+
 2.30.0
 ++++++
 * [BREAKING CHANGE] ADAL to MSAL migration (#19853)

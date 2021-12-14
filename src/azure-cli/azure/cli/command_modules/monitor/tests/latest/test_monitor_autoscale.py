@@ -5,7 +5,7 @@
 
 from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, record_only
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
