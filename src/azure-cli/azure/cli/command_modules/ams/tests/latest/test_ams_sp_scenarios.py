@@ -7,7 +7,7 @@ import time
 from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class AmsSpTests(ScenarioTest):
     @ResourceGroupPreparer()
@@ -48,7 +48,7 @@ class AmsSpTests(ScenarioTest):
 
                 # Wait 2 minutes for role assignment to be created.
                 time.sleep(300)
-                
+
                 self.cmd('az ams account sp reset-credentials -a {amsname} -g {rg} -n {appId} -p {spNewPassword}', checks=[
                     self.check('AadSecret', '{spNewPassword}'),
                     self.check('ResourceGroup', '{rg}'),

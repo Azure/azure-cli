@@ -35,7 +35,7 @@ from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
-from knack.log import get_logger
+from knack.log import get_logger, CLILogging
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
@@ -562,7 +562,8 @@ class AzCliCommandInvoker(CommandInvoker):
         self.cli_ctx.raise_event(EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
                                  parser=self.parser)
 
-        arg_check = [a for a in args if a not in ['--debug', '--verbose']]
+        arg_check = [a for a in args if a not in
+                     (CLILogging.DEBUG_FLAG, CLILogging.VERBOSE_FLAG, CLILogging.ONLY_SHOW_ERRORS_FLAG)]
         if not arg_check:
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]

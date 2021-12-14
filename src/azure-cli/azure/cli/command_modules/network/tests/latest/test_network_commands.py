@@ -9,7 +9,7 @@ import os
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -70,6 +70,13 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('sku.name', 'Standard')
         ])
+
+        # test network lb update command
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=[
+            self.check('tags.CostCenter', 'MyTestGroup')
+        ])
+
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
             self.check('publicIpAllocationMethod', 'Static')
@@ -389,7 +396,7 @@ class NetworkPublicIpWithSku(ScenarioTest):
         ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
+        with self.assertRaisesRegex(HttpResponseError, 'Global publicIP addresses are only supported for standard SKU public IP addresses'):
             self.cmd('network public-ip create -g {rg} -l {location} -n {ip4} --tier {global_tier}')
 
 
@@ -442,6 +449,11 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
                  checks=self.check('prefixLength', 30))
         self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
         self.cmd('network public-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
@@ -472,7 +484,7 @@ class NetworkPublicIpPrefix(ScenarioTest):
         ])
 
         # Check with unsupported IP address version: IPv5
-        with self.assertRaisesRegexp(SystemExit, '2'):
+        with self.assertRaisesRegex(SystemExit, '2'):
             self.cmd('network public-ip prefix create -g {rg} -n {prefix_name_ipv6} --length 127 --version IPv5')
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_public_ip_prefix_zone', location='eastus2')
@@ -1398,7 +1410,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd(
             'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
             '--paths /mypath122/* --address-pool {pool} --http-settings {settings}')
-        with self.assertRaisesRegexp(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
+        with self.assertRaisesRegex(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
             self.cmd(
                 'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                 '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
@@ -1954,6 +1966,58 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('exclusions | length(@)', 0)
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_app_gateway_waf_policy_exclusion_rule_set_")
+    def test_network_app_gateway_waf_policy_exclusion_rule_set(self, resource_group):
+        self.kwargs.update({
+            "waf": "agp",
+            "rule_group1": "REQUEST-921-PROTOCOL-ATTACK",
+            "rule_group2": "REQUEST-931-APPLICATION-ATTACK-RFI",
+        })
+        # create a waf-policy
+        self.cmd("network application-gateway waf-policy create -g {rg} -n {waf}")
+        # add an exclusion rule
+        self.cmd("network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} \
+                 --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing")
+        # add one rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group1} --rule-ids 921140 921150",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group1"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "921140"),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[1].ruleId", "921150"),
+            ]
+        )
+        # add another rule group to exclusion
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set add -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 \
+            --group-name {rule_group2} --rule-ids 931100",
+            checks=[
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 2),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("managedRules.exclusions[0].exclusionManagedRuleSets[0].ruleGroups[1].rules[0].ruleId", "931100"),
+            ]
+        )
+        # remove the first rule group
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set remove -g {rg} --policy-name {waf} \
+            --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing \
+            --type OWASP --version 3.2 --group-name {rule_group1}"
+        )
+        self.cmd(
+            "network application-gateway waf-policy managed-rule exclusion rule-set list -g {rg} --policy-name {waf}",
+            checks=[
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups | length(@)", 1),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].ruleGroupName", self.kwargs["rule_group2"]),
+                self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "931100"),
+            ]
+        )
+
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
@@ -2187,7 +2251,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         # Expecting no results as we just deleted the only express route in the resource group
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
-        with self.assertRaisesRegexp(CLIError, 'Please provide a complete resource ID'):
+        with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
     @unittest.skip('Test is wrong, please fix. rg not found')
@@ -2359,7 +2423,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
+        with self.assertRaisesRegex(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
@@ -2383,7 +2447,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # cannot create it, so this test will fail due to resource is not found.
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
         self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
 
@@ -2404,11 +2468,11 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
+        with self.assertRaisesRegex(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
-        with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
+        with self.assertRaisesRegex(HttpResponseError, 'ParentResourceIsInFailedState'):
             self.cmd('network express-route peering connection ipv6-config set -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --address-prefix .../125')
-        with self.assertRaisesRegexp(HttpResponseError, 'ParentResourceIsInFailedState'):
+        with self.assertRaisesRegex(HttpResponseError, 'ParentResourceIsInFailedState'):
             self.cmd('network express-route peering connection ipv6-config remove -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
@@ -2806,6 +2870,20 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb inbound-nat-rule list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 0))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules_v2', location='eastus2')
+    def test_network_lb_nat_rules_v2(self, resource_group):
+        self.kwargs['lb'] = 'lb1'
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp  --backend-port 3 '
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3', checks=[
+                 self.check('name', 'rule3'),
+                 self.check('frontendPortRangeStart', 0),
+                 self.check('frontendPortRangeEnd', 3)])
+        self.cmd('network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule3 --floating-ip true --idle-timeout 10 --frontend-port-range-end 5',
+                 checks=self.check('frontendPortRangeEnd', 5))
+        self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools', location='eastus2')
     def test_network_lb_nat_pools(self, resource_group):
 
@@ -2881,6 +2959,18 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  '--backend-address name=addr2 ip-address=10.0.0.2 subnet={subnet_name} '
                  '--backend-address name=addr3 ip-address=10.0.0.3 subnet={subnet}',
                  checks=self.check('name', 'bap2'))
+
+        # update backendpool
+        self.cmd('network lb address-pool update -g {rg} --lb-name {lb} -n bap2 --vnet {vnet} '
+                 '--backend-address name=addr1 ip-address=10.0.0.3 subnet={subnet} '
+                 '--backend-address name=addr2 ip-address=10.0.0.4 subnet={subnet_name} '
+                 '--backend-address name=addr3 ip-address=10.0.0.5 subnet={subnet}',
+                 checks=[
+                     self.check('loadBalancerBackendAddresses[0].ipAddress', '10.0.0.3'),
+                     self.check('loadBalancerBackendAddresses[1].ipAddress', '10.0.0.4'),
+                     self.check('loadBalancerBackendAddresses[2].ipAddress', '10.0.0.5')
+                 ])
+
         self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap2 ')
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
@@ -3159,7 +3249,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
-        with self.assertRaisesRegexp(HttpResponseError, 'not supported for secondary IpConfigurations'):
+        with self.assertRaisesRegex(HttpResponseError, 'not supported for secondary IpConfigurations'):
             self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
@@ -3591,6 +3681,53 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('bgpCommunities.virtualNetworkCommunity', '12076:20001')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_encryption')
+    def test_network_vnet_with_encryption(self, resource_group):
+        self.kwargs.update({
+            'allowUnencrypted': 'AllowUnencrypted',
+            'dropUnencrypted': 'DropUnencrypted',
+        })
+        # only create with --enable-encryption and --encryption-enforcement-policy
+        self.cmd('network vnet create --address-prefixes 10.0.0.0/16 -n MyVnet1 -g {rg} --subnet-name Mysubnet --subnet-prefixes 10.0.0.0/24 --enable-encryption true --encryption-enforcement-policy allowUnencrypted')
+        self.cmd('network vnet create --address-prefixes 10.1.0.0/16 -n MyVnet2 -g {rg} --subnet-name MySubnet --subnet-prefixes 10.1.0.0/24 --enable-encryption true --encryption-enforcement-policy dropUnencrypted')
+        self.cmd('network vnet show -n MyVnet1 -g {rg}', checks=[
+            self.check('encryption.enabled', True),
+            self.check('encryption.enforcement', '{allowUnencrypted}'),
+        ])
+        self.cmd('network vnet show -n MyVnet2 -g {rg}', checks=[
+            self.check('encryption.enabled', True),
+            self.check('encryption.enforcement', '{dropUnencrypted}'),
+        ])
+        # only create with --enable-encryption
+        self.cmd('network vnet create --address-prefixes 10.2.0.0/16 --name MyVnet3 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.2.0.0/24 --enable-encryption false')
+        self.cmd('network vnet create --address-prefixes 10.3.0.0/16 --name MyVnet4 --resource-group {rg} --subnet-name MySubnet --subnet-prefixes 10.3.0.0/24 --enable-encryption true', expect_failure=True)
+        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy allowUnencrypted', checks=[
+            self.check('encryption.enabled', True),
+            self.check('encryption.enforcement', '{allowUnencrypted}'),
+        ])
+        self.cmd('network vnet update --name MyVnet3 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy dropUnencrypted', checks=[
+            self.check('encryption.enabled', True),
+            self.check('encryption.enforcement', '{dropUnencrypted}'),
+        ])
+        # only create with --encryption-enforcement-policy
+        self.cmd('network vnet create --address-prefixes 10.4.0.0/16 --name MyVnet5 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.4.0.0/24 --encryption-enforcement-policy allowUnencrypted', expect_failure=True)
+        # create without encryption
+        self.cmd('network vnet create --address-prefixes 10.5.0.0/16 --name MyVnet6 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.5.0.0/24')
+        self.cmd('network vnet create --address-prefixes 10.6.0.0/16 --name MyVnet7 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.6.0.0/24')
+        self.cmd('network vnet create --address-prefixes 10.7.0.0/16 --name MyVnet8 --resource-group {rg} --subnet-name Mysubnet --subnet-prefixes 10.7.0.0/24')
+        # update
+        self.cmd('network vnet update --name MyVnet6 --resource-group {rg} --enable-encryption true', expect_failure=True)
+        self.cmd('network vnet update --name MyVnet7 --resource-group {rg} --encryption-enforcement-policy dropUnencrypted', expect_failure=True)
+        self.cmd('network vnet update --name MyVnet8 --resource-group {rg} --enable-encryption true --encryption-enforcement-policy dropUnencrypted', checks=[
+            self.check('encryption.enabled', True),
+            self.check('encryption.enforcement', '{dropUnencrypted}'),
+        ])
+        # vnet peering
+        self.cmd('network vnet peering create --name MyVnet1ToMyVnet2 --remote-vnet MyVnet2 --resource-group {rg} --vnet-name MyVnet1')
+        self.cmd('network vnet peering show --name MyVnet1ToMyVnet2 --vnet-name MyVnet1 -g {rg}', checks=[
+            self.check('remoteVirtualNetworkEncryption.enabled', True),
+            self.check('remoteVirtualNetworkEncryption.enforcement', '{dropUnencrypted}'),
+        ])
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
@@ -3606,14 +3743,14 @@ class NetworkVNetCachingScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 --defer')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet1 --address-prefix 10.0.0.0/24 --defer')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet2 --address-prefix 10.0.1.0/24 --defer')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             # ensure vnet has not been created
             self.cmd('network vnet show -g {rg} -n {vnet}')
         self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n subnet3 --address-prefix 10.0.2.0/24')
         self.cmd('network vnet show -g {rg} -n {vnet}',
                  checks=self.check('length(subnets)', 3))
-        with self.assertRaisesRegexp(CLIError, 'Not found in cache'):
+        with self.assertRaisesRegex(CLIError, 'Not found in cache'):
             self.cmd('cache show -g {rg} -n {vnet} -t VirtualNetwork')
 
         # test that generic update works with caching
@@ -4319,7 +4456,7 @@ class NetworkActiveActiveVnetScenarioTest(ScenarioTest):  # pylint: disable=too-
         output = self.cmd('network vpn-connection packet-capture start -g {rg} -n {conn12}').output.strip()
         self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
         # currently we cannot create traffic by cli command. So it will return an error when stop.
-        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+        with self.assertRaisesRegex(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vpn-connection packet-capture stop -g {rg} -n {conn12} --sas-url {sas_url}')
 
 
@@ -4361,7 +4498,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        with self.assertRaisesRegexp(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
+        with self.assertRaisesRegex(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
             self.cmd(
                 'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
 
@@ -4529,7 +4666,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
         output = self.cmd('network vnet-gateway packet-capture start -g {rg} -n {gw1}').output.strip()
         self.assertTrue('Successful' in output, 'Expected Successful in output.\nActual: {}'.format(output))
         # currently we cannot create traffic by cli command. So it will return an error when stop.
-        with self.assertRaisesRegexp(HttpResponseError, 'The response did not contain any data'):
+        with self.assertRaisesRegex(HttpResponseError, 'The response did not contain any data'):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
 
@@ -4676,7 +4813,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
-    def _mock_thread_count():
+    def _mock_thread_count(self):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
@@ -4874,7 +5011,7 @@ class NetworkProfileScenarioTest(ScenarioTest):
         # no e2e scenario without create. Testing path to service only.
         self.cmd('network profile list')
         self.cmd('network profile list -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('network profile show -g {rg} -n dummy')
         self.cmd('network profile delete -g {rg} -n dummy -y')
 

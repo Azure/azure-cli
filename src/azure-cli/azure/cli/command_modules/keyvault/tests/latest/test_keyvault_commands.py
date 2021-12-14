@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 from dateutil import tz
 from ipaddress import ip_network
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure_devtools.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, ScenarioTest
 
 from knack.util import CLIError
@@ -373,7 +373,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ]).get_output_in_json()
 
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'already exist'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'already exist'):
             self.cmd('keyvault create -g {rg} -n {kv} -l {loc}')
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[

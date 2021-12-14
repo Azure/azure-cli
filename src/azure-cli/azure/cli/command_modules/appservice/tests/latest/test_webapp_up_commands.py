@@ -10,7 +10,7 @@ import unittest
 import os
 import requests
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only)
 

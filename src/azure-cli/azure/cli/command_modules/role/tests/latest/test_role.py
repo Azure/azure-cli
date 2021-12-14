@@ -13,7 +13,7 @@ from unittest import mock
 import unittest
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from ..util import retry
@@ -34,7 +34,6 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
 
         try:
             sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
-            self.assertTrue(sp_info['name'] == sp_info['appId'])
             self.assertTrue(sp_info['displayName'] == sp_name)
             self.kwargs['app_id'] = sp_info['appId']
 
@@ -341,7 +340,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
+                with self.assertRaisesRegex(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
