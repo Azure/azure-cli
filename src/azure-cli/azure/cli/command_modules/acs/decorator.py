@@ -1104,6 +1104,28 @@ class AKSContext:
         # this parameter does not need validation
         return node_public_ip_prefix_id
 
+    def get_enable_fips_image(self) -> bool:
+        """Obtain the value of enable_fips_image.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_fips_image = self.raw_param.get("enable_fips_image")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.enable_fips is not None
+            ):
+                enable_fips_image = agent_pool_profile.enable_fips
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_fips_image
+
     def get_enable_encryption_at_host(self) -> bool:
         """Obtain the value of enable_encryption_at_host.
 
@@ -4484,6 +4506,7 @@ class AKSCreateDecorator:
             min_count=min_count,
             max_count=max_count,
             enable_auto_scaling=enable_auto_scaling,
+            enable_fips=self.context.get_enable_fips_image(),
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
