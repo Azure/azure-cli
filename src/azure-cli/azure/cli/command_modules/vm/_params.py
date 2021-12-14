@@ -139,6 +139,8 @@ def load_arguments(self, _):
             c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
             c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
             c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable bursting beyond the provisioned performance target of the disk. Bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
+            c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
 
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
@@ -161,7 +163,7 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
         c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
         c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
-        c.argument('gallery_image_reference', help='ID of the shared galley image version from which to create a disk')
+        c.argument('gallery_image_reference', help='ID of the Compute Gallery image version from which to create a disk')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('logical_sector_size', type=int, help='Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.')
         c.argument('tier', help='Performance tier of the disk (e.g, P4, S10) as described here: https://azure.microsoft.com/pricing/details/managed-disks/. Does not apply to Ultra disks.')

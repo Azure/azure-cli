@@ -53,7 +53,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         :param tenant_id: Tenant GUID, like 00000000-0000-0000-0000-000000000000. If unspecified, default to
             'organizations'.
         :param client_id: Client ID of the CLI application.
-        :param encrypt:  Whether to encrypt token cache and service principal entries.
+        :param encrypt:  Whether to encrypt MSAL token cache and service principal entries.
         """
         self.authority = authority
         self.tenant_id = tenant_id

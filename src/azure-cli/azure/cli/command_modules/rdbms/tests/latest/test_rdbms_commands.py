@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from time import sleep
 from dateutil.tz import tzutc  # pylint: disable=import-error
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError

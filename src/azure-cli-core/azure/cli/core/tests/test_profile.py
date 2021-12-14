@@ -1277,7 +1277,13 @@ class TestProfile(unittest.TestCase):
         result = storage_mock['subscriptions']
         self.assertEqual(2, len(result))
         self.assertEqual(self.id1.split('/')[-1], result[0]['id'])
+        assert result[0]['user']['name'] == self.user1
+        assert result[0]['user']['type'] == 'user'
+
         self.assertEqual(self.id2.split('/')[-1], result[1]['id'])
+        assert result[1]['user']['name'] == self.user1
+        assert result[1]['user']['type'] == 'user'
+
         self.assertTrue(result[0]['isDefault'])
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
@@ -1287,11 +1293,12 @@ class TestProfile(unittest.TestCase):
                                                               get_service_principal_credential_mock,
                                                               create_subscription_client_mock):
         cli = DummyCli()
+        sp_id = '44fee498-c798-4ebb-a41f-7bb523bed8d8'
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'footenant.onmicrosoft.com')
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None)
-        consolidated += profile._normalize_properties('http://foo', [sp_subscription1], True)
+        consolidated += profile._normalize_properties(sp_id, [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
 
         mock_arm_client = mock.MagicMock()
@@ -1305,9 +1312,17 @@ class TestProfile(unittest.TestCase):
         result = storage_mock['subscriptions']
         self.assertEqual(3, len(result))
         self.assertEqual(self.id1.split('/')[-1], result[0]['id'])
+        assert result[0]['user']['name'] == self.user1
+        assert result[0]['user']['type'] == 'user'
+
         self.assertEqual(self.id2.split('/')[-1], result[1]['id'])
+        assert result[1]['user']['name'] == sp_id
+        assert result[1]['user']['type'] == 'servicePrincipal'
+
         self.assertEqual('3', result[2]['id'])
         self.assertTrue(result[0]['isDefault'])
+        assert result[2]['user']['name'] == sp_id
+        assert result[2]['user']['type'] == 'servicePrincipal'
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
