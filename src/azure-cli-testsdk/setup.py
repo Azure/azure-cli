@@ -47,7 +47,8 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure.cli.testsdk'
+        'azure.cli.testsdk',
+        'azure.cli.testsdk.scenario_tests',
     ],
     install_requires=DEPENDENCIES
 )
