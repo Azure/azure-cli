@@ -1110,23 +1110,17 @@ class AKSContext:
         :return: bool
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("enable_fips_image")
+        enable_fips_image = self.raw_param.get("enable_fips_image")
         # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
         if self.mc and self.mc.agent_pool_profiles:
             agent_pool_profile = safe_list_get(
                 self.mc.agent_pool_profiles, 0, None
             )
-            if agent_pool_profile:
-                value_obtained_from_mc = (
-                    agent_pool_profile.enable_fips
-                )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            enable_fips_image = value_obtained_from_mc
-        else:
-            enable_fips_image = raw_value
+            if (
+                agent_pool_profile and
+                agent_pool_profile.enable_fips is not None
+            ):
+                enable_fips_image = agent_pool_profile.enable_fips
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
