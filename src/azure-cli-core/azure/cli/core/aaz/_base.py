@@ -62,7 +62,7 @@ class AAZBaseValue:
             self._is_patch = False
 
     @abc.abstractmethod
-    def to_serialized_data(self, filters=None):
+    def to_serialized_data(self, processor=None):
         raise NotImplementedError()
 
 

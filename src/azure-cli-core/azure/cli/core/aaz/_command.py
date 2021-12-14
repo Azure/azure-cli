@@ -7,6 +7,7 @@ from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
+from ._base import AAZUndefined
 
 
 _DOC_EXAMPLE_FLAG = ':example:'
@@ -153,7 +154,24 @@ class AAZCommand(CLICommand):
             super().update_argument(param_name, argtype)
 
     def transform_output(self, value, client_flatten=True):
-        return value.to_serialized_data()
+        def processor(schema, result):
+            if result == AAZUndefined:
+                return result
+            if client_flatten and isinstance(schema, AAZObjectType):
+                new_result = {}
+                for k, v in result.items():
+                    k_schema = schema[k]
+                    if k_schema._flags.get('client_flatten', False):
+                        assert isinstance(k_schema, AAZObjectType) and isinstance(v, dict)
+                        for sub_k, sub_v in v.items():
+                            assert sub_k not in new_result
+                            new_result[sub_k] = sub_v
+                    else:
+                        assert k not in new_result
+                        new_result[k] = v
+                result = new_result
+            return result
+        return value.to_serialized_data(processor=processor)
 
 
 def register_command_group(name):

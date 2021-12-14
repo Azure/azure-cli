@@ -18,7 +18,7 @@ class Show(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.VirtualNetworkGet(ctx=self.ctx)()
-        return self.transform_output(self.ctx.vars['instance'], client_flatten=True)
+        return self.transform_output(self.ctx.vars.instance, client_flatten=True)
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

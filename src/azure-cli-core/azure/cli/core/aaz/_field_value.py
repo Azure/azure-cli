@@ -40,8 +40,11 @@ class AAZSimpleValue(AAZBaseValue):
             other = other._data
         return self._data >= other
 
-    def to_serialized_data(self, filters=None):
-        return self._data
+    def to_serialized_data(self, processor=None):
+        result = self._data
+        if processor:
+            result = processor(self._schema, result)
+        return result
 
 
 class AAZObject(AAZBaseValue):
@@ -102,18 +105,20 @@ class AAZObject(AAZBaseValue):
     def __ne__(self, other):
         return not (self == other)
 
-    def to_serialized_data(self, filters=None):
-        results = {}
+    def to_serialized_data(self, processor=None):
+        result = {}
         for name, field_schema in self._schema._fields.items():
-            v = self[name].to_serialized_data(filters=filters)
+            v = self[name].to_serialized_data(processor=processor)
             if v == AAZUndefined:
                 continue
             if field_schema._serialized_name:
                 name = field_schema._serialized_name
-            results[name] = v
-        if not results and self._is_patch:
+            result[name] = v
+        if not result and self._is_patch:
             return AAZUndefined
-        return results
+        if processor:
+            result = processor(self._schema, result)
+        return result
 
 
 class AAZDict(AAZBaseValue):
@@ -177,16 +182,18 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
-    def to_serialized_data(self, filters=None):
-        results = {}
+    def to_serialized_data(self, processor=None):
+        result = {}
         for key, v in self.items():
-            v = v.to_serialized_data(filters=filters)
+            v = v.to_serialized_data(processor=processor)
             if v == AAZUndefined:
                 continue
-            results[key] = v
-        if not results and self._is_patch:
+            result[key] = v
+        if not result and self._is_patch:
             return AAZUndefined
-        return results
+        if processor:
+            result = processor(self._schema, result)
+        return result
 
 
 class AAZList(AAZBaseValue):
@@ -286,11 +293,13 @@ class AAZList(AAZBaseValue):
         self._data.clear()
         self._len = 0
 
-    def to_serialized_data(self, filters=None):
-        results = []
+    def to_serialized_data(self, processor=None):
+        result = []
         for v in self:
-            v = v.to_serialized_data(filters=filters)
-            results.append(v)
-        if not results and self._is_patch:
+            v = v.to_serialized_data(processor=processor)
+            result.append(v)
+        if not result and self._is_patch:
             return AAZUndefined
-        return results
+        if processor:
+            result = processor(self._schema, result)
+        return result
