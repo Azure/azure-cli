@@ -867,7 +867,7 @@ class AKSContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_enable_fips_image(), False)
         agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", enable_fips_image=True
+            name="test_nodepool_name", enable_fips=True
         )
         mc = self.models.ManagedCluster(
             location="test_location", agent_pool_profiles=[agent_pool_profile]

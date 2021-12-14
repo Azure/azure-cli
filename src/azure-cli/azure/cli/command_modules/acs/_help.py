@@ -535,7 +535,7 @@ examples:
   - name: Create a kubernetes cluster with custom headers
     text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
   - name: Create a kubernetes cluster with FIPS-enabled OS
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --enabled-fips-image
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
 """
 
 helps['aks update'] = """
