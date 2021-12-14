@@ -1989,6 +1989,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_ultra_ssd=False,
                edge_zone=None,
                disable_local_accounts=False,
+               enable_fips_image=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False,
@@ -3068,6 +3069,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       mode="User",
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
+                      enable_fips_image=False,
                       no_wait=False):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3123,7 +3125,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
-        mode=mode
+        mode=mode,
+        enable_fips=enable_fips_image
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
