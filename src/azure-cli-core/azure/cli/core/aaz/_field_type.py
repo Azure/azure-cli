@@ -7,7 +7,7 @@ from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
 class AAZSimpleType(AAZBaseType):
     DataType = None
 
-    ValueCls = AAZSimpleValue
+    _ValueCls = AAZSimpleValue
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,17 +54,17 @@ class AAZFloatType(AAZSimpleType):
             if float(data) != data:
                 raise AAZValuePrecisionLossError(data, float(data))
             data = float(data)
-        assert isinstance(data, self.DataType)
+        assert isinstance(data, self.DataType), f'Expect {self.DataType}, got {data} ({type(data)}'
         return data
 
 
 # compound types
 
 class AAZObjectType(AAZBaseType):
-    _PROTECTED_KEYWORDS = ("ValueCls", "PatchDataCls", "get_attr_name", "process_data", "to_serialized_data")
+    _PROTECTED_KEYWORDS = ("get_attr_name", "process_data", "to_serialized_data")
 
-    ValueCls = AAZObject
-    PatchDataCls = dict
+    _ValueCls = AAZObject
+    _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -144,8 +144,8 @@ class AAZObjectType(AAZBaseType):
 
 class AAZDictType(AAZBaseType):
 
-    ValueCls = AAZDict
-    PatchDataCls = dict
+    _ValueCls = AAZDict
+    _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -192,8 +192,8 @@ class AAZDictType(AAZBaseType):
 
 class AAZListType(AAZBaseType):
 
-    ValueCls = AAZList
-    PatchDataCls = dict
+    _ValueCls = AAZList
+    _PatchDataCls = dict
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

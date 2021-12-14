@@ -64,3 +64,7 @@ class AAZMgmtClient(ARMPipelineClient):
             base_url=base_url,
             config=config
         )
+
+    def send_request(self, request, stream=False, **kwargs):
+        session = self._pipeline.run(request, stream=stream, **kwargs) # pylint: disable=protected-access
+        return session

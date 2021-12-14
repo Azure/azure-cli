@@ -1,5 +1,5 @@
-from azure.core.exceptions import ClientAuthenticationError, HttpResponseError, ResourceExistsError, \
-    ResourceNotFoundError, map_error
+from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, \
+    ResourceNotFoundError, HttpResponseError
 from ._base import AAZUndefined, AAZBaseValue
 import json
 
@@ -17,6 +17,7 @@ class AAZOperation:
 
 class AAZHttpOperation(AAZOperation):
     CLIENT_TYPE = None
+    ERROR_FORMAT = None
 
     def __init__(self, ctx):
         super().__init__(ctx)
@@ -120,8 +121,23 @@ class AAZHttpOperation(AAZOperation):
         value = str(value)
         return {name: value}
 
+    @staticmethod
+    def deserialize_http_content(session):
+        from azure.core.pipeline.policies import ContentDecodePolicy
+        if ContentDecodePolicy.CONTEXT_NAME in session.context:
+            return session.context[ContentDecodePolicy.CONTEXT_NAME]
+        elif session.context.options['stream']:
+            # Cannot handle stream response now
+            raise NotImplementedError()
+        else:
+            raise ValueError("This pipeline didn't have the ContentDecode Policy; can't deserialize")
+
     @property
     def url(self):
+        return None
+
+    @property
+    def method(self):
         return None
 
     @property
@@ -133,20 +149,45 @@ class AAZHttpOperation(AAZOperation):
         return {}
 
     @property
-    def body(self):
+    def content(self):
         return None
+
+    @property
+    def form_content(self):
+        return None
+
+    @property
+    def stream_content(self):
+        return None
+
+    @property
+    def error_format(self):
+        if self.ERROR_FORMAT:
+            return self.ctx.get_error_format(self.ERROR_FORMAT)
+        return None
+
+    def make_request(self):
+        if self.method in ("GET", "DELETE", "MERGE", "OPTIONS"):
+            request = self.client._request(
+                self.method, self.url, self.query_parameters, self.header_parameters,
+                self.content, self.form_content, None)
+        elif self.method in ("PUT", "POST", "HEAD", "PATCH", ):
+            request = self.client._request(
+                self.method, self.url, self.query_parameters, self.header_parameters,
+                self.content, self.form_content, self.stream_content)
+        else:
+            raise ValueError(f"Invalid request method {self.method}")
+        return request
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def map_error(self, status_code, response):
-        if not self.error_map:
-            return
-        error_type = self.error_map.get(status_code)
-        if not error_type:
-            return
-        error = error_type(response=response)
-        raise error
+    def on_error(self, session):
+        response = session.http_response
+        error_type = self.error_map.get(response.status_code)
+        if error_type:
+            raise error_type(response=response)
+        raise HttpResponseError(response=response, error_format=self.error_format)
 
 
 class AAZInstanceUpdateOperation(AAZOperation):

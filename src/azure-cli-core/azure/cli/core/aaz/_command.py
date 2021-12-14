@@ -5,6 +5,8 @@ from knack.commands import CLICommand
 from azure.cli.core._profile import Profile
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
+from ._field_type import AAZObjectType
+from ._field_value import AAZObject
 
 
 _DOC_EXAMPLE_FLAG = ':example:'
@@ -39,6 +41,8 @@ class AAZCommandCtx:
                 else:
                     self.args[dest] = cmd_arg
         self._clients = {}
+        self._vars_schema = AAZObjectType()
+        self.vars = AAZObject(schema=self._vars_schema, data={})
 
     def get_login_credential(self):
         credential, _, _ = self._profile.get_login_credentials(
@@ -58,9 +62,21 @@ class AAZCommandCtx:
             client_cls = registered_clients[client_type]
             credential = self.get_login_credential()
             client_kwargs = _prepare_client_kwargs_track2(self._cli_ctx)
+            client_kwargs['user_agent'] += " (AAZ)"  # Add AAZ label in user agent
             self._clients[client_type] = client_cls(self._cli_ctx, credential, **client_kwargs)
 
         return self._clients[client_type]
+
+    def set_var(self, name, data, schema_builder=None):
+        if not hasattr(self._vars_schema, name):
+            assert schema_builder is not None
+            self._vars_schema[name] = schema_builder()
+        self.vars[name] = data
+
+    @staticmethod
+    def get_error_format(name):
+        from ._error_format import registered_error_formats
+        return registered_error_formats[name]
 
     @property
     def subscription_id(self):
@@ -135,6 +151,9 @@ class AAZCommand(CLICommand):
         schema = self.get_arguments_schema()
         if not hasattr(schema, param_name):
             super().update_argument(param_name, argtype)
+
+    def transform_output(self, value, client_flatten=True):
+        return value.to_serialized_data()
 
 
 def register_command_group(name):

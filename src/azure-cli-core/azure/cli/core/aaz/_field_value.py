@@ -40,7 +40,7 @@ class AAZSimpleValue(AAZBaseValue):
             other = other._data
         return self._data >= other
 
-    def to_serialized_data(self):
+    def to_serialized_data(self, filters=None):
         return self._data
 
 
@@ -56,7 +56,7 @@ class AAZObject(AAZBaseValue):
         if name not in self._data:
             # is key is not set before, then create a patch, and value updated in patch will be partial updated
             self._data[name] = AAZValuePatch.build(attr_schema)
-        return attr_schema.ValueCls(attr_schema, self._data[name])
+        return attr_schema._ValueCls(attr_schema, self._data[name])
 
     def __setitem__(self, key, data):
         assert not key.startswith('_')
@@ -102,10 +102,10 @@ class AAZObject(AAZBaseValue):
     def __ne__(self, other):
         return not (self == other)
 
-    def to_serialized_data(self):
+    def to_serialized_data(self, filters=None):
         results = {}
         for name, field_schema in self._schema._fields.items():
-            v = self[name].to_serialized_data()
+            v = self[name].to_serialized_data(filters=filters)
             if v == AAZUndefined:
                 continue
             if field_schema._serialized_name:
@@ -128,7 +128,7 @@ class AAZDict(AAZBaseValue):
         item_schema = self._schema.Element
         if key not in self._data:
             self._data[key] = AAZValuePatch.build(item_schema)
-        return item_schema.ValueCls(item_schema, self._data[key])
+        return item_schema._ValueCls(item_schema, self._data[key])
 
     def __setitem__(self, key, data):
         item_schema = self._schema.Element
@@ -177,10 +177,10 @@ class AAZDict(AAZBaseValue):
         for key in self._data:
             yield key, self[key]
 
-    def to_serialized_data(self):
+    def to_serialized_data(self, filters=None):
         results = {}
         for key, v in self.items():
-            v = v.to_serialized_data()
+            v = v.to_serialized_data(filters=filters)
             if v == AAZUndefined:
                 continue
             results[key] = v
@@ -217,7 +217,7 @@ class AAZList(AAZBaseValue):
             if idx + 1 > self._len:
                 self._len = idx + 1
 
-        return item_schema.ValueCls(item_schema, self._data[idx])
+        return item_schema._ValueCls(item_schema, self._data[idx])
 
     def __setitem__(self, idx, data):
         if not isinstance(idx, int):
@@ -286,10 +286,10 @@ class AAZList(AAZBaseValue):
         self._data.clear()
         self._len = 0
 
-    def to_serialized_data(self):
+    def to_serialized_data(self, filters=None):
         results = []
         for v in self:
-            v = v.to_serialized_data()
+            v = v.to_serialized_data(filters=filters)
             results.append(v)
         if not results and self._is_patch:
             return AAZUndefined

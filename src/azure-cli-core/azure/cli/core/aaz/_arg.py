@@ -135,7 +135,6 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
 
 
 #
-
 class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):

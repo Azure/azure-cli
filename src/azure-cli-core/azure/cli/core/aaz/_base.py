@@ -41,8 +41,8 @@ class AAZValuePatch:
 
     @classmethod
     def build(cls, schema):
-        if schema.PatchDataCls:
-            return cls(data=schema.PatchDataCls())
+        if schema._PatchDataCls:
+            return cls(data=schema._PatchDataCls())
         else:
             return cls(data=AAZUndefined)
 
@@ -62,20 +62,21 @@ class AAZBaseValue:
             self._is_patch = False
 
     @abc.abstractmethod
-    def to_serialized_data(self):
+    def to_serialized_data(self, filters=None):
         raise NotImplementedError()
 
 
 class AAZBaseType:
-    ValueCls = None
-    PatchDataCls = None
+    _ValueCls = None
+    _PatchDataCls = None
 
-    def __init__(self, options=None, nullable=False, serialized_name=None):
-        assert issubclass(self.ValueCls, AAZBaseValue)
+    def __init__(self, options=None, nullable=False, serialized_name=None, flags={}):
+        assert issubclass(self._ValueCls, AAZBaseValue)
         self._serialized_name = serialized_name
         self._options = options
         self._name = None
         self._nullable = nullable   # when true, specifies that null is a valid value
+        self._flags = flags
 
     @abc.abstractmethod
     def process_data(self, data, **kwargs):
