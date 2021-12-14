@@ -200,6 +200,8 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
+        c.argument('minimum_elastic_instance_count', type=int, help="Minimum number of instances. Only applies to the elastic App Service Plans.")
+        c.argument('prewarmed_instance_count', type=int, help="Number of preWarmed instances. Only applies to the elastic  App Service Plans.")
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
