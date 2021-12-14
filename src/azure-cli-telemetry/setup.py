@@ -42,7 +42,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'applicationinsights>=0.11.1,<0.12',
-        'portalocker~=1.6',
+        'portalocker>=1.6,<3',
     ],
     packages=[
         'azure.cli.telemetry',
