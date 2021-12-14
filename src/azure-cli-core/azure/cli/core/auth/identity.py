@@ -7,7 +7,6 @@ import json
 import os
 import pickle
 import re
-import time
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core.decorators import retry

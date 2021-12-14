@@ -8,7 +8,6 @@
 
 import json
 import sys
-import time
 
 from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersistence, LibsecretPersistence,
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
