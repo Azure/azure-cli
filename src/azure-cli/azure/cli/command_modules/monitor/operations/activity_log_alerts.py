@@ -55,7 +55,7 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
     from msrestazure.tools import resource_id
     from azure.mgmt.monitor.models import (ActivityLogAlertResource, AlertRuleAllOfCondition,
                                            AlertRuleLeafCondition, ActionList)
-    from azure.mgmt.monitor.models import ActionGroup as ActionGroup
+    from azure.mgmt.monitor.models import ActionGroup
     from azure.cli.core.commands.client_factory import get_subscription_id
     from knack.util import CLIError
 
@@ -114,7 +114,7 @@ def remove_scope(client, resource_group_name, activity_log_alert_name, scopes):
 
 def add_action_group(cmd, client, resource_group_name, activity_log_alert_name, action_group_ids, reset=False,
                      webhook_properties=None, strict=False):
-    from azure.mgmt.monitor.models import ActionGroup as ActionGroup
+    from azure.mgmt.monitor.models import ActionGroup
 
     settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
 
