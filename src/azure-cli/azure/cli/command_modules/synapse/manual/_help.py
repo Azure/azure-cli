@@ -1094,7 +1094,7 @@ helps['synapse linked-service create'] = """
 type: command
 short-summary: Create a linked service.
 examples:
-  - name: Create a linked service.
+  - name: Create a linked service. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse linked-service create --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @"path/linkedservice.json"
@@ -1104,7 +1104,7 @@ helps['synapse linked-service update'] = """
 type: command
 short-summary: Update an exist linked service.
 examples:
-  - name: Update an exist linked service.
+  - name: Update an exist linked service. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse linked-service update --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @"path/linkedservice.json"
@@ -1114,7 +1114,7 @@ helps['synapse linked-service set'] = """
 type: command
 short-summary: Update an exist linked service.
 examples:
-  - name: Update an exist linked service.
+  - name: Update an exist linked service. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse linked-service set --workspace-name testsynapseworkspace \\
           --name testlinkedservice --file @"path/linkedservice.json"
@@ -1158,7 +1158,7 @@ helps['synapse dataset create'] = """
 type: command
 short-summary: Create a dataset.
 examples:
-  - name: Create a dataset.
+  - name: Create a dataset. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse dataset create --workspace-name testsynapseworkspace \\
           --name testdataset --file @"path/dataset.json"
@@ -1168,7 +1168,7 @@ helps['synapse dataset update'] = """
 type: command
 short-summary: Update an exist dataset.
 examples:
-  - name: Update an exist dataset.
+  - name: Update an exist dataset. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse dataset update --workspace-name testsynapseworkspace \\
           --name testdataset --file @"path/dataset.json"
@@ -1178,7 +1178,7 @@ helps['synapse dataset set'] = """
 type: command
 short-summary: Update an exist dataset.
 examples:
-  - name: Update an exist dataset.
+  - name: Update an exist dataset. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse dataset set --workspace-name testsynapseworkspace \\
           --name testdataset --file @"path/dataset.json"
@@ -1222,7 +1222,7 @@ helps['synapse pipeline create'] = """
 type: command
 short-summary: Create a pipeline.
 examples:
-  - name: Create a pipeline.
+  - name: Create a pipeline. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse pipeline create --workspace-name testsynapseworkspace \\
           --name testpipeline --file @"path/pipeline.json"
@@ -1232,7 +1232,7 @@ helps['synapse pipeline update'] = """
 type: command
 short-summary: Update an exist pipeline.
 examples:
-  - name: Update an exist pipeline.
+  - name: Update an exist pipeline. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse pipeline update --workspace-name testsynapseworkspace \\
           --name testpipeline --file @"path/pipeline.json"
@@ -1242,7 +1242,7 @@ helps['synapse pipeline set'] = """
 type: command
 short-summary: Update an exist pipeline.
 examples:
-  - name: Update an exist pipeline.
+  - name: Update an exist pipeline. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse pipeline set --workspace-name testsynapseworkspace \\
           --name testpipeline --file @"path/pipeline.json"
@@ -1348,7 +1348,7 @@ helps['synapse trigger create'] = """
 type: command
 short-summary: Create a trigger.
 examples:
-  - name: Create a trigger.
+  - name: Create a trigger. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse trigger create --workspace-name testsynapseworkspace \\
           --name testtrigger --file @"path/trigger.json"
@@ -1358,7 +1358,7 @@ helps['synapse trigger update'] = """
 type: command
 short-summary: Update an exist trigger.
 examples:
-  - name: Update an exist trigger.
+  - name: Update an exist trigger. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse trigger update --workspace-name testsynapseworkspace \\
           --name testtrigger --file @"path/trigger.json"
@@ -1368,7 +1368,7 @@ helps['synapse trigger set'] = """
 type: command
 short-summary: Update an exist trigger.
 examples:
-  - name: Update an exist trigger.
+  - name: Update an exist trigger. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse trigger set --workspace-name testsynapseworkspace \\
           --name testtrigger --file @"path/trigger.json"
@@ -1503,7 +1503,7 @@ helps['synapse data-flow create'] = """
 type: command
 short-summary: Create a data flow.
 examples:
-  - name: Create a data flow.
+  - name: Create a data flow. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse data-flow create --workspace-name testsynapseworkspace \\
           --name testdataflow --file @"path/dataflow.json"
@@ -1513,7 +1513,7 @@ helps['synapse data-flow set'] = """
 type: command
 short-summary: Set an exist data flow.
 examples:
-  - name: Set an exist data flow.
+  - name: Set an exist data flow. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse data-flow set --workspace-name testsynapseworkspace \\
           --name testdataflow --file @"path/dataflow.json"
@@ -1987,7 +1987,7 @@ helps['synapse spark-job-definition create'] = """
 type: command
 short-summary: Create a spark job definition.
 examples:
-  - name: Create a spark job definition.
+  - name: Create a spark job definition. Pay attention to add "@" at the front of the file path.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
           --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
@@ -1997,7 +1997,7 @@ helps['synapse spark-job-definition update'] = """
 type: command
 short-summary: Update a spark job definition.
 examples:
-  - name: Update a spark job definition.
+  - name: Update a spark job definition. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
           --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
