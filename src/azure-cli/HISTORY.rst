@@ -3,6 +3,133 @@
 Release History
 ===============
 
+2.31.0
+++++++
+
+**AKS**
+
+* `az aks update`: Support edit nodepool label after creation (#20187)
+* `az aks nodepool update`: Support edit nodepool label after creation (#20187)
+* `az aks create`: Fix issue that `--attach-acr` parameter can't work (#20406)
+
+**AMS**
+
+* Remove deprecated variable 'identifier_uri' from creating sp method (#20281)
+* Update api version for AMS and AVA private link registration (#20266)
+
+**App Service**
+
+* `az functionapp create`: Add support for creating a webapp joined to a vnet (#20008)
+* `az webapp up`: Fix failure to detect dotnet 6.0 web apps (#20157)
+* `az appservice ase update`: Support for allowing new private endpoint connections on ASEv3 (#20084)
+* `az appservice ase list-addresses`: Support ASEv3 (#20084)
+* `az staticwebapp identity assign`: Assign managed service identity to the static web app (#20140)
+* `az staticwebapp identity remove`: Disable static web app's managed service identity (#20140)
+* `az staticwebapp identity show`: Display static web app's managed service identity (#20140)
+* Fix #17507: `az staticwebapp functions`: Add support for linking existing function app to static webapp (bring your own functions) (#20116)
+* `az staticwebapp create`: Update help text with guidance for repos in Github organizations (#20245)
+* `az functionapp deployment source config-zip`: Fix #12289: Allow build on zip deploy for windows function apps (#20207)
+* `az staticwebapp create`: Add better error message when attempting to create a static webapp that already exists (#20184)
+* `az appservice`: Fix AttributeError during user error handling (#20264)
+* `az appservice plan create`: Add `--zone-redundant` parameter to support enabling zone redundancy for high availability (#20302)
+* `az webapp ssh`: Add proxy support (#20325)
+* `az webapp create-remote-connection`: Add proxy support (#20325)
+* `az webapp log download/tail`: Add proxy support (#20325)
+* `az webapp create`: Fix container registry server url parsing for `--deployment-container-image-name/-i` argument (#20345)
+* `az functionapp deployment source config-zip`: Fix returning success when the deployment did not succeed (#20261)
+* `az staticwebapp appsettings set`: Make set functional (#18468)
+* `az staticwebapp appsettings`: Switch to the new SWA app settings SDK methods (#20320)
+* `az functionapp plan create`: Add `--zone-redundant` parameter to give the option to create a zone redundant app service plan (#20450)
+* Support managed identity in App Service container (#20215)
+
+**ARM**
+
+* `az resource\group list`: Support querying data only by passing the tag name to `--tag` parameter (#20169)
+* `az account management-group`: Add new parameters `--no-register` to skip RP registration for `Microsoft.Management` (#20166)
+* `az deployment`: Prettify error output for ARM deployment (#20238)
+* `az bicep install`: Add a new parameter `--target-platform/-t` to specify the running platform of Bicep CLI (#20250)
+* `az bicep upgrade`: Add a new parameter `--target-platform/-t` to specify the running platform of Bicep CLI (#20250)
+* `az deployment sub/tenant/mg create`: Fix the `KeyError: 'resourceGroup'` in outputting results in table format when deploying non-resource group level resources (#20455)
+* `az policy assignment create` and `az policy assignment identity assign` support adding user assigned identity (#20480)
+* `az bicep install`: Work now behind a corporate proxy (#20183)
+
+**Backup**
+
+* GA `az backup` and some bug fixes (#20291)
+* `az backup protectable-item list/show`: Fix AttributeError for server_name (#20513)
+* `az backup restore restore-disks`: Add support for Cross Zonal Restore (#20539)
+
+**Cognitive Services**
+
+* `az cognitiveservices account deployment`: Add new commands `show`, `list`, `create`, `delete` (#20551)
+* `az cognitiveservices account commitment-plan`: Add new commands `show`, `list`, `create`, `delete` (#20551)
+* `az cognitiveservices commitment-tier`: Add new command `list` (#20551)
+
+**Compute **
+
+* Fix #20182: `az snapshot create`: Fix auto-detection bug for `--copy-start` (#20190)
+* Fix #20133: `az vm create`: Fix `--data-disk-delete-option` not working when no `--attach-data-disks` are provided (#20165)
+* Fix boot diagnostics decoding (#16454)
+* `az vm create/update`: Add new parameter `--enable-hibernation` to support enabling hibernation capability (#20235)
+* `az vm/vmss run-command show`: Add new parameter `--instance-view` to support tracking the progress of RunCommand (#20191)
+* Update the help description for unmanaged disks (#20394)
+* `az disk create/update`: Add `--public-network-access` argument to control the policy for export on the disk (#20251)
+* `az disk create/update`: Add `--accelerated-network` argument to support the accelerated networking (#20251)
+* `az snapshot create/update`: Add `--public-network-access` argument to control the policy for export on the disk (#20251)
+* `az snapshot create/update`: Add `--accelerated-network` argument support the accelerated networking (#20251)
+* `az snapshot create`: Fix #20258: Fix creating a snapshot of a Uniform VMSS OS disk (#20306)
+
+**EventGrid**
+
+* GA `az eventgrid system-topic` (#20531)
+
+**Key Vault**
+
+* `az keyvault key encrypt/decrypt`: Support AES algorithm for MHSM (#20189)
+* `az keyvault key rotation-policy update`: Support both camel case and snake case json for `--value` (#20530)
+
+**NetAppFiles**
+
+* `az netappfiles volume create`: Fix volume export policy (#20535)
+
+**Network**
+
+* `az network express-route peering connection ipv6-config`: Add new commands `set`, `remove` (#19887)
+* `az network application-gateway waf-policy managed-rule exclusion`: Add new subgroup `rule-set` to support per rule exclusions (#20360)
+* `az network bastion create`: Fix invalid validator when `--scale-units` is None (#20305)
+* `az network vnet create`: Add `--enable-encryption` argument to support enable encryption on virtual network (#20355)
+* `az network vnet update`: Add `--enable-encryption` argument to support enable encryption on virtual network (#20355)
+* `az network vnet create`: Add `--encryption-enforcement-policy` argument to choose If Virtual Machine without encryption is allowed in encrypted Virtual Network. (#20355)
+* `az network vnet update`: Add `--encryption-enforcement-policy` argument to choose If Virtual Machine without encryption is allowed in encrypted Virtual Network. (#20355)
+
+**Packaging**
+
+* Support Python 3.10 (#20195)
+* Add Dockerfile.mariner to support Mariner build (#20061)
+
+**Profile**
+
+* `az logout`, `az account clear`: Remove ADAL token cache file `accessTokens.json` (#20308)
+
+**RDBMS**
+
+* Fix private DNS zone suffix bug (#20483)
+* Fix #20124: `az mysql/postgres flexible-server db create`: Make resource group and server name required (#20162)
+* `az postgres flexible-server`: Remove preview tag (#20426)
+
+**Storage**
+
+* `az storage share list-handle/close-handle`: New commands for share handle (#20144)
+* GA account level and blob version level immutable storage (#20233)
+
+**Synapse**
+
+* [BREAKING CHANGE] `az synapse sql/pool audit-policy`: Remove `--blob-auditing-policy-name` (#20494)
+* `az synapse notebook/spark-job-definition`: Add `--folder-path` argument (#20288)
+* `az synapse spark pool create/update`: Add `--spark-config-file-path` (#20381)
+* `az synapse spark job submit`: Fix for `--main-class-name` (#20537)
+* `az synapse sql-script`: New command group to support sql script management (#20044)
+
 2.30.0
 ++++++
 

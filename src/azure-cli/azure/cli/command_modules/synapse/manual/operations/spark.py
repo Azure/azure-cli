@@ -29,7 +29,7 @@ def list_spark_batch_jobs(cmd, workspace_name, spark_pool_name, from_index=None,
 
 
 def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_definition_file,
-                           main_class_name, executor_size, executors, language=SparkBatchLanguage.Scala,
+                           executor_size, executors, language=SparkBatchLanguage.Scala, main_class_name=None,
                            command_line_arguments=None,
                            reference_files=None, archives=None, configuration=None,
                            tags=None):
@@ -38,11 +38,17 @@ def create_spark_batch_job(cmd, workspace_name, spark_pool_name, job_name, main_
     file = main_definition_file
     class_name = main_class_name
     final_command_line_arguments = []
-    for item in command_line_arguments:
-        final_command_line_arguments.append(' '.join(item))
-    # e.g --arguments a b; command_line_arguments =[['a', 'b']]
-    if len(command_line_arguments) == 1 and len(command_line_arguments[0]) != 1:
-        final_command_line_arguments = split(final_command_line_arguments[0])
+    if main_class_name is None:
+        if language == SparkBatchLanguage.SparkDotNet or language == SparkBatchLanguage.Spark:
+            raise CLIError('Cannot perform the requested operation because main class name'
+                           ' is not provided. Please specify --main-class-name for Spark job or '
+                           ' .NET Spark job')
+    if command_line_arguments:
+        for item in command_line_arguments:
+            final_command_line_arguments.append(' '.join(item))
+        # e.g --arguments a b; command_line_arguments =[['a', 'b']]
+        if len(command_line_arguments) == 1 and len(command_line_arguments[0]) != 1:
+            final_command_line_arguments = split(final_command_line_arguments[0])
     arguments = final_command_line_arguments
     # dotnet spark
     if language.upper() == SparkBatchLanguage.SparkDotNet.upper() or language.upper() == SparkBatchLanguage.CSharp.upper():

@@ -242,3 +242,15 @@ def cf_synapse_managedprivateendpoints_factory(cli_ctx, workspace_name):
 
 def cf_synapse_spark_job_definition(cli_ctx, workspace_name):
     return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).spark_job_definition
+
+
+def cf_kusto_script(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).kql_script
+
+
+def cf_kusto_scripts(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).kql_scripts
+
+
+def cf_synapse_sql_script(cli_ctx, workspace_name):
+    return cf_synapse_client_artifacts_factory(cli_ctx, workspace_name).sql_script

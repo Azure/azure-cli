@@ -9,7 +9,7 @@ import unittest
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
                                RoleBasedServicePrincipalPreparer, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 # flake8: noqa
 
 AZURE_TEST_RUN_LIVE = bool(os.environ.get('AZURE_TEST_RUN_LIVE'))
