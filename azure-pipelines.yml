@@ -398,8 +398,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -419,8 +419,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -443,8 +443,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -468,8 +468,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -489,8 +489,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -510,8 +510,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -531,8 +531,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   steps:
@@ -678,11 +678,26 @@ jobs:
 
     displayName: 'Test Homebrew Package'
 
+
+- job: BuildYumPackageMariner
+  displayName: Build Yum Package Mariner
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package: Mariner'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline_mariner.sh
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: yum-mariner'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: yum-mariner
+
+
 - job: BuildYumPackage
   displayName: Build Yum Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -691,13 +706,12 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
-
-
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
+
 
 - job: TestYumPackage
   displayName: Test Yum Package
@@ -878,8 +892,8 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-      # Python39:
-      #   python.version: '3.9'
+      Python39:
+        python.version: '3.9'
       Python310:
         python.version: '3.10'
   pool:

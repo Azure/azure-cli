@@ -15,6 +15,7 @@ from azure.cli.command_modules.appservice.custom import (
     remove_remote_build_app_settings,
     validate_app_settings_in_scm)
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -29,6 +30,17 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+def _get_zip_deploy_headers(username, password):
+    from urllib3.util import make_headers
+    from azure.cli.core.util import get_az_user_agent
+
+    headers = make_headers(basic_auth='{0}:{1}'.format(username, password))
+    headers['Content-Type'] = 'application/octet-stream'
+    headers['Cache-Control'] = 'no-cache'
+    headers['User-Agent'] = get_az_user_agent()
+    return headers
 
 
 class TestFunctionappMocked(unittest.TestCase):
@@ -154,6 +166,91 @@ class TestFunctionappMocked(unittest.TestCase):
         # assert
         get_site_credential_mock.assert_called_with(cmd_mock.cli_ctx, 'rg', 'name', None)
         get_scm_url_mock.assert_called_with(cmd_mock, 'rg', 'name', None)
+    
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential', return_value=('usr', 'pwd'))
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._check_zip_deployment_status')
+    def test_enable_zip_deploy_accepted(self,
+                                        check_zip_deployment_status_mock,
+                                        requests_post_mock,
+                                        get_scm_url_mock,
+                                        get_site_credential_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 202
+        requests_post_mock.return_value = response
+
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+
+        # action
+        with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
+            enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
+
+        # assert
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+                                              headers=expected_zip_deploy_headers, verify=mock.ANY)
+        # TODO improve authorization matcher
+        check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
+                                                            'https://mock-scm/api/deployments/latest', mock.ANY, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential', return_value=('usr', 'pwd'))
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('requests.post', autospec=True)
+    def test_enable_zip_deploy_conflict(self,
+                                        requests_post_mock,
+                                        get_scm_url_mock,
+                                        get_site_credential_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 409
+        requests_post_mock.return_value = response
+
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+
+        # action
+        with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
+            with self.assertRaises(UnclassifiedUserFault):
+                enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
+
+        # assert
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+                                              headers=expected_zip_deploy_headers, verify=mock.ANY)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_site_credential', return_value=('usr', 'pwd'))
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', return_value='https://mock-scm')
+    @mock.patch('requests.post', autospec=True)
+    def test_enable_zip_deploy_service_unavailable(self,
+                                                   requests_post_mock,
+                                                   get_scm_url_mock,
+                                                   get_site_credential_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 503
+        requests_post_mock.return_value = response
+
+        expected_zip_deploy_headers = _get_zip_deploy_headers('usr', 'pwd')
+
+        # action
+        with mock.patch('builtins.open', new_callable=mock.mock_open, read_data='zip-content'):
+            with self.assertRaises(AzureInternalError):
+                enable_zip_deploy(cmd_mock, 'rg', 'name', 'src', slot=None)
+
+        # assert
+        requests_post_mock.assert_called_with('https://mock-scm/api/zipdeploy?isAsync=true', data='zip-content',
+                                              headers=expected_zip_deploy_headers, verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._get_app_settings_from_scm', return_value={
         'SCM_DO_BUILD_DURING_DEPLOYMENT': 'true'

@@ -14,7 +14,7 @@ from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
 from datetime import datetime, timedelta
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -658,7 +658,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # Table service
-        with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
+        with self.assertRaisesRegex(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
             self.cmd('storage logging update --services t --log r --retention 1 '
                      '--version 2.0 --connection-string {}'.format(connection_string))
 
@@ -698,7 +698,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         blob_connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, blob_storage)).output
-        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+        with self.assertRaisesRegex(CLIError, "Your storage account doesn't support logging"):
             self.cmd('storage logging show --services q --connection-string {}'.format(blob_connection_string))
 
         # PremiumStorage doesn't support logging for some services
@@ -708,7 +708,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         premium_connection_string = self.cmd(
             'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, premium_storage)).output
-        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+        with self.assertRaisesRegex(CLIError, "Your storage account doesn't support logging"):
             self.cmd('storage logging show --services q --connection-string {}'.format(premium_connection_string))
 
     @ResourceGroupPreparer()
@@ -1689,7 +1689,7 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account blob-service-properties show -n {sa} -g {rg}', checks=[
             self.check('defaultServiceVersion', None)])
 
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Valid example: 2008-10-27'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Valid example: 2008-10-27'):
             self.cmd('storage account blob-service-properties update --default-service-version 2018 -n {sa} -g {rg}')
 
         self.cmd('storage account blob-service-properties update --default-service-version 2018-11-09 -n {sa} -g {rg}',
@@ -1757,7 +1757,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 
-        with self.assertRaisesRegexp(ValidationError, "Delete Retention Policy hasn't been enabled,"):
+        with self.assertRaisesRegex(ValidationError, "Delete Retention Policy hasn't been enabled,"):
             self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg} -n {sa} -g {rg}')
 
         with self.assertRaises(ValidationError):
@@ -1787,7 +1787,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             'cmd': 'storage account file-service-properties'
         })
 
-        with self.assertRaisesRegexp(ResourceExistsError, "SMB Multichannel is not supported for the account."):
+        with self.assertRaisesRegex(ResourceExistsError, "SMB Multichannel is not supported for the account."):
             self.cmd('{cmd} update --mc -n {sa2} -g {rg}')
 
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
@@ -1910,13 +1910,13 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-        with self.assertRaisesRegexp(CLIError, 'Your connection is already approved. No need to approve again.'):
+        with self.assertRaisesRegex(CLIError, 'Your connection is already approved. No need to approve again.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegex(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')

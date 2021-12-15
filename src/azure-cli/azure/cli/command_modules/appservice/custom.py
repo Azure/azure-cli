@@ -18,6 +18,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+import invoke
 from nacl import encoding, public
 
 import OpenSSL.crypto
@@ -45,7 +46,7 @@ from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
                                        CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
+                                       AzureInternalError, ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -59,7 +60,9 @@ from .utils import (_normalize_sku,
                     _get_location_from_resource_group,
                     _list_app,
                     _rename_server_farm_props,
-                    _get_location_from_webapp, _normalize_location)
+                    _get_location_from_webapp,
+                    _normalize_location,
+                    get_pool_manager)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -69,6 +72,7 @@ from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_K
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
 from ._github_oauth import (get_github_access_token)
+from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
 logger = get_logger(__name__)
 
@@ -329,11 +333,15 @@ def validate_container_app_create_options(runtime=None, deployment_container_ima
 def parse_docker_image_name(deployment_container_image_name):
     if not deployment_container_image_name:
         return None
-    slash_ix = deployment_container_image_name.rfind('/')
-    docker_registry_server_url = deployment_container_image_name[0:slash_ix]
-    if slash_ix == -1 or ("." not in docker_registry_server_url and ":" not in docker_registry_server_url):
+    non_url = "/" not in deployment_container_image_name
+    non_url = non_url or ("." not in deployment_container_image_name and ":" not in deployment_container_image_name)
+    if non_url:
         return None
-    return docker_registry_server_url
+    parsed_url = urlparse(deployment_container_image_name)
+    if parsed_url.scheme:
+        return parsed_url.hostname
+    hostname = urlparse("https://{}".format(deployment_container_image_name)).hostname
+    return "https://{}".format(hostname)
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -521,19 +529,26 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
         res = requests.post(zip_url, data=zip_content, headers=headers, verify=not should_disable_connection_verify())
         logger.warning("Deployment endpoint responded with status code %d", res.status_code)
 
+    # check the status of async deployment
+    if res.status_code == 202:
+        response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                authorization, timeout)
+        return response
+
     # check if there's an ongoing process
     if res.status_code == 409:
-        raise CLIError("There may be an ongoing deployment or your app setting has WEBSITE_RUN_FROM_PACKAGE. "
-                       "Please track your deployment in {} and ensure the WEBSITE_RUN_FROM_PACKAGE app setting "
-                       "is removed. Use 'az webapp config appsettings list --name MyWebapp --resource-group "
-                       "MyResourceGroup --subscription MySubscription' to list app settings and 'az webapp "
-                       "config appsettings delete --name MyWebApp --resource-group MyResourceGroup "
-                       "--setting-names <setting-names> to delete them.".format(deployment_status_url))
+        raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
+                                    "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
+                                    "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
+                                    "appsettings list --name MyWebapp --resource-group MyResourceGroup --subscription "
+                                    "MySubscription' to list app settings and 'az webapp config appsettings delete "
+                                    "--name MyWebApp --resource-group MyResourceGroup --setting-names <setting-names> "
+                                    "to delete them.".format(deployment_status_url))
 
-    # check the status of async deployment
-    response = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                            authorization, timeout)
-    return response
+    # check if an error occured during deployment
+    if res.status_code:
+        raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
+                                 .format(res.status_code, res.text))
 
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
@@ -1762,15 +1777,23 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
+# TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
+    plan_def.enable_additional_properties_sending()
+    existing_properties = plan_def.serialize()["properties"]
+    plan_def.additional_properties["properties"] = existing_properties
+    plan_def.additional_properties["properties"]["zoneRedundant"] = True
+    if number_of_workers is None:
+        sku_def.capacity = 3
+    else:
+        sku_def.capacity = max(3, number_of_workers)
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False):
+                            tags=None, no_wait=False, zone_redundant=False):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
-    sku = _normalize_sku(sku)
-    _validate_asp_sku(app_service_environment, sku)
-    if is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
@@ -1794,10 +1817,14 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
             location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     # the api is odd on parameter naming, have to live with it for now
-    sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
+    sku_def = SkuDescription(tier=get_sku_name(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, number_of_workers)
+
     return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
@@ -2392,7 +2419,6 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
 
 
 def _get_log(url, user_name, password, log_file=None):
-    import certifi
     import urllib3
     try:
         import urllib3.contrib.pyopenssl
@@ -2400,7 +2426,7 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+    http = get_pool_manager(url)
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
         'GET',
@@ -2846,18 +2872,12 @@ def get_app_insights_key(cli_ctx, resource_group, name):
     return appinsights.instrumentation_key
 
 
-def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku,
-                                        number_of_workers=None, max_burst=None, location=None, tags=None):
+def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
+                                        max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     sku = _normalize_sku(sku)
     tier = get_sku_name(sku)
-    if max_burst is not None:
-        if tier.lower() != "elasticpremium":
-            raise CLIError("Usage error: --max-burst is only supported for Elastic Premium (EP) plans")
-        max_burst = validate_range_of_int_flag('--max-burst', max_burst, min_val=0, max_val=20)
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
-                                                       number_of_workers, min_val=0, max_val=20)
+
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
         location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
@@ -2865,6 +2885,10 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
                               hyper_v=None, name=name)
+
+    if zone_redundant:
+        _enable_zone_redundant(plan_def, sku_def, number_of_workers)
+
     return client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
 
@@ -2882,21 +2906,6 @@ def is_plan_elastic_premium(cmd, plan_info):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier == 'ElasticPremium'
     return False
-
-
-def validate_and_convert_to_int(flag, val):
-    try:
-        return int(val)
-    except ValueError:
-        raise CLIError("Usage error: {} is expected to have an int value.".format(flag))
-
-
-def validate_range_of_int_flag(flag_name, value, min_val, max_val):
-    value = validate_and_convert_to_int(flag_name, value)
-    if min_val > value or value > max_val:
-        raise CLIError("Usage error: {} is expected to be between {} and {} (inclusive)".format(flag_name, min_val,
-                                                                                                max_val))
-    return value
 
 
 def create_functionapp(cmd, resource_group_name, name, storage_account, plan=None,
@@ -4430,7 +4439,11 @@ def _start_ssh_session(hostname, port, username, password):
             logger.warning('.')
             time.sleep(1)
     try:
-        c.run('cat /etc/motd', pty=True)
+        try:
+            c.run('cat /etc/motd', pty=True)
+        except invoke.exceptions.UnexpectedExit:
+            # Don't crash over a non-existing /etc/motd.
+            pass
         c.run('source /etc/profile; exec $SHELL -l', pty=True)
     except Exception as ex:  # pylint: disable=broad-except
         logger.info(ex)
@@ -4478,18 +4491,6 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
         namespace='Microsoft.Web',
         type='hostingEnvironments',
         name=ase)
-
-
-def _validate_asp_sku(app_service_environment, sku):
-    # Isolated SKU is supported only for ASE
-    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
-        if not app_service_environment:
-            raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
-    else:
-        if app_service_environment:
-            raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
-                           "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):

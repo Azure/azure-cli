@@ -23,17 +23,21 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
+from azure.cli.command_modules.acs._resourcegroup import (
+    get_rg_location,
+)
 from azure.cli.command_modules.acs._validators import (
     extract_comma_separated_string,
+)
+from azure.cli.command_modules.acs.addonconfiguration import (
+    ensure_default_log_analytics_workspace_for_monitoring,
+    ensure_container_insights_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
     _ensure_aks_acr,
     _ensure_aks_service_principal,
     _ensure_cluster_identity_permission_on_kubelet_identity,
-    _ensure_container_insights_for_monitoring,
-    _ensure_default_log_analytics_workspace_for_monitoring,
-    _get_rg_location,
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
@@ -322,6 +326,15 @@ class AKSParamDict:
         self.__increase(key)
         return self.__store.get(key)
 
+    def keys(self):
+        return self.__store.keys()
+
+    def values(self):
+        return self.__store.values()
+
+    def items(self):
+        return self.__store.items()
+
     def __format_count(self):
         untouched_keys = [x for x in self.__store.keys() if x not in self.__count.keys()]
         for k in untouched_keys:
@@ -468,7 +481,7 @@ class AKSContext:
         """Helper function to check the validity of serveral count-related parameters in autoscaler.
 
         On the premise that enable_cluster_autoscaler (in update mode, this could be update_cluster_autoscaler) is
-        enabled, it will check whether both min_count and max_count are  assigned, if not, raise the
+        enabled, it will check whether both min_count and max_count are assigned, if not, raise the
         RequiredArgumentMissingError. If min_count is less than max_count, raise the InvalidArgumentValueError. Only in
         create mode it will check whether the value of node_count is between min_count and max_count, if not, raise the
         InvalidArgumentValueError. If enable_cluster_autoscaler (in update mode, this could be
@@ -558,7 +571,7 @@ class AKSContext:
     def _get_location(self, read_only: bool = False, **kwargs) -> Union[str, None]:
         """Internal function to dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -580,7 +593,7 @@ class AKSContext:
 
         # dynamic completion
         if not read_from_mc and location is None:
-            location = _get_rg_location(
+            location = get_rg_location(
                 self.cmd.cli_ctx, self.get_resource_group_name()
             )
 
@@ -590,7 +603,7 @@ class AKSContext:
     def get_location(self) -> Union[str, None]:
         """Dynamically obtain the value of location according to the context.
 
-        When location is not assigned, dynamic completion will be triggerd. Function "_get_rg_location" will be called
+        When location is not assigned, dynamic completion will be triggerd. Function "get_rg_location" will be called
         to get the location of the provided resource group, which internally used ResourceManagementClient to send
         the request.
 
@@ -889,21 +902,15 @@ class AKSContext:
         :return: dictionary or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("nodepool_labels")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if self.mc and self.mc.agent_pool_profiles:
-            agent_pool_profile = safe_list_get(
-                self.mc.agent_pool_profiles, 0, None
-            )
-            if agent_pool_profile:
-                value_obtained_from_mc = agent_pool_profile.node_labels
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            nodepool_labels = value_obtained_from_mc
-        else:
-            nodepool_labels = raw_value
+        nodepool_labels = self.raw_param.get("nodepool_labels")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.agent_pool_profiles:
+                agent_pool_profile = safe_list_get(
+                    self.mc.agent_pool_profiles, 0, None
+                )
+                if agent_pool_profile:
+                    nodepool_labels = agent_pool_profile.node_labels
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -1096,6 +1103,28 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_public_ip_prefix_id
+
+    def get_enable_fips_image(self) -> bool:
+        """Obtain the value of enable_fips_image.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_fips_image = self.raw_param.get("enable_fips_image")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.enable_fips is not None
+            ):
+                enable_fips_image = agent_pool_profile.enable_fips
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return enable_fips_image
 
     def get_enable_encryption_at_host(self) -> bool:
         """Obtain the value of enable_encryption_at_host.
@@ -1754,23 +1783,25 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if self.mc and self.mc.identity:
-            enable_managed_identity = check_is_msi_cluster(self.mc)
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.identity:
+                enable_managed_identity = check_is_msi_cluster(self.mc)
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
             return enable_managed_identity
 
-        # dynamic completion
-        (
-            service_principal,
-            client_secret,
-        ) = self._get_service_principal_and_client_secret(read_only=True)
-        if not read_from_mc and service_principal and client_secret:
-            enable_managed_identity = False
+        # dynamic completion for create mode only
+        if self.decorator_mode == DecoratorMode.CREATE:
+            (
+                service_principal,
+                client_secret,
+            ) = self._get_service_principal_and_client_secret(read_only=True)
+            if not read_from_mc and service_principal and client_secret:
+                enable_managed_identity = False
 
         # validation
         if enable_validation:
@@ -1820,23 +1851,19 @@ class AKSContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("assign_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if (
-            self.mc and
-            self.mc.identity and
-            self.mc.identity.user_assigned_identities is not None
-        ):
-            value_obtained_from_mc = safe_list_get(
-                list(self.mc.identity.user_assigned_identities.keys()), 0, None
-            )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            assign_identity = value_obtained_from_mc
-        else:
-            assign_identity = raw_value
+        assign_identity = self.raw_param.get("assign_identity")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.identity and
+                self.mc.identity.user_assigned_identities is not None
+            ):
+                value_obtained_from_mc = safe_list_get(
+                    list(self.mc.identity.user_assigned_identities.keys()), 0, None
+                )
+                if value_obtained_from_mc is not None:
+                    assign_identity = value_obtained_from_mc
 
         # this parameter does not need dynamic completion
         # validation
@@ -1847,10 +1874,11 @@ class AKSContext:
                         "--assign-identity can only be specified when --enable-managed-identity is specified"
                     )
             else:
-                if self._get_assign_kubelet_identity(enable_validation=False):
-                    raise RequiredArgumentMissingError(
-                        "--assign-kubelet-identity can only be specified when --assign-identity is specified"
-                    )
+                if self.decorator_mode == DecoratorMode.CREATE:
+                    if self._get_assign_kubelet_identity(enable_validation=False):
+                        raise RequiredArgumentMissingError(
+                            "--assign-kubelet-identity can only be specified when --assign-identity is specified"
+                        )
         return assign_identity
 
     def get_assign_identity(self) -> Union[str, None]:
@@ -1956,18 +1984,20 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if self.decorator_mode == DecoratorMode.CREATE and attach_acr:
-            if self._get_enable_managed_identity(enable_validation=False) and self.get_no_wait():
-                raise MutuallyExclusiveArgumentError(
-                    "When --attach-acr and --enable-managed-identity are both specified, "
-                    "--no-wait is not allowed, please wait until the whole operation succeeds."
-                )
+            if self._get_enable_managed_identity(enable_validation=False):
                 # Attach acr operation will be handled after the cluster is created
-            # newly added check, check whether client_id exists before creating role assignment
-            service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
-            if not service_principal:
-                raise RequiredArgumentMissingError(
-                    "No service principal provided to create the acrpull role assignment for acr."
-                )
+                if self.get_no_wait():
+                    raise MutuallyExclusiveArgumentError(
+                        "When --attach-acr and --enable-managed-identity are both specified, "
+                        "--no-wait is not allowed, please wait until the whole operation succeeds."
+                    )
+            else:
+                # newly added check, check whether client_id exists before creating role assignment
+                service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+                if not service_principal:
+                    raise RequiredArgumentMissingError(
+                        "No service principal provided to create the acrpull role assignment for acr."
+                    )
         return attach_acr
 
     def get_detach_acr(self) -> Union[str, None]:
@@ -2691,7 +2721,7 @@ class AKSContext:
         """Internal function to dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         This function supports the option of enable_validation. When enabled, it will check if workspace_resource_id is
@@ -2733,7 +2763,7 @@ class AKSContext:
             if workspace_resource_id is None:
                 # use default workspace if exists else create default workspace
                 workspace_resource_id = (
-                    _ensure_default_log_analytics_workspace_for_monitoring(
+                    ensure_default_log_analytics_workspace_for_monitoring(
                         self.cmd,
                         self.get_subscription_id(),
                         self.get_resource_group_name(),
@@ -2756,7 +2786,7 @@ class AKSContext:
         """Dynamically obtain the value of workspace_resource_id according to the context.
 
         When workspace_resource_id is not assigned, dynamic completion will be triggerd. Function
-        "_ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
+        "ensure_default_log_analytics_workspace_for_monitoring" will be called to create a workspace with
         subscription_id and resource_group_name, which internally used ResourceManagementClient to send the request.
 
         :return: string or None
@@ -2982,8 +3012,13 @@ class AKSContext:
         # this parameter does not need validation
         return enable_sgxquotehelper
 
-    def get_enable_secret_rotation(self) -> bool:
-        """Obtain the value of enable_secret_rotation.
+    # pylint: disable=unused-argument
+    def _get_enable_secret_rotation(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_secret_rotation.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if enable_secret_rotation
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
 
         :return: bool
         """
@@ -2998,25 +3033,103 @@ class AKSContext:
 
         # read the original value passed by the command
         enable_secret_rotation = self.raw_param.get("enable_secret_rotation")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.addon_profiles and
-            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
-            self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_SECRET_ROTATION_ENABLED) is not None
-        ):
-            enable_secret_rotation = self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_SECRET_ROTATION_ENABLED) == "true"
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.addon_profiles and
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_SECRET_ROTATION_ENABLED) is not None
+            ):
+                enable_secret_rotation = self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_SECRET_ROTATION_ENABLED) == "true"
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if enable_secret_rotation:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
+                    )
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--enable-secret-rotation can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
         return enable_secret_rotation
 
-    def get_rotation_poll_interval(self) -> Union[str, None]:
-        """Obtain the value of rotation_poll_interval.
+    def get_enable_secret_rotation(self) -> bool:
+        """Obtain the value of enable_secret_rotation.
+
+        This function will verify the parameter by default. In update mode, if enable_secret_rotation is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: bool
+        """
+        return self._get_enable_secret_rotation(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_secret_rotation(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_secret_rotation.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if disable_secret_rotation
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
+
+        :return: bool
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+
+        # read the original value passed by the command
+        disable_secret_rotation = self.raw_param.get("disable_secret_rotation")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_secret_rotation:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
+                    )
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--disable-secret-rotation can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
+        return disable_secret_rotation
+
+    def get_disable_secret_rotation(self) -> bool:
+        """Obtain the value of disable_secret_rotation.
+
+        This function will verify the parameter by default. In update mode, if disable_secret_rotation is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: bool
+        """
+        return self._get_disable_secret_rotation(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_rotation_poll_interval(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of rotation_poll_interval.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if rotation_poll_interval
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
 
         :return: string or None
         """
@@ -3031,76 +3144,119 @@ class AKSContext:
 
         # read the original value passed by the command
         rotation_poll_interval = self.raw_param.get("rotation_poll_interval")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.addon_profiles and
-            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
-            self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_ROTATION_POLL_INTERVAL) is not None
-        ):
-            rotation_poll_interval = self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_ROTATION_POLL_INTERVAL)
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return rotation_poll_interval
-
-    # pylint: disable=unused-argument
-    def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
-        """Internal function to obtain the value of enable_aad.
-        This function supports the option of enable_validation. When enabled, if the value of enable_aad is True and
-        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
-        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
-        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
-        :return: bool
-        """
-        # read the original value passed by the command
-        enable_aad = self.raw_param.get("enable_aad")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.managed is not None
-        ):
-            enable_aad = self.mc.aad_profile.managed
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.addon_profiles and
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_ROTATION_POLL_INTERVAL) is not None
+            ):
+                rotation_poll_interval = self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_ROTATION_POLL_INTERVAL)
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            (
-                aad_client_app_id,
-                aad_server_app_id,
-                aad_server_app_secret,
-            ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
-                enable_validation=False
-            )
-            if enable_aad:
-                if any(
-                    [
-                        aad_client_app_id,
-                        aad_server_app_id,
-                        aad_server_app_secret,
-                    ]
-                ):
-                    raise MutuallyExclusiveArgumentError(
-                        "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
-                        "--aad-server-app-secret"
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if rotation_poll_interval:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
                     )
-            if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
-                raise RequiredArgumentMissingError(
-                    "--enable-azure-rbac can only be used together with --enable-aad"
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--rotation-poll-interval can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
+        return rotation_poll_interval
+
+    def get_rotation_poll_interval(self) -> Union[str, None]:
+        """Obtain the value of rotation_poll_interval.
+
+        This function will verify the parameter by default. In update mode, if rotation_poll_interval is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: string or None
+        """
+        return self._get_rotation_poll_interval(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_aad.
+
+        This function supports the option of enable_validation. When enabled, in create mode, if the value of enable_aad
+        is True and any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
+        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
+        specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_aad = self.raw_param.get("enable_aad")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.managed is not None
+            ):
+                enable_aad = self.mc.aad_profile.managed
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                (
+                    aad_client_app_id,
+                    aad_server_app_id,
+                    aad_server_app_secret,
+                ) = self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(
+                    enable_validation=False
                 )
+                if enable_aad:
+                    if any(
+                        [
+                            aad_client_app_id,
+                            aad_server_app_id,
+                            aad_server_app_secret,
+                        ]
+                    ):
+                        raise MutuallyExclusiveArgumentError(
+                            "--enable-aad cannot be used together with --aad-client-app-id, --aad-server-app-id or "
+                            "--aad-server-app-secret"
+                        )
+                if not enable_aad and self._get_enable_azure_rbac(enable_validation=False):
+                    raise RequiredArgumentMissingError(
+                        "--enable-azure-rbac can only be used together with --enable-aad"
+                    )
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if enable_aad:
+                    if (
+                        self.mc and
+                        self.mc.aad_profile is not None and
+                        self.mc.aad_profile.managed
+                    ):
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--enable-aad" if managed AAD is already enabled'
+                        )
         return enable_aad
 
     def get_enable_aad(self) -> bool:
         """Obtain the value of enable_aad.
-        This function will verify the parameter by default. If the value of enable_aad is True and any of
-        aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a MutuallyExclusiveArgumentError
-        will be raised. If the value of enable_aad is False and the value of enable_azure_rbac is True,
-        a RequiredArgumentMissingError will be raised.
+
+        This function will verify the parameter by default. In create mode, if the value of enable_aad is True and
+        any of aad_client_app_id, aad_server_app_id or aad_server_app_secret is asssigned, a
+        MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value of
+        enable_azure_rbac is True, a RequiredArgumentMissingError will be raised. In update mode, if enable_aad is
+        specified and managed aad has been enabled, an InvalidArgumentValueError will be raised.
+
         :return: bool
         """
 
@@ -3176,42 +3332,57 @@ class AKSContext:
         return self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=True)
 
     # pylint: disable=unused-argument
-    def _get_aad_tenant_id(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+    def _get_aad_tenant_id(
+        self, enable_validation: bool = False, read_only: bool = False, **kwargs
+    ) -> Union[str, None]:
         """Internal function to dynamically obtain the value of aad_server_app_secret according to the context.
         When both aad_tenant_id and enable_aad are not assigned, and any of aad_client_app_id, aad_server_app_id or
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
+
+        This function supports the option of enable_validation. When enabled in update mode, if aad_tenant_id
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
         :return: string or None
         """
         # read the original value passed by the command
         aad_tenant_id = self.raw_param.get("aad_tenant_id")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.tenant_id is not None
-        ):
-            aad_tenant_id = self.mc.aad_profile.tenant_id
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.tenant_id is not None
+            ):
+                aad_tenant_id = self.mc.aad_profile.tenant_id
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
             return aad_tenant_id
 
-        # dynamic completion
-        if not read_from_mc and not self._get_enable_aad(
-            enable_validation=False
-        ):
-            if aad_tenant_id is None and any(
-                self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
+        # dynamic completion for create mode only
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if not read_from_mc and not self._get_enable_aad(
+                enable_validation=False
             ):
-                profile = Profile(cli_ctx=self.cmd.cli_ctx)
-                _, _, aad_tenant_id = profile.get_login_credentials()
+                if aad_tenant_id is None and any(
+                    self._get_aad_client_app_id_and_aad_server_app_id_and_aad_server_app_secret(enable_validation=False)
+                ):
+                    profile = Profile(cli_ctx=self.cmd.cli_ctx)
+                    _, _, aad_tenant_id = profile.get_login_credentials()
 
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if aad_tenant_id:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--aad-tenant-id" if managed AAD is not enabled'
+                        )
         return aad_tenant_id
 
     def get_aad_tenant_id(self) -> Union[str, None]:
@@ -3220,35 +3391,66 @@ class AKSContext:
         aad_server_app_secret is asssigned, dynamic completion will be triggerd. Class
         "azure.cli.core._profile.Profile" will be instantiated, and then call its "get_login_credentials" method to
         get the tenant of the deployment subscription.
+
+        This function will verify the parameter by default. In update mode, if aad_tenant_id is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+
         :return: string or None
         """
+        return self._get_aad_tenant_id(enable_validation=True)
 
-        return self._get_aad_tenant_id()
+    # pylint: disable=unused-argument
+    def _get_aad_admin_group_object_ids(self, enable_validation: bool = False, **kwargs) -> Union[List[str], None]:
+        """Internal function to obtain the value of aad_admin_group_object_ids.
 
-    def get_aad_admin_group_object_ids(self) -> Union[List[str], None]:
-        """Obtain the value of aad_admin_group_object_ids.
+        This function supports the option of enable_validation. When enabled in update mode, if
+        aad_admin_group_object_ids is specified, while aad_profile is not set or managed aad is not enabled,
+        raise an InvalidArgumentValueError.
+
         This function will normalize the parameter by default. It will split the string into a list with "," as the
         delimiter.
         :return: empty list or list of strings, or None
         """
         # read the original value passed by the command
         aad_admin_group_object_ids = self.raw_param.get("aad_admin_group_object_ids")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         read_from_mc = False
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.admin_group_object_i_ds is not None
-        ):
-            aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.admin_group_object_i_ds is not None
+            ):
+                aad_admin_group_object_ids = self.mc.aad_profile.admin_group_object_i_ds
+                read_from_mc = True
 
         # keep None as None, but empty string ("") to empty list ([])
         if not read_from_mc and aad_admin_group_object_ids is not None:
             aad_admin_group_object_ids = aad_admin_group_object_ids.split(',') if aad_admin_group_object_ids else []
 
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if aad_admin_group_object_ids:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--aad-admin-group-object-ids" if managed AAD is not enabled'
+                        )
+
         return aad_admin_group_object_ids
+
+    def get_aad_admin_group_object_ids(self) -> Union[List[str], None]:
+        """Obtain the value of aad_admin_group_object_ids.
+
+        This function will verify the parameter by default. In update mode, if aad_admin_group_object_ids is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+
+        This function will normalize the parameter by default. It will split the string into a list with "," as the
+        delimiter.
+
+        :return: empty list or list of strings, or None
+        """
+        return self._get_aad_admin_group_object_ids(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_disable_rbac(self, enable_validation: bool = False, **kwargs) -> Union[bool, None]:
@@ -3330,43 +3532,104 @@ class AKSContext:
     # pylint: disable=unused-argument
     def _get_enable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
         """Internal function to obtain the value of enable_azure_rbac.
-        This function supports the option of enable_validation. When enabled, if the values of disable_rbac and
-        enable_azure_rbac are both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad
-        is False and the value of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+
+        This function supports the option of enable_validation. When enabled and enable_azure_rbac is specified,
+        in create mode, if the value of enable_aad is not True, a RequiredArgumentMissingError will be raised.
+        If disable_rbac is specified, a MutuallyExclusiveArgumentError will be raised. In update mode, if
+        enable_azure_rbac is specified, while aad_profile is not set or managed aad is not enabled,
+        raise an InvalidArgumentValueError. If both disable_azure_rbac and enable_azure_rbac are specified,
+        raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
         enable_azure_rbac = self.raw_param.get("enable_azure_rbac")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.aad_profile and
-            self.mc.aad_profile.enable_azure_rbac is not None
-        ):
-            enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.aad_profile and
+                self.mc.aad_profile.enable_azure_rbac is not None
+            ):
+                enable_azure_rbac = self.mc.aad_profile.enable_azure_rbac
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if enable_azure_rbac and self._get_disable_rbac(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "--enable-azure-rbac cannot be used together with --disable-rbac"
-                )
-            if enable_azure_rbac and not self._get_enable_aad(enable_validation=False):
-                raise RequiredArgumentMissingError(
-                    "--enable-azure-rbac can only be used together with --enable-aad"
-                )
+            if enable_azure_rbac:
+                if self.decorator_mode == DecoratorMode.CREATE:
+                    if not self._get_enable_aad(enable_validation=False):
+                        raise RequiredArgumentMissingError(
+                            "--enable-azure-rbac can only be used together with --enable-aad"
+                        )
+                    if self._get_disable_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "--enable-azure-rbac cannot be used together with --disable-rbac"
+                        )
+                elif self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--enable-azure-rbac" if managed AAD is not enabled'
+                        )
+                    if self._get_disable_azure_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time'
+                        )
         return enable_azure_rbac
 
     def get_enable_azure_rbac(self) -> bool:
         """Obtain the value of enable_azure_rbac.
-        This function will verify the parameter by default. If the values of disable_rbac and enable_azure_rbac are
-        both True, a MutuallyExclusiveArgumentError will be raised. If the value of enable_aad is False and the value
-        of enable_azure_rbac is True, a RequiredArgumentMissingError will be raised.
+
+        This function will verify the parameter by default. If enable_azure_rbac is specified, in create mode,
+        if the value of enable_aad is not True, a RequiredArgumentMissingError will be raised. If disable_rbac
+        is specified, a MutuallyExclusiveArgumentError will be raised. In update mode, if enable_azure_rbac
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
 
         return self._get_enable_azure_rbac(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_azure_rbac(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_azure_rbac.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if disable_azure_rbac
+        is specified, while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_azure_rbac = self.raw_param.get("disable_azure_rbac")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if disable_azure_rbac:
+                if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self.mc is None or self.mc.aad_profile is None or not self.mc.aad_profile.managed:
+                        raise InvalidArgumentValueError(
+                            'Cannot specify "--disable-azure-rbac" if managed AAD is not enabled'
+                        )
+                    if self._get_enable_azure_rbac(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            'Cannot specify "--enable-azure-rbac" and "--disable-azure-rbac" at the same time'
+                        )
+        return disable_azure_rbac
+
+    def get_disable_azure_rbac(self) -> bool:
+        """Obtain the value of disable_azure_rbac.
+
+        This function will verify the parameter by default. In update mode, if disable_azure_rbac is specified,
+        while aad_profile is not set or managed aad is not enabled, raise an InvalidArgumentValueError.
+        If both disable_azure_rbac and enable_azure_rbac are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_azure_rbac(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_api_server_authorized_ip_ranges(self, enable_validation: bool = False, **kwargs) -> List[str]:
@@ -3793,13 +4056,15 @@ class AKSContext:
         """
         # read the original value passed by the command
         auto_upgrade_channel = self.raw_param.get("auto_upgrade_channel")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.auto_upgrade_profile and
-            self.mc.auto_upgrade_profile.upgrade_channel is not None
-        ):
-            auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.upgrade_channel is not None
+            ):
+                auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -4123,16 +4388,17 @@ class AKSContext:
         """
         return self._get_enable_local_accounts(enable_validation=True)
 
-    def get_client_id_from_identity_or_sp_profile(self) -> str:
-        """Helper function to obtain the value of client_id from identity_profile or service_principal_profile.
+    def get_assignee_from_identity_or_sp_profile(self) -> (str, bool):
+        """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
 
         Note: This is not a parameter of aks_update, and it will not be decorated into the `mc` object.
 
-        If client_id cannot be obtained, raise an UnknownError.
+        If assignee cannot be obtained, raise an UnknownError.
 
-        :return: string
+        :return: string, bool
         """
-        client_id = None
+        assignee = None
+        is_service_principal = False
         if check_is_msi_cluster(self.mc):
             if self.mc.identity_profile is None or self.mc.identity_profile["kubeletidentity"] is None:
                 raise UnknownError(
@@ -4141,13 +4407,15 @@ class AKSContext:
                     "You can manually grant or revoke permission to the identity named "
                     "<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR."
                 )
-            client_id = self.mc.identity_profile["kubeletidentity"].client_id
+            assignee = self.mc.identity_profile["kubeletidentity"].object_id
+            is_service_principal = False
         elif self.mc and self.mc.service_principal_profile is not None:
-            client_id = self.mc.service_principal_profile.client_id
+            assignee = self.mc.service_principal_profile.client_id
+            is_service_principal = True
 
-        if not client_id:
+        if not assignee:
             raise UnknownError('Cannot get the AKS cluster\'s service principal.')
-        return client_id
+        return assignee, is_service_principal
 
 
 class AKSCreateDecorator:
@@ -4175,7 +4443,7 @@ class AKSCreateDecorator:
     def init_mc(self) -> ManagedCluster:
         """Initialize a ManagedCluster object with several parameters and attach it to internal context.
 
-        When location is not assigned, function "_get_rg_location" will be called to get the location of the provided
+        When location is not assigned, function "get_rg_location" will be called to get the location of the provided
         resource group, which internally used ResourceManagementClient to send the request.
 
         :return: the ManagedCluster object
@@ -4238,6 +4506,7 @@ class AKSCreateDecorator:
             min_count=min_count,
             max_count=max_count,
             enable_auto_scaling=enable_auto_scaling,
+            enable_fips=self.context.get_enable_fips_image(),
         )
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
@@ -4432,7 +4701,7 @@ class AKSCreateDecorator:
                 service_principal_profile = mc.service_principal_profile
                 _ensure_aks_acr(
                     self.cmd,
-                    client_id=service_principal_profile.client_id,
+                    assignee=service_principal_profile.client_id,
                     acr_name_or_id=attach_acr,
                     # not actually used
                     subscription_id=self.context.get_subscription_id(),
@@ -4546,9 +4815,9 @@ class AKSCreateDecorator:
     def build_monitoring_addon_profile(self) -> ManagedClusterAddonProfile:
         """Build monitoring addon profile.
 
-        The function "_ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
+        The function "ensure_container_insights_for_monitoring" will be called to create a deployment which publishes
         the Container Insights solution to the Log Analytics workspace.
-        When workspace_resource_id is not assigned, function "_ensure_default_log_analytics_workspace_for_monitoring"
+        When workspace_resource_id is not assigned, function "ensure_default_log_analytics_workspace_for_monitoring"
         will be called to create a workspace, which internally used ResourceManagementClient to send the request.
 
         :return: a ManagedClusterAddonProfile object
@@ -4567,8 +4836,13 @@ class AKSCreateDecorator:
             },
         )
         # post-process, create a deployment
-        _ensure_container_insights_for_monitoring(
-            self.cmd, monitoring_addon_profile
+        ensure_container_insights_for_monitoring(
+            self.cmd, monitoring_addon_profile,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            self.context.get_location(),
+            aad_route=False,
         )
         # set intermediate
         self.context.set_intermediate("monitoring", True, overwrite_exists=True)
@@ -5061,10 +5335,10 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring"),
-                    self.context.get_intermediate("ingress_appgw_addon_enabled"),
-                    self.context.get_intermediate("enable_virtual_node"),
-                    self.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
+                    self.context.get_intermediate("enable_virtual_node", default_value=False),
+                    self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
                     self.context.get_vnet_subnet_id(),
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
@@ -5162,7 +5436,8 @@ class AKSUpdateDecorator:
                 '"--disable-azure-rbac" or '
                 '"--enable-public-fqdn" or '
                 '"--disable-public-fqdn" or '
-                '"--tags"'
+                '"--tags" or '
+                '"--nodepool-labels"'
             )
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
@@ -5258,22 +5533,24 @@ class AKSUpdateDecorator:
         self._ensure_mc(mc)
 
         subscription_id = self.context.get_subscription_id()
-        client_id = self.context.get_client_id_from_identity_or_sp_profile()
+        assignee, is_service_principal = self.context.get_assignee_from_identity_or_sp_profile()
         attach_acr = self.context.get_attach_acr()
         detach_acr = self.context.get_detach_acr()
 
         if attach_acr:
             _ensure_aks_acr(self.cmd,
-                            client_id=client_id,
+                            assignee=assignee,
                             acr_name_or_id=attach_acr,
-                            subscription_id=subscription_id)
+                            subscription_id=subscription_id,
+                            is_service_principal=is_service_principal)
 
         if detach_acr:
             _ensure_aks_acr(self.cmd,
-                            client_id=client_id,
+                            assignee=assignee,
                             acr_name_or_id=detach_acr,
                             subscription_id=subscription_id,
-                            detach=True)
+                            detach=True,
+                            is_service_principal=is_service_principal)
 
     def update_sku(self, mc: ManagedCluster) -> ManagedCluster:
         """Update sku (uptime sla) for the ManagedCluster object.
@@ -5379,20 +5656,216 @@ class AKSUpdateDecorator:
         """
         self._ensure_mc(mc)
 
-        if not mc.windows_profile:
+        enable_ahub = self.context.get_enable_ahub()
+        disable_ahub = self.context.get_disable_ahub()
+        windows_admin_password = self.context.get_windows_admin_password()
+
+        if any([enable_ahub, disable_ahub, windows_admin_password]) and not mc.windows_profile:
             raise UnknownError(
                 "Encounter an unexpected error while getting windows profile from the cluster in the process of update."
             )
 
-        enable_ahub = self.context.get_enable_ahub()
-        disable_ahub = self.context.get_disable_ahub()
-        windows_admin_password = self.context.get_windows_admin_password()
         if enable_ahub:
             mc.windows_profile.license_type = 'Windows_Server'
         if disable_ahub:
             mc.windows_profile.license_type = 'None'
         if windows_admin_password:
             mc.windows_profile.admin_password = windows_admin_password
+        return mc
+
+    def update_aad_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update aad profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_aad():
+            mc.aad_profile = self.models.ManagedClusterAADProfile(
+                managed=True
+            )
+
+        aad_tenant_id = self.context.get_aad_tenant_id()
+        aad_admin_group_object_ids = self.context.get_aad_admin_group_object_ids()
+        enable_azure_rbac = self.context.get_enable_azure_rbac()
+        disable_azure_rbac = self.context.get_disable_azure_rbac()
+        if aad_tenant_id is not None:
+            mc.aad_profile.tenant_id = aad_tenant_id
+        if aad_admin_group_object_ids is not None:
+            # ids -> i_ds due to track 2 naming issue
+            mc.aad_profile.admin_group_object_i_ds = aad_admin_group_object_ids
+        if enable_azure_rbac:
+            mc.aad_profile.enable_azure_rbac = True
+        if disable_azure_rbac:
+            mc.aad_profile.enable_azure_rbac = False
+        return mc
+
+    def update_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update auto upgrade profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+        return mc
+
+    def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update identity for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        current_identity_type = "spn"
+        if mc.identity is not None:
+            current_identity_type = mc.identity.type.casefold()
+
+        goal_identity_type = current_identity_type
+        assign_identity = self.context.get_assign_identity()
+        if self.context.get_enable_managed_identity():
+            if not assign_identity:
+                goal_identity_type = "systemassigned"
+            else:
+                goal_identity_type = "userassigned"
+
+        if current_identity_type != goal_identity_type:
+            if current_identity_type == "spn":
+                msg = (
+                    "Your cluster is using service principal, and you are going to update "
+                    "the cluster to use {} managed identity.\nAfter updating, your "
+                    "cluster's control plane and addon pods will switch to use managed "
+                    "identity, but kubelet will KEEP USING SERVICE PRINCIPAL "
+                    "until you upgrade your agentpool.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using {} managed identity, and you are going to "
+                    "update the cluster to use {} managed identity.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_identity_type, goal_identity_type)
+            # gracefully exit if user does not confirm
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException
+            # update identity
+            if goal_identity_type == "systemassigned":
+                identity = self.models.ManagedClusterIdentity(
+                    type="SystemAssigned"
+                )
+            elif goal_identity_type == "userassigned":
+                user_assigned_identity = {
+                    assign_identity: self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+                }
+                identity = self.models.ManagedClusterIdentity(
+                    type="UserAssigned",
+                    user_assigned_identities=user_assigned_identity
+                )
+            mc.identity = identity
+        return mc
+
+    def update_azure_keyvault_secrets_provider_addon_profile(
+        self,
+        azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
+    ) -> None:
+        """Update azure keyvault secrets provider addon profile in-place.
+
+        :return: None
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+
+        if self.context.get_enable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_SECRET_ROTATION_ENABLED
+            ] = "true"
+
+        if self.context.get_disable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_SECRET_ROTATION_ENABLED
+            ] = "false"
+
+        if self.context.get_rotation_poll_interval() is not None:
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_ROTATION_POLL_INTERVAL
+            ] = self.context.get_rotation_poll_interval()
+
+    def update_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update addon profiles for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get(
+            "CONST_MONITORING_ADDON_NAME"
+        )
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        )
+        CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get(
+            "CONST_VIRTUAL_NODE_ADDON_NAME"
+        )
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+
+        azure_keyvault_secrets_provider_addon_profile = None
+        if mc.addon_profiles is not None:
+            monitoring_addon_enabled = (
+                CONST_MONITORING_ADDON_NAME in mc.addon_profiles and
+                mc.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+            )
+            ingress_appgw_addon_enabled = (
+                CONST_INGRESS_APPGW_ADDON_NAME in mc.addon_profiles and
+                mc.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+            )
+            virtual_node_addon_enabled = (
+                CONST_VIRTUAL_NODE_ADDON_NAME + self.context.get_virtual_node_addon_os_type() in mc.addon_profiles and
+                mc.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + self.context.get_virtual_node_addon_os_type()].enabled
+            )
+            # set intermediates, used later to ensure role assignments
+            self.context.set_intermediate(
+                "monitoring", monitoring_addon_enabled, overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "ingress_appgw_addon_enabled", ingress_appgw_addon_enabled, overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "virtual_node_addon_enabled", virtual_node_addon_enabled, overwrite_exists=True
+            )
+            # get azure keyvault secrets provider profile
+            azure_keyvault_secrets_provider_addon_profile = mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            )
+
+        # update azure keyvault secrets provider profile in-place
+        self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
+        return mc
+
+    def update_nodepool_labels(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update nodepool labels for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        nodepool_labels = self.context.get_nodepool_labels()
+        if nodepool_labels is not None:
+            for agent_profile in mc.agent_pool_profiles:
+                agent_profile.node_labels = nodepool_labels
         return mc
 
     def update_default_mc_profile(self) -> ManagedCluster:
@@ -5426,14 +5899,20 @@ class AKSUpdateDecorator:
         mc = self.update_api_server_access_profile(mc)
         # update windows profile
         mc = self.update_windows_profile(mc)
-
+        # update aad profile
+        mc = self.update_aad_profile(mc)
+        # update auto upgrade profile
+        mc = self.update_auto_upgrade_profile(mc)
+        # update identity
+        mc = self.update_identity(mc)
+        # update addon profiles
+        mc = self.update_addon_profiles(mc)
+        # update nodepool labels
+        mc = self.update_nodepool_labels(mc)
         return mc
 
-    def update_mc(self) -> ManagedCluster:
+    def update_mc(self, mc: ManagedCluster) -> ManagedCluster:
         """Send request to update the existing managed cluster.
-
-        Note: To reduce the risk of regression introduced by refactoring, this function is not complete and is being
-        implemented gradually.
 
         The function "_put_managed_cluster_ensuring_permission" will be called to use the ContainerServiceClient to
         send a reqeust to update the existing managed cluster, and also add necessary role assignments for some optional
@@ -5441,3 +5920,22 @@ class AKSUpdateDecorator:
 
         :return: the ManagedCluster object
         """
+        self._ensure_mc(mc)
+
+        return _put_managed_cluster_ensuring_permission(
+            self.cmd,
+            self.client,
+            self.context.get_subscription_id(),
+            self.context.get_resource_group_name(),
+            self.context.get_name(),
+            mc,
+            self.context.get_intermediate("monitoring", default_value=False),
+            self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
+            self.context.get_intermediate("enable_virtual_node", default_value=False),
+            False,
+            mc.agent_pool_profiles[0].vnet_subnet_id,
+            check_is_msi_cluster(mc),
+            self.context.get_attach_acr(),
+            self.context.get_aks_custom_headers(),
+            self.context.get_no_wait()
+        )

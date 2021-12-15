@@ -97,8 +97,7 @@ def load_flexibleserver_command_table(self, _):
     # Postgres commands
     with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_servers,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_server_create', table_transformer=table_transform_output)
         g.custom_command('restore', 'flexible_server_restore', supports_no_wait=True)
         g.command('start', 'begin_start')
@@ -116,8 +115,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server firewall-rule', postgres_flexible_firewall_rule_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_firewall_rules,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_firewall_rules) as g:
         g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
         g.custom_show_command('show', 'firewall_rule_get_func', custom_command_type=flexible_server_custom_common)
@@ -142,23 +140,20 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server parameter', postgres_flexible_config_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_config, table_transformer=table_transform_output_parameters,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_config, table_transformer=table_transform_output_parameters) as g:
         g.custom_command('set', 'flexible_parameter_update')
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('postgres flexible-server', postgres_flexible_location_capabilities_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_location_capabilities,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_location_capabilities) as g:
         g.custom_command('list-skus', 'flexible_list_skus', table_transformer=table_transform_output_list_skus)
         g.custom_command('show-connection-string', 'flexible_server_connection_string')
 
     with self.command_group('postgres flexible-server db', postgres_flexible_db_sdk,
                             custom_command_type=flexible_server_custom_common,
-                            client_factory=cf_postgres_flexible_db,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_db) as g:
         g.custom_command('create', 'database_create_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('delete', 'database_delete_func')
         g.show_command('show', 'get')
@@ -166,8 +161,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server deploy', postgres_flexible_servers_sdk,
                             custom_command_type=flexible_server_custom_common,
-                            client_factory=cf_postgres_flexible_servers,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('setup', 'github_actions_setup')
         g.custom_command('run', 'github_actions_run')
 

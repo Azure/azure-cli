@@ -146,7 +146,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-12-01',
+            'disks': '2021-04-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
             'snapshots': '2021-04-01',
@@ -159,7 +159,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2021-06-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2021-04-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',

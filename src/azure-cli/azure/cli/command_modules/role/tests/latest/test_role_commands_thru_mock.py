@@ -134,7 +134,6 @@ class TestRoleMocked(unittest.TestCase):
         result = create_service_principal_for_rbac(cmd, name, 12, skip_assignment=True)
 
         # assert
-        self.assertEqual(result['name'], test_app_id)
         self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
 
@@ -175,7 +174,6 @@ class TestRoleMocked(unittest.TestCase):
         result = create_service_principal_for_rbac(cmd, name, cert=cert, years=2, skip_assignment=True)
 
         # assert
-        self.assertEqual(result['name'], test_app_id)
         self.assertEqual(result['appId'], test_app_id)
         self.assertTrue(logger_mock.warning.called)  # we should warn 'years' will be dropped
         self.assertTrue(faked_graph_client.applications.create.called)
