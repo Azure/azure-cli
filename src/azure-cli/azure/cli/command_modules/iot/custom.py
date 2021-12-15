@@ -61,6 +61,9 @@ from ._utils import open_certificate, generate_key
 
 logger = get_logger(__name__)
 
+# Identity types
+SYSTEM_ASSIGNED = 'SystemAssigned'
+NONE_IDENTITY = 'None'
 
 # CUSTOM TYPE
 class KeyType(Enum):
@@ -1269,6 +1272,31 @@ def iot_central_app_list(client, resource_group_name=None):
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
     return client.apps.begin_update(resource_group_name, app_name, parameters)
+
+
+def iot_central_app_assign_identity(client, app_name, system_assigned=False, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+
+    if system_assigned:
+        app.identity.type = SYSTEM_ASSIGNED
+
+    poller = iot_central_app_update(client, app_name, app, resource_group_name)
+    return poller.result().identity
+
+
+def iot_central_app_remove_identity(client, app_name, system_identity=False, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+
+    if system_identity and (app.identity.type.upper() == SYSTEM_ASSIGNED.upper()):
+        app.identity.type = NONE_IDENTITY
+
+    poller = iot_central_app_update(client, app_name, app, resource_group_name)
+    return poller.result().identity
+
+
+def iot_central_app_show_identity(client, app_name, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+    return app.identity
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):

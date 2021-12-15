@@ -920,3 +920,30 @@ examples:
     text: >
         az iot central app update -n my-first-iot-app -g MyResourceGroup --set subdomain.name=my-iot-app-new
 """
+
+helps['iot central app identity assign'] = """
+type: command
+short-summary: Assign managed identities to an IoT Central application
+examples:
+  - name: Assign a system-assigned managed identity to an IoT Central application.
+    text: >
+        az iot central app identity assign --name my-iotc-app --resource-group MyResourceGroup --system-assigned
+"""
+
+helps['iot central app identity show'] = """
+type: command
+short-summary: Show the identity properties of an IoT Central application
+examples:
+  - name: Show identity properties of an IoT Central application
+    text: >
+        az iot central app identity show --name my-iotc-app --resource-group MyResourceGroup
+"""
+
+helps['iot central app identity remove'] = """
+type: command
+short-summary: Remove managed identities from an IoT Central application
+examples:
+  - name: Remove a system-assigned managed identity from an IoT Central application.
+    text: >
+        az iot central app identity remove --name my-iotc-app --resource-group MyResourceGroup --system-assigned
+"""
