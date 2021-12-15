@@ -4758,8 +4758,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--enable-managed-identity ' \
-                     '--auto-upgrade-channel rapid ' \
+                     '--enable-managed-identity --auto-upgrade-channel rapid ' \
                      '--ssh-key-value={ssh_key_value}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -4767,7 +4766,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # update upgrade channel
-        self.cmd('aks update --resource-group={resource_group} --name={name} --auto-upgrade-channel stable', checks=[
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--auto-upgrade-channel stable'
+        self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('autoUpgradeProfile.upgradeChannel', 'stable')
         ])
@@ -5769,6 +5770,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('disableLocalAccounts', False)
         ])
 
+         # update to disable local accounts
+        self.cmd('aks update --resource-group={resource_group} --name={name} --disable-local-accounts', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('disableLocalAccounts', True)
+        ])
+
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -5783,9 +5790,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5802,16 +5807,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '--ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh', None),
         ])
 
-        # TODO: add support for option --aks-custom-headers to `aks enable-addons` command
         enable_cmd = 'aks enable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
         self.cmd(enable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -5828,16 +5830,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys()
         })
 
-        # use AKSHTTPCustomFeatures header to enable preview addon AKS-OpenServiceMesh
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-OpenServiceMesh ' \
                      '-a open-service-mesh --ssh-key-value={ssh_key_value} -o json'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.openServiceMesh.enabled', True),
         ])
 
-        # TODO: add support for option --aks-custom-headers to `aks disable-addons` command
         disable_cmd = 'aks disable-addons --addons open-service-mesh --resource-group={resource_group} --name={name} -o json'
         self.cmd(disable_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6016,3 +6015,38 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
             self.check('agentPoolProfiles[0].nodeLabels.label2', None),
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_custom_headers(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        # the content specified by the custom header is deprecated, we are only testing the option
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --auto-upgrade-channel rapid ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'rapid')
+        ])
+
+        # update
+        # the content specified by the custom header is deprecated, we are only testing the option
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--auto-upgrade-channel stable ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AutoUpgradePreview'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('autoUpgradeProfile.upgradeChannel', 'stable')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

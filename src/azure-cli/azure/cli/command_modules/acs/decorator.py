@@ -1754,23 +1754,25 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         read_from_mc = False
-        if self.mc and self.mc.identity:
-            enable_managed_identity = check_is_msi_cluster(self.mc)
-            read_from_mc = True
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if self.mc and self.mc.identity:
+                enable_managed_identity = check_is_msi_cluster(self.mc)
+                read_from_mc = True
 
         # skip dynamic completion & validation if option read_only is specified
         if read_only:
             return enable_managed_identity
 
-        # dynamic completion
-        (
-            service_principal,
-            client_secret,
-        ) = self._get_service_principal_and_client_secret(read_only=True)
-        if not read_from_mc and service_principal and client_secret:
-            enable_managed_identity = False
+        # dynamic completion for create mode only
+        if self.decorator_mode == DecoratorMode.CREATE:
+            (
+                service_principal,
+                client_secret,
+            ) = self._get_service_principal_and_client_secret(read_only=True)
+            if not read_from_mc and service_principal and client_secret:
+                enable_managed_identity = False
 
         # validation
         if enable_validation:
@@ -1820,23 +1822,19 @@ class AKSContext:
         :return: string or None
         """
         # read the original value passed by the command
-        raw_value = self.raw_param.get("assign_identity")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        value_obtained_from_mc = None
-        if (
-            self.mc and
-            self.mc.identity and
-            self.mc.identity.user_assigned_identities is not None
-        ):
-            value_obtained_from_mc = safe_list_get(
-                list(self.mc.identity.user_assigned_identities.keys()), 0, None
-            )
-
-        # set default value
-        if value_obtained_from_mc is not None:
-            assign_identity = value_obtained_from_mc
-        else:
-            assign_identity = raw_value
+        assign_identity = self.raw_param.get("assign_identity")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.identity and
+                self.mc.identity.user_assigned_identities is not None
+            ):
+                value_obtained_from_mc = safe_list_get(
+                    list(self.mc.identity.user_assigned_identities.keys()), 0, None
+                )
+                if value_obtained_from_mc is not None:
+                    assign_identity = value_obtained_from_mc
 
         # this parameter does not need dynamic completion
         # validation
@@ -1956,18 +1954,20 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if self.decorator_mode == DecoratorMode.CREATE and attach_acr:
-            if self._get_enable_managed_identity(enable_validation=False) and self.get_no_wait():
-                raise MutuallyExclusiveArgumentError(
-                    "When --attach-acr and --enable-managed-identity are both specified, "
-                    "--no-wait is not allowed, please wait until the whole operation succeeds."
-                )
+            if self._get_enable_managed_identity(enable_validation=False):
                 # Attach acr operation will be handled after the cluster is created
-            # newly added check, check whether client_id exists before creating role assignment
-            service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
-            if not service_principal:
-                raise RequiredArgumentMissingError(
-                    "No service principal provided to create the acrpull role assignment for acr."
-                )
+                if self.get_no_wait():
+                    raise MutuallyExclusiveArgumentError(
+                        "When --attach-acr and --enable-managed-identity are both specified, "
+                        "--no-wait is not allowed, please wait until the whole operation succeeds."
+                    )
+            else:
+                # newly added check, check whether client_id exists before creating role assignment
+                service_principal, _ = self._get_service_principal_and_client_secret(read_only=True)
+                if not service_principal:
+                    raise RequiredArgumentMissingError(
+                        "No service principal provided to create the acrpull role assignment for acr."
+                    )
         return attach_acr
 
     def get_detach_acr(self) -> Union[str, None]:
@@ -2982,8 +2982,13 @@ class AKSContext:
         # this parameter does not need validation
         return enable_sgxquotehelper
 
-    def get_enable_secret_rotation(self) -> bool:
-        """Obtain the value of enable_secret_rotation.
+    # pylint: disable=unused-argument
+    def _get_enable_secret_rotation(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of enable_secret_rotation.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if enable_secret_rotation
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
 
         :return: bool
         """
@@ -2998,25 +3003,103 @@ class AKSContext:
 
         # read the original value passed by the command
         enable_secret_rotation = self.raw_param.get("enable_secret_rotation")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.addon_profiles and
-            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
-            self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_SECRET_ROTATION_ENABLED) is not None
-        ):
-            enable_secret_rotation = self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_SECRET_ROTATION_ENABLED) == "true"
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.addon_profiles and
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_SECRET_ROTATION_ENABLED) is not None
+            ):
+                enable_secret_rotation = self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_SECRET_ROTATION_ENABLED) == "true"
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if enable_secret_rotation:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
+                    )
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--enable-secret-rotation can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
         return enable_secret_rotation
 
-    def get_rotation_poll_interval(self) -> Union[str, None]:
-        """Obtain the value of rotation_poll_interval.
+    def get_enable_secret_rotation(self) -> bool:
+        """Obtain the value of enable_secret_rotation.
+
+        This function will verify the parameter by default. In update mode, if enable_secret_rotation is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: bool
+        """
+        return self._get_enable_secret_rotation(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_disable_secret_rotation(self, enable_validation: bool = False, **kwargs) -> bool:
+        """Internal function to obtain the value of disable_secret_rotation.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if disable_secret_rotation
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
+
+        :return: bool
+        """
+        # determine the value of constants
+        addon_consts = self.get_addon_consts()
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+
+        # read the original value passed by the command
+        disable_secret_rotation = self.raw_param.get("disable_secret_rotation")
+        # We do not support this option in create mode, therefore we do not read the value from `mc`.
+
+        # this parameter does not need dynamic completion
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if disable_secret_rotation:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
+                    )
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--disable-secret-rotation can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
+        return disable_secret_rotation
+
+    def get_disable_secret_rotation(self) -> bool:
+        """Obtain the value of disable_secret_rotation.
+
+        This function will verify the parameter by default. In update mode, if disable_secret_rotation is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: bool
+        """
+        return self._get_disable_secret_rotation(enable_validation=True)
+
+    # pylint: disable=unused-argument
+    def _get_rotation_poll_interval(self, enable_validation: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to obtain the value of rotation_poll_interval.
+
+        This function supports the option of enable_validation. When enabled, in update mode, if rotation_poll_interval
+        is specified but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError
+        will be raised.
 
         :return: string or None
         """
@@ -3031,22 +3114,47 @@ class AKSContext:
 
         # read the original value passed by the command
         rotation_poll_interval = self.raw_param.get("rotation_poll_interval")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.addon_profiles and
-            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
-            self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_ROTATION_POLL_INTERVAL) is not None
-        ):
-            rotation_poll_interval = self.mc.addon_profiles.get(
-                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
-            ).config.get(CONST_ROTATION_POLL_INTERVAL)
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.addon_profiles and
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_ROTATION_POLL_INTERVAL) is not None
+            ):
+                rotation_poll_interval = self.mc.addon_profiles.get(
+                    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+                ).config.get(CONST_ROTATION_POLL_INTERVAL)
 
         # this parameter does not need dynamic completion
-        # this parameter does not need validation
+        # validation
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if rotation_poll_interval:
+                    azure_keyvault_secrets_provider_enabled = (
+                        self.mc and
+                        self.mc.addon_profiles and
+                        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME in self.mc.addon_profiles and
+                        self.mc.addon_profiles.get(CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME).enabled
+                    )
+                    if not azure_keyvault_secrets_provider_enabled:
+                        raise InvalidArgumentValueError(
+                            "--rotation-poll-interval can only be specified "
+                            "when azure-keyvault-secrets-provider is enabled"
+                        )
         return rotation_poll_interval
+
+    def get_rotation_poll_interval(self) -> Union[str, None]:
+        """Obtain the value of rotation_poll_interval.
+
+        This function will verify the parameter by default. In update mode, if rotation_poll_interval is specified
+        but azure keyvault secret provider addon is not enabled, an InvalidArgumentValueError will be raised.
+
+        :return: string or None
+        """
+        return self._get_rotation_poll_interval(enable_validation=True)
 
     # pylint: disable=unused-argument
     def _get_enable_aad(self, enable_validation: bool = False, **kwargs) -> bool:
@@ -3918,13 +4026,15 @@ class AKSContext:
         """
         # read the original value passed by the command
         auto_upgrade_channel = self.raw_param.get("auto_upgrade_channel")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.auto_upgrade_profile and
-            self.mc.auto_upgrade_profile.upgrade_channel is not None
-        ):
-            auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
+
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.auto_upgrade_profile and
+                self.mc.auto_upgrade_profile.upgrade_channel is not None
+            ):
+                auto_upgrade_channel = self.mc.auto_upgrade_profile.upgrade_channel
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
@@ -5186,10 +5296,10 @@ class AKSCreateDecorator:
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     mc,
-                    self.context.get_intermediate("monitoring"),
-                    self.context.get_intermediate("ingress_appgw_addon_enabled"),
-                    self.context.get_intermediate("enable_virtual_node"),
-                    self.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+                    self.context.get_intermediate("monitoring", default_value=False),
+                    self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False),
+                    self.context.get_intermediate("enable_virtual_node", default_value=False),
+                    self.context.get_intermediate("need_post_creation_vnet_permission_granting", default_value=False),
                     self.context.get_vnet_subnet_id(),
                     self.context.get_enable_managed_identity(),
                     self.context.get_attach_acr(),
@@ -5547,6 +5657,161 @@ class AKSUpdateDecorator:
             mc.aad_profile.enable_azure_rbac = False
         return mc
 
+    def update_auto_upgrade_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update auto upgrade profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        auto_upgrade_channel = self.context.get_auto_upgrade_channel()
+        if auto_upgrade_channel is not None:
+            if mc.auto_upgrade_profile is None:
+                mc.auto_upgrade_profile = self.models.ManagedClusterAutoUpgradeProfile()
+            mc.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
+        return mc
+
+    def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update identity for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        current_identity_type = "spn"
+        if mc.identity is not None:
+            current_identity_type = mc.identity.type.casefold()
+
+        goal_identity_type = current_identity_type
+        assign_identity = self.context.get_assign_identity()
+        if self.context.get_enable_managed_identity():
+            if not assign_identity:
+                goal_identity_type = "systemassigned"
+            else:
+                goal_identity_type = "userassigned"
+
+        if current_identity_type != goal_identity_type:
+            if current_identity_type == "spn":
+                msg = (
+                    "Your cluster is using service principal, and you are going to update "
+                    "the cluster to use {} managed identity.\nAfter updating, your "
+                    "cluster's control plane and addon pods will switch to use managed "
+                    "identity, but kubelet will KEEP USING SERVICE PRINCIPAL "
+                    "until you upgrade your agentpool.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(goal_identity_type)
+            else:
+                msg = (
+                    "Your cluster is already using {} managed identity, and you are going to "
+                    "update the cluster to use {} managed identity.\n"
+                    "Are you sure you want to perform this operation?"
+                ).format(current_identity_type, goal_identity_type)
+            # gracefully exit if user does not confirm
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException
+            # update identity
+            if goal_identity_type == "systemassigned":
+                identity = self.models.ManagedClusterIdentity(
+                    type="SystemAssigned"
+                )
+            elif goal_identity_type == "userassigned":
+                user_assigned_identity = {
+                    assign_identity: self.models.ManagedServiceIdentityUserAssignedIdentitiesValue()
+                }
+                identity = self.models.ManagedClusterIdentity(
+                    type="UserAssigned",
+                    user_assigned_identities=user_assigned_identity
+                )
+            mc.identity = identity
+        return mc
+
+    def update_azure_keyvault_secrets_provider_addon_profile(
+        self,
+        azure_keyvault_secrets_provider_addon_profile: ManagedClusterAddonProfile,
+    ) -> None:
+        """Update azure keyvault secrets provider addon profile in-place.
+
+        :return: None
+        """
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_SECRET_ROTATION_ENABLED = addon_consts.get(
+            "CONST_SECRET_ROTATION_ENABLED"
+        )
+        CONST_ROTATION_POLL_INTERVAL = addon_consts.get(
+            "CONST_ROTATION_POLL_INTERVAL"
+        )
+
+        if self.context.get_enable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_SECRET_ROTATION_ENABLED
+            ] = "true"
+
+        if self.context.get_disable_secret_rotation():
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_SECRET_ROTATION_ENABLED
+            ] = "false"
+
+        if self.context.get_rotation_poll_interval() is not None:
+            azure_keyvault_secrets_provider_addon_profile.config[
+                CONST_ROTATION_POLL_INTERVAL
+            ] = self.context.get_rotation_poll_interval()
+
+    def update_addon_profiles(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update addon profiles for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # determine the value of constants
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_ADDON_NAME = addon_consts.get(
+            "CONST_MONITORING_ADDON_NAME"
+        )
+        CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
+            "CONST_INGRESS_APPGW_ADDON_NAME"
+        )
+        CONST_VIRTUAL_NODE_ADDON_NAME = addon_consts.get(
+            "CONST_VIRTUAL_NODE_ADDON_NAME"
+        )
+        CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME = addon_consts.get(
+            "CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME"
+        )
+
+        azure_keyvault_secrets_provider_addon_profile = None
+        if mc.addon_profiles is not None:
+            monitoring_addon_enabled = (
+                CONST_MONITORING_ADDON_NAME in mc.addon_profiles and
+                mc.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+            )
+            ingress_appgw_addon_enabled = (
+                CONST_INGRESS_APPGW_ADDON_NAME in mc.addon_profiles and
+                mc.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+            )
+            virtual_node_addon_enabled = (
+                CONST_VIRTUAL_NODE_ADDON_NAME + self.context.get_virtual_node_addon_os_type() in mc.addon_profiles and
+                mc.addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + self.context.get_virtual_node_addon_os_type()].enabled
+            )
+            # set intermediates, used later to ensure role assignments
+            self.context.set_intermediate(
+                "monitoring", monitoring_addon_enabled, overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "ingress_appgw_addon_enabled", ingress_appgw_addon_enabled, overwrite_exists=True
+            )
+            self.context.set_intermediate(
+                "virtual_node_addon_enabled", virtual_node_addon_enabled, overwrite_exists=True
+            )
+            # get azure keyvault secrets provider profile
+            azure_keyvault_secrets_provider_addon_profile = mc.addon_profiles.get(
+                CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
+            )
+
+        # update azure keyvault secrets provider profile in-place
+        self.update_azure_keyvault_secrets_provider_addon_profile(azure_keyvault_secrets_provider_addon_profile)
+        return mc
+
     def update_default_mc_profile(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -5580,6 +5845,12 @@ class AKSUpdateDecorator:
         mc = self.update_windows_profile(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
+        # update auto upgrade profile
+        mc = self.update_auto_upgrade_profile(mc)
+        # update identity
+        mc = self.update_identity(mc)
+        # update addon profiles
+        mc = self.update_addon_profiles(mc)
 
         return mc
 

@@ -1463,6 +1463,38 @@ type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
+helps['network application-gateway waf-policy managed-rule exclusion rule-set'] = """
+type: group
+short-summary: Define a managed rule set for exclusions.
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set add'] = """
+type: command
+short-summary: Add a managed rule set to an exclusion.
+examples:
+  - name: Add a managed rule set to an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set add -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup --rule-ids 921140 921150
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set remove'] = """
+type: command
+short-summary: Remove managed rule set within an exclusion.
+examples:
+  - name: Remove managed rule set within an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set remove -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set list'] = """
+type: command
+short-summary: List all managed rule sets of an exclusion.
+examples:
+  - name: List all managed rule sets of an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set list -g MyResourceGroup --policy-name MyPolicy
+"""
+
 helps['network application-gateway waf-policy show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy.
@@ -3520,6 +3552,55 @@ examples:
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
   - name: Create an address pool with several backend addresses using config file
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
+"""
+
+helps['network lb address-pool update'] = """
+type: command
+short-summary: Update an address pool.
+parameters:
+  - name: --backend-address
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
+    long-summary: |
+        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
+        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
+
+        name: Required. The name of the backend address.
+        ip-address: Required. Ip Address within the Virtual Network.
+        subnet: Name or Id of the subnet.
+
+        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
+  - name: --backend-addresses-config-file
+    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
+    long-summary: |
+        Usage: --backend-addresses-config-file @"{config_file.json}"
+
+        A example config file is
+        [
+          {
+            "name": "address1",
+            "virtualNetwork": "clitestvnet",
+            "ipAddress": "10.0.0.4"
+          },
+          {
+            "name": "address2",
+            "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
+            "ipAddress": "10.0.0.5"
+          },
+          {
+            "name": "address3",
+            "subnet": "subnet3",
+            "ipAddress": "10.0.0.6"
+          },
+          {
+            "name": "address4",
+            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
+            "ipAddress": "10.0.0.7"
+          }
+        ]
+examples:
+  - name: Update an address pool with several backend addresses using key-value arguments.
+    text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
 """
 
 helps['network lb address-pool delete'] = """

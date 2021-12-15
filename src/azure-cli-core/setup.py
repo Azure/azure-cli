@@ -48,17 +48,16 @@ DEPENDENCIES = [
     'azure-cli-telemetry==1.0.6.*',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
-    'humanfriendly>=4.7,<10.0',
+    'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.9.0',
     'msal-extensions>=0.3.0,<0.4',
-    'msal>=1.15.0,<2.0.0',
+    'msal>=1.16.0,<2.0.0',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo>=1.5.0.1',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'requests[socks]~=2.25.1',
-    'urllib3[secure]>=1.26.5'
+    'requests[socks]'
 ]
 
 # dependencies for specific OSes

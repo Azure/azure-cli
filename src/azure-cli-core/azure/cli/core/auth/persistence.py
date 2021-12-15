@@ -35,6 +35,7 @@ def load_secret_store(location, encrypt):
 def build_persistence(location, encrypt):
     """Build a suitable persistence instance based your current OS"""
     location += file_extensions[encrypt]
+    logger.debug("build_persistence: location=%r, encrypt=%r", location, encrypt)
     if encrypt:
         if sys.platform.startswith('win'):
             return FilePersistenceWithDataProtection(location)

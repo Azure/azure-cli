@@ -219,7 +219,7 @@ def load_arguments(self, _):
     for scope in ['webapp', 'functionapp', 'logicapp']:
         with self.argument_context(scope + ' create') as c:
             c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'],
-                       help='Linux only. Container image name from Docker Hub, e.g. publisher/image-name:tag')
+                       help='Container image name from Docker Hub, e.g. publisher/image-name:tag')
             c.argument('deployment_local_git', action='store_true', options_list=['--deployment-local-git', '-l'],
                        help='enable local git')
             c.argument('deployment_zip', options_list=['--deployment-zip', '-z'],
