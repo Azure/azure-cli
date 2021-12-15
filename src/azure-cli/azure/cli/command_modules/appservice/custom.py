@@ -730,8 +730,8 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
         plan = get_app_service_plan_from_webapp(cmd, instance, api_version="2021-01-15")
         sku = _normalize_sku(plan.sku.name)
-        if get_sku_tier(sku) not in ["PREMIUM", "PREMIUMV2", "PREMIUMV3"]:
-            raise ValidationError("{} are only supported for elastic premium SKUs".format(str(args)))
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
         if not plan.elastic_scale_enabled:
             raise ValidationError("Elastic scale is not enabled on the App Service Plan. Please update the plan ")
         if (minimum_elastic_instance_count or 0) > plan.maximum_elastic_worker_count:
@@ -1870,8 +1870,8 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_
     if elastic_scale is not None or max_elastic_worker_count is not None:
         if sku is None:
             sku = instance.sku.name
-        if get_sku_tier(sku) not in ["PREMIUM", "PREMIUMV2", "PREMIUMV3"]:
-            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium SKUs. "
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium V2/V3 SKUs. "
                                   "Use command help to see all available SKUs")
 
     if elastic_scale is not None:
