@@ -71,15 +71,11 @@ def generate_deployment_name(namespace):
 def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.core.exceptions import HttpResponseError
-        from knack.util import CLIError
 
         resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        try:
-            rg = resource_client.resource_groups.get(namespace.resource_group_name)
-        except HttpResponseError as ex:
-            raise CLIError('error retrieving default location: {}'.format(ex.message))
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
         logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)
 
 
