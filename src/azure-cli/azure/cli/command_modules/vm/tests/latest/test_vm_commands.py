@@ -1613,6 +1613,7 @@ class VMMonitorTestDefault(ScenarioTest):
             self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_metric_tail', location='eastus')
     def test_vm_metric_tail(self, resource_group):
 
