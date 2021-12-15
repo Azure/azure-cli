@@ -38,7 +38,7 @@ def storage_copy(source, destination, put_md5=None, recursive=None, blob_type=No
     if cap_mbps is not None:
         flags.append('--cap-mbps=' + cap_mbps)
     if extra_options is not None:
-        flags.extend(shlex.split(extra_options))
+        flags.extend(extra_options)
     azcopy.copy(source, destination, flags=flags)
 
 

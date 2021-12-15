@@ -1491,7 +1491,7 @@ examples:
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
   - name: Upload a single file to Azure Blob using url with azcopy options pass-through.
-    text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] --extra-options "--block-size-mb 0.25 --check-length"
+    text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] -- --block-size-mb=0.25 --check-length
 """
 
 helps['storage cors'] = """
