@@ -65,6 +65,7 @@ logger = get_logger(__name__)
 SYSTEM_ASSIGNED = 'SystemAssigned'
 NONE_IDENTITY = 'None'
 
+
 # CUSTOM TYPE
 class KeyType(Enum):
     primary = 'primary'
@@ -1284,10 +1285,10 @@ def iot_central_app_assign_identity(client, app_name, system_assigned=False, res
     return poller.result().identity
 
 
-def iot_central_app_remove_identity(client, app_name, system_identity=False, resource_group_name=None):
+def iot_central_app_remove_identity(client, app_name, system_assigned=False, resource_group_name=None):
     app = iot_central_app_get(client, app_name, resource_group_name)
 
-    if system_identity and (app.identity.type.upper() == SYSTEM_ASSIGNED.upper()):
+    if system_assigned and (app.identity.type.upper() == SYSTEM_ASSIGNED.upper()):
         app.identity.type = NONE_IDENTITY
 
     poller = iot_central_app_update(client, app_name, app, resource_group_name)

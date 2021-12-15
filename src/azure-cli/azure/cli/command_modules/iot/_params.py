@@ -52,9 +52,9 @@ app_name_type = CLIArgumentType(
 
 mi_system_assigned_type = CLIArgumentType(
     options_list=['--mi-system-assigned'],
-    help="Provide this flag to use system assigned identity.")
+    help='Provide this flag to use system assigned identity.')
 
-system_identity_type = CLIArgumentType(
+system_assigned_type = CLIArgumentType(
     options_list=['--system-assigned'],
     help='Provide this flag to refer to the system-assigned identity.')
 
@@ -378,11 +378,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('iot central app identity assign') as c:
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])
-        c.argument('system_identity', system_identity_type)
+        c.argument('system_assigned', system_assigned_type)
 
     with self.argument_context('iot central app identity remove') as c:
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])
-        c.argument('system_identity', system_identity_type)
+        c.argument('system_assigned', system_assigned_type)
 
     with self.argument_context('iot central app identity show') as c:
         c.argument('app_name', app_name_type, options_list=['--name', '-n'])

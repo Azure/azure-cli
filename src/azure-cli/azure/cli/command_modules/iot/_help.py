@@ -921,6 +921,12 @@ examples:
         az iot central app update -n my-first-iot-app -g MyResourceGroup --set subdomain.name=my-iot-app-new
 """
 
+helps['iot central app identity'] = """
+type: group
+short-summary: Manage IoT Central application identities.
+long-summary: Assign, remove, and show your IoT Central application identities.
+"""
+
 helps['iot central app identity assign'] = """
 type: command
 short-summary: Assign managed identities to an IoT Central application
