@@ -195,7 +195,7 @@ class Profile:
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
         import jwt
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
