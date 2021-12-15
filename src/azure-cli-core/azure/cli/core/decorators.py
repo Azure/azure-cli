@@ -87,8 +87,13 @@ def suppress_all_exceptions(fallback_return=None, **kwargs):  # pylint: disable=
 
 
 def retry(retry_times=3, interval=0.5, exceptions=Exception):
-    # Use optimistic locking to call a function, so that multiple processes can
-    # access the same resource (such as a file) at the same time.
+    """Use optimistic locking to call a function, so that multiple processes can
+    access the same resource (such as a file) at the same time.
+
+    :param retry_times: Times to retry.
+    :param interval: Interval between retries.
+    :param exceptions: Exceptions that can be ignored. Use a tuple if multiple exceptions should be ignored.
+    """
     def _decorator(func):
         @wraps(func)
         def _wrapped_func(*args, **kwargs):
