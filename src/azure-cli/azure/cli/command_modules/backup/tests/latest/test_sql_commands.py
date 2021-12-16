@@ -400,10 +400,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -471,10 +472,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
