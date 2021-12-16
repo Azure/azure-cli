@@ -72,6 +72,8 @@ def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+        # We don't use try catch here to let azure.cli.core.parser.AzCliCommandParser.validation_error
+        # handle exceptions, such as azure.core.exceptions.ResourceNotFoundError
         resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
         rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
