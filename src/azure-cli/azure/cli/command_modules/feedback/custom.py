@@ -446,11 +446,21 @@ def _get_az_version_summary():
 
     # Add each line until 'python location'
     lines = az_vers_string.splitlines()
-    new_lines = []
-    for line in lines:
+
+    # First line is azure-cli
+    new_lines = [lines[0], '']
+
+    # Only add lines between 'Extensions:' and 'Python location'
+    extension_line = -1
+    python_line = -1
+    for i, line in enumerate(lines):
+        if 'extensions:' in line.lower():
+            extension_line = i
         if 'python location' in line.lower():
+            python_line = i
             break
-        new_lines.append(line)
+
+    new_lines.extend(lines[extension_line:python_line])
 
     # Remove last line which is empty
     new_lines.pop()
