@@ -13,7 +13,8 @@ from urllib.parse import urlencode
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 from azure.cli.core.commands.constants import SURVEY_PROMPT
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
-from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
+from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console, \
+    get_dependency_versions
 from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
@@ -440,34 +441,20 @@ def _get_az_version_summary():
     """
     az_vers_string = get_az_version_string()[0]
 
+    # Remove consecutive spaces
+    import re
+    az_vers_string = re.sub(' +', ' ', az_vers_string)
+
+    # Add each line until 'python location'
     lines = az_vers_string.splitlines()
-
     new_lines = []
-    ext_line = -1
-    legal_line = -1
     for i, line in enumerate(lines):
-        if line.startswith("azure-cli"):
-            line = " ".join(line.split())
-            new_lines.append(line)
-        if line.lower().startswith("extensions:"):
-            ext_line = i
-            continue
-        l_lower = line.lower()
-        if all(["legal" in l_lower, "docs" in l_lower, "info" in l_lower]):
-            legal_line = i
+        if 'python location' in line.lower():
             break
+        new_lines.append(line)
 
-    new_lines.append("")
-
-    if 0 < ext_line < legal_line:
-        for i in range(ext_line, legal_line):
-            l_lower = lines[i].lower()
-            if "python location" in l_lower or "extensions directory" in l_lower:
-                break
-
-            line = " ".join(lines[i].split())
-            new_lines.append(line)
-
+    # Remove last line which is empty
+    new_lines.pop()
     return "\n".join(new_lines)
 
 
