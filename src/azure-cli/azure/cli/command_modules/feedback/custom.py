@@ -13,8 +13,7 @@ from urllib.parse import urlencode
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
 from azure.cli.core.commands.constants import SURVEY_PROMPT
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
-from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console, \
-    get_dependency_versions
+from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
 from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
@@ -448,7 +447,7 @@ def _get_az_version_summary():
     # Add each line until 'python location'
     lines = az_vers_string.splitlines()
     new_lines = []
-    for i, line in enumerate(lines):
+    for line in lines:
         if 'python location' in line.lower():
             break
         new_lines.append(line)
