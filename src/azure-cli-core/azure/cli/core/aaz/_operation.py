@@ -141,6 +141,10 @@ class AAZHttpOperation(AAZOperation):
         return None
 
     @property
+    def url_parameters(self):
+        return {}
+
+    @property
     def query_parameters(self):
         return {}
 

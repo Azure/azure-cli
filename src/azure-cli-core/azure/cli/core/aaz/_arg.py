@@ -75,7 +75,7 @@ class AAZBaseArg(AAZBaseType):
             options_list=[*self._options] if self._options else None,
             required=self._required,
             help=self._help,
-            default=None,
+            default=self._default,
         )
         if self._arg_group:
             arg.arg_group = self._arg_group

@@ -18,7 +18,10 @@ class Show(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.VirtualNetworkGet(ctx=self.ctx)()
-        return self.transform_output(self.ctx.vars.instance, client_flatten=True)
+        return self.dict_output()
+
+    def dict_output(self, *args, **kwargs):
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -49,19 +52,23 @@ class Show(AAZCommand):
 
         @property
         def url(self):
-            parameters = {
-                **self.serialize_url_param('subscriptionId', self.ctx.subscription_id),
-                **self.serialize_url_param('resourceGroupName', self.ctx.args.resource_group_name),
-                **self.serialize_url_param('virtualNetworkName', self.ctx.args.virtual_network_name),
-            }
             return self.client.format_url(
                 '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}',
-                **parameters
+                **self.url_parameters
             )
 
         @property
         def method(self):
             return "GET"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param('subscriptionId', self.ctx.subscription_id),
+                **self.serialize_url_param('resourceGroupName', self.ctx.args.resource_group_name),
+                **self.serialize_url_param('virtualNetworkName', self.ctx.args.virtual_network_name),
+            }
+            return parameters
 
         @property
         def query_parameters(self):

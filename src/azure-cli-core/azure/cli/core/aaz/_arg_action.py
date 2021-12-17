@@ -47,7 +47,7 @@ class AAZArgAction(Action):
     _str_parser = AAZShortHandSyntaxParser()
 
     def __call__(self, parser, namespace, values, option_string=None):
-        if getattr(namespace, self.dest) is None:
+        if getattr(namespace, self.dest) is None or getattr(namespace, self.dest) == AAZUndefined:
             setattr(namespace, self.dest, AAZArgActionOperations())
         dest_ops = getattr(namespace, self.dest)
         try:

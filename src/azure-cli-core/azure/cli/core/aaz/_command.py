@@ -7,7 +7,8 @@ from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
-from ._base import AAZUndefined
+from ._base import AAZUndefined, AAZBaseValue
+from ._poller import AAZLROPoller
 
 
 _DOC_EXAMPLE_FLAG = ':example:'
@@ -101,6 +102,7 @@ class AAZCommand(CLICommand):
     """Atomic Layer Command"""
     AZ_NAME = None
     AZ_HELP = None
+    AZ_SUPPORT_NO_WAIT = False
 
     @classmethod
     def get_arguments_schema(cls):
@@ -129,7 +131,7 @@ class AAZCommand(CLICommand):
         # help_file will be loaded as file_data in knack https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/help.py#L206-L208
 
         # additional properties
-        self.supports_no_wait = False
+        self.supports_no_wait = self.AZ_SUPPORT_NO_WAIT
         self.no_wait_param = None
         self.exception_handler = None
 
@@ -153,7 +155,11 @@ class AAZCommand(CLICommand):
         if not hasattr(schema, param_name):
             super().update_argument(param_name, argtype)
 
-    def transform_output(self, value, client_flatten=True):
+    @staticmethod
+    def deserialize_output(value, client_flatten=True):
+        if not isinstance(value, AAZBaseValue):
+            return value
+
         def processor(schema, result):
             if result == AAZUndefined:
                 return result
@@ -171,7 +177,12 @@ class AAZCommand(CLICommand):
                         new_result[k] = v
                 result = new_result
             return result
+
         return value.to_serialized_data(processor=processor)
+
+    @staticmethod
+    def build_lro_poller(polling, result_callback):
+        return AAZLROPoller(polling_method=polling, result_callback=result_callback)
 
 
 def register_command_group(name):

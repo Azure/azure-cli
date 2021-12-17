@@ -1,5 +1,8 @@
 from azure.core.configuration import Configuration
 from azure.mgmt.core import ARMPipelineClient
+from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
+from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
+from ._poller import AAZNoPolling, AAZBasePolling
 
 
 registered_clients = {}
@@ -68,3 +71,25 @@ class AAZMgmtClient(ARMPipelineClient):
     def send_request(self, request, stream=False, **kwargs):
         session = self._pipeline.run(request, stream=stream, **kwargs) # pylint: disable=protected-access
         return session
+
+    def build_lro_polling(
+            self, no_wait, initial_session, deserialization_callback, lro_options=None, path_format_arguments=None):
+        if no_wait == True:
+            polling = AAZNoPolling()
+        else:
+            polling = AAZBasePolling(
+                lro_options=lro_options,
+                lro_algorithms=[
+                    AzureAsyncOperationPolling(lro_options=lro_options),
+                    LocationPolling(),
+                    BodyContentPolling(),
+                    StatusCheckPolling(),
+                ],
+                path_format_arguments=path_format_arguments,
+            )
+        polling.initialize(
+            client=self,
+            initial_response=initial_session,
+            deserialization_callback=deserialization_callback
+        )
+        return polling
