@@ -12,7 +12,7 @@ import certifi
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import (RequiredArgumentMissingError)
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError)
 from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify
 
@@ -42,6 +42,7 @@ def _normalize_sku(sku):
     return sku
 
 
+# FYI these function/parameter names are misnomers -- this function really maps SKU name to SKU tier, not the reverse
 def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     tier = tier.upper()
     if tier in ['F1', 'FREE']:
@@ -66,7 +67,18 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'Isolated'
     if tier in ['I1V2', 'I2V2', 'I3V2']:
         return 'IsolatedV2'
-    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+    if tier in ['WS1', 'WS2', 'WS3']:
+        return 'WorkflowStandard'
+    raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
+# resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
+def get_resource_if_exists(resource, **kwargs):
+    from azure.core.exceptions import ResourceNotFoundError
+    try:
+        return resource.get(**kwargs)
+    except ResourceNotFoundError:
+        return None
 
 
 def normalize_sku_for_staticapp(sku):
@@ -74,7 +86,7 @@ def normalize_sku_for_staticapp(sku):
         return 'Free'
     if sku.lower() == 'standard':
         return 'Standard'
-    raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+    raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
 def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
