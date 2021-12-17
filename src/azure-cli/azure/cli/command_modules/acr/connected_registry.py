@@ -56,7 +56,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_message_ttl=None,
                                   sync_window=None,
                                   log_level=None,
-                                  sync_audit_logs_enabled=False):
+                                  sync_audit_logs_enabled=False,
+                                  notifications_list=None):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
@@ -104,6 +105,11 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
 
+    if notifications_list is not None:
+        notifications_set = set(list(notifications_list))
+    else:
+        notifications_set = set()
+
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
         'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties')
     connected_registry_create_parameters = ConnectedRegistry(
@@ -122,7 +128,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         logging=LoggingProperties(
             log_level=log_level,
             audit_log_status='Enabled' if sync_audit_logs_enabled else 'Disabled'
-        )
+        ),
+        notifications_list=list(notifications_set) if notifications_set else None
     )
 
     try:
@@ -145,7 +152,9 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_window=None,
                                   log_level=None,
                                   sync_message_ttl=None,
-                                  sync_audit_logs_enabled=None):
+                                  sync_audit_logs_enabled=None,
+                                  add_notifications_list=None,
+                                  remove_notifications_list=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -181,11 +190,30 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
 
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
+    # Add or remove from the current notifications list
+    add_notifications_set = set(list(add_notifications_list)) \
+        if add_notifications_list else set()
+
+    remove_notifications_set = set(list(remove_notifications_list)) \
+        if remove_notifications_list else set()
+
+    duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
+    if duplicate_notifications:
+        errors = sorted(duplicate_notifications)
+        raise CLIError(
+            'Update ambiguity. Duplicate notifications list were provided with ' +
+            '--add-notifications-list and --remove-notifications-list arguments.\n{}'.format(errors))
+
+    current_notifications_set = set(current_connected_registry.notifications_list) \
+        if current_connected_registry.notifications_list else set()
+    notifications_set = current_notifications_set.union(add_notifications_set).difference(remove_notifications_set)
+
+    notifications_list = list(notifications_set) if notifications_set != current_notifications_set else None
+
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
         'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncUpdateProperties(
-            token_id=current_connected_registry.parent.sync_properties.token_id,
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window
@@ -194,7 +222,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
             log_level=log_level,
             audit_log_status=sync_audit_logs_enabled
         ),
-        client_token_ids=client_token_list
+        client_token_ids=client_token_list,
+        notifications_list=notifications_list
     )
 
     try:
