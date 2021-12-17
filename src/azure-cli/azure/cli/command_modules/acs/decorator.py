@@ -3988,7 +3988,7 @@ class AKSContext:
                         raise InvalidArgumentValueError(
                             "--fqdn-subdomain should only be used for private cluster with custom private dns zone"
                         )
-            if self.decorator_mode == DecoratorMode.UPDATE:
+            elif self.decorator_mode == DecoratorMode.UPDATE:
                 if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
                     if self._get_disable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
