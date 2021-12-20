@@ -303,6 +303,7 @@ def load_arguments(self, _):
         c.argument('yes', options_list=[
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
+        c.argument('enable_fips_image', action='store_true')
 
     with self.argument_context('aks update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -452,6 +453,7 @@ def load_arguments(self, _):
                        '--enable-encryption-at-host'], action='store_true')
             c.argument('enable_ultra_ssd', options_list=[
                        '--enable-ultra-ssd'], action='store_true')
+            c.argument('enable_fips_image', action='store_true')
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:

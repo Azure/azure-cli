@@ -857,6 +857,24 @@ class AKSContextTestCase(unittest.TestCase):
             "test_mc_node_public_ip_prefix_id",
         )
 
+    def test_get_enable_fips_image(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"enable_fips_image": False},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_fips_image(), False)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", enable_fips=True
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_enable_fips_image(), True)
+
     def test_get_enable_encryption_at_host(self):
         # default
         ctx_1 = AKSContext(
@@ -4383,6 +4401,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_cluster_autoscaler": False,
                 "min_count": None,
                 "max_count": None,
+                "enable_fips_image": False,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4415,6 +4434,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             enable_auto_scaling=False,
             min_count=None,
             max_count=None,
+            enable_fips=False,
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_1.agent_pool_profiles = [agent_pool_profile_1]
@@ -4444,6 +4464,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "enable_cluster_autoscaler": True,
                 "min_count": 5,
                 "max_count": 20,
+                "enable_fips_image": True,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4473,6 +4494,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             enable_auto_scaling=True,
             min_count=5,
             max_count=20,
+            enable_fips=True,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_2.agent_pool_profiles = [agent_pool_profile_2]
@@ -6114,6 +6136,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             type="VirtualMachineScaleSets",
             mode="System",
             enable_auto_scaling=False,
+            enable_fips=False,
         )
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
             public_keys=[
