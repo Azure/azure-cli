@@ -8,7 +8,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import AzCLIError, RequiredArgumentMissingError, ArgumentUsageError
+from azure.cli.core.azclierror import UnclassifiedUserFault, RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -586,7 +586,7 @@ def update_iot_hub_custom(instance,
         # no default storage endpoint, either recreate with existing params or throw an error
         if not default_storage_endpoint:
             if not all([fileupload_storage_connectionstring, fileupload_storage_container_name]):
-                raise AzCLIError('This hub has no default storage endpoint for file upload.\n'
+                raise UnclassifiedUserFault('This hub has no default storage endpoint for file upload.\n'
                                  'Please recreate your default storage endpoint by running '
                                  '`az iot hub update --name {hub_name} --fcs {storage_connection_string} --fc {storage_container_name}`')
             default_storage_endpoint = StorageEndpointProperties(container_name=fileupload_storage_container_name, connection_string=fileupload_storage_connectionstring)
