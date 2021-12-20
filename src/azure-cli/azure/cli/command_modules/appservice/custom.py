@@ -738,6 +738,10 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
             raise ValidationError("--minimum-elastic-instance-count: Minimum elastic instance count is greater than "
                                   "the app service plan's maximum Elastic worker count. "
                                   "Please choose a lower count or update the plan's maximum ")
+        if (prewarmed_instance_count or 0) > plan.maximum_elastic_worker_count:
+            raise ValidationError("--prewarmed-instance-count: Prewarmed instance count is greater than "
+                                  "the app service plan's maximum Elastic worker count. "
+                                  "Please choose a lower count or update the plan's maximum ")
 
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'

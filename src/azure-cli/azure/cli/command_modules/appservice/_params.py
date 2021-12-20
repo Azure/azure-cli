@@ -106,7 +106,6 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.',
                    deprecate_info=c.deprecate(expiration='0.2.17'))
         c.ignore('max_burst')
@@ -116,6 +115,7 @@ def load_arguments(self, _):
                    validator=validate_asp_create,
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
                    help="Name or ID of the app service environment",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -133,6 +133,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan')
         c.argument('max_elastic_worker_count', type=int, help='')
+        c.argument('number_of_workers', type=int, help='Number of workers to be allocated')
         c.ignore('allow_pending_state')
 
     with self.argument_context('appservice plan delete') as c:
