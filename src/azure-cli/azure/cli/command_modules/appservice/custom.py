@@ -744,9 +744,12 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
     if https_only is not None:
         instance.https_only = https_only == 'true'
 
-    # TODO this doesn't work for some reason
     if minimum_elastic_instance_count is not None:
-        instance.site_config.minimum_elastic_instance_count = minimum_elastic_instance_count
+        from azure.mgmt.web.models import SiteConfig
+        # Need to create a new SiteConfig object to ensure that the new property is included in request body
+        conf = SiteConfig(**instance.site_config.as_dict())
+        conf.minimum_elastic_instance_count = minimum_elastic_instance_count
+        instance.site_config = conf
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
