@@ -131,9 +131,9 @@ def load_arguments(self, _):
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan')
-        c.argument('max_elastic_worker_count', type=int, help='')
-        c.argument('number_of_workers', type=int, help='Number of workers to be allocated')
+        c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Enable or disable automatic scaling. Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan. The SKU must be a Premium V2 SKU (P1V2, P2V2, P3V2) or a Premium V3 SKU (P1V3, P2V3, P3V3)')
+        c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
+        c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
         c.ignore('allow_pending_state')
 
     with self.argument_context('appservice plan delete') as c:
@@ -201,8 +201,8 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
-        c.argument('minimum_elastic_instance_count', type=int, help="Minimum number of instances. Only applies to the elastic App Service Plans.")
-        c.argument('prewarmed_instance_count', type=int, help="Number of preWarmed instances. Only applies to the elastic  App Service Plans.")
+        c.argument('minimum_elastic_instance_count', options_list=["--minimum-elastic-instance-count", "-i"], type=int, help="Minimum number of instances. App must be in an elastic scale App Service Plan.")
+        c.argument('prewarmed_instance_count', options_list=["--prewarmed-instance-count", "-w"], type=int, help="Number of preWarmed instances. App must be in an elastic scale App Service Plan.")
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',

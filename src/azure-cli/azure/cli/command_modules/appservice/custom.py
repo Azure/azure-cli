@@ -44,9 +44,10 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
-                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       AzureInternalError, ArgumentUsageError)
+from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
+                                       RequiredArgumentMissingError, ValidationError, CLIInternalError,
+                                       UnclassifiedUserFault, AzureResponseError, AzureInternalError,
+                                       ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -62,7 +63,8 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
-                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp, get_resource_if_exists)
+                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
+                    get_resource_if_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,

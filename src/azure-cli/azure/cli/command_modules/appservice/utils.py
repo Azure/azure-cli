@@ -80,10 +80,10 @@ def get_sku_name(tier):
 
 # resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
 def get_resource_if_exists(resource, **kwargs):
-    from azure.core.exceptions import ResourceNotFoundError
+    from azure.core.exceptions import ResourceNotFoundError as E
     try:
         return resource.get(**kwargs)
-    except ResourceNotFoundError:
+    except E:
         return None
 
 
