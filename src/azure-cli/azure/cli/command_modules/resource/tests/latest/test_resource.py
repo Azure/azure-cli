@@ -13,8 +13,8 @@ import unittest
 from pathlib import Path
 
 from azure.cli.core.parser import IncorrectUsageError, InvalidArgumentValueError
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT

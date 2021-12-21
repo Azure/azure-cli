@@ -9,7 +9,7 @@ import os
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -70,6 +70,13 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('sku.name', 'Standard')
         ])
+
+        # test network lb update command
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=[
+            self.check('tags.CostCenter', 'MyTestGroup')
+        ])
+
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
             self.check('publicIpAllocationMethod', 'Static')
@@ -442,6 +449,11 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
                  checks=self.check('prefixLength', 30))
         self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
         self.cmd('network public-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
@@ -960,6 +972,14 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name ag3 -n ag3SslCert --cert-file "{path}" --cert-password {pass}')
         self.cmd('network application-gateway wait -g {rg} -n ag3 --updated')
 
+        # test ssl-cert list
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name ag3',
+                 checks=[self.check('length(@)', 1)])
+
+        # test ssl-cert show
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name ag3 -n ag3SslCert',
+                 checks=[self.check('name', 'ag3SslCert')])
+
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols TLSv1_0 TLSv1_1 --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
@@ -979,6 +999,19 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
             self.check('policyName', policy_name),
             self.check('policyType', 'Predefined')
+        ])
+        # test predefined show
+        self.cmd('network application-gateway ssl-policy predefined show -n {policy}', checks=[
+            self.check('name', policy_name)
+        ])
+
+        # test predefined list
+        self.cmd('network application-gateway ssl-policy predefined list', checks=[
+            self.check('length(@)', 3)])
+
+        # test ssl-policy list-options
+        self.cmd('network application-gateway ssl-policy list-options', checks=[
+            self.check('length(@)', 10)
         ])
 
 
@@ -4801,7 +4834,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
-    def _mock_thread_count():
+    def _mock_thread_count(self):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)

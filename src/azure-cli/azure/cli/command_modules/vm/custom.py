@@ -4479,8 +4479,44 @@ def sig_shared_gallery_list(client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       shared_to=shared_to)
+    return client.list(location=location, shared_to=shared_to)
+
+
+def get_page_result(generator, marker, show_next_marker=None):
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
+    result = list_generator(pages=pages)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+def list_generator(pages, num_results=50):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result
 
 
 def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
@@ -4509,21 +4545,23 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
                                sharing_update=sharing_update)
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+def sig_shared_image_definition_list(client, location, gallery_unique_name,
+                                     shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       gallery_unique_name=gallery_unique_name,
-                       shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
+                                  shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, gallery_unique_name=gallery_unique_name,
-                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
+                            gallery_image_name=gallery_image_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
 def gallery_application_create(client,

@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):

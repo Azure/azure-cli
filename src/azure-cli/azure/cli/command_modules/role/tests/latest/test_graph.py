@@ -8,7 +8,7 @@ import unittest
 import datetime
 import dateutil
 import dateutil.parser
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 from knack.util import CLIError
 
@@ -23,7 +23,6 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
                           checks=self.check('displayName', '{display_name}')).get_output_in_json()
 
-        self.assertEqual(result['name'], result['appId'])
         self.kwargs['app_id'] = result['appId']
 
         # show/list app

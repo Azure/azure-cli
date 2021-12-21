@@ -6,7 +6,7 @@
 import time
 import os
 
-from azure_devtools.scenario_tests import AllowLargeResponse, live_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
