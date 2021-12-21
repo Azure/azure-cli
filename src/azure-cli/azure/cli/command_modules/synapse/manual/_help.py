@@ -1922,7 +1922,7 @@ helps['synapse managed-private-endpoints create'] = """
 type: command
 short-summary: Create a synapse managed private endpoints.
 examples:
-  - name: Create a synapse managed private endpoints.
+  - name: Create a synapse managed private endpoints. Definition file should contains privateLinkResourceId and groupId.
     text: |-
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
           --pe-name testendpointname \\
