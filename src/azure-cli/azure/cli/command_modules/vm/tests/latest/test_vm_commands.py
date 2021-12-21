@@ -1959,6 +1959,25 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
 
+class VMSSExtensionImageTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
+    def test_vmss_extension_image(self, resource_group):
+        self.kwargs.update({
+            'pub': 'Microsoft.Azure.NetworkWatcher',
+            'name': 'NetworkWatcherAgentLinux',
+            'location': 'eastus'
+        })
+        
+        self.cmd('vmss extension image list -p {pub}')
+        self.cmd('vmss extension image list-names -p {pub} -l {location}')
+        self.cmd('vmss extension image list-versions -n {name} -p {pub} -l {location}')
+        self.cmd('vmss extension image show -n {name} -p {pub} -l {location} --version 1.4.905.2')
+        # not existing image
+        self.cmd('vmss extension image show -n fooBAR -p fooBAR -l {location} --version 0', expect_failure=True)
+
+
 class DiagnosticsExtensionInstallTest(ScenarioTest):
     """
     Note that this is currently only for a Linux VM. There's currently no test of this feature for a Windows VM.
