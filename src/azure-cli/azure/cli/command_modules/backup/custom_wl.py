@@ -13,21 +13,23 @@ from datetime import datetime, timedelta, timezone
 
 from knack.log import get_logger
 
-from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, CrossRegionRestoreRequest
+    AzureWorkloadSQLRestoreWithRehydrateRequest
+
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._validators import datetime_type, validate_wl_restore, validate_log_point_in_time
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf
+    backup_protection_intent_cf, recovery_points_passive_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
@@ -683,7 +685,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         aad_client = aad_properties_cf(cmd.cli_ctx)
         filter_string = cust_help.get_filter_string({'backupManagementType': 'AzureWorkload'})
         aad_result = aad_client.get(azure_region, filter_string)
-        rp_client = recovery_points_cf(cmd.cli_ctx)
+        rp_client = recovery_points_passive_cf(cmd.cli_ctx)
         crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
                                                       item_uri, recovery_point_id, aad_result).properties
         crr_client = cross_region_restore_cf(cmd.cli_ctx)

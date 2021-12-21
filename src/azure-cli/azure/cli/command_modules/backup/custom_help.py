@@ -14,7 +14,8 @@ from knack.log import get_logger
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
-from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus, CrrJobRequest
+from azure.mgmt.recoveryservicesbackup.activestamp.models import OperationStatusValues, JobStatus
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import _is_paged
