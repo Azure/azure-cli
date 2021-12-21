@@ -2249,6 +2249,8 @@ def show_deployment_stack_at_resource_group(cmd, name=None, resource_group=None,
         return rcf.deployment_stacks.get_at_resource_group(resource_group, name)
     if id:
         stack_arr = id.split('/')
+        if len(stack_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
         return rcf.deployment_stacks.get_at_resource_group(stack_arr[4], stack_arr[-1])
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
@@ -2270,6 +2272,8 @@ def delete_deployment_stack_at_resource_group(cmd, name=None, resource_group = N
         return sdk_no_wait(False, rcf.deployment_stacks.begin_delete_at_resource_group, resource_group, name)
     if id:
         stack_arr = id.split('/')
+        if len(stack_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
         name = stack_arr[-1]
         stack_rg = stack_arr[-5]
         try:
@@ -2284,6 +2288,8 @@ def show_deployment_stack_snapshot_at_subscription(cmd, name=None, stack_name=No
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if id:
         snapshot_arr = id.split('/')
+        if len(snapshot_arr) < 3:
+            raise InvalidArgumentValueError("Please enter a valid id")
         return rcf.deployment_stack_snapshots.get_at_subscription(snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name:
         return rcf.deployment_stack_snapshots.get_at_subscription(stack_name, name)
@@ -2294,6 +2300,8 @@ def show_deployment_stack_snapshot_at_resource_group(cmd, name=None, stack_name=
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if id:
         snapshot_arr = id.split('/')
+        if len(snapshot_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
         return rcf.deployment_stack_snapshots.get_at_resource_group(snapshot_arr[4], snapshot_arr[-3], snapshot_arr[-1])
     if name and stack_name and resource_group:
         return rcf.deployment_stack_snapshots.get_at_resource_group(resource_group, stack_name, name)
@@ -2313,6 +2321,8 @@ def list_deployment_stack_snapshot_at_resource_group(cmd, stack_name=None, resou
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if stack:
         stack_arr = stack.split('/')
+        if len(stack_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
         return rcf.deployment_stack_snapshots.list_at_resource_group(stack_arr[4], stack_arr[-1])
     if stack_name and resource_group:
         return rcf.deployment_stack_snapshots.list_at_resource_group(resource_group, stack_name)
