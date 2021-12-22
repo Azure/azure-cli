@@ -2295,12 +2295,12 @@ def aks_update(cmd, client, resource_group_name, name,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
     )
     try:
-        # construct mc profile
+        # update mc profile
         mc = aks_update_decorator.update_default_mc_profile()
     except DecoratorEarlyExitException:
         # exit gracefully
         return None
-    # send request to create a real managed cluster
+    # send request to update the real managed cluster
     return aks_update_decorator.update_mc(mc)
 
 
