@@ -1556,6 +1556,44 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
 
         self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint_without_standard')
+    def test_manage_appgw_private_endpoint_without_standard(self, resource_group):
+        """
+        Add Private Link without standard
+        """
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_private_link_for_public': 'appgw_private_link_for_public',
+            'appgw_private_link_for_private': 'appgw_private_link_for_private',
+            'appgw_private_link_subnet_for_public': 'appgw_private_link_subnet_for_public',
+            'appgw_private_link_subnet_for_private': 'appgw_private_link_subnet_for_private',
+            'appgw_public_ip': 'public_ip',
+            'appgw_private_ip': 'private_ip',
+            'appgw_private_endpoint_for_public': 'appgw_private_endpoint_for_public',
+            'appgw_private_endpoint_for_private': 'appgw_private_endpoint_for_private',
+            'appgw_private_endpoint_vnet': 'appgw_private_endpoint_vnet',
+            'appgw_private_endpoint_subnet_for_public': 'appgw_private_endpoint_subnet_for_public',
+            'appgw_private_endpoint_subnet_for_private': 'appgw_private_endpoint_subnet_for_private',
+            'appgw_private_endpoint_connection_for_public': 'appgw_private_endpoint_connection_for_public',
+            'appgw_private_endpoint_connection_for_private': 'appgw_private_endpoint_connection_for_private'
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP without Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip}')
+
+        # Create a application gateway without enable --enable-private-link
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip}')
+
+        # Add one private link
+        self.cmd('network application-gateway private-link add -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name {appgw_private_link_for_public} '
+                 '--frontend-ip appGatewayFrontendIP '
+                 '--subnet {appgw_private_link_subnet_for_public} '
+                 '--subnet-prefix 10.0.4.0/24')
+
 
 class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_disk_access_private_endpoint_')
