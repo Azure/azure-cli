@@ -3772,7 +3772,6 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_4 = AKSContext(
             self.cmd,
             {
-                "private_dns_zone": CONST_PRIVATE_DNS_ZONE_NONE,
                 "disable_public_fqdn": True,
             },
             self.models,
@@ -3781,6 +3780,7 @@ class AKSContextTestCase(unittest.TestCase):
         api_server_access_profile_4 = (
             self.models.ManagedClusterAPIServerAccessProfile(
                 enable_private_cluster=True,
+                private_dns_zone=CONST_PRIVATE_DNS_ZONE_NONE,
             )
         )
         mc_4 = self.models.ManagedCluster(
