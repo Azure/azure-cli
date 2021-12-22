@@ -141,7 +141,7 @@ def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
-# pylint: disable=too-many-instance-attributes,too-few-public-methods
+# pylint: disable=too-many-instance-attributes, too-few-public-methods
 class AKSModels:
     """Store the models used in aks_create and aks_update.
 
@@ -323,6 +323,7 @@ class AKSParamDict:
         self.__count[key] = self.__count.get(key, 0) + 1
 
     def get(self, key):
+        value = self.__store.get(key)
         self.__increase(key)
         return self.__store.get(key)
 
@@ -424,11 +425,13 @@ class AKSContext:
         :return: Any
         """
         if variable_name not in self.intermediates:
-            msg = "The intermediate '{}' does not exist, return default value '{}'.".format(
-                variable_name, default_value
+            logger.debug(
+                "The intermediate '%s' does not exist. Return default value '%s'.",
+                variable_name,
+                default_value,
             )
-            logger.debug(msg)
-        return self.intermediates.get(variable_name, default_value)
+        intermediate_value = self.intermediates.get(variable_name, default_value)
+        return intermediate_value
 
     def set_intermediate(
         self, variable_name: str, value: Any, overwrite_exists: bool = False
@@ -1336,8 +1339,8 @@ class AKSContext:
         """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
         min_count and max_count.
 
-        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides if
-        both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides
+        if both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
         will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
         agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
         autoscaler is already enabled in `mc`, it will output warning messages and exit with code 0. If
