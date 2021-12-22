@@ -359,40 +359,40 @@ class AKSContextTestCase(unittest.TestCase):
             self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
         )
         # default
-        ctx.validate_counts_in_autoscaler(
+        ctx._AKSContext__validate_counts_in_autoscaler(
             3, False, None, None, DecoratorMode.CREATE
         )
 
         # custom value
-        ctx.validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
+        ctx._AKSContext__validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
 
         # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_counts_in_autoscaler(
+            ctx._AKSContext__validate_counts_in_autoscaler(
                 5, True, None, None, DecoratorMode.CREATE
             )
 
         # fail on min_count > max_count
         with self.assertRaises(InvalidArgumentValueError):
-            ctx.validate_counts_in_autoscaler(
+            ctx._AKSContext__validate_counts_in_autoscaler(
                 5, True, 3, 1, DecoratorMode.CREATE
             )
 
         # fail on node_count < min_count in create mode
         with self.assertRaises(InvalidArgumentValueError):
-            ctx.validate_counts_in_autoscaler(
+            ctx._AKSContext__validate_counts_in_autoscaler(
                 5, True, 7, 10, DecoratorMode.CREATE
             )
 
         # skip node_count check in update mode
-        ctx.validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
-        ctx.validate_counts_in_autoscaler(
+        ctx._AKSContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
+        ctx._AKSContext__validate_counts_in_autoscaler(
             None, True, 7, 10, DecoratorMode.UPDATE
         )
 
         # fail on enable_cluster_autoscaler not specified
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_counts_in_autoscaler(
+            ctx._AKSContext__validate_counts_in_autoscaler(
                 5, False, 3, None, DecoratorMode.UPDATE
             )
 

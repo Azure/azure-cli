@@ -470,7 +470,7 @@ class AKSContext:
         self.intermediates.pop(variable_name, None)
 
     # pylint: disable=no-self-use
-    def validate_counts_in_autoscaler(
+    def __validate_counts_in_autoscaler(
         self,
         node_count,
         enable_cluster_autoscaler,
@@ -1277,7 +1277,7 @@ class AKSContext:
     ) -> Tuple[int, bool, Union[int, None], Union[int, None]]:
         """Obtain the value of node_count, enable_cluster_autoscaler, min_count and max_count.
 
-        This function will verify the parameters through function "validate_counts_in_autoscaler" by default.
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default.
 
         :return: a tuple containing four elements: node_count of int type, enable_cluster_autoscaler of bool type,
         min_count of int type or None and max_count of int type or None
@@ -1320,7 +1320,7 @@ class AKSContext:
         # these parameters do not need dynamic completion
 
         # validation
-        self.validate_counts_in_autoscaler(
+        self.__validate_counts_in_autoscaler(
             node_count,
             enable_cluster_autoscaler,
             min_count,
@@ -1336,7 +1336,7 @@ class AKSContext:
         """Obtain the value of update_cluster_autoscaler, enable_cluster_autoscaler, disable_cluster_autoscaler,
         min_count and max_count.
 
-        This function will verify the parameters through function "validate_counts_in_autoscaler" by default. Besides if
+        This function will verify the parameters through function "__validate_counts_in_autoscaler" by default. Besides if
         both enable_cluster_autoscaler and update_cluster_autoscaler are specified, a MutuallyExclusiveArgumentError
         will be raised. If enable_cluster_autoscaler or update_cluster_autoscaler is specified and there are multiple
         agent pool profiles, an ArgumentUsageError will be raised. If enable_cluster_autoscaler is specified and
@@ -1392,7 +1392,7 @@ class AKSContext:
                 "--disable-cluster-autoscaler"
             )
 
-        self.validate_counts_in_autoscaler(
+        self.__validate_counts_in_autoscaler(
             None,
             enable_cluster_autoscaler or update_cluster_autoscaler,
             min_count,
