@@ -5386,15 +5386,46 @@ class AKSUpdateDecorator:
         )
 
         if not is_changed and is_default:
-            option_names = [
-                '"{}"'.format(format_parameter_name_to_option_name(x))
-                for x in self.context.raw_param.keys()
-                if x not in excluded_keys
-            ]
-            error_msg = "Please specify one or more of {}.".format(
-                " or ".join(option_names)
+            # Note: Uncomment the followings to automatically generate the error message.
+            # option_names = [
+            #     '"{}"'.format(format_parameter_name_to_option_name(x))
+            #     for x in self.context.raw_param.keys()
+            #     if x not in excluded_keys
+            # ]
+            # error_msg = "Please specify one or more of {}.".format(
+            #     " or ".join(option_names)
+            # )
+            # raise RequiredArgumentMissingError(error_msg)
+            raise RequiredArgumentMissingError(
+                'Please specify one or more of "--enable-cluster-autoscaler" or '
+                '"--disable-cluster-autoscaler" or '
+                '"--update-cluster-autoscaler" or '
+                '"--cluster-autoscaler-profile" or '
+                '"--load-balancer-managed-outbound-ip-count" or '
+                '"--load-balancer-outbound-ips" or '
+                '"--load-balancer-outbound-ip-prefixes" or '
+                '"--load-balancer-outbound-ports" or '
+                '"--load-balancer-idle-timeout" or '
+                '"--auto-upgrade-channel" or '
+                '"--attach-acr" or "--detach-acr" or '
+                '"--uptime-sla" or '
+                '"--no-uptime-sla" or '
+                '"--api-server-authorized-ip-ranges" or '
+                '"--enable-aad" or '
+                '"--aad-tenant-id" or '
+                '"--aad-admin-group-object-ids" or '
+                '"--enable-ahub" or '
+                '"--disable-ahub" or '
+                '"--windows-admin-password" or '
+                '"--enable-managed-identity" or '
+                '"--assign-identity" or '
+                '"--enable-azure-rbac" or '
+                '"--disable-azure-rbac" or '
+                '"--enable-public-fqdn" or '
+                '"--disable-public-fqdn" or '
+                '"--tags" or '
+                '"--nodepool-labels".'
             )
-            raise RequiredArgumentMissingError(error_msg)
 
     def _ensure_mc(self, mc: ManagedCluster) -> None:
         """Internal function to ensure that the incoming `mc` object is valid and the same as the attached `mc` object
