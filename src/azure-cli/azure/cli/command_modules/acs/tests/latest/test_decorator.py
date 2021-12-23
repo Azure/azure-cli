@@ -3428,6 +3428,29 @@ class AKSContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_6.get_api_server_authorized_ip_ranges(), [])
 
+        # custom value (update mode)
+        ctx_7 = AKSContext(
+            self.cmd,
+            {
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_7 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            )
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_7,
+        )
+        ctx_7.attach_mc(mc_7)
+        # fail on mutually exclusive api_server_authorized_ip_ranges and private cluster
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_7.get_api_server_authorized_ip_ranges()
+
     def test_get_fqdn_subdomain(self):
         # default
         ctx_1 = AKSContext(
@@ -3611,6 +3634,29 @@ class AKSContextTestCase(unittest.TestCase):
         # fail on enable_public_fqdn specified when private cluster is not enabled
         with self.assertRaises(InvalidArgumentValueError):
             ctx_7.get_enable_private_cluster()
+
+        # custom value (update mode)
+        ctx_8 = AKSContext(
+            self.cmd,
+            {
+                "api_server_authorized_ip_ranges": "test_api_server_authorized_ip_ranges",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        api_server_access_profile_8 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            )
+        )
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_8,
+        )
+        ctx_8.attach_mc(mc_8)
+        # fail on mutually exclusive api_server_authorized_ip_ranges and private cluster
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_8.get_enable_private_cluster()
 
     def test_get_disable_public_fqdn(self):
         # default

@@ -3669,15 +3669,22 @@ class AKSContext:
 
         # validation
         if enable_validation:
-            if api_server_authorized_ip_ranges:
-                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                    raise InvalidArgumentValueError(
-                        "--api-server-authorized-ip-ranges can only be used with standard load balancer"
-                    )
-                if self._get_enable_private_cluster(enable_validation=False):
-                    raise MutuallyExclusiveArgumentError(
-                        "--api-server-authorized-ip-ranges is not supported for private cluster"
-                    )
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if api_server_authorized_ip_ranges:
+                    if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
+                        raise InvalidArgumentValueError(
+                            "--api-server-authorized-ip-ranges can only be used with standard load balancer"
+                        )
+                    if self._get_enable_private_cluster(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "--api-server-authorized-ip-ranges is not supported for private cluster"
+                        )
+            elif self.decorator_mode == DecoratorMode.UPDATE:
+                if api_server_authorized_ip_ranges:
+                    if check_is_private_cluster(self.mc):
+                        raise MutuallyExclusiveArgumentError(
+                            "--api-server-authorized-ip-ranges is not supported for private cluster"
+                        )
         return api_server_authorized_ip_ranges
 
     def get_api_server_authorized_ip_ranges(self) -> List[str]:
@@ -3796,7 +3803,12 @@ class AKSContext:
                         )
             elif self.decorator_mode == DecoratorMode.UPDATE:
                 is_private_cluster = check_is_private_cluster(self.mc)
-                if not is_private_cluster:
+                if is_private_cluster:
+                    if self._get_api_server_authorized_ip_ranges(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "--api-server-authorized-ip-ranges is not supported for private cluster"
+                        )
+                else:
                     if self._get_disable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
                             "--disable-public-fqdn can only be used for private cluster"
