@@ -13,9 +13,9 @@ from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
-from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+    AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
+    BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
@@ -861,8 +861,8 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
         identity_info = IdentityInfo(
             is_system_assigned_identity=mi_system_assigned is not None,
             managed_identity_resource_id=mi_user_assigned)
-        identity_based_restore_details=IdentityBasedRestoreDetails(
-                    target_storage_account_id=target_storage_account_id)
+        identity_based_restore_details = IdentityBasedRestoreDetails(
+            target_storage_account_id=target_storage_account_id)
         target_storage_account_id = None
 
     if tier == 'VaultArchive':
