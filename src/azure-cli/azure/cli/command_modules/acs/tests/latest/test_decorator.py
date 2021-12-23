@@ -43,7 +43,6 @@ from azure.cli.command_modules.acs.decorator import (
     AKSUpdateDecorator,
     check_is_msi_cluster,
     format_parameter_name_to_option_name,
-    log_before_return,
     safe_list_get,
     safe_lower,
     validate_decorator_mode,
@@ -73,14 +72,6 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
         self.cli_ctx = MockCLI()
         self.cmd = MockCmd(self.cli_ctx)
         self.models = AKSModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
-
-    def test_log_before_return(self):
-        class CannotPrint:
-            def __str__(self) -> str:
-                raise Exception("Can not convert to string.")
-
-        obj_cannot_print = CannotPrint()
-        self.assertEqual(log_before_return(lambda: obj_cannot_print)(), obj_cannot_print)
 
     def test_format_parameter_name_to_option_name(self):
         self.assertEqual(
