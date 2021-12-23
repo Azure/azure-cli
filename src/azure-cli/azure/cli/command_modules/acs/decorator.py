@@ -333,7 +333,6 @@ class AKSParamDict:
         self.__count[key] = self.__count.get(key, 0) + 1
 
     def get(self, key):
-        value = self.__store.get(key)
         self.__increase(key)
         return self.__store.get(key)
 
@@ -3876,7 +3875,7 @@ class AKSContext:
         enable_public_fqdn are assigned, raise a MutuallyExclusiveArgumentError. In update mode, if
         disable_public_fqdn is assigned and private_dns_zone equals to CONST_PRIVATE_DNS_ZONE_NONE, raise an
         InvalidArgumentValueError.
-
+326
         :return: bool
         """
         return self._get_disable_public_fqdn(enable_validation=True)
