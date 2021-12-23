@@ -1578,6 +1578,7 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--public-ip-address {appgw_public_ip}')
 
         # Add one private link
+        # These will fail because application-gateway feature cannot be enabled for selected sku
         with self.assertRaises(HttpResponseError):
             self.cmd('network application-gateway private-link add -g {rg} '
                      '--gateway-name {appgw} '
