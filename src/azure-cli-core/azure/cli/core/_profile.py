@@ -860,8 +860,8 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
 
-    # Only enable encryption for Windows (for now).
-    fallback = sys.platform.startswith('win32')
+    # Only enable encryption for Windows and MacOS (for now).
+    fallback = sys.platform.startswith('win32') or sys.platform.startswith('darwin')
     # encrypt_token_cache affects both MSAL token cache and service principal entries.
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
