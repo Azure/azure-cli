@@ -141,6 +141,16 @@ def check_is_msi_cluster(mc: ManagedCluster) -> bool:
     return False
 
 
+def check_is_private_cluster(mc: ManagedCluster) -> bool:
+    """Check `mc` object to determine whether private cluster is enabled.
+
+    :return: bool
+    """
+    if mc and mc.api_server_access_profile:
+        return bool(mc.api_server_access_profile.enable_private_cluster)
+    return False
+
+
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class AKSModels:
     """Store the models used in aks_create and aks_update.
@@ -3754,48 +3764,48 @@ class AKSContext:
         """
         # read the original value passed by the command
         enable_private_cluster = self.raw_param.get("enable_private_cluster")
-        # try to read the property value corresponding to the parameter from the `mc` object
-        if (
-            self.mc and
-            self.mc.api_server_access_profile and
-            self.mc.api_server_access_profile.enable_private_cluster is not None
-        ):
-            enable_private_cluster = self.mc.api_server_access_profile.enable_private_cluster
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.api_server_access_profile and
+                self.mc.api_server_access_profile.enable_private_cluster is not None
+            ):
+                enable_private_cluster = self.mc.api_server_access_profile.enable_private_cluster
 
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if enable_private_cluster:
-                if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
-                    raise InvalidArgumentValueError(
-                        "Please use standard load balancer for private cluster"
-                    )
-                if self._get_api_server_authorized_ip_ranges(enable_validation=False):
-                    raise MutuallyExclusiveArgumentError(
-                        "--api-server-authorized-ip-ranges is not supported for private cluster"
-                    )
-            else:
-                if self._get_disable_public_fqdn(enable_validation=False):
-                    if self.decorator_mode == DecoratorMode.UPDATE:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if enable_private_cluster:
+                    if safe_lower(self._get_load_balancer_sku(enable_validation=False)) == "basic":
+                        raise InvalidArgumentValueError(
+                            "Please use standard load balancer for private cluster"
+                        )
+                    if self._get_api_server_authorized_ip_ranges(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "--api-server-authorized-ip-ranges is not supported for private cluster"
+                        )
+                else:
+                    if self._get_disable_public_fqdn(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn should only be used with --enable-private-cluster"
+                        )
+                    if self._get_private_dns_zone(enable_validation=False):
+                        raise InvalidArgumentValueError(
+                            "Invalid private dns zone for public cluster. It should always be empty for public cluster"
+                        )
+            elif self.decorator_mode == DecoratorMode.UPDATE:
+                is_private_cluster = check_is_private_cluster(self.mc)
+                if not is_private_cluster:
+                    if self._get_disable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
                             "--disable-public-fqdn can only be used for private cluster"
                         )
-                    raise InvalidArgumentValueError(
-                        "--disable-public-fqdn should only be used with --enable-private-cluster"
-                    )
-                if self._get_enable_public_fqdn(enable_validation=False):
-                    if self.decorator_mode == DecoratorMode.UPDATE:
+                    if self._get_enable_public_fqdn(enable_validation=False):
                         raise InvalidArgumentValueError(
                             "--enable-public-fqdn can only be used for private cluster"
                         )
-                    # In fact, there is no such option in the create command.
-                    raise InvalidArgumentValueError(
-                        "--enable-public-fqdn should only be used with --enable-private-cluster"
-                    )
-                if self._get_private_dns_zone(enable_validation=False):
-                    raise InvalidArgumentValueError(
-                        "Invalid private dns zone for public cluster. It should always be empty for public cluster"
-                    )
         return enable_private_cluster
 
     def get_enable_private_cluster(self) -> bool:
@@ -3836,26 +3846,26 @@ class AKSContext:
         # this parameter does not need dynamic completion
         # validation
         if enable_validation:
-            if disable_public_fqdn and self._get_enable_public_fqdn(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
-                )
-            enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
-            if disable_public_fqdn and not enable_private_cluster:
-                if self.decorator_mode == DecoratorMode.UPDATE:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if disable_public_fqdn and not self._get_enable_private_cluster(enable_validation=False):
                     raise InvalidArgumentValueError(
-                        "--disable-public-fqdn can only be used for private cluster"
+                        "--disable-public-fqdn should only be used with --enable-private-cluster"
                     )
-                raise InvalidArgumentValueError(
-                    "--disable-public-fqdn should only be used with --enable-private-cluster"
-                )
             if self.decorator_mode == DecoratorMode.UPDATE:
                 if disable_public_fqdn:
-                    private_dns_zone = self._get_private_dns_zone(enable_validation=False)
-                    if safe_lower(private_dns_zone) == CONST_PRIVATE_DNS_ZONE_NONE:
+                    if self._get_enable_public_fqdn(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
+                        )
+                    if safe_lower(self._get_private_dns_zone(enable_validation=False)) == CONST_PRIVATE_DNS_ZONE_NONE:
                         raise InvalidArgumentValueError(
                             "--disable-public-fqdn cannot be applied for none mode private dns zone cluster"
                         )
+                    if not check_is_private_cluster(self.mc):
+                        raise InvalidArgumentValueError(
+                            "--disable-public-fqdn can only be used for private cluster"
+                        )
+
         return disable_public_fqdn
 
     def get_disable_public_fqdn(self) -> bool:
@@ -3888,20 +3898,16 @@ class AKSContext:
         # validation
         # Note: The parameter involved in the validation is not verified in its own getter.
         if enable_validation:
-            if enable_public_fqdn and self._get_disable_public_fqdn(enable_validation=False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
-                )
-            enable_private_cluster = self._get_enable_private_cluster(enable_validation=False)
-            if enable_public_fqdn and not enable_private_cluster:
-                if self.decorator_mode == DecoratorMode.UPDATE:
-                    raise InvalidArgumentValueError(
-                        "--enable-public-fqdn can only be used for private cluster"
-                    )
-                # In fact, there is no such option in the create command.
-                raise InvalidArgumentValueError(
-                    "--enable-public-fqdn should only be used with --enable-private-cluster"
-                )
+            if self.decorator_mode == DecoratorMode.UPDATE:
+                if enable_public_fqdn:
+                    if self._get_disable_public_fqdn(enable_validation=False):
+                        raise MutuallyExclusiveArgumentError(
+                            "Cannot specify '--enable-public-fqdn' and '--disable-public-fqdn' at the same time"
+                        )
+                    if not check_is_private_cluster(self.mc):
+                        raise InvalidArgumentValueError(
+                            "--enable-public-fqdn can only be used for private cluster"
+                        )
         return enable_public_fqdn
 
     def get_enable_public_fqdn(self) -> bool:

@@ -42,6 +42,7 @@ from azure.cli.command_modules.acs.decorator import (
     AKSParamDict,
     AKSUpdateDecorator,
     check_is_msi_cluster,
+    check_is_private_cluster,
     format_parameter_name_to_option_name,
     safe_list_get,
     safe_lower,
@@ -119,6 +120,36 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="Test"),
         )
         self.assertEqual(check_is_msi_cluster(mc_3), False)
+
+    def test_check_is_private_cluster(self):
+        self.assertEqual(check_is_private_cluster(None), False)
+
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=True,
+            )
+        )
+        self.assertEqual(check_is_private_cluster(mc_1), True)
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            )
+        )
+        self.assertEqual(check_is_private_cluster(mc_2), False)
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile()
+        )
+        self.assertEqual(check_is_private_cluster(mc_3), False)
+
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(check_is_private_cluster(mc_4), False)
 
 
 class AKSModelsTestCase(unittest.TestCase):
@@ -3539,44 +3570,47 @@ class AKSContextTestCase(unittest.TestCase):
         ctx_6 = AKSContext(
             self.cmd,
             {
-                "enable_private_cluster": False,
                 "disable_public_fqdn": True,
             },
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        api_server_access_profile_6 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            )
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_6,
+        )
+        ctx_6.attach_mc(mc_6)
         # fail on disable_public_fqdn specified when enable_private_cluster is not specified
         with self.assertRaises(InvalidArgumentValueError):
             ctx_6.get_enable_private_cluster()
 
         # custom value
-        # In fact, there is no such option in the create command.
         ctx_7 = AKSContext(
             self.cmd,
             {
-                "enable_public_fqdn": True,
-                "enable_private_cluster": False,
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_7.get_enable_private_cluster()
-
-        # custom value
-        ctx_8 = AKSContext(
-            self.cmd,
-            {
-                "enable_private_cluster": False,
                 "enable_public_fqdn": True,
             },
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        # fail on enable_public_fqdn specified when enable_private_cluster is not specified
+        api_server_access_profile_7 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            )
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_7,
+        )
+        ctx_7.attach_mc(mc_7)
+        # fail on enable_public_fqdn specified when private cluster is not enabled
         with self.assertRaises(InvalidArgumentValueError):
-            ctx_8.get_enable_private_cluster()
+            ctx_7.get_enable_private_cluster()
 
     def test_get_disable_public_fqdn(self):
         # default
@@ -3662,7 +3696,7 @@ class AKSContextTestCase(unittest.TestCase):
                 "enable_public_fqdn": False,
             },
             self.models,
-            decorator_mode=DecoratorMode.CREATE,
+            decorator_mode=DecoratorMode.UPDATE,
         )
         self.assertEqual(ctx_1.get_enable_public_fqdn(), False)
 
@@ -3689,24 +3723,20 @@ class AKSContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
+        api_server_access_profile_3 = (
+            self.models.ManagedClusterAPIServerAccessProfile(
+                enable_private_cluster=False,
+            )
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=api_server_access_profile_3,
+        )
+        ctx_3.attach_mc(mc_3)
         # fail on private cluster not enabled in update mode
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_3.get_enable_public_fqdn(), True)
 
-        # custom value
-        # In fact, there is no such option in the create command.
-        ctx_4 = AKSContext(
-            self.cmd,
-            {
-                "enable_public_fqdn": True,
-                "enable_private_cluster": False,
-            },
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        # fail on private cluster not enabled in update mode
-        with self.assertRaises(InvalidArgumentValueError):
-            self.assertEqual(ctx_4.get_enable_public_fqdn(), True)
 
     def test_get_private_dns_zone(self):
         # default
