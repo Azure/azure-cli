@@ -778,7 +778,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              v_cpus_available=None, v_cpus_per_core=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -997,7 +998,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
         user_data=user_data, capacity_reservation_group=capacity_reservation_group,
-        enable_hibernation=enable_hibernation)
+        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1418,7 +1419,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
-              enable_hibernation=None, **kwargs):
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1526,6 +1527,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             logger.warning("VM size is already %s", size)
         else:
             vm.hardware_profile.vm_size = size
+
+    if v_cpus_available is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
 
     if ephemeral_os_disk_placement is not None:
         if vm.storage_profile.os_disk.diff_disk_settings is not None:

@@ -1038,6 +1038,21 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm user update -g {rg} -n vm --username AzureUser --password testPassword1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_size_properties')
+    def test_vm_size_properties(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --v-cpus-available 1 --v-cpus-per-core 1', checks=[
+            self.check('hardwareProfile.vCPUsAvailable', 1),
+            self.check('hardwareProfile.vCPUsPerCore', 1)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
+            self.check('hardwareProfile.vCPUsAvailable', 2),
+            self.check('hardwareProfile.vCPUsPerCore', 2)
+        ])
+
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):
 
