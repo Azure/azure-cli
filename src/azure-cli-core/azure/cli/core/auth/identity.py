@@ -263,8 +263,9 @@ class ServicePrincipalAuth:
         """
         entry = {}
         if secret_or_certificate:
-            if os.path.isfile(secret_or_certificate):
-                entry[_CERTIFICATE] = secret_or_certificate
+            user_expanded = os.path.expanduser(secret_or_certificate)
+            if os.path.isfile(user_expanded):
+                entry[_CERTIFICATE] = user_expanded
                 if use_cert_sn_issuer:
                     entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
             else:
