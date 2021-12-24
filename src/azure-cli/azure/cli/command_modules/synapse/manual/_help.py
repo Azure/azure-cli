@@ -1094,30 +1094,30 @@ helps['synapse linked-service create'] = """
 type: command
 short-summary: Create a linked service.
 examples:
-  - name: Create a linked service.
+  - name: Create a linked service. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse linked-service create --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service update'] = """
 type: command
 short-summary: Update an exist linked service.
 examples:
-  - name: Update an exist linked service.
+  - name: Update an exist linked service. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse linked-service update --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service set'] = """
 type: command
 short-summary: Update an exist linked service.
 examples:
-  - name: Update an exist linked service.
+  - name: Update an exist linked service. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse linked-service set --workspace-name testsynapseworkspace \\
-          --name testlinkedservice --file @path/linkedservice.json
+          --name testlinkedservice --file @"path/linkedservice.json"
 """
 
 helps['synapse linked-service show'] = """
@@ -1158,30 +1158,30 @@ helps['synapse dataset create'] = """
 type: command
 short-summary: Create a dataset.
 examples:
-  - name: Create a dataset.
+  - name: Create a dataset. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse dataset create --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset update'] = """
 type: command
 short-summary: Update an exist dataset.
 examples:
-  - name: Update an exist dataset.
+  - name: Update an exist dataset. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse dataset update --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset set'] = """
 type: command
 short-summary: Update an exist dataset.
 examples:
-  - name: Update an exist dataset.
+  - name: Update an exist dataset. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse dataset set --workspace-name testsynapseworkspace \\
-          --name testdataset --file @path/dataset.json
+          --name testdataset --file @"path/dataset.json"
 """
 
 helps['synapse dataset show'] = """
@@ -1222,30 +1222,30 @@ helps['synapse pipeline create'] = """
 type: command
 short-summary: Create a pipeline.
 examples:
-  - name: Create a pipeline.
+  - name: Create a pipeline. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse pipeline create --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline update'] = """
 type: command
 short-summary: Update an exist pipeline.
 examples:
-  - name: Update an exist pipeline.
+  - name: Update an exist pipeline. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse pipeline update --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline set'] = """
 type: command
 short-summary: Update an exist pipeline.
 examples:
-  - name: Update an exist pipeline.
+  - name: Update an exist pipeline. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse pipeline set --workspace-name testsynapseworkspace \\
-          --name testpipeline --file @path/pipeline.json
+          --name testpipeline --file @"path/pipeline.json"
 """
 
 helps['synapse pipeline show'] = """
@@ -1348,30 +1348,30 @@ helps['synapse trigger create'] = """
 type: command
 short-summary: Create a trigger.
 examples:
-  - name: Create a trigger.
+  - name: Create a trigger. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse trigger create --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger update'] = """
 type: command
 short-summary: Update an exist trigger.
 examples:
-  - name: Update an exist trigger.
+  - name: Update an exist trigger. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse trigger update --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger set'] = """
 type: command
 short-summary: Update an exist trigger.
 examples:
-  - name: Update an exist trigger.
+  - name: Update an exist trigger. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse trigger set --workspace-name testsynapseworkspace \\
-          --name testtrigger --file @path/trigger.json
+          --name testtrigger --file @"path/trigger.json"
 """
 
 helps['synapse trigger show'] = """
@@ -1503,20 +1503,20 @@ helps['synapse data-flow create'] = """
 type: command
 short-summary: Create a data flow.
 examples:
-  - name: Create a data flow.
+  - name: Create a data flow. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse data-flow create --workspace-name testsynapseworkspace \\
-          --name testdataflow --file @path/dataflow.json
+          --name testdataflow --file @"path/dataflow.json"
 """
 
 helps['synapse data-flow set'] = """
 type: command
 short-summary: Set an exist data flow.
 examples:
-  - name: Set an exist data flow.
+  - name: Set an exist data flow. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse data-flow set --workspace-name testsynapseworkspace \\
-          --name testdataflow --file @path/dataflow.json
+          --name testdataflow --file @"path/dataflow.json"
 """
 
 helps['synapse data-flow show'] = """
@@ -1557,30 +1557,30 @@ helps['synapse notebook create'] = """
 type: command
 short-summary: Create a notebook.
 examples:
-  - name: Create a notebook.
+  - name: Create a notebook. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse notebook create --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
+          --name testnotebook --file @"path/notebook.ipynb" --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook set'] = """
 type: command
 short-summary: Set an exist notebook.
 examples:
-  - name: Set an exist notebook.
+  - name: Set an exist notebook. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse notebook set --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
+          --name testnotebook --file @"path/notebook.ipynb" --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook import'] = """
 type: command
 short-summary: Import a notebook.
 examples:
-  - name: Import a notebook.
+  - name: Import a notebook. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse notebook import --workspace-name testsynapseworkspace \\
-          --name testnotebook --file @path/notebook.ipynb --folder-path 'folder/subfolder'
+          --name testnotebook --file @"path/notebook.ipynb" --folder-path 'folder/subfolder'
 """
 
 helps['synapse notebook show'] = """
@@ -1922,12 +1922,11 @@ helps['synapse managed-private-endpoints create'] = """
 type: command
 short-summary: Create a synapse managed private endpoints.
 examples:
-  - name: Create a synapse managed private endpoints.
+  - name: Create a synapse managed private endpoints. Definition file should contains privateLinkResourceId and groupId.
     text: |-
         az synapse managed-private-endpoints create --workspace-name testsynapseworkspace \\
           --pe-name testendpointname \\
-          --resource-id '/subscriptions/yoursub/resourceGroups/myResourceGroup/providers/Microsoft.Storage/accounts/myStorageAccount' \\
-          --group-Id blob
+          --file @path/test.json
 """
 
 helps['synapse managed-private-endpoints list'] = """
@@ -1987,20 +1986,20 @@ helps['synapse spark-job-definition create'] = """
 type: command
 short-summary: Create a spark job definition.
 examples:
-  - name: Create a spark job definition.
+  - name: Create a spark job definition. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse spark-job-definition create --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
+          --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition update'] = """
 type: command
 short-summary: Update a spark job definition.
 examples:
-  - name: Update a spark job definition.
+  - name: Update a spark job definition. Pay attention to add "@" at the front of the file path as the best practice for complex arguments like JSON string.
     text: |-
         az synapse spark-job-definition update --workspace-name testsynapseworkspace \\
-          --name testsjdname --file @path/test.json --folder-path 'folder/subfolder'
+          --name testsjdname --file @"path/test.json" --folder-path 'folder/subfolder'
 """
 
 helps['synapse spark-job-definition wait'] = """

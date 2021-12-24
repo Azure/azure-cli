@@ -853,6 +853,15 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+
+        # test command of auth-cert list
+        self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 2))
+
+        # test command of auth-cert show
+        self.cmd('network application-gateway auth-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
+                 checks=self.check('name', 'cert1'))
+
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
@@ -877,6 +886,14 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}"')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}"')
+
+        # test root-cert list
+        self.cmd('network application-gateway root-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 2))
+        # test root-cert show
+        self.cmd('network application-gateway root-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
+                 checks=self.check('name', 'cert1'))
+
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
@@ -890,7 +907,8 @@ class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
     def test_network_app_gateway_redirect_config(self, resource_group):
         self.kwargs.update({
             'gateway': 'ag1',
-            'name': 'redirect1'
+            'name': 'redirect1',
+            'name2': 'redirect2'
         })
         self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
@@ -906,6 +924,17 @@ class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
             self.check('includeQueryString', False),
             self.check('redirectType', 'Permanent')
         ])
+        # test redirect-config list command
+        self.cmd('network application-gateway redirect-config create --gateway-name {gateway} -g {rg} -n {name2} -t permanent --include-query-string --include-path false --target-listener appGatewayHttpListener --no-wait')
+        self.cmd('network application-gateway redirect-config list --gateway-name {gateway} -g {rg}', checks=[
+            self.check('length(@)', 2)
+        ])
+        # test redirect-config delete command
+        self.cmd('network application-gateway redirect-config delete --gateway-name {gateway} -g {rg} -n {name2}')
+        self.cmd('network application-gateway redirect-config list --gateway-name {gateway} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
 
 
 class NetworkAppGatewayExistingSubnetScenarioTest(ScenarioTest):
@@ -1393,9 +1422,27 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* --address-pool {pool} '
                  '--default-address-pool {pool} --http-settings {settings} --default-http-settings {settings} '
                  '--default-rewrite-rule-set {set} --rewrite-rule-set {set}')
+
+        # test url-path-map list
+        self.cmd('network application-gateway url-path-map list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 1)])
+
+        # test url-path-map show
+        self.cmd('network application-gateway url-path-map show -g {rg} --gateway-name {ag} -n {name}',
+                 checks=[self.check('name', 'mypathmap')])
+
         self.cmd('network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
         self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                  '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
+
+        # test url-path-map rule delete
+        self.cmd('network application-gateway url-path-map rule delete -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name}')
+
+        # test url-path-map delete
+        self.cmd('network application-gateway url-path-map delete -g {rg} --gateway-name {ag} -n {name}')
+        self.cmd('network application-gateway url-path-map list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 0)])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map_edge_case')
     def test_network_ag_url_path_map_edge_case(self, resource_group):
@@ -1541,6 +1588,10 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check('length(disabledRuleGroups)', 2),
             self.check('length(disabledRuleGroups[1].rules)', 2)
         ])
+        # test list rule sets
+        self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[
+            self.check('length(@)', 5)
+        ])
 
 
 class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
@@ -1666,6 +1717,16 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check("contains(applicationGateways[0].id, '{ag1}')", True),
             self.check("contains(applicationGateways[1].id, '{ag2}')", True)
         ])
+
+        # test custom-rule delete
+        self.cmd('network application-gateway waf-policy custom-rule delete -g {rg} '
+                 '--policy-name {waf} -n {custom-rule2}')
+        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 1)
+                 ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
