@@ -433,10 +433,12 @@ def get_dependency_versions():
 
     # Add azure-mgmt-resource version
     try:
+        # Track 2 >=15.0.0
         # pylint: disable=protected-access
         from azure.mgmt.resource._version import VERSION as azure_mgmt_resource_version
     except ImportError:
         try:
+            # Track 1 <=13.0.0
             from azure.mgmt.resource.version import VERSION as azure_mgmt_resource_version
         except ImportError:
             azure_mgmt_resource_version = "N/A"
