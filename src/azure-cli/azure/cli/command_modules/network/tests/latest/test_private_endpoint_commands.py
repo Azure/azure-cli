@@ -8,6 +8,8 @@ import time
 import uuid
 import unittest
 
+from azure.core.exceptions import HttpResponseError
+
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
@@ -1555,6 +1557,36 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
         #          '--yes')
 
         self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+
+    @ResourceGroupPreparer(name_prefix='test_manage_appgw_private_endpoint_without_standard')
+    def test_manage_appgw_private_endpoint_without_standard(self, resource_group):
+        """
+        Add Private Link without standard
+        """
+        self.kwargs.update({
+            'appgw': 'appgw',
+            'appgw_private_link_for_public': 'appgw_private_link_for_public',
+            'appgw_private_link_subnet_for_public': 'appgw_private_link_subnet_for_public',
+            'appgw_public_ip': 'public_ip',
+        })
+
+        # Enable private link feature on Application Gateway would require a public IP without Standard tier
+        self.cmd('network public-ip create -g {rg} -n {appgw_public_ip}')
+
+        # Create a application gateway without enable --enable-private-link
+        self.cmd('network application-gateway create -g {rg} -n {appgw} '
+                 '--public-ip-address {appgw_public_ip}')
+
+        # Add one private link
+        # These will fail because application-gateway feature cannot be enabled for selected sku
+        with self.assertRaises(HttpResponseError):
+            self.cmd('network application-gateway private-link add -g {rg} '
+                     '--gateway-name {appgw} '
+                     '--name {appgw_private_link_for_public} '
+                     '--frontend-ip appGatewayFrontendIP '
+                     '--subnet {appgw_private_link_subnet_for_public} '
+                     '--subnet-prefix 10.0.4.0/24'
+                     '--no-wait')
 
 
 class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
