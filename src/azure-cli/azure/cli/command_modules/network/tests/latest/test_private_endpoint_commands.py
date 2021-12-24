@@ -1585,7 +1585,8 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                      '--name {appgw_private_link_for_public} '
                      '--frontend-ip appGatewayFrontendIP '
                      '--subnet {appgw_private_link_subnet_for_public} '
-                     '--subnet-prefix 10.0.4.0/24')
+                     '--subnet-prefix 10.0.4.0/24'
+                     '--no-wait')
 
 
 class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
