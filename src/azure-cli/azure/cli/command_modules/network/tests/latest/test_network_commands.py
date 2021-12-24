@@ -3625,6 +3625,11 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{route}'),
         ])
+        # test route-table route update
+        self.cmd('network route-table route update -g {rg} -n {route} --route-table-name {table} --next-hop-type VirtualNetworkGateway' , checks=[
+            self.check('nextHopType', 'VirtualNetworkGateway')
+            ])
+
         self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route}')
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
@@ -3995,10 +4000,19 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+        # test vpn connection show
+        self.cmd('network vpn-connection show -g {rg} -n {conn1}', checks=[
+            self.check('name', 'conn1')
+        ])
+        # test vpn connection show-device-config-script
+        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"', checks=[
+                self.check('length(@)', 10581)
+            ])
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+
 
 
 class NetworkVpnConnectionNatRule(ScenarioTest):
@@ -4818,6 +4832,11 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager endpoint list -g {rg} --profile-name {tm} -t externalEndpoints',
                  checks=self.check('length(@)', 1))
 
+        # test show-geographic-hierarchy
+        self.cmd('network traffic-manager endpoint show-geographic-hierarchy', checks=[
+            self.check('type', 'Microsoft.Network/trafficManagerGeographicHierarchies')
+        ])
+
         # ensure a profile with endpoints can be updated
         self.cmd('network traffic-manager profile update -n {tm} -g {rg}')
 
@@ -5204,6 +5223,9 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
                  '--nat-rule name=nat type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 '
                  'external-mappings=192.168.21.0/24',
                  checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+        # test vnet-gateway reset
+        self.cmd('network vnet-gateway reset -g {rg} -n {vg}')
 
     @ResourceGroupPreparer()
     def test_network_vnet_gateway_nat_rule_sub_cmd(self, resource_group):
