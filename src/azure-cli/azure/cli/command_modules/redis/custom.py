@@ -21,7 +21,7 @@ wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
 # pylint: disable=unused-argument
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
-    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format) 
+    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format)
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -41,23 +41,23 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         instance.redis_configuration.maxmemory_reserved = None
         instance.redis_configuration.maxfragmentationmemory_reserved = None
         instance.redis_configuration.maxmemory_delta = None
+        properties = instance.redis_configuration.additional_properties
         for memory_config in memory_configs:
-            if instance.redis_configuration.additional_properties is not None and memory_config in instance.redis_configuration.additional_properties:
+            if properties is not None and memory_config in properties:
                 instance.redis_configuration.additional_properties.pop(memory_config)
 
     # trim RDB and AOF connection strings and zonal-configuration
-    removable_keys = [  'rdb-storage-connection-string',
+    removable_keys = ['rdb-storage-connection-string',
                         'aof-storage-connection-string-0',
                         'aof-storage-connection-string-1',
                         'zonal-configuration']
     instance.redis_configuration.rdb_storage_connection_string = None
     instance.redis_configuration.aof_storage_connection_string0 = None
     instance.redis_configuration.aof_storage_connection_string1 = None
+    properties = instance.redis_configuration.additional_properties
     for key in removable_keys:
-        if instance.redis_configuration.additional_properties is not None and key in instance.redis_configuration.additional_properties:
+        if properties is not None and key in properties:
             instance.redis_configuration.additional_properties.pop(key)
-
-
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         redis_configuration=instance.redis_configuration,
