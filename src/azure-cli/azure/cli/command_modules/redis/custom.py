@@ -47,10 +47,11 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
                 instance.redis_configuration.additional_properties.pop(memory_config)
 
     # trim RDB and AOF connection strings and zonal-configuration
-    removable_keys = ['rdb-storage-connection-string',
-                        'aof-storage-connection-string-0',
-                        'aof-storage-connection-string-1',
-                        'zonal-configuration']
+    removable_keys = [
+        'rdb-storage-connection-string',
+        'aof-storage-connection-string-0',
+        'aof-storage-connection-string-1',
+        'zonal-configuration']
     instance.redis_configuration.rdb_storage_connection_string = None
     instance.redis_configuration.aof_storage_connection_string0 = None
     instance.redis_configuration.aof_storage_connection_string1 = None
