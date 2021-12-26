@@ -21,7 +21,7 @@ wrong_vmsize_error = CLIError('Invalid VM size. Example for Valid values: '
 # pylint: disable=unused-argument
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
-    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format)
+    parameters = ExportRDBParameters(prefix=prefix, container=container, format=file_format) 
     return client.begin_export_data(resource_group_name, name, parameters)
 
 
@@ -38,21 +38,25 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
     # avoid setting memory configs for basic sku
     if instance.sku.name == 'Basic':
         memory_configs = ['maxmemory-reserved', 'maxfragmentationmemory-reserved', 'maxmemory-delta']
+        instance.redis_configuration.maxmemory_reserved = None
+        instance.redis_configuration.maxfragmentationmemory_reserved = None
+        instance.redis_configuration.maxmemory_delta = None
         for memory_config in memory_configs:
-            if memory_config in instance.redis_configuration:
-                instance.redis_configuration.pop(memory_config)
+            if instance.redis_configuration.additional_properties is not None and memory_config in instance.redis_configuration.additional_properties:
+                instance.redis_configuration.additional_properties.pop(memory_config)
 
-    # trim RDB and AOF connection strings
-    rdb_aof_connection_strings = ['rdb-storage-connection-string',
-                                  'aof-storage-connection-string-0',
-                                  'aof-storage-connection-string-1']
-    for connection_string in rdb_aof_connection_strings:
-        if connection_string in instance.redis_configuration:
-            instance.redis_configuration.pop(connection_string)
+    # trim RDB and AOF connection strings and zonal-configuration
+    removable_keys = [  'rdb-storage-connection-string',
+                        'aof-storage-connection-string-0',
+                        'aof-storage-connection-string-1',
+                        'zonal-configuration']
+    instance.redis_configuration.rdb_storage_connection_string = None
+    instance.redis_configuration.aof_storage_connection_string0 = None
+    instance.redis_configuration.aof_storage_connection_string1 = None
+    for key in removable_keys:
+        if instance.redis_configuration.additional_properties is not None and key in instance.redis_configuration.additional_properties:
+            instance.redis_configuration.additional_properties.pop(key)
 
-    # Trim zonal-configuration
-    if 'zonal-configuration' in instance.redis_configuration:
-        instance.redis_configuration.pop('zonal-configuration')
 
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
@@ -73,7 +77,7 @@ def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
-                     zones=None, replicas_per_master=None, redis_version=None):
+                     zones=None, replicas_per_master=None, redis_version=None, identity=None):
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
@@ -81,12 +85,12 @@ def cli_redis_create(cmd, client,
     if tenant_settings is not None:
         for item in tenant_settings:
             tenant_settings_in_json.update(get_key_value_pair(item))
-    from azure.mgmt.redis.models import RedisCreateParameters, Sku
+    from azure.mgmt.redis.models import RedisCreateParameters, Sku, RedisCommonPropertiesRedisConfiguration
     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
         sku=Sku(name=sku, family=vm_size[0], capacity=vm_size[1:]),
         location=location,
-        redis_configuration=redis_configuration,
+        redis_configuration=RedisCommonPropertiesRedisConfiguration(additional_properties=redis_configuration),
         enable_non_ssl_port=enable_non_ssl_port,
         replicas_per_master=replicas_per_master,
         tenant_settings=tenant_settings_in_json,
@@ -96,6 +100,7 @@ def cli_redis_create(cmd, client,
         static_ip=static_ip,
         zones=zones,
         redis_version=redis_version,
+        identity=identity,
         tags=tags)
     return client.begin_create(resource_group_name, name, params)
 

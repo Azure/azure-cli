@@ -43,6 +43,7 @@ def load_arguments(self, _):
         c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.')
         c.argument('redis_version', help='Redis version. Only major version will be used in create/update request with current valid values: (4, 6)')
+        c.argument('identity', help='The identity json. Example: {"type":"SystemAssigned"} will assign a system idenity, {"type":"SystemAssigned, UserAssigned","userAssignedIdentities":{"<User_Identity_resource_ID":{}} will assign system and user identity', type=JsonString)
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)
