@@ -220,9 +220,12 @@ def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system
     user_assigned = None
     if identity.user_assigned_identities is not None:
         user_assigned = list(identity.user_assigned_identities)
-    if mi_user_assigned is not None:
+    if mi_user_assigned is not None and user_assigned is not None:
         for mi_user_id in mi_user_assigned:
-            user_assigned.remove(mi_user_id)
+            try:
+                user_assigned.remove(mi_user_id)
+            except ValueError:
+                pass
         if len(user_assigned) == 0:
             user_assigned = None
     update_params = RedisUpdateParameters(
