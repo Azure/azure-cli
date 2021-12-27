@@ -525,9 +525,10 @@ def add_ag_private_link(cmd,
     else:
         raise CLIError("Frontend IP doesn't exist")
 
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            raise CLIError('Private Link name duplicates')
+    if appgw.private_link_configurations is not None:
+        for pl in appgw.private_link_configurations:
+            if pl.name == private_link_name:
+                raise CLIError('Private Link name duplicates')
 
     # get the virtual network of this application gateway
     vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
@@ -579,6 +580,8 @@ def add_ag_private_link(cmd,
         if fic.name == frontend_ip:
             fic.private_link_configuration = SubResource(id=private_link_config_id)
 
+    if appgw.private_link_configurations is None:
+        appgw.private_link_configurations = []
     appgw.private_link_configurations.append(private_link_config)
 
     return sdk_no_wait(no_wait,
