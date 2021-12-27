@@ -862,10 +862,13 @@ long-summary: |
 examples:
   - name: Create an IoT Central application in the region of the resource group using the default pricing SKU.
     text: >
-        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates
-  - name: Create an IoT Central application the in the 'United States' region with the 'ST1' pricing plan and an industry template.
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app
+  - name: Create an IoT Central application the in the 'East US' region with the 'ST1' pricing plan and an industry template.
     text: >
-        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l unitedstates -p ST1 -t iotc-distribution
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app -l eastus -p ST1 -t iotc-distribution
+  - name: Create an IoT Central application using system-assigned managed identity.
+    text: >
+        az iot central app create -n my-first-iot-app -g MyResourceGroup -s my-iot-app --mi-system-assigned
 """
 
 helps['iot central app delete'] = """
@@ -916,4 +919,37 @@ examples:
   - name: Change the subdomain for 'my-first-iot-app'
     text: >
         az iot central app update -n my-first-iot-app -g MyResourceGroup --set subdomain.name=my-iot-app-new
+"""
+
+helps['iot central app identity'] = """
+type: group
+short-summary: Manage IoT Central application identities.
+long-summary: Assign, remove, and show your IoT Central application identities.
+"""
+
+helps['iot central app identity assign'] = """
+type: command
+short-summary: Assign managed identities to an IoT Central application
+examples:
+  - name: Assign a system-assigned managed identity to an IoT Central application.
+    text: >
+        az iot central app identity assign --name my-iotc-app --resource-group MyResourceGroup --system-assigned
+"""
+
+helps['iot central app identity show'] = """
+type: command
+short-summary: Show the identity properties of an IoT Central application
+examples:
+  - name: Show identity properties of an IoT Central application
+    text: >
+        az iot central app identity show --name my-iotc-app --resource-group MyResourceGroup
+"""
+
+helps['iot central app identity remove'] = """
+type: command
+short-summary: Remove managed identities from an IoT Central application
+examples:
+  - name: Remove a system-assigned managed identity from an IoT Central application.
+    text: >
+        az iot central app identity remove --name my-iotc-app --resource-group MyResourceGroup --system-assigned
 """
