@@ -44,8 +44,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         properties = instance.redis_configuration.additional_properties
         for memory_config in memory_configs:
             if properties is not None and memory_config in properties:
-                instance.redis_configuration.additional_properties.pop(memory_config)
-
+                instance.redis_configuration.additional_properties.pop(memory_config, None)
     # trim RDB and AOF connection strings and zonal-configuration
     removable_keys = [
         'rdb-storage-connection-string',
@@ -58,7 +57,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
     properties = instance.redis_configuration.additional_properties
     for key in removable_keys:
         if properties is not None and key in properties:
-            instance.redis_configuration.additional_properties.pop(key)
+            instance.redis_configuration.additional_properties.pop(key, None)
     # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         redis_configuration=instance.redis_configuration,
@@ -74,11 +73,13 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 
 
 # pylint: disable=unused-argument
+# pylint: disable=too-many-locals
 def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
-                     zones=None, replicas_per_master=None, redis_version=None, identity=None):
+                     zones=None, replicas_per_master=None, redis_version=None, mi_system_assigned=None,
+                     mi_user_assigned=None):
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
         raise wrong_vmsize_error
@@ -101,7 +102,7 @@ def cli_redis_create(cmd, client,
         static_ip=static_ip,
         zones=zones,
         redis_version=redis_version,
-        identity=identity,
+        identity=build_identity(mi_system_assigned, mi_user_assigned),
         tags=tags)
     return client.begin_create(resource_group_name, name, params)
 
@@ -182,5 +183,71 @@ def cli_redis_force_reboot(client, resource_group_name, name, reboot_type, shard
     from azure.mgmt.redis.models import RedisRebootParameters
     param = RedisRebootParameters(reboot_type=reboot_type, shard_id=shard_id)
     return client.force_reboot(resource_group_name, name, param)
+
+
+def cli_redis_identity_show(client, resource_group_name, cache_name):
+    from azure.mgmt.redis.models import ManagedServiceIdentityType, ManagedServiceIdentity
+    redis_resourse = client.get(resource_group_name, cache_name)
+    if redis_resourse.identity is None:
+        redis_resourse.identity = ManagedServiceIdentity(
+            type=ManagedServiceIdentityType.NONE.value,
+        )
+    return redis_resourse.identity
+
+
+def cli_redis_identity_assign(client, resource_group_name, cache_name, mi_system_assigned=None, mi_user_assigned=None):
+    from azure.mgmt.redis.models import RedisUpdateParameters
+    update_params = RedisUpdateParameters(
+        identity=build_identity(mi_system_assigned, mi_user_assigned))
+    redis_resourse = client.update(resource_group_name, cache_name, update_params)
+    return redis_resourse.identity
+
+
+def cli_redis_identity_remove(client, resource_group_name, cache_name, mi_system_assigned=None, mi_user_assigned=None):
+    from azure.mgmt.redis.models import RedisUpdateParameters, ManagedServiceIdentityType, ManagedServiceIdentity
+    redis_resourse = client.get(resource_group_name, cache_name)
+    identity = redis_resourse.identity
+    system_assigned = None
+    none_identity = ManagedServiceIdentity(
+        type=ManagedServiceIdentityType.NONE.value)
+    if identity is None:
+        return none_identity
+    if (identity.type == ManagedServiceIdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value or
+            identity.type == ManagedServiceIdentityType.SYSTEM_ASSIGNED.value):
+        system_assigned = True
+    if mi_system_assigned is not None:
+        system_assigned = None
+    user_assigned = None
+    if identity.user_assigned_identities is not None:
+        user_assigned = list(identity.user_assigned_identities)
+    if mi_user_assigned is not None:
+        for mi_user_id in mi_user_assigned:
+            user_assigned.remove(mi_user_id)
+        if len(user_assigned) == 0:
+            user_assigned = None
+    update_params = RedisUpdateParameters(
+        identity=build_identity(system_assigned, user_assigned)
+    )
+    updated_resourse = client.update(resource_group_name, cache_name, update_params)
+    if updated_resourse.identity is None:
+        updated_resourse.identity = none_identity
+    return updated_resourse.identity
+
+
+def build_identity(mi_system_assigned, mi_user_assigned):
+    from azure.mgmt.redis.models import ManagedServiceIdentity, ManagedServiceIdentityType, UserAssignedIdentity
+    identityType = ManagedServiceIdentityType.NONE
+    userIdentities = None
+    if mi_system_assigned is not None:
+        identityType = ManagedServiceIdentityType.SYSTEM_ASSIGNED
+    if mi_user_assigned is not None and len(mi_user_assigned) > 0:
+        userIdentities = {id: UserAssignedIdentity() for id in mi_user_assigned}
+        if identityType == ManagedServiceIdentityType.NONE:
+            identityType = ManagedServiceIdentityType.USER_ASSIGNED
+        else:
+            identityType = ManagedServiceIdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+    return ManagedServiceIdentity(
+        type=identityType.value,
+        user_assigned_identities=userIdentities)
 
 # endregion

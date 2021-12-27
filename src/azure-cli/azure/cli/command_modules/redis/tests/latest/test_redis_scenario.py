@@ -126,6 +126,7 @@ class RedisCacheTests(ScenarioTest):
         result = self.cmd('az redis list-keys -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(result['primaryKey'] is not None)
         self.assertTrue(result['secondaryKey'] is not None)
+        self.cmd('az redis update -n {name} -g {rg} --set "tags.mytag=mytagval"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_patch_schedule(self, resource_group):
@@ -284,32 +285,88 @@ class RedisCacheTests(ScenarioTest):
             'location': location,
             'sku': basic_sku,
             'size': basic_size,
-            'identity': '{\\"type\\": \\"SystemAssigned, UserAssigned\\",\\"userAssignedIdentities\\":{\\"/subscriptions/0ee2a145-4d40-44f4-b764-67b40274f1ac/resourceGroups/prn-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test\\":{},\\"/subscriptions/0ee2a145-4d40-44f4-b764-67b40274f1ac/resourceGroups/prn-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test2\\":{}}}',
-            'identitySystemOnly':'{\\"type\\": \\"SystemAssigned\\"}',
-            'identityUserOnly': '{\\"type\\": \\"UserAssigned\\",\\"userAssignedIdentities\\":{\\"/subscriptions/0ee2a145-4d40-44f4-b764-67b40274f1ac/resourceGroups/prn-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test\\":{}}}',
-            'identityNone': '{\\"type\\": \\"None\\"}',
-            
+            'userIdentity': "/subscriptions/0ee2a145-4d40-44f4-b764-67b40274f1ac/resourcegroups/prn-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/test",
         }
-        result = self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --identity="{identity}"', checks=[
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size} --mi-system-assigned --mi-user-assigned "{userIdentity}"', checks=[
             self.check('identity.type', 'SystemAssigned, UserAssigned'),
-            self.check('length(identity.userAssignedIdentities)', 2)
-        ]).get_output_in_json()
-        self.check('length(result.identity.userAssignedIdentities)', 2)
-        self.cmd('az redis update -n {name} -g {rg} --set "identity={identitySystemOnly}"', checks=[
-            self.check('identity.type', 'SystemAssigned'),
-            self.check('identity.userAssignedIdentities', None)
+            self.check('length(identity.userAssignedIdentities)', 1)
         ])
+
+        self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'None')
+        ])
+
         if self.is_live:
-            time.sleep(60)
-        self.cmd('az redis update -n {name} -g {rg} --set "identity={identityUserOnly}"', checks=[
-            self.check('identity.type', 'UserAssigned'),
-            self.check('length(identity.userAssignedIdentities)', 1),
+            time.sleep(30)
+
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned',checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None)
         ])
+
         if self.is_live:
-            time.sleep(60)
-        self.cmd('az redis update -n {name} -g {rg} --set "identity={identityNone}"', checks=[
-            self.check('identity', None)
+            time.sleep(30)
+
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
         ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned',checks=[
+            self.check('type', 'UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity remove -n {name} -g {rg} --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'None')
+        ])
+
+        self.cmd('az redis identity show -n {name} -g {rg}',checks=[
+            self.check('type', 'None')
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned',checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None)
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned',checks=[
+            self.check('type', 'None')
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        self.cmd('az redis identity show -n {name} -g {rg}',checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_redis')
     def test_redis_cache_server_link(self, resource_group):
