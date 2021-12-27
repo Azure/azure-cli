@@ -3003,7 +3003,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
 
         # test lb inbound-nat-rule create with new param --backend-pool-name
         self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp --backend-port 30 '
-                 '--frontend-port-range-start 0 --frontend-port-range-end 3 --backend-pool-name {lb}bepool', checks=[
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3 --backend-pool-name {backend}', checks=[
             self.check('name', 'rule3'),
             self.check('frontendPortRangeStart', 0),
             self.check('frontendPortRangeEnd', 3),
