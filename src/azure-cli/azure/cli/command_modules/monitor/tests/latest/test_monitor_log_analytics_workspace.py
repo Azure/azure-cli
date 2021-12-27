@@ -30,6 +30,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 100)
         ])
 
+
         self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
         self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
             self.check('length(@)', 1),
@@ -52,6 +53,11 @@ class TestLogProfileScenarios(ScenarioTest):
             "monitor log-analytics workspace pack disable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
         self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[False]')
+        ])
+
+        # test list-management-groups
+        self.cmd("monitor log-analytics workspace list-management-groups -g {rg} -n {name}", checks=[
+            self.check('length(@)', 0)
         ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
