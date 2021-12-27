@@ -188,3 +188,23 @@ type: command
 short-summary: Regenerate Redis cache's access keys.
 long-summary: Usage example - az redis regenerate-keys --name testCacheName --resource-group testResourceGroup --key-type {Primary, Secondary}
 """
+
+helps['redis identity'] = """
+type: group
+short-summary: Manage identity assigned to Azure cache for Redis.
+"""
+
+helps['redis identity assign'] = """
+type: command
+short-summary: Assigns identity for Azure cache for Redis.
+"""
+
+helps['redis identity remove'] = """
+type: command
+short-summary: Removes the identity already assigned for Azure cache for Redis.
+"""
+
+helps['redis identity show'] = """
+type: command
+short-summary: Shows the identity assigned for Azure cache for Redis.
+"""
