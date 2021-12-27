@@ -8,7 +8,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
+from azure.cli.core.azclierror import UnclassifiedUserFault, RequiredArgumentMissingError, ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -60,6 +60,10 @@ from ._utils import open_certificate, generate_key
 
 
 logger = get_logger(__name__)
+
+# Identity types
+SYSTEM_ASSIGNED = 'SystemAssigned'
+NONE_IDENTITY = 'None'
 
 
 # CUSTOM TYPE
@@ -578,19 +582,32 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
-    # if setting a fileupload storage identity or changing fileupload to identity-based
-    if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
-        _validate_fileupload_identity(instance, fileupload_storage_identity)
+    # only bother with $default storage endpoint checking if modifying fileupload params
+    if any([
+            fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
+            fileupload_storage_authentication_type, fileupload_storage_container_uri, fileupload_storage_identity]):
+        default_storage_endpoint = instance.properties.storage_endpoints.get('$default', None)
+        # no default storage endpoint, either recreate with existing params or throw an error
+        if not default_storage_endpoint:
+            if not all([fileupload_storage_connectionstring, fileupload_storage_container_name]):
+                raise UnclassifiedUserFault('This hub has no default storage endpoint for file upload.\n'
+                                            'Please recreate your default storage endpoint by running '
+                                            '`az iot hub update --name {hub_name} --fcs {storage_connection_string} --fc {storage_container_name}`')
+            default_storage_endpoint = StorageEndpointProperties(container_name=fileupload_storage_container_name, connection_string=fileupload_storage_connectionstring)
 
-    default_storage_endpoint = _process_fileupload_args(
-        instance.properties.storage_endpoints['$default'],
-        fileupload_storage_connectionstring,
-        fileupload_storage_container_name,
-        fileupload_sas_ttl,
-        fileupload_storage_authentication_type,
-        fileupload_storage_container_uri,
-        fileupload_storage_identity,
-    )
+        # if setting a fileupload storage identity or changing fileupload to identity-based
+        if fileupload_storage_identity or fileupload_storage_authentication_type == AuthenticationType.IdentityBased.value:
+            _validate_fileupload_identity(instance, fileupload_storage_identity)
+
+        instance.properties.storage_endpoints['$default'] = _process_fileupload_args(
+            default_storage_endpoint,
+            fileupload_storage_connectionstring,
+            fileupload_storage_container_name,
+            fileupload_sas_ttl,
+            fileupload_storage_authentication_type,
+            fileupload_storage_container_uri,
+            fileupload_storage_identity,
+        )
 
     # sas token authentication switches
     if disable_local_auth is not None:
@@ -599,8 +616,6 @@ def update_iot_hub_custom(instance,
         instance.properties.disable_device_sas = disable_device_sas
     if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
-
-    instance.properties.storage_endpoints['$default'] = default_storage_endpoint
 
     return instance
 
@@ -1233,18 +1248,20 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
 
 def iot_central_app_create(
         cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
-        location=None, template=None, display_name=None, no_wait=False
+        location=None, template=None, display_name=None, no_wait=False, mi_system_assigned=False
 ):
     cli_ctx = cmd.cli_ctx
     location = _ensure_location(cli_ctx, resource_group_name, location)
     display_name = _ensure_display_name(app_name, display_name)
     appSku = AppSkuInfo(name=sku)
+    appid = {"type": "SystemAssigned"} if mi_system_assigned else None
 
     app = App(subdomain=subdomain,
               location=location,
               display_name=display_name,
               sku=appSku,
-              template=template)
+              template=template,
+              identity=appid)
 
     return sdk_no_wait(no_wait, client.apps.begin_create_or_update, resource_group_name, app_name, app)
 
@@ -1267,6 +1284,31 @@ def iot_central_app_list(client, resource_group_name=None):
 
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
     return client.apps.begin_update(resource_group_name, app_name, parameters)
+
+
+def iot_central_app_assign_identity(client, app_name, system_assigned=False, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+
+    if system_assigned:
+        app.identity.type = SYSTEM_ASSIGNED
+
+    poller = iot_central_app_update(client, app_name, app, resource_group_name)
+    return poller.result().identity
+
+
+def iot_central_app_remove_identity(client, app_name, system_assigned=False, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+
+    if system_assigned and (app.identity.type.upper() == SYSTEM_ASSIGNED.upper()):
+        app.identity.type = NONE_IDENTITY
+
+    poller = iot_central_app_update(client, app_name, app, resource_group_name)
+    return poller.result().identity
+
+
+def iot_central_app_show_identity(client, app_name, resource_group_name=None):
+    app = iot_central_app_get(client, app_name, resource_group_name)
+    return app.identity
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):
