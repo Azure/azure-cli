@@ -9,7 +9,13 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import RequiredArgumentMissingError, ArgumentUsageError
+from azure.cli.core.azclierror import (
+    ArgumentUsageError,
+    BadRequestError,
+    InvalidArgumentValueError,
+    RequiredArgumentMissingError,
+    ResourceNotFoundError
+)
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
 
@@ -149,7 +155,7 @@ def iot_dps_policy_create(
     dps_access_policies = []
     dps_access_policies.extend(iot_dps_policy_list(client, dps_name, resource_group_name))
     if _does_policy_exist(dps_access_policies, access_policy_name):
-        raise CLIError("Access policy {} already exists.".format(access_policy_name))
+        raise BadRequestError("Access policy {} already exists.".format(access_policy_name))
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
     access_policy_rights = _convert_rights_to_access_rights(rights)
@@ -182,7 +188,7 @@ def iot_dps_policy_update(
     dps_access_policies.extend(iot_dps_policy_list(client, dps_name, resource_group_name))
 
     if not _does_policy_exist(dps_access_policies, access_policy_name):
-        raise CLIError("Access policy {} doesn't exist.".format(access_policy_name))
+        raise ResourceNotFoundError("Access policy {} doesn't exist.".format(access_policy_name))
 
     for policy in dps_access_policies:
         if policy.key_name == access_policy_name:
@@ -211,7 +217,7 @@ def iot_dps_policy_delete(cmd, client, dps_name, access_policy_name, resource_gr
     dps_access_policies.extend(iot_dps_policy_list(client, dps_name, resource_group_name))
 
     if not _does_policy_exist(dps_access_policies, access_policy_name):
-        raise CLIError("Access policy {0} doesn't existed.".format(access_policy_name))
+        raise ResourceNotFoundError("Access policy {0} doesn't exist.".format(access_policy_name))
     updated_policies = [p for p in dps_access_policies if p.key_name.lower() != access_policy_name.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
@@ -241,7 +247,7 @@ def iot_dps_linked_hub_get(cmd, client, dps_name, linked_hub, resource_group_nam
     for hub in dps.properties.iot_hubs:
         if hub.name == linked_hub:
             return hub
-    raise CLIError("Linked hub '{0}' does not exist. Use 'iot dps linked-hub show to see all linked hubs.".format(linked_hub))
+    raise ResourceNotFoundError("Linked hub '{0}' does not exist. Use 'iot dps linked-hub show to see all linked hubs.".format(linked_hub))
 
 
 def iot_dps_linked_hub_create(
@@ -258,7 +264,7 @@ def iot_dps_linked_hub_create(
     no_wait=False
 ):
     if not any([connection_string, hub_name]):
-        raise CLIError("Please provide the IoT Hub name or connection string.")
+        raise RequiredArgumentMissingError("Please provide the IoT Hub name or connection string.")
     if not connection_string:
         # Get the connection string for the hub
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
@@ -272,7 +278,7 @@ def iot_dps_linked_hub_create(
             try:
                 hub_name = re.search(r"hostname=(.[^\;\.]+)?", connection_string, re.IGNORECASE).group(1)
             except AttributeError:
-                raise CLIError("Please provide a valid IoT Hub connection string.")
+                raise InvalidArgumentValueError("Please provide a valid IoT Hub connection string.")
 
         hub_client = iot_hub_service_factory(cmd.cli_ctx)
         location = iot_hub_get(cmd, hub_client, hub_name=hub_name, resource_group_name=hub_resource_group).location
@@ -308,7 +314,7 @@ def iot_dps_linked_hub_update(cmd, client, dps_name, linked_hub, resource_group_
     dps_linked_hubs = []
     dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
     if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
-        raise CLIError("Access policy {0} doesn't existed.".format(linked_hub))
+        raise ResourceNotFoundError("Access policy {0} doesn't exist.".format(linked_hub))
 
     for hub in dps_linked_hubs:
         if hub.name == linked_hub:
@@ -338,7 +344,7 @@ def iot_dps_linked_hub_delete(cmd, client, dps_name, linked_hub, resource_group_
     dps_linked_hubs = []
     dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
     if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
-        raise CLIError("Linked hub {0} doesn't existed.".format(linked_hub))
+        raise ResourceNotFoundError("Linked hub {0} doesn't exist.".format(linked_hub))
     updated_hub = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
 
     dps = iot_dps_get(client, dps_name, resource_group_name)
