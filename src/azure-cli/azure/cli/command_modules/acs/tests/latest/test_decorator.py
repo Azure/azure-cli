@@ -479,6 +479,18 @@ class AKSContextTestCase(unittest.TestCase):
         g8 = {"scan-interval": "20s", "scale-down-delay-after-add": "15m"}
         self.assertEqual(t8, g8)
 
+        # two pairs of empty key & empty value
+        s9 = ["=", "="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s9)
+
+        # additional empty key & empty value
+        s10 = ["scan-interval=20s", "="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s10)
+
     def test_get_subscription_id(self):
         ctx_1 = AKSContext(
             self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE

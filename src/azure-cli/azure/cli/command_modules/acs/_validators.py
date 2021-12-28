@@ -108,39 +108,6 @@ def validate_k8s_version(namespace):
                            'such as "1.11.8" or "1.12.6"')
 
 
-def validate_cluster_autoscaler_profile(cmd, namespace):
-    """ Validates that cluster autoscaler profile is acceptable by:
-        1. Extracting the key[=value] format to map
-        2. Validating that the key isn't empty and that the key is valid
-        Empty strings pass validation
-    """
-    _extract_cluster_autoscaler_params(namespace)
-    if namespace.cluster_autoscaler_profile is not None:
-        for key in namespace.cluster_autoscaler_profile.keys():
-            _validate_cluster_autoscaler_key(cmd, key)
-
-
-def _validate_cluster_autoscaler_key(cmd, key):
-    if not key:
-        raise CLIError('Empty key specified for cluster-autoscaler-profile')
-    ManagedClusterPropertiesAutoScalerProfile = cmd.get_models('ManagedClusterPropertiesAutoScalerProfile',
-                                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
-                                                               operation_group='managed_clusters')
-    valid_keys = list(k.replace("_", "-") for k, v in ManagedClusterPropertiesAutoScalerProfile._attribute_map.items())  # pylint: disable=protected-access
-    if key not in valid_keys:
-        raise CLIError("'{0}' is an invalid key for cluster-autoscaler-profile. "
-                       "Valid keys are {1}.".format(key, ', '.join(valid_keys)))
-
-
-def _extract_cluster_autoscaler_params(namespace):
-    """ Extracts multiple space-separated cluster autoscaler parameters in key[=value] format """
-    if isinstance(namespace.cluster_autoscaler_profile, list):
-        params_dict = {}
-        for item in namespace.cluster_autoscaler_profile:
-            params_dict.update(validate_tag(item))
-        namespace.cluster_autoscaler_profile = params_dict
-
-
 def validate_nodepool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     if namespace.nodepool_name != "":
