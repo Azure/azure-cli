@@ -4,22 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import unicode_literals
+
 import os
 import os.path
 import re
-from math import isnan, isclose
 from ipaddress import ip_network
+from math import isclose, isnan
 
-# pylint: disable=no-name-in-module,import-error
-from knack.log import get_logger
-
-from azure.cli.core.profiles import ResourceType
-
+from azure.cli.core import keys
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
-from azure.cli.core import keys
-
+# pylint: disable=no-name-in-module,import-error
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
