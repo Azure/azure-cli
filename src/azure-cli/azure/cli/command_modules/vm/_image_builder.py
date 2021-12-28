@@ -388,7 +388,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor,
                                                 ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
-                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties, # pylint: disable=line-too-long
+                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
                                                 ImageTemplateVmProfile, VirtualNetworkConfig)
 
     if image_template is not None:
@@ -473,14 +473,15 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties() # pylint: disable=line-too-long
+            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
         identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     # VM profile
     vnet_config = None
     if vnet or subnet:
         if not is_valid_resource_id(subnet):
-            subnet = resource_id(subscription=client._config.subscription_id, resource_group=resource_group_name,
+            subscription_id = get_subscription_id(cmd.cli_ctx)
+            subnet = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                  namespace='Microsoft.Network', type='virtualNetworks', name=vnet,
                                  child_type_1='subnets', child_name_1=subnet)
         vnet_config = VirtualNetworkConfig(subnet_id=subnet)
@@ -547,7 +548,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
     existing_image_template.distribute.append(distributor)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -571,7 +572,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -586,7 +587,7 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
     existing_image_template.distribute = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -635,7 +636,7 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
 
     existing_image_template.customize.append(new_customizer)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -659,7 +660,7 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
     existing_image_template.customize = new_customize
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -675,7 +676,7 @@ def clear_template_customizer(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.customize = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 # endregion
