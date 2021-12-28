@@ -196,15 +196,15 @@ short-summary: Manage identity assigned to Azure cache for Redis.
 
 helps['redis identity assign'] = """
 type: command
-short-summary: Assigns identity for Azure cache for Redis.
+short-summary: Assign identity for Azure cache for Redis.
 """
 
 helps['redis identity remove'] = """
 type: command
-short-summary: Removes the identity already assigned for Azure cache for Redis.
+short-summary: Remove the identity already assigned for Azure cache for Redis.
 """
 
 helps['redis identity show'] = """
 type: command
-short-summary: Shows the identity assigned for Azure cache for Redis.
+short-summary: Show the identity assigned for Azure cache for Redis.
 """
