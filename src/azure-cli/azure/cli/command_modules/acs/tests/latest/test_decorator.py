@@ -427,6 +427,58 @@ class AKSContextTestCase(unittest.TestCase):
                 5, False, 3, None, DecoratorMode.UPDATE
             )
 
+    def test_validate_cluster_autoscaler_profile(self):
+        ctx = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
+        # default
+        s1 = None
+        t1 = ctx._AKSContext__validate_cluster_autoscaler_profile(s1)
+        g1 = None
+        self.assertEqual(t1, g1)
+
+        # invalid type
+        s2 = set()
+        # fail on invalid type
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s2)
+
+        # empty list
+        s3 = []
+        t3 = ctx._AKSContext__validate_cluster_autoscaler_profile(s3)
+        g3 = {}
+        self.assertEqual(t3, g3)
+
+        # empty dict
+        s4 = {}
+        t4 = ctx._AKSContext__validate_cluster_autoscaler_profile(s4)
+        g4 = {}
+        self.assertEqual(t4, g4)
+
+        # empty key & empty value
+        s5 = ["="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s5)
+
+        # non-empty key & empty value
+        s6 = ["scan-interval="]
+        t6 = ctx._AKSContext__validate_cluster_autoscaler_profile(s6)
+        g6 = {"scan-interval": ""}
+        self.assertEqual(t6, g6)
+
+        # invalid key
+        s7 = ["bad-key=val"]
+        # fail on invalid key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s7)
+
+        # valid key
+        s8 = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
+        t8 = ctx._AKSContext__validate_cluster_autoscaler_profile(s8)
+        g8 = {"scan-interval": "20s", "scale-down-delay-after-add": "15m"}
+        self.assertEqual(t8, g8)
+
     def test_get_subscription_id(self):
         ctx_1 = AKSContext(
             self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
@@ -4031,39 +4083,6 @@ class AKSContextTestCase(unittest.TestCase):
                 "skip_nodes_with_system_pods": None,
             },
         )
-
-        # custom value
-        ctx_3 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": []},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on invalid type of cluster_autoscaler_profile (should be dict)
-        with self.assertRaises(CLIInternalError):
-            ctx_3.get_cluster_autoscaler_profile()
-
-        # custom value
-        ctx_4 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": {"": "xyz"}},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on empty key
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_4.get_cluster_autoscaler_profile()
-
-        # custom value
-        ctx_5 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": {"xyz": "123"}},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on invalid key
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_5.get_cluster_autoscaler_profile()
 
     def test_get_uptime_sla(self):
         # default

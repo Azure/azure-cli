@@ -346,29 +346,29 @@ class TestAssignIdentity(unittest.TestCase):
 
 class TestExtractCommaSeparatedString(unittest.TestCase):
     def test_extract_comma_separated_string(self):
-        s1 = "abc, xyz, 123"
-        t1 = validators.extract_comma_separated_string(s1)
-        g1 = ["abc", " xyz", " 123"]
+        s1 = None
+        t1 = validators.extract_comma_separated_string(s1, keep_none=True, default_value="")
+        g1 = None
         self.assertEqual(t1, g1)
 
-        s2 = "abc, xyz, 123"
-        t2 = validators.extract_comma_separated_string(s2, enable_strip=True)
-        g2 = ["abc", "xyz", "123"]
+        s2 = None
+        t2 = validators.extract_comma_separated_string(s2, keep_none=False, default_value="")
+        g2 = ""
         self.assertEqual(t2, g2)
 
-        s3 = None
-        t3 = validators.extract_comma_separated_string(s3, keep_none=True, default_value="")
-        g3 = None
+        s3 = ""
+        t3 = validators.extract_comma_separated_string(s3, keep_none=True, default_value={})
+        g3 = {}
         self.assertEqual(t3, g3)
 
-        s4 = None
-        t4 = validators.extract_comma_separated_string(s4, keep_none=False, default_value="")
-        g4 = ""
+        s4 = "abc, xyz, 123"
+        t4 = validators.extract_comma_separated_string(s4)
+        g4 = ["abc", " xyz", " 123"]
         self.assertEqual(t4, g4)
 
-        s5 = ""
-        t5 = validators.extract_comma_separated_string(s5, keep_none=True, default_value={})
-        g5 = {}
+        s5 = "abc, xyz, 123"
+        t5 = validators.extract_comma_separated_string(s5, enable_strip=True)
+        g5 = ["abc", "xyz", "123"]
         self.assertEqual(t5, g5)
 
         s6 = "abc = def, xyz = 123"
@@ -381,26 +381,34 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         g7 = {"abc": "def", "xyz": "123"}
         self.assertEqual(t7, g7)
 
-        s8 = "abc = def, xyz = 123"
-        t8 = validators.extract_comma_separated_string(s8, extract_kv=True, key_only=True)
-        g8 = {"abc ": "", " xyz ": ""}
+        s8 = "abc = def, xyz = "
+        t8 = validators.extract_comma_separated_string(s8, extract_kv=True, allow_empty_value=True)
+        g8 = {"abc ": " def", " xyz ": " "}
         self.assertEqual(t8, g8)
 
-        s9 = "abc = def, xyz = 123"
-        t9 = validators.extract_comma_separated_string(s9, enable_strip=True, extract_kv=True, key_only=True)
-        g9 = {"abc": "", "xyz": ""}
+        s9 = "abc = def, xyz = "
+        t9 = validators.extract_comma_separated_string(s9, enable_strip=True, extract_kv=True, allow_empty_value=True)
+        g9 = {"abc": "def", "xyz": ""}
         self.assertEqual(t9, g9)
 
-        s10 = "abc def, xyz 123"
-        t10 = validators.extract_comma_separated_string(s10, enable_strip=True, extract_kv=True, key_only=True)
-        g10 = {"abc def": "", "xyz 123": ""}
-        self.assertEqual(t10, g10)
+        s10 = "abc = def, xyz = "
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s10, extract_kv=True)
 
         s11 = "abc def, xyz 123"
         with self.assertRaises(InvalidArgumentValueError):
-            validators.extract_comma_separated_string(s11, enable_strip=True, extract_kv=True)
+            validators.extract_comma_separated_string(s11, extract_kv=True)
 
-        s12 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
-        t12 = validators.extract_comma_separated_string(s12, enable_strip=True, extract_kv=True, default_value={},)
-        g12 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
-        self.assertEqual(t12, g12)
+        s12 = "abc=def=xyz,123=456"
+        with self.assertRaises(InvalidArgumentValueError):
+            validators.extract_comma_separated_string(s12, extract_kv=True)
+
+        s13 = "WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview"
+        t13 = validators.extract_comma_separated_string(s13, enable_strip=True, extract_kv=True, default_value={},)
+        g13 = {"WindowsContainerRuntime": "containerd", "AKSHTTPCustomFeatures": "Microsoft.ContainerService/CustomNodeConfigPreview"}
+        self.assertEqual(t13, g13)
+
+        s14 = "="
+        t14 = validators.extract_comma_separated_string(s14, extract_kv=True, allow_empty_value=True)
+        g14 = {"": ""}
+        self.assertEqual(t14, g14)

@@ -436,16 +436,18 @@ def extract_comma_separated_string(
     raw_string,
     enable_strip=False,
     extract_kv=False,
-    key_only=False,
+    allow_empty_value=False,
     keep_none=False,
     default_value=None,
 ):
     """Extract comma-separated string.
 
     If enable_strip is specified, will remove leading and trailing whitespace before each operation on the string.
-    If extract_kv is specified, will extract key value pair from the string, otherwise keep the entire string.
-    Option key_only is valid since extract_kv is specified, when the number of string segments split by "=" is not 2,
-    only the first segment is retained as the key.
+    If extract_kv is specified, will extract key value pairs from the string with "=" as the delimiter and this would
+    return a dictionary, otherwise keep the entire string.
+    Option allow_empty_value is valid since extract_kv is specified. When the number of string segments split by "="
+    is 1, the first segment is retained as the key and empty string would be set as its corresponding value without
+    raising an exception.
     If keep_none is specified, will return None when input is None. Otherwise will return default_value if input is
     None or empty string.
     """
@@ -463,25 +465,29 @@ def extract_comma_separated_string(
         if enable_strip:
             item = item.strip()
         if extract_kv:
-            kv = item.split("=")
-            if key_only:
-                if enable_strip:
-                    result[kv[0].strip()] = ""
-                else:
-                    result[kv[0]] = ""
-            else:
-                if len(kv) == 2:
-                    if enable_strip:
-                        result[kv[0].strip()] = kv[1].strip()
-                    else:
-                        result[kv[0]] = kv[1]
-                else:
+            kv_list = item.split("=")
+            if len(kv_list) in [1, 2]:
+                key = kv_list[0]
+                value = ""
+                if len(kv_list) == 2:
+                    value = kv_list[1]
+                if not allow_empty_value and (value == "" or value.isspace()):
                     raise InvalidArgumentValueError(
-                        "The format of '{}' in '{}' is incorrect, correct format should be "
-                        "'Key1=Value1,Key2=Value2'.".format(
-                            item, raw_string
+                        "Empty value not allowed. The value '{}' of key '{}' in '{}' is empty. Raw input '{}'.".format(
+                            value, key, item, raw_string
                         )
                     )
+                if enable_strip:
+                    key = key.strip()
+                    value = value.strip()
+                result[key] = value
+            else:
+                raise InvalidArgumentValueError(
+                    "The format of '{}' in '{}' is incorrect, correct format should be "
+                    "'Key1=Value1,Key2=Value2'.".format(
+                        item, raw_string
+                    )
+                )
         else:
             result.append(item)
     return result
