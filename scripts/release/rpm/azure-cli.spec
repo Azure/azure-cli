@@ -5,6 +5,10 @@
 # Turn off python byte compilation
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
+# Enforces SHA-256 in file digests
+%global _binary_filedigest_algorithm 8
+%global _source_filedigest_algorithm 8
+
 # .el7.centos -> .el7
 %if 0%{?rhel}
   %define dist .el%{?rhel}
