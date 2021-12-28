@@ -1970,13 +1970,30 @@ class VMSSExtensionImageTest(ScenarioTest):
         self.kwargs.update({
             'pub': 'Microsoft.Azure.NetworkWatcher',
             'name': 'NetworkWatcherAgentLinux',
-            'location': 'eastus'
+            'location': 'eastus',
+            'ver': '1.4.905.2'
         })
         
-        self.cmd('vmss extension image list -p {pub}')
-        self.cmd('vmss extension image list-names -p {pub} -l {location}')
-        self.cmd('vmss extension image list-versions -n {name} -p {pub} -l {location}')
-        self.cmd('vmss extension image show -n {name} -p {pub} -l {location} --version 1.4.905.2')
+        self.cmd('vmss extension image list -p {pub}', checks=[
+            self.check('[0].publisher', self.kwargs['pub'])
+        ])
+
+        result = self.cmd('vmss extension image list-names -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location'])
+        ]).get_output_in_json()
+        self.assertTrue([n for n in result if n['name'] == self.kwargs['name']])
+
+        result = self.cmd('vmss extension image list-versions -n {name} -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location']),
+        ]).get_output_in_json()
+        self.assertTrue([v for v in result if v['name'] == self.kwargs['ver']])
+
+        self.cmd('vmss extension image show -n {name} -p {pub} -l {location} --version {ver}', checks=[
+            self.check('location', self.kwargs['location']),
+            self.check('name', self.kwargs['ver']),
+            self.check('operatingSystem', 'Linux')
+        ])
+
         # not existing image
         self.cmd('vmss extension image show -n fooBAR -p fooBAR -l {location} --version 0', expect_failure=True)
 
