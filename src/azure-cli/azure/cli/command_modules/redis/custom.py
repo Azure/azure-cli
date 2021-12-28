@@ -196,7 +196,18 @@ def cli_redis_identity_show(client, resource_group_name, cache_name):
 
 
 def cli_redis_identity_assign(client, resource_group_name, cache_name, mi_system_assigned=None, mi_user_assigned=None):
-    from azure.mgmt.redis.models import RedisUpdateParameters
+    from azure.mgmt.redis.models import RedisUpdateParameters, ManagedServiceIdentityType
+    redis_resourse = client.get(resource_group_name, cache_name)
+    identity = redis_resourse.identity
+    if identity is not None:
+        if ManagedServiceIdentityType.SYSTEM_ASSIGNED.value in identity.type:
+            mi_system_assigned = True
+        if ManagedServiceIdentityType.USER_ASSIGNED.value in identity.type:
+            old_user_identity = list(identity.user_assigned_identities)
+            if mi_user_assigned is None:
+                mi_user_assigned = []
+            for user_id in old_user_identity:
+                mi_user_assigned.append(user_id)
     update_params = RedisUpdateParameters(
         identity=build_identity(mi_system_assigned, mi_user_assigned))
     redis_resourse = client.update(resource_group_name, cache_name, update_params)

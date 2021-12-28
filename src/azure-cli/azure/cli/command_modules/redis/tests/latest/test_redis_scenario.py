@@ -308,6 +308,14 @@ class RedisCacheTests(ScenarioTest):
             time.sleep(30)
 
         self.cmd('az redis identity assign -n {name} -g {rg} --mi-user-assigned "{userIdentity}"',checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+            self.check('length(userAssignedIdentities)', 1)
+        ])
+
+        if self.is_live:
+            time.sleep(30)
+
+        self.cmd('az redis identity remove -n {name} -g {rg} --mi-system-assigned',checks=[
             self.check('type', 'UserAssigned'),
             self.check('length(userAssignedIdentities)', 1)
         ])
@@ -315,7 +323,7 @@ class RedisCacheTests(ScenarioTest):
         if self.is_live:
             time.sleep(30)
 
-        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned --mi-user-assigned "{userIdentity}"',checks=[
+        self.cmd('az redis identity assign -n {name} -g {rg} --mi-system-assigned',checks=[
             self.check('type', 'SystemAssigned, UserAssigned'),
             self.check('length(userAssignedIdentities)', 1)
         ])
