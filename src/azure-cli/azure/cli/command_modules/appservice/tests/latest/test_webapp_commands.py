@@ -129,10 +129,10 @@ class WebappBasicE2ETest(ScenarioTest):
 
         # verify creating an non node app using --runtime
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.3"'.format(resource_group, webapp_name, plan))
+            'webapp create -g {} -n {} --plan {} -r "php|7.4"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.3')
+            JMESPathCheck('phpVersion', '7.4')
         ])
 
     def test_webapp_runtimes(self):

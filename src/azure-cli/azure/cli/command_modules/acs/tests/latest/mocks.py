@@ -15,7 +15,7 @@ MOCK_CLI_CONFIG_DIR = tempfile.mkdtemp()
 MOCK_CLI_ENV_VAR_PREFIX = "MOCK_" + ENV_VAR_PREFIX
 
 
-class MockClient(object):
+class MockClient:
     def __init__(self):
         pass
 
@@ -33,7 +33,7 @@ class MockCLI(CLI):
         self.cloud = get_active_cloud(self)
 
 
-class MockCmd(object):
+class MockCmd:
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.cmd = AzCliCommand(AzCommandsLoader(cli_ctx), "mock-cmd", None)

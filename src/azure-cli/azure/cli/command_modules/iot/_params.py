@@ -50,6 +50,14 @@ app_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
     help='IoT Central application name.')
 
+mi_system_assigned_type = CLIArgumentType(
+    options_list=['--mi-system-assigned'],
+    help='Provide this flag to use system assigned identity.')
+
+system_assigned_type = CLIArgumentType(
+    options_list=['--system-assigned'],
+    help='Provide this flag to refer to the system-assigned identity.')
+
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
@@ -404,3 +412,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('display_name', options_list=['--display-name', '-d'],
                    help='Custom display name for the IoT Central app. This will be used in the IoT Central application'
                         ' manager to help you identify your app. Default value is the resource name.')
+        c.argument('mi_system_assigned', mi_system_assigned_type)
+
+    with self.argument_context('iot central app identity assign') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+        c.argument('system_assigned', system_assigned_type)
+
+    with self.argument_context('iot central app identity remove') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+        c.argument('system_assigned', system_assigned_type)
+
+    with self.argument_context('iot central app identity show') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])

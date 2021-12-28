@@ -181,3 +181,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.generic_update_command('update', getter_name='iot_central_app_get',
                                  setter_name='iot_central_app_update', command_type=update_custom_util)
         g.custom_command('delete', 'iot_central_app_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('identity assign', 'iot_central_app_assign_identity')
+        g.custom_command('identity remove', 'iot_central_app_remove_identity')
+        g.custom_show_command('identity show', 'iot_central_app_show_identity')

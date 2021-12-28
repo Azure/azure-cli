@@ -34,7 +34,6 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
 
         try:
             sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
-            self.assertTrue(sp_info['name'] == sp_info['appId'])
             self.assertTrue(sp_info['displayName'] == sp_name)
             self.kwargs['app_id'] = sp_info['appId']
 
@@ -629,7 +628,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
                 else:
                     # figure out the right time stamps from the recording file
-                    r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/microsoft.insights/eventtypes/management/' in r.uri)
+                    r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/Microsoft.Insights/eventtypes/management/' in r.uri)
                     from urllib.parse import parse_qs, urlparse
                     query_parts = parse_qs(urlparse(r.uri).query)['$filter'][0].split()
                     start_index, end_index = [i + 2 for (i, j) in enumerate(query_parts) if j == 'eventTimestamp']

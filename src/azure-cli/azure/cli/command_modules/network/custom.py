@@ -27,6 +27,7 @@ import threading
 import time
 import platform
 import subprocess
+import tempfile
 
 logger = get_logger(__name__)
 
@@ -524,9 +525,10 @@ def add_ag_private_link(cmd,
     else:
         raise CLIError("Frontend IP doesn't exist")
 
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            raise CLIError('Private Link name duplicates')
+    if appgw.private_link_configurations is not None:
+        for pl in appgw.private_link_configurations:
+            if pl.name == private_link_name:
+                raise CLIError('Private Link name duplicates')
 
     # get the virtual network of this application gateway
     vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
@@ -578,6 +580,8 @@ def add_ag_private_link(cmd,
         if fic.name == frontend_ip:
             fic.private_link_configuration = SubResource(id=private_link_config_id)
 
+    if appgw.private_link_configurations is None:
+        appgw.private_link_configurations = []
     appgw.private_link_configurations.append(private_link_config)
 
     return sdk_no_wait(no_wait,
@@ -7898,6 +7902,7 @@ def list_bastion_host(cmd, resource_group_name=None):
 
 SSH_EXTENSION_NAME = 'ssh'
 SSH_EXTENSION_MODULE = 'azext_ssh.custom'
+SSH_UTILS_EXTENSION_MODULE = 'azext_ssh.ssh_utils'
 SSH_EXTENSION_VERSION = '0.1.3'
 
 
@@ -7982,6 +7987,7 @@ def _build_args(cert_file, private_key_file):
 
 
 def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, bastion_host_name, resource_port=None, username=None, ssh_key=None):
+    import os
 
     _test_extension(SSH_EXTENSION_NAME)
 
@@ -8000,8 +8006,14 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
     elif auth_type.lower() == 'aad':
         azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
-        public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)  # pylint: disable=protected-access
-        cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file + '-cert.pub')  # pylint: disable=protected-access
+        azssh_utils = _get_azext_module(SSH_EXTENSION_NAME, SSH_UTILS_EXTENSION_MODULE)
+        cert_folder = tempfile.mkdtemp(prefix="aadsshcert")
+        if not os.path.isdir(cert_folder):
+            os.makedirs(cert_folder)
+        azssh.ssh_cert(cmd, cert_path=os.path.join(cert_folder, "id_rsa.pub-aadcert.pub"))
+        private_key_file = os.path.join(cert_folder, "id_rsa")
+        cert_file = os.path.join(cert_folder, "id_rsa.pub-aadcert.pub")
+        username = azssh_utils.get_ssh_cert_principals(cert_file)[0]
         command = [_get_ssh_path(), _get_host(username, 'localhost')]
         command = command + _build_args(cert_file, private_key_file)
     elif auth_type.lower() == 'ssh-key':
