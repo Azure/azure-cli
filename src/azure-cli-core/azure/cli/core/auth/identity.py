@@ -5,7 +5,6 @@
 
 import json
 import os
-import pickle
 import re
 
 from azure.cli.core._environment import get_config_dir
