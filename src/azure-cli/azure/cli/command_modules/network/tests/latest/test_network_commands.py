@@ -2992,6 +2992,27 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('frontendPortRangeEnd', 5))
         self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules_v3', location='eastus2euap')
+    def test_network_lb_nat_rules_v3(self, resource_group):
+        self.kwargs.update({
+            'lb': 'lb1',
+            'backend': 'lb1bepool',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        # test lb inbound-nat-rule create with new param --backend-pool-name
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp --backend-port 30 '
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3 --backend-pool-name {backend}', checks=[
+            self.check('name', 'rule3'),
+            self.check('frontendPortRangeStart', 0),
+            self.check('frontendPortRangeEnd', 3),
+            self.check("contains(backendAddressPool.id, '{backend}')", True)])
+        self.cmd(
+            'network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule3 --floating-ip true --idle-timeout 10 --frontend-port-range-end 5',
+            checks=self.check('frontendPortRangeEnd', 5))
+        self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools', location='eastus2')
     def test_network_lb_nat_pools(self, resource_group):
 
