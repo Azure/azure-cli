@@ -1750,7 +1750,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self._test_download_secret()
 
 
-class KeyVaultCertificateRecoverScenarioTest(ScenarioTest):
+class KeyVaultCertificateRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_soft_delete_')
     @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-')
     def test_keyvault_certificate_soft_delete(self, resource_group, key_vault):
