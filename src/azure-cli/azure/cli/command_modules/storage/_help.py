@@ -1424,14 +1424,10 @@ type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
 examples:
-  - name: Restore soft-deleted container.
-    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
-    
-> [!NOTE]
-> Deleted containers have versions associated with them since you can delete and recreate the container with the same name, multiple times. 
-> The “deletedversion” in the above command, refers to the version of the container which is deleted, that you want to restore. 
-> You can fetch the version available through the az storage container list command when used with the --include-deleted parameter.
-
+  - name: List and restore soft-deleted container.
+    text: |
+          az storage container list --include-deleted
+          az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
