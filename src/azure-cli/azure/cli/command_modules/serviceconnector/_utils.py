@@ -123,7 +123,7 @@ def auto_register(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
     except HttpResponseError as ex:
-        if ex.error.code == 'SubscriptionNotRegistered':
+        if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
                 return func(*args, **kwargs)
             raise CLIInternalError('Registeration failed, please manually run command '
