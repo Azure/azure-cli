@@ -41,7 +41,7 @@ def connection_list(client,
                     spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
-    return client.list(resource_uri=source_id)
+    return auto_register(client.list, resource_uri=source_id)
 
 
 def connection_list_support_types(cmd, client,
@@ -84,8 +84,7 @@ def connection_show(client,
                     spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return client.get(resource_uri=source_id,
-                      linker_name=connection_name)
+    return auto_register(client.get, resource_uri=source_id, linker_name=connection_name)
 
 
 def connection_delete(client,
@@ -99,10 +98,10 @@ def connection_delete(client,
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_uri=source_id,
-                       linker_name=connection_name)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_delete,
+                         resource_uri=source_id,
+                         linker_name=connection_name)
 
 
 def connection_list_configuration(client,
