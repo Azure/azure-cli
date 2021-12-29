@@ -319,7 +319,7 @@ def load_arguments(self, _):
 
     with self.argument_context('backup protectable-item show') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
-        c.argument('name', options_list=['--name'], help='Name of the protectable item.', id_part='child_name_3')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the protectable item.', id_part='child_name_3')
         c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
         c.argument('protectable_item_type', protectable_item_type)
 
