@@ -15,7 +15,7 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.6.10"
+PYTHON_VERSION="3.8.11"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
@@ -33,7 +33,7 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip==21.0.1
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
