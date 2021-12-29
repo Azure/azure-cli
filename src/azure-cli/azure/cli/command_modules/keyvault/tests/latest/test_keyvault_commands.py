@@ -1750,6 +1750,43 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self._test_download_secret()
 
 
+class KeyVaultCertificateRecoverScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_soft_delete_')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-')
+    def test_keyvault_certificate_soft_delete(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'policy_path' : os.path.join(TEST_DIR, 'policy.json')
+        })
+        self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
+
+        self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"', checks=[
+            self.check('status', 'completed'),
+            self.check('name', 'cert1')
+        ])
+        data = self.cmd('keyvault certificate delete --vault-name {kv} -n cert1').get_output_in_json()
+        self.kwargs['cert_id'] = data['id']
+        self.kwargs['cert_recovery_id'] = data['recoveryId']
+
+        max_timeout = 100
+        time_counter = 0
+        while time_counter <= max_timeout:
+            try:
+                # show deleted
+                self.cmd('keyvault certificate list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
+                self.cmd('keyvault certificate list-deleted --vault-name {kv} --maxresults 10',
+                         checks=self.check('length(@)', 1))
+                self.cmd('keyvault certificate show-deleted --id {secret_recovery_id}',
+                         checks=self.check('id', '{secret_id}'))
+                self.cmd('keyvault certificate show-deleted --vault-name {kv} -n {sec}',
+                         checks=self.check('id', '{secret_id}'))
+            except:  # pylint: disable=bare-except
+                time.sleep(10)
+                time_counter += 10
+            else:
+                break
+
+
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
     @KeyVaultPreparer(name_prefix='cli-test-kv-ct-co-')
