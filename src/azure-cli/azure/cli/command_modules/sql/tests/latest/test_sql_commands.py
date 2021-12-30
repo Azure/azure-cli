@@ -76,13 +76,19 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
-    subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
-    location = 'westeurope'
-    subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
-    target_vnet_name = 'vnet-powershell-cli-testing'
+    subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    group = 'CustomerExperienceTeam_RG'
+    location = 'westcentralus'
+    vnet_name = 'vnet-mi-tooling'
+    subnet_name = 'ManagedInstance'
+    subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+    # For cross-subnet update SLO, we need a target subnet to move managed instance to.
+    target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
-    target_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
-    group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
+    target_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, target_vnet_name, target_subnet_name)
+    target_subnet_vcores = 4
+    
     collation = "Serbian_Cyrillic_100_CS_AS"
 
     licence = 'LicenseIncluded'
@@ -92,8 +98,8 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     family = 'Gen5'
     proxy = 'Proxy'
 
-    sec_location = 'westus'
-    sec_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/secondary-vnet/subnets/ManagedInstance'
+    sec_location = 'centralus'
+    sec_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/vnet-sql-mi-secondary/subnets/default'.format(subscription_id, group)
 
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
@@ -4107,10 +4113,17 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         user = admin_login
 
         # test show sql managed instance 1
+        subnet = ManagedInstancePreparer.subnet
+        target_subnet = ManagedInstancePreparer.target_subnet
+        if not (self.in_recording or self.is_live):
+            subnet = subnet.replace(ManagedInstancePreparer.subscription_id, "00000000-0000-0000-0000-000000000000")
+            target_subnet = target_subnet.replace(ManagedInstancePreparer.subscription_id, "00000000-0000-0000-0000-000000000000")
+
         managed_instance_1 = self.cmd('sql mi show -g {} -n {}'
                                       .format(resource_group_1, managed_instance_name_1),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
+                                          JMESPathCheck('subnetId', subnet),
                                           JMESPathCheck('resourceGroup', resource_group_1),
                                           JMESPathCheck('administratorLogin', user),
                                           JMESPathCheck('vCores', 8),
@@ -4136,8 +4149,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
-        if self.is_live:
-            sleep(60)
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        sleep(120)
 
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
@@ -4212,23 +4226,21 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('tags', {})])
 
-        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
-        try:
-            self.cmd('sql mi update -g {} -n {} --subnet {}'
-                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet))
-        except Exception as e:
-            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
-            if expectedmessage in str(e):
-                pass
+        # test cross-subnet update SLO with the subnet resource id
+        self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
+                .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('subnetId', target_subnet)])
 
-        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
-        try:
-            self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
-                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet_name, ManagedInstancePreparer.target_vnet_name))
-        except Exception as e:
-            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
-            if expectedmessage in str(e):
-                pass
+        # test cross-subnet update SLO with subnet and vNet names
+        self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
+            .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.subnet_name, ManagedInstancePreparer.vnet_name),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('subnetId', subnet)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
