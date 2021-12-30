@@ -32,6 +32,10 @@ class KeyReplacer(RecordingProcessor):
         if 'secondaryKey' in val:
             val = re.sub(r'"secondaryKey":( ?)"([^"]+)"', r'"secondaryKey":"{}"'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
+        if any(['SharedAccessKey=' in val, 'sharedaccesskey=' in val]):
+            # Replaces live key with `mock_key` in `SharedAccessKey=live_key` or `sharedaccesskey=live_key` string response
+            val = re.sub(r'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
+                         .format(MOCK_KEY), val, flags=re.IGNORECASE)
         return val
 
     # pylint: disable=no-self-use
@@ -42,5 +46,9 @@ class KeyReplacer(RecordingProcessor):
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         if b'secondaryKey' in val:
             val = re.sub(b'"secondaryKey":( ?)"([^"]+)"', '"secondaryKey":"{}"'
+                         .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
+        if any([b'SharedAccessKey=' in val, b'sharedaccesskey=' in val]):
+            # Replaces live key with `mock_key` in `SharedAccessKey=live_key` or `sharedaccesskey=live_key` byte response
+            val = re.sub(br'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         return val
