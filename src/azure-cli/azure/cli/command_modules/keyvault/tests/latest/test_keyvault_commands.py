@@ -66,6 +66,7 @@ def _create_hsm(test):
                     '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
 
 
+
 def _delete_and_purge_hsm(test):
     test.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
     test.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
@@ -237,6 +238,7 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         # Show the connection at vault side
         hsm = self.cmd('keyvault show --hsm-name {hsm}',
                        checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+
         self.kwargs['hsm_pec_id'] = hsm['properties']['privateEndpointConnections'][0]['id']
         self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
                  checks=self.check('id', '{hsm_pec_id}'))
@@ -284,8 +286,8 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
-            'rg': 'clitest-mhsm-rg',
-            'loc': 'eastus2',
+            'rg': 'clitest-mhsm-rg02',
+             'loc': 'eastus2',
             'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
@@ -1842,6 +1844,8 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.check('status', 'inProgress'),
             self.check('name', 'pending-cert')
         ])
+
+
         self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', checks=[
             self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
             self.check('cancellationRequested', False),
@@ -1978,7 +1982,11 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             with open(policy3_path, "w") as f:
                 f.write(json.dumps(policy))
 
-        self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+            try:
+                self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+
+            except CLIError as e:
+                    print('The file already exists.')
 
         self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
                  checks=[
@@ -1987,6 +1995,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                                 policy['secretProperties']['contentType'])
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+
+
         if os.path.exists(cert_secret_path):
             os.remove(cert_secret_path)
 
@@ -2206,6 +2216,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
                  checks=self.check('attributes.enabled', True))
 
+        # test key get-policy-template
+        self.cmd('keyvault key get-policy-template',
+                 checks=self.check('length(@)', 2))
+
         self.kwargs.update({
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
             'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
@@ -2253,6 +2267,9 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault recover -n {kv2} -l {loc}', checks=self.check('name', '{kv2}'))
         self.cmd('keyvault delete -n {kv2}')
         self.cmd('keyvault purge -n {kv2} -l {loc}')
+
+
+
 
 
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):
@@ -2377,6 +2394,9 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         # delete a sas definition by (vault, account-name, name) and by id
         self.cmd('keyvault storage sas-definition delete --vault-name {kv} --account-name {sa} -n {blob_sas_name}')
         self.cmd('keyvault storage sas-definition delete --id {acct_sas_id}')
+
+        #test sas definition list-deleted
+        #self.cmd('keyvault storage sas-definition list-deleted --vault-name {kv} --account-name {sa}', checks=[self.check('length(@)', 2)])
 
         # list the sas definitions and secrets verfy none are left
         self.cmd('keyvault storage sas-definition list --vault-name {kv} --account-name {sa}',
