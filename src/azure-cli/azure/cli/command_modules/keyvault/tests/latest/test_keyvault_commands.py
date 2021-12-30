@@ -1991,8 +1991,6 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                                 policy['secretProperties']['contentType'])
                  ])
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
-
-
         if os.path.exists(cert_secret_path):
             os.remove(cert_secret_path)
 
