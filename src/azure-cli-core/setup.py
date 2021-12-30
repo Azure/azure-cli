@@ -64,7 +64,7 @@ DEPENDENCIES = [
 
 # dependencies for specific OSes
 if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.8')
+    DEPENDENCIES.append('psutil~=5.9')
 
 
 with open('README.rst', 'r', encoding='utf-8') as f:
