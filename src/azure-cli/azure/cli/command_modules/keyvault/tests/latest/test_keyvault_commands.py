@@ -66,7 +66,6 @@ def _create_hsm(test):
                     '--administrators "3707fb2f-ac10-4591-a04f-8b0d786ea37d"')
 
 
-
 def _delete_and_purge_hsm(test):
     test.cmd('keyvault delete --hsm-name {hsm} -g {rg}')
     test.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
@@ -238,7 +237,6 @@ class KeyVaultHSMPrivateEndpointConnectionScenarioTest(ScenarioTest):
         # Show the connection at vault side
         hsm = self.cmd('keyvault show --hsm-name {hsm}',
                        checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
-
         self.kwargs['hsm_pec_id'] = hsm['properties']['privateEndpointConnections'][0]['id']
         self.cmd('keyvault private-endpoint-connection show --id {hsm_pec_id}',
                  checks=self.check('id', '{hsm_pec_id}'))
@@ -1844,8 +1842,6 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.check('status', 'inProgress'),
             self.check('name', 'pending-cert')
         ])
-
-
         self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', checks=[
             self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
             self.check('cancellationRequested', False),
@@ -2268,10 +2264,6 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault delete -n {kv2}')
         self.cmd('keyvault purge -n {kv2} -l {loc}')
 
-
-
-
-
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):
     def _create_managable_storage_account(self):
         storageacct = self.cmd('az storage account create -g {rg} -n {sa}').get_output_in_json()
@@ -2394,10 +2386,6 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         # delete a sas definition by (vault, account-name, name) and by id
         self.cmd('keyvault storage sas-definition delete --vault-name {kv} --account-name {sa} -n {blob_sas_name}')
         self.cmd('keyvault storage sas-definition delete --id {acct_sas_id}')
-
-        #test sas definition list-deleted
-        #self.cmd('keyvault storage sas-definition list-deleted --vault-name {kv} --account-name {sa}', checks=[self.check('length(@)', 2)])
-
         # list the sas definitions and secrets verfy none are left
         self.cmd('keyvault storage sas-definition list --vault-name {kv} --account-name {sa}',
                  checks=[self.check('length(@)', 0)])
