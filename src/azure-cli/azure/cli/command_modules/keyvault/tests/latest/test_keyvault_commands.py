@@ -284,8 +284,8 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
             'hsm_name': self.create_random_name('clitest-mhsm-', 24),
-            'rg': 'clitest-mhsm-rg02',
-             'loc': 'eastus2',
+            'rg': 'clitest-mhsm-rg',
+            'loc': 'eastus2',
             'init_admin': '3707fb2f-ac10-4591-a04f-8b0d786ea37d'
         })
 
