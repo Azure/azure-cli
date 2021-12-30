@@ -20,7 +20,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
 apt-get update
-apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev
+# uuid-dev is used to build _uuid module: https://github.com/python/cpython/pull/3796
+apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev uuid-dev
 apt-get install -y wget
 
 # Download Python source code
