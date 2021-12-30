@@ -1978,12 +1978,7 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             with open(policy3_path, "w") as f:
                 f.write(json.dumps(policy))
 
-            try:
-                self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
-
-            except CLIError as e:
-                    print('The file already exists.')
-
+        self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
         self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
                  checks=[
                      self.check('name', 'cert2'),
