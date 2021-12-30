@@ -331,13 +331,17 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault list --resource-type hsm', checks=list_checks)
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None', checks=[
+            self.check('properties.networkAcls.bypass', 'None')
+        ])
+
+        self.cmd(r"az keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault show-deleted --hsm-name {hsm_name}', checks=show_deleted_checks)
         self.cmd('keyvault show-deleted --hsm-name {hsm_name} -l {loc}', checks=show_deleted_checks)
-        self.cmd('keyvault list-deleted --resource-type hsm', checks=list_deleted_checks)
+        self.cmd(r"az keyvault list-deleted --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_deleted_checks)
 
         self.cmd('keyvault recover --hsm-name {hsm_name}')
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
