@@ -14,7 +14,7 @@ import threading
 import vcr
 
 from .config import TestConfig
-from .const import ENV_TEST_DIAGNOSE
+from .const import ENV_KEEP_RECORDING_FILE, ENV_TEST_DIAGNOSE
 from .utilities import create_random_name
 from .decorators import live_only
 from .recording_processors import ContentLengthProcessor
@@ -125,7 +125,8 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
             '{}.yaml'.format(recording_name or method_name)
         )
         if self.is_live and os.path.exists(self.recording_file):
-            os.remove(self.recording_file)
+            if not os.environ.get(ENV_KEEP_RECORDING_FILE, False):
+                os.remove(self.recording_file)
 
         self.in_recording = self.is_live or not os.path.exists(self.recording_file)
         self.test_resources_count = 0

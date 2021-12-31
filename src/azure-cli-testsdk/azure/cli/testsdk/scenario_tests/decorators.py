@@ -6,7 +6,7 @@
 import os
 import functools
 import unittest
-from .const import ENV_LIVE_TEST
+from .const import ENV_KEEP_RECORDING_FILE, ENV_LIVE_TEST
 from .utilities import trim_kwargs_from_test_function
 
 
@@ -16,7 +16,9 @@ def live_only():
         'This is a live only test. A live test will bypass all vcrpy components.')
 
 
-def record_only():
+def record_only(keep_recording_file=False):
+    if keep_recording_file:
+        os.environ[ENV_KEEP_RECORDING_FILE] = 'True'
     return unittest.skipUnless(
         not os.environ.get(ENV_LIVE_TEST, False),
         'This test is excluded from being run live. To force a recording, please remove the recording file.')
