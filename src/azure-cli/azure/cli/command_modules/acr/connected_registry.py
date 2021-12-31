@@ -576,12 +576,13 @@ def _update_repo_permissions(cmd,
         actions=current_actions
     )
 
-    return scope_map_client.begin_update(
+    poller = scope_map_client.begin_update(
         resource_group_name,
         registry_name,
         sync_scope_map_name,
         scope_map_update_parameters
     )
+    return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def _get_scope_map_actions_set(repos, actions):

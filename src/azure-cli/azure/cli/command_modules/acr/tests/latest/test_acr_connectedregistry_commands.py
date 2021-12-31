@@ -155,9 +155,5 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Delete connected registry child
         self.cmd('acr connected-registry delete -n {child_name} -r {registry_name} -y')
 
-        # Wait for 10 seconds for cleanup
-        import time
-        time.sleep(10)
-
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
