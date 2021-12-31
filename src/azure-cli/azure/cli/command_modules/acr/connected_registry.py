@@ -7,6 +7,7 @@ from enum import Enum
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
@@ -57,7 +58,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   sync_window=None,
                                   log_level=None,
                                   sync_audit_logs_enabled=False,
-                                  notifications_list=None):
+                                  notifications=None):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
@@ -105,10 +106,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
             client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
 
-    if notifications_list is not None:
-        notifications_set = set(list(notifications_list))
-    else:
-        notifications_set = set()
+    notifications_set = set(list(notifications)) \
+        if notifications else set()
 
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
         'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties')
@@ -153,8 +152,8 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
                                   log_level=None,
                                   sync_message_ttl=None,
                                   sync_audit_logs_enabled=None,
-                                  add_notifications_list=None,
-                                  remove_notifications_list=None):
+                                  add_notifications=None,
+                                  remove_notifications=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -191,18 +190,18 @@ def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-m
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
     # Add or remove from the current notifications list
-    add_notifications_set = set(list(add_notifications_list)) \
-        if add_notifications_list else set()
+    add_notifications_set = set(list(add_notifications)) \
+        if add_notifications else set()
 
-    remove_notifications_set = set(list(remove_notifications_list)) \
-        if remove_notifications_list else set()
+    remove_notifications_set = set(list(remove_notifications)) \
+        if remove_notifications else set()
 
     duplicate_notifications = set.intersection(add_notifications_set, remove_notifications_set)
     if duplicate_notifications:
         errors = sorted(duplicate_notifications)
-        raise CLIError(
+        raise ArgumentUsageError(
             'Update ambiguity. Duplicate notifications list were provided with ' +
-            '--add-notifications-list and --remove-notifications-list arguments.\n{}'.format(errors))
+            '--add-notifications and --remove-notifications arguments.\n{}'.format(errors))
 
     current_notifications_set = set(current_connected_registry.notifications_list) \
         if current_connected_registry.notifications_list else set()
