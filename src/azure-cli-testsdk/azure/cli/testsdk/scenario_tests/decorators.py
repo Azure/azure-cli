@@ -21,7 +21,8 @@ def record_only(keep_recording_file=False):
         os.environ[ENV_KEEP_RECORDING_FILE] = 'True'
     return unittest.skipUnless(
         not os.environ.get(ENV_LIVE_TEST, False),
-        'This test is excluded from being run live. To force a recording, please remove the recording file.')
+        'This test is excluded from being run live. To force a recording, '
+        'please remove the recording file and rerun in recording mode.')
 
 
 class AllowLargeResponse(object):  # pylint: disable=too-few-public-methods
