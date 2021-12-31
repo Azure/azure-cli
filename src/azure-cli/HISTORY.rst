@@ -13,14 +13,14 @@ Release History
 
 **App Service**
 
-* [BREAKING CHANGE] az webapp up: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
-* [BREAKING CHANGE] az webapp create: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
-* [BREAKING CHANGE] az functionapp create: Remove python 3.6 support (#20770)
+* [BREAKING CHANGE] `az webapp up`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
+* [BREAKING CHANGE] `az webapp create`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
+* [BREAKING CHANGE] `az functionapp create`: Remove python 3.6 support (#20770)
 * Fix #19550: `az staticwebapp users update`: Allow updating static web app user roles again (#20694)
 * `az logicapp create`: Autogenerate a WS1 App Service Plan when no value for `--plan` or `--consumption-plan-location` is provided (#20678)
 * `az appservice plan create`: Allow creating App Service Plans for Logic Apps (SKUs WS1, WS2, and WS3) (#20678)
-* Fix #20757: `az webapp up`:  Fix list index out of range when no `--plan` argument passed (#20760)
-* Fix  #18652: `az webapp up`: Search for *.csproj in child directories (#20738)
+* Fix #20757: `az webapp up`: Fix list index out of range when no `--plan` argument passed (#20760)
+* Fix #18652: `az webapp up`: Search for \*.csproj in child directories (#20738)
 * `az webapp list-runtimes`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
 
 **Backup**
@@ -38,21 +38,16 @@ Release History
 
 **IoT**
 
-* `az iot hub update`: Adds error handling for file-upload parameters and fixes empty $default storage endpoint errors (#20595)
+* `az iot hub update`: Add error handling for file-upload parameters and fixes empty $default storage endpoint errors (#20595)
 * `az iot central app create`: Add new parameter `--mi-system-assigned` to support creating an app with system-assigned managed identity (#20448)
 * `az iot central app identity show/assign/remove`: Add new commands to manage the system-assigned managed identity to an existing IoT Central app (#20448)
-* `az iot dps access-policy`: Being replaced with `az iot dps policy` (#20682)
-* `az iot dps linked-hub create`: Add convenience arguments for linking hubs. (#20682)
+* `az iot dps access-policy`: Be replaced with `az iot dps policy` (#20682)
+* `az iot dps linked-hub create`: Add convenience arguments for linking hubs (#20682)
 
 **Network**
 
 * Fix #19482: Azure Bastion AAD fix for new CLI core changes (#20648)
 * `az network lb inbound-nat-pool create`: Add new parameter `--backend-pool-name` (#20835)
-
-**Packaging**
-
-* Add CI job to build Mariner RPM (#20584)
-* Fix install script on Python 3.10 (#20714)
 
 **Profile**
 
@@ -60,7 +55,7 @@ Release History
 
 **Redis**
 
-* `az redis identity`: Added support for assigning and modifying Identity. (#20833)
+* `az redis identity`: Add support for assigning and modifying Identity (#20833)
 
 **REST**
 
@@ -68,7 +63,7 @@ Release History
 
 **Role**
 
-* [BREAKING CHANGE] `az ad sp create-for-rbac`: Drop `name` property from the output. Use `appId` instead. (#19808)
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: Drop `name` property from the output. Use `appId` instead (#19808)
 * [BREAKING CHANGE] `az ad sp create-for-rbac`: No role assignment will be created by default (#19805)
 
 **Storage**
