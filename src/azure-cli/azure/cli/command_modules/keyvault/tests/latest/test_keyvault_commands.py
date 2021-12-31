@@ -2206,6 +2206,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
                  checks=self.check('attributes.enabled', True))
 
+        # test key get-policy-template
+        self.cmd('keyvault key get-policy-template',
+                 checks=self.check('length(@)', 2))
+
         self.kwargs.update({
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
             'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
