@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.32.0
+++++++
+* Use optimistic locking for service principal entry reads (#20408)
+
 2.31.0
 ++++++
 * Use MSAL HTTP cache (#20234)
