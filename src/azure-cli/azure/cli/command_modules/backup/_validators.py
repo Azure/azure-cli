@@ -6,7 +6,7 @@
 from datetime import datetime
 from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError, \
     ArgumentUsageError, InvalidArgumentValueError
-from azure.mgmt.recoveryservicesbackup.models import StorageType
+from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 # Argument types
 
 

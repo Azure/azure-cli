@@ -178,11 +178,24 @@ class TestServicePrincipalAuth(unittest.TestCase):
         cred = ServicePrincipalAuth.build_credential("test_secret")
         assert cred == {"client_secret": "test_secret"}
 
+        # secret with '~', which is preserved as-is
+        cred = ServicePrincipalAuth.build_credential("~test_secret")
+        assert cred == {"client_secret": "~test_secret"}
+
         # certificate
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'sp_cert.pem')
         cred = ServicePrincipalAuth.build_credential(test_cert_file)
         assert cred == {'certificate': test_cert_file}
+
+        # certificate path with '~', which expands to HOME folder
+        import shutil
+        home = os.path.expanduser('~')
+        home_cert = os.path.join(home, 'sp_cert.pem')  # C:\Users\username\sp_cert.pem
+        shutil.copyfile(test_cert_file, home_cert)
+        cred = ServicePrincipalAuth.build_credential(os.path.join('~', 'sp_cert.pem'))  # ~\sp_cert.pem
+        assert cred == {'certificate': home_cert}
+        os.remove(home_cert)
 
         cred = ServicePrincipalAuth.build_credential(test_cert_file, use_cert_sn_issuer=True)
         assert cred == {'certificate': test_cert_file, 'use_cert_sn_issuer': True}
@@ -192,7 +205,7 @@ class TestServicePrincipalAuth(unittest.TestCase):
         assert cred == {"client_assertion": "test_jwt"}
 
 
-class TestMsalSecretStore(unittest.TestCase):
+class TestServicePrincipalStore(unittest.TestCase):
 
     test_sp = {
         'client_id': 'myapp',

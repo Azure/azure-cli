@@ -1076,6 +1076,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('cap_mbps', arg_group='Additional Flags', help="Caps the transfer rate, in megabits per second. "
                    "Moment-by-moment throughput might vary slightly from the cap. "
                    "If this option is set to zero, or it is omitted, the throughput isn't capped. ")
+        c.positional('extra_options', nargs='*', is_experimental=True, default=[],
+                     help="Other options which will be passed through to azcopy as it is. "
+                          "Please put all the extra options after a `--`")
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
