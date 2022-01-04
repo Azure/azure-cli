@@ -276,7 +276,7 @@ def _validate_tag(string):
 def process_action_group_detail_for_creation(namespace):
     from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver, \
         ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
 
     _validate_tags(namespace)
 
@@ -296,6 +296,7 @@ def process_action_group_detail_for_creation(namespace):
         'voice_receivers': [r for r in receivers if isinstance(r, VoiceReceiver)],
         'logic_app_receivers': [r for r in receivers if isinstance(r, LogicAppReceiver)],
         'azure_function_receivers': [r for r in receivers if isinstance(r, AzureFunctionReceiver)],
+        'event_hub_receivers': [r for r in receivers if isinstance(r, EventHubReceiver)],
         'tags': ns.get('tags') or None
     }
     if hasattr(namespace, 'tags'):

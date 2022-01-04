@@ -33,11 +33,12 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
         instance.voice_receivers = filter_receivers(instance.voice_receivers)
         instance.logic_app_receivers = filter_receivers(instance.logic_app_receivers)
         instance.azure_function_receivers = filter_receivers(instance.azure_function_receivers)
+        instance.event_hub_receivers = filter_receivers(instance.event_hub_receivers)
 
     if add_receivers:
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
             ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
         for r in add_receivers:
             if isinstance(r, EmailReceiver):
                 instance.email_receivers.append(r)
@@ -59,6 +60,8 @@ def update_action_groups(instance, tags=None, short_name=None, add_receivers=Non
                 instance.logic_app_receivers.append(r)
             elif isinstance(r, AzureFunctionReceiver):
                 instance.azure_function_receivers.append(r)
+            elif isinstance(r, EventHubReceiver):
+                instance.event_hub_receivers.append(r)
 
     return instance
 
