@@ -3964,7 +3964,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                sku=sku,
                                create_rg=_create_new_rg,
                                resource_group_name=rg_name,
-                               plan=plan)
+                               plan=plan,
+                               is_linux=_is_linux)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
