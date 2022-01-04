@@ -70,13 +70,13 @@ class AAZBaseType:
     _ValueCls = None
     _PatchDataCls = None
 
-    def __init__(self, options=None, nullable=False, serialized_name=None, flags={}):
+    def __init__(self, options=None, nullable=False, serialized_name=None, flags=None):
         assert issubclass(self._ValueCls, AAZBaseValue)
         self._serialized_name = serialized_name
         self._options = options
         self._name = None
         self._nullable = nullable   # when true, specifies that null is a valid value
-        self._flags = flags
+        self._flags = {} if flags is None else flags
 
     @abc.abstractmethod
     def process_data(self, data, **kwargs):

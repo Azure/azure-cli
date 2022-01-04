@@ -56,7 +56,7 @@ class AAZArgAction(Action):
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
 
     @classmethod
-    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
         raise NotImplementedError()
 
     @classmethod
@@ -68,7 +68,9 @@ class AAZArgAction(Action):
 class AAZSimpleTypeArgAction(AAZArgAction):
 
     @classmethod
-    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
+        if prefix_keys is None:
+            prefix_keys = []
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
@@ -112,7 +114,9 @@ class AAZCompoundTypeArgAction(AAZArgAction):
     )
 
     @classmethod
-    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
+        if prefix_keys is None:
+            prefix_keys = []
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
@@ -255,7 +259,9 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
             raise azclierror.InvalidArgumentValueError(f"Failed to parse '{option_string}' argument: {ex}") from ex
 
     @classmethod
-    def setup_operations(cls, dest_ops, values, prefix_keys=[]):
+    def setup_operations(cls, dest_ops, values, prefix_keys=None):
+        if prefix_keys is None:
+            prefix_keys = []
         if values is None:
             if cls._schema._blank == AAZUndefined:
                 raise AAZInvalidValueError("argument cannot be blank")
