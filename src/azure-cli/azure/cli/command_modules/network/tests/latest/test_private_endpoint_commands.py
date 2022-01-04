@@ -2212,6 +2212,19 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self, approve=False, rejected=False)
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_datafactory", location="westus")
+    def test_private_endpoint_connection_datafactory(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'datafactory',
+            'list_num': 1,
+            'type': 'Microsoft.DataFactory/factories'
+        })
+        self.cmd('extension add -n datafactory')
+
+        _test_private_endpoint(self)
+
 
 class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def _test_private_endpoint_connection_scenario_powerbi(self, resource_group, powerBIResourceName, resource_type, reject):
@@ -2625,6 +2638,7 @@ class AzureWebPubSubServicePrivateEndpointScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_datafactory_private_endpoint', random_name_length=40, location="westus")
     def test_private_link_endpoint_datafactory(self, resource_group):
         self.kwargs.update({
@@ -2649,9 +2663,9 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Test list private link resources
-        hdi_private_link_resources = self.cmd(
+        datafactory_private_link_resources = self.cmd(
             'network private-link-resource list --id {datafactory_id}').get_output_in_json()
-        self.kwargs['group_id'] = hdi_private_link_resources[0]['properties']['groupId']
+        self.kwargs['group_id'] = datafactory_private_link_resources[0]['properties']['groupId']
 
         # Create private endpoint with manual request approval
         private_endpoint = self.cmd(
