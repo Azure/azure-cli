@@ -2649,9 +2649,9 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Test list private link resources
-        hdi_private_link_resources = self.cmd(
+        datafactory_private_link_resources = self.cmd(
             'network private-link-resource list --id {datafactory_id}').get_output_in_json()
-        self.kwargs['group_id'] = hdi_private_link_resources[0]['properties']['groupId']
+        self.kwargs['group_id'] = datafactory_private_link_resources[0]['properties']['groupId']
 
         # Create private endpoint with manual request approval
         private_endpoint = self.cmd(
