@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from azure.cli.core.azclierror import (
     CLIInternalError
 )
@@ -87,3 +88,44 @@ def set_user_token_header(client, cli_ctx):
     client._config.logging_policy.headers_to_redact.append('x-ms-serviceconnector-user-token')
 
     return client
+
+
+def register_provider():
+    from knack.log import get_logger
+    logger = get_logger(__name__)
+
+    logger.warning('Provider Microsoft.ServiceLinker is not registered, '
+                   'trying to register. This usually takes 1-2 minutes.')
+    # register the provider
+    run_cli_cmd('az provider register -n Microsoft.ServiceLinker')
+
+    # verify the registration, 30 * 10s polling the result
+    MAX_RETRY_TIMES = 30
+    RETRY_INTERVAL = 10
+
+    count = 0
+    while count < MAX_RETRY_TIMES:
+        time.sleep(RETRY_INTERVAL)
+        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker')
+        current_state = output.get('registrationState')
+        if current_state == 'Registered':
+            return True
+        if current_state == 'Registering':
+            count += 1
+        else:
+            return False
+    return False
+
+
+def auto_register(func, *args, **kwargs):
+    from azure.core.exceptions import HttpResponseError
+
+    try:
+        return func(*args, **kwargs)
+    except HttpResponseError as ex:
+        if ex.error and ex.error.code == 'SubscriptionNotRegistered':
+            if register_provider():
+                return func(*args, **kwargs)
+            raise CLIInternalError('Registeration failed, please manually run command '
+                                   '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
+        raise ex

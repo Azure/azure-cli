@@ -404,8 +404,9 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
     try:
         key_values = []
         from azure.cli.command_modules.appservice.custom import get_app_settings
+        slot = appservice_account.get('resource_name') if appservice_account.get('resource_type') == 'slots' else None
         settings = get_app_settings(
-            cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
+            cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=slot)
         for item in settings:
             key = prefix_to_add + item['name']
             if validate_import_key(key):
@@ -485,9 +486,10 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
             else:
                 non_slot_settings.append(name + '=' + value)
         # known issue 4/26: with in-place update, AppService could change slot-setting true/false incorrectly
+        slot = appservice_account.get('resource_name') if appservice_account.get('resource_type') == 'slots' else None
         from azure.cli.command_modules.appservice.custom import update_app_settings
         update_app_settings(cmd, resource_group_name=appservice_account["resource_group"],
-                            name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings)
+                            name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings, slot=slot)
     except Exception as exception:
         raise CLIError("Failed to write key-values to appservice: " + str(exception))
 

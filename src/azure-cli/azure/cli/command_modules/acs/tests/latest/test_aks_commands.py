@@ -5269,7 +5269,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # install Azure Firewall preview CLI extension
         try:
-            subprocess.call(["az", "extension", "add", "--name", "azure-firewall"])
+            subprocess.call(["az", "extension", "add", "--name", "azure-firewall", "--yes"])
         except subprocess.CalledProcessError as err:
             raise CLIInternalError("Failed to install azure-firewall extension with error: '{}'!".format(err))
 

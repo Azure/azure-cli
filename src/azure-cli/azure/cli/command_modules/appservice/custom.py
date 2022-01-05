@@ -62,7 +62,7 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
-                    get_pool_manager)
+                    get_pool_manager, get_resource_if_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -1821,6 +1821,14 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    if sku.upper() in ['WS1', 'WS2', 'WS3']:
+        existing_plan = get_resource_if_exists(client.app_service_plans,
+                                               resource_group_name=resource_group_name, name=name)
+        if existing_plan and existing_plan.sku.tier != "WorkflowStandard":
+            raise ValidationError("Plan {} in resource group {} already exists and "
+                                  "cannot be updated to a logic app SKU (WS1, WS2, or WS3)")
+        plan_def.type = "elastic"
 
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
