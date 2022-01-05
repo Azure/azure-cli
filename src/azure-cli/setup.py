@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.31.0"
+VERSION = "2.32.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -60,7 +60,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys~=4.5.0b4',
+    'azure-keyvault-keys==4.5.0b4',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
