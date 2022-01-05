@@ -382,7 +382,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,
         shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
-        vm_size=None, os_disk_size=None, vnet=None, subnet=None):
+        vm_size=None, os_disk_size=None, vnet=None, subnet=None, proxy_vm_size=None, build_vm_identities=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
@@ -485,7 +485,9 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                                  namespace='Microsoft.Network', type='virtualNetworks', name=vnet,
                                  child_type_1='subnets', child_name_1=subnet)
         vnet_config = VirtualNetworkConfig(subnet_id=subnet)
-    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, vnet_config=vnet_config)
+    if subnet is not None and proxy_vm_size is not None:
+        vnet_config = VirtualNetworkConfig(subnet_id=subnet, proxy_vm_size=proxy_vm_size)
+    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
