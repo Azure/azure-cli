@@ -3708,14 +3708,17 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
-    client = web_client_factory(cmd.cli_ctx)
+    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
 
     if is_webapp:
+        # TODO change to a GET
         app = show_webapp(cmd, resource_group_name, name, slot)
     else:
-        app = show_functionapp(cmd, resource_group_name, name, slot)
+        app = client.web_apps.get(resource_group_name=resource_group_name, name=name)
+        # TODO support slots
+        # app = show_functionapp(cmd, resource_group_name, name, slot)
 
-    parsed_plan = parse_resource_id(app.app_service_plan_id)
+    parsed_plan = parse_resource_id(show_functionapp(cmd, resource_group_name, name, slot).app_service_plan_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
     if skip_delegation_check:
@@ -3729,10 +3732,17 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
     subnet_id = subnet_info["subnet_resource_id"]
     if not slot:
-        client.web_apps.update(resource_group_name=resource_group_name,
-                               name=name,
-                               site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+        app.virtual_network_subnet_id = subnet_id
+        client.web_apps.begin_create_or_update(resource_group_name=resource_group_name,
+                                               name=name,
+                                               site_envelope=app)
+        print("updated")
+        # client.web_apps.update(resource_group_name=resource_group_name,
+        #                        name=name,
+        #                        site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    # TODO update slot
     else:
+        0/0  # TODO remove
         client.web_apps.update_slot(resource_group_name=resource_group_name,
                                     name=name,
                                     slot=slot,

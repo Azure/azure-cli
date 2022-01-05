@@ -333,6 +333,7 @@ def validate_staticsite_link_function(cmd, namespace):
         raise ValidationError("Cannot have more than one user provided function app associated with a Static Web App")
 
 
+# TODO consider combining with validate_add_vnet
 def validate_vnet_integration(cmd, namespace):
     validate_tags(namespace)
     if namespace.subnet or namespace.vnet:
