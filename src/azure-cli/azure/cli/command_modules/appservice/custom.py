@@ -3692,33 +3692,24 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
 
 
 def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, True)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
 def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
                                      skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, False)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
-def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False,
-                          is_webapp=True):
-    from azure.mgmt.web.models import SitePatchResource
-
+def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
     subnet_info = _get_subnet_info(cmd=cmd,
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
     client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
 
-    if is_webapp:
-        # TODO change to a GET
-        app = show_webapp(cmd, resource_group_name, name, slot)
-    else:
-        app = client.web_apps.get(resource_group_name=resource_group_name, name=name)
-        # TODO support slots
-        # app = show_functionapp(cmd, resource_group_name, name, slot)
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
-    parsed_plan = parse_resource_id(show_functionapp(cmd, resource_group_name, name, slot).app_service_plan_id)
+    parsed_plan = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
 
     if skip_delegation_check:
@@ -3730,23 +3721,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
 
-    subnet_id = subnet_info["subnet_resource_id"]
-    if not slot:
-        app.virtual_network_subnet_id = subnet_id
-        client.web_apps.begin_create_or_update(resource_group_name=resource_group_name,
-                                               name=name,
-                                               site_envelope=app)
-        print("updated")
-        # client.web_apps.update(resource_group_name=resource_group_name,
-        #                        name=name,
-        #                        site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
-    # TODO update slot
-    else:
-        0/0  # TODO remove
-        client.web_apps.update_slot(resource_group_name=resource_group_name,
-                                    name=name,
-                                    slot=slot,
-                                    site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                            client=client, extra_parameter=app)
 
     # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
