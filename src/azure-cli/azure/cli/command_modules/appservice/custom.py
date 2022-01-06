@@ -4054,7 +4054,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
         cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
         cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
-        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
         cmd.cli_ctx.config.set_value('defaults', 'location', loc)
         cmd.cli_ctx.config.set_value('defaults', 'web', name)
     return create_json
