@@ -142,7 +142,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -254,10 +255,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location):
+def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    current_sub_id = get_subscription_id(cmd.cli_ctx)
+    if vnet_sub_id:
+        cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
+
     vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
     vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
                                     virtual_network_name=vnet_name).location
+
+    cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
@@ -2950,7 +2959,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
