@@ -9,14 +9,14 @@ from unittest import mock
 import os
 import time
 import tempfile
-from azure_devtools.scenario_tests.utilities import create_random_name
+from azure.cli.testsdk.scenario_tests.utilities import create_random_name
 import requests
 import datetime
 import urllib3
 from knack.util import CLIError
 import certifi
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists
@@ -129,10 +129,10 @@ class WebappBasicE2ETest(ScenarioTest):
 
         # verify creating an non node app using --runtime
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.3"'.format(resource_group, webapp_name, plan))
+            'webapp create -g {} -n {} --plan {} -r "php|7.4"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.3')
+            JMESPathCheck('phpVersion', '7.4')
         ])
 
     def test_webapp_runtimes(self):

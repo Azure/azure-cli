@@ -1989,11 +1989,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_ultra_ssd=False,
                edge_zone=None,
                disable_local_accounts=False,
+               enable_fips_image=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False,
                aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
     # decorator pattern
@@ -2282,7 +2283,7 @@ def aks_update(cmd, client, resource_group_name, name,
                tags=None,
                nodepool_labels=None,
                aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
     # decorator pattern
@@ -2294,12 +2295,12 @@ def aks_update(cmd, client, resource_group_name, name,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
     )
     try:
-        # construct mc profile
+        # update mc profile
         mc = aks_update_decorator.update_default_mc_profile()
     except DecoratorEarlyExitException:
         # exit gracefully
         return None
-    # send request to create a real managed cluster
+    # send request to update the real managed cluster
     return aks_update_decorator.update_mc(mc)
 
 
@@ -3068,6 +3069,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       mode="User",
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
+                      enable_fips_image=False,
                       no_wait=False):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -3123,7 +3125,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
-        mode=mode
+        mode=mode,
+        enable_fips=enable_fips_image
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
