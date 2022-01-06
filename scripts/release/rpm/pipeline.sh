@@ -28,7 +28,7 @@ docker build \
 
 # Extract the built RPM so that it can be distributed independently.
 # The RPM file looks like azure-cli-2.32.0-1.el7.x86_64.rpm
-id=$(docker create azure/azure-cli:centos7-builder)
+id=$(docker create azure/azure-cli:${IMAGE}-builder)
 # https://docs.docker.com/engine/reference/commandline/cp/
 # Append /. so that the x86_64 folder's content is copied, instead of x86_64 folder itself.
 docker cp $id:/root/rpmbuild/RPMS/x86_64/. ${BUILD_STAGINGDIRECTORY}
