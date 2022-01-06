@@ -27,7 +27,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_
 from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
@@ -490,7 +490,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         if subnet is not None:
             vnet_config = VirtualNetworkConfig(subnet_id=subnet, proxy_vm_size=proxy_vm_size)
         else:
-            raise ArgumentUsageError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
+            raise RequiredArgumentMissingError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
     vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
