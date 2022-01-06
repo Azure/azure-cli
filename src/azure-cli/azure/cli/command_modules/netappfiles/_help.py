@@ -60,6 +60,8 @@ parameters:
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
     short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+  - name: --encrypt-dc-conn --encrypt-dc-connections
+    short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
 examples:
   - name: Add an active directory to the account
     text: >
@@ -747,6 +749,22 @@ parameters:
     short-summary: Indication that NFSv4.1 protocol is allowed
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names)
+  - name: --kerberos5-r
+    short-summary: Kerberos5 Read only access
+  - name: --kerberos5-rw
+    short-summary: Kerberos5 Read and write access
+  - name: --kerberos5i-r
+    short-summary: Kerberos5i Read only access
+  - name: --kerberos5i-rw
+    short-summary: Kerberos5i Read and write access
+  - name: --kerberos5p-r
+    short-summary: Kerberos5p Read only access
+  - name: --kerberos5p-rw
+    short-summary: Kerberos5p Read and write access
+  - name: --has-root-access
+    short-summary: Has root access to volume
+  - name: --chown-mode
+    short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
   - name: Add an export policy rule for the ANF volume
     text: >
