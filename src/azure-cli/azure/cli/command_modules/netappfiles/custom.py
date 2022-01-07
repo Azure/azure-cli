@@ -41,7 +41,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
-                         administrators=None, encrypt_dc_connections=None):
+                         administrators=None, encrypt_dc_conn=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -50,7 +50,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
-                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_connections)
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])

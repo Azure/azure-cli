@@ -60,7 +60,7 @@ parameters:
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
     short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
-  - name: --encrypt-dc-conn --encrypt-dc-connections
+  - name: --encrypt-dc-conn
     short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
 examples:
   - name: Add an active directory to the account
