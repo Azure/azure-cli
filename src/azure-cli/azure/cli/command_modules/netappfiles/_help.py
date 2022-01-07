@@ -867,6 +867,8 @@ parameters:
     short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
   - name: --default-group-quota
     short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+  - name: --throughput-mibps
+    short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume.
 examples:
   - name: Update an ANF volume
     text: >
@@ -994,6 +996,10 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --backup-name -b
     short-summary: The name of the ANF backup
+  - name: --label
+    short-summary: Label for backup.
+  - name: --use-existing-snapshot
+    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true or false for manual backups.
 examples:
   - name: Update an ANF backup
     text: >
