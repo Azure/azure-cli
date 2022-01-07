@@ -1008,8 +1008,20 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
-            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
             c.ignore('identity_role_id')
+
+    for scope in ['vm create', 'vmss create']:
+        with self.argument_context(scope) as c:
+            arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
+            c.argument('identity_role', options_list=['--role'], arg_group=arg_group,
+                       help='Role name or id the system assigned identity will have. '
+                            'Please note that the default value "Contributor" will be removed in the future. '
+                            'So please specify the "--role" and "--scope" parameters at the same time when assigning role to the managed identity')
+
+    for scope in ['vm identity assign', 'vmss identity assign']:
+        with self.argument_context(scope) as c:
+            arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
+            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
