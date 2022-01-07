@@ -251,6 +251,8 @@ def load_arguments(self, _):
         c.argument('os_disk_size', type=int, help='Size of the OS disk in GB. Omit or specify 0 to use Azure\'s default OS disk size')
         c.argument('vnet', help='Name of VNET to deploy the build virtual machine. You should only specify it when subnet is a name')
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
+        c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
+        c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
