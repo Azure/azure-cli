@@ -3,6 +3,79 @@
 Release History
 ===============
 
+2.32.0
+++++++
+
+**AKS**
+
+* `az aks create`: Add new parameter `--enable-fips-image` to support enabling fips image (#20721)
+* `az aks nodepool add`: Add new parameter `--enable-fips-image` to support enabling fips image (#20721)
+
+**App Service**
+
+* [BREAKING CHANGE] `az webapp up`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
+* [BREAKING CHANGE] `az webapp create`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
+* [BREAKING CHANGE] `az functionapp create`: Remove python 3.6 support (#20770)
+* Fix #19550: `az staticwebapp users update`: Allow updating static web app user roles again (#20694)
+* `az logicapp create`: Autogenerate a WS1 App Service Plan when no value for `--plan` or `--consumption-plan-location` is provided (#20678)
+* `az appservice plan create`: Allow creating App Service Plans for Logic Apps (SKUs WS1, WS2, and WS3) (#20678)
+* Fix #20757: `az webapp up`: Fix list index out of range when no `--plan` argument passed (#20760)
+* Fix #18652: `az webapp up`: Search for \*.csproj in child directories (#20738)
+* `az webapp list-runtimes`: Remove support for the python|3.6 (linux and windows), ruby|2.5 (linux), and php|7.3 (windows) runtimes. Add support for the python|3.9 runtime (linux), php|8.0 (linux), and ruby|2.7 (linux) (#20770)
+
+**Backup**
+
+* `az backup restore restore-azurewl`: Add client side validations (#20638)
+* `az backup container unregister`: Support MAB type for parameter `--backup-management-type` (#20711)
+* `az backup protectable-item list/show`: Add auto-protection policy and node-list field in the response for SQLInstance SQLAG (#20821)
+* `az backup protection auto-enable-for-azurewl/auto-disable-for-azurewl`: Add support for SQLAG (#20821)
+
+**Compute **
+
+* `az vm/vmss create/update`: Expand validate license types for `--license-type` parameter (#20724)
+* `az sig image-definition list-shared`: Add new parameters `--marker` and `--show-next-marker` to support paging (#20618)
+* `az sig image-version list-shared`: Add new parameters `--marker` and `--show-next-marker` to support paging (#20618)
+
+**IoT**
+
+* `az iot hub update`: Add error handling for file-upload parameters and fixes empty $default storage endpoint errors (#20595)
+* `az iot central app create`: Add new parameter `--mi-system-assigned` to support creating an app with system-assigned managed identity (#20448)
+* `az iot central app identity show/assign/remove`: Add new commands to manage the system-assigned managed identity to an existing IoT Central app (#20448)
+* `az iot dps access-policy`: Be replaced with `az iot dps policy` (#20682)
+* `az iot dps linked-hub create`: Add convenience arguments for linking hubs (#20682)
+
+**Network**
+
+* Fix #19482: Azure Bastion AAD fix for new CLI core changes (#20648)
+* `az network lb inbound-nat-pool create`: Add new parameter `--backend-pool-name` (#20835)
+
+**Profile**
+
+* `az account show/set`: Add `-n`, `--name` argument (#20777)
+
+**Redis**
+
+* `az redis identity`: Add support for assigning and modifying Identity (#20833)
+
+**REST**
+
+* [BREAKING CHANGE] `az rest`: Remove `resourceGroup`, `x509ThumbprintHex` transforms (#19579)
+
+**Role**
+
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: Drop `name` property from the output. Use `appId` instead (#19808)
+* [BREAKING CHANGE] `az ad sp create-for-rbac`: No role assignment will be created by default (#19805)
+
+**Storage**
+
+* `az storage copy`: Add positional argument `extra_options` to pass through options to `azcopy` (#20702)
+
+**Synapse**
+
+* [BREAKING CHANGE] `az synapse managed private endpoints create`: Remove `--resource-id` and `--group-id`, use `--file` instead (#20664)
+* `az synapse sql pool create/restore`: Add parameters `--storage-type` to support specifying storage account type (#20553)
+* `az synapse kql-script`: New command group to support Kusto script (#20699)
+
 2.31.0
 ++++++
 

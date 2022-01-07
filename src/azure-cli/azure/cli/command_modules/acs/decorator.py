@@ -23,15 +23,13 @@ from azure.cli.command_modules.acs._loadbalancer import (
 from azure.cli.command_modules.acs._loadbalancer import (
     update_load_balancer_profile as _update_load_balancer_profile,
 )
-from azure.cli.command_modules.acs._resourcegroup import (
-    get_rg_location,
-)
+from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._validators import (
     extract_comma_separated_string,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
-    ensure_default_log_analytics_workspace_for_monitoring,
     ensure_container_insights_for_monitoring,
+    ensure_default_log_analytics_workspace_for_monitoring,
 )
 from azure.cli.command_modules.acs.custom import (
     _add_role_assignment,
@@ -46,6 +44,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
+    AzCLIError,
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
@@ -57,10 +56,12 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import truncate_text
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt, prompt_pass, prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
+
 logger = get_logger(__name__)
 
 # type variables
@@ -527,6 +528,56 @@ class AKSContext:
                         option_name
                     )
                 )
+
+    def __validate_cluster_autoscaler_profile(
+        self, cluster_autoscaler_profile: Union[List, Dict, None]
+    ) -> Union[Dict, None]:
+        """Helper function to parse and verify cluster_autoscaler_profile.
+
+        If the user input is a list, parse it with function "extract_comma_separated_string". If the type of user input
+        or parsed value is not a dictionary, raise an InvalidArgumentValueError. Otherwise, take the keys from the
+        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
+        provided by the user are valid. If not, raise an InvalidArgumentValueError.
+
+        :return: dictionary or None
+        """
+        if cluster_autoscaler_profile is not None:
+            # convert list to dict
+            if isinstance(cluster_autoscaler_profile, list):
+                params_dict = {}
+                for item in cluster_autoscaler_profile:
+                    params_dict.update(
+                        extract_comma_separated_string(
+                            item,
+                            extract_kv=True,
+                            allow_empty_value=True,
+                            default_value={},
+                        )
+                    )
+                cluster_autoscaler_profile = params_dict
+            # check if the type is dict
+            if not isinstance(cluster_autoscaler_profile, dict):
+                raise InvalidArgumentValueError(
+                    "Unexpected input cluster-autoscaler-profile, value: '{}', type '{}'.".format(
+                        cluster_autoscaler_profile,
+                        type(cluster_autoscaler_profile),
+                    )
+                )
+            # verify keys
+            # pylint: disable=protected-access
+            valid_keys = list(
+                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
+            )
+            for key in cluster_autoscaler_profile.keys():
+                if not key:
+                    raise InvalidArgumentValueError("Empty key specified for cluster-autoscaler-profile")
+                if key not in valid_keys:
+                    raise InvalidArgumentValueError(
+                        "'{}' is an invalid key for cluster-autoscaler-profile. Valid keys are {}.".format(
+                            key, ", ".join(valid_keys)
+                        )
+                    )
+        return cluster_autoscaler_profile
 
     def get_subscription_id(self):
         """Helper function to obtain the value of subscription_id.
@@ -2545,27 +2596,20 @@ class AKSContext:
         :return: dict
         """
         from azure.cli.command_modules.acs._consts import (
-            ADDONS,
-            CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
-            CONST_AZURE_POLICY_ADDON_NAME,
-            CONST_CONFCOM_ADDON_NAME,
+            ADDONS, CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+            CONST_AZURE_POLICY_ADDON_NAME, CONST_CONFCOM_ADDON_NAME,
             CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
             CONST_INGRESS_APPGW_ADDON_NAME,
             CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID,
             CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME,
-            CONST_INGRESS_APPGW_SUBNET_CIDR,
-            CONST_INGRESS_APPGW_SUBNET_ID,
+            CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID,
             CONST_INGRESS_APPGW_WATCH_NAMESPACE,
-            CONST_KUBE_DASHBOARD_ADDON_NAME,
-            CONST_MONITORING_ADDON_NAME,
+            CONST_KUBE_DASHBOARD_ADDON_NAME, CONST_MONITORING_ADDON_NAME,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
-            CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-            CONST_VIRTUAL_NODE_ADDON_NAME,
-            CONST_VIRTUAL_NODE_SUBNET_NAME,
-            CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
-            CONST_SECRET_ROTATION_ENABLED,
-            CONST_ROTATION_POLL_INTERVAL,
-        )
+            CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
+            CONST_SECRET_ROTATION_ENABLED, CONST_VIRTUAL_NODE_ADDON_NAME,
+            CONST_VIRTUAL_NODE_SUBNET_NAME)
 
         addon_consts = {}
         addon_consts["ADDONS"] = ADDONS
@@ -4083,42 +4127,20 @@ class AKSContext:
     def _get_cluster_autoscaler_profile(self, read_only: bool = False) -> Union[Dict[str, str], None]:
         """Internal function to dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
+        This function will call function "__validate_cluster_autoscaler_profile" to parse and verify the parameter
+        by default.
+
         In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
         been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
         (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
         dictionary with the dictionary of new options.
 
-        This function will verify the parameter by default. If the user input is not empty, take the keys from the
-        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
-        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
-        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
-
         :return: dictionary or None
         """
         # read the original value passed by the command
         cluster_autoscaler_profile = self.raw_param.get("cluster_autoscaler_profile")
-        # validate user input (replace function "_validate_cluster_autoscaler_key" in file "_validators.py")
-        if cluster_autoscaler_profile is not None:
-            if not isinstance(cluster_autoscaler_profile, dict):
-                raise CLIInternalError(
-                    "Unexpected input cluster-autoscaler-profile, value: '{}', type '{}'.".format(
-                        cluster_autoscaler_profile,
-                        type(cluster_autoscaler_profile),
-                    )
-                )
-            # pylint: disable=protected-access
-            valid_keys = list(
-                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
-            )
-            for key in cluster_autoscaler_profile.keys():
-                if not key:
-                    raise InvalidArgumentValueError("Empty key specified for cluster-autoscaler-profile")
-                if key not in valid_keys:
-                    raise InvalidArgumentValueError(
-                        "'{}' is an invalid key for cluster-autoscaler-profile. Valid keys are {}.".format(
-                            key, ", ".join(valid_keys)
-                        )
-                    )
+        # parse and validate user input
+        cluster_autoscaler_profile = self.__validate_cluster_autoscaler_profile(cluster_autoscaler_profile)
 
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
         if self.decorator_mode == DecoratorMode.CREATE:
@@ -4147,15 +4169,13 @@ class AKSContext:
     def get_cluster_autoscaler_profile(self) -> Union[Dict[str, str], None]:
         """Dynamically obtain the value of cluster_autoscaler_profile according to the context.
 
+        This function will call function "__validate_cluster_autoscaler_profile" to parse and verify the parameter
+        by default.
+
         In update mode, when cluster_autoscaler_profile is assigned and auto_scaler_profile in the `mc` object has also
         been set, dynamic completion will be triggerd. We will first make a copy of the original configuration
         (extract the dictionary from the ManagedClusterPropertiesAutoScalerProfile object), and then update the copied
         dictionary with the dictionary of new options.
-
-        This function will verify the parameter by default. If the user input is not empty, take the keys from the
-        attribute map of ManagedClusterPropertiesAutoScalerProfile to verify whether the keys in the key-value pairs
-        provided by the user are valid. If not, raise an InvalidArgumentValueError. The value of the raw parameter
-        should be a dictionary after being processed by the validator. If not, raise a CLIInternalError.
 
         :return: dictionary or None
         """
@@ -5312,7 +5332,7 @@ class AKSCreateDecorator:
 
         # Due to SPN replication latency, we do a few retries here
         max_retry = 30
-        retry_exception = Exception(None)
+        error_msg = ""
         for _ in range(0, max_retry):
             try:
                 created_cluster = _put_managed_cluster_ensuring_permission(
@@ -5332,13 +5352,15 @@ class AKSCreateDecorator:
                     self.context.get_aks_custom_headers(),
                     self.context.get_no_wait())
                 return created_cluster
-            except CloudError as ex:
-                retry_exception = ex
-                if 'not found in Active Directory tenant' in ex.message:
+            # CloudError was raised before, but since the adoption of track 2 SDK,
+            # HttpResponseError would be raised instead
+            except (CloudError, HttpResponseError) as ex:
+                error_msg = str(ex)
+                if "not found in Active Directory tenant" in ex.message:
                     time.sleep(3)
                 else:
                     raise ex
-        raise retry_exception
+        raise AzCLIError("Maximum number of retries exceeded. " + error_msg)
 
 
 class AKSUpdateDecorator:

@@ -7,10 +7,10 @@ import importlib
 import unittest
 from unittest.mock import Mock, call, patch
 
-import requests
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
     CONST_ACC_SGX_QUOTE_HELPER_ENABLED,
+    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     CONST_AZURE_POLICY_ADDON_NAME,
     CONST_CONFCOM_ADDON_NAME,
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
@@ -27,11 +27,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_PRIVATE_DNS_ZONE_NONE,
     CONST_PRIVATE_DNS_ZONE_SYSTEM,
+    CONST_ROTATION_POLL_INTERVAL,
+    CONST_SECRET_ROTATION_ENABLED,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
-    CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
-    CONST_SECRET_ROTATION_ENABLED,
-    CONST_ROTATION_POLL_INTERVAL,
     DecoratorEarlyExitException,
     DecoratorMode,
 )
@@ -55,6 +54,7 @@ from azure.cli.command_modules.acs.tests.latest.mocks import (
 )
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
+    AzCLIError,
     CLIInternalError,
     InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
@@ -63,6 +63,7 @@ from azure.cli.core.azclierror import (
     UnknownError,
 )
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
@@ -128,7 +129,7 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
             api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
                 enable_private_cluster=True,
-            )
+            ),
         )
         self.assertEqual(check_is_private_cluster(mc_1), True)
 
@@ -136,13 +137,13 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
             api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
                 enable_private_cluster=False,
-            )
+            ),
         )
         self.assertEqual(check_is_private_cluster(mc_2), False)
 
         mc_3 = self.models.ManagedCluster(
             location="test_location",
-            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile()
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
         )
         self.assertEqual(check_is_private_cluster(mc_3), False)
 
@@ -395,7 +396,9 @@ class AKSContextTestCase(unittest.TestCase):
         )
 
         # custom value
-        ctx._AKSContext__validate_counts_in_autoscaler(5, True, 1, 10, DecoratorMode.CREATE)
+        ctx._AKSContext__validate_counts_in_autoscaler(
+            5, True, 1, 10, DecoratorMode.CREATE
+        )
 
         # fail on min_count/max_count not specified
         with self.assertRaises(RequiredArgumentMissingError):
@@ -416,7 +419,9 @@ class AKSContextTestCase(unittest.TestCase):
             )
 
         # skip node_count check in update mode
-        ctx._AKSContext__validate_counts_in_autoscaler(5, True, 7, 10, DecoratorMode.UPDATE)
+        ctx._AKSContext__validate_counts_in_autoscaler(
+            5, True, 7, 10, DecoratorMode.UPDATE
+        )
         ctx._AKSContext__validate_counts_in_autoscaler(
             None, True, 7, 10, DecoratorMode.UPDATE
         )
@@ -426,6 +431,70 @@ class AKSContextTestCase(unittest.TestCase):
             ctx._AKSContext__validate_counts_in_autoscaler(
                 5, False, 3, None, DecoratorMode.UPDATE
             )
+
+    def test_validate_cluster_autoscaler_profile(self):
+        ctx = AKSContext(
+            self.cmd, {}, self.models, decorator_mode=DecoratorMode.CREATE
+        )
+        # default
+        s1 = None
+        t1 = ctx._AKSContext__validate_cluster_autoscaler_profile(s1)
+        g1 = None
+        self.assertEqual(t1, g1)
+
+        # invalid type
+        s2 = set()
+        # fail on invalid type
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s2)
+
+        # empty list
+        s3 = []
+        t3 = ctx._AKSContext__validate_cluster_autoscaler_profile(s3)
+        g3 = {}
+        self.assertEqual(t3, g3)
+
+        # empty dict
+        s4 = {}
+        t4 = ctx._AKSContext__validate_cluster_autoscaler_profile(s4)
+        g4 = {}
+        self.assertEqual(t4, g4)
+
+        # empty key & empty value
+        s5 = ["="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s5)
+
+        # non-empty key & empty value
+        s6 = ["scan-interval="]
+        t6 = ctx._AKSContext__validate_cluster_autoscaler_profile(s6)
+        g6 = {"scan-interval": ""}
+        self.assertEqual(t6, g6)
+
+        # invalid key
+        s7 = ["bad-key=val"]
+        # fail on invalid key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s7)
+
+        # valid key
+        s8 = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
+        t8 = ctx._AKSContext__validate_cluster_autoscaler_profile(s8)
+        g8 = {"scan-interval": "20s", "scale-down-delay-after-add": "15m"}
+        self.assertEqual(t8, g8)
+
+        # two pairs of empty key & empty value
+        s9 = ["=", "="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s9)
+
+        # additional empty key & empty value
+        s10 = ["scan-interval=20s", "="]
+        # fail on empty key
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx._AKSContext__validate_cluster_autoscaler_profile(s10)
 
     def test_get_subscription_id(self):
         ctx_1 = AKSContext(
@@ -3783,7 +3852,6 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError):
             self.assertEqual(ctx_3.get_enable_public_fqdn(), True)
 
-
     def test_get_private_dns_zone(self):
         # default
         ctx_1 = AKSContext(
@@ -4031,39 +4099,6 @@ class AKSContextTestCase(unittest.TestCase):
                 "skip_nodes_with_system_pods": None,
             },
         )
-
-        # custom value
-        ctx_3 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": []},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on invalid type of cluster_autoscaler_profile (should be dict)
-        with self.assertRaises(CLIInternalError):
-            ctx_3.get_cluster_autoscaler_profile()
-
-        # custom value
-        ctx_4 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": {"": "xyz"}},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on empty key
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_4.get_cluster_autoscaler_profile()
-
-        # custom value
-        ctx_5 = AKSContext(
-            self.cmd,
-            {"cluster_autoscaler_profile": {"xyz": "123"}},
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        # fail on invalid key
-        with self.assertRaises(InvalidArgumentValueError):
-            ctx_5.get_cluster_autoscaler_profile()
 
     def test_get_uptime_sla(self):
         # default
@@ -4389,14 +4424,14 @@ class AKSContextTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="UserAssigned"),
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id",
-                    object_id = "test_object_id"
+                    client_id="test_client_id", object_id="test_object_id"
                 )
             },
         )
         ctx_3.attach_mc(mc_3)
         self.assertEqual(
-            ctx_3.get_assignee_from_identity_or_sp_profile(), ("test_object_id", False)
+            ctx_3.get_assignee_from_identity_or_sp_profile(),
+            ("test_object_id", False),
         )
 
         # custom value
@@ -4414,7 +4449,8 @@ class AKSContextTestCase(unittest.TestCase):
         )
         ctx_4.attach_mc(mc_4)
         self.assertEqual(
-            ctx_4.get_assignee_from_identity_or_sp_profile(), ("test_client_id", True)
+            ctx_4.get_assignee_from_identity_or_sp_profile(),
+            ("test_client_id", True),
         )
 
 
@@ -6258,20 +6294,21 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         # fail on passing the wrong mc object
         with self.assertRaises(CLIInternalError):
             dec_1.create_mc(None)
+
+        # raise exception
         mock_profile = Mock(
             get_subscription_id=Mock(return_value="test_subscription_id")
         )
-        resp = requests.Response()
-        resp.status_code = 500
-        err = CloudError(resp)
-        err.message = "not found in Active Directory tenant"
-        # fail on mock CloudError
-        with self.assertRaises(CloudError), patch("time.sleep",), patch(
+        err_1 = HttpResponseError(
+            message="not found in Active Directory tenant"
+        )
+        # fail on mock HttpResponseError, max retry exceeded
+        with self.assertRaises(AzCLIError), patch("time.sleep",), patch(
             "azure.cli.command_modules.acs.decorator.Profile",
             return_value=mock_profile,
         ), patch(
             "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission",
-            side_effect=err,
+            side_effect=err_1,
         ) as put_mc:
             dec_1.create_mc(mc_1)
         put_mc.assert_called_with(
@@ -6291,6 +6328,33 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             {},
             False,
         )
+
+        # raise exception
+        resp = Mock(
+            reason="error reason",
+            status_code=500,
+            text=Mock(return_value="error text"),
+        )
+        err_2 = HttpResponseError(response=resp)
+        # fail on mock HttpResponseError
+        with self.assertRaises(HttpResponseError), patch("time.sleep",), patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission",
+            side_effect=[err_1, err_2],
+        ) as put_mc:
+            dec_1.create_mc(mc_1)
+
+        # return mc
+        with patch(
+            "azure.cli.command_modules.acs.decorator.Profile",
+            return_value=mock_profile,
+        ), patch(
+            "azure.cli.command_modules.acs.decorator._put_managed_cluster_ensuring_permission",
+            return_value=mc_1,
+        ) as put_mc:
+            self.assertEqual(dec_1.create_mc(mc_1), mc_1)
 
 
 class AKSUpdateDecoratorTestCase(unittest.TestCase):
@@ -6567,8 +6631,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id",
-                    object_id="test_object_id"
+                    client_id="test_client_id", object_id="test_object_id"
                 )
             },
         )
@@ -6596,8 +6659,7 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
             identity_profile={
                 "kubeletidentity": self.models.UserAssignedIdentity(
-                    client_id="test_client_id",
-                    object_id="test_object_id"
+                    client_id="test_client_id", object_id="test_object_id"
                 )
             },
         )
@@ -7873,4 +7935,3 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
             {},
             False,
         )
-
