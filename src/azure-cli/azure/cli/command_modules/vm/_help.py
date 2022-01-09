@@ -1450,7 +1450,7 @@ examples:
           --image debian --secrets "$vm_secrets"
   - name: Create a CentOS VM with a system assigned identity. The VM will have a 'Contributor' role with access to a storage account.
     text: >
-        az vm create -n MyVm -g rg1 --image centos --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        az vm create -n MyVm -g rg1 --image centos --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
   - name: Create a debian VM with a user assigned identity.
     text: >
         az vm create -n MyVm -g rg1 --image debian --assign-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
@@ -2820,7 +2820,7 @@ examples:
           --image debian --secrets "$vm_secrets"
   - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        az vmss create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1 --role Contributor
   - name: Create a debian VM scaleset with a user assigned identity.
     text: >
         az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
