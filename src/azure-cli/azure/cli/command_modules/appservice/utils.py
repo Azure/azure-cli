@@ -146,6 +146,7 @@ def _get_location_from_webapp(client, resource_group_name, webapp):
     return webapp.location
 
 
+# can't just normalize locations with location.lower().replace(" ", "") because of UAE/UK regions
 def _normalize_location(cmd, location):
     location = location.lower()
     locations = get_subscription_locations(cmd.cli_ctx)
