@@ -426,7 +426,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
-        g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
+        g.storage_custom_command('sync', 'storage_blob_sync', is_preview=True)
 
     with self.command_group('storage container', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
@@ -844,8 +844,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=transform_metadata)
 
     with self.command_group('storage fs directory', custom_command_type=get_custom_sdk('azcopy', None))as g:
-        g.storage_custom_command_oauth('upload', 'storage_fs_directory_copy', is_preview=True)
-        g.storage_custom_command_oauth('download', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command('upload', 'storage_fs_directory_copy', is_preview=True)
+        g.storage_custom_command('download', 'storage_fs_directory_copy', is_preview=True)
 
     with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:

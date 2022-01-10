@@ -144,7 +144,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -256,10 +257,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location):
+def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    current_sub_id = get_subscription_id(cmd.cli_ctx)
+    if vnet_sub_id:
+        cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
+
     vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
     vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
                                     virtual_network_name=vnet_name).location
+
+    cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
@@ -3016,7 +3025,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -3758,35 +3768,25 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
 
 
 def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, True)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
 def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
                                      skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, False)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
-def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False,
-                          is_webapp=True):
-    from azure.mgmt.web.models import SitePatchResource
-
+def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
     subnet_info = _get_subnet_info(cmd=cmd,
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
-    client = web_client_factory(cmd.cli_ctx)
+    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
 
-    if is_webapp:
-        app = show_webapp(cmd, resource_group_name, name, slot)
-    else:
-        app = show_functionapp(cmd, resource_group_name, name, slot)
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
-    parsed_plan = parse_resource_id(app.app_service_plan_id)
+    parsed_plan = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
-
-    _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
-                                        subnet_resource_group=subnet_info["resource_group_name"],
-                                        vnet_name=subnet_info["vnet_name"])
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
@@ -3797,16 +3797,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
 
-    subnet_id = subnet_info["subnet_resource_id"]
-    if not slot:
-        client.web_apps.update(resource_group_name=resource_group_name,
-                               name=name,
-                               site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
-    else:
-        client.web_apps.update_slot(resource_group_name=resource_group_name,
-                                    name=name,
-                                    slot=slot,
-                                    site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                            client=client, extra_parameter=app)
 
     # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
