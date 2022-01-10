@@ -696,15 +696,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
+        permissions = Permissions(keys=[KeyPermissions.all],
                                   secrets=[
                                       SecretPermissions.get,
                                       SecretPermissions.list,
