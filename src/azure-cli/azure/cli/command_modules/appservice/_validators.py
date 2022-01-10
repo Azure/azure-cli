@@ -13,7 +13,6 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 
 from knack.log import get_logger
-from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
@@ -146,7 +145,7 @@ def validate_app_exists_in_rg(cmd, namespace):
 
 
 def validate_add_vnet(cmd, namespace):
-    from azure.core.exceptions import ResourceNotFoundError
+    from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError
 
     resource_group_name = namespace.resource_group_name
     from azure.cli.command_modules.network._client_factory import network_client_factory
@@ -174,7 +173,7 @@ def validate_add_vnet(cmd, namespace):
         try:
             vnet_loc = vnet_client.virtual_networks.get(resource_group_name=namespace.resource_group_name,
                                                         virtual_network_name=vnet_identifier).location
-        except ResourceNotFoundError:
+        except ResNotFoundError:
             vnets = vnet_client.virtual_networks.list_all()
             vnet_loc = ''
             for v in vnets:
