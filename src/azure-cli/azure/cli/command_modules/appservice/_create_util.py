@@ -18,6 +18,7 @@ from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION
                          PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
                          NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS,
                          DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES)
+from .utils import get_resource_if_exists
 
 logger = get_logger(__name__)
 
@@ -380,11 +381,17 @@ def detect_os_form_src(src_dir, html=False):
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
 
 
-def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, is_linux=False, plan=None):
+def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, client, is_linux=False, plan=None):
     _default_asp = _get_default_plan_name(user)
     if plan is None:  # --plan not provided by user
         # get the plan name to use
         return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg, is_linux)
+
+    asp = get_resource_if_exists(client.app_service_plans, resource_group_name=resource_group_name, name=plan)
+    if asp is not None:
+        if asp.reserved != is_linux:
+            logger.warning("Existing app service plan %s has a different OS type and deployment may fail. "
+                           "Consider using a different OS or app service plan", plan)
     return plan
 
 

@@ -1997,6 +1997,9 @@ short-summary: >
     where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
     Python apps are created as Linux apps. .Net Core, ASP.NET, and static HTML apps are created as Windows apps.
     Append the html flag to deploy as a static HTML app.
+    Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
+    These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
+
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >

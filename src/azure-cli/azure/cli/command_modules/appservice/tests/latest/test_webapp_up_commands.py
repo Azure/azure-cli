@@ -87,7 +87,7 @@ class WebAppUpE2ETests(ScenarioTest):
         os.chdir(up_working_dir)
 
         # test the full E2E operation works
-        self.cmd('webapp up -n {} -g {} --os-type windows'.format(webapp_name, resource_group)).get_output_in_json()
+        self.cmd('webapp up -n {} -g {} --os-type windows'.format(webapp_name, resource_group))
 
         # Verify app is created
         # since we set local context, -n and -g are no longer required
@@ -98,18 +98,8 @@ class WebAppUpE2ETests(ScenarioTest):
             JMESPathCheck('resourceGroup', resource_group)
         ])
 
-        # ensure we don't have conflicts when creating a linux app from the same directory with no --plan arg
         webapp_name = self.create_random_name('up-nodeapp', 24)
-        self.cmd('webapp up -n {} -g {} --os-type linux'.format(webapp_name, resource_group)).get_output_in_json()
-
-        # Verify app is created
-        # since we set local context, -n and -g are no longer required
-        self.cmd('webapp show', checks=[
-            JMESPathCheck('name', webapp_name),
-            JMESPathCheck('httpsOnly', True),
-            JMESPathCheck('kind', 'app,linux'),
-            JMESPathCheck('resourceGroup', resource_group)
-        ])
+        self.cmd('webapp up -n {} -g {} --os-type linux'.format(webapp_name, resource_group), expect_failure=True)
 
         # cleanup
         # switch back the working dir
