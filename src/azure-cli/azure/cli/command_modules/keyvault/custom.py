@@ -696,40 +696,46 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.all],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if is_azure_stack_profile(cmd):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
