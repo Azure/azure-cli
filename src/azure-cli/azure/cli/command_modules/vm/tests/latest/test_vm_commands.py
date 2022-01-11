@@ -935,56 +935,56 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_architecture')
-    def test_vm_disk_architecture(self, resource_group):
-        self.kwargs.update({
-            'disk1': 'disk1',
-            'disk2': 'disk2',
-            'snapshot1': 'snapshot1',
-            'snapshot2': 'snapshot2',
-        })
-
-        self.cmd('disk create --architecture x64 --size-gb 5 -n {disk1} -g {rg}')
-        self.cmd('disk show -g {rg} -n {disk1}', checks=[
-            self.check('name', '{disk1}'),
-            self.check('supportedCapabilities.Architecture', 'x64')
-        ])
-        self.cmd('disk update --architecture Arm64 -n {disk1} -g {rg}')
-        self.cmd('disk show -g {rg} -n {disk1}', checks=[
-            self.check('name', '{disk1}'),
-            self.check('supportedCapabilities.Architecture', 'Arm64')
-        ])
-        self.cmd('disk create --size-gb 5 -n {disk2} -g {rg}')
-        self.cmd('disk show -g {rg} -n {disk2}', checks=[
-            self.check('name', '{disk2}'),
-            self.check('supportedCapabilities', None)
-        ])
-        self.cmd('disk update --architecture Arm64 -n {disk2} -g {rg}')
-        self.cmd('snapshot show -g {rg} -n {disk2}', checks=[
-            self.check('name', '{disk2}'),
-            self.check('supportedCapabilities.Architecture', 'Arm64')
-        ])
-
-        self.cmd('snapshot create --architecture x64 --size-gb 5 -n {snapshot1} -g {rg}')
-        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
-            self.check('name', '{snapshot1}'),
-            self.check('supportedCapabilities.Architecture', 'x64')
-        ])
-        self.cmd('snapshot update --architecture Arm64 -n {snapshot1} -g {rg}')
-        self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
-            self.check('name', '{snapshot1}'),
-            self.check('supportedCapabilities.Architecture', 'Arm64')
-        ])
-        self.cmd('snapshot create --size-gb 5 -n {snapshot2} -g {rg}')
-        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
-            self.check('name', '{snapshot2}'),
-            self.check('supportedCapabilities', None)
-        ])
-        self.cmd('snapshot update --architecture Arm64 -n {snapshot2} -g {rg}')
-        self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
-            self.check('name', '{snapshot2}'),
-            self.check('supportedCapabilities.Architecture', 'Arm64')
-        ])
+    # @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_architecture')
+    # def test_vm_disk_architecture(self, resource_group):
+    #     self.kwargs.update({
+    #         'disk1': 'disk1',
+    #         'disk2': 'disk2',
+    #         'snapshot1': 'snapshot1',
+    #         'snapshot2': 'snapshot2',
+    #     })
+    #
+    #     self.cmd('disk create --architecture x64 --size-gb 5 -n {disk1} -g {rg}')
+    #     self.cmd('disk show -g {rg} -n {disk1}', checks=[
+    #         self.check('name', '{disk1}'),
+    #         self.check('supportedCapabilities.Architecture', 'x64')
+    #     ])
+    #     self.cmd('disk update --architecture Arm64 -n {disk1} -g {rg}')
+    #     self.cmd('disk show -g {rg} -n {disk1}', checks=[
+    #         self.check('name', '{disk1}'),
+    #         self.check('supportedCapabilities.Architecture', 'Arm64')
+    #     ])
+    #     self.cmd('disk create --size-gb 5 -n {disk2} -g {rg}')
+    #     self.cmd('disk show -g {rg} -n {disk2}', checks=[
+    #         self.check('name', '{disk2}'),
+    #         self.check('supportedCapabilities', None)
+    #     ])
+    #     self.cmd('disk update --architecture Arm64 -n {disk2} -g {rg}')
+    #     self.cmd('snapshot show -g {rg} -n {disk2}', checks=[
+    #         self.check('name', '{disk2}'),
+    #         self.check('supportedCapabilities.Architecture', 'Arm64')
+    #     ])
+    #
+    #     self.cmd('snapshot create --architecture x64 --size-gb 5 -n {snapshot1} -g {rg}')
+    #     self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+    #         self.check('name', '{snapshot1}'),
+    #         self.check('supportedCapabilities.Architecture', 'x64')
+    #     ])
+    #     self.cmd('snapshot update --architecture Arm64 -n {snapshot1} -g {rg}')
+    #     self.cmd('snapshot show -g {rg} -n {snapshot1}', checks=[
+    #         self.check('name', '{snapshot1}'),
+    #         self.check('supportedCapabilities.Architecture', 'Arm64')
+    #     ])
+    #     self.cmd('snapshot create --size-gb 5 -n {snapshot2} -g {rg}')
+    #     self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+    #         self.check('name', '{snapshot2}'),
+    #         self.check('supportedCapabilities', None)
+    #     ])
+    #     self.cmd('snapshot update --architecture Arm64 -n {snapshot2} -g {rg}')
+    #     self.cmd('snapshot show -g {rg} -n {snapshot2}', checks=[
+    #         self.check('name', '{snapshot2}'),
+    #         self.check('supportedCapabilities.Architecture', 'Arm64')
+    #     ])
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
