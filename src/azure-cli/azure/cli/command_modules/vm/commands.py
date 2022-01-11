@@ -416,6 +416,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'set_user')
         g.custom_command('delete', 'delete_user')
         g.custom_command('reset-ssh', 'reset_linux_ssh')
+        g.show_command('show', 'get')
+        g.custom_command('test', 'delete_user')
 
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
                             min_api='2019-03-01') as g:
