@@ -1397,8 +1397,16 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         self.cmd('deployment group export --resource-group {rg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
             self.check('length([])', 2)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'operation_id': operation_output[0]['operationId']
+        })
+        self.cmd('deployment operation group show --resource-group {rg} -n {dn} --operation-id {operation_id}', checks=[
+            self.check('[0].properties.provisioningOperation', 'Create'),
+            self.check('[0].properties.provisioningState', 'Succeeded')
         ])
 
         self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --no-wait')
@@ -1453,8 +1461,18 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         self.cmd('deployment mg export --management-group-id {mg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
+        operation_output = self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
             self.check('length([])', 4)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operation_output[0]['operationId'],
+            'oid2': operation_output[1]['operationId'],
+            'oid3': operation_output[2]['operationId']
+        })
+        self.cmd('deployment operation mg show --management-group-id {mg} -n {dn} --operation-ids {oid1} {oid2} {oid3}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '

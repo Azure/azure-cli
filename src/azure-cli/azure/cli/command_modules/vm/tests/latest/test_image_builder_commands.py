@@ -9,6 +9,7 @@ from knack.testsdk import record_only
 from knack.util import CLIError
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
+from azure.core.exceptions import HttpResponseError
 
 from msrestazure.tools import parse_resource_id
 
@@ -564,6 +565,33 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('image builder cancel -g {rg} -n {tmpl}')
         self.cmd('image builder show -g {rg} -n {tmpl}', checks=[
             self.check_pattern('lastRunStatus.runState', 'Canceling|Canceled')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='img_tmpl_vmprofile')
+    def test_image_builder_vm_profile(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': self.create_random_name('vnet_', 15),
+            'identity': self.create_random_name('id_', 10),
+            'img_src': LINUX_IMAGE_SOURCE,
+            'loc': 'westus',
+            'subnet': self.create_random_name('subnet_', 15),
+            'ib_name': self.create_random_name('ib_', 10),
+            'proxy_vm_size': 'Standard_A1_v1'
+        })
+        my_vnet = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
+        my_identity=self.cmd('identity create -n {identity} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'subnet_id': my_vnet['newVNet']['subnets'][0]['id'],
+            'identity_vm': my_identity['id']
+        })
+        with self.assertRaises(HttpResponseError):
+            self.cmd('image builder create -g {rg} -n {ib_name} --image-source {img_src} --managed-image-destinations image_1=westus --identity {identity} '
+                 '--subnet {subnet_id} --proxy-vm-size {proxy_vm_size} --build-vm-identities {identity_vm}')
+
+        self.cmd('image builder show -g {rg} -n {ib_name}', checks=[
+            self.check('vmProfile.vnetConfig.proxyVmSize', '{proxy_vm_size}'),
+            self.check('vmProfile.userAssignedIdentities[0]', '{identity_vm}')
         ])
 
 
