@@ -985,6 +985,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('name', '{snapshot2}'),
             self.check('supportedCapabilities.Architecture', 'Arm64')
         ])
+        self.cmd('vm user show')
+        self.cmd('vm user test')
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
