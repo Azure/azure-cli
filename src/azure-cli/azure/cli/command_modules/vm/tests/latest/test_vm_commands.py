@@ -5647,7 +5647,9 @@ class DiskEncryptionSetTest(ScenarioTest):
             'kid2': kid2
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --enable-auto-key-rotation true')
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --enable-auto-key-rotation true', checks=[
+            self.check('activeKey.sourceVault', None)
+        ])
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
         self.assertEqual(des_show_output['rotationToLatestKeyVersionEnabled'], True)
         des_sp_id = des_show_output['identity']['principalId']
