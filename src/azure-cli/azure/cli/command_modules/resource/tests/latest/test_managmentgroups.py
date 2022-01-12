@@ -85,13 +85,13 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_get["tenantId"])
         self.assertEqual(
             managementgroup_get["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
         self.assertEqual(
             managementgroup_get["children"][0]["id"],
             "/providers/Microsoft.Management/managementGroups/testcligetgroup3")
         self.assertEqual(
             managementgroup_get["children"][0]["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
         self.assertEqual(
             managementgroup_get["children"][0]["displayName"],
             "testcligetgroup3")
@@ -133,13 +133,13 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_get["tenantId"])
         self.assertEqual(
             managementgroup_get["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
         self.assertEqual(
             managementgroup_get["children"][0]["id"],
             "/providers/Microsoft.Management/managementGroups/testcligetgroup3")
         self.assertEqual(
             managementgroup_get["children"][0]["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
         self.assertEqual(
             managementgroup_get["children"][0]["displayName"],
             "testcligetgroup3")
@@ -151,7 +151,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             "/providers/Microsoft.Management/managementGroups/testcligetgroup4")
         self.assertEqual(
             managementgroup_get["children"][0]["children"][0]["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
         self.assertEqual(
             managementgroup_get["children"][0]["children"][0]["displayName"],
             "testcligetgroup4")
@@ -240,27 +240,27 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_create)
-        self.assertIsNotNone(managementgroup_create["properties"]["details"])
+        self.assertIsNotNone(managementgroup_create["details"])
         self.assertEqual(
             managementgroup_create["id"],
             "/providers/Microsoft.Management/managementGroups/" + name)
         self.assertEqual(managementgroup_create["name"], name)
         self.assertEqual(
-            managementgroup_create["properties"]["displayName"],
+            managementgroup_create["displayName"],
             displayName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["displayName"],
+            managementgroup_create["details"]["parent"]["displayName"],
             parentName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["id"],
+            managementgroup_create["details"]["parent"]["id"],
             parentId)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["name"],
+            managementgroup_create["details"]["parent"]["name"],
             parentName)
-        self.assertIsNotNone(managementgroup_create["properties"]["tenantId"])
+        self.assertIsNotNone(managementgroup_create["tenantId"])
         self.assertEqual(
             managementgroup_create["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_create_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
@@ -321,7 +321,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertEqual(managementgroup_update["displayName"], displayName)
         self.assertEqual(
             managementgroup_update["details"]["parent"]["displayName"],
-            "Tenant Root Group")
+            "Root Management Group")
         self.assertEqual(
             managementgroup_update["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
@@ -332,7 +332,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_update["tenantId"])
         self.assertEqual(
             managementgroup_update["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_update_managementgroup_with_parentid(self):
         name = "testcligroupchild"
@@ -369,7 +369,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_update["tenantId"])
         self.assertEqual(
             managementgroup_update["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_update_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
@@ -407,7 +407,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_update["tenantId"])
         self.assertEqual(
             managementgroup_update["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_create_delete_group_managementgroup(self):
         self.cmd('account management-group create --name testcligroup')

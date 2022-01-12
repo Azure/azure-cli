@@ -459,15 +459,16 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'cli_managementgroups_group_show')
         g.custom_command('create', 'cli_managementgroups_group_create')
         g.custom_command('delete', 'cli_managementgroups_group_delete')
-        g.generic_update_command(
-            'update',
-            getter_name='cli_managementgroups_group_update_get',
-            getter_type=resource_managementgroups_update_type,
-            setter_name='cli_managementgroups_group_update_set',
-            setter_type=resource_managementgroups_update_type,
-            custom_func_name='cli_managementgroups_group_update_custom_func',
-            custom_func_type=resource_managementgroups_update_type,
-            exception_handler=managementgroups_exception_handler)
+        g.custom_command('update', 'cli_managementgroups_group_create')
+        #g.generic_update_command(
+            #'update',
+            #getter_name='cli_managementgroups_group_update_get',
+            #getter_type=resource_managementgroups_update_type,
+            #setter_name='cli_managementgroups_group_update_set',
+            #setter_type=resource_managementgroups_update_type,
+            #custom_func_name='cli_managementgroups_group_update_custom_func',
+            #custom_func_type=resource_managementgroups_update_type,
+            #exception_handler=managementgroups_exception_handler)
 
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')

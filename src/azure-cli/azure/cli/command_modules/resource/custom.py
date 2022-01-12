@@ -2888,15 +2888,15 @@ def cli_managementgroups_group_update_custom_func(
         instance,
         display_name=None,
         parent_id=None):
-    parent_id = _get_parent_id_from_parent(parent_id)
+    parent_group_id = _get_parent_id_from_parent(parent_id)
     instance.display_name = display_name
-    instance.parent_id = parent_id
+    instance.parent_group_id = parent_group_id
     return instance
 
 
 def cli_managementgroups_group_update_get():
     from azure.mgmt.managementgroups.models import PatchManagementGroupRequest
-    update_parameters = PatchManagementGroupRequest(display_name=None, parent_id=None)
+    update_parameters = PatchManagementGroupRequest(display_name=None, parent_group_id=None)
     return update_parameters
 
 
