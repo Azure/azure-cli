@@ -5747,7 +5747,8 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'key1': self.create_random_name(prefix='key1-', length=20),
             'key2': self.create_random_name(prefix='key2-', length=20),
-            'des': self.create_random_name(prefix='des-', length=20)
+            'des': self.create_random_name(prefix='des-', length=20),
+            'des2': self.create_random_name(prefix='des-', length=20)
         })
 
         kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
@@ -5760,9 +5761,10 @@ class DiskEncryptionSetTest(ScenarioTest):
             'kid2': kid2
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --enable-auto-key-rotation true', checks=[
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid1} --enable-auto-key-rotation true', checks=[
             self.check('activeKey.sourceVault', None)
         ])
+        self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1} --enable-auto-key-rotation true')
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
         self.assertEqual(des_show_output['rotationToLatestKeyVersionEnabled'], True)
         des_sp_id = des_show_output['identity']['principalId']
