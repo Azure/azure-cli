@@ -24,9 +24,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'ConfigArgParse>=0.12.0',
     'jmespath',
     'vcrpy>=1.10.3',
-    'azure-devtools==1.2.0',
     'pytest'
 ]
 
@@ -47,7 +47,8 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure.cli.testsdk'
+        'azure.cli.testsdk',
+        'azure.cli.testsdk.scenario_tests',
     ],
     install_requires=DEPENDENCIES
 )

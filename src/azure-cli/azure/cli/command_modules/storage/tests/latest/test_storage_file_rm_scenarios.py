@@ -10,7 +10,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
                                JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
@@ -91,7 +91,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'non_exist_share_name': non_exist_share_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {non_exist_share_name}')
 
         # 5. Test update command.
@@ -224,7 +224,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1)
         })
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share} --snapshot {snapshot}')
 
         self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')

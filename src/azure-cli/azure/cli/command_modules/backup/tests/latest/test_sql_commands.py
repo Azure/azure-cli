@@ -271,7 +271,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection auto-enable-for-azurewl -v {vault} -g {rg} -p {policy} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
 
+        protectable_item_json = self.cmd('backup protectable-item show -v {vault} -g {rg} -n {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}', checks=[
+            self.check("properties.isAutoProtected", True)]).get_output_in_json()
+
+        self.assertIn(self.kwargs['policy'], protectable_item_json['properties']['autoProtectionPolicy'])
+
         self.cmd('backup protection auto-disable-for-azurewl -v {vault} -g {rg} --protectable-item-name {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}')
+
+        self.cmd('backup protectable-item show -v {vault} -g {rg} -n {item} --protectable-item-type {pit} --server-name {fname} --workload-type {wt}', checks=[
+            self.check("properties.isAutoProtected", False),
+            self.check("properties.autoProtectionPolicy", None)])
 
         self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
 
@@ -400,10 +409,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 
@@ -471,10 +481,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
-            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+        self.assertIn("Backup", self.kwargs['backup_job']['properties']['operation'])
 
         self.kwargs['job'] = self.kwargs['backup_job']['name']
 

@@ -9,7 +9,7 @@ import azure.cli.command_modules.backup.custom_help as helper
 
 import azure.cli.command_modules.backup.custom_common as common
 
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     RestoreRequestResource, BackupRequestResource, RestoreFileSpecs, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
@@ -174,15 +174,14 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     item_uri = helper.get_protected_item_uri_from_id(item.id)
 
     sa_name = item.properties.container_name
-    source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1], sa_name.split(';')[-2])
-    target_resource_id = None
 
     afs_restore_request = AzureFileShareRestoreRequest()
     target_details = None
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = source_resource_id
+    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx, sa_name.split(';')[-1],
+                                                                     sa_name.split(';')[-2])
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -199,10 +198,10 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
                                                        target_folder_path=target_folder))
 
     if restore_mode == "AlternateLocation":
-        target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_storage_account_name, resource_group_name)
+        target_sa_name, target_sa_rg = helper.get_resource_name_and_rg(resource_group_name, target_storage_account_name)
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
-        target_details.target_resource_id = target_resource_id
+        target_details.target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_sa_name, target_sa_rg)
         afs_restore_request.target_details = target_details
 
     afs_restore_request.restore_file_specs = restore_file_specs

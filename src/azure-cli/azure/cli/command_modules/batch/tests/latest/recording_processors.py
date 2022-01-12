@@ -6,8 +6,8 @@
 import re
 import json
 
-from azure_devtools.scenario_tests.utilities import is_text_payload
-from azure_devtools.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 
 
 class StorageSASReplacer(RecordingProcessor):

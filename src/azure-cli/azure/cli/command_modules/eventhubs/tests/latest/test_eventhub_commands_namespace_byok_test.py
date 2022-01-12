@@ -15,7 +15,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, KeyVaultPrep
 
 
 class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
-    from azure_devtools.scenario_tests import AllowLargeResponse
+    from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')

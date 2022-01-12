@@ -32,7 +32,7 @@ from azure.cli.core.util import get_default_admin_username
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.core.exceptions import ResourceNotFoundError
-import azure.mgmt.batchai.models as models
+from azure.mgmt.batchai import models
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
 # decision about which storage account to use instead of using his default account specified via AZURE_STORAGE_ACCOUNT

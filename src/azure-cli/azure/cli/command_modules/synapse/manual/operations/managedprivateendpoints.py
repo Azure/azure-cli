@@ -5,14 +5,12 @@
 # pylint: disable=line-too-long, too-many-statements, too-many-locals
 from azure.cli.core.util import sdk_no_wait
 from .._client_factory import cf_synapse_managedprivateendpoints_factory
+from azure.synapse.managedprivateendpoints.models import ManagedPrivateEndpointProperties
 
 
-def create_Managed_private_endpoints(cmd, workspace_name, managed_private_endpoint_name, private_Link_Resource_Id, group_Id, no_wait=False):
+def create_Managed_private_endpoints(cmd, workspace_name, managed_private_endpoint_name, definition_file, no_wait=False):
     client = cf_synapse_managedprivateendpoints_factory(cmd.cli_ctx, workspace_name)
-    property_files = {}
-    property_files['privateLinkResourceId'] = private_Link_Resource_Id
-    property_files['groupId'] = group_Id
-    properties = property_files
+    properties = ManagedPrivateEndpointProperties.from_dict(definition_file)
     managed_virtual_network_name = "default"
     return sdk_no_wait(no_wait, client.create,
                        managed_private_endpoint_name, managed_virtual_network_name, properties)

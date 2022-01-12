@@ -23,6 +23,13 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
             self.check('length(value)', 2)
         ])
 
+        # test diagnostic-settings categories show
+        self.cmd(
+            'monitor diagnostic-settings categories show -n NetworkSecurityGroupEvent -g {rg} --resource-type Microsoft.Network/networkSecurityGroups --resource {nsg}',
+            checks=[
+                self.check('categoryType', 'Logs')
+            ])
+
         self.kwargs['log_config'] = json.dumps([
             {
                 "category": "NetworkSecurityGroupEvent",

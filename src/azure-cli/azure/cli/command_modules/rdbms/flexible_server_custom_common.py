@@ -15,7 +15,7 @@ from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import send_raw_request
 from azure.cli.core.util import user_confirmation
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError
+from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, FileOperationError, BadRequestError
 from azure.mgmt.rdbms.mysql_flexibleservers.operations._servers_operations import ServersOperations as MySqlServersOperations
 from ._flexible_server_util import run_subprocess, run_subprocess_get_output, fill_action_template, get_git_root_dir, \
     GITHUB_ACTION_PATH
@@ -53,7 +53,12 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     if not os.path.exists(properties_filepath):
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
-        json_data = f.read()
+        try:
+            json_data = json.dumps(json.load(f))
+        except ValueError as err:
+            logger.error(err)
+            raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
+
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())

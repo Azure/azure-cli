@@ -120,9 +120,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
 
   - task: BatchScript@1
     inputs:
@@ -137,9 +137,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.9'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -306,9 +306,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.9'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
 
 
   - script: |
@@ -375,10 +375,10 @@ jobs:
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
          /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       echo "== Testing pip install on Python 3.9 =="
-       docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+       # echo "== Testing pip install on Python 3.9 =="
+       # docker run \
+       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.10 =="
        docker run \
@@ -595,7 +595,7 @@ jobs:
                   -e CLI_VERSION=$CLI_VERSION \
                   -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                   --name azurecli \
-                  python:3.9 \
+                  python:3.10 \
                   /mnt/scripts/run.sh
 
        # clean up
@@ -678,11 +678,26 @@ jobs:
 
     displayName: 'Test Homebrew Package'
 
+
+- job: BuildYumPackageMariner
+  displayName: Build Yum Package Mariner
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package: Mariner'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline_mariner.sh
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: yum-mariner'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: yum-mariner
+
+
 - job: BuildYumPackage
   displayName: Build Yum Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -691,13 +706,12 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
-
-
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
+
 
 - job: TestYumPackage
   displayName: Test Yum Package
@@ -843,9 +857,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.9'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -859,9 +873,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.9'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -880,6 +894,8 @@ jobs:
         python.version: '3.8'
       Python39:
         python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   pool:
     vmImage: 'ubuntu-20.04'
   steps:
@@ -907,9 +923,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.9'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.9
+      versionSpec: 3.10
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -927,9 +943,9 @@ jobs:
     vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.9'
+      displayName: 'Use Python 3.10'
       inputs:
-        versionSpec: 3.9
+        versionSpec: 3.10
     - bash: pip install --upgrade pip wheel
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh

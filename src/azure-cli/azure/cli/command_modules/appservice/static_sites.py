@@ -5,13 +5,16 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
+
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.tools import parse_resource_id
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion
-from .custom import _build_identities_info
+from .custom import show_functionapp, _build_identities_info
+
 
 logger = get_logger(__name__)
 
@@ -238,15 +241,15 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_function_app_settings(cmd, name, resource_group_name=None):
+def list_staticsite_app_settings(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_function_app_settings(resource_group_name, name)
+    return client.list_static_site_app_settings(resource_group_name, name)
 
 
-def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_group_name=None):
+def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -256,24 +259,29 @@ def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_grou
         key, value = _parse_pair(pair, "=")
         setting_dict[key] = value
 
-    return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, app_settings=setting_dict)
+    # fetch current settings to prevent deleting existing app settings
+    settings = list_staticsite_app_settings(cmd, name, resource_group_name)
+    for k, v in setting_dict.items():
+        settings.properties[k] = v
+
+    return client.create_or_update_static_site_app_settings(
+        resource_group_name, name, app_settings=settings)
 
 
-def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
+def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    app_settings = client.list_static_site_function_app_settings(resource_group_name, name).properties
+    app_settings = client.list_static_site_app_settings(resource_group_name, name)
 
     for key in setting_names:
-        if key in app_settings:
-            app_settings.pop(key)
+        if key in app_settings.properties:
+            app_settings.properties.pop(key)
         else:
             logger.warning("key '%s' not found in app settings", key)
 
-    return client.create_or_update_static_site_function_app_settings(
+    return client.create_or_update_static_site_app_settings(
         resource_group_name, name, app_settings=app_settings)
 
 
@@ -306,6 +314,8 @@ def invite_staticsite_users(cmd, name, authentication_provider, user_details, do
 
 def update_staticsite_users(cmd, name, roles, authentication_provider=None, user_details=None, user_id=None,
                             resource_group_name=None):
+    from azure.mgmt.web.models import StaticSiteUserARMResource
+
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -319,15 +329,28 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
             client, resource_group_name, name, user_id, authentication_provider, user_details)
 
     if not authentication_provider or not user_id:
-        raise CLIError("Either user id or user details is required.")
+        raise RequiredArgumentMissingError("Either user id or user details is required.")
 
-    return client.update_static_site_user(resource_group_name, name, authentication_provider, user_id, roles=roles)
+    user_envelope = StaticSiteUserARMResource(roles=roles)
+
+    return client.update_static_site_user(resource_group_name,
+                                          name, authentication_provider, user_id,
+                                          static_site_user_envelope=user_envelope)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', output_location='.github/workflows',
                        tags=None, no_wait=False, sku='Free', login_with_github=False):
+    from azure.core.exceptions import ResourceNotFoundError
+
+    try:
+        site = show_staticsite(cmd, name, resource_group_name)
+        logger.warning("Static Web App %s already exists in resource group %s", name, resource_group_name)
+        return site
+    except ResourceNotFoundError:
+        pass
+
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
@@ -435,7 +458,6 @@ def _get_resource_group_name_of_staticsite(client, static_site_name):
 
 
 def _parse_resource_group_from_arm_id(arm_id):
-    from msrestazure.tools import parse_resource_id
     components = parse_resource_id(arm_id)
     rg_key = 'resource_group'
     if rg_key not in components:
@@ -446,7 +468,7 @@ def _parse_resource_group_from_arm_id(arm_id):
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):
     from azure.mgmt.web import WebSiteManagementClient
-    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).static_sites
+    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient, api_version=api_version).static_sites
     if api_version:
         client.api_version = api_version
     return client
@@ -501,3 +523,40 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
                                             name=name,
                                             reset_properties_envelope=reset_envelope)
+
+
+def link_user_function(cmd, name, resource_group_name, function_resource_id, force=False):
+    from azure.mgmt.web.models import StaticSiteUserProvidedFunctionAppARMResource
+
+    if force:
+        logger.warning("--force: overwriting static webapp connection with this function if one exists")
+
+    parsed_rid = parse_resource_id(function_resource_id)
+    function_name = parsed_rid["name"]
+    function_group = parsed_rid["resource_group"]
+    function_location = show_functionapp(cmd, resource_group_name=function_group, name=function_name).location
+
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    function = StaticSiteUserProvidedFunctionAppARMResource(function_app_resource_id=function_resource_id,
+                                                            function_app_region=function_location)
+
+    return client.begin_register_user_provided_function_app_with_static_site(
+        name=name,
+        resource_group_name=resource_group_name,
+        function_app_name=function_name,
+        static_site_user_provided_function_envelope=function,
+        is_forced=force)
+
+
+def unlink_user_function(cmd, name, resource_group_name):
+    function_name = list(get_user_function(cmd, name, resource_group_name))[0].name
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    return client.detach_user_provided_function_app_from_static_site(
+        name=name,
+        resource_group_name=resource_group_name,
+        function_app_name=function_name)
+
+
+def get_user_function(cmd, name, resource_group_name):
+    client = _get_staticsites_client_factory(cmd.cli_ctx, api_version="2020-12-01")
+    return client.get_user_provided_function_apps_for_static_site(name=name, resource_group_name=resource_group_name)
