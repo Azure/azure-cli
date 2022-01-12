@@ -418,7 +418,7 @@ def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disa
 
 def update_staticsite(cmd, name, source=None, branch=None, token=None,
                       tags=None, sku=None, no_wait=False, format_output=None):
-    existing_staticsite = show_staticsite(cmd, name)
+    existing_staticsite = show_staticsite(cmd, name, format_output=False)
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
 
@@ -554,7 +554,7 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    existing_staticsite = show_staticsite(cmd, name, resource_group_name)
+    existing_staticsite = show_staticsite(cmd, name, resource_group_name, format_output=False)
     ResetPropertiesEnvelope = cmd.get_models('StaticSiteResetPropertiesARMResource')
     reset_envelope = ResetPropertiesEnvelope(repository_token=existing_staticsite.repository_token)
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
