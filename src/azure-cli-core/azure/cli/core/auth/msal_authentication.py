@@ -14,7 +14,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
-from .util import check_result
+from .util import check_result, AccessToken
 
 # OAuth 2.0 client credentials flow parameter
 # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
@@ -38,17 +38,20 @@ class UserCredential(PublicClientApplication):
         """
         super().__init__(client_id, **kwargs)
 
+        # Make sure username is specified, otherwise MSAL returns all accounts
+        assert username, "username must be specified, got {!r}".format(username)
+
         accounts = self.get_accounts(username)
 
-        if not accounts:
-            raise CLIError("User {} does not exist in MSAL token cache. Run `az login`.".format(username))
-
+        # Usernames are usually unique. We are collecting corner cases to better understand its behavior.
         if len(accounts) > 1:
-            raise CLIError("Found multiple accounts with the same username. Please report to us via Github: "
-                           "https://github.com/Azure/azure-cli/issues/new")
+            raise CLIError(f"Found multiple accounts with the same username '{username}': {accounts}\n"
+                           "Please report to us via Github: https://github.com/Azure/azure-cli/issues/20168")
 
-        account = accounts[0]
-        self._account = account
+        if not accounts:
+            raise CLIError("User '{}' does not exist in MSAL token cache. Run `az login`.".format(username))
+
+        self._account = accounts[0]
 
     def get_token(self, *scopes, **kwargs):
         # scopes = ['https://pas.windows.net/CheckMyAccess/Linux/.default']
@@ -134,9 +137,14 @@ def _build_sdk_access_token(token_entry):
     import time
     request_time = int(time.time())
 
+    # MSAL token entry sample:
+    # {
+    #     'access_token': 'eyJ0eXAiOiJKV...',
+    #     'token_type': 'Bearer',
+    #     'expires_in': 1618
+    # }
+
     # Importing azure.core.credentials.AccessToken is expensive.
     # This can slow down commands that doesn't need azure.core, like `az account get-access-token`.
     # So We define our own AccessToken.
-    from collections import namedtuple
-    AccessToken = namedtuple("AccessToken", ["token", "expires_on"])
     return AccessToken(token_entry["access_token"], request_time + token_entry["expires_in"])

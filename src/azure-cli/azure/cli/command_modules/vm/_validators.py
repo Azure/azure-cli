@@ -22,7 +22,7 @@ from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default
 from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
-import azure.cli.core.keys as keys
+from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
@@ -1641,7 +1641,17 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not source_info:
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
-                    source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
+                    try:
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
+                    except Exception:  # pylint: disable=broad-except
+                        # There's a chance that the source doesn't exist, eg, vmss os disk.
+                        # You can get the id of vmss os disk by
+                        #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
+                        # But `az disk show --ids {}` will return ResourceNotFound error
+                        # We don't autodetect copy_start in this situation
+                        return
                 if not namespace.location:
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario

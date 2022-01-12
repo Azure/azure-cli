@@ -6,7 +6,7 @@
 import time
 import os
 
-from azure_devtools.scenario_tests import AllowLargeResponse, live_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
@@ -3824,6 +3824,282 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
+        # Set db names
+        source_non_zr_db_name = "sourceNonZrDb"
+        source_zr_db_name = "sourceZrDb"
+        copy_source_non_zr_true_param_db_name = "copySourceNonZrTrueParamDb"
+        copy_source_zr_false_param_db_name = "copySourceZrFalseParamDb"
+        copy_source_non_zr_no_param_db_name = "copySourceNonZrNoParamDb"
+        copy_source_zr_no_param_db_name = "copySourceZrNoParamDb"
+
+        # Create non zone redundant source vldb
+        # Verify created vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
+                 .format(resource_group, server, source_non_zr_db_name, "Hyperscale", 'Gen5', 2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', source_non_zr_db_name),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+        # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
+                 .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', source_zr_db_name),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Copy non zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
+        # Verify copied vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {} --backup-storage-redundancy {} --z'
+                 .format(resource_group, server, source_non_zr_db_name, copy_source_non_zr_true_param_db_name, 'zone'),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', copy_source_non_zr_true_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Copy zone redundant source vldb with zone redundancy == false
+        # Verify copied vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
+        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {} --zone-redundant {}'
+                 .format(resource_group, server, source_zr_db_name, copy_source_zr_false_param_db_name, False),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', copy_source_zr_false_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Copy non zone redundant source vldb with no parameters passed in
+        # Verify copied vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {}'
+                 .format(resource_group, server, source_non_zr_db_name, copy_source_non_zr_no_param_db_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', copy_source_non_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Copy zone redundant source vldb with no parameters passed in
+        # Verify copied vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db copy -g {} --server {} --name {} --dest-name {}'
+                 .format(resource_group, server, source_zr_db_name, copy_source_zr_no_param_db_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', copy_source_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
+        # Set db names
+        non_zr_db_name_1 = "nonZrDb1"
+        zr_db_name_1 = "zrDb1"
+        non_zr_db_name_2 = "nonZrDb2"
+        zr_db_name_2 = "zrDb2"
+        pri_non_zr_true_param_db_name = "priNonZrTrueParamDb"
+        pri_zr_false_param_db_name = "priZrFalseParamDb"
+        pri_non_zr_no_param_db_name = "priNonZrNoParamDb"
+        pri_zr_no_param_db_name = "priZrNoParamDb"
+
+        # Create non zone redundant primary vldb
+        # Verify created vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1, "Hyperscale", 'Gen5', 2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_pri),
+                     JMESPathCheck('name', non_zr_db_name_1),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Create secondary vldb replica from non zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone
+        # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
+                 '--partner-database {} --backup-storage-redundancy {} --z'
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_1, 
+                         resource_group_sec, server_name_sec, pri_non_zr_true_param_db_name, 'zone'),
+                 checks=[
+					 JMESPathCheck('name', pri_non_zr_true_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+        # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
+                 .format(resource_group_pri, server_name_pri, zr_db_name_1, "Hyperscale", 'Gen5', 2, 'zone', True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_pri),
+                     JMESPathCheck('name', zr_db_name_1),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Create secondary vldb replica from zone redundant primary vldb with zone redundancy == false
+        # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} '
+                 '--partner-database {} --z {}'
+                 .format(resource_group_pri, server_name_pri, zr_db_name_1, 
+                         resource_group_sec, server_name_sec, pri_zr_false_param_db_name, False),
+                 checks=[
+					 JMESPathCheck('name', pri_zr_false_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Create non zone redundant primary vldb
+        # Verify created vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2, "Hyperscale", 'Gen5', 2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_pri),
+                     JMESPathCheck('name', non_zr_db_name_2),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Create secondary vldb replica from non zone redundant primary vldb with no parameters passed in
+        # Verify created secondary vldb replica has correct values (specifically zone redundancy == false and backup storage redundancy == geo)
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
+                 .format(resource_group_pri, server_name_pri, non_zr_db_name_2, 
+                         resource_group_sec, server_name_sec, pri_non_zr_no_param_db_name),
+                 checks=[
+					 JMESPathCheck('name', pri_non_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+		# Create zone redundant primary vldb with zone redundancy == true and backup storage redundancy == Zone 
+        # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant'
+                 .format(resource_group_pri, server_name_pri, zr_db_name_2, "Hyperscale", 'Gen5', 2, 'zone'),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_pri),
+                     JMESPathCheck('name', zr_db_name_2),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Create secondary vldb replica from zone redundant primary vldb with no parameters passed in
+        # Verify created secondary vldb replica has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-resource-group {} --partner-server {} --partner-database {}'
+                 .format(resource_group_pri, server_name_pri, zr_db_name_2, 
+                         resource_group_sec, server_name_sec, pri_zr_no_param_db_name),
+                 checks=[
+					 JMESPathCheck('name', pri_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
+    @AllowLargeResponse()
+    def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
+        # Set db names
+        source_non_zr_db_name = "sourceNonZrDb"
+        source_zr_db_name = "sourceZrDb"
+        restore_source_non_zr_true_param_db_name = "restoreSourceNonZrTrueParamDb"
+        restore_source_zr_false_param_db_name = "restoreSourceZrFalseParamDb"
+        restore_source_non_zr_no_param_db_name = "restoreSourceNonZrNoParamDb"
+        restore_source_zr_no_param_db_name = "restoreSourceZrNoParamDb"
+
+        # Create non zone redundant source vldb
+        # Verify created vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}'
+                 .format(resource_group, server, source_non_zr_db_name, "Hyperscale", 'Gen5', 2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', source_non_zr_db_name),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+		# Create zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone 
+        # Verify created vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --family {} --capacity {}  --backup-storage-redundancy {} --zone-redundant {}'
+                 .format(resource_group, server, source_zr_db_name, "Hyperscale", 'Gen5', 2, 'zone', True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', source_zr_db_name),
+                     JMESPathCheck('edition', 'Hyperscale'),
+                     JMESPathCheck('sku.tier', 'Hyperscale'),
+					 JMESPathCheck('sku.family', 'Gen5'),
+					 JMESPathCheck('sku.capacity', 2),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Restore non zone redundant source vldb with zone redundancy == true and backup storage redundancy == Zone
+        # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} '
+                 '--edition {} --family {} --capacity {} --backup-storage-redundancy {} --z'
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(), 
+                         "Hyperscale", 'Gen5', 2, 'zone'),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', restore_source_non_zr_true_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
+
+        # Restore zone redundant source vldb with zone redundancy == false
+        # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
+        self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} --z {}'
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_false_param_db_name, datetime.utcnow().isoformat(), False),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', restore_source_zr_false_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+
+        # Restore non zone redundant source vldb with no parameters passed in
+        # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
+        self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', restore_source_non_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Geo'),
+                     JMESPathCheck('zoneRedundant', False)])
+
+        # Restore zone redundant source vldb with no parameters passed in
+        # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
+        self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+					 JMESPathCheck('name', restore_source_zr_no_param_db_name),
+					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
+                     JMESPathCheck('zoneRedundant', True)])
 
 class SqlDBMaintenanceScenarioTest(ScenarioTest):
     DEFAULT_MC = "SQL_Default"

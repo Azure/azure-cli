@@ -5,58 +5,62 @@
 
 # pylint: disable=protected-access
 import json
-import os
-import sys
-import unittest
-from unittest import mock
-import re
 import datetime
-
+import unittest
 from copy import deepcopy
-
-from azure.core.credentials import AccessToken
+from unittest import mock
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
                                      _transform_subscription_for_multiapi)
-
-from azure.mgmt.resource.subscriptions.models import \
-    (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant, TenantIdDescription)
-
+from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
 from azure.identity import AuthenticationRecord
+from azure.mgmt.resource.subscriptions.models import \
+    (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from knack.util import CLIError
 
-
 MOCK_ACCESS_TOKEN = "mock_access_token"
-MOCK_EXPIRES_ON = 1630920323
+MOCK_EXPIRES_ON_STR = "1630920323"
+MOCK_EXPIRES_ON_INT = 1630920323
+MOCK_EXPIRES_ON_DATETIME = datetime.datetime.fromtimestamp(MOCK_EXPIRES_ON_INT).strftime("%Y-%m-%d %H:%M:%S.%f")
 BEARER = 'Bearer'
 
 
-class MockCredential:
+class CredentialMock:
 
     def __init__(self, *args, **kwargs):
+        # If get_token_scopes is checked, make sure to create a new instance of CredentialMock
+        # to avoid interference from other tests.
+        self.get_token_scopes = None
         super().__init__()
 
     def get_token(self, *scopes, **kwargs):
-        from azure.core.credentials import AccessToken
-        import time
-        now = int(time.time())
-        # Mock sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:230
-        return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON)
+        self.get_token_scopes = scopes
+        return AccessToken(MOCK_ACCESS_TOKEN, MOCK_EXPIRES_ON_INT)
+
+
+# Used as the return_value of azure.cli.core.auth.identity.Identity.get_user_credential
+# If we directly patch azure.cli.core.auth.msal_authentication.UserCredential with CredentialMock,
+# get_user_credential will prepare MSAL token cache and HTTP cache which is time-consuming and unnecessary.
+credential_mock = CredentialMock()
 
 
 class MSRestAzureAuthStub:
+
     def __init__(self, *args, **kwargs):
         self._token = {
             'token_type': 'Bearer',
-            'access_token': TestProfile.test_msi_access_token
+            'access_token': TestProfile.test_msi_access_token,
+            'expires_on': MOCK_EXPIRES_ON_STR
         }
         self.set_token_invoked_count = 0
         self.token_read_count = 0
+        self.get_token_scopes = None
         self.client_id = kwargs.get('client_id')
         self.object_id = kwargs.get('object_id')
         self.msi_res_id = kwargs.get('msi_res_id')
+        self.resource = kwargs.get('resource')
 
     def set_token(self):
         self.set_token_invoked_count += 1
@@ -69,6 +73,10 @@ class MSRestAzureAuthStub:
     @token.setter
     def token(self, value):
         self._token = value
+
+    def get_token(self, *args, **kwargs):
+        self.get_token_scopes = args
+        return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
 
 class TestProfile(unittest.TestCase):
@@ -263,7 +271,8 @@ class TestProfile(unittest.TestCase):
                 'authority_type': 'MSSTS'
             }]
 
-        cls.msal_scopes = ['https://foo/.default']
+        cls.adal_resource = 'https://foo/'
+        cls.msal_scopes = ['https://foo//.default']
 
         cls.service_principal_id = "00000001-0000-0000-0000-000000000000"
         cls.service_principal_secret = "test_secret"
@@ -843,8 +852,8 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(user, self.user1)
 
-    @mock.patch('azure.cli.core.auth.identity.UserCredential', MockCredential)
-    def test_get_login_credentials(self):
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
+    def test_get_login_credentials(self, get_user_credential_mock):
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -858,6 +867,7 @@ class TestProfile(unittest.TestCase):
         profile._set_subscriptions(consolidated)
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
+        get_user_credential_mock.assert_called_with(self.user1)
 
         # verify
         self.assertEqual(subscription_id, test_subscription_id)
@@ -866,8 +876,8 @@ class TestProfile(unittest.TestCase):
         token = cred.get_token()
         self.assertEqual(token.token, MOCK_ACCESS_TOKEN)
 
-    @mock.patch('azure.cli.core.auth.identity.UserCredential', MockCredential)
-    def test_get_login_credentials_aux_subscriptions(self):
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
+    def test_get_login_credentials_aux_subscriptions(self, get_user_credential_mock):
         cli = DummyCli()
 
         storage_mock = {'subscriptions': None}
@@ -895,8 +905,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(token.token, MOCK_ACCESS_TOKEN)
         self.assertEqual(aux_tokens[0].token, MOCK_ACCESS_TOKEN)
 
-    @mock.patch('azure.cli.core.auth.identity.UserCredential', MockCredential)
-    def test_get_login_credentials_aux_tenants(self):
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', return_value=credential_mock)
+    def test_get_login_credentials_aux_tenants(self, get_user_credential_mock):
         cli = DummyCli()
 
         storage_mock = {'subscriptions': None}
@@ -925,7 +935,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(aux_tokens[0].token, MOCK_ACCESS_TOKEN)
 
         # test input aux_tenants and aux_subscriptions
-        with self.assertRaisesRegexp(CLIError,
+        with self.assertRaisesRegex(CLIError,
                                      "Please specify only one of aux_subscriptions and aux_tenants, not both"):
             cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id1,
                                                                      aux_subscriptions=[test_subscription_id2],
@@ -1026,8 +1036,10 @@ class TestProfile(unittest.TestCase):
         self.assertTrue(cred.token_read_count)
         self.assertTrue(cred.msi_res_id, test_res_id)
 
-    @mock.patch('azure.cli.core.auth.identity.UserCredential', MockCredential)
-    def test_get_raw_token(self):
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
+    def test_get_raw_token(self, get_user_credential_mock):
+        credential_mock_temp = CredentialMock()
+        get_user_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -1039,7 +1051,7 @@ class TestProfile(unittest.TestCase):
 
         # action
         # Get token with ADAL-style resource
-        resource_result = profile.get_raw_token(resource='https://foo')
+        resource_result = profile.get_raw_token(resource=self.adal_resource)
         # Get token with MSAL-style scopes
         scopes_result = profile.get_raw_token(scopes=self.msal_scopes)
 
@@ -1049,18 +1061,23 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
         self.assertEqual(tenant, self.tenant_id)
 
         # Test get_raw_token with tenant
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
+
+        # verify
+        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
 
         self.assertEqual(creds[0], 'Bearer')
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)
@@ -1068,7 +1085,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
     def test_get_raw_token_for_sp(self, get_service_principal_credential_mock):
-        get_service_principal_credential_mock.return_value = MockCredential()
+        credential_mock_temp = CredentialMock()
+        get_service_principal_credential_mock.return_value = credential_mock_temp
         cli = DummyCli()
         # setup
         storage_mock = {'subscriptions': None}
@@ -1078,24 +1096,28 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
         # action
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo')
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource)
 
         # verify
+        assert list(credential_mock_temp.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
         # the last in the tuple is the whole token entry which has several fields
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription should be set
         self.assertEqual(sub, self.subscription1.subscription_id)
         self.assertEqual(tenant, self.tenant_id)
 
         # Test get_raw_token with tenant
-        creds, sub, tenant = profile.get_raw_token(resource='https://foo', tenant=self.tenant_id)
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource, tenant=self.tenant_id)
 
         self.assertEqual(creds[0], BEARER)
         self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
-        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
 
         # subscription shouldn't be set
         self.assertIsNone(sub)
@@ -1115,20 +1137,34 @@ class TestProfile(unittest.TestCase):
                                                      True)
         profile._set_subscriptions(consolidated)
 
-        mock_msi_auth.side_effect = MSRestAzureAuthStub
+        mi_auth_instance = None
+
+        def mi_auth_factory(*args, **kwargs):
+            nonlocal mi_auth_instance
+            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
+            return mi_auth_instance
+
+        mock_msi_auth.side_effect = mi_auth_factory
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
-        # assert
+        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
+        assert mi_auth_instance.resource == self.adal_resource
+        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+
+        # Make sure expires_on and expiresOn are set
+        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for MSI account
-        with self.assertRaisesRegexp(CLIError, "MSI"):
+        with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core._profile.in_cloud_console', autospec=True)
@@ -1148,20 +1184,34 @@ class TestProfile(unittest.TestCase):
         consolidated[0]['user']['cloudShellID'] = True
         profile._set_subscriptions(consolidated)
 
-        mock_msi_auth.side_effect = MSRestAzureAuthStub
+        mi_auth_instance = None
+
+        def mi_auth_factory(*args, **kwargs):
+            nonlocal mi_auth_instance
+            mi_auth_instance = MSRestAzureAuthStub(*args, **kwargs)
+            return mi_auth_instance
+
+        mock_msi_auth.side_effect = mi_auth_factory
 
         # action
-        cred, subscription_id, tenant_id = profile.get_raw_token(resource='http://test_resource')
+        cred, subscription_id, tenant_id = profile.get_raw_token(resource=self.adal_resource)
 
-        # assert
+        # Make sure resource/scopes are passed to MSIAuthenticationWrapper
+        assert mi_auth_instance.resource == self.adal_resource
+        assert list(mi_auth_instance.get_token_scopes) == self.msal_scopes
+
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(cred[0], 'Bearer')
         self.assertEqual(cred[1], TestProfile.test_msi_access_token)
+
+        # Make sure expires_on and expiresOn are set
+        self.assertEqual(cred[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(cred[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
         # verify tenant shouldn't be specified for Cloud Shell account
-        with self.assertRaisesRegexp(CLIError, 'Cloud Shell'):
+        with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
             cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
 
     @mock.patch('azure.cli.core.auth.identity.Identity.logout_user')
@@ -1227,7 +1277,13 @@ class TestProfile(unittest.TestCase):
         result = storage_mock['subscriptions']
         self.assertEqual(2, len(result))
         self.assertEqual(self.id1.split('/')[-1], result[0]['id'])
+        assert result[0]['user']['name'] == self.user1
+        assert result[0]['user']['type'] == 'user'
+
         self.assertEqual(self.id2.split('/')[-1], result[1]['id'])
+        assert result[1]['user']['name'] == self.user1
+        assert result[1]['user']['type'] == 'user'
+
         self.assertTrue(result[0]['isDefault'])
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
@@ -1237,11 +1293,12 @@ class TestProfile(unittest.TestCase):
                                                               get_service_principal_credential_mock,
                                                               create_subscription_client_mock):
         cli = DummyCli()
+        sp_id = '44fee498-c798-4ebb-a41f-7bb523bed8d8'
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
         sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'footenant.onmicrosoft.com')
         consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None)
-        consolidated += profile._normalize_properties('http://foo', [sp_subscription1], True)
+        consolidated += profile._normalize_properties(sp_id, [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
 
         mock_arm_client = mock.MagicMock()
@@ -1255,9 +1312,17 @@ class TestProfile(unittest.TestCase):
         result = storage_mock['subscriptions']
         self.assertEqual(3, len(result))
         self.assertEqual(self.id1.split('/')[-1], result[0]['id'])
+        assert result[0]['user']['name'] == self.user1
+        assert result[0]['user']['type'] == 'user'
+
         self.assertEqual(self.id2.split('/')[-1], result[1]['id'])
+        assert result[1]['user']['name'] == sp_id
+        assert result[1]['user']['type'] == 'servicePrincipal'
+
         self.assertEqual('3', result[2]['id'])
         self.assertTrue(result[0]['isDefault'])
+        assert result[2]['user']['name'] == sp_id
+        assert result[2]['user']['type'] == 'servicePrincipal'
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)

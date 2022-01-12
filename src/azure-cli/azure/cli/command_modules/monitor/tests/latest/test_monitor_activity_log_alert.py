@@ -58,6 +58,14 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                          JMESPathCheck('scopes[0]', scope),
                          JMESPathCheck('actions.actionGroups[0].actionGroupId', action_rid)])
 
+        # test monitor activity-log alert list
+        self.cmd('az monitor activity-log alert list -g {} -ojson'.format(resource_group),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # test monitor activity-log list-categories
+        self.cmd('monitor activity-log list-categories',
+                 checks=[self.check('length(@)', 8)])
+
     @ResourceGroupPreparer(location='southcentralus')
     def test_monitor_activity_log_alert_update_action(self, resource_group):
         cmd_action = 'az monitor action-group create -n {} -g {} --query id -otsv'

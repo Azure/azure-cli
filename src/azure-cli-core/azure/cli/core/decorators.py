@@ -16,6 +16,9 @@ from functools import wraps
 from knack.log import get_logger
 
 
+logger = get_logger(__name__)
+
+
 # pylint: disable=too-few-public-methods
 class Completer:
 
@@ -79,5 +82,32 @@ def suppress_all_exceptions(fallback_return=None, **kwargs):  # pylint: disable=
                 get_logger(__name__).info('Suppress exception:\n%s', traceback.format_exc())
                 if fallback_return is not None:
                     return fallback_return
+        return _wrapped_func
+    return _decorator
+
+
+def retry(retry_times=3, interval=0.5, exceptions=Exception):
+    """Use optimistic locking to call a function, so that multiple processes can
+    access the same resource (such as a file) at the same time.
+
+    :param retry_times: Times to retry.
+    :param interval: Interval between retries.
+    :param exceptions: Exceptions that can be ignored. Use a tuple if multiple exceptions should be ignored.
+    """
+    def _decorator(func):
+        @wraps(func)
+        def _wrapped_func(*args, **kwargs):
+            for attempt in range(1, retry_times + 1):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:  # pylint: disable=broad-except
+                    if attempt < retry_times:
+                        logger.debug("%s failed in No. %d attempt", func, attempt)
+                        import traceback
+                        import time
+                        logger.debug(traceback.format_exc())
+                        time.sleep(interval)
+                    else:
+                        raise  # End of retry. Re-raise the exception as-is.
         return _wrapped_func
     return _decorator

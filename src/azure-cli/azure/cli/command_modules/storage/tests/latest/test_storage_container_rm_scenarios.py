@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
                                ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
@@ -37,7 +37,7 @@ class StorageContainerRmScenarios(ScenarioTest):
 
         # Create container using existing name while setting fail-on-exist true
         from knack.util import CLIError
-        with self.assertRaisesRegexp(CLIError, 'The specified container already exists.'):
+        with self.assertRaisesRegex(CLIError, 'The specified container already exists.'):
             self.cmd(
                 'storage container-rm create --storage-account {sa} -g {rg} -n {container_name} --fail-on-exist').get_output_in_json()
 
@@ -124,7 +124,7 @@ class StorageContainerRmScenarios(ScenarioTest):
         self.assertEqual(self.cmd('storage container-rm list --storage-account {storage_account_id}').get_output_in_json(), [])
 
         # 7. Test show command (the container doesn't exist).
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('storage container-rm show --storage-account {sa} -g {rg} -n {container_name}')
 
         # 8. Test exists command (the container doesn't exist).

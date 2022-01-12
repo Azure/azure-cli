@@ -7,7 +7,7 @@
 
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from datetime import datetime, timedelta, timezone
 from dateutil import parser
 
@@ -328,7 +328,7 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-virtual-network')
 
-        with self.assertRaisesRegexp(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
+        with self.assertRaisesRegex(CLIError, "usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
             self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --subnet {vnet}')
 
         vnet_rule = self.cmd('az cosmosdb network-rule add -n {acc} -g {rg} --virtual-network {vnet} --subnet {sub} --ignore-missing-vnet-service-endpoint').get_output_in_json()
