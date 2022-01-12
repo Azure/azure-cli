@@ -19,21 +19,48 @@ from .custom import show_functionapp, _build_identities_info
 logger = get_logger(__name__)
 
 
-def list_staticsites(cmd, resource_group_name=None):
+# remove irrelevant attributes from staticsites printed to the user
+def _format_staticsite(site, format_site=False):
+    if format_site:
+        props_to_remove = {"allow_config_file_updates",
+                           "build_properties",
+                           "content_distribution_endpoint",
+                           "key_vault_reference_identity",
+                           "kind",
+                           "private_endpoint_connections",
+                           "repository_token",
+                           "staging_environment_policy",
+                           "template_properties"}
+        sku_props_to_remove = {"capabilities",
+                               "capacity",
+                               "family",
+                               "locations",
+                               "size",
+                               "sku_capacity"}
+        for p in sku_props_to_remove:
+            if hasattr(site.sku, p):
+                delattr(site.sku, p)
+        for p in props_to_remove:
+            if hasattr(site, p):
+                delattr(site, p)
+    return site
+
+
+def list_staticsites(cmd, resource_group_name=None, format_output=True):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if resource_group_name:
         result = list(client.get_static_sites_by_resource_group(resource_group_name))
     else:
         result = list(client.list())
-    return result
+    return [_format_staticsite(site, format_output) for site in result]
 
 
-def show_staticsite(cmd, name, resource_group_name=None):
+def show_staticsite(cmd, name, resource_group_name=None, format_output=True):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.get_static_site(resource_group_name, name)
+    return _format_staticsite(client.get_static_site(resource_group_name, name), format_output)
 
 
 def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
@@ -338,10 +365,10 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
-def create_staticsites(cmd, resource_group_name, name, location,
+def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals
                        source, branch, token=None,
-                       app_location='.', api_location='.', output_location='.github/workflows',
-                       tags=None, no_wait=False, sku='Free', login_with_github=False):
+                       app_location='.', api_location='.', output_location=None,
+                       tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
     from azure.core.exceptions import ResourceNotFoundError
 
     try:
@@ -380,13 +407,17 @@ def create_staticsites(cmd, resource_group_name, name, location,
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not no_wait:
+        return _format_staticsite(client.begin_create_or_update_static_site(
+            resource_group_name=resource_group_name, name=name,
+            static_site_envelope=staticsite_deployment_properties), format_output)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
 
 def update_staticsite(cmd, name, source=None, branch=None, token=None,
-                      tags=None, sku=None, no_wait=False):
+                      tags=None, sku=None, no_wait=False, format_output=None):
     existing_staticsite = show_staticsite(cmd, name)
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
@@ -411,6 +442,12 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+    if not no_wait:
+        # get around CLI linter rules for default parameter values on update commands
+        format_output = (format_output is None) or (format_output is True)
+        return _format_staticsite(client.update_static_site(
+            resource_group_name=resource_group_name, name=name,
+            static_site_envelope=staticsite_deployment_properties), format_output)
     return sdk_no_wait(no_wait, client.update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
