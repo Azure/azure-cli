@@ -6,7 +6,6 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 
 
-@record_only()
 class AzureManagementGroupsScenarioTest(ScenarioTest):
     def test_list_managementgroups(self):
         managementgroups_list = self.cmd(
@@ -20,7 +19,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroups_list[0]["tenantId"])
         self.assertEqual(
             managementgroups_list[0]["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_show_managementgroup(self):
         self.cmd('account management-group create --name testcligetgroup1')
@@ -52,7 +51,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(managementgroup_get["tenantId"])
         self.assertEqual(
             managementgroup_get["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_show_managementgroup_with_expand(self):
         self.cmd('account management-group create --name testcligetgroup1')
@@ -169,28 +168,28 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name ' + name)
 
         self.assertIsNotNone(managementgroup_create)
-        self.assertIsNotNone(managementgroup_create["properties"]["details"])
+        self.assertIsNotNone(managementgroup_create["details"])
         self.assertEqual(
             managementgroup_create["id"],
             "/providers/Microsoft.Management/managementGroups/" + name)
         self.assertEqual(managementgroup_create["name"], name)
         self.assertEqual(
-            managementgroup_create["properties"]["displayName"],
+            managementgroup_create["displayName"],
             displayName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["displayName"],
-            "Tenant Root Group")
+            managementgroup_create["details"]["parent"]["displayName"],
+            "Root Management Group")
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["id"],
+            managementgroup_create["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
-            managementgroup_create["properties"]["tenantId"])
+            managementgroup_create["tenantId"])
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["name"],
-            managementgroup_create["properties"]["tenantId"])
-        self.assertIsNotNone(managementgroup_create["properties"]["tenantId"])
+            managementgroup_create["details"]["parent"]["name"],
+            managementgroup_create["tenantId"])
+        self.assertIsNotNone(managementgroup_create["tenantId"])
         self.assertEqual(
             managementgroup_create["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_create_managementgroup_with_displayname(self):
         name = "testcligroup"
@@ -203,28 +202,28 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name ' + name)
 
         self.assertIsNotNone(managementgroup_create)
-        self.assertIsNotNone(managementgroup_create["properties"]["details"])
+        self.assertIsNotNone(managementgroup_create["details"])
         self.assertEqual(
             managementgroup_create["id"],
             "/providers/Microsoft.Management/managementGroups/" + name)
         self.assertEqual(managementgroup_create["name"], name)
         self.assertEqual(
-            managementgroup_create["properties"]["displayName"],
+            managementgroup_create["displayName"],
             displayName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["displayName"],
-            "Tenant Root Group")
+            managementgroup_create["details"]["parent"]["displayName"],
+            "Root Management Group")
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["id"],
+            managementgroup_create["details"]["parent"]["id"],
             "/providers/Microsoft.Management/managementGroups/" +
-            managementgroup_create["properties"]["tenantId"])
+            managementgroup_create["tenantId"])
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["name"],
-            managementgroup_create["properties"]["tenantId"])
-        self.assertIsNotNone(managementgroup_create["properties"]["tenantId"])
+            managementgroup_create["details"]["parent"]["name"],
+            managementgroup_create["tenantId"])
+        self.assertIsNotNone(managementgroup_create["tenantId"])
         self.assertEqual(
             managementgroup_create["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_create_managementgroup_with_parentid(self):
         name = "testcligroupchild"
@@ -280,27 +279,27 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name ' + parentName)
 
         self.assertIsNotNone(managementgroup_create)
-        self.assertIsNotNone(managementgroup_create["properties"]["details"])
+        self.assertIsNotNone(managementgroup_create["details"])
         self.assertEqual(
             managementgroup_create["id"],
             "/providers/Microsoft.Management/managementGroups/" + name)
         self.assertEqual(managementgroup_create["name"], name)
         self.assertEqual(
-            managementgroup_create["properties"]["displayName"],
+            managementgroup_create["displayName"],
             displayName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["displayName"],
+            managementgroup_create["details"]["parent"]["displayName"],
             parentName)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["id"],
+            managementgroup_create["details"]["parent"]["id"],
             parentId)
         self.assertEqual(
-            managementgroup_create["properties"]["details"]["parent"]["name"],
+            managementgroup_create["details"]["parent"]["name"],
             parentName)
-        self.assertIsNotNone(managementgroup_create["properties"]["tenantId"])
+        self.assertIsNotNone(managementgroup_create["tenantId"])
         self.assertEqual(
             managementgroup_create["type"],
-            "/providers/Microsoft.Management/managementGroups")
+            "Microsoft.Management/managementGroups")
 
     def test_update_managementgroup_with_displayname(self):
         name = "testcligroup"
@@ -347,6 +346,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             name +
             ' --parent ' +
             parentId).get_output_in_json()
+        print(managementgroup_update)
         self.cmd('account management-group delete --name ' + name)
         self.cmd('account management-group delete --name ' + parentName)
 

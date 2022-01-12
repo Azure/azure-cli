@@ -2882,8 +2882,7 @@ def cli_managementgroups_group_create(
         name=group_name,
         display_name=display_name,
         details=create_mgmt_grp_details)
-    return client.create_or_update(group_name, create_mgmt_grp_request)
-
+    return client.begin_create_or_update(group_name, create_mgmt_grp_request)
 
 def cli_managementgroups_group_update_custom_func(
         instance,
@@ -2909,21 +2908,21 @@ def cli_managementgroups_group_update_set(
 def cli_managementgroups_group_delete(cmd, client, group_name, no_register=False):
     if not no_register:
         _register_rp(cmd.cli_ctx)
-    return client.delete(group_name)
+    return client.begin_delete(group_name)
 
 
 def cli_managementgroups_subscription_add(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    return client.create(group_name, subscription_id)
+    return client.begin_create(group_name, subscription_id)
 
 
 def cli_managementgroups_subscription_remove(
         cmd, client, group_name, subscription):
     subscription_id = _get_subscription_id_from_subscription(
         cmd.cli_ctx, subscription)
-    return client.delete(group_name, subscription_id)
+    return client.begin_delete(group_name, subscription_id)
 
 
 # region Locks
