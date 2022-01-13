@@ -5878,6 +5878,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 
+        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
+
         self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true', checks=[
             self.check('activeKey.sourceVault', None)
         ])
