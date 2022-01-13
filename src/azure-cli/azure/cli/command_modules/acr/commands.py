@@ -200,16 +200,23 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr repository', acr_repo_util) as g:
         g.command('list', 'acr_repository_list')
         g.command('show-tags', 'acr_repository_show_tags')
+        g.command('show-manifests', 'acr_repository_show_manifests',
+                deprecate_info=self.deprecate(redirect='manifest list', hide=True))
         g.show_command('show', 'acr_repository_show')
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
         g.command('untag', 'acr_repository_untag')
 
-    with self.command_group('acr repository manifest', acr_repo_util) as g:
-        g.command('list', 'acr_repository_list_manifests', table_transformer=list_manifest_output_format)
+    with self.command_group('acr repository manifest', acr_repo_util, is_preview=True) as g:
         g.show_command('show', 'acr_repository_show_manifest', table_transformer=show_manifest_output_format)
+        g.command('list', 'acr_repository_list_manifests', table_transformer=list_manifest_output_format)
         g.command('delete', 'acr_repository_delete_manifests')
-        g.command('list-references', 'acr_repository_list_references', table_transformer=list_references_output_format)
+        g.show_command('show-metadata', 'acr_repository_show_manifest_metadata')
+        g.command('list-metadata', 'acr_repository_list_manifest_metadata')
+        g.command('update-metadata', 'acr_repository_update_manifest_metadata')
+        g.command('list-referrers', 'acr_repository_list_manifest_referrers', table_transformer=list_references_output_format)
+
+
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')

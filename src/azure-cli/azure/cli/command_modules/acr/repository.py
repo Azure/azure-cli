@@ -56,7 +56,7 @@ def _get_manifest_path(repository, manifest=None):
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
-def _get_references_path(repository, manifest, artifact_type):
+def _get_references_path(repository, manifest, artifact_type=None):
     if(artifact_type):
         return '/oras/artifacts/v1/{}/manifests/{}/referrers?artifactType={}'.format(repository, manifest, artifact_type)
     else:
@@ -223,17 +223,10 @@ def acr_repository_list_manifests(cmd,
                                   repository,
                                   top=None,
                                   orderby=None,
-                                  resource_group_name=None,  # pylint: disable=unused-argument
                                   tenant_suffix=None,
                                   username=None,
-                                  password=None,
-                                  artifact_type=None,
-                                  subject = None,
-                                  detail=False,
-                                  full=False):
-
-    if (artifact_type is not None or subject is not None) and not full:
-        raise CLIError("Filtering by subject or artifact type is only supported when the --full flag is present.")
+                                  password=None
+                                  ):
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -247,22 +240,23 @@ def acr_repository_list_manifests(cmd,
     raw_result = _obtain_data_from_registry(
         login_server=login_server,
         path=_get_manifest_path(repository),
+        top=top,
         username=username,
         password=password,
         result_index='manifests',
         orderby=orderby)
 
-    if full:
-        digest_list = [x['digest'] for x in raw_result]
-        manifest_list = []
 
-        for digest in digest_list:
-            manifest_list.append(_obtain_manifest_from_registry(
+    digest_list = [x['digest'] for x in raw_result]
+    manifest_list = []
+
+    for digest in digest_list:
+        manifest_list.append(_obtain_manifest_from_registry(
             login_server=login_server,
             path=_get_v2_manifest_path(repository, digest),
             username=username,
             password=password))
-
+    """
         if(subject):
             image = repository + ':' + subject
             if 'sha256:' not in subject:
@@ -271,34 +265,94 @@ def acr_repository_list_manifests(cmd,
 
         if(artifact_type):
             manifest_list = list(filter(lambda x: 'artifactType' in x and x['artifactType'] == artifact_type, manifest_list))
+    """
+    #return manifest_list[:top] if top else manifest_list
+    return manifest_list
 
-        return manifest_list[:top] if top else manifest_list
 
+def acr_repository_list_manifest_metadata(cmd,
+                                  registry_name,
+                                  repository,
+                                  top=None,
+                                  orderby=None,
+                                  tenant_suffix=None,
+                                  username=None,
+                                  password=None
+                                  ):
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+    raw_result = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_manifest_path(repository),
+        username=username,
+        password=password,
+        result_index='manifests',
+        top=top,
+        orderby=orderby)
+
+    return raw_result
+
+
+#This command lists manifest metadata, legacy and deprecated
+def acr_repository_show_manifests(cmd,
+                                  registry_name,
+                                  repository,
+                                  top=None,
+                                  orderby=None,
+                                  resource_group_name=None,  # pylint: disable=unused-argument
+                                  tenant_suffix=None,
+                                  username=None,
+                                  password=None,
+                                  detail=False):
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+    raw_result = _obtain_data_from_registry(
+        login_server=login_server,
+        path=_get_manifest_path(repository),
+        username=username,
+        password=password,
+        result_index='manifests',
+        top=top,
+        orderby=orderby)
 
     # For backward compatibility, convert the results to the old schema
     if not detail:
-        manifest_list = [{
+        return [{
             'digest': item['digest'] if 'digest' in item else '',
             'tags': item['tags'] if 'tags' in item else [],
             'timestamp': item['lastUpdateTime'] if 'lastUpdateTime' in item else ''
         } for item in raw_result]
 
-        return manifest_list[:top] if top else manifest_list
+    return raw_result
 
-    manifest_list = [x for x in raw_result]
-
-    return manifest_list[:top] if top else manifest_list
-
-
-def acr_repository_list_references(cmd,
+def acr_repository_list_manifest_referrers(cmd,
                                   registry_name,
-                                  repository,
-                                  manifest,
+                                  manifest_id,
                                   artifact_type=None,
-                                  resource_group_name=None,  # pylint: disable=unused-argument
+                                  recurse=False,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
+
+    repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+    if not manifest:
+        image = repository + ':' + tag
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -307,10 +361,6 @@ def acr_repository_list_references(cmd,
         password=password,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
-
-    if 'sha256:' not in manifest:
-        image = repository + ':' + manifest
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
 
     raw_result = _obtain_manifest_from_registry(
         login_server=login_server,
@@ -318,18 +368,35 @@ def acr_repository_list_references(cmd,
         username=username,
         password=password)
 
+    ref_key = "references"
+    if recurse:
+        #checking for ref_key only necessary because of backend bug when manifest has no referrers
+        if ref_key in raw_result:
+            for referrers_obj in raw_result[ref_key]:
+                internal_referrers_obj = _obtain_manifest_from_registry(
+                                login_server=login_server,
+                                path=_get_references_path(repository, referrers_obj["digest"]),
+                                username=username,
+                                password=password)
+
+                if ref_key in internal_referrers_obj:
+                    for ref in internal_referrers_obj[ref_key]:
+                        raw_result[ref_key].append(ref)
+
     return raw_result
 
 def acr_repository_show_manifest(cmd,
                                   registry_name,
-                                  repository,
-                                  manifest,
-                                  top=None,
-                                  orderby=None,
-                                  resource_group_name=None,  # pylint: disable=unused-argument
+                                  manifest_id,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
+
+    repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+    if not manifest:
+        image = repository + ':' + tag
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
@@ -339,9 +406,7 @@ def acr_repository_show_manifest(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    if 'sha256:' not in manifest:
-        image = repository + ':' + manifest
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+
 
     raw_result = _obtain_manifest_from_registry(
         login_server=login_server,
@@ -351,18 +416,15 @@ def acr_repository_show_manifest(cmd,
 
     return raw_result
 
-def acr_repository_delete_manifests(cmd,
-                                    registry_name,
-                                    repository=None,
-                                    manifest=None,
-                                    resource_group_name=None,  # pylint: disable=unused-argument
-                                    tenant_suffix=None,
-                                    username=None,
-                                    password=None,
-                                    yes=False):
-
-    if 'sha256:' not in manifest:
-        image = repository + ':' + manifest
+def acr_repository_show_manifest_metadata(cmd,
+                                  registry_name,
+                                  manifest_id,
+                                  tenant_suffix=None,
+                                  username=None,
+                                  password=None):
+    repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+    if not manifest:
+        image = repository + ':' + tag
         repository, tag, manifest = get_image_digest(cmd, registry_name, image)
 
     login_server, username, password = get_access_credentials(
@@ -372,24 +434,88 @@ def acr_repository_delete_manifests(cmd,
         username=username,
         password=password,
         repository=repository,
-        permission=RepoAccessTokenPermission.PULL_DELETE_META_READ.value)
+        permission=RepoAccessTokenPermission.PULL.value)
 
     raw_result = _obtain_manifest_from_registry(
         login_server=login_server,
-        path=_get_references_path(repository, manifest),
+        path=_get_manifest_path(repository, manifest),
         username=username,
         password=password)
 
-    manifest_list = [x['digest'] for x in raw_result['references']]
-    manifest_list.append(manifest)
+    return raw_result
+
+
+def acr_repository_update_manifest_metadata(cmd,
+                          registry_name,
+                          manifest_id=None,
+                          tenant_suffix=None,
+                          username=None,
+                          password=None,
+                          delete_enabled=None,
+                          list_enabled=None,
+                          read_enabled=None,
+                          write_enabled=None):
+    json_payload = {}
+
+    if delete_enabled is not None:
+        json_payload.update({
+            'deleteEnabled': delete_enabled
+        })
+    if list_enabled is not None:
+        json_payload.update({
+            'listEnabled': list_enabled
+        })
+    if read_enabled is not None:
+        json_payload.update({
+            'readEnabled': read_enabled
+        })
+    if write_enabled is not None:
+        json_payload.update({
+            'writeEnabled': write_enabled
+        })
+
+    permission = RepoAccessTokenPermission.META_WRITE_META_READ.value if json_payload \
+        else RepoAccessTokenPermission.METADATA_READ.value
+    return _acr_repository_attributes_helper(
+        cmd=cmd,
+        registry_name=registry_name,
+        http_method='patch' if json_payload else 'get',
+        json_payload=json_payload,
+        permission=permission,
+        repository=None,
+        image=manifest_id,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password)
+
+
+def acr_repository_delete_manifests(cmd,
+                                    registry_name,
+                                    manifest_id,
+                                    tenant_suffix=None,
+                                    username=None,
+                                    password=None,
+                                    yes=False):
+
+    repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+    if not manifest:
+        image = repository + ':' + tag
+        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
+
+    login_server, username, password = get_access_credentials(
+        cmd=cmd,
+        registry_name=registry_name,
+        tenant_suffix=tenant_suffix,
+        username=username,
+        password=password,
+        repository=repository,
+        permission=RepoAccessTokenPermission.DELETE.value)
 
     user_confirmation("Are you sure you want to delete the artifact '{}' "
                           "and all manifests that refer to it?".format(manifest), yes)
 
-    for target_manifest in manifest_list:
-        path = _get_v2_manifest_path(repository, target_manifest)
-
-        request_data_from_registry(
+    path = _get_v2_manifest_path(repository, manifest)
+    request_data_from_registry(
         http_method='delete',
         login_server=login_server,
         path=path,

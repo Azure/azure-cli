@@ -175,30 +175,13 @@ def list_manifest_output_format(result):
 
     else:
         # --full case
-        hasDockerManifest = False
         for manifest in result:
-            if  _get_value(manifest, 'artifactType') == ' ':
-                hasDockerManifest = True
-                break
-
-        # Both OCI and ORAS artifacts case
-        if hasDockerManifest:
-            for manifest in result:
-                manifests.append(OrderedDict([
-                ('ArtifactType',  _get_value(manifest, 'artifactType')),
-                ('SubjectDigest', _get_value(manifest, 'subject', 'digest')),
-                ('MediaType',  _get_value(manifest, 'mediaType'))
-            ]))
-            return manifests
-
-        # ORAS artifacts only case
-        else:
-            for manifest in result:
-                manifests.append(OrderedDict([
-                    ('ArtifactType',  _get_value(manifest, 'artifactType')),
-                    ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
-                ]))
-            return manifests
+            manifests.append(OrderedDict([
+            ('MediaType',  _get_value(manifest, 'mediaType')),
+            ('ArtifactType',  _get_value(manifest, 'artifactType')),
+            ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
+        ]))
+        return manifests
 
 
 def show_manifest_output_format(result):
