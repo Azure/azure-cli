@@ -633,7 +633,7 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
