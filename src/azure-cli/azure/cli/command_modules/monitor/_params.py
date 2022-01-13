@@ -416,6 +416,9 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
+    with self.argument_context('monitor log-analytics workspace') as c:
+        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace.')
+
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
@@ -441,6 +444,15 @@ def load_arguments(self, _):
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
         c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
+
+    with self.argument_context('monitor log-analytics workspace table create') as c:
+        from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('schema_name', help='Table name.')
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
+        c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
+        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
+        c.argument('display_name', help='Table display name.')
+        c.argument('description', help='Table description.')
     # endregion
 
     # region Log Analytics Workspace Data Export

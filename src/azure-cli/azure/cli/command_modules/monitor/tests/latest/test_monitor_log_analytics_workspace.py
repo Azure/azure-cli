@@ -478,3 +478,23 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd('monitor log-analytics workspace data-export delete -g {rg} --workspace-name {workspace_name} -n {data_export_name} -y')
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
+    def test_monitor_log_analytics_workspace_table(self, resource_group_name):
+
+        self.kwargs.update({
+            'ws_name':self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('table-', 15),
+
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {workspace_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+
+        ])
+        self.cmd('monitor log-analytics workspcae table update -g {rg} -n {table_name} --workspace-name {ws_name}',checks=[
+
+        ])
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}')
+        self.cmd('monitor log-analytics workspace table list -g {rg} --workspace-name {ws_name}')
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name}')

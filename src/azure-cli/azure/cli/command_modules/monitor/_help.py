@@ -1107,6 +1107,15 @@ examples:
         az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
 """
 
+helps['monitor log-analytics workspace table create'] = """
+type: command
+short-summary: Create a Log Analytics workspace table..
+examples:
+  - name: Create a Log Analytics workspace table.
+    text: |
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --schema-name MySchema --retention-time 45 --columns MyColumn1=string
+"""
+
 helps['monitor log-analytics workspace table update'] = """
 type: command
 short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.

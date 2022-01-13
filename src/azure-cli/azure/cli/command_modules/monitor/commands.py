@@ -390,7 +390,9 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
+        g.custom_command('create', 'create_log_analytics_workspace_table')
         g.custom_command('update', 'update_log_analytics_workspace_table')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:

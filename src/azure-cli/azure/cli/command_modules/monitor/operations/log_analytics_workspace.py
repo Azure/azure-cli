@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
-from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table
+from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
+    Schema, Column, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from knack.util import CLIError
 
 
@@ -35,7 +37,8 @@ def create_log_analytics_workspace(client, resource_group_name, workspace_name, 
 
 def update_log_analytics_workspace(instance, tags=None, capacity_reservation_level=None,
                                    retention_time=None, daily_quota_gb=None,
-                                   public_network_access_for_query=None, public_network_access_for_ingestion=None):
+                                   public_network_access_for_query=None, public_network_access_for_ingestion=None,
+                                   default_data_collection_rule_resource_id=None):
     if tags is not None:
         instance.tags = tags
     if capacity_reservation_level is not None:
@@ -50,6 +53,8 @@ def update_log_analytics_workspace(instance, tags=None, capacity_reservation_lev
         instance.public_network_access_for_query = public_network_access_for_query
     if public_network_access_for_ingestion is not None:
         instance.public_network_access_for_ingestion = public_network_access_for_ingestion
+    if default_data_collection_rule_resource_id is not None:
+        instance.default_data_collection_rule_resource_id = default_data_collection_rule_resource_id
     return instance
 
 
@@ -142,9 +147,36 @@ def update_log_analytics_workspace_data_exports(cmd, instance, table_names, dest
     return instance
 
 
+def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, schema_name, columns,
+                                         retention_in_days=None, total_retention_in_days=None, plan=None,
+                                         display_name=None, description=None):
+
+    columns_list = []
+    for col in columns:
+        if '=' in col:
+            n, t = col.split('=', 1)
+            if t.lower() not in [x.value.lower() for x in ColumnTypeEnum]:
+                raise InvalidArgumentValueError('InvalidArgumentValueError: "{}" is not a valid value for type_name. '
+                                                'Allowed values: string, int, long, real, boolean, dateTime, guid, '
+                                                'dynamic".'.format(t))
+        else:
+            raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
+        columns_list.append(Column(name=n, type=t))
+    schema = Schema(name=schema_name, columns=columns_list, display_name=display_name, description=description)
+    table = Table(retention_in_days=retention_in_days,
+                  total_retention_in_days=total_retention_in_days,
+                  schema=schema,
+                  plan=plan
+                  )
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         workspace_name=workspace_name,
+                                         table_name=table_name,
+                                         parameters=table)
+
+
 def update_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, retention_in_days):
     table = Table(retention_in_days=retention_in_days)
-    return client.update(resource_group_name=resource_group_name,
-                         workspace_name=workspace_name,
-                         table_name=table_name,
-                         parameters=table)
+    return client.begin_update(resource_group_name=resource_group_name,
+                               workspace_name=workspace_name,
+                               table_name=table_name,
+                               parameters=table)
