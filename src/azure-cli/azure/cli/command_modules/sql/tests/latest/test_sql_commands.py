@@ -4471,13 +4471,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # update encryption protector to akv key
         self.cmd(
-            'sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid} --auto-rotation-enabled',
+            'sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid}',
             checks=[
                 self.check('serverKeyType', 'AzureKeyVault'),
                 self.check('serverKeyName', '{server_key_name}'),
-                self.check('uri', '{kid}'),
-                self.check('autoRotationEnabled', True)])
-
+                self.check('uri', '{kid}')])
+                
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
                  checks=[
