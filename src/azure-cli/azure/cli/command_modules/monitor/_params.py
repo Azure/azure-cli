@@ -416,7 +416,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
-    with self.argument_context('monitor log-analytics workspace') as c:
+    with self.argument_context('monitor log-analytics workspace update') as c:
         c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace.')
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
