@@ -98,6 +98,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     family = 'Gen5'
     proxy = 'Proxy'
 
+    fog_name = "fgtest2022a"
+    primary_name = 'mi-primary-wcus'
+    secondary_name = 'mi-tooling-cus'
     sec_location = 'centralus'
     sec_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/vnet-sql-mi-secondary/subnets/default'.format(subscription_id, group)
 
@@ -1058,8 +1061,10 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         edition_updated = 'BusinessCritical'
         v_core_update = 4
 
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
         if self.is_live:
-            sleep(60)
+            sleep(120)
 
         print('Updating MI...\n')
 
@@ -4247,8 +4252,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
-    test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-    verify_umi_with_empty_uuid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+    test_umi = '/subscriptions/{}/resourcegroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-tooling-managed-identity'.format(ManagedInstancePreparer.subscription_id, ManagedInstancePreparer.group)
+    verify_umi_with_empty_uuid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-tooling-managed-identity'.format(ManagedInstancePreparer.group)
 
     @AllowLargeResponse()
     @ManagedInstancePreparer(
@@ -4269,7 +4274,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                          'primaryUserAssignedIdentityId',
                          self.test_umi if self.in_recording or self.is_live else self.verify_umi_with_empty_uuid
                      ),
-                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')]
+                     JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned')]
                  )
 
 
@@ -4614,13 +4619,13 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup list -l {loc} -g {rg}',
             checks=[
-                self.check('length(@)', 0)])
+                JMESPathCheckGreaterThan('length(@)', 0)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc}',
             checks=[
-                self.check('length(@)', 0)])
+                JMESPathCheckGreaterThan('length(@)', 0)])
 
         # test list long term retention backups for instance
         # with resource group
@@ -5155,21 +5160,19 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
-    @ManagedInstancePreparer(parameter_name="mi1")
-    @ManagedInstancePreparer(parameter_name="mi2", is_geo_secondary=True)
-    def test_sql_instance_failover_group_mgmt(self, mi1, rg, mi2):
-        managed_instance_name_1 = mi1
-        managed_instance_name_2 = mi2
-        resource_group_name = rg
-        failover_group_name = "fgtest2021a"
-        mi1_location = ManagedInstancePreparer.location
-        mi2_location = ManagedInstancePreparer.sec_location
+    def test_sql_instance_failover_group_mgmt(self):
+        resource_group_name = ManagedInstancePreparer.group
+        primary_name = ManagedInstancePreparer.primary_name
+        secondary_name = ManagedInstancePreparer.secondary_name
+        failover_group_name = ManagedInstancePreparer.fog_name
+        primary_location = ManagedInstancePreparer.location
+        secondary_location = ManagedInstancePreparer.sec_location
 
         # Create Failover Group
         self.cmd(
             'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
-                .format(failover_group_name, resource_group_name, managed_instance_name_1, resource_group_name,
-                        managed_instance_name_2),
+                .format(failover_group_name, resource_group_name, primary_name, resource_group_name,
+                        secondary_name),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
@@ -5179,7 +5182,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('name', failover_group_name),
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
@@ -5190,7 +5193,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Update Failover Group
         self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, mi1_location),
+                 .format(resource_group_name, failover_group_name, primary_location),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
@@ -5199,7 +5202,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check if properties got propagated to secondary server
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('name', failover_group_name),
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
@@ -5210,7 +5213,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql instance-failover-group update -g {} -n {} -l {} --failover-policy Manual'
-                 .format(resource_group_name, failover_group_name, mi1_location),
+                 .format(resource_group_name, failover_group_name, primary_location),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
@@ -5218,7 +5221,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Failover Failover Group
         self.cmd('sql instance-failover-group set-primary -g {} -n {} -l {} '
-                 .format(resource_group_name, failover_group_name, mi2_location))
+                 .format(resource_group_name, failover_group_name, secondary_location))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -5228,20 +5231,20 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         # Fail back to original server
         self.cmd('sql instance-failover-group set-primary --allow-data-loss -g {} -n {} -l {}'
-                 .format(resource_group_name, failover_group_name, mi1_location))
+                 .format(resource_group_name, failover_group_name, primary_location))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -5251,37 +5254,37 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         # Do no-op failover to the same server
         self.cmd('sql instance-failover-group set-primary -g {} -n {} -l {}'
-                 .format(resource_group_name, failover_group_name, mi1_location))
+                 .format(resource_group_name, failover_group_name, primary_location))
 
         # Check the roles of failover groups to confirm failover didn't happen
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         # Drop failover group
         self.cmd('sql instance-failover-group delete -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=NoneCheck())
 
 
