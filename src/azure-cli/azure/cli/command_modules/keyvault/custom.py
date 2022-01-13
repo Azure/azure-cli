@@ -696,8 +696,21 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        if is_azure_stack_profile(cmd):
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
             permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
                                       secrets=[
                                           SecretPermissions.get,
                                           SecretPermissions.list,
@@ -731,11 +744,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
                                           StoragePermissions.listsas,
                                           StoragePermissions.getsas,
                                           StoragePermissions.deletesas])
-        else:
-            permissions = Permissions(keys=[KeyPermissions.all],
-                                      secrets=[SecretPermissions.all],
-                                      certificates=[CertificatePermissions.all],
-                                      storage=[StoragePermissions.all])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:
