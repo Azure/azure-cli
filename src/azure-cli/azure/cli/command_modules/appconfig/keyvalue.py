@@ -57,6 +57,7 @@ def import_config(cmd,
                   separator=None,
                   depth=None,
                   profile=ImportExportProfiles.DEFAULT,
+                  strict=False,
                   # from-configstore parameters
                   src_name=None,
                   src_connection_string=None,
@@ -79,7 +80,7 @@ def import_config(cmd,
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, yes=yes)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -147,7 +148,7 @@ def import_config(cmd,
         # generate preview and wait for user confirmation
         need_kv_change = __print_preview(
             old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
-            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source))
+            new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), strict=strict)
 
         need_feature_change = False
         if src_features and not skip_features:

@@ -8,6 +8,7 @@
 import io
 import json
 from difflib import Differ
+from itertools import filterfalse
 from json import JSONDecodeError
 from urllib.parse import urlparse
 
@@ -628,7 +629,7 @@ def __print_features_preview(old_json, new_json):
     return True
 
 
-def __print_preview(old_json, new_json):
+def __print_preview(old_json, new_json, strict):
     logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
     if not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
@@ -641,14 +642,20 @@ def __print_preview(old_json, new_json):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
-    if res == {} or (('update' not in keys) and ('insert' not in keys)):
+    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         logger.warning('\nTarget configuration already contains all key-values in source. No changes will be made.')
         return False
 
     # format result printing
     for action, changes in res.items():
         if action.label == 'delete':
-            continue  # we do not delete KVs while importing/exporting
+            if strict:
+                logger.warning('\nDeleting:')
+                for key in changes:
+                    record = {'key': key}
+                    logger.warning(json.dumps(record, ensure_ascii=False))
+            else:
+                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
@@ -1026,7 +1033,7 @@ def __resolve_secret(keyvault_client, keyvault_reference):
         raise CLIError(str(exception))
 
 
-def __import_kvset_from_file(client, path, yes):
+def __import_kvset_from_file(client, path, strict, yes):
     new_kvset = __read_with_appropriate_encoding(file_path=path, format_='json')
     if KVSetConstants.KVSETRootElementName not in new_kvset:
         raise FileOperationError("file '{0}' is not in a valid '{1}' format.".format(path, ImportExportProfiles.KVSET))
@@ -1044,15 +1051,20 @@ def __import_kvset_from_file(client, path, yes):
         if __validate_import_config_setting(config_setting):
             kvset_to_import.append(config_setting)
 
+    existing_kvset = __read_kv_from_config_store(client,
+                                                 key=SearchFilterOptions.ANY_KEY,
+                                                 label=SearchFilterOptions.ANY_LABEL)
+    kvset_to_delete = []
+    if strict:
+        kvset_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
+                                                          for kv_import in kvset_to_import), existing_kvset))
     if not yes:
-        existing_kvset = __read_kv_from_config_store(client,
-                                                     key=SearchFilterOptions.ANY_KEY,
-                                                     label=SearchFilterOptions.ANY_LABEL)
-        # we don't delete configurations if they are missing from the import file, so don't need to show them in the
-        # diff, so omit them from existing kvset
-        existing_kvset = list(filter(lambda kv:
-                                     any(kv_import.key == kv.key and kv_import.label == kv.label
-                                         for kv_import in kvset_to_import), existing_kvset))
+
+        # When strict mode is not enabled, we don't delete configurations if they are missing from the import file,
+        # so don't need to show them in the diff, so omit them from existing kvset
+        if not strict:
+            existing_kvset = list(filter(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
+                                                        for kv_import in kvset_to_import), existing_kvset))
 
         existing_kvset_list = __serialize_kv_list_to_comparable_json_list(existing_kvset, ImportExportProfiles.KVSET)
         kvset_to_import_list = __serialize_kv_list_to_comparable_json_list(kvset_to_import, ImportExportProfiles.KVSET)
@@ -1064,6 +1076,10 @@ def __import_kvset_from_file(client, path, yes):
             return
 
         user_confirmation('Do you want to continue?\n')
+
+    if len(kvset_to_delete) > 0:
+        for config_setting in kvset_to_delete:
+            __delete_configuration_setting_from_config_store(client, config_setting)
 
     for config_setting in kvset_to_import:
         __write_configuration_setting_to_config_store(client, config_setting)
@@ -1149,6 +1165,21 @@ def __write_configuration_setting_to_config_store(azconfig_client, configuration
     except HttpResponseError as exception:
         logger.warning(
             "Failed to set key-value with key '%s' and label '%s'. %s",
+            configuration_setting.key, configuration_setting.label, str(exception))
+    except Exception as exception:
+        raise AzureInternalError(str(exception))
+
+
+def __delete_configuration_setting_from_config_store(azconfig_client, configuration_setting):
+    try:
+        azconfig_client.delete_configuration_setting(key=configuration_setting.key, label=configuration_setting.label)
+    except ResourceReadOnlyError:
+        logger.warning(
+            "Failed to delete read only key-value with key '%s' and label '%s'. Unlock the key-value before deleting it.",
+            configuration_setting.key, configuration_setting.label)
+    except HttpResponseError as exception:
+        logger.warning(
+            "Failed to delete key-value with key '%s' and label '%s'. %s",
             configuration_setting.key, configuration_setting.label, str(exception))
     except Exception as exception:
         raise AzureInternalError(str(exception))

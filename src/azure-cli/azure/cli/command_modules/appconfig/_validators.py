@@ -9,7 +9,7 @@ import json
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
 from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
@@ -283,6 +283,11 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+
+
+def validate_strict_import(namespace):
+    if namespace.strict and namespace.skip_features:
+        raise MutuallyExclusiveArgumentError("The option '--skip-features' cannot be used with the '--strict' option.")
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
