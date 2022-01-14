@@ -1624,9 +1624,11 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
             kubectl_server_patch = int(
                 kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
             if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-                logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
-                            'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                            'more information.')
+                logger.warning(
+                    "There is a known issue for Kubernetes versions < 1.17.14 when connecting to "
+                    "ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for"
+                    "more information."
+                )
         except subprocess.CalledProcessError as err:
             raise ValidationError(
                 "Could not find kubectl minor version: {}".format(err))
@@ -1831,8 +1833,10 @@ def _aks_browse(
                 result['url'], protocol)
             term_id = os.environ.get('ACC_TERM_ID')
             if term_id:
-                response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
-                                        json={"url": dashboardURL})
+                response = requests.post(
+                    "http://localhost:8888/openLink/{0}".format(term_id),
+                    json={"url": dashboardURL},
+                )
             logger.warning(
                 'To view the console, please open %s in a new tab', dashboardURL)
         else:
