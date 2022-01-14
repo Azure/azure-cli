@@ -2759,6 +2759,9 @@ class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
+        # install az databricks
+        self.cmd('extension add --name databricks')
+
         # Create vnet injected databricks workspace
         databricks = self.cmd(
             'databricks workspace create --name {databricks_name} --resource-group {rg} '
