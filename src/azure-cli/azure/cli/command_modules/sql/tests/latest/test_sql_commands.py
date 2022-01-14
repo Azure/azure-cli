@@ -76,24 +76,24 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
-    subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
-    location = 'westeurope'
-    subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
-    target_vnet_name = 'vnet-powershell-cli-testing'
+    subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    location = 'westcentralus'
+    subnet = '/subscriptions/8313371e-0879-428e-b1da-6353575a9192/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance'
+    target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
-    target_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
-    group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
+    target_subnet = '/subscriptions/8313371e-0879-428e-b1da-6353575a9192/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
+    group = 'CustomerExperienceTeam_RG'
     collation = "Serbian_Cyrillic_100_CS_AS"
 
     licence = 'LicenseIncluded'
-    v_core = 8
+    v_core = 4
     storage = 32
     edition = 'GeneralPurpose'
     family = 'Gen5'
     proxy = 'Proxy'
 
     sec_location = 'westus'
-    sec_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/secondary-vnet/subnets/ManagedInstance'
+    sec_subnet = '/subscriptions/8313371e-0879-428e-b1da-6353575a9192/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/secondary-vnet/subnets/ManagedInstance'
 
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
@@ -120,7 +120,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
-                   ' --proxy-override {}'
+                   ' --proxy-override {} --bsr Geo'
 
         if self.public:
             template += ' --public-data-endpoint-enabled'

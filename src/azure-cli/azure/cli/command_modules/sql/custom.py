@@ -4221,7 +4221,7 @@ def managed_instance_create(
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(cmd.cli_ctx, kwargs['maintenance_configuration_id'])
 
     if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
-        if kwargs['storage_account_type'] == 'GRS':
+        if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
              Note that database backups will be geo-replicated to the paired region.
              To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
@@ -4229,7 +4229,7 @@ def managed_instance_create(
             if not confirmation:
                 return
 
-        if not kwargs['storage_account_type']:
+        if not kwargs['requested_backup_storage_redundancy']:
             confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
             which will default to geo-redundant storage. Note that database backups will be geo-replicated
             to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.

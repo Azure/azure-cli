@@ -19,9 +19,7 @@ from ._format import (
     outbound_firewall_rule_table_format,
     server_table_format,
     usage_table_format,
-    LongRunningOperationResultTransform,
-    mi_transform,
-    mi_list_transform
+    LongRunningOperationResultTransform
 )
 
 from ._util import (
@@ -701,14 +699,13 @@ def load_command_table(self, _):
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
-        g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
-        g.command('delete', 'begin_delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
-        g.custom_show_command('show', 'managed_instance_get', transform=mi_transform)
-        g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
+        g.custom_command('create', 'managed_instance_create', supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'managed_instance_get')
+        g.custom_command('list', 'managed_instance_list')
         g.generic_update_command('update',
                                  setter_name='begin_create_or_update',
                                  custom_func_name='managed_instance_update',
-                                 transform=mi_transform,
                                  supports_no_wait=True)
         g.command('failover', 'begin_failover', supports_no_wait=True)
 
