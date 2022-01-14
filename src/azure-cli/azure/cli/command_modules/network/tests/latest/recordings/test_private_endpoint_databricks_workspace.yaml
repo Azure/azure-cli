@@ -1,0 +1,3783 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_databricks_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001","name":"test_databricks_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-14T08:16:42Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:16:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nsg000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\",\r\n
+        \ \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"7d985fd2-1129-4995-b1c4-376cfbc2f3a8\",\r\n    \"securityRules\": [],\r\n
+        \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowVnetInBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/DenyAllInBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n
+        \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
+        \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowVnetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to all VMs
+        in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\":
+        \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowInternetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n          \"access\":
+        \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\": \"Outbound\",\r\n
+        \         \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/DenyAllOutBound\",\r\n
+        \       \"etag\": \"W/\\\"8639db1f-a7b4-4608-89ba-259d1889b5fc\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
+        [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
+        \   ]\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6363267e-0863-448d-9e1c-2c027f5eda26?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '6706'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:16:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5eded45a-8c08-4e9f-9b58-fb2774baf340
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6363267e-0863-448d-9e1c-2c027f5eda26?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:16:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 477beb4f-34e4-4b57-9dbb-94632d8768dc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"nsg000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\",\r\n
+        \ \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"7d985fd2-1129-4995-b1c4-376cfbc2f3a8\",\r\n    \"securityRules\": [],\r\n
+        \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowVnetInBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/DenyAllInBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n
+        \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
+        \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowVnetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to all VMs
+        in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\":
+        \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/AllowInternetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n          \"access\":
+        \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\": \"Outbound\",\r\n
+        \         \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002/defaultSecurityRules/DenyAllOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
+        [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
+        \   ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6713'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:16:58 GMT
+      etag:
+      - W/"e5a69d01-f7d9-4708-8e1e-32c6bc7d4e92"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e6ffbe5c-5892-4229-a3c4-487015898d5c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_databricks_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001","name":"test_databricks_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-14T08:16:42Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:16:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "databricks-privatelink-subnet000004",
+      "properties": {"addressPrefix": "10.0.0.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '527'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet-name --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"baa94536-e605-4415-a805-2663f64964b2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"baa94536-e605-4415-a805-2663f64964b2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/cd211b54-13c9-48b4-89bb-5a33651038aa?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1707'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ebdd49b8-df9a-40b1-b5fe-22986d603291
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/cd211b54-13c9-48b4-89bb-5a33651038aa?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 18c81f10-8c1f-42f8-914c-7774c9661254
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1709'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:08 GMT
+      etag:
+      - W/"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ab66adb6-93c4-44e2-8dfc-0f3738cebd85
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1709'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:09 GMT
+      etag:
+      - W/"9e5f62d1-9fd4-4158-87c6-e72a8bb3c54b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c3b2b74b-b19c-40e1-a8b2-438ff6a96d04
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003",
+      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004",
+      "name": "databricks-privatelink-subnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, {"name": "private-subnet", "properties": {"addressPrefix": "10.0.1.0/24",
+      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}], "virtualNetworkPeerings": [], "enableDdosProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1275'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"3208216f-73b1-45ba-8cd0-0aa16bbbd0ea\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"3208216f-73b1-45ba-8cd0-0aa16bbbd0ea\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"private-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \       \"etag\": \"W/\\\"3208216f-73b1-45ba-8cd0-0aa16bbbd0ea\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/066889ec-95b9-402f-98e2-37f8f84a5611?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2378'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e87a174d-99ad-4bfe-b1cc-ccb8923868d2
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/066889ec-95b9-402f-98e2-37f8f84a5611?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f64e58a7-e04c-4f3d-8c98-24b23d18cb54
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"private-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \       \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:14 GMT
+      etag:
+      - W/"efb9c20f-8a74-4ce7-98b0-980555bbc72d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f1178f5a-94aa-42fb-9e66-b78340062fb2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"private-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \       \"etag\": \"W/\\\"efb9c20f-8a74-4ce7-98b0-980555bbc72d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:14 GMT
+      etag:
+      - W/"efb9c20f-8a74-4ce7-98b0-980555bbc72d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cb1a363a-e920-4b74-bc32-81d61e323086
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003",
+      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004",
+      "name": "databricks-privatelink-subnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet",
+      "name": "private-subnet", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.1.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}, {"name": "public-subnet",
+      "properties": {"addressPrefix": "10.0.2.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      [], "enableDdosProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1731'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"d200c11f-0054-4d65-a482-52d1e0fc3480\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"d200c11f-0054-4d65-a482-52d1e0fc3480\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"private-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \       \"etag\": \"W/\\\"d200c11f-0054-4d65-a482-52d1e0fc3480\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"public-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet\",\r\n
+        \       \"etag\": \"W/\\\"d200c11f-0054-4d65-a482-52d1e0fc3480\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/422c7fd2-82e4-4dd0-aaa6-b1117a6eeca2?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '3047'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ace1def0-779f-4b44-8fee-ca9a186d3551
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/422c7fd2-82e4-4dd0-aaa6-b1117a6eeca2?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 14004dee-dd18-455d-8281-8ed9fa7a5f5f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"405859c4-dae2-4d0d-952a-286e23e0728e\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"databricks-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"networkSecurityGroup\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \         },\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"private-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \       \"etag\": \"W/\\\"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"public-subnet\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet\",\r\n
+        \       \"etag\": \"W/\\\"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3051'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:19 GMT
+      etag:
+      - W/"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 19d6f4f1-8bea-40de-a733-a851df8e5f33
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"private-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \ \"etag\": \"W/\\\"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.1.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '591'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:20 GMT
+      etag:
+      - W/"9e8ea98e-eb1f-48b1-a7b6-59d6cd790ca3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7beb9f03-c22d-4cae-9e78-28a5d272eb49
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet",
+      "name": "private-subnet", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.1.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "delegations": [{"name": "0", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}],
+      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '735'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"private-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \ \"etag\": \"W/\\\"59faff69-177b-43b0-a402-626ca90d0f86\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.1.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet/delegations/0\",\r\n
+        \       \"etag\": \"W/\\\"59faff69-177b-43b0-a402-626ca90d0f86\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Databricks/workspaces\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/379ae987-1a1c-4673-b146-3850a9a1483b?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 99b57d52-a1e9-48fd-9585-064675905c61
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/379ae987-1a1c-4673-b146-3850a9a1483b?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c185d9bb-7716-4adc-98d5-f6c25035c2fd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"private-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet\",\r\n
+        \ \"etag\": \"W/\\\"1d829af9-f579-4786-9a4c-008ff139df21\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.1.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/private-subnet/delegations/0\",\r\n
+        \       \"etag\": \"W/\\\"1d829af9-f579-4786-9a4c-008ff139df21\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Databricks/workspaces\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1659'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:24 GMT
+      etag:
+      - W/"1d829af9-f579-4786-9a4c-008ff139df21"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fb14cab6-68da-4454-a76d-cb5997860bbf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"public-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet\",\r\n
+        \ \"etag\": \"W/\\\"1d829af9-f579-4786-9a4c-008ff139df21\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '589'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:25 GMT
+      etag:
+      - W/"1d829af9-f579-4786-9a4c-008ff139df21"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 99d8e1f9-96fb-44aa-976f-84a88c921ca8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet",
+      "name": "public-subnet", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.2.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "delegations": [{"name": "0", "properties": {"serviceName": "Microsoft.Databricks/workspaces"}}],
+      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '733'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"public-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet\",\r\n
+        \ \"etag\": \"W/\\\"ed9aef70-1331-4c42-8864-51050b7f88ff\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet/delegations/0\",\r\n
+        \       \"etag\": \"W/\\\"ed9aef70-1331-4c42-8864-51050b7f88ff\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Databricks/workspaces\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9e613add-c1d7-4523-84d7-231b372725e3?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1655'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 47e6822a-38ca-48bd-a1f2-c05bdf8f7569
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/9e613add-c1d7-4523-84d7-231b372725e3?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f3c3aec6-3586-4ed2-b2b8-5936dc3db730
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --delegation --network-security-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"public-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet\",\r\n
+        \ \"etag\": \"W/\\\"3ed3b008-5733-474c-b146-792bd7872f02\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/public-subnet/delegations/0\",\r\n
+        \       \"etag\": \"W/\\\"3ed3b008-5733-474c-b146-792bd7872f02\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Databricks/workspaces\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \           \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1656'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:30 GMT
+      etag:
+      - W/"3ed3b008-5733-474c-b146-792bd7872f02"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 46ce5f30-bce5-407b-bd86-ea93ed7e9bfb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"3ed3b008-5733-474c-b146-792bd7872f02\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '853'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:30 GMT
+      etag:
+      - W/"3ed3b008-5733-474c-b146-792bd7872f02"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a41a4646-41cc-4f84-b4ef-e67d2a12d0b7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004",
+      "name": "databricks-privatelink-subnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "networkSecurityGroup": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002"},
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '699'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"037c956e-de9d-430b-8f13-3e446c7fdce9\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/249cb4d0-561e-4a09-b752-3065a4a098a1?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '853'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dd8d2303-1d14-46da-997f-146be25023b7
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/249cb4d0-561e-4a09-b752-3065a4a098a1?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dde77f2a-1f0c-46df-b7c2-b08471633742
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"7e2ce510-8c9b-4496-b82d-4ba8e93c9aec\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkSecurityGroups/nsg000002\"\r\n
+        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '854'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:35 GMT
+      etag:
+      - W/"7e2ce510-8c9b-4496-b82d-4ba8e93c9aec"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dbef10d2-0e6e-4bf7-a22f-5072509ff3cd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "premium"}, "properties": {"managedResourceGroupId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/databricks-rg-test-workspace-fof9uffneg5tv",
+      "parameters": {"customVirtualNetworkId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003"},
+      "customPublicSubnetName": {"value": "public-subnet"}, "customPrivateSubnetName":
+      {"value": "private-subnet"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '555'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace?api-version=2018-04-01
+  response:
+    body:
+      string: '{"properties":{"managedResourceGroupId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/databricks-rg-test-workspace-fof9uffneg5tv","provisioningState":"Accepted","authorizations":[{"principalId":"9a74af6f-d153-4348-988a-e2672920bee9","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"createdBy":{"oid":"674368bb-7eaa-4100-aef7-138f65f50648","puid":"10032001C021F1B6","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"updatedBy":{"oid":"674368bb-7eaa-4100-aef7-138f65f50648","puid":"10032001C021F1B6","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"createdDateTime":"2022-01-14T08:17:40.6401266Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace","name":"test-workspace","type":"Microsoft.Databricks/workspaces","sku":{"name":"premium"},"location":"westus"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '925'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:17:56 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:18:11 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:18:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:18:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:18:58 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:19:13 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:19:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:19:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:19:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IkFwcGxpYW5jZVByb3Zpc2lvbmluZ0pvYjoyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT1JLU1BBQ0UifQ?api-version=2018-04-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - databricks workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku --private-subnet --public-subnet --vnet --location
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-databricks/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace?api-version=2018-04-01
+  response:
+    body:
+      string: '{"properties":{"managedResourceGroupId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/databricks-rg-test-workspace-fof9uffneg5tv","parameters":{"customPrivateSubnetName":{"type":"String","value":"private-subnet"},"customPublicSubnetName":{"type":"String","value":"public-subnet"},"customVirtualNetworkId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003"},"enableFedRampCertification":{"type":"Bool","value":false},"enableNoPublicIp":{"type":"Bool","value":false},"natGatewayName":{"type":"String","value":"nat-gateway"},"prepareEncryption":{"type":"Bool","value":false},"publicIpName":{"type":"String","value":"nat-gw-public-ip"},"relayNamespaceName":{"type":"String","value":"dbrelaywbiybat2suezy"},"requireInfrastructureEncryption":{"type":"Bool","value":false},"resourceTags":{"type":"Object","value":{"application":"databricks","databricks-environment":"true"}},"storageAccountName":{"type":"String","value":"dbstoragewbiybat2suezy"},"storageAccountSkuName":{"type":"String","value":"Standard_GRS"},"vnetAddressPrefix":{"type":"String","value":"10.139"}},"provisioningState":"Succeeded","authorizations":[{"principalId":"9a74af6f-d153-4348-988a-e2672920bee9","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"createdBy":{"oid":"674368bb-7eaa-4100-aef7-138f65f50648","puid":"10032001C021F1B6","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"updatedBy":{"oid":"674368bb-7eaa-4100-aef7-138f65f50648","puid":"10032001C021F1B6","applicationId":"04b07795-8ddb-461a-bbee-02f9e1bf7b46"},"workspaceId":"8483728067405012","workspaceUrl":"adb-8483728067405012.12.azuredatabricks.net","createdDateTime":"2022-01-14T08:17:40.6401266Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace","name":"test-workspace","type":"Microsoft.Databricks/workspaces","sku":{"name":"premium"},"location":"westus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '1799'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateLinkResources?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateLinkResources/databricks_ui_api","name":"databricks_ui_api","type":"Microsoft.Databricks/workspaces/privateLinkResources","properties":{"groupId":"databricks_ui_api","displayName":"databricks_ui_api","requiredMembers":["databricks_ui_api"],"requiredZoneNames":["privatelink.azuredatabricks.net"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '486'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_databricks_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001","name":"test_databricks_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-14T08:16:42Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "db-privatelink-endpoint-connection000006",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace",
+      "groupIds": ["databricks_ui_api"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '732'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-endpoint000005\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"a9b9a6ff-c211-4d12-beb4-d87221ed16bc\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"b5dd4e31-537f-4f9a-9170-ef6bdfb63888\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"db-privatelink-endpoint-connection000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005/manualPrivateLinkServiceConnections/db-privatelink-endpoint-connection000006\",\r\n
+        \       \"etag\": \"W/\\\"a9b9a6ff-c211-4d12-beb4-d87221ed16bc\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace\",\r\n
+        \         \"groupIds\": [\r\n            \"databricks_ui_api\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkInterfaces/databricks-privatelink-endpoint000005.nic.ecdd704b-ce09-4887-a803-f9510816c093\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8a934184-613f-4c49-9307-3e77a392f6ac?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1dc5d111-2d0c-428d-a3c3-2bb4f87a24af
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8a934184-613f-4c49-9307-3e77a392f6ac?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 27101a03-c576-4e6c-9ad3-243cacaede6e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8a934184-613f-4c49-9307-3e77a392f6ac?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:20:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2a04197f-6ee4-40e9-80cd-aca28ca94c57
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8a934184-613f-4c49-9307-3e77a392f6ac?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e7d0a864-bf3d-4e42-97ab-32aca8ebc6b4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8a934184-613f-4c49-9307-3e77a392f6ac?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6b4f0e0b-280f-45c7-8a3c-73f60b7e50e8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"databricks-privatelink-endpoint000005\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"a839aec9-da0f-4afe-b6f8-5db590db4a3b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"b5dd4e31-537f-4f9a-9170-ef6bdfb63888\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"db-privatelink-endpoint-connection000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005/manualPrivateLinkServiceConnections/db-privatelink-endpoint-connection000006\",\r\n
+        \       \"etag\": \"W/\\\"a839aec9-da0f-4afe-b6f8-5db590db4a3b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace\",\r\n
+        \         \"groupIds\": [\r\n            \"databricks_ui_api\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/databricks-privatelink-vnet000003/subnets/databricks-privatelink-subnet000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/networkInterfaces/databricks-privatelink-endpoint000005.nic.ecdd704b-ce09-4887-a803-f9510816c093\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:28 GMT
+      etag:
+      - W/"a839aec9-da0f-4afe-b6f8-5db590db4a3b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - af4d2409-61e6-4bde-a73a-ca81226d638f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Succeeded"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '747'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '735'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006",
+      "name": "db-privatelink-endpoint-connection000006", "type": "Microsoft.Databricks/workspaces/privateEndpointConnections",
+      "properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},
+      "groupIds": ["databricks_ui_api"], "privateLinkServiceConnectionState": {"status":
+      "Approved", "actionsRequired": "None", "description": "Approved!"}, "provisioningState":
+      "Succeeded"}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '782'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:21:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Pending","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '734'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '762'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '762'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '762'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006",
+      "name": "db-privatelink-endpoint-connection000006", "type": "Microsoft.Databricks/workspaces/privateEndpointConnections",
+      "properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},
+      "groupIds": ["databricks_ui_api"], "privateLinkServiceConnectionState": {"status":
+      "Rejected", "description": "Rejected!", "actionsRequired": "None"}, "provisioningState":
+      "Succeeded"}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '782'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:22:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Approved","description":"Approved!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"},"provisioningState":"Updating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '762'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections/db-privatelink-endpoint-connection000006","name":"db-privatelink-endpoint-connection000006","type":"Microsoft.Databricks/workspaces/privateEndpointConnections","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/databricks-privatelink-endpoint000005"},"groupIds":["databricks_ui_api"],"privateLinkServiceConnectionState":{"status":"Rejected","description":"Rejected!","actionsRequired":"None"},"provisioningState":"Deleting"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:23:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/locations/westus/operationStatuses/eyJmdWxseVF1YWxpZmllZEFwcGxpYW5jZUlkIjoiL3N1YnNjcmlwdGlvbnMvMGIxZjY0NzEtMWJmMC00ZGRhLWFlYzMtY2I5MjcyZjA5NTkwL3Jlc291cmNlR3JvdXBzL3Rlc3RfZGF0YWJyaWNrc19wcml2YXRlX2VuZHBvaW50bm1ndTZic3ovcHJvdmlkZXJzL01pY3Jvc29mdC5EYXRhYnJpY2tzL3dvcmtzcGFjZXMvdGVzdC13b3Jrc3BhY2UiLCJqb2JJZCI6IlByaXZhdGVFbmRwb2ludENvbm5lY3Rpb25Kb2JNZXRhZGF0YToyRFJHQToyRFRFU1Q6M0E1RkRBVEFCUklDS1M6M0E1RlBSSVZBVEU6M0E1RkVORFBPSU5UTk1HVTZCU1o6MkRURVNUOjNBMkRXT3xDNkIzODQ4QTVBNDAyNEZBIn0?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_databricks_private_endpoint000001/providers/Microsoft.Databricks/workspaces/test-workspace/privateEndpointConnections?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 14 Jan 2022 08:28:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
