@@ -1015,7 +1015,7 @@ def load_arguments(self, _):
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
                        help='Role name or id the system assigned identity will have. '
                             'Please note that the default value "Contributor" will be removed in the future. '
-                            'So please specify the "--role" and "--scope" parameters at the same time when assigning role to the managed identity')
+                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
