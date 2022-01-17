@@ -1551,7 +1551,10 @@ class DeploymentTestAtTenantScope(ScenarioTest):
             'oid3': operations[2]['operationId'],
             'oid4': operations[3]['operationId'],
         })
-        self.cmd('deployment operation tenant show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4}') #todo: add checks
+        self.cmd('deployment operation tenant show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
+        ])
         self.cmd('deployment tenant delete -n {dn}')
 
         self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
