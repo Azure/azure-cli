@@ -633,7 +633,7 @@ def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
-def create_vault(cmd, client,  # pylint: disable=too-many-locals
+def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
                  resource_group_name, vault_name, location=None, sku=None,
                  enabled_for_deployment=None,
                  enabled_for_disk_encryption=None,
@@ -696,48 +696,55 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore,
-                                        KeyPermissions.recover],
-                                  secrets=[
-                                      SecretPermissions.get,
-                                      SecretPermissions.list,
-                                      SecretPermissions.set,
-                                      SecretPermissions.delete,
-                                      SecretPermissions.backup,
-                                      SecretPermissions.restore,
-                                      SecretPermissions.recover],
-                                  certificates=[
-                                      CertificatePermissions.get,
-                                      CertificatePermissions.list,
-                                      CertificatePermissions.delete,
-                                      CertificatePermissions.create,
-                                      CertificatePermissions.import_enum,
-                                      CertificatePermissions.update,
-                                      CertificatePermissions.managecontacts,
-                                      CertificatePermissions.getissuers,
-                                      CertificatePermissions.listissuers,
-                                      CertificatePermissions.setissuers,
-                                      CertificatePermissions.deleteissuers,
-                                      CertificatePermissions.manageissuers,
-                                      CertificatePermissions.recover],
-                                  storage=[
-                                      StoragePermissions.get,
-                                      StoragePermissions.list,
-                                      StoragePermissions.delete,
-                                      StoragePermissions.set,
-                                      StoragePermissions.update,
-                                      StoragePermissions.regeneratekey,
-                                      StoragePermissions.setsas,
-                                      StoragePermissions.listsas,
-                                      StoragePermissions.getsas,
-                                      StoragePermissions.deletesas])
+        if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2019-09-01'):
+            permissions = Permissions(keys=[KeyPermissions.all],
+                                      secrets=[SecretPermissions.all],
+                                      certificates=[CertificatePermissions.all],
+                                      storage=[StoragePermissions.all])
+        else:
+            permissions = Permissions(keys=[KeyPermissions.get,
+                                            KeyPermissions.create,
+                                            KeyPermissions.delete,
+                                            KeyPermissions.list,
+                                            KeyPermissions.update,
+                                            KeyPermissions.import_enum,
+                                            KeyPermissions.backup,
+                                            KeyPermissions.restore,
+                                            KeyPermissions.recover],
+                                      secrets=[
+                                          SecretPermissions.get,
+                                          SecretPermissions.list,
+                                          SecretPermissions.set,
+                                          SecretPermissions.delete,
+                                          SecretPermissions.backup,
+                                          SecretPermissions.restore,
+                                          SecretPermissions.recover],
+                                      certificates=[
+                                          CertificatePermissions.get,
+                                          CertificatePermissions.list,
+                                          CertificatePermissions.delete,
+                                          CertificatePermissions.create,
+                                          CertificatePermissions.import_enum,
+                                          CertificatePermissions.update,
+                                          CertificatePermissions.managecontacts,
+                                          CertificatePermissions.getissuers,
+                                          CertificatePermissions.listissuers,
+                                          CertificatePermissions.setissuers,
+                                          CertificatePermissions.deleteissuers,
+                                          CertificatePermissions.manageissuers,
+                                          CertificatePermissions.recover],
+                                      storage=[
+                                          StoragePermissions.get,
+                                          StoragePermissions.list,
+                                          StoragePermissions.delete,
+                                          StoragePermissions.set,
+                                          StoragePermissions.update,
+                                          StoragePermissions.regeneratekey,
+                                          StoragePermissions.setsas,
+                                          StoragePermissions.listsas,
+                                          StoragePermissions.getsas,
+                                          StoragePermissions.deletesas])
+
         try:
             object_id = _get_current_user_object_id(graph_client)
         except GraphErrorException:

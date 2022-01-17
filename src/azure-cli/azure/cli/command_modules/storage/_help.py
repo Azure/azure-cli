@@ -1424,8 +1424,10 @@ type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
 examples:
-  - name: Restore soft-deleted container.
-    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
+  - name: List and restore soft-deleted container.
+    text: |
+          az storage container list --include-deleted
+          az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """

@@ -69,8 +69,8 @@ def load_arguments(self, _):
              "Windows Server, use 'Windows_Server'. To enable Multi-tenant Hosting Rights for Windows 10, "
              "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
         arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
-                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'SLES_BASE', 'SLES_SAP', 'SLES_HPC', 'None',
-                                'RHEL_ELS_6']))
+                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD ', 'SLES_SAP', 'SLES_HPC',
+                                'None', 'RHEL_ELS_6']))
 
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
@@ -251,6 +251,8 @@ def load_arguments(self, _):
         c.argument('os_disk_size', type=int, help='Size of the OS disk in GB. Omit or specify 0 to use Azure\'s default OS disk size')
         c.argument('vnet', help='Name of VNET to deploy the build virtual machine. You should only specify it when subnet is a name')
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
+        c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
+        c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -693,6 +695,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('force_deletion', action='store_true', is_preview=True, help='This property allow you to specify if virtual machines chosen for removal have to be force deleted when a virtual machine scale set is being scaled-in.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
@@ -1006,8 +1009,18 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
-            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
             c.ignore('identity_role_id')
+
+    for scope in ['vm create', 'vmss create']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
+                       help='Role name or id the system assigned identity will have. '
+                            'Please note that the default value "Contributor" will be removed in the future, '
+                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+
+    for scope in ['vm identity assign', 'vmss identity assign']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')

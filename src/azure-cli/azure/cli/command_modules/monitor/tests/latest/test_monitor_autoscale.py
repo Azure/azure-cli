@@ -237,11 +237,17 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('recurrence', None)
         ])
 
+        # test autoscale profile show
+        self.cmd('monitor autoscale profile show -g {rg} --autoscale-name {vmss} -n {sched}', checks=[
+            self.check('name', '{sched}')
+        ])
+
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 2))
         self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n {sched}')
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_recurring')
     def test_monitor_autoscale_recurring(self, resource_group):

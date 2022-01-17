@@ -92,6 +92,13 @@ def _normalize_expires_on(expires_on):
         expires_on_epoch_int = int(expires_on)
     except ValueError:
         import datetime
+
+        # Python 3.6 doesn't recognize timezone as +00:00.
+        # These lines can be dropped after Python 3.6 is dropped.
+        # https://stackoverflow.com/questions/30999230/how-to-parse-timezone-with-colon
+        if expires_on[-3] == ":":
+            expires_on = expires_on[:-3] + expires_on[-2:]
+
         # Treat as datetime string "11/05/2021 15:18:31 +00:00"
         expires_on_epoch_int = int(datetime.datetime.strptime(expires_on, '%m/%d/%Y %H:%M:%S %z').timestamp())
 

@@ -129,10 +129,10 @@ class WebappBasicE2ETest(ScenarioTest):
 
         # verify creating an non node app using --runtime
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "php|7.3"'.format(resource_group, webapp_name, plan))
+            'webapp create -g {} -n {} --plan {} -r "php|7.4"'.format(resource_group, webapp_name, plan))
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
-            JMESPathCheck('phpVersion', '7.3')
+            JMESPathCheck('phpVersion', '7.4')
         ])
 
     def test_webapp_runtimes(self):
@@ -341,6 +341,54 @@ class AppServiceLogTest(ScenarioTest):
 
 class AppServicePlanScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_elastic_scale_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale false'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --sku free'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_elastic_scale_plan_max_workers(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 1)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 10)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 20'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 20)
+        ])
+
+        # ensure that we can't make --max-elastic-worker-count < the number of workers
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9 --number-of-workers 10'.format(resource_group, plan), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 10 --number-of-workers 10'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9'.format(resource_group, plan), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_retain_plan(self, resource_group):
         webapp_name = self.create_random_name('web', 24)
         plan = self.create_random_name('web-plan', 24)
@@ -395,6 +443,83 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
 
+class WebappElasticScaleTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 1),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1)
+        ])
+
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {}".format(resource_group, app, 3, 5))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 3),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_prewarmed_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 4)
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_min_elastic_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 4)
+        ])
 
 class WebappConfigureTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
