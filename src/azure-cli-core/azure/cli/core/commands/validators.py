@@ -71,15 +71,13 @@ def generate_deployment_name(namespace):
 def get_default_location_from_resource_group(cmd, namespace):
     if not namespace.location:
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from msrestazure.azure_exceptions import CloudError
-        from knack.util import CLIError
 
+        # We don't use try catch here to let azure.cli.core.parser.AzCliCommandParser.validation_error
+        # handle exceptions, such as azure.core.exceptions.ResourceNotFoundError
         resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        try:
-            rg = resource_client.resource_groups.get(namespace.resource_group_name)
-        except CloudError as ex:
-            raise CLIError('error retrieving default location: {}'.format(ex.message))
+        rg = resource_client.resource_groups.get(namespace.resource_group_name)
         namespace.location = rg.location  # pylint: disable=no-member
+
         logger.debug("using location '%s' from resource group '%s'", namespace.location, rg.name)
 
 

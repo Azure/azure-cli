@@ -18,7 +18,7 @@ from azure.cli.testsdk import (
     StorageAccountPreparer)
 
 from msrestazure.azure_exceptions import CloudError
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 name_prefix = 'cliadm'
 resource_location = 'centralus'

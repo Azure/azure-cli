@@ -9,7 +9,7 @@ import os
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 from azure.core.exceptions import HttpResponseError
@@ -70,6 +70,13 @@ class NetworkLoadBalancerWithSku(ScenarioTest):
         self.cmd('network lb show -g {rg} -n {lb}', checks=[
             self.check('sku.name', 'Standard')
         ])
+
+        # test network lb update command
+        self.cmd('network lb update -g {rg} -n {lb} --set tags.CostCenter=MyTestGroup')
+        self.cmd('network lb show -g {rg} -n {lb}', checks=[
+            self.check('tags.CostCenter', 'MyTestGroup')
+        ])
+
         self.cmd('network public-ip show -g {rg} -n {ip}', checks=[
             self.check('sku.name', 'Standard'),
             self.check('publicIpAllocationMethod', 'Static')
@@ -442,6 +449,11 @@ class NetworkPublicIpPrefix(ScenarioTest):
         self.cmd('network public-ip prefix create -g {rg} -n {prefix} --length 30',
                  checks=self.check('prefixLength', 30))
         self.cmd('network public-ip prefix update -g {rg} -n {prefix} --tags foo=doo')
+
+        # test prefix show command
+        self.cmd('network public-ip prefix show -g {rg} -n {prefix}',
+                 checks=self.check('tags.foo', 'doo'))
+
         self.cmd('network public-ip prefix list -g {rg}',
                  checks=self.check('length(@)', 1))
         self.cmd('network public-ip prefix delete -g {rg} -n {prefix}')
@@ -841,6 +853,22 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+
+        # test command of auth-cert list
+        self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 2))
+
+        # test command of auth-cert show
+        self.cmd('network application-gateway auth-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
+                 checks=self.check('name', 'cert1'))
+
+        # test command of auth-cert delete
+        self.cmd('network application-gateway auth-cert delete -g {rg} --gateway-name {gateway} -n {cert1} --no-wait')
+        self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
+
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
@@ -865,6 +893,20 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}"')
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}"')
+
+        # test root-cert list
+        self.cmd('network application-gateway root-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 2))
+        # test root-cert show
+        self.cmd('network application-gateway root-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
+                 checks=self.check('name', 'cert1'))
+
+        # test root-cert delete
+        self.cmd('network application-gateway root-cert delete -g {rg} --gateway-name {gateway} -n {cert2} --no-wait')
+        self.cmd('network application-gateway root-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
@@ -878,7 +920,8 @@ class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
     def test_network_app_gateway_redirect_config(self, resource_group):
         self.kwargs.update({
             'gateway': 'ag1',
-            'name': 'redirect1'
+            'name': 'redirect1',
+            'name2': 'redirect2'
         })
         self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
@@ -894,6 +937,17 @@ class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
             self.check('includeQueryString', False),
             self.check('redirectType', 'Permanent')
         ])
+        # test redirect-config list command
+        self.cmd('network application-gateway redirect-config create --gateway-name {gateway} -g {rg} -n {name2} -t permanent --include-query-string --include-path false --target-listener appGatewayHttpListener --no-wait')
+        self.cmd('network application-gateway redirect-config list --gateway-name {gateway} -g {rg}', checks=[
+            self.check('length(@)', 2)
+        ])
+        # test redirect-config delete command
+        self.cmd('network application-gateway redirect-config delete --gateway-name {gateway} -g {rg} -n {name2}')
+        self.cmd('network application-gateway redirect-config list --gateway-name {gateway} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
 
 
 class NetworkAppGatewayExistingSubnetScenarioTest(ScenarioTest):
@@ -960,6 +1014,21 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name ag3 -n ag3SslCert --cert-file "{path}" --cert-password {pass}')
         self.cmd('network application-gateway wait -g {rg} -n ag3 --updated')
 
+        # test ssl-cert list
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name ag3',
+                 checks=[self.check('length(@)', 1)])
+
+        # test ssl-cert show
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name ag3 -n ag3SslCert',
+                 checks=[self.check('name', 'ag3SslCert')])
+
+        self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert.pfx')
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name ag3 -n ag3SslCert01 --cert-file "{path}" --cert-password {pass} --no-wait')
+        # test ssl-cert delete
+        self.cmd('network application-gateway ssl-cert delete -g {rg} --gateway-name ag3 -n ag3SslCert01 --no-wait')
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name ag3', checks=[
+            self.check('length(@)', 1)])
+
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols TLSv1_0 TLSv1_1 --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
@@ -979,6 +1048,19 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
             self.check('policyName', policy_name),
             self.check('policyType', 'Predefined')
+        ])
+        # test predefined show
+        self.cmd('network application-gateway ssl-policy predefined show -n {policy}', checks=[
+            self.check('name', policy_name)
+        ])
+
+        # test predefined list
+        self.cmd('network application-gateway ssl-policy predefined list', checks=[
+            self.check('length(@)', 3)])
+
+        # test ssl-policy list-options
+        self.cmd('network application-gateway ssl-policy list-options', checks=[
+            self.check('length(@)', 10)
         ])
 
 
@@ -1320,6 +1402,10 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
 
         self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+
+        # test rewrite-rule set update command
+        self.cmd('network application-gateway rewrite-rule set update -g {rg} --gateway-name {ag} -n {set}')
+
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener --priority 10')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
         self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
@@ -1360,9 +1446,27 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* --address-pool {pool} '
                  '--default-address-pool {pool} --http-settings {settings} --default-http-settings {settings} '
                  '--default-rewrite-rule-set {set} --rewrite-rule-set {set}')
+
+        # test url-path-map list
+        self.cmd('network application-gateway url-path-map list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 1)])
+
+        # test url-path-map show
+        self.cmd('network application-gateway url-path-map show -g {rg} --gateway-name {ag} -n {name}',
+                 checks=[self.check('name', 'mypathmap')])
+
         self.cmd('network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
         self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                  '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
+
+        # test url-path-map rule delete
+        self.cmd('network application-gateway url-path-map rule delete -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name}')
+
+        # test url-path-map delete
+        self.cmd('network application-gateway url-path-map delete -g {rg} --gateway-name {ag} -n {name}')
+        self.cmd('network application-gateway url-path-map list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 0)])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map_edge_case')
     def test_network_ag_url_path_map_edge_case(self, resource_group):
@@ -1508,6 +1612,10 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
             self.check('length(disabledRuleGroups)', 2),
             self.check('length(disabledRuleGroups[1].rules)', 2)
         ])
+        # test list rule sets
+        self.cmd('network application-gateway waf-config list-rule-sets --group *', checks=[
+            self.check('length(@)', 5)
+        ])
 
 
 class NetworkAppGatewayWafV2ConfigScenarioTest(ScenarioTest):
@@ -1563,9 +1671,27 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--policy-name {waf} -n {custom-rule2} '
                  '--priority 100 --action log --rule-type MatchRule')
 
+        # test custom-rule list
+        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 2)
+                 ])
+
+        # test match-condition list
+        self.cmd('network application-gateway waf-policy custom-rule match-condition list -g {rg} --name {custom-rule1} --policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 0)
+                 ])
+
         # update some policy settings of this waf-policy
         self.cmd('network application-gateway waf-policy policy-setting update -g {rg} --policy-name {waf} '
                  '--state Enabled --file-upload-limit-in-mb 64 --mode Prevention')
+
+        # test waf-policy policy-setting list
+        self.cmd('network application-gateway waf-policy policy-setting list -g {rg} --policy-name {waf}', checks=[
+            self.check('length(@)', 5)
+        ])
 
         # add two managed rule set to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
@@ -1634,6 +1760,16 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check("contains(applicationGateways[1].id, '{ag2}')", True)
         ])
 
+        # test custom-rule delete
+        self.cmd('network application-gateway waf-policy custom-rule delete -g {rg} '
+                 '--policy-name {waf} -n {custom-rule2}')
+        self.cmd('network application-gateway waf-policy custom-rule list -g {rg} '
+                 '--policy-name {waf}',
+                 checks=[
+                     self.check('length(@)', 1)
+                 ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_custom_rule_')
     def test_network_app_gateway_waf_custom_rule(self, resource_group):
         self.kwargs.update({
@@ -1641,7 +1777,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             'rule': 'rule1',
             'ip': 'pip1',
             'ag': 'ag1',
-            'rg': resource_group
+            'rg': resource_group,
+            'custom-rule1':'custom-rule1'
         })
 
         # create a waf-policy with empty custom rule
@@ -1717,6 +1854,7 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('action', 'Log'),
                      self.check('matchConditions | length(@)', 1)
                  ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):
@@ -2514,6 +2652,12 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{rg}'),
             self.check('name', '{lb}1')
         ])
+        # test cross-region-lb update
+        self.cmd(
+            'network cross-region-lb update --resource-group {rg} --name {lb}1 --set tags.CostCenter=MyBusinessGroup',
+            checks=[
+                self.check('tags.CostCenter', 'MyBusinessGroup')
+            ])
         self.cmd('network cross-region-lb delete --resource-group {rg} --name {lb}1')
         # Expecting no results as we just deleted the only lb in the resource group
         self.cmd('network cross-region-lb list --resource-group {rg}', checks=self.check('length(@)', 2))
@@ -2872,6 +3016,27 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('frontendPortRangeEnd', 5))
         self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_rules_v3', location='eastus2euap')
+    def test_network_lb_nat_rules_v3(self, resource_group):
+        self.kwargs.update({
+            'lb': 'lb1',
+            'backend': 'lb1bepool',
+        })
+
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        # test lb inbound-nat-rule create with new param --backend-pool-name
+        self.cmd('network lb inbound-nat-rule create -g {rg} --lb-name {lb} -n rule3 --protocol tcp --backend-port 30 '
+                 '--frontend-port-range-start 0 --frontend-port-range-end 3 --backend-pool-name {backend}', checks=[
+            self.check('name', 'rule3'),
+            self.check('frontendPortRangeStart', 0),
+            self.check('frontendPortRangeEnd', 3),
+            self.check("contains(backendAddressPool.id, '{backend}')", True)])
+        self.cmd(
+            'network lb inbound-nat-rule update -g {rg} --lb-name {lb} -n rule3 --floating-ip true --idle-timeout 10 --frontend-port-range-end 5',
+            checks=self.check('frontendPortRangeEnd', 5))
+        self.cmd('network lb inbound-nat-rule delete -g {rg} --lb-name {lb} -n rule3')
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_nat_pools', location='eastus2')
     def test_network_lb_nat_pools(self, resource_group):
 
@@ -3115,6 +3280,12 @@ class NetworkNicScenarioTest(ScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()['newVNet']['subnets'][0]['id']
         self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.kwargs['nsg_id'] = self.cmd('network nsg show -g {rg} -n {nsg1}').get_output_in_json()['id']
+
+        # test network nsg update
+        self.cmd('network nsg update -g {rg} -n {nsg1} --set tags.CostCenter=MyBusinessGroup')
+        self.cmd('network nsg show -g {rg} -n {nsg1}', checks=[
+            self.check('tags.CostCenter', 'MyBusinessGroup')
+        ])
         self.cmd('network nsg create -g {rg} -n {nsg2}')
         self.cmd('network public-ip create -g {rg} -n {pub_ip}')
         self.kwargs['pub_ip_id'] = self.cmd('network public-ip show -g {rg} -n {pub_ip}').get_output_in_json()['id']
@@ -3531,6 +3702,11 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{route}'),
         ])
+        # test route-table route update
+        self.cmd('network route-table route update -g {rg} -n {route} --route-table-name {table} --next-hop-type VirtualNetworkGateway' , checks=[
+            self.check('nextHopType', 'VirtualNetworkGateway')
+            ])
+
         self.cmd('network route-table route delete --resource-group {rg} --route-table-name {table} --name {route}')
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
@@ -3901,10 +4077,19 @@ class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+        # test vpn connection show
+        self.cmd('network vpn-connection show -g {rg} -n {conn1}', checks=[
+            self.check('name', 'conn1')
+        ])
+        # test vpn connection show-device-config-script
+        self.cmd('network vpn-connection show-device-config-script -g {rg} -n {conn1} --vendor "Cisco" --device-family "Cisco-ISR(IOS)" --firmware-version "Cisco-ISR-15.x--IKEv2+BGP"', checks=[
+                self.check('length(@)', 10581)
+            ])
         self.cmd('network vpn-connection ipsec-policy add -g {rg} --connection-name {conn1} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy clear -g {rg} --connection-name {conn1}')
         self.cmd('network vpn-connection ipsec-policy list -g {rg} --connection-name {conn1}')
+
 
 
 class NetworkVpnConnectionNatRule(ScenarioTest):
@@ -4724,6 +4909,11 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager endpoint list -g {rg} --profile-name {tm} -t externalEndpoints',
                  checks=self.check('length(@)', 1))
 
+        # test show-geographic-hierarchy
+        self.cmd('network traffic-manager endpoint show-geographic-hierarchy', checks=[
+            self.check('type', 'Microsoft.Network/trafficManagerGeographicHierarchies')
+        ])
+
         # ensure a profile with endpoints can be updated
         self.cmd('network traffic-manager profile update -n {tm} -g {rg}')
 
@@ -4801,7 +4991,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 class NetworkWatcherScenarioTest(ScenarioTest):
     from unittest import mock
 
-    def _mock_thread_count():
+    def _mock_thread_count(self):
         return 1
 
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
@@ -5006,6 +5196,7 @@ class NetworkProfileScenarioTest(ScenarioTest):
 
 class NetworkServiceAliasesScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_network_service_aliases')
     def test_network_service_aliases(self, resource_group):
         self.kwargs.update({
@@ -5014,6 +5205,8 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         self.cmd('network list-service-aliases -l centralus')
         self.cmd('network list-service-aliases -l centralus -g {rg}')
 
+        # test list-service-tags
+        self.cmd('network list-service-tags -l centralus')
 
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
@@ -5110,6 +5303,9 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
                  '--nat-rule name=nat type=Static mode=EgressSnat internal-mappings=10.4.0.0/24 '
                  'external-mappings=192.168.21.0/24',
                  checks=[self.check('length(vnetGateway.natRules)', 1)])
+
+        # test vnet-gateway reset
+        self.cmd('network vnet-gateway reset -g {rg} -n {vg}')
 
     @ResourceGroupPreparer()
     def test_network_vnet_gateway_nat_rule_sub_cmd(self, resource_group):
