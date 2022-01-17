@@ -3447,9 +3447,9 @@ helps['restore-point collection'] = """
 
 helps['restore-point collection list'] = """
     type: command
-    short-summary: "Gets the list of restore point collections in a resource group."
+    short-summary: "Get the list of restore point collections in a resource group."
     examples:
-      - name: Gets the list of restore point collections in a resource group.
+      - name: Get the list of restore point collections in a resource group.
         text: |-
                az restore-point collection list --resource-group "myResourceGroup"
 """
