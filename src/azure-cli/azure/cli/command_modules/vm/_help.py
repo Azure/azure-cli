@@ -3491,7 +3491,7 @@ contained restore points."
 
 helps['restore-point collection list-all'] = """
     type: command
-    short-summary: "Gets the list of restore point collections in the subscription. Use nextLink property in the \
+    short-summary: "Get the list of restore point collections in the subscription. Use nextLink property in the \
 response to get the next page of restore point collections. Do this till nextLink is not null to fetch all the restore \
 point collections."
     examples:
