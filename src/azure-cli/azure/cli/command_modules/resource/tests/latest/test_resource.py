@@ -1558,6 +1558,8 @@ class DeploymentTestAtTenantScope(ScenarioTest):
 
         self.cmd('deployment tenant cancel -n {dn2}')
 
+        self.cmd('deployment tenant wait -n {dn2} --custom "provisioningState==Canceled"')
+
         self.cmd('deployment tenant show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
