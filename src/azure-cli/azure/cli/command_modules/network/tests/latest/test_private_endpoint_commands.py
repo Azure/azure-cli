@@ -2237,7 +2237,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         })
         self.cmd('extension add -n databricks')
 
-        _test_private_endpoint(self)
+        _test_private_endpoint(self, approve=False, rejected=False)
 
 
 class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
