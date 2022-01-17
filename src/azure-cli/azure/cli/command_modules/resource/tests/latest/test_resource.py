@@ -727,7 +727,11 @@ class ProviderRegistrationTest(ScenarioTest):
 
 class ProviderOperationTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=99999)
     def test_provider_operation(self):
+        result = self.cmd('provider operation list').get_output_in_json()
+        self.assertGreater(len(result), 0)
+        
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
