@@ -1603,103 +1603,111 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(
-        cmd, client, resource_group_name, name, admin=False, path=browse_path
-    )
-
-    # Get kubectl minor version
-    kubectl_minor_version = -1
+    return_msg = None
+    fd, browse_path = tempfile.mkstemp()
     try:
-        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        jsonS, _ = output.communicate()
-        kubectl_version = json.loads(jsonS)
-        # Remove any non-numeric characters like + from minor version
-        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
-        kubectl_server_minor_version = int(
-            kubectl_version["serverVersion"]["minor"])
-        kubectl_server_patch = int(
-            kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
-        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
-                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                           'more information.')
-    except subprocess.CalledProcessError as err:
-        raise ValidationError(
-            "Could not find kubectl minor version: {}".format(err))
-    if kubectl_minor_version == -1:
-        raise ValidationError("Failed to get kubectl version")
-
-    podName = "canipull-" + str(uuid.uuid4())
-    overrides = {
-        "spec": {
-            "restartPolicy": "Never",
-            "hostNetwork": True,
-            "containers": [
-                {
-                    "securityContext": {"runAsUser": 0},
-                    "name": podName,
-                    "image": CONST_CANIPULL_IMAGE,
-                    "args": ["-v6", acr],
-                    "stdin": True,
-                    "stdinOnce": True,
-                    "tty": True,
-                    "volumeMounts": [
-                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                    ],
-                }
-            ],
-            "tolerations": [
-                {"key": "CriticalAddonsOnly", "operator": "Exists"},
-                {"effect": "NoExecute", "operator": "Exists"},
-            ],
-            "volumes": [
-                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
-                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
-            ],
-            "nodeSelector": {"kubernetes.io/os": "linux"},
-        }
-    }
-
-    try:
-        cmd = [
-            "kubectl",
-            "run",
-            "--kubeconfig",
-            browse_path,
-            "--rm",
-            "--quiet",
-            "--image",
-            CONST_CANIPULL_IMAGE,
-            "--overrides",
-            json.dumps(overrides),
-            "-it",
-            podName,
-            "--namespace=default",
-        ]
-
-        # Support kubectl versons < 1.18
-        if kubectl_minor_version < 18:
-            cmd += ["--generator=run-pod/v1"]
-
-        output = subprocess.check_output(
-            cmd,
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
+        aks_get_credentials(
+            cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
-    except subprocess.CalledProcessError as err:
-        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
-    if output:
-        print(output)
-        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
-        if test_hook_data:
-            test_configs = test_hook_data.get("configs", None)
-            if test_configs and test_configs.get("returnOutput", False):
-                return output
-    else:
-        raise AzureInternalError("Failed to check the ACR.")
+
+        # Get kubectl minor version
+        kubectl_minor_version = -1
+        try:
+            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            jsonS, _ = output.communicate()
+            kubectl_version = json.loads(jsonS)
+            # Remove any non-numeric characters like + from minor version
+            kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
+            kubectl_server_minor_version = int(
+                kubectl_version["serverVersion"]["minor"])
+            kubectl_server_patch = int(
+                kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+            if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+                logger.warning(
+                    "There is a known issue for Kubernetes versions < 1.17.14 when connecting to "
+                    "ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for"
+                    "more information."
+                )
+        except subprocess.CalledProcessError as err:
+            raise ValidationError(
+                "Could not find kubectl minor version: {}".format(err))
+        if kubectl_minor_version == -1:
+            raise ValidationError("Failed to get kubectl version")
+
+        podName = "canipull-" + str(uuid.uuid4())
+        overrides = {
+            "spec": {
+                "restartPolicy": "Never",
+                "hostNetwork": True,
+                "containers": [
+                    {
+                        "securityContext": {"runAsUser": 0},
+                        "name": podName,
+                        "image": CONST_CANIPULL_IMAGE,
+                        "args": ["-v6", acr],
+                        "stdin": True,
+                        "stdinOnce": True,
+                        "tty": True,
+                        "volumeMounts": [
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                        ],
+                    }
+                ],
+                "tolerations": [
+                    {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                    {"effect": "NoExecute", "operator": "Exists"},
+                ],
+                "volumes": [
+                    {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                    {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+                ],
+                "nodeSelector": {"kubernetes.io/os": "linux"},
+            }
+        }
+
+        try:
+            cmd = [
+                "kubectl",
+                "run",
+                "--kubeconfig",
+                browse_path,
+                "--rm",
+                "--quiet",
+                "--image",
+                CONST_CANIPULL_IMAGE,
+                "--overrides",
+                json.dumps(overrides),
+                "-it",
+                podName,
+                "--namespace=default",
+            ]
+
+            # Support kubectl versons < 1.18
+            if kubectl_minor_version < 18:
+                cmd += ["--generator=run-pod/v1"]
+
+            output = subprocess.check_output(
+                cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.CalledProcessError as err:
+            raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+        if output:
+            print(output)
+            # only return the output in test case "test_aks_create_attach_acr"
+            test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+            if test_hook_data:
+                test_configs = test_hook_data.get("configs", None)
+                if test_configs and test_configs.get("returnOutput", False):
+                    return_msg = output
+        else:
+            raise AzureInternalError("Failed to check the ACR.")
+    finally:
+        os.close(fd)
+    return return_msg
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1750,121 +1758,155 @@ def _aks_browse(
     if not which('kubectl'):
         raise FileOperationError('Can not find kubectl executable in PATH')
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name,
-                        name, admin=False, path=browse_path)
-
-    # find the dashboard pod's name
+    fd, browse_path = tempfile.mkstemp()
     try:
-        dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
-    if dashboard_pod:
-        # remove any "pods/" or "pod/" prefix from the name
-        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
-    else:
-        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+        aks_get_credentials(cmd, client, resource_group_name,
+                            name, admin=False, path=browse_path)
 
-    # find the port
-    try:
-        dashboard_port = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-        # output format: "'{port}'"
-        dashboard_port = int((dashboard_port.replace("'", "")))
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
-
-    # use https if dashboard container is using https
-    if dashboard_port == 8443:
-        protocol = 'https'
-    else:
-        protocol = 'http'
-
-    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
-                                                                                                        protocol)
-    # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
-        # TODO: better error handling here.
-        response = requests.post(
-            'http://localhost:8888/openport/{0}'.format(listen_port))
-        result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
-            result['url'], protocol)
-        term_id = os.environ.get('ACC_TERM_ID')
-        if term_id:
-            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
-                                     json={"url": dashboardURL})
-        logger.warning(
-            'To view the console, please open %s in a new tab', dashboardURL)
-    else:
-        logger.warning('Proxy running on %s', proxy_url)
-
-    timeout = None
-    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
-    if test_hook_data:
-        test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", False):
-            timeout = test_configs.get("timeoutInterval", None)
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async(dashboardURL)
-    try:
+        # find the dashboard pod's name
         try:
-            subprocess.check_output(
-                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                 listen_address, "--port", listen_port],
+            dashboard_pod = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--output",
+                    "name",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                ],
                 universal_newlines=True,
                 stderr=subprocess.STDOUT,
-                timeout=timeout,
             )
         except subprocess.CalledProcessError as err:
-            if err.output.find('unknown flag: --address'):
-                return_msg = "Test Invalid Address! "
-                if listen_address != '127.0.0.1':
-                    logger.warning(
-                        '"--address" is only supported in kubectl v1.13 and later.')
-                    logger.warning(
-                        'The "--listen-address" argument will be ignored.')
-                try:
-                    subprocess.call(["kubectl", "--kubeconfig",
-                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-                    return_msg = return_msg if return_msg else ""
-                    return_msg += "Test Passed!"
-                except subprocess.CalledProcessError as new_err:
+            raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
+        if dashboard_pod:
+            # remove any "pods/" or "pod/" prefix from the name
+            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+        else:
+            raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+
+        # find the port
+        try:
+            dashboard_port = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                    "--output",
+                    "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'",
+                ],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            # output format: "'{port}'"
+            dashboard_port = int((dashboard_port.replace("'", "")))
+        except subprocess.CalledProcessError as err:
+            raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
+
+        # use https if dashboard container is using https
+        if dashboard_port == 8443:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+
+        proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+        dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                            protocol)
+        # launch kubectl port-forward locally to access the remote dashboard
+        if in_cloud_console():
+            # TODO: better error handling here.
+            response = requests.post(
+                'http://localhost:8888/openport/{0}'.format(listen_port))
+            result = json.loads(response.text)
+            dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+                result['url'], protocol)
+            term_id = os.environ.get('ACC_TERM_ID')
+            if term_id:
+                response = requests.post(
+                    "http://localhost:8888/openLink/{0}".format(term_id),
+                    json={"url": dashboardURL},
+                )
+            logger.warning(
+                'To view the console, please open %s in a new tab', dashboardURL)
+        else:
+            logger.warning('Proxy running on %s', proxy_url)
+
+        timeout = None
+        test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("enableTimeout", False):
+                timeout = test_configs.get("timeoutInterval", None)
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(dashboardURL)
+        try:
+            try:
+                subprocess.check_output(
+                    [
+                        "kubectl",
+                        "--kubeconfig",
+                        browse_path,
+                        "proxy",
+                        "--address",
+                        listen_address,
+                        "--port",
+                        listen_port,
+                    ],
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                    timeout=timeout,
+                )
+            except subprocess.CalledProcessError as err:
+                if err.output.find('unknown flag: --address'):
+                    return_msg = "Test Invalid Address! "
+                    if listen_address != '127.0.0.1':
+                        logger.warning(
+                            '"--address" is only supported in kubectl v1.13 and later.')
+                        logger.warning(
+                            'The "--listen-address" argument will be ignored.')
+                    try:
+                        subprocess.call(["kubectl", "--kubeconfig",
+                                        browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                        return_msg = return_msg if return_msg else ""
+                        return_msg += "Test Passed!"
+                    except subprocess.CalledProcessError as new_err:
+                        raise AzureInternalError(
+                            "Could not open proxy: {} Command output: {}".format(
+                                new_err, new_err.output
+                            )
+                        )
+                else:
                     raise AzureInternalError(
                         "Could not open proxy: {} Command output: {}".format(
-                            new_err, new_err.output
+                            err, err.output
                         )
                     )
-            else:
-                raise AzureInternalError(
-                    "Could not open proxy: {} Command output: {}".format(
-                        err, err.output
-                    )
-                )
-        except subprocess.TimeoutExpired:
-            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-            return_msg = return_msg if return_msg else ""
-            return_msg += "Test Passed!"
-    except KeyboardInterrupt:
-        # Let command processing finish gracefully after the user presses [Ctrl+C]
-        pass
+            except subprocess.TimeoutExpired:
+                logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                return_msg = return_msg if return_msg else ""
+                return_msg += "Test Passed!"
+        except KeyboardInterrupt:
+            # Let command processing finish gracefully after the user presses [Ctrl+C]
+            pass
+        finally:
+            if in_cloud_console():
+                requests.post('http://localhost:8888/closeport/8001')
     finally:
-        if in_cloud_console():
-            requests.post('http://localhost:8888/closeport/8001')
+        os.close(fd)
     return return_msg
 
 
