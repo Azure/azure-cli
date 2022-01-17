@@ -1235,9 +1235,22 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment sub export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation sub list -n {dn}', checks=[
+        operations = self.cmd('deployment operation sub list -n {dn}', checks=[
             self.check('length([])', 5)
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+            'oid5': operations[4]['operationId']
+        })
+        self.cmd('deployment operation sub show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4} {oid5}', checks=[
+            self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\', \'Create\', \'EvaluateDeploymentOutput\']'),
+            self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment sub delete -n {dn}')
 
         self.cmd('deployment sub create -n {dn2} --location WestUS --template-file "{tf}" --parameters @"{params}" '
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
@@ -1474,6 +1487,7 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             self.check('[].properties.provisioningOperation', '[\'Create\', \'Create\', \'Create\']'),
             self.check('[].properties.provisioningState', '[\'Succeeded\', \'Succeeded\', \'Succeeded\']')
         ])
+        self.cmd('deployment mg delete --management-group-id {mg} -n {dn}')
 
         self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn2} --template-file "{tf}" '
                  '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}" '
@@ -1527,9 +1541,18 @@ class DeploymentTestAtTenantScope(ScenarioTest):
         self.cmd('deployment tenant export -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation tenant list -n {dn}', checks=[
+        operations = self.cmd('deployment operation tenant list -n {dn}', checks=[
             self.check('length([])', 4)
-        ])
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'oid1': operations[0]['operationId'],
+            'oid2': operations[1]['operationId'],
+            'oid3': operations[2]['operationId'],
+            'oid4': operations[3]['operationId'],
+        })
+        self.cmd('deployment operation tenant show -n {dn} --operation-ids {oid1} {oid2} {oid3} {oid4}') #todo: add checks
+        self.cmd('deployment tenant delete -n {dn}')
 
         self.cmd('deployment tenant create --location WestUS -n {dn2} --template-file "{tf}" --parameters targetMG="{mg}" --no-wait')
 
