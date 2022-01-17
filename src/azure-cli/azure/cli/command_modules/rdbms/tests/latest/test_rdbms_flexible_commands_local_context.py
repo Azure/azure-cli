@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import (

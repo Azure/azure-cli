@@ -36,7 +36,7 @@ from azure.cli.command_modules.network._validators import (
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
     validate_vpn_connection_name_or_id,
-    process_vnet_name_or_id, validate_trusted_client_cert)
+    process_vnet_name_or_id, validate_trusted_client_cert, validate_scale_unit_ranges)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -272,7 +272,6 @@ def load_arguments(self, _):
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
-        c.argument('ssl_profile', min_api='2020-06-01', help='SSL profile resource of the application gateway.', completer=get_ag_subresource_completion_list('ssl_profiles'))
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -508,7 +507,7 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
                    help='The version of the web application firewall rule set type. '
                         '0.1 is used for Microsoft_BotManagerRuleSet')
 
@@ -584,11 +583,19 @@ def load_arguments(self, _):
                    help='The variable to be excluded.')
         c.argument('selector_match_operator',
                    arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   options_list=['--selector-match-operator', '--match-operator'],
                    help='When matchVariable is a collection, operate on the selector to '
                         'specify which elements in the collection this exclusion applies to.')
         c.argument('selector',
                    help='When matchVariable is a collection, operator used to '
                         'specify which elements in the collection this exclusion applies to.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion rule-set',
+                               min_api='2021-05-01') as c:
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='The managed rule group for exclusion.')
+        c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
     # region
 
     # region ApplicationSecurityGroups
@@ -793,6 +800,9 @@ def load_arguments(self, _):
     with self.argument_context('network express-route peering connection list') as c:
         c.argument('circuit_name', id_part=None)
         c.argument('peering_name', id_part=None)
+
+    with self.argument_context('network express-route peering connection ipv6-config') as c:
+        c.argument('address_prefix', help='/125 IP address space to carve out customer addresses for global reach.')
 
     with self.argument_context('network express-route peering peer-connection') as c:
         c.argument('circuit_name', circuit_name_type, id_part=None)
@@ -1877,6 +1887,7 @@ def load_arguments(self, _):
     # endregion
 
     # region VirtualNetworks
+    encryption_policy_types = ['dropUnencrypted', 'allowUnencrypted']
     with self.argument_context('network vnet') as c:
         c.argument('virtual_network_name', virtual_network_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list='--address-prefixes', metavar='PREFIX')
@@ -1885,6 +1896,9 @@ def load_arguments(self, _):
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
         c.argument('flowtimeout', type=int, help='The FlowTimeout value (in minutes) for the Virtual Network', min_api='2021-02-01', is_preview=True)
+        c.argument('bgp_community', help='The BGP community associated with the virtual network.')
+        c.argument('enable_encryption', arg_type=get_three_state_flag(), help='Enable encryption on the virtual network.', min_api='2021-05-01', is_preview=True)
+        c.argument('encryption_enforcement_policy', options_list=['--encryption-enforcement-policy', '--encryption-policy'], arg_type=get_enum_type(encryption_policy_types), help='To control if the Virtual Machine without encryption is allowed in encrypted Virtual Network or not.', min_api='2021-05-01', is_preview=True)
 
     with self.argument_context('network vnet check-ip-address') as c:
         c.argument('ip_address', required=True)
@@ -2175,6 +2189,11 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
         c.argument('resource_port', help='Resource port of the target VM to which the bastion will connect.', options_list=['--resource-port'])
         c.argument('target_resource_id', help='ResourceId of the target Virtual Machine.', options_list=['--target-resource-id'])
+        c.argument('scale_units', type=int, min_api='2021-03-01', options_list=['--scale-units'],
+                   validator=validate_scale_unit_ranges,
+                   help='The scale units for the Bastion Host resource, which minimum is 2 and maximum is 50.')
+        c.argument('sku', arg_type=get_enum_type(['Basic', 'Standard']), default='Standard', min_api='2021-03-01',
+                   options_list=['--sku'], help='The SKU of this Bastion Host.')
         c.ignore('subnet')
     for item in ['ssh', 'rdp']:
         with self.argument_context('network bastion {}'.format(item)) as c:

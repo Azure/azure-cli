@@ -406,39 +406,50 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr connected-registry') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the connected registry. Name must be between 5 to 40 character long, start with a letter and contain only alphanumeric characters (including ‘_’ or ‘-’). Name must be unique under the Cloud ACR hierarchy.', required=True)
-        c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.', required=False)
-        c.argument('repositories', options_list=['--repository', c.deprecate(target='-t', redirect='--repository', hide=True)], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
-        c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
-        c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.', required=False)
-        c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
-        c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
+        c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.')
+        c.argument('repositories', options_list=['--repository'], nargs='+', help='Specify the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...')
+        c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.')
+        c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.')
+        c.argument('no_children', help='Used to remove all children from the list.', action='store_true')
+        c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicate whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
+
+        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Specify the protocol used to communicate with its parent.', required=True)
+        c.argument('generate_password', arg_type=get_enum_type(['1', '2']), options_list=['--generate-password'], help='Select which password you want to generate, and it is required to retrieve the password from the sync token.')
 
     with self.argument_context('acr connected-registry create') as c:
-        c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
-        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry (read/write mode) or mirror (read-only mode).', required=False, default="Registry")
-        c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
-        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
+        c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
+        c.argument('mode', arg_type=get_enum_type(['ReadOnly', 'ReadWrite']), options_list=['--mode', '-m'], help='Determine the access it will have when synchronized.', required=False, default="ReadWrite")
+        c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specify the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...')
+        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.')
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
-        c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+        c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+        c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
 
     with self.argument_context('acr connected-registry update') as c:
-        c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False)
-        c.argument('add_client_token_list', options_list=['--add-client-tokens'], nargs='*', required=False,
+        c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
+        c.argument('add_client_token_list', options_list=['--add-client-tokens'], nargs='*',
                    help='Client tokens to be added. Use the format "--add-client-tokens [TOKEN_NAME1 TOKEN_NAME2 ...]" per token id.')
-        c.argument('remove_client_token_list', options_list=['--remove-client-tokens'], nargs='*', required=False,
+        c.argument('remove_client_token_list', options_list=['--remove-client-tokens'], nargs='*',
                    help='Client tokens to be removed. Use the format "--remove-client-tokens [TOKEN_NAME1 TOKEN_NAME2 ...]" per token id.')
-        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
-        c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False)
-        c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
+        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.')
+        c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.')
+        c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.')
+        c.argument('add_notifications', options_list=['--add-notifications'], nargs='*',
+                   help='List of artifact pattern to be added to notifications list. Use the format "--add-notifications [PATTERN1 PATTERN2 ...]".')
+        c.argument('remove_notifications', options_list=['--remove-notifications'], nargs='*',
+                   help='List of artifact pattern to be removed from notifications list. Use the format "--remove-notifications [PATTERN1 PATTERN2 ...]".')
 
-    with self.argument_context('acr connected-registry repo') as c:
-        c.argument('add_repos', options_list=['--add'], nargs='*', required=False,
+    with self.argument_context('acr connected-registry permissions') as c:
+        c.argument('add_repos', options_list=['--add'], nargs='*',
                    help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
-        c.argument('remove_repos', options_list=['--remove'], nargs='*', required=False,
+        c.argument('remove_repos', options_list=['--remove'], nargs='*',
                    help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
-    with self.argument_context('acr connected-registry install') as c:
-        c.argument('parent_protocol', arg_type=get_enum_type(['http', 'https']), options_list=['--parent-protocol'], help='Required parameter to specify the parent protocol.', required=True)
+    with self.argument_context('acr connected-registry repo') as c:
+        c.argument('add_repos', options_list=['--add'], nargs='*',
+                   help='repository permissions to be added to the targeted connected registry and it\'s ancestors sync scope maps. Use the format "--add [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('remove_repos', options_list=['--remove'], nargs='*',
+                   help='respsitory permissions to be removed from the targeted connected registry and it\'s succesors sync scope maps. Use the format "--remove [REPO1 REPO2 ...]" per flag. ' + repo_valid_actions)
 
 
 def _get_helm_default_install_location():

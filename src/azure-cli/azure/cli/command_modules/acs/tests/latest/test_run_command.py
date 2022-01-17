@@ -9,7 +9,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs.custom import _get_command_context
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (
     StringContainCheck, StringContainCheckIgnoreCase)
 

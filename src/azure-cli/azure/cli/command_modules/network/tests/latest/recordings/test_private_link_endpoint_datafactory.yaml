@@ -1,0 +1,1439 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - datafactory create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_datafactory_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001","name":"test_datafactory_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-04T06:54:25Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '356'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "identity": {"type": "SystemAssigned"}, "properties":
+      {"encryption": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - datafactory create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-datafactory/1.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"name\": \"cli-test-datafactory-pe-000002\",\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories\",\n  \"properties\": {\n    \"provisioningState\":
+        \"Succeeded\",\n    \"createTime\": \"2022-01-04T06:54:38.4587189Z\",\n    \"version\":
+        \"2018-06-01\",\n    \"encryption\": {}\n  },\n  \"eTag\": \"\\\"0f014b55-0000-0700-0000-61d3ef2e0000\\\"\",\n
+        \ \"location\": \"westus\",\n  \"identity\": {\n    \"type\": \"SystemAssigned\",\n
+        \   \"principalId\": \"9e83f71e-d656-403a-ad6f-5fde92956c75\",\n    \"tenantId\":
+        \"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a\"\n  },\n  \"tags\": {}\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '700'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_datafactory_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001","name":"test_datafactory_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-04T06:54:25Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '356'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "datafactory-privatelink-subnet000004",
+      "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '327'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"7d677117-3a84-4dca-add2-89ef169e91b8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"65596ec0-2179-4cc1-a155-8e6be428267d\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"datafactory-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"7d677117-3a84-4dca-add2-89ef169e91b8\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1c47f5e7-a19f-459e-a19d-c64d7cbb35a4?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1476'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cdc358b1-f790-491a-b1a4-73fbdac286e2
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1c47f5e7-a19f-459e-a19d-c64d7cbb35a4?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c993c890-cdee-4927-b08f-43e8d5fee0c9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-vnet000003\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003\",\r\n
+        \ \"etag\": \"W/\\\"a6e9222e-2dd2-4995-8e64-e0ddc86c9607\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"65596ec0-2179-4cc1-a155-8e6be428267d\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"datafactory-privatelink-subnet000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\",\r\n
+        \       \"etag\": \"W/\\\"a6e9222e-2dd2-4995-8e64-e0ddc86c9607\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1478'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:50 GMT
+      etag:
+      - W/"a6e9222e-2dd2-4995-8e64-e0ddc86c9607"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5bf3067b-d2fb-48f0-9922-755d0598341a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"a6e9222e-2dd2-4995-8e64-e0ddc86c9607\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '637'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:51 GMT
+      etag:
+      - W/"a6e9222e-2dd2-4995-8e64-e0ddc86c9607"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 67e1554a-15af-464c-835d-06c785543365
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004",
+      "name": "datafactory-privatelink-subnet000004", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '502'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"5a2e6d08-f337-4f33-a390-522a36343984\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/872bf01d-d4c1-4e2f-97d5-72088f759a41?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '637'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 99a3f394-d220-498b-a7b8-cb2dec5bc477
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/872bf01d-d4c1-4e2f-97d5-72088f759a41?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d5bed40e-e45d-47fd-8564-537c38854be7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --vnet-name --name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-subnet000004\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\",\r\n
+        \ \"etag\": \"W/\\\"76c06057-4310-48ea-8184-b5dda0b20250\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '638'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:56 GMT
+      etag:
+      - W/"76c06057-4310-48ea-8184-b5dda0b20250"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2bba8e91-17d9-4da5-92c3-ed3c0a59ac83
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateLinkResources?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privatelinkresources/dataFactory\",\n
+        \     \"name\": \"dataFactory\",\n      \"type\": \"Microsoft.DataFactory/factories/privatelinkresources\",\n
+        \     \"properties\": {\n        \"groupId\": \"dataFactory\",\n        \"requiredMembers\":
+        [\n          \"dataFactory\"\n        ],\n        \"requiredZoneNames\": [\n
+        \         \"privatelink.datafactory.azure.net\"\n        ]\n      }\n    },\n
+        \   {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privatelinkresources/portal\",\n
+        \     \"name\": \"portal\",\n      \"type\": \"Microsoft.DataFactory/factories/privatelinkresources\",\n
+        \     \"properties\": {\n        \"groupId\": \"portal\",\n        \"requiredMembers\":
+        [\n          \"portal\"\n        ],\n        \"requiredZoneNames\": [\n          \"privatelink.adf.azure.com\"\n
+        \       ]\n      }\n    }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1101'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_datafactory_private_endpoint000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001","name":"test_datafactory_private_endpoint000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-04T06:54:25Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '356'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:54:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "manualPrivateLinkServiceConnections": [{"name": "df-privatelink-endpoint-connection000006",
+      "properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002",
+      "groupIds": ["dataFactory"]}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '746'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-endpoint000005\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"3a986ef2-d9fd-46b4-81bd-30a288986042\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"0f1d7853-2007-4b36-9103-d42be224d755\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"df-privatelink-endpoint-connection000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/manualPrivateLinkServiceConnections/df-privatelink-endpoint-connection000006\",\r\n
+        \       \"etag\": \"W/\\\"3a986ef2-d9fd-46b4-81bd-30a288986042\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"dataFactory\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/networkInterfaces/datafactory-privatelink-endpoint000005.nic.5226ac97-b7a8-4d09-895b-58d3ec3b4a05\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d2406247-8520-4a2a-9605-07cf52d75855?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2350'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 53d483db-2f98-42f8-ab49-cb0980f70bf8
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d2406247-8520-4a2a-9605-07cf52d75855?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e48b3f6d-84bd-4179-ab6c-cc9a762c39fa
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d2406247-8520-4a2a-9605-07cf52d75855?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5633e59c-003d-4901-b43e-b1ad2a58e751
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.1 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"datafactory-privatelink-endpoint000005\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\",\r\n
+        \ \"etag\": \"W/\\\"0338f734-9e5a-4093-a3c5-c8233a671b19\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"0f1d7853-2007-4b36-9103-d42be224d755\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"df-privatelink-endpoint-connection000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/manualPrivateLinkServiceConnections/df-privatelink-endpoint-connection000006\",\r\n
+        \       \"etag\": \"W/\\\"0338f734-9e5a-4093-a3c5-c8233a671b19\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"dataFactory\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\":
+        {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/virtualNetworks/datafactory-privatelink-vnet000003/subnets/datafactory-privatelink-subnet000004\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/networkInterfaces/datafactory-privatelink-endpoint000005.nic.5226ac97-b7a8-4d09-895b-58d3ec3b4a05\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2334'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:27 GMT
+      etag:
+      - W/"0338f734-9e5a-4093-a3c5-c8233a671b19"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 21c976c9-e483-4745-886f-af8f7b557dc2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \     \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \     \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \     \"properties\": {\n        \"provisioningState\": \"Succeeded\",\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \       },\n        \"privateLinkServiceConnectionState\": {\n          \"status\":
+        \"Pending\",\n          \"description\": \"\",\n          \"actionsRequired\":
+        \"None\"\n        }\n      },\n      \"etag\": \"7508088f-0000-0700-0000-61d3ef590000\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1011'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Pending\",\n
+        \     \"description\": \"\",\n      \"actionsRequired\": \"None\"\n    },\n
+        \   \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"7508088f-0000-0700-0000-61d3ef590000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e",
+      "name": "cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e",
+      "type": "Microsoft.DataFactory/factories/privateendpointconnections", "properties":
+      {"provisioningState": "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005"},
+      "privateLinkServiceConnectionState": {"status": "Approved", "description": "Approved!",
+      "actionsRequired": "None"}, "internalProperties": {"nrpPlsResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3",
+      "peConnectionProxyName": "datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755",
+      "plsConnectionName": "df-privatelink-endpoint-connection000006", "groupId":
+      "dataFactory", "connectionId": "8e29a056-cbdb-4c50-96c2-8011fc5ad265", "privateIpAddress":
+      "10.0.0.4", "linkIdentifier": "620822994", "requestDescription": "", "operationId":
+      "2c5fd25f-a877-498a-bd07-2fd57352fc7a"}}, "etag": "7508088f-0000-0700-0000-61d3ef590000"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1609'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\",\n
+        \     \"description\": \"Approved!\",\n      \"actionsRequired\": \"None\"\n
+        \   },\n    \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"7508088f-0000-0700-0000-61d3ef590000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\",\n
+        \     \"description\": \"Approved!\",\n      \"actionsRequired\": \"None\"\n
+        \   },\n    \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"7508758f-0000-0700-0000-61d3ef640000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\",\n
+        \     \"description\": \"Approved!\",\n      \"actionsRequired\": \"None\"\n
+        \   },\n    \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"7508758f-0000-0700-0000-61d3ef640000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e",
+      "name": "cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e",
+      "type": "Microsoft.DataFactory/factories/privateendpointconnections", "properties":
+      {"provisioningState": "Succeeded", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "Rejected!",
+      "actionsRequired": "None"}, "internalProperties": {"nrpPlsResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3",
+      "peConnectionProxyName": "datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755",
+      "plsConnectionName": "df-privatelink-endpoint-connection000006", "groupId":
+      "dataFactory", "connectionId": "8e29a056-cbdb-4c50-96c2-8011fc5ad265", "privateIpAddress":
+      "10.0.0.4", "linkIdentifier": "620822994", "requestDescription": "", "operationId":
+      "2c5fd25f-a877-498a-bd07-2fd57352fc7a"}}, "etag": "7508758f-0000-0700-0000-61d3ef640000"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1609'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Rejected\",\n
+        \     \"description\": \"Rejected!\",\n      \"actionsRequired\": \"None\"\n
+        \   },\n    \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"7508758f-0000-0700-0000-61d3ef640000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id --description
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"name\": \"cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e\",\n
+        \ \"type\": \"Microsoft.DataFactory/factories/privateendpointconnections\",\n
+        \ \"properties\": {\n    \"provisioningState\": \"Succeeded\",\n    \"privateEndpoint\":
+        {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005\"\n
+        \   },\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Rejected\",\n
+        \     \"description\": \"Rejected!\",\n      \"actionsRequired\": \"None\"\n
+        \   },\n    \"internalProperties\": {\n      \"nrpPlsResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.Network/privateEndpoints/datafactory-privatelink-endpoint000005/privateLinkServiceProxies/datafactory-privatelink-endpoint000005.proxy.a7141ad4-3ab4-4eb6-853e-e4660b802fc3\",\n
+        \     \"peConnectionProxyName\": \"datafactory-privatelink-endpoint000005.0f1d7853-2007-4b36-9103-d42be224d755\",\n
+        \     \"plsConnectionName\": \"df-privatelink-endpoint-connection000006\",\n
+        \     \"groupId\": \"dataFactory\",\n      \"connectionId\": \"8e29a056-cbdb-4c50-96c2-8011fc5ad265\",\n
+        \     \"privateIpAddress\": \"10.0.0.4\",\n      \"linkIdentifier\": \"620822994\",\n
+        \     \"requestDescription\": \"\",\n      \"operationId\": \"2c5fd25f-a877-498a-bd07-2fd57352fc7a\"\n
+        \   }\n  },\n  \"etag\": \"75081090-0000-0700-0000-61d3ef730000\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1737'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 04 Jan 2022 06:55:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id --yes
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 04 Jan 2022 06:56:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.22000-SP0) AZURECLI/2.32.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateEndpointConnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"NotFound","message":"The document could not be retrieved
+        because it does not exist.","target":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_datafactory_private_endpoint000001/providers/Microsoft.DataFactory/factories/cli-test-datafactory-pe-000002/privateendpointconnections/cli-test-datafactory-pe-000002.b6e486c5-aae1-4004-a982-60b98c213d8e","details":null}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '405'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Tue, 04 Jan 2022 06:56:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+version: 1
