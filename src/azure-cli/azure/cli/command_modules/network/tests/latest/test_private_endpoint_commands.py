@@ -2225,19 +2225,19 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    # @live_only()
-    # @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_databricks_workspaces")
-    # def test_private_endpoint_connection_databricks_workspaces(self, resource_group):
-    #     self.kwargs.update({
-    #         'rg': resource_group,
-    #         'cmd': 'databricks workspaces',
-    #         'list_num': 1,
-    #         'type': 'Microsoft.Databricks/workspaces',
-    #         'extra_create': '--location westus --sku premium'
-    #     })
-    #     self.cmd('extension add -n databricks')
-    #
-    #     _test_private_endpoint(self, approve=False, rejected=False)
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_databricks_workspaces")
+    def test_private_endpoint_connection_databricks_workspaces(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'cmd': 'databricks workspaces',
+            'list_num': 2,
+            'type': 'Microsoft.Databricks/workspaces',
+            'extra_create': '--location westus --sku premium'
+        })
+        self.cmd('extension add -n databricks')
+
+        _test_private_endpoint(self, approve=False, rejected=False)
 
 
 class PowerBINetworkARMTemplateBasedScenarioTest(ScenarioTest):
@@ -2759,8 +2759,6 @@ class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
-        # install az databricks
-        self.cmd('extension add --name databricks')
         # Create vnet injected databricks workspace
         databricks = self.cmd(
             'az databricks workspace create --name {databricks_name} --resource-group {rg} '
