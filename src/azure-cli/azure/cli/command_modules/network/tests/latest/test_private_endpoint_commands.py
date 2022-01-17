@@ -2225,6 +2225,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_databricks_workspaces")
     def test_private_endpoint_connection_databricks_workspaces(self, resource_group):
         self.kwargs.update({
@@ -2234,7 +2235,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
             'type': 'Microsoft.Databricks/workspaces',
             'extra_create': '--location westus --sku premium'
         })
-        self.cmd('extension add -n databricks workspaces')
+        self.cmd('extension add -n databricks')
 
         _test_private_endpoint(self)
 
