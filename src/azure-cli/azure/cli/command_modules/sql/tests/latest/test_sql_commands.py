@@ -76,13 +76,19 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
-    subscription_id = '4cac86b0-1e56-48c2-9df2-669a6d2d87c5'
-    location = 'westeurope'
-    subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/vnet-powershell-cli-testing/subnets/ManagedInstance'
-    target_vnet_name = 'vnet-powershell-cli-testing'
+    subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    group = 'CustomerExperienceTeam_RG'
+    location = 'westcentralus'
+    vnet_name = 'vnet-mi-tooling'
+    subnet_name = 'ManagedInstance'
+    subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+    # For cross-subnet update SLO, we need a target subnet to move managed instance to.
+    target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
-    target_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(target_vnet_name, target_subnet_name)
-    group = 'Committer-SwaggerAndGeneratedSDKs-MI-CLI'
+    target_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, target_vnet_name, target_subnet_name)
+    target_subnet_vcores = 4
+    
     collation = "Serbian_Cyrillic_100_CS_AS"
 
     licence = 'LicenseIncluded'
@@ -92,8 +98,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     family = 'Gen5'
     proxy = 'Proxy'
 
-    sec_location = 'westus'
-    sec_subnet = '/subscriptions/4cac86b0-1e56-48c2-9df2-669a6d2d87c5/resourceGroups/Committer-SwaggerAndGeneratedSDKs-MI-CLI/providers/Microsoft.Network/virtualNetworks/secondary-vnet/subnets/ManagedInstance'
+    fog_name = "fgtest2022a"
+    primary_name = 'mi-primary-wcus'
+    secondary_name = 'mi-tooling-cus'
+    sec_location = 'centralus'
+    sec_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/vnet-sql-mi-secondary/subnets/default'.format(subscription_id, group)
 
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
@@ -1052,8 +1061,10 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         edition_updated = 'BusinessCritical'
         v_core_update = 4
 
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
         if self.is_live:
-            sleep(60)
+            sleep(120)
 
         print('Updating MI...\n')
 
@@ -4383,10 +4394,17 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         user = admin_login
 
         # test show sql managed instance 1
+        subnet = ManagedInstancePreparer.subnet
+        target_subnet = ManagedInstancePreparer.target_subnet
+        if not (self.in_recording or self.is_live):
+            subnet = subnet.replace(ManagedInstancePreparer.subscription_id, "00000000-0000-0000-0000-000000000000")
+            target_subnet = target_subnet.replace(ManagedInstancePreparer.subscription_id, "00000000-0000-0000-0000-000000000000")
+
         managed_instance_1 = self.cmd('sql mi show -g {} -n {}'
                                       .format(resource_group_1, managed_instance_name_1),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
+                                          JMESPathCheck('subnetId', subnet),
                                           JMESPathCheck('resourceGroup', resource_group_1),
                                           JMESPathCheck('administratorLogin', user),
                                           JMESPathCheck('vCores', 8),
@@ -4412,8 +4430,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
-        if self.is_live:
-            sleep(60)
+        # Managed instance becomes ready before the operation is completed. For that reason, we should wait
+        # for the operation to complete in order to proceed with testing.
+        sleep(120)
 
         # test update sql managed_instance 1
         self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
@@ -4488,31 +4507,29 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('tags', {})])
 
-        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
-        try:
-            self.cmd('sql mi update -g {} -n {} --subnet {}'
-                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet))
-        except Exception as e:
-            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
-            if expectedmessage in str(e):
-                pass
+        # test cross-subnet update SLO with the subnet resource id
+        self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
+                .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('subnetId', target_subnet)])
 
-        # test cross-subnet update SLO. Since the feature isn't rolled out, we expect the operation to fail.
-        try:
-            self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
-                 .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.target_subnet_name, ManagedInstancePreparer.target_vnet_name))
-        except Exception as e:
-            expectedmessage = "Subnet resource ID '{}' is invalid. Please provide a correct resource Id for the target subnet.".format(ManagedInstancePreparer.target_subnet)
-            if expectedmessage in str(e):
-                pass
+        # test cross-subnet update SLO with subnet and vNet names
+        self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
+            .format(resource_group_1, managed_instance_name_1, ManagedInstancePreparer.subnet_name, ManagedInstancePreparer.vnet_name),
+                checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('subnetId', subnet)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
-    test_umi = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
-    verify_umi_with_empty_uuid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/viparek/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testumi'
+    test_umi = '/subscriptions/{}/resourcegroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-tooling-managed-identity'.format(ManagedInstancePreparer.subscription_id, ManagedInstancePreparer.group)
+    verify_umi_with_empty_uuid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-tooling-managed-identity'.format(ManagedInstancePreparer.group)
 
     @AllowLargeResponse()
     @ManagedInstancePreparer(
@@ -4533,7 +4550,7 @@ class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
                          'primaryUserAssignedIdentityId',
                          self.test_umi if self.in_recording or self.is_live else self.verify_umi_with_empty_uuid
                      ),
-                     JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned')]
+                     JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned')]
                  )
 
 
@@ -4730,13 +4747,12 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # update encryption protector to akv key
         self.cmd(
-            'sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid} --auto-rotation-enabled',
+            'sql mi tde-key set -g {rg} --mi {managed_instance_name} -t AzureKeyVault -k {kid}',
             checks=[
                 self.check('serverKeyType', 'AzureKeyVault'),
                 self.check('serverKeyName', '{server_key_name}'),
-                self.check('uri', '{kid}'),
-                self.check('autoRotationEnabled', True)])
-
+                self.check('uri', '{kid}')])
+                
         # validate encryption protector is akv via show
         self.cmd('sql mi tde-key show -g {rg} --mi {managed_instance_name}',
                  checks=[
@@ -4878,13 +4894,13 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup list -l {loc} -g {rg}',
             checks=[
-                self.check('length(@)', 0)])
+                JMESPathCheckGreaterThan('length(@)', 0)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc}',
             checks=[
-                self.check('length(@)', 0)])
+                JMESPathCheckGreaterThan('length(@)', 0)])
 
         # test list long term retention backups for instance
         # with resource group
@@ -5419,21 +5435,19 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
 
 class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
-    @ManagedInstancePreparer(parameter_name="mi1")
-    @ManagedInstancePreparer(parameter_name="mi2", is_geo_secondary=True)
-    def test_sql_instance_failover_group_mgmt(self, mi1, rg, mi2):
-        managed_instance_name_1 = mi1
-        managed_instance_name_2 = mi2
-        resource_group_name = rg
-        failover_group_name = "fgtest2021a"
-        mi1_location = ManagedInstancePreparer.location
-        mi2_location = ManagedInstancePreparer.sec_location
+    def test_sql_instance_failover_group_mgmt(self):
+        resource_group_name = ManagedInstancePreparer.group
+        primary_name = ManagedInstancePreparer.primary_name
+        secondary_name = ManagedInstancePreparer.secondary_name
+        failover_group_name = ManagedInstancePreparer.fog_name
+        primary_location = ManagedInstancePreparer.location
+        secondary_location = ManagedInstancePreparer.sec_location
 
         # Create Failover Group
         self.cmd(
             'sql instance-failover-group create -n {} -g {} --mi {} --partner-resource-group {} --partner-mi {} --failover-policy Automatic --grace-period 2'
-                .format(failover_group_name, resource_group_name, managed_instance_name_1, resource_group_name,
-                        managed_instance_name_2),
+                .format(failover_group_name, resource_group_name, primary_name, resource_group_name,
+                        secondary_name),
             checks=[
                 JMESPathCheck('name', failover_group_name),
                 JMESPathCheck('resourceGroup', resource_group_name),
@@ -5443,7 +5457,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Get Instance Failover Group on a partner managed instance and check if role is secondary
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('name', failover_group_name),
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
@@ -5454,7 +5468,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Update Failover Group
         self.cmd('sql instance-failover-group update -g {} -n {} -l {} --grace-period 3 '
-                 .format(resource_group_name, failover_group_name, mi1_location),
+                 .format(resource_group_name, failover_group_name, primary_location),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
@@ -5463,7 +5477,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check if properties got propagated to secondary server
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('name', failover_group_name),
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
@@ -5474,7 +5488,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql instance-failover-group update -g {} -n {} -l {} --failover-policy Manual'
-                 .format(resource_group_name, failover_group_name, mi1_location),
+                 .format(resource_group_name, failover_group_name, primary_location),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled')
@@ -5482,7 +5496,7 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Failover Failover Group
         self.cmd('sql instance-failover-group set-primary -g {} -n {} -l {} '
-                 .format(resource_group_name, failover_group_name, mi2_location))
+                 .format(resource_group_name, failover_group_name, secondary_location))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -5492,20 +5506,20 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         # Fail back to original server
         self.cmd('sql instance-failover-group set-primary --allow-data-loss -g {} -n {} -l {}'
-                 .format(resource_group_name, failover_group_name, mi1_location))
+                 .format(resource_group_name, failover_group_name, primary_location))
 
         # The failover operation is completed when new primary is promoted to primary role
         # But there is a async part to make old primary a new secondary
@@ -5515,37 +5529,37 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         # Check the roles of failover groups to confirm failover happened
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         # Do no-op failover to the same server
         self.cmd('sql instance-failover-group set-primary -g {} -n {} -l {}'
-                 .format(resource_group_name, failover_group_name, mi1_location))
+                 .format(resource_group_name, failover_group_name, primary_location))
 
         # Check the roles of failover groups to confirm failover didn't happen
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi2_location, failover_group_name),
+                 .format(resource_group_name, secondary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Secondary')
                  ])
 
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=[
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
         # Drop failover group
         self.cmd('sql instance-failover-group delete -g {} -l {} -n {}'
-                 .format(resource_group_name, mi1_location, failover_group_name),
+                 .format(resource_group_name, primary_location, failover_group_name),
                  checks=NoneCheck())
 
 
