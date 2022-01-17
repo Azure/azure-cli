@@ -2231,7 +2231,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'cmd': 'databricks workspaces',
-            'list_num': 2,
+            'list_num': 1,
             'type': 'Microsoft.Databricks/workspaces',
             'extra_create': '--location westus --sku premium'
         })
@@ -2719,6 +2719,7 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_databricks_private_endpoint', random_name_length=40, location="westus")
     def test_private_endpoint_databricks_workspace(self, resource_group):
         location = 'westus'
