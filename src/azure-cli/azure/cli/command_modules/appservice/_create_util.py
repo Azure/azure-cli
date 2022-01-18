@@ -74,15 +74,12 @@ def zip_contents_from_dir(dirPath, lang):
     return zip_file_path
 
 
-def get_runtime_version_details(file_path, lang_name, is_linux=False):
-    from .custom import _StackRuntimeHelper
-    stacks = _StackRuntimeHelper()
-
+def get_runtime_version_details(file_path, lang_name, is_linux=False, stack_helper=None):
     version_detected = None
     version_to_create = None
 
-    versions = stacks.get_version_list(lang_name, is_linux)
-    default_version = stacks.get_default_version(lang_name, is_linux)
+    versions = stack_helper.get_version_list(lang_name, is_linux)
+    default_version = stack_helper.get_default_version(lang_name, is_linux)
 
     if lang_name.lower() == DOTNET_RUNTIME_NAME:
         version_detected = parse_dotnet_version(file_path, default_version)

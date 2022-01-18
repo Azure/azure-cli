@@ -3954,12 +3954,14 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _create_new_app = _site_availability.name_available
     os_name = os_type if os_type else detect_os_form_src(src_dir, html)
     _is_linux = os_name.lower() == 'linux'
+    helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime and html:
         raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
 
+
+
     if runtime:
-        helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
@@ -3976,7 +3978,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         # detect the version
         _lang_details = get_lang_from_content(src_dir, html, is_linux=_is_linux)
         language = _lang_details.get('language')
-        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, _is_linux)
+        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, _is_linux, helper)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
 
