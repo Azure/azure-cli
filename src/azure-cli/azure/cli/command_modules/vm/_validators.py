@@ -282,6 +282,12 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_offer = matched['offer']
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
+            if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
+                image_plan = _get_image_plan_info_if_exists(cmd, namespace)
+                if image_plan:
+                    namespace.plan_name = image_plan.name
+                    namespace.plan_product = image_plan.product
+                    namespace.plan_publisher = image_plan.publisher
             return 'urn'
     except requests.exceptions.ConnectionError:
         pass
