@@ -478,6 +478,9 @@ parameters:
   - name: --rotation-poll-interval
     type: string
     short-summary: Set interval of rotation poll. Use with azure-keyvault-secrets-provider addon.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Use FIPS-enabled OS on agent nodes.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -531,6 +534,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
     text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+  - name: Create a kubernetes cluster with FIPS-enabled OS
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
 """
 
 helps['aks update'] = """
@@ -900,7 +905,7 @@ parameters:
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
   - name: --labels
     type: string
-    short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
+    short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
@@ -922,6 +927,9 @@ parameters:
   - name: --enable-ultra-ssd
     type: bool
     short-summary: Enable UltraSSD, default value is false.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Use FIPS-enabled OS on agent nodes.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -931,6 +939,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
   - name: Create a nodepool cluster with a specific OS SKU
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku Ubuntu
+  - name: Create a nodepool with FIPS-enabled OS
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-fips-image
 
 """
 
@@ -996,6 +1006,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --labels
+    type: string
+    short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster

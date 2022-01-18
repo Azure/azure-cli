@@ -195,7 +195,7 @@ class Profile:
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
         import jwt
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
@@ -361,37 +361,42 @@ class Profile:
             raise CLIError("Please specify only one of subscription and tenant, not both")
 
         account = self.get_subscription(subscription)
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
-            # MSI
+            # managed identity
             if tenant:
-                raise CLIError("Tenant shouldn't be specified for MSI account")
-            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
-            msi_creds.set_token()
-            token_entry = msi_creds.token
-            creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
+                raise CLIError("Tenant shouldn't be specified for managed identity account")
+            from .auth.util import scopes_to_resource
+            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id,
+                                                         scopes_to_resource(scopes))
+            sdk_token = msi_creds.get_token(*scopes)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            # Cloud Shell
+            # Cloud Shell, which is just a system-assigned managed identity.
             if tenant:
                 raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            creds = self._get_token_from_cloud_shell(resource)
+            from .auth.util import scopes_to_resource
+            msi_creds = MsiAccountTypes.msi_auth_factory(MsiAccountTypes.system_assigned, identity_id,
+                                                         scopes_to_resource(scopes))
+            sdk_token = msi_creds.get_token(*scopes)
         else:
             credential = self._create_credential(account, tenant)
-            token = credential.get_token(*scopes)
+            sdk_token = credential.get_token(*scopes)
 
-            import datetime
-            expiresOn = datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
+        # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
+        # WARNING: expiresOn is deprecated and will be removed in future release.
+        import datetime
+        expiresOn = datetime.datetime.fromtimestamp(sdk_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")
 
-            token_entry = {
-                'accessToken': token.token,
-                'expires_on': token.expires_on,
-                'expiresOn': expiresOn
-            }
+        token_entry = {
+            'accessToken': sdk_token.token,
+            'expires_on': sdk_token.expires_on,  # epoch int, like 1605238724
+            'expiresOn': expiresOn  # datetime string, like "2020-11-12 13:50:47.114324"
+        }
 
-            # (tokenType, accessToken, tokenEntry)
-            creds = 'Bearer', token.token, token_entry
+        # (tokenType, accessToken, tokenEntry)
+        creds = 'Bearer', sdk_token.token, token_entry
+
         # (cred, subscription, tenant)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
@@ -628,7 +633,7 @@ class Profile:
                 if not subscriptions:
                     continue
 
-            consolidated = self._normalize_properties(subscription_finder.user_id,
+            consolidated = self._normalize_properties(user_name,
                                                       subscriptions,
                                                       is_service_principal)
             result += consolidated
@@ -695,13 +700,6 @@ class Profile:
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
-    def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
-        auth = MSIAuthenticationWrapper(resource=resource)
-        auth.set_token()
-        token_entry = auth.token
-        return (token_entry['token_type'], token_entry['access_token'], token_entry)
-
 
 class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
@@ -733,8 +731,6 @@ class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
     def __init__(self, cli_ctx):
-
-        self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -866,6 +862,12 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
 
     # Only enable encryption for Windows (for now).
     fallback = sys.platform.startswith('win32')
-    encrypt = cli_ctx.config.getboolean('core', 'token_encryption', fallback=fallback)
 
-    return Identity(*args, encrypt=encrypt, **kwargs)
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
+    # encrypt_token_cache affects both MSAL token cache and service principal entries.
+    encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
+
+    # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
+    use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
+
+    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, **kwargs)

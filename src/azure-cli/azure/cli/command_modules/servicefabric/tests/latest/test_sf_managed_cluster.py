@@ -32,7 +32,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         # 'InvalidParameter - Cluster must have at least one active primary node type'
-        with self.assertRaisesRegexp(HttpResponseError, 'Cluster must have at least one active primary node type'):
+        with self.assertRaisesRegex(HttpResponseError, 'Cluster must have at least one active primary node type'):
             self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n pnt')
 
         self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}',
@@ -41,7 +41,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
@@ -96,7 +96,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-node-type delete -g {rg} -c {cluster_name} -n snt')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-node-type show -g {rg} -c {cluster_name} -n snt')
 
         self.cmd('az sf managed-node-type list -g {rg} -c {cluster_name}',
@@ -105,7 +105,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
@@ -171,7 +171,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
 
         # SystemExit 3 'not found'
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
 

@@ -8,7 +8,7 @@ import time
 
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer

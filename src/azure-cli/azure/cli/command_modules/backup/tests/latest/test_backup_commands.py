@@ -10,8 +10,8 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, KeyVaultPreparer, record_only
-from azure.mgmt.recoveryservicesbackup.models import StorageType
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -71,7 +71,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(location="eastasia")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
     def test_backup_vault(self, resource_group, resource_group_location, vault1, vault2):
@@ -129,6 +129,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             new_storage_model = StorageType.geo_redundant.value
 
         self.kwargs['model'] = new_storage_model
+        self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
+        time.sleep(300)
+        self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
+            self.check('properties.storageModelType', new_storage_model)
+        ])
+
+        new_storage_model = StorageType.zone_redundant.value
+        self.kwargs['model'] = StorageType.zone_redundant.value
         self.cmd('backup vault backup-properties set -n {vault1} -g {rg} --backup-storage-redundancy {model}')
         time.sleep(300)
         self.cmd('backup vault backup-properties show -n {vault1} -g {rg} --query [0]', checks=[
@@ -747,6 +755,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+        # Get Recommended for Archive Recovery Points
+        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
+            self.check("length(@)", 0)
+        ])
+
 
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -1061,8 +1074,3 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.useSystemAssignedIdentity', False),
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
-
-        
-
-
-        

@@ -145,7 +145,12 @@ def normalize_disk_info(image_data_disks=None,
     data_disk_sizes_gb = data_disk_sizes_gb or []
     image_data_disks = image_data_disks or []
 
-    data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+    if data_disk_delete_option:
+        if attach_data_disks:
+            data_disk_delete_option = validate_delete_options(attach_data_disks, data_disk_delete_option)
+        else:
+            if isinstance(data_disk_delete_option, list) and len(data_disk_delete_option) == 1 and len(data_disk_delete_option[0].split('=')) == 1:  # pylint: disable=line-too-long
+                data_disk_delete_option = data_disk_delete_option[0]
     info['os'] = {}
     # update os diff disk settings
     if ephemeral_os_disk:
@@ -210,7 +215,7 @@ def normalize_disk_info(image_data_disks=None,
         }
 
         d = attach_data_disks_copy.pop(0)
-
+        info[i]['name'] = d.split('/')[-1].split('.')[0]
         if is_valid_resource_id(d):
             info[i]['managedDisk'] = {'id': d}
             if data_disk_delete_option:
@@ -218,7 +223,6 @@ def normalize_disk_info(image_data_disks=None,
                     else data_disk_delete_option.get(info[i]['name'], None)
         else:
             info[i]['vhd'] = {'uri': d}
-            info[i]['name'] = d.split('/')[-1].split('.')[0]
             if data_disk_delete_option:
                 info[i]['deleteOption'] = data_disk_delete_option if isinstance(data_disk_delete_option, str) \
                     else data_disk_delete_option.get(info[i]['name'], None)

@@ -1,0 +1,615 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column --label
+        --information-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/informationProtectionPolicies/effective?api-version=2017-08-01-preview
+  response:
+    body:
+      string: "{\"id\":\"/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/informationProtectionPolicies/effective\",\"name\":\"effective\",\"type\":\"Microsoft.Security/InformationProtectionPolicies\",\"properties\":{\"lastModifiedUtc\":\"2018-08-12T09:07:19.9341023Z\",\"version\":\"2.0\",\"labels\":{\"50e58766-ab53-4846-be8a-35e0bb87723e\":{\"displayName\":\"Public\",\"description\":\"\",\"rank\":\"None\",\"order\":100,\"enabled\":true},\"6d21db50-501c-4250-8db3-638960433892\":{\"displayName\":\"General\",\"description\":\"\",\"rank\":\"Low\",\"order\":200,\"enabled\":true},\"05e6eaa1-075a-4fb4-a732-a92215a2444a\":{\"displayName\":\"Confidential\",\"description\":\"\",\"rank\":\"Medium\",\"order\":300,\"enabled\":true},\"bf91e08c-f4f0-478a-b016-25164b2a65ff\":{\"displayName\":\"Confidential
+        - GDPR\",\"description\":\"\",\"rank\":\"Medium\",\"order\":400,\"enabled\":true},\"1bf478cb-3e74-414f-b579-2075823b138e\":{\"displayName\":\"Highly
+        Confidential\",\"description\":\"\",\"rank\":\"High\",\"order\":500,\"enabled\":true},\"674eabcd-dfb9-4261-8ac2-ac66ce366ab7\":{\"displayName\":\"Highly
+        Confidential - GDPR\",\"description\":\"\",\"rank\":\"High\",\"order\":600,\"enabled\":true}},\"informationTypes\":{\"b40ad280-0f6a-6ca8-11ba-2f1a08651fcf\":{\"displayName\":\"Networking\",\"description\":\"Data
+        related to the network domain. Example: IP, port, etc.\",\"order\":100,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"ip\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%[^h]ip%address%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"ip%address%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%mac%address%\",\"custom\":false,\"canBeNumeric\":false}]},\"5c503e21-22c6-81fa-620b-f369b8ec38d1\":{\"displayName\":\"Contact
+        Info\",\"description\":\"Contact data of a person. Example: address, phone,
+        etc.\",\"order\":200,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%email%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%e-mail%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%addr%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%street%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%city%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%phone%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mobile%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%area%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%postal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%zip%\",\"custom\":false,\"canBeNumeric\":true}]},\"c64aba7b-3a3e-95b6-535d-3bc535da5a59\":{\"displayName\":\"Credentials\",\"description\":\"Credential
+        related data. Example: username, password, etc.\",\"order\":300,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%username%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pwd%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%password%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%reset%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pass%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%user%acc%\",\"custom\":false,\"canBeNumeric\":true}]},\"d22fa6e9-5ee4-3bde-4c2b-a409604c4646\":{\"displayName\":\"Credit
+        Card\",\"description\":\"Credit card related data\",\"order\":700,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%credit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ccn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mastercard%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvv%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expy%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%american%express%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%americanexpress%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%americano%espresso%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amex%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%cards%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmcard%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmcards%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%bancaire%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmkaarten%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bancontact%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bankkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%holder%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%type%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cardano%numerico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%bianca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%di%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%d\xE9bito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cirrus%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%blanche%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%bleue%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%de%credit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%de%cr\xE9dit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%di%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carteblanche%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%d\xE9bito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%check%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%chequekaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%hoofdkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cirrus-edc-maestro%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%controlekaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%credit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debet%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debito%automatico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%diners%club%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%discover%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%discover%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%d\xE9bito%autom\xE1tico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%eigent\xFCmername%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%european%debit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%master%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%hoofdkaarten%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%in%viaggio%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%japanese%card%bureau%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%japanse%kaartdienst%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%jcb%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaart%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaartaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaarthouder%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%karte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%karteninhaber%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kartennr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kartennummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkarte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%maestro%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"mc\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mister%cash%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n.%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%nr%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%nr.%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numeri%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%della%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%la%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA.%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scoprono%le%schede%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'assegno%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%della%banca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%di%controllo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%di%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%matrice%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%di%controllo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%di%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%matrici%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scoprono%la%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%plus%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%solo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%supporti%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%supporto%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%switch%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%atm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%atm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjetahabiente%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tipo%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ufficio%giapponese%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%v%pay%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codice%di%verifica%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%electron%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visto%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%identification%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%verification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cardi%la%verifica%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"cid\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seg%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seg%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codice%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%de%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%de%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%de%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%crittogramma%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cryptogram%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cryptogramme%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cv2%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvc2%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d.%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d.%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%de%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%de%kaart%controle%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%geeft%nr%uit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%issue%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%issue%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaartidentificatienummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkartenprufnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkartenpr\xFCfnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kwestieaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%dell'edizione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%securite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%verificacao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%dell'edizione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%identificazione%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheid%nr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%van%veiligheid%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9curit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%autorizzazione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%verifica\xE7\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%perno%il%blocco%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pin%block%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%prufziffer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pr\xFCfziffer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheits%kode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheitscode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheitsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%speldblok%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%van%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidsaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidscode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%verfalldatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ablauf%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%de%expiracao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%de%expira\xE7\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%del%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%di%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%di%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%em%que%expira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%scad%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%date%de%validit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%afloop%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%de%afloop%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%van%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%espira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%espira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%exp%date%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%exp%datum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expiration%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expire%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expires%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expiry%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%fecha%de%expiracion%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%fecha%de%venc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%gultig%bis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%gultigkeitsdatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%g\xFCltig%bis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%g\xFCltigkeitsdatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valable%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%validade%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valido%hasta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valor%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%venc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vencimento%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vencimiento%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%verloopt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vervaldag%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vervaldatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vto%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%v\xE1lido%hasta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true}]},\"8a462631-4130-0a31-9a52-c6a9ca125f92\":{\"displayName\":\"Banking\",\"description\":\"Bank
+        related data. Example: debit, swift, etc.\",\"order\":800,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%iban%code%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%iban%num%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%banking%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%routing%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%savings%acc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%acc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"iban\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%routing%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"aba\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%aba%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bic%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bic%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%nbr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%acc%\",\"custom\":false,\"canBeNumeric\":true}]},\"c44193e1-0e58-4b2a-9001-f7d6e7bc1373\":{\"displayName\":\"Financial\",\"description\":\"Finance
+        related data. Example: account, payment, etc.\",\"order\":900,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%account%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tax%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%paypal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%payment%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%insurance%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pmt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amount%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%compensation%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%currency%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%invoice%\",\"custom\":false,\"canBeNumeric\":true}]},\"9c5b4809-0ccc-0637-6547-91a6f8bb609d\":{\"displayName\":\"Other\",\"description\":\"Any
+        other data which doesn\u2019t fall into any of the above info types\",\"order\":1200,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%security%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%personal%\",\"custom\":false,\"canBeNumeric\":true}]},\"57845286-7598-22f5-9659-15b24aeb125e\":{\"displayName\":\"Name\",\"description\":\"Data
+        related to a person\u2019s first and last names\",\"order\":400,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%last%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%first%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%surname%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%maiden%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%full%name%\",\"custom\":false,\"canBeNumeric\":false}]},\"6f5a11a7-08b1-19c3-59e5-8c89cf4f8444\":{\"displayName\":\"National
+        ID\",\"description\":\"Data related to the ID of a person. Example: passport,
+        diver, etc.\",\"order\":500,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%passport%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Pasaporte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tax%id%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"itin\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%driver%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identificaci\xF3n%Fiscal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%id%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%national%id%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuehrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%F\xFChrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuhrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuehrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%le%num\xE9ro%d'identification%nationale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identit\xE9%nationale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%reisepass%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%passeport%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Personalausweis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identifizierungsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Ausweis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identifikation%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%patente%di%guida%\",\"custom\":false,\"canBeNumeric\":true}]},\"d936ec2c-04a4-9cf7-44c2-378a96456c61\":{\"displayName\":\"SSN\",\"description\":\"Data
+        related to the Social Security Number of a person\",\"order\":600,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"ssn\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ss_num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ssnum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"sin\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%employeessn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%social%security%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%soc%sec%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"ssid\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%insee%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%securit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%securite%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9curit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%le%code%de%la%s\xE9curit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%d'assurance%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9cu%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%code%s\xE9cu%\",\"custom\":false,\"canBeNumeric\":true}]},\"6e2c5b18-97cf-3073-27ab-f12f87493da7\":{\"displayName\":\"Health\",\"description\":\"Health
+        related data. Example: patient, clinic, etc.\",\"order\":1000,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%patient%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%clinic%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%medical%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%treatment%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%healthcondition%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%medication%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%health%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%prescription%\",\"custom\":false,\"canBeNumeric\":true}]},\"3de7cc52-710d-4e96-7e20-4d5188d2590c\":{\"displayName\":\"Date
+        Of Birth\",\"description\":\"Data related to a person\u2019s date of birth\",\"order\":1100,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%birthday%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%date%of%birth%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%birth%date%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"dob\",\"custom\":false,\"canBeNumeric\":true}]}}}}"
+    headers:
+      api-supported-versions:
+      - '1.0'
+      cache-control:
+      - no-cache
+      content-length:
+      - '27388'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"labelName": "Confidential", "labelId": "05e6eaa1-075a-4fb4-a732-a92215a2444a",
+      "informationType": "Contact Info", "informationTypeId": "5c503e21-22c6-81fa-620b-f369b8ec38d1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '192'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column --label
+        --information-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current?api-version=2021-06-01
+  response:
+    body:
+      string: '{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current","name":"current","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '742'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current?api-version=2021-06-01
+  response:
+    body:
+      string: '{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current","name":"current","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '742'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/currentSensitivityLabels?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current","name":"current","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '754'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column --label
+        --information-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-security/2.0.0b1 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/informationProtectionPolicies/effective?api-version=2017-08-01-preview
+  response:
+    body:
+      string: "{\"id\":\"/providers/Microsoft.Management/managementGroups/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/informationProtectionPolicies/effective\",\"name\":\"effective\",\"type\":\"Microsoft.Security/InformationProtectionPolicies\",\"properties\":{\"lastModifiedUtc\":\"2018-08-12T09:07:19.9341023Z\",\"version\":\"2.0\",\"labels\":{\"50e58766-ab53-4846-be8a-35e0bb87723e\":{\"displayName\":\"Public\",\"description\":\"\",\"rank\":\"None\",\"order\":100,\"enabled\":true},\"6d21db50-501c-4250-8db3-638960433892\":{\"displayName\":\"General\",\"description\":\"\",\"rank\":\"Low\",\"order\":200,\"enabled\":true},\"05e6eaa1-075a-4fb4-a732-a92215a2444a\":{\"displayName\":\"Confidential\",\"description\":\"\",\"rank\":\"Medium\",\"order\":300,\"enabled\":true},\"bf91e08c-f4f0-478a-b016-25164b2a65ff\":{\"displayName\":\"Confidential
+        - GDPR\",\"description\":\"\",\"rank\":\"Medium\",\"order\":400,\"enabled\":true},\"1bf478cb-3e74-414f-b579-2075823b138e\":{\"displayName\":\"Highly
+        Confidential\",\"description\":\"\",\"rank\":\"High\",\"order\":500,\"enabled\":true},\"674eabcd-dfb9-4261-8ac2-ac66ce366ab7\":{\"displayName\":\"Highly
+        Confidential - GDPR\",\"description\":\"\",\"rank\":\"High\",\"order\":600,\"enabled\":true}},\"informationTypes\":{\"b40ad280-0f6a-6ca8-11ba-2f1a08651fcf\":{\"displayName\":\"Networking\",\"description\":\"Data
+        related to the network domain. Example: IP, port, etc.\",\"order\":100,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"ip\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%[^h]ip%address%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"ip%address%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%mac%address%\",\"custom\":false,\"canBeNumeric\":false}]},\"5c503e21-22c6-81fa-620b-f369b8ec38d1\":{\"displayName\":\"Contact
+        Info\",\"description\":\"Contact data of a person. Example: address, phone,
+        etc.\",\"order\":200,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%email%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%e-mail%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%addr%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%street%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%city%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%phone%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mobile%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%area%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%postal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%zip%\",\"custom\":false,\"canBeNumeric\":true}]},\"c64aba7b-3a3e-95b6-535d-3bc535da5a59\":{\"displayName\":\"Credentials\",\"description\":\"Credential
+        related data. Example: username, password, etc.\",\"order\":300,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%username%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pwd%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%password%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%reset%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pass%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%user%acc%\",\"custom\":false,\"canBeNumeric\":true}]},\"d22fa6e9-5ee4-3bde-4c2b-a409604c4646\":{\"displayName\":\"Credit
+        Card\",\"description\":\"Credit card related data\",\"order\":700,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%credit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ccn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mastercard%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvv%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expy%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%american%express%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%americanexpress%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%americano%espresso%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amex%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%cards%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atm%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmcard%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmcards%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%bancaire%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%atmkaarten%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bancontact%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bankkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%holder%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%type%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cardano%numerico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%bianca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carta%di%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cartao%de%d\xE9bito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cirrus%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%blanche%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%bleue%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%de%credit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%de%cr\xE9dit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carte%di%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%carteblanche%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cart\xE3o%de%d\xE9bito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%check%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%chequekaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%hoofdkaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cirrus-edc-maestro%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%controlekaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%credit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debet%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debito%automatico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%diners%club%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%discover%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%discover%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%d\xE9bito%autom\xE1tico%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%eigent\xFCmername%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%european%debit%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%master%card%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%hoofdkaarten%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%in%viaggio%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%japanese%card%bureau%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%japanse%kaartdienst%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%jcb%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaart%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaart%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaartaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaarthouder%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%karte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%karteninhaber%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kartennr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kartennummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkarte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%maestro%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"mc\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%mister%cash%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n.%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%nr%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%nr.%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numeri%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%della%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%carta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%la%carte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA.%do%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scoprono%le%schede%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%cart\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%tarjeta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%do%cartao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'assegno%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%della%banca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%di%controllo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%di%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scheda%matrice%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%dell'atmosfera%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%di%controllo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%di%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%schede%matrici%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scoprono%la%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%plus%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%solo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%supporti%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%supporto%di%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%switch%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%atm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%atm%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%credito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%de%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%debito%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjetahabiente%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tipo%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ufficio%giapponese%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%v%pay%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codice%di%verifica%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visa%electron%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%visto%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%identification%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%card%verification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cardi%la%verifica%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"cid\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seg%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seg%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cod.%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codice%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%de%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%de%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%codigo%de%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%crittogramma%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cryptogram%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cryptogramme%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cv2%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvc2%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%cvn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d.%seguranca%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3d.%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%c\xF3digo%de%seguran\xE7a%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%de%kaart%controle%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%geeft%nr%uit%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%issue%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%issue%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kaartidentificatienummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkartenprufnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kreditkartenpr\xFCfnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%kwestieaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%dell'edizione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%di%sicurezza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%securite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%de%verificacao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%dell'edizione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%di%identificazione%della%scheda%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheid%nr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%van%veiligheid%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9curit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xBA%autorizzazione%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%n\xFAmero%de%verifica\xE7\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%perno%il%blocco%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pin%block%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%prufziffer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pr\xFCfziffer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%security%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheits%kode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheitscode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%sicherheitsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%speldblok%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%van%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidsaantal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidscode%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%veiligheidsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%verfalldatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ablauf%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%de%expiracao%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%de%expira\xE7\xE3o%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%del%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%di%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%di%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%em%que%expira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%scad%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%data%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%date%de%validit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%afloop%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%de%afloop%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%datum%van%exp%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%espira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%espira%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%exp%date%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%exp%datum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expiration%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expire%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expires%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%expiry%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%fecha%de%expiracion%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%fecha%de%venc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%gultig%bis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%gultigkeitsdatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%g\xFCltig%bis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%g\xFCltigkeitsdatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%scadenza%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valable%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%validade%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valido%hasta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%valor%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%venc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vencimento%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vencimiento%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%verloopt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vervaldag%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vervaldatum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%vto%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%v\xE1lido%hasta%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tarjeta%cr\xE9dito%\",\"custom\":false,\"canBeNumeric\":true}]},\"8a462631-4130-0a31-9a52-c6a9ca125f92\":{\"displayName\":\"Banking\",\"description\":\"Bank
+        related data. Example: debit, swift, etc.\",\"order\":800,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%iban%code%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%iban%num%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%banking%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%routing%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%savings%acc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%debit%acc%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"iban\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%routing%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"aba\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%aba%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%routing%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%swift%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bic%code%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bic%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%nbr%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%acct%no%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%bank%acc%\",\"custom\":false,\"canBeNumeric\":true}]},\"c44193e1-0e58-4b2a-9001-f7d6e7bc1373\":{\"displayName\":\"Financial\",\"description\":\"Finance
+        related data. Example: account, payment, etc.\",\"order\":900,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%account%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tax%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%paypal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%payment%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%insurance%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%pmt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amount%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%amt%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%compensation%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%currency%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%invoice%\",\"custom\":false,\"canBeNumeric\":true}]},\"9c5b4809-0ccc-0637-6547-91a6f8bb609d\":{\"displayName\":\"Other\",\"description\":\"Any
+        other data which doesn\u2019t fall into any of the above info types\",\"order\":1200,\"recommendedLabelId\":\"05e6eaa1-075a-4fb4-a732-a92215a2444a\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%security%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%personal%\",\"custom\":false,\"canBeNumeric\":true}]},\"57845286-7598-22f5-9659-15b24aeb125e\":{\"displayName\":\"Name\",\"description\":\"Data
+        related to a person\u2019s first and last names\",\"order\":400,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%last%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%first%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%surname%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%maiden%name%\",\"custom\":false,\"canBeNumeric\":false},{\"pattern\":\"%full%name%\",\"custom\":false,\"canBeNumeric\":false}]},\"6f5a11a7-08b1-19c3-59e5-8c89cf4f8444\":{\"displayName\":\"National
+        ID\",\"description\":\"Data related to the ID of a person. Example: passport,
+        diver, etc.\",\"order\":500,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%passport%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Pasaporte%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%tax%id%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"itin\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%driver%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identificaci\xF3n%Fiscal%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identification%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%id%number%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%national%id%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuehrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%F\xFChrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuhrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Fuehrerschein%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%identit\xE9%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%numero%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%no.%identite%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%le%num\xE9ro%d'identification%nationale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%identit\xE9%nationale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%reisepass%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%passeport%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Personalausweis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identifizierungsnummer%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Ausweis%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%Identifikation%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%patente%di%guida%\",\"custom\":false,\"canBeNumeric\":true}]},\"d936ec2c-04a4-9cf7-44c2-378a96456c61\":{\"displayName\":\"SSN\",\"description\":\"Data
+        related to the Social Security Number of a person\",\"order\":600,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"ssn\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ss_num%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%ssnum%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"sin\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%employeessn%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%social%security%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%soc%sec%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"ssid\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%insee%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%securit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%securite%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9curit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%le%code%de%la%s\xE9curit\xE9%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%d'assurance%sociale%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%num\xE9ro%de%s\xE9cu%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%code%s\xE9cu%\",\"custom\":false,\"canBeNumeric\":true}]},\"6e2c5b18-97cf-3073-27ab-f12f87493da7\":{\"displayName\":\"Health\",\"description\":\"Health
+        related data. Example: patient, clinic, etc.\",\"order\":1000,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%patient%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%clinic%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%medical%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%treatment%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%healthcondition%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%medication%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%health%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%prescription%\",\"custom\":false,\"canBeNumeric\":true}]},\"3de7cc52-710d-4e96-7e20-4d5188d2590c\":{\"displayName\":\"Date
+        Of Birth\",\"description\":\"Data related to a person\u2019s date of birth\",\"order\":1100,\"recommendedLabelId\":\"bf91e08c-f4f0-478a-b016-25164b2a65ff\",\"enabled\":true,\"keywords\":[{\"pattern\":\"%birthday%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%date%of%birth%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"%birth%date%\",\"custom\":false,\"canBeNumeric\":true},{\"pattern\":\"dob\",\"custom\":false,\"canBeNumeric\":true}]}}}}"
+    headers:
+      api-supported-versions:
+      - '1.0'
+      cache-control:
+      - no-cache
+      content-length:
+      - '27388'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column --label
+        --information-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current?api-version=2021-06-01
+  response:
+    body:
+      string: '{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current","name":"current","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '742'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"labelName": "Confidential", "labelId": "05e6eaa1-075a-4fb4-a732-a92215a2444a",
+      "informationType": "Contact Info", "informationTypeId": "5c503e21-22c6-81fa-620b-f369b8ec38d1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '192'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column --label
+        --information-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current?api-version=2021-06-01
+  response:
+    body:
+      string: '{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current","name":"current","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '742'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:35:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/current?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 12:35:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification recommendation enable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/recommended/enable?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 12:35:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification recommendation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/recommendedSensitivityLabels?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"managedBy":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool","properties":{"schemaName":"dbo","tableName":"Persons","columnName":"City","labelName":"Confidential","labelId":"05e6eaa1-075a-4fb4-a732-a92215a2444a","informationType":"Contact
+        Info","informationTypeId":"5c503e21-22c6-81fa-620b-f369b8ec38d1","isDisabled":false,"rank":"Medium"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/recommended","name":"recommended","type":"Microsoft.Synapse/workspaces/sqlPools/sensitivityLabels"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:36:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification recommendation disable
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name --workspace-name --resource-group --schema --table --column
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/schemas/dbo/tables/Persons/columns/City/sensitivityLabels/recommended/disable?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 04 Nov 2021 12:36:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool classification recommendation list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgtesting/providers/Microsoft.Synapse/workspaces/testingsynapseworkspace/sqlPools/testingsqlpool/recommendedSensitivityLabels?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 04 Nov 2021 12:36:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

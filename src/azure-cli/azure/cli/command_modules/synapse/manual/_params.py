@@ -165,6 +165,9 @@ def load_arguments(self, _):
         # Component Version
         c.argument('spark_version', arg_group='Component Version', help='The supported Spark version is 2.4 now.')
 
+        # Spark config file
+        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse spark pool update') as c:
@@ -196,6 +199,9 @@ def load_arguments(self, _):
                    help='Package action must be specified when you add or remove a workspace package from a Apache Spark pool.')
         c.argument('package', arg_group='Custom Libraries', nargs='+', help='List of workspace packages name.')
 
+        # Spark config file
+        c.argument('spark_config_file_path', arg_group='Environment Configuration', help='Absolute path of Spark pool properties configuration file.')
+
     # synapse sql pool
     with self.argument_context('synapse sql pool') as c:
         c.argument('workspace_name', id_part='name', help='The workspace name.')
@@ -215,6 +221,11 @@ def load_arguments(self, _):
         c.argument('source_database_id', help='The source database id.')
         c.argument('recoverable_database_id', help='The recoverable database id.')
         c.argument('tags', arg_type=tags_type)
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')
@@ -224,6 +235,12 @@ def load_arguments(self, _):
         c.argument('performance_level', help='The performance level.')
         c.argument('destination_name', options_list=['--dest-name', '--destination-name'],
                    help='Name of the sql pool that will be created as the restore destination.')
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('tags', arg_type=tags_type)
 
         restore_point_arg_group = 'Restore Point'
         c.argument('restore_point_in_time',
@@ -311,19 +328,9 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag())
 
     # synapse sql pool audit-policy
-    with self.argument_context('synapse sql pool audit-policy') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
-                   help='Name of the blob auditing policy name.')
-
-    with self.argument_context('synapse sql pool audit-policy show') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
-                   help='Name of the blob auditing policy name.')
-        c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
-
-    with self.argument_context('synapse sql pool audit-policy update') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
-                   help='Name of the blob auditing policy name.')
-        c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
+    for scope in ['show', 'update']:
+        with self.argument_context('synapse sql pool audit-policy ' + scope) as c:
+            c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
 
     for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
         with self.argument_context(scope + ' update') as c:
@@ -391,8 +398,6 @@ def load_arguments(self, _):
                        )
 
     with self.argument_context('synapse sql audit-policy update') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
-                   help='Name of the blob auditing policy name.')
         c.argument('queue_delay_milliseconds', type=int,
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
@@ -472,8 +477,6 @@ def load_arguments(self, _):
                    )
 
     with self.argument_context('synapse sql audit-policy') as c:
-        c.argument('blob_auditing_policy_name', options_list=['--blob-auditing-policy-name', '-b'],
-                   help='Name of the blob auditing policy name.')
         c.argument('workspace_name', help='The workspace name.')
 
     with self.argument_context('synapse sql ad-admin') as c:
@@ -834,6 +837,8 @@ def load_arguments(self, _):
                        help='Number of core and memory to be used for executors allocated in the specified Spark pool for the job.')
             c.argument('executor_count',
                        help='Number of executors to be allocated in the specified Spark pool for the job.')
+            c.argument('folder_path',
+                       help='The folder that this notebook is in. If not specified, this notebook will appear at the root level. Eg: folder/subfolder1')
 
     with self.argument_context('synapse notebook list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
@@ -945,8 +950,14 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     with self.argument_context('synapse managed-private-endpoints create') as c:
-        c.argument('private_Link_Resource_Id', options_list=['--resource-id'], help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
-        c.argument('group_Id', help='The groupId to which the managed private endpoint is created')
+        c.argument('private_Link_Resource_Id',
+                   options_list=['--resource-id'],
+                   help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('group_Id',
+                   help='The groupId to which the managed private endpoint is created',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts spark job definition
     with self.argument_context('synapse spark-job-definition list') as c:
@@ -962,9 +973,34 @@ def load_arguments(self, _):
             c.argument('workspace_name', arg_type=workspace_name_arg_type)
             c.argument('spark_job_definition_name', options_list=['--name', '-n'], help='The spark job definition name')
             c.argument('definition_file', arg_type=definition_file_arg_type)
+            c.argument('folder_path',
+                       help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
 
+    # synapse artifacts sql script
+    for scope in ['create', 'show', 'wait', 'delete', 'export', 'import']:
+        with self.argument_context('synapse sql-script ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('sql_script_name', options_list=['--name', '-n'], help='The SQL script name')
 
-# kusto pool
+    with self.argument_context('synapse sql-script list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    for scope in ['create', 'import']:
+        with self.argument_context('synapse sql-script ' + scope) as c:
+            c.argument('definition_file', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(), help='The SQL query file path')
+            c.argument('result_limit', arg_type=get_enum_type([5000, -1]), help="The SQL query results limit. Default is 5000. '-1' is no limit.")
+            c.argument('folder_name', help='The folder that this SQL script is in. If not specified, this SQL script will appear at the root level. Eg: folder/subfolder1')
+            c.argument('description', help='The SQL script description')
+            c.argument('sql_pool_name', help='The SQL pool name')
+            c.argument('sql_database_name', help='The SQL database name')
+            c.argument('additional_properties', help='The SQL script additional properties')
+
+    with self.argument_context('synapse sql-script export') as c:
+        c.argument('output_folder', help='The SQL script export path')
+        c.argument('folder_path',
+                   help='The folder that this spark job definition is in. If not specified, it will appear at the root level. Eg: folder/subfolder1')
+
+    # kusto pool
     with self.argument_context('synapse kusto pool create') as c:
         c.argument('workspace_name', type=str, help='The name of the workspace')
         c.argument('resource_group_name', resource_group_name_type)
@@ -1039,3 +1075,26 @@ def load_arguments(self, _):
                    options_list=['--attached-database-configuration-name', '--adcn'],
                    type=str, help='Resource name of the attached database '
                    'configuration in the follower cluster.')
+
+    for scope in ['import', 'create']:
+        with self.argument_context('synapse kql-script ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('kusto_pool_name', type=str, help='The name of the Kusto pool.')
+            c.argument('kusto_database_name', type=str, help='The name of the Kusto database.')
+            c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+            c.argument('definition_file', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                       help='The KQL query file path')
+
+    for scope in ['show', 'wait', 'delete']:
+        with self.argument_context('synapse kql-script ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('script_name', arg_type=name_type,
+                       help='The name of the KQL script.')
+
+    with self.argument_context('synapse kql-script list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+
+    with self.argument_context('synapse kql-script export') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+        c.argument('output_folder', type=str, help='The name of the output folder')
+        c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')

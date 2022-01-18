@@ -13,8 +13,8 @@ from datetime import datetime, timedelta
 from dateutil import tz
 from ipaddress import ip_network
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure_devtools.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk import ResourceGroupPreparer, KeyVaultPreparer, ScenarioTest
 
 from knack.util import CLIError
@@ -319,10 +319,8 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         ]
 
         list_deleted_checks = [
-            self.check('length(@)', 1),
-            self.check('[0].properties.location', '{loc}'),
-            self.check('[0].name', '{hsm_name}'),
-            self.exists('[0].properties.deletionDate')
+            self.check('length([?name==\'{hsm_name}\'])', 1),
+            self.exists('[?name==\'{hsm_name}\'&&properties.location==\'{loc}\'&&properties.deletionDate]'),
         ]
 
         self.cmd('group create -g {rg} -l {loc}'),
@@ -331,7 +329,11 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show --hsm-name {hsm_name}', checks=show_checks)
         self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=show_checks)
 
-        self.cmd('keyvault list --resource-type hsm', checks=list_checks)
+        self.cmd('keyvault update-hsm --hsm-name {hsm_name} --bypass None', checks=[
+            self.check('properties.networkAcls.bypass', 'None')
+        ])
+
+        self.cmd(r"keyvault list --resource-type hsm --query [?name==\'{hsm_name}\']", checks=list_checks)
         self.cmd('keyvault list --resource-type hsm -g {rg}', checks=list_checks)
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
@@ -373,7 +375,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         ]).get_output_in_json()
 
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        with self.assertRaisesRegexp(InvalidArgumentValueError, 'already exist'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'already exist'):
             self.cmd('keyvault create -g {rg} -n {kv} -l {loc}')
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[
@@ -1267,6 +1269,8 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --hsm-name {hsm_name} -n key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
+    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
+    @record_only()
     def test_keyvault_hsm_key_random(self):
         self.kwargs.update({
             'hsm_name': TEST_HSM_NAME,
@@ -1278,6 +1282,32 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
 
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
+
+    # Since the MHSM has to be activated manually so we use fixed hsm resource and mark the test as record_only
+    @record_only()
+    def test_keyvault_hsm_key_encrypt_AES(self):
+        self.kwargs.update({
+            'hsm_name': TEST_HSM_NAME,
+            'hsm_url': TEST_HSM_URL,
+            'key': self.create_random_name('oct256key-', 24)
+        })
+
+        self.cmd('keyvault key create --kty oct-HSM --size 256 -n {key} --hsm-name {hsm_name} --ops encrypt decrypt')
+
+        self.kwargs['plaintext_value'] = 'this is plaintext'
+        self.kwargs['base64_value'] = 'dGhpcyBpcyBwbGFpbnRleHQ='
+        self.kwargs['aad'] = '101112131415161718191a1b1c1d1e1f'
+        encryption_result1 = self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a A256GCM --value "{plaintext_value}" --data-type plaintext --aad {aad}').get_output_in_json()
+        encryption_result2 = self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a A256GCM --value "{base64_value}" --data-type base64 --aad {aad}').get_output_in_json()
+        self.cmd('keyvault key decrypt -n {} --hsm-name {} -a A256GCM --value "{}" --data-type plaintext --iv {} --tag {} --aad {}'
+                 .format(self.kwargs['key'], self.kwargs['hsm_name'], encryption_result1['result'], encryption_result1['iv'], encryption_result1['tag'], encryption_result1['aad']),
+                 checks=self.check('result', '{plaintext_value}'))
+        self.cmd('keyvault key decrypt -n {} --hsm-name {} -a A256GCM --value "{}" --data-type base64 --iv {} --tag {} --aad {}'
+                 .format(self.kwargs['key'], self.kwargs['hsm_name'], encryption_result2['result'], encryption_result2['iv'], encryption_result2['tag'], encryption_result2['aad']),
+                 checks=self.check('result', '{base64_value}'))
+
+        self.cmd('keyvault key delete -n {key} --hsm-name {hsm_name}')
+        self.cmd('keyvault key purge -n {key} --hsm-name {hsm_name}')
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
@@ -1720,6 +1750,43 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
         self._test_download_secret()
+
+
+class KeyVaultCertificateRestoreScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_soft_delete_')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-')
+    def test_keyvault_certificate_soft_delete(self, resource_group, key_vault):
+        self.kwargs.update({
+            'loc': 'eastus',
+            'policy_path' : os.path.join(TEST_DIR, 'policy.json')
+        })
+        self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
+
+        self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"', checks=[
+            self.check('status', 'completed'),
+            self.check('name', 'cert1')
+        ])
+        data = self.cmd('keyvault certificate delete --vault-name {kv} -n cert1').get_output_in_json()
+        self.kwargs['cert_id'] = data['id']
+        self.kwargs['cert_recovery_id'] = data['recoveryId']
+
+        max_timeout = 100
+        time_counter = 0
+        while time_counter <= max_timeout:
+            try:
+                # show deleted
+                self.cmd('keyvault certificate list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
+                self.cmd('keyvault certificate list-deleted --vault-name {kv} --maxresults 10',
+                         checks=self.check('length(@)', 1))
+                self.cmd('keyvault certificate show-deleted --id {secret_recovery_id}',
+                         checks=self.check('id', '{secret_id}'))
+                self.cmd('keyvault certificate show-deleted --vault-name {kv} -n {sec}',
+                         checks=self.check('id', '{secret_id}'))
+            except:  # pylint: disable=bare-except
+                time.sleep(10)
+                time_counter += 10
+            else:
+                break
 
 
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
@@ -2177,6 +2244,10 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
                  checks=self.check('attributes.enabled', True))
         self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
                  checks=self.check('attributes.enabled', True))
+
+        # test key get-policy-template
+        self.cmd('keyvault key get-policy-template',
+                 checks=self.check('length(@)', 2))
 
         self.kwargs.update({
             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
