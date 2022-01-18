@@ -4861,6 +4861,14 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {public_ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+
+        # test vnet-gateway revoked-cert create
+        # self.cmd('network vnet-gateway update -g {rg} -n {vg} --address-prefixes 40.1.0.0/24')
+        self.cmd('network vnet-gateway revoked-cert create -g {rg} -n MyCer --gateway-name {gateway} --thumbprint e806da0b7fe24f47e76fa269dc4ed76dac4b39d0')
+
+        # test vnet-gateway revoked-cert delete
+        self.cmd('network vnet-gateway revoked-cert delete -g {rg} -n MyCer --gateway-name {gateway}')
+
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
         output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
