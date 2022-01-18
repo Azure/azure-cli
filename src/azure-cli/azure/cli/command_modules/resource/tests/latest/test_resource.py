@@ -3938,6 +3938,25 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+    def test_bicep_build_decompile(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
+        build_path = os.path.join(curr_dir, 'test.json').replace('\\', '\\\\')
+        decompile_path = os.path.join(curr_dir, 'test.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'tf': tf,
+            'build_path': build_path,
+            'decompile_path': decompile_path
+        })
+
+        self.cmd('az bicep build -f {tf} --outfile {build_path}')
+        self.cmd('az bicep decompile -f {build_path}')
+
+        if os.path.exists(build_path):
+            os.remove(build_path)
+        if os.path.exists(decompile_path):
+            os.remove(decompile_path)
+
 
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
