@@ -6,7 +6,6 @@
 import threading
 import time
 import ast
-from typing import Protocol
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -1041,7 +1040,7 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, linux=False, windows=False):
+def list_runtimes(cmd, linux=False, windows=False, yolo=None):
     if not linux and not windows:
         raise ArgumentUsageError("Use one or both of the --linux/--windows options")
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
@@ -2734,9 +2733,35 @@ class _StackRuntimeHelper:
     def get_site_config_setter(cls, runtime, linux=False):
         if linux:
             return cls.update_site_config
-        else:
-            return (cls.update_site_appsettings if 'node' in
+        return (cls.update_site_appsettings if 'node' in
                     runtime['displayName'] else cls.update_site_config)
+
+    # assumes non-java
+    def get_default_version(self, lang, linux=False):
+        lang = lang.upper()
+        os = "windows" if not linux else "linux"
+
+        for s in self.stacks[os]:
+            l, v, *_ = s["displayName"].upper().split("|")
+            if l == lang:
+                return v
+
+        raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
+
+    # assumes non-java
+    def get_version_list(self, lang, linux=False):
+        lang = lang.upper()
+        os = "windows" if not linux else "linux"
+
+        versions = []
+
+        for s in self.stacks[os]:
+            l, v, *_ = s["displayName"].upper().split("|")
+            if l == lang:
+                versions.append(v)
+
+        return versions
+
 
     @property
     def stacks(self):
@@ -2777,8 +2802,10 @@ class _StackRuntimeHelper:
     # format a (non-java) windows runtime display text
     @classmethod
     def _format_windows_display_text(cls, display_text):
+        import re
         t = display_text.upper()
         t = t.replace(".NET CORE", "DOTNETCORE").replace("ASP.NET", "ASPNET").replace(".NET", "DOTNET")
+        t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
 
     @classmethod
@@ -3947,9 +3974,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         detected_version = '-'
     else:
         # detect the version
-        _lang_details = get_lang_from_content(src_dir, html)
+        _lang_details = get_lang_from_content(src_dir, html, is_linux=_is_linux)
         language = _lang_details.get('language')
-        _data = get_runtime_version_details(_lang_details.get('file_loc'), language)
+        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, _is_linux)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
 

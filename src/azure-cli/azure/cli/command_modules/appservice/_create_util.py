@@ -74,31 +74,38 @@ def zip_contents_from_dir(dirPath, lang):
     return zip_file_path
 
 
-def get_runtime_version_details(file_path, lang_name):
+def get_runtime_version_details(file_path, lang_name, is_linux=False):
+    from .custom import _StackRuntimeHelper
+    stacks = _StackRuntimeHelper()
+
     version_detected = None
     version_to_create = None
+
+    versions = stacks.get_version_list(lang_name, is_linux)
+    default_version = stacks.get_default_version(lang_name, is_linux)
+
     if lang_name.lower() == DOTNET_RUNTIME_NAME:
-        version_detected = parse_dotnet_version(file_path, DOTNET_VERSION_DEFAULT)
-        version_to_create = detect_dotnet_version_tocreate(version_detected, DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS)
+        version_detected = parse_dotnet_version(file_path, default_version)
+        version_to_create = detect_dotnet_version_tocreate(version_detected, default_version, versions)
     elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
         version_to_create = detect_netcore_version_tocreate(version_detected)
     elif lang_name.lower() == ASPDOTNET_RUNTIME_NAME:
         # method returns list in DESC, pick the first
-        version_detected = parse_dotnet_version(file_path, ASPDOTNET_VERSION_DEFAULT)
+        version_detected = parse_dotnet_version(file_path, default_version)
         version_to_create = detect_dotnet_version_tocreate(version_detected,
-                                                           ASPDOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS)
+                                                           default_version, versions)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
         if file_path == '':
             version_detected = "-"
-            version_to_create = NODE_VERSION_DEFAULT
+            version_to_create = default_version
         else:
             version_detected = parse_node_version(file_path)[0]
             version_to_create = detect_node_version_tocreate(version_detected)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
         version_detected = "-"
-        version_to_create = PYTHON_VERSION_DEFAULT
+        version_to_create = default_version
     elif lang_name.lower() == STATIC_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = "-"
@@ -137,7 +144,7 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 
 # pylint:disable=unexpected-keyword-arg
-def get_lang_from_content(src_path, html=False):
+def get_lang_from_content(src_path, html=False, is_linux=False):
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -178,7 +185,7 @@ def get_lang_from_content(src_path, html=False):
         runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netcore_file:
-        runtime_lang = detect_dotnet_lang(package_netcore_file)
+        runtime_lang = detect_dotnet_lang(package_netcore_file, is_linux=is_linux)
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
@@ -189,9 +196,13 @@ def get_lang_from_content(src_path, html=False):
     return runtime_details_dict
 
 
-def detect_dotnet_lang(csproj_path):
+def detect_dotnet_lang(csproj_path, is_linux=False):
     import xml.etree.ElementTree as ET
     import re
+
+    if is_linux:
+        return NETCORE_RUNTIME_NAME
+
     parsed_file = ET.parse(csproj_path)
     root = parsed_file.getroot()
     version_lang = ''

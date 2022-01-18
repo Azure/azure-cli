@@ -166,7 +166,8 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
+        c.argument('linux', options_list=['--linux', '-l'], action='store_true', help='list runtime stacks for linux based web apps')
+        c.argument('windows', options_list=['--windows', '-w'], action='store_true', help='list runtime stacks for windows based web apps')
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

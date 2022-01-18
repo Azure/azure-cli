@@ -46,7 +46,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -64,7 +64,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('linuxFxVersion', 'NODE|16-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -510,7 +510,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -570,17 +570,17 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --runtime "PYTHON|3.6" --sku S1 --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --runtime "PYTHON|3.7" --sku S1 --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'PYTHON|3.6')
+        self.assertEqual(result['runtime_version'], 'PYTHON|3.7')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --runtime "PYTHON|3.6" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --runtime "PYTHON|3.7" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # Verify app is created
@@ -637,17 +637,17 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10-lts" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10-lts')
+        self.assertEqual(result['runtime_version'], 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # Verify app is created
@@ -747,17 +747,17 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # Verify app is created
@@ -772,7 +772,7 @@ class WebAppUpE2ETests(ScenarioTest):
         from azure.cli.core.util import CLIError
         # changing existing linux app to windows should fail gracefully
         with self.assertRaises(CLIError):
-            self.cmd('webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan))
+            self.cmd('webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|12LTS" --sku "S1"'.format(webapp_name, resource_group, plan))
 
         # cleanup
         # switch back the working dir
@@ -803,17 +803,17 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|10.14" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|12LTS" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|12LTS')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full E2E operation works
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|12LTS" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # Verify app is created
@@ -828,7 +828,7 @@ class WebAppUpE2ETests(ScenarioTest):
         from azure.cli.core.util import CLIError
         # changing existing linux app to windows should fail gracefully
         with self.assertRaises(CLIError):
-            self.cmd('webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan))
+            self.cmd('webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-LTS" --sku "S1"'.format(webapp_name, resource_group, plan))
 
         # cleanup
         # switch back the working dir
@@ -860,17 +860,17 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-LTS" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-LTS" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # Verify app is created
@@ -885,24 +885,24 @@ class WebAppUpE2ETests(ScenarioTest):
         # test changing runtime to newer version
         time.sleep(30)
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|16-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # verify newer version
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|12-lts"),
+            JMESPathCheck('linuxFxVersion', "NODE|16-lts"),
             JMESPathCheck('tags.cli', 'None')
         ])
 
         # test changing runtime to older version
         time.sleep(30)
         full_result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertEqual(result['name'], full_result['name'])
 
         # verify older version
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|10.14"),
+            JMESPathCheck('linuxFxVersion', "NODE|12-lts"),
             JMESPathCheck('tags.cli', 'None')
         ])
 
@@ -937,7 +937,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertEqual(result['sku'].lower(), 'premiumv2')
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'], 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -953,7 +953,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('linuxFxVersion', 'NODE|16-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -980,11 +980,11 @@ class WebAppUpE2ETests(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_linux_windows_sharing_resource_group(self, resource_group):
-        linux_plan = self.create_random_name('up-pythonplan-linux', 24)
-        linux_webapp_name = self.create_random_name('up-pythonapp-linux', 24)
-        windows_plan = self.create_random_name('up-pythonplan-windows', 26)
-        windows_webapp_name = self.create_random_name('up-pythonapp-windows', 26)
-        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+        linux_plan = self.create_random_name('plan-linux', 24)
+        linux_webapp_name = self.create_random_name('app-linux', 24)
+        windows_plan = self.create_random_name('plan-windows', 26)
+        windows_webapp_name = self.create_random_name('app-windows', 26)
+        zip_file_name = os.path.join(TEST_DIR, 'node-Express-up.zip')
 
         # create a temp directory and unzip the code to this folder
         import zipfile
@@ -995,7 +995,7 @@ class WebAppUpE2ETests(ScenarioTest):
         current_working_dir = os.getcwd()
 
         # change the working dir to the dir where the code has been extracted to
-        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        up_working_dir = os.path.join(temp_dir, 'myExpressApp')
         os.chdir(up_working_dir)
 
         # test linux dryrun operation
@@ -1005,7 +1005,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(linux_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'python|3.7')
+        self.assertEqual(result['runtime_version'], 'node|10.14')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full linux E2E operation works
@@ -1023,7 +1023,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7'),
+            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -1032,16 +1032,14 @@ class WebAppUpE2ETests(ScenarioTest):
             JMESPathCheck('[0].value', 'True')
         ])
 
-
-
         # test windows dryrun operation
-        result = self.cmd("webapp up -n {} --sku  S1 --dryrun -r 'python|3.6' --os-type windows --plan {}"
+        result = self.cmd("webapp up -n {} --sku  S1 --dryrun -r 'node|10.14' --os-type windows --plan {}"
                           .format(windows_webapp_name, windows_plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(windows_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'python|3.6')
+        self.assertEqual(result['runtime_version'], 'node|10.14')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full windows E2E operation works
@@ -1071,6 +1069,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # delete temp_dir
         import shutil
         shutil.rmtree(temp_dir)
+
 
 if __name__ == '__main__':
     unittest.main()
