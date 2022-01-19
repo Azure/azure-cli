@@ -44,9 +44,10 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
-                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       AzureInternalError, ArgumentUsageError)
+from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
+                                       RequiredArgumentMissingError, ValidationError, CLIInternalError,
+                                       UnclassifiedUserFault, AzureResponseError, AzureInternalError,
+                                       ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -54,7 +55,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
-                    get_sku_name,
+                    get_sku_tier,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
@@ -62,7 +63,8 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
-                    get_pool_manager)
+                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
+                    get_resource_if_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -93,7 +95,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
@@ -142,7 +144,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -254,10 +257,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
-def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location):
+def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, webapp_location, vnet_sub_id=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    current_sub_id = get_subscription_id(cmd.cli_ctx)
+    if vnet_sub_id:
+        cmd.cli_ctx.data['subscription_id'] = vnet_sub_id
+
     vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
     vnet_location = vnet_client.get(resource_group_name=subnet_resource_group,
                                     virtual_network_name=vnet_name).location
+
+    cmd.cli_ctx.data['subscription_id'] = current_sub_id
 
     vnet_location = _normalize_location(cmd, vnet_location)
     asp_location = _normalize_location(cmd, webapp_location)
@@ -722,13 +733,41 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     return updater(**kwargs)
 
 
-def update_webapp(instance, client_affinity_enabled=None, https_only=None):
+def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
+                  prewarmed_instance_count=None):
     if 'function' in instance.kind:
-        raise CLIError("please use 'az functionapp update' to update this function app")
+        raise ValidationError("please use 'az functionapp update' to update this function app")
+    if minimum_elastic_instance_count or prewarmed_instance_count:
+        args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
+        plan = get_app_service_plan_from_webapp(cmd, instance, api_version="2021-01-15")
+        sku = _normalize_sku(plan.sku.name)
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
+        if not plan.elastic_scale_enabled:
+            raise ValidationError("Elastic scale is not enabled on the App Service Plan. Please update the plan ")
+        if (minimum_elastic_instance_count or 0) > plan.maximum_elastic_worker_count:
+            raise ValidationError("--minimum-elastic-instance-count: Minimum elastic instance count is greater than "
+                                  "the app service plan's maximum Elastic worker count. "
+                                  "Please choose a lower count or update the plan's maximum ")
+        if (prewarmed_instance_count or 0) > plan.maximum_elastic_worker_count:
+            raise ValidationError("--prewarmed-instance-count: Prewarmed instance count is greater than "
+                                  "the app service plan's maximum Elastic worker count. "
+                                  "Please choose a lower count or update the plan's maximum ")
+
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
         instance.https_only = https_only == 'true'
+
+    if minimum_elastic_instance_count is not None:
+        from azure.mgmt.web.models import SiteConfig
+        # Need to create a new SiteConfig object to ensure that the new property is included in request body
+        conf = SiteConfig(**instance.site_config.as_dict())
+        conf.minimum_elastic_instance_count = minimum_elastic_instance_count
+        instance.site_config = conf
+
+    if prewarmed_instance_count is not None:
+        instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
 
     return instance
 
@@ -834,7 +873,8 @@ def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
             "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
                 app_type=cmd_app_type, name=name, resource_group=resource_group_name),
             "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
-    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
+                                              slot, api_version="2021-01-15")
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
     return app
@@ -1817,10 +1857,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
             location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     # the api is odd on parameter naming, have to live with it for now
-    sku_def = SkuDescription(tier=get_sku_name(sku), name=_normalize_sku(sku), capacity=number_of_workers)
+    sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+
+    if sku.upper() in ['WS1', 'WS2', 'WS3']:
+        existing_plan = get_resource_if_exists(client.app_service_plans,
+                                               resource_group_name=resource_group_name, name=name)
+        if existing_plan and existing_plan.sku.tier != "WorkflowStandard":
+            raise ValidationError("Plan {} in resource group {} already exists and "
+                                  "cannot be updated to a logic app SKU (WS1, WS2, or WS3)")
+        plan_def.type = "elastic"
 
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
@@ -1829,17 +1877,44 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None):
-    if number_of_workers is None and sku is None:
-        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
+def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+                            max_elastic_worker_count=None):
+    if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
+        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
-        sku_def.tier = get_sku_name(sku)
+        sku_def.tier = get_sku_tier(sku)
         sku_def.name = sku
 
     if number_of_workers is not None:
         sku_def.capacity = number_of_workers
+    else:
+        number_of_workers = sku_def.capacity
+
+    if elastic_scale is not None or max_elastic_worker_count is not None:
+        if sku is None:
+            sku = instance.sku.name
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium V2/V3 SKUs. "
+                                  "Use command help to see all available SKUs")
+
+    if elastic_scale is not None:
+        # TODO use instance.elastic_scale_enabled once the ASP client factories are updated
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["elasticScaleEnabled"] = elastic_scale
+
+    if max_elastic_worker_count is not None:
+        instance.maximum_elastic_worker_count = max_elastic_worker_count
+        if max_elastic_worker_count < number_of_workers:
+            raise InvalidArgumentValueError("--max-elastic-worker-count must be greater than or equal to the "
+                                            "plan's number of workers. To update the plan's number of workers, use "
+                                            "--number-of-workers ")
+        # TODO use instance.maximum_elastic_worker_count once the ASP client factories are updated
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
+
     instance.sku = sku_def
     return instance
 
@@ -2876,7 +2951,7 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     sku = _normalize_sku(sku)
-    tier = get_sku_name(sku)
+    tier = get_sku_tier(sku)
 
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
@@ -2950,7 +3025,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                        vnet=vnet)
         _validate_vnet_integration_location(cmd=cmd, webapp_location=webapp_location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
-                                            vnet_name=subnet_info["vnet_name"])
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
         _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
                                vnet_resource_group=subnet_info["resource_group_name"],
                                vnet_name=subnet_info["vnet_name"],
@@ -3341,7 +3417,7 @@ def list_consumption_locations(cmd):
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
-    full_sku = get_sku_name(sku)
+    full_sku = get_sku_tier(sku)
     web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
@@ -3692,35 +3768,25 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
 
 
 def add_webapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, True)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
 def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None,
                                      skip_delegation_check=False):
-    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check, False)
+    return _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot, skip_delegation_check)
 
 
-def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False,
-                          is_webapp=True):
-    from azure.mgmt.web.models import SitePatchResource
-
+def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None, skip_delegation_check=False):
     subnet_info = _get_subnet_info(cmd=cmd,
                                    resource_group_name=resource_group_name,
                                    subnet=subnet,
                                    vnet=vnet)
-    client = web_client_factory(cmd.cli_ctx)
+    client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
 
-    if is_webapp:
-        app = show_webapp(cmd, resource_group_name, name, slot)
-    else:
-        app = show_functionapp(cmd, resource_group_name, name, slot)
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
-    parsed_plan = parse_resource_id(app.app_service_plan_id)
+    parsed_plan = parse_resource_id(app.server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
-
-    _validate_vnet_integration_location(cmd=cmd, webapp_location=plan_info.location,
-                                        subnet_resource_group=subnet_info["resource_group_name"],
-                                        vnet_name=subnet_info["vnet_name"])
 
     if skip_delegation_check:
         logger.warning('Skipping delegation check. Ensure that subnet is delegated to Microsoft.Web/serverFarms.'
@@ -3731,16 +3797,10 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
 
-    subnet_id = subnet_info["subnet_resource_id"]
-    if not slot:
-        client.web_apps.update(resource_group_name=resource_group_name,
-                               name=name,
-                               site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
-    else:
-        client.web_apps.update_slot(resource_group_name=resource_group_name,
-                                    name=name,
-                                    slot=slot,
-                                    site_envelope=SitePatchResource(virtual_network_subnet_id=subnet_id))
+    app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
+
+    _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                            client=client, extra_parameter=app)
 
     # Enable Route All configuration
     config = get_site_configs(cmd, resource_group_name, name, slot)
@@ -3968,7 +4028,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                 "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
-                """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
+                """ % (name, plan, rg_name, get_sku_tier(sku), os_name, loc, _src_path_escaped, detected_version,
                        runtime_version)
     create_json = json.loads(dry_run_str)
 

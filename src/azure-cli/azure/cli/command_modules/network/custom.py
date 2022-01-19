@@ -525,9 +525,10 @@ def add_ag_private_link(cmd,
     else:
         raise CLIError("Frontend IP doesn't exist")
 
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            raise CLIError('Private Link name duplicates')
+    if appgw.private_link_configurations is not None:
+        for pl in appgw.private_link_configurations:
+            if pl.name == private_link_name:
+                raise CLIError('Private Link name duplicates')
 
     # get the virtual network of this application gateway
     vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
@@ -579,6 +580,8 @@ def add_ag_private_link(cmd,
         if fic.name == frontend_ip:
             fic.private_link_configuration = SubResource(id=private_link_config_id)
 
+    if appgw.private_link_configurations is None:
+        appgw.private_link_configurations = []
     appgw.private_link_configurations.append(private_link_config)
 
     return sdk_no_wait(no_wait,
@@ -3704,8 +3707,8 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
         frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None):
-    InboundNatRule = cmd.get_models('InboundNatRule')
+        frontend_port_range_start=None, frontend_port_range_end=None, backend_pool_name=None):
+    InboundNatRule, SubResource = cmd.get_models('InboundNatRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
@@ -3722,6 +3725,9 @@ def create_lb_inbound_nat_rule(
         new_rule.frontend_port_range_end = frontend_port_range_end
     if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
         new_rule.frontend_port_range_start = frontend_port_range_start
+    if backend_pool_name and cmd.supported_api_version('2021-03-01'):
+        backend_pool_id = get_property(lb.backend_address_pools, backend_pool_name).id
+        new_rule.backend_address_pool = SubResource(id=backend_pool_id)
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)

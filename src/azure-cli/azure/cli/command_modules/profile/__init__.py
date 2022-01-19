@@ -65,7 +65,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account') as c:
-            c.argument('subscription', options_list=['--subscription', '-s'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
+            c.argument('subscription', options_list=['--subscription', '-s', '--name', '-n'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:

@@ -274,7 +274,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                 Multiple containers with same Friendly Name found. Please give native names instead.
                 """)
             container_uri = container.name
-    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type,
+    return custom_wl.list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
                                             backup_management_type, container_uri, protectable_item_type, server_name)
 
 

@@ -29,6 +29,10 @@ class TestActionGroupScenarios(ScenarioTest):
                          JMESPathCheck('length(@)', 1),
                          JMESPathCheck('[0].name', action_group_name)])
 
+        # test monitor action-group show
+        self.cmd('monitor action-group show -n {} -g {} -ojson'.format(action_group_name, resource_group),
+                 checks=[JMESPathCheck('location', 'Global')])
+
         self.cmd('monitor action-group update -n {} -g {} -ojson --short-name new_name --tag owner=alice'
                  .format(action_group_name, resource_group), checks=[JMESPathCheck('tags.owner', 'alice'),
                                                                      JMESPathCheck('groupShortName', 'new_name')])

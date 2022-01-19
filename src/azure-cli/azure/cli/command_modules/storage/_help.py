@@ -1424,8 +1424,10 @@ type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
 examples:
-  - name: Restore soft-deleted container.
-    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
+  - name: List and restore soft-deleted container.
+    text: |
+          az storage container list --include-deleted
+          az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
@@ -1490,6 +1492,8 @@ examples:
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
+  - name: Upload a single file to Azure Blob using url with azcopy options pass-through.
+    text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] -- --block-size-mb=0.25 --check-length
 """
 
 helps['storage cors'] = """
