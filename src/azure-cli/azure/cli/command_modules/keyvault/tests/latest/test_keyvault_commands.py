@@ -2310,12 +2310,13 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
             'sa_rid': f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{storage_account}'
             })
 
-        _create_keyvault(self, self.kwargs)
-
-        # Give Key Vault access to the storage account
         if self.is_live:
+            # Give Key Vault access to the storage account
             self.cmd('az role assignment create --role "Storage Account Key Operator Service Role" '
                      '--assignee "https://vault.azure.net" --scope {sa_rid}')
+            # Give tester all permissions to keyvault storage
+            # (remember to replace the object id if you are the new tester)
+            self.cmd('az keyvault set-policy -n {kv} --storage-permissions all purge --object-id 3707fb2f-ac10-4591-a04f-8b0d786ea37d')
             time.sleep(300)
 
         retry = 0
@@ -2375,7 +2376,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
             'b': 'test_secret.txt',
             'f': os.path.join(TEST_DIR, 'test_secret.txt')
         })
-
+        time.sleep(60)
         self.cmd('storage blob upload -f "{f}" -c {c} -n {b} --account-name {sa} --sas-token "{acct_sas}"',
                  checks=[self.exists('lastModified')])
 
@@ -2403,6 +2404,11 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         self.cmd('keyvault storage sas-definition list --vault-name {kv} --account-name {sa}',
                  checks=[self.check('length(@)', 2)])
 
+        # update the sas definitions
+        self.cmd('keyvault storage sas-definition create --vault-name {kv} --account-name {sa} -n {blob_sas_name} '
+                 '--sas-type service --validity-period PT12H --template-uri "{blob_temp}" --disabled',
+                 checks=[self.check('attributes.enabled', False), self.check('validityPeriod', 'PT12H')])
+
         # show a sas definition by (vault, account-name, name) and by id
         self.cmd('keyvault storage sas-definition show --vault-name {kv} --account-name {sa} -n {blob_sas_name}',
                  checks=[self.check('id', '{blob_sas_id}')])
@@ -2418,6 +2424,20 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                  checks=[self.check('length(@)', 0)])
         self.cmd('keyvault secret list --vault-name {kv}', checks=[self.check('length(@)', 0)])
 
+        # list the deleted sas definitions
+        self.cmd('keyvault storage sas-definition list-deleted --vault-name {kv} --account-name {sa}',
+                 checks=[self.check('length(@)', 2)])
+
+        # show the deleted sas definition
+        self.cmd('keyvault storage sas-definition show-deleted --vault-name {kv} --account-name {sa} -n {blob_sas_name}',
+                 checks=[self.exists('recoveryId')])
+
+        # recover the deleted
+        self.cmd('keyvault storage sas-definition recover --vault-name {kv} --account-name {sa} -n {blob_sas_name}')
+
+        self.cmd('keyvault storage sas-definition list-deleted --vault-name {kv} --account-name {sa}',
+                 checks=[self.check('length(@)', 1)])
+
         # list the storage accounts
         self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 1)])
 
@@ -2427,9 +2447,42 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         self.cmd('keyvault storage show --id {sa_id}',
                  checks=[self.check('resourceId', '{sa_rid}')])
 
+        # update the storage account
+        self.cmd('keyvault storage update --vault-name {kv} -n {sa} --regeneration-period P30D',
+                 checks=[self.check('regenerationPeriod', 'P30D')])
+
         # delete the storage account and verify no storage accounts exist in the vault
         self.cmd('keyvault storage remove --id {sa_id}')
         self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
+        self.cmd('keyvault storage list-deleted --vault-name {kv}', checks=[self.check('length(@)', 1)])
+
+        # recover the deleted storage account
+        self.cmd('keyvault storage recover -n {sa} --vault-name {kv}')
+        self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 1)])
+        self.cmd('keyvault storage list-deleted --vault-name {kv}', checks=[self.check('length(@)', 0)])
+
+        # backup the storage account in local file
+        self.kwargs.update({
+            'file': os.path.join(TEST_DIR, 'backup.blob')
+        })
+        self.cmd('keyvault storage backup -f "{file}" -n {sa} --vault-name {kv}')
+
+        # permanently delete the storage account
+        self.cmd('keyvault storage remove -n {sa} --vault-name {kv}')
+        with self.assertRaisesRegex(CLIError, f'{storage_account} was not found in this key vault'):
+            self.cmd('keyvault storage purge -n {sa} --vault-name {kv}')
+        self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
+        self.cmd('keyvault storage list-deleted --vault-name {kv}', checks=[self.check('length(@)', 0)])
+
+        # restore storage account from local backup
+        self.cmd('keyvault storage restore -f "{file}" --vault-name {kv}')
+        self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 1)])
+
+        # clear local file
+        try:
+            os.remove(self.kwargs['file'])
+        except Exception:
+            return
 
 
 class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
