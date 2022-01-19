@@ -10,7 +10,7 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, KeyVaultPreparer, record_only
-from azure.mgmt.recoveryservicesbackup.models import StorageType
+from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer

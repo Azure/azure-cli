@@ -368,7 +368,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if identity_type and 'UserAssigned' in identity_type and user_identity_id:
         user_assigned_identities = {user_identity_id: {}}
-        if instance.identity.user_assigned_identities:
+        if instance.identity and instance.identity.user_assigned_identities:
             for item in instance.identity.user_assigned_identities:
                 if item != user_identity_id:
                     user_assigned_identities[item] = None

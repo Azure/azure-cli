@@ -7,12 +7,15 @@
 from knack.arguments import CLIArgumentType
 
 
-def load_arguments(self, _):
+def load_arguments(self, _):  # pylint: disable=too-many-statements
     from azure.mgmt.redis.models import RebootType, RedisKeyType, SkuName, TlsVersion, ReplicationRole
     from azure.cli.command_modules.redis._validators import JsonString, ScheduleEntryList
     from azure.cli.command_modules.redis.custom import allowed_c_family_sizes, allowed_p_family_sizes
     from azure.cli.core.commands.parameters import get_enum_type, tags_type, zones_type
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
+
+    system_identity_type = CLIArgumentType(action='store_true', help='Flag to specify system assigned identity')
+    user_identity_type = CLIArgumentType(nargs='+', help='One or more space separated resource IDs of user assigned identities')
 
     with self.argument_context('redis') as c:
         cache_name = CLIArgumentType(options_list=['--name', '-n'], help='Name of the Redis cache.', id_part='name',
@@ -43,6 +46,8 @@ def load_arguments(self, _):
         c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.')
         c.argument('redis_version', help='Redis version. Only major version will be used in create/update request with current valid values: (4, 6)')
+        c.argument('mi_system_assigned', arg_type=system_identity_type)
+        c.argument('mi_user_assigned', arg_type=user_identity_type)
 
     with self.argument_context('redis firewall-rules list') as c:
         c.argument('cache_name', arg_type=cache_name, id_part=None)
@@ -65,3 +70,8 @@ def load_arguments(self, _):
     with self.argument_context('redis patch-schedule') as c:
         c.argument('name', arg_type=cache_name, id_part=None)
         c.argument('schedule_entries', help="List of Patch schedule entries. Example Value:[{\"dayOfWeek\":\"Monday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]", type=ScheduleEntryList)
+
+    with self.argument_context('redis identity') as c:
+        c.argument('name', arg_type=cache_name, id_part=None)
+        c.argument('mi_system_assigned', arg_type=system_identity_type)
+        c.argument('mi_user_assigned', arg_type=user_identity_type)

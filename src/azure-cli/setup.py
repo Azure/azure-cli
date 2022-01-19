@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.31.0"
+VERSION = "2.32.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -60,7 +60,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys~=4.5.0b4',
+    'azure-keyvault-keys==4.5.0b4',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
@@ -91,10 +91,10 @@ DEPENDENCIES = [
     'azure-mgmt-eventhub~=9.1.0',
     'azure-mgmt-extendedlocation~=1.0.0b2',
     'azure-mgmt-hdinsight~=9.0.0',
-    'azure-mgmt-imagebuilder~=0.4.0',
-    'azure-mgmt-iotcentral~=9.0.0b1',
+    'azure-mgmt-imagebuilder~=1.0.0',
+    'azure-mgmt-iotcentral~=9.0.0',
     'azure-mgmt-iothub==2.1.0',
-    'azure-mgmt-iothubprovisioningservices~=0.3.0',
+    'azure-mgmt-iothubprovisioningservices~=1.0.0',
     'azure-mgmt-keyvault==9.3.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=12.0.0',
@@ -105,15 +105,15 @@ DEPENDENCIES = [
     'azure-mgmt-media~=7.0',
     'azure-mgmt-monitor~=3.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=5.1.0',
+    'azure-mgmt-netapp~=6.0.1',
     'azure-mgmt-network~=19.3.0',
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms~=10.0.0',
-    'azure-mgmt-recoveryservicesbackup~=3.0.0',
+    'azure-mgmt-recoveryservicesbackup~=4.0.0',
     'azure-mgmt-recoveryservices~=2.0.0',
     'azure-mgmt-redhatopenshift==1.0.0',
-    'azure-mgmt-redis~=13.0.0',
+    'azure-mgmt-redis~=13.1.0',
     'azure-mgmt-relay~=0.1.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==20.0.0',

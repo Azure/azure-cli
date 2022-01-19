@@ -39,6 +39,9 @@ CREDENTIAL_WARNING = (
 
 logger = get_logger(__name__)
 
+SCOPE_WARNING = "In a future release, --scopes argument will become required for creating a role assignment. " \
+                "Please explicitly specify --scopes."
+
 # pylint: disable=too-many-lines
 
 
@@ -1403,7 +1406,11 @@ def create_service_principal_for_rbac(
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
+    if role and not scopes:
+        logger.warning(SCOPE_WARNING)
+        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None

@@ -525,9 +525,10 @@ def add_ag_private_link(cmd,
     else:
         raise CLIError("Frontend IP doesn't exist")
 
-    for pl in appgw.private_link_configurations:
-        if pl.name == private_link_name:
-            raise CLIError('Private Link name duplicates')
+    if appgw.private_link_configurations is not None:
+        for pl in appgw.private_link_configurations:
+            if pl.name == private_link_name:
+                raise CLIError('Private Link name duplicates')
 
     # get the virtual network of this application gateway
     vnet_name = parse_resource_id(appgw.gateway_ip_configurations[0].subnet.id)['name']
@@ -579,6 +580,8 @@ def add_ag_private_link(cmd,
         if fic.name == frontend_ip:
             fic.private_link_configuration = SubResource(id=private_link_config_id)
 
+    if appgw.private_link_configurations is None:
+        appgw.private_link_configurations = []
     appgw.private_link_configurations.append(private_link_config)
 
     return sdk_no_wait(no_wait,
@@ -3314,7 +3317,7 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None):
+                            request_message=None, manual_request=None, edge_zone=None, custom_interface_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3336,6 +3339,10 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
 
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
+
+    if cmd.supported_api_version(min_api='2021-05-01') and custom_interface_name:
+        private_endpoint.custom_network_interface_name = custom_interface_name
+
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
@@ -3402,6 +3409,79 @@ def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_e
                                          private_endpoint_name=private_endpoint_name,
                                          private_dns_zone_group_name=private_dns_zone_group_name,
                                          parameters=private_dns_zone_group)
+
+
+def add_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name,
+                                   ip_config_name=None, group_id=None, member_name=None, private_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
+    ip_config = PrivateEndpointIPConfiguration(
+        name=ip_config_name,
+        group_id=group_id,
+        member_name=member_name,
+        private_ip_address=private_ip_address
+    )
+    private_endpoint.ip_configurations.append(ip_config)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def remove_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    ip_config = None
+    for item in private_endpoint.ip_configurations:
+        if item.name == ip_config_name:
+            ip_config = item
+            break
+    if ip_config is None:
+        logger.warning("IP Configuration %s doesn't exist.", ip_config_name)
+        return private_endpoint
+    private_endpoint.ip_configurations.remove(ip_config)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def list_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    return private_endpoint.ip_configurations
+
+
+def add_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
+    asg = ApplicationSecurityGroup(id=application_security_group_id)
+    try:
+        private_endpoint.application_security_groups.append(asg)
+    except AttributeError:
+        private_endpoint.application_security_groups = [asg]
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def remove_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    asg = None
+    for item in private_endpoint.application_security_groups:
+        if item.id == application_security_group_id:
+            asg = item
+            break
+    if asg is None:
+        logger.warning("Application security group %s doesn't exist.", application_security_group_id)
+        return private_endpoint
+    private_endpoint.application_security_groups.remove(asg)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def list_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    return private_endpoint.application_security_groups
 # endregion
 
 
@@ -3627,8 +3707,8 @@ def list_load_balancer_nic(cmd, resource_group_name, load_balancer_name):
 def create_lb_inbound_nat_rule(
         cmd, resource_group_name, load_balancer_name, item_name, protocol, backend_port, frontend_port=None,
         frontend_ip_name=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None,
-        frontend_port_range_start=None, frontend_port_range_end=None):
-    InboundNatRule = cmd.get_models('InboundNatRule')
+        frontend_port_range_start=None, frontend_port_range_end=None, backend_pool_name=None):
+    InboundNatRule, SubResource = cmd.get_models('InboundNatRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = lb_get(ncf.load_balancers, resource_group_name, load_balancer_name)
     if not frontend_ip_name:
@@ -3645,6 +3725,9 @@ def create_lb_inbound_nat_rule(
         new_rule.frontend_port_range_end = frontend_port_range_end
     if frontend_port_range_start and cmd.supported_api_version('2021-03-01'):
         new_rule.frontend_port_range_start = frontend_port_range_start
+    if backend_pool_name and cmd.supported_api_version('2021-03-01'):
+        backend_pool_id = get_property(lb.backend_address_pools, backend_pool_name).id
+        new_rule.backend_address_pool = SubResource(id=backend_pool_id)
     upsert_to_collection(lb, 'inbound_nat_rules', new_rule, 'name')
     poller = ncf.load_balancers.begin_create_or_update(resource_group_name, load_balancer_name, lb)
     return get_property(poller.result().inbound_nat_rules, item_name)

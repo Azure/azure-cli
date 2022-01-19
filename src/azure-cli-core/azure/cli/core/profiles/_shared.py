@@ -64,6 +64,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_IOTDPS = ('azure.mgmt.iothubprovisioningservices', 'IotDpsClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
@@ -173,7 +174,7 @@ AZURE_API_PROFILES = {
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-06-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-08-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -228,6 +229,7 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-07-01',
+        ResourceType.MGMT_IOTDPS: '2020-03-01',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',

@@ -1899,6 +1899,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
+        self.cmd('vmss extension list --vmss-name {vmss} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
         result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{net-ext}'),
@@ -1957,6 +1960,42 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('typePropertiesType', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
+
+
+class VMSSExtensionImageTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
+    def test_vmss_extension_image(self, resource_group):
+        self.kwargs.update({
+            'pub': 'Microsoft.Azure.NetworkWatcher',
+            'name': 'NetworkWatcherAgentLinux',
+            'location': 'eastus',
+            'ver': '1.4.905.2'
+        })
+        
+        self.cmd('vmss extension image list -p {pub}', checks=[
+            self.check('[0].publisher', self.kwargs['pub'])
+        ])
+
+        result = self.cmd('vmss extension image list-names -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location'])
+        ]).get_output_in_json()
+        self.assertTrue([n for n in result if n['name'] == self.kwargs['name']])
+
+        result = self.cmd('vmss extension image list-versions -n {name} -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location']),
+        ]).get_output_in_json()
+        self.assertTrue([v for v in result if v['name'] == self.kwargs['ver']])
+
+        self.cmd('vmss extension image show -n {name} -p {pub} -l {location} --version {ver}', checks=[
+            self.check('location', self.kwargs['location']),
+            self.check('name', self.kwargs['ver']),
+            self.check('operatingSystem', 'Linux')
+        ])
+
+        # not existing image
+        self.cmd('vmss extension image show -n fooBAR -p fooBAR -l {location} --version 0', expect_failure=True)
 
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
@@ -2582,6 +2621,9 @@ class VMSSCreateAndModify(ScenarioTest):
         ])
         self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
             self.check('scaleInPolicy.rules[0]', 'OldestVM')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --force-deletion', checks=[
+            self.check('scaleInPolicy.forceDeletion', True)
         ])
 
 
@@ -6620,7 +6662,8 @@ class VMSSHKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
     def test_vm_ssh_key(self, resource_group):
         self.kwargs.update({
-            'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0='
+            'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0=',
+            'updated-key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+4oSAGj8KYVXKmikS/sCD9zCTq1AqpK/jzKGhe6ujvl8B1JelAij9qkS7Maf6HdPjZmgChTbDcZmbfrOcT6opL/SCiFiGKgKi7cpL4Vo4K6DecHOtQ5cg4lUJrCDtSjuwwnuTsJvPym/AnBSW+OCGDkLC8CUdaMtdwLo6yYTSZ2fiRVTKz8/Kqv2HmXk4+M4T4U4V9enDepaCyZrFPdqaCZxzcQNQxNJhGpTGahDsCoFwsL8KNNPV3fXe12K0xJ1QEhd2MeCofDE1xkD0wr1BO5hMh7x5ui2JwOK/7BYyPNZ5Cr2UxzA/ty/L/I/qHTVoDCmaZT0gjXNp6zMz1bApJ91iGtQAr+WNsOhvXRYcTmwBzzBtMaFEYxNgv+O1qi8h++E+GH3d62NIp8rIya7JgBzjhmArefO4xSDqlQrl9vHliTBW8+58Mm0zWGMqODD3B13FG5B0f4KaZWiniDWiKNLosKsV08yK+eMulIuY2s8XvjqDifx8YPOQv+bYGL0='
         })
         self.cmd('sshkey create -g {rg} -n k1')
         self.cmd('sshkey list')
@@ -6629,6 +6672,15 @@ class VMSSHKeyScenarioTest(ScenarioTest):
             self.exists('publicKey')
         ])
         self.cmd('sshkey create -g {rg} -n k2 --public-key "{key}"')
+        self.cmd('sshkey update -g {rg} -n k2 --public-key "{updated-key}"')
+
+        self.cmd('sshkey list -g {rg}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('sshkey delete -g {rg} -n k2 --yes')
+        self.cmd('sshkey list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         # Use existing key
         self.cmd('vm create -g {rg} -n vm1 --image centos --nsg-rule None --ssh-key-name k1')
