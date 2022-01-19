@@ -78,8 +78,9 @@ def get_runtime_version_details(file_path, lang_name, is_linux=False, stack_help
     version_detected = None
     version_to_create = None
 
-    versions = stack_helper.get_version_list(lang_name, is_linux)
-    default_version = stack_helper.get_default_version(lang_name, is_linux)
+    if lang_name.lower() != STATIC_RUNTIME_NAME:
+        versions = stack_helper.get_version_list(lang_name, is_linux)
+        default_version = stack_helper.get_default_version(lang_name, is_linux)
 
     if lang_name.lower() == DOTNET_RUNTIME_NAME:
         version_detected = parse_dotnet_version(file_path, default_version)
