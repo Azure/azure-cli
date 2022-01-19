@@ -469,7 +469,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'python|3.7')
+        self.assertEqual(result['runtime_version'], 'python|3.9')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -707,7 +707,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|Java se|8')
+        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|java se|8')
 
         # test dryrun operation
         result = self.cmd(
@@ -716,7 +716,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|Java se|8')
+        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|java se|8')
 
         # cleanup
         # switch back the working dir
