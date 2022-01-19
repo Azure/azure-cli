@@ -5781,8 +5781,11 @@ class DiskEncryptionSetTest(ScenarioTest):
         time.sleep(15)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
-        time.sleep(15)
+        time.sleep(30)
 
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --source-vault {vault2} ' ,checks=[
+             self.check('activeKey.sourceVault', '{vault2_id}')
+        ])
         self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault.id', '{vault2_id}'),

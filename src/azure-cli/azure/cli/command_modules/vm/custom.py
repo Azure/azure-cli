@@ -4431,7 +4431,7 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
     if key_url:
         instance.active_key.key_url = key_url
     if source_vault:
-        instance.active_key.source_vault.id = source_vault
+        instance.active_key.source_vault = {'id': source_vault}
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
     return instance
