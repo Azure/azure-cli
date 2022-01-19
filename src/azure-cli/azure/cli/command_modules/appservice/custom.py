@@ -103,7 +103,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
                                                                                                    resource_group_name))
     is_linux = plan_info.reserved
-    node_default_version = NODE_EXACT_VERSION_DEFAULT
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
+    node_default_version = helper.get_default_version("node", is_linux, get_windows_config_version=True)
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = get_site_availability(cmd, name)
@@ -151,7 +152,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
-    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
 
@@ -2710,6 +2710,14 @@ class _StackRuntimeHelper:
         self._linux = linux
         self._windows = windows
         self._stacks = []
+        self.windows_config_mappings = {
+                'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+                'python': 'python_version',
+                'php': 'php_version',
+                'aspnet': 'net_framework_version',
+                'dotnet': 'net_framework_version',
+                'dotnetcore': None
+            }
 
     @staticmethod
     def remove_delimiters(runtime):
@@ -2734,16 +2742,18 @@ class _StackRuntimeHelper:
         if linux:
             return cls.update_site_config
         return (cls.update_site_appsettings if 'node' in
-                    runtime['displayName'] else cls.update_site_config)
+                    runtime['displayName'].lower() else cls.update_site_config)
 
     # assumes non-java
-    def get_default_version(self, lang, linux=False):
+    def get_default_version(self, lang, linux=False, get_windows_config_version=False):
         lang = lang.upper()
         os = "windows" if not linux else "linux"
 
         for s in self.stacks[os]:
             l, v, *_ = s["displayName"].upper().split("|")
             if l == lang:
+                if get_windows_config_version:
+                    return s["configs"][self.windows_config_mappings[lang.lower()]]
                 return v
 
         raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
@@ -2908,14 +2918,6 @@ class _StackRuntimeHelper:
 
         parsed_stacks = {"windows": [], "linux": []}  # emulates the form of the old hardcoded JSON for ease of use
         # TODO try and get API support for this so it isn't hardcoded
-        windows_config_mappings = {
-                'node': 'WEBSITE_NODE_DEFAULT_VERSION',
-                'python': 'python_version',
-                'php': 'php_version',
-                'aspnet': 'net_framework_version',
-                'dotnet': 'net_framework_version',
-                'dotnetcore': None
-            }
 
         for lang in stacks:
             if lang.display_text.lower() == "java":
@@ -2924,7 +2926,8 @@ class _StackRuntimeHelper:
                 if self._linux:
                     self._parse_major_version_linux(major_version, parsed_stacks["linux"])
                 if self._windows:
-                    self._parse_major_version_windows(major_version, parsed_stacks["windows"], windows_config_mappings)
+                    self._parse_major_version_windows(major_version, parsed_stacks["windows"],
+                    self.windows_config_mappings)
 
         self._stacks = parsed_stacks
 
@@ -3969,7 +3972,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                 raise ValidationError("Linux runtime '{}' is not supported."
                                       " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
             raise ValidationError("Windows runtime '{}' is not supported."
-                                  " Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+                                  " Please invoke 'az webapp list-runtimes --windows' to cross check".format(runtime))
 
         language = runtime.split('|')[0]
         version_used_create = '|'.join(runtime.split('|')[1:])

@@ -147,7 +147,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.14.1'),
+            JMESPathCheck('[0].value', '~14'),
         ])
 
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -161,7 +161,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '10.14.1'),
+            JMESPathCheck('[0].value', '~14'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "DOTNETCORE|3.1"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
@@ -824,7 +824,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         if platform.system() == "Windows":
             return
 
-        runtime = 'node|12lts'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
