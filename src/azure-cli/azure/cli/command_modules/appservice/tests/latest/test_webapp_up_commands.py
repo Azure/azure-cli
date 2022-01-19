@@ -46,7 +46,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|16-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -113,7 +113,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'python|3.7')
+        self.assertEqual(result['runtime_version'].lower(), 'python|3.7')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -181,7 +181,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'dotnetcore|3.1')
+        self.assertEqual(result['runtime_version'].lower(), 'dotnetcore|3.1')
         self.assertEqual(result['os'].lower(), 'windows')
         self.assertNotEqual(result['location'], 'None')
 
@@ -251,7 +251,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'dotnet|6.0')
+        self.assertEqual(result['runtime_version'].lower(), 'dotnet|6.0')
         self.assertEqual(result['os'].lower(), 'linux')
         self.assertNotEqual(result['location'], 'None')
 
@@ -322,7 +322,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], '-')
+        self.assertEqual(result['runtime_version'].lower(), '-')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full E2E operation works
@@ -510,7 +510,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|16-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -575,7 +575,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'PYTHON|3.7')
+        self.assertEqual(result['runtime_version'].lower(), 'python|3.7')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -642,7 +642,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|12-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -707,7 +707,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'java|1.8|Java SE|8')
+        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|Java se|8')
 
         # test dryrun operation
         result = self.cmd(
@@ -716,7 +716,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'java|1.8|Java SE|8')
+        self.assertEqual(result['runtime_version'].lower(), 'java|1.8|Java se|8')
 
         # cleanup
         # switch back the working dir
@@ -752,7 +752,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|12-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -808,7 +808,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|12LTS')
+        self.assertEqual(result['runtime_version'].lower(), 'node|12LTS')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full E2E operation works
@@ -865,7 +865,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|12-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|12-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -937,7 +937,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertEqual(result['sku'].lower(), 'premiumv2')
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|16-lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -1005,7 +1005,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(linux_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'].lower(), 'node|14lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full linux E2E operation works
@@ -1023,7 +1023,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('linuxFxVersion', 'NODE|16-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -1039,7 +1039,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(windows_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'], 'node|10.14')
+        self.assertEqual(result['runtime_version'].lower(), 'node|14LTS')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full windows E2E operation works
