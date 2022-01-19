@@ -4646,6 +4646,64 @@ examples:
     crafted: true
 """
 
+helps['network private-endpoint ip-config'] = """
+type: group
+short-summary: Manage private endpoint ip configurations.
+"""
+
+helps['network private-endpoint ip-config add'] = """
+type: command
+short-summary: Add a private endpoint ip configuration.
+examples:
+  - name: Add a private endpoint ip configuration.
+    text: az network private-endpoint ip-config add --endpoint-name MyPE -g MyRG -n MyIpConfig --group-id MyGroup --member-name MyMember --private-ip-address MyPrivateIPAddress
+"""
+
+helps['network private-endpoint ip-config remove'] = """
+type: command
+short-summary: Remove a private endpoint ip configuration.
+examples:
+  - name: Remove a private endpoint ip configuration.
+    text: az network private-endpoint ip-config remove --endpoint-name MyPE -g MyRG -n MyIpConfig
+"""
+
+helps['network private-endpoint ip-config list'] = """
+type: command
+short-summary: List ip configuration within a private endpoint.
+examples:
+  - name: List ip configuration within a private endpoint.
+    text: az network private-endpoint ip-config list --endpoint-name MyPE -g MyRG
+"""
+
+helps['network private-endpoint asg'] = """
+type: group
+short-summary: Manage private endpoint application security groups.
+"""
+
+helps['network private-endpoint asg add'] = """
+type: command
+short-summary: Add a private endpoint application security group.
+examples:
+  - name: Add a private endpoint application security group.
+    text: az network private-endpoint asg add --endpoint-name MyPE -g MyRG --asg-id MyApplicationSecurityGroupId
+"""
+
+helps['network private-endpoint asg remove'] = """
+type: command
+short-summary: Remove a private endpoint application security group.
+examples:
+  - name: Remove a private endpoint application security group.
+    text: az network private-endpoint asg remove --endpoint-name MyPE -g MyRG --asg-id MyApplicationSecurityGroupId
+"""
+
+helps['network private-endpoint asg list'] = """
+type: command
+short-summary: List application security group within a private endpoint.
+examples:
+  - name: List application security group within a private endpoint.
+    text: az network private-endpoint asg list --endpoint-name MyPE -g MyRG
+"""
+
 helps['network private-link-service'] = """
 type: group
 short-summary: Manage private link services.

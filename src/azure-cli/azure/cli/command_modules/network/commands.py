@@ -876,6 +876,16 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show')
         g.command('list', 'list')
+
+    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_ip_config')
+        g.custom_command('remove', 'remove_private_endpoint_ip_config')
+        g.custom_command('list', 'list_private_endpoint_ip_config')
+
+    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_asg')
+        g.custom_command('remove', 'remove_private_endpoint_asg')
+        g.custom_command('list', 'list_private_endpoint_asg')
     # endregion
 
     # region PrivateLinkServices
