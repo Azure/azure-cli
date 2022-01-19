@@ -99,7 +99,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             'lks1': 'lks1',
             'lks2': 'lks2',
             'pe': 'pe1',
-            'rg': resource_group
+            'rg': resource_group,
+            'nic': 'nic1',
         })
 
         # Create PLS
@@ -116,12 +117,13 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.kwargs['pls_id'] = pls1['id']
         self.cmd('network private-endpoint list-types -l {location}')
 
-        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location}', checks=[
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location} --nic-name {nic}', checks=[
             self.check('name', 'pe1'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.check('customNetworkInterfaceName', self.kwargs['nic']),
         ])
 
-        # temporalily disable the test
+        # temporarily disable the test
         '''
         self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
             self.check('privateLinkServiceConnections[0].requestMessage', 'test')
@@ -145,6 +147,94 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(privateEndpointConnections)', 0)
         ])
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+    @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
+    @StorageAccountPreparer(name_prefix="ipconfig", kind="StorageV2")
+    def test_network_private_endpoint_ip_config(self, storage_account):
+        self.kwargs.update({
+            "sa": storage_account,
+            "loc": "eastus",
+            "vnet": self.create_random_name("vnet-", 24),
+            "subnet": self.create_random_name("subnet-", 24),
+            "pe": self.create_random_name("pe-", 24),
+            "connection": self.create_random_name("connection-", 24),
+            "ipconfig1": "ipconfig1",
+            "ipconfig2": "ipconfig2",
+        })
+
+        # prepare network
+        self.cmd("network vnet create -n {vnet} -l {loc} -g {rg} --address-prefixes 10.0.0.0/16 --subnet-name {subnet} --subnet-prefixes 10.0.0.0/24")
+        self.cmd("network vnet subnet update -n {subnet} -g {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true")
+
+        # create private endpoint connection
+        pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
+        self.kwargs["group_id"] = pl_resources[0]["groupId"]
+        self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
+        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
+
+        # check ip configuration operations
+        self.cmd(
+            "network private-endpoint ip-config add -n {ipconfig1} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob --private-ip-address 10.0.0.4",
+            checks=[
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("length(ipConfigurations)", 1),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config add -n {ipconfig2} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob2 --private-ip-address 10.0.0.6",
+            checks=[
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
+                self.check("length(ipConfigurations)", 2),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}",
+            checks=[
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config list -g {rg} --endpoint-name {pe}",
+            checks=[
+                self.check("length(@)", 1),
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
+    @StorageAccountPreparer(name_prefix="asg", kind="StorageV2")
+    def test_network_private_endpoint_asg(self, storage_account):
+        self.kwargs.update({
+            "sa": storage_account,
+            "loc": "eastus",
+            "vnet": self.create_random_name("vnet-", 24),
+            "subnet": self.create_random_name("subnet-", 24),
+            "pe": self.create_random_name("pe-", 24),
+            "connection": self.create_random_name("connection-", 24),
+            "asg": "asg1",
+        })
+
+        # prepare network
+        self.cmd("network vnet create -n {vnet} -l {loc} -g {rg} --address-prefixes 10.0.0.0/16 --subnet-name {subnet} --subnet-prefixes 10.0.0.0/24")
+        self.cmd("network vnet subnet update -n {subnet} -g {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true")
+
+        # create private endpoint connection
+        pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
+        self.kwargs["group_id"] = pl_resources[0]["groupId"]
+        self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
+        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
+
+        # check application security group operations
+        self.kwargs["asg_id"] = self.cmd("network asg create -n {asg} -g {rg}").get_output_in_json()["id"]
+        self.cmd(
+            "network private-endpoint asg add -g {rg} --endpoint-name {pe} --asg-id {asg_id}",
+            checks=[
+                self.check("applicationSecurityGroups[0].id", self.kwargs["asg_id"]),
+                self.check("length(applicationSecurityGroups)", 1),
+            ]
+        )
+        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.check("length(@)", 1))
+        self.cmd("network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {asg_id}")
+        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
