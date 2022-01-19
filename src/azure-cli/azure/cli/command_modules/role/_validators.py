@@ -5,8 +5,6 @@
 
 import uuid
 from knack.util import CLIError
-from azure.cli.core.commands.validators import (
-    get_default_location_from_resource_group, validate_tags)
 from ._client_factory import _graph_client_factory
 
 
