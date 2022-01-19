@@ -40,7 +40,7 @@ class AAZCommandCtx:
             if hasattr(schema, dest):
                 if isinstance(cmd_arg, AAZArgActionOperations):
                     cmd_arg.apply(self.args, dest)
-                else:
+                elif cmd_arg != AAZUndefined:
                     self.args[dest] = cmd_arg
         self._clients = {}
         self._vars_schema = AAZObjectType()
