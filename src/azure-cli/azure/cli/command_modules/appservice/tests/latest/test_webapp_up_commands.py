@@ -1005,7 +1005,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(linux_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'node|14lts')
+        self.assertEqual(result['runtime_version'].lower(), 'node|16-lts')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full linux E2E operation works
@@ -1033,13 +1033,13 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         # test windows dryrun operation
-        result = self.cmd("webapp up -n {} --sku  S1 --dryrun -r 'node|10.14' --os-type windows --plan {}"
+        result = self.cmd("webapp up -n {} --sku  S1 --dryrun -r 'node|14lts' --os-type windows --plan {}"
                           .format(windows_webapp_name, windows_plan)).get_output_in_json()
         self.assertEqual(result['sku'].lower(), 'standard')
         self.assertTrue(result['name'].startswith(windows_webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'node|14LTS')
+        self.assertEqual(result['runtime_version'].lower(), 'node|14lts')
         self.assertEqual(result['os'].lower(), 'windows')
 
         # test the full windows E2E operation works
