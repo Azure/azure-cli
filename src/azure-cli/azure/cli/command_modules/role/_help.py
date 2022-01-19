@@ -579,21 +579,6 @@ examples:
     crafted: true
 """
 
-helps['identity'] = """
-type: group
-short-summary: Managed Service Identities
-"""
-
-helps['identity list'] = """
-type: command
-short-summary: List Managed Service Identities
-"""
-
-helps['identity list-operations'] = """
-type: command
-short-summary: Lists available operations for the Managed Identity provider
-"""
-
 helps['role'] = """
 type: group
 short-summary: Manage user roles for access control with Azure Active Directory and service principals.
