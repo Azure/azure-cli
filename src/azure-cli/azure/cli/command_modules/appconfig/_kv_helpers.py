@@ -583,9 +583,9 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     return res
 
 
-def __print_features_preview(old_json, new_json):
+def __print_features_preview(old_json, new_json, strict):
     logger.warning('\n---------------- Feature Flags Preview (Beta) -------------')
-    if not new_json:
+    if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 
@@ -596,14 +596,20 @@ def __print_features_preview(old_json, new_json):
     differ = JsonDiffer(syntax='explicit')
     res = differ.diff(old_json, new_json)
     keys = str(res.keys())
-    if res == {} or (('update' not in keys) and ('insert' not in keys)):
+    if res == {} or (('update' not in keys) and ('insert' not in keys) and (not strict or ('delete' not in keys))):
         logger.warning('\nTarget configuration already contains all feature flags in source. No changes will be made.')
         return False
 
     # format result printing
     for action, changes in res.items():
         if action.label == 'delete':
-            continue  # we do not delete KVs while importing/exporting
+            if strict:
+                logger.warning('\nDeleting:')
+                for key in changes:
+                    record = {'key': key}
+                    logger.warning(json.dumps(record, ensure_ascii=False))
+            else:
+                continue  # we do not delete KVs while importing/exporting unless it is strict mode.
         if action.label == 'insert':
             logger.warning('\nAdding:')
             for key, adding in changes.items():
@@ -631,7 +637,7 @@ def __print_features_preview(old_json, new_json):
 
 def __print_preview(old_json, new_json, strict):
     logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
-    if not new_json:
+    if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
         return False
 

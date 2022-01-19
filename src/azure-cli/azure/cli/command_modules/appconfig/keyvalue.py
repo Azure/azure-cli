@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-locals, too-many-statements
+# pylint: disable=line-too-long, too-many-locals, too-many-statements, too-many-branches
 
 import json
 import time
 import sys
 
-from itertools import chain
+from itertools import chain, filterfalse
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -34,7 +34,7 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __serialize_kv_list_to_comparable_json_object, __print_preview,
                           __serialize_features_from_kv_list_to_comparable_json_object, __export_kvset_to_file,
                           __serialize_feature_list_to_comparable_json_object, __print_features_preview,
-                          __import_kvset_from_file)
+                          __import_kvset_from_file, __delete_configuration_setting_from_config_store)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -102,7 +102,7 @@ def import_config(cmd,
                                       depth=depth,
                                       content_type=content_type)
 
-        if not skip_features:
+        if strict or not skip_features:
             # src_features is a list of KeyValue objects
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
@@ -137,12 +137,13 @@ def import_config(cmd,
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
 
-    # if customer needs preview & confirmation
-    if not yes:
+    if strict or not yes:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
                                                key=SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL)
+    # if customer needs preview & confirmation
+    if not yes:
         __discard_features_from_retrieved_kv(dest_kvs)
 
         # generate preview and wait for user confirmation
@@ -151,7 +152,7 @@ def import_config(cmd,
             new_json=__serialize_kv_list_to_comparable_json_object(keyvalues=src_kvs, level=source), strict=strict)
 
         need_feature_change = False
-        if src_features and not skip_features:
+        if strict or (src_features and not skip_features):
             # Append all features to dest_features list
             all_features = __read_kv_from_config_store(azconfig_client,
                                                        key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
@@ -162,7 +163,8 @@ def import_config(cmd,
 
             need_feature_change = __print_features_preview(
                 old_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=dest_features),
-                new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features))
+                new_json=__serialize_features_from_kv_list_to_comparable_json_object(keyvalues=src_features),
+                strict=strict)
 
         if not need_kv_change and not need_feature_change:
             return
@@ -171,6 +173,13 @@ def import_config(cmd,
 
     # append all feature flags to src_kvs list
     src_kvs.extend(src_features)
+
+    # In strict mode, delete kvs with specific label that are missing from the imported file
+    if strict:
+        kvs_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and label == kv.label
+                                                        for kv_import in src_kvs), dest_kvs))
+        for kv in kvs_to_delete:
+            __delete_configuration_setting_from_config_store(azconfig_client, kv)
 
     # import into configstore
     __write_kv_and_features_to_config_store(azconfig_client,

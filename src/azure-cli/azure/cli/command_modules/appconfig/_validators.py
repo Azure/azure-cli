@@ -286,8 +286,11 @@ def validate_export_profile(namespace):
 
 
 def validate_strict_import(namespace):
-    if namespace.strict and namespace.skip_features:
-        raise MutuallyExclusiveArgumentError("The option '--skip-features' cannot be used with the '--strict' option.")
+    if namespace.strict:
+        if namespace.skip_features:
+            raise MutuallyExclusiveArgumentError("The option '--skip-features' cannot be used with the '--strict' option.")
+        if namespace.source != 'file':
+            raise InvalidArgumentValueError("The option '--strict' can only be used when importing from a file.")
 
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
