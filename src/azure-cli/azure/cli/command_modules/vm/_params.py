@@ -695,6 +695,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('force_deletion', action='store_true', is_preview=True, help='This property allow you to specify if virtual machines chosen for removal have to be force deleted when a virtual machine scale set is being scaled-in.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
@@ -1008,8 +1009,18 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
-            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
             c.ignore('identity_role_id')
+
+    for scope in ['vm create', 'vmss create']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
+                       help='Role name or id the system assigned identity will have. '
+                            'Please note that the default value "Contributor" will be removed in the future, '
+                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+
+    for scope in ['vm identity assign', 'vmss identity assign']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')

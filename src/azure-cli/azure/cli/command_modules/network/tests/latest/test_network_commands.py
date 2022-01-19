@@ -862,6 +862,13 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
         self.cmd('network application-gateway auth-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
                  checks=self.check('name', 'cert1'))
 
+        # test command of auth-cert delete
+        self.cmd('network application-gateway auth-cert delete -g {rg} --gateway-name {gateway} -n {cert1} --no-wait')
+        self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
+
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
         self.cmd('network application-gateway show -g {rg} -n {gateway}',
@@ -893,6 +900,12 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
         # test root-cert show
         self.cmd('network application-gateway root-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
                  checks=self.check('name', 'cert1'))
+
+        # test root-cert delete
+        self.cmd('network application-gateway root-cert delete -g {rg} --gateway-name {gateway} -n {cert2} --no-wait')
+        self.cmd('network application-gateway root-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
 
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
@@ -1008,6 +1021,13 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         # test ssl-cert show
         self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name ag3 -n ag3SslCert',
                  checks=[self.check('name', 'ag3SslCert')])
+
+        self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert.pfx')
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name ag3 -n ag3SslCert01 --cert-file "{path}" --cert-password {pass} --no-wait')
+        # test ssl-cert delete
+        self.cmd('network application-gateway ssl-cert delete -g {rg} --gateway-name ag3 -n ag3SslCert01 --no-wait')
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name ag3', checks=[
+            self.check('length(@)', 1)])
 
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols TLSv1_0 TLSv1_1 --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
@@ -1382,6 +1402,10 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
 
         self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+
+        # test rewrite-rule set update command
+        self.cmd('network application-gateway rewrite-rule set update -g {rg} --gateway-name {ag} -n {set}')
+
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener --priority 10')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
         self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
