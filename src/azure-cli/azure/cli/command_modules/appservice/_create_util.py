@@ -99,7 +99,7 @@ def get_runtime_version_details(file_path, lang_name, is_linux=False, stack_help
             version_to_create = default_version
         else:
             version_detected = parse_node_version(file_path)[0]
-            version_to_create = detect_node_version_tocreate(version_detected)
+            version_to_create = detect_node_version_tocreate(version_detected, versions, default_version)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = default_version
@@ -289,19 +289,11 @@ def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list)
     return default_version
 
 
-def detect_node_version_tocreate(detected_ver):
-    if detected_ver in NODE_VERSIONS:
+# TODO include better detections logic here
+def detect_node_version_tocreate(detected_ver, node_versions, default_node_version):
+    if detected_ver in node_versions:
         return detected_ver
-    # get major version & get the closest version from supported list
-    major_ver = int(detected_ver.split('.')[0])
-    node_ver = NODE_VERSION_DEFAULT
-    # TODO: Handle checking for minor versions if node major version is 10
-    if major_ver <= 11:
-        node_ver = NODE_VERSION_DEFAULT
-    else:
-        node_ver = NODE_VERSION_NEWER
-    return node_ver
-
+    return default_node_version
 
 def find_key_in_json(json_data, key):
     for k, v in json_data.items():
