@@ -113,7 +113,7 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertEqual(result['runtime_version'].lower(), 'python|3.7')
+        self.assertEqual(result['runtime_version'].lower(), 'python|3.9')
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
@@ -131,7 +131,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7'),
+            JMESPathCheck('linuxFxVersion', 'PYTHON|3.9'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
