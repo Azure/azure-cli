@@ -104,7 +104,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                                                                    resource_group_name))
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
-    node_default_version = helper.get_default_version("node", is_linux, get_windows_config_version=True)
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = get_site_availability(cmd, name)
@@ -208,6 +207,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     else:  # windows webapp without runtime specified
         if name_validation.name_available:  # If creating new webapp
+            node_default_version = helper.get_default_version("node", is_linux, get_windows_config_version=True)
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
 
@@ -2753,6 +2753,7 @@ class _StackRuntimeHelper:
             l, v, *_ = s["displayName"].upper().split("|")
             if l == lang:
                 if get_windows_config_version:
+                    print(s)
                     return s["configs"][self.windows_config_mappings[lang.lower()]]
                 return v
 
