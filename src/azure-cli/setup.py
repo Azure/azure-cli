@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'azure-batch~=11.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
-    'azure-data-tables==12.2.0'
+    'azure-data-tables==12.2.0',
     'azure-datalake-store~=0.0.49',
     'azure-graphrbac~=0.60.0',
     'azure-identity',
