@@ -5744,29 +5744,32 @@ class DiskEncryptionSetTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='westcentralus', additional_params='--enable-purge-protection')
     @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='westcentralus', additional_params='--enable-purge-protection')
+    @KeyVaultPreparer(name_prefix='vault3-', name_len=20, key='vault3', parameter_name='key_vault3', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set_update(self, resource_group, key_vault1, key_vault2):
 
         self.kwargs.update({
             'key1': self.create_random_name(prefix='key1-', length=20),
             'key2': self.create_random_name(prefix='key2-', length=20),
+            'key3': self.create_random_name(prefix='key3-', length=20),
             'des': self.create_random_name(prefix='des-', length=20),
             'des2': self.create_random_name(prefix='des-', length=20)
         })
 
         kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
         vault2_id = self.cmd('keyvault show -g {rg} -n {vault2}').get_output_in_json()['id']
+        vault3_id = self.cmd('keyvault show -g {rg} -n {vault3}').get_output_in_json()['id']
         kid2 = self.cmd('keyvault key create -n {key2} --vault {vault2} --protection software').get_output_in_json()['key']['kid']
+        kid3 = self.cmd('keyvault key create -n {key3} --vault {vault3} --protection software').get_output_in_json()['key']['kid']
 
         self.kwargs.update({
             'kid1': kid1,
             'vault2_id': vault2_id,
-            'kid2': kid2
+            'vault3_id': vault3_id,
+            'kid2': kid2,
+            'kid3': kid3
         })
 
-        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid1} --enable-auto-key-rotation true', checks=[
-            self.check('activeKey.sourceVault', None)
-        ])
         self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1} --enable-auto-key-rotation true')
         des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
         self.assertEqual(des_show_output['rotationToLatestKeyVersionEnabled'], True)
@@ -5778,17 +5781,50 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd('keyvault set-policy -n {vault2} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
-        time.sleep(15)
+        time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
-        time.sleep(15)
+        time.sleep(30)
 
-        self.cmd('disk-encryption-set update -g {rg} -n {des2} --source-vault {vault2} --key-url {kid2}' ,checks=[
-             self.check('activeKey.sourceVault', '{vault2_id}')
-        ])
-        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2} --enable-auto-key-rotation false', checks=[
+        self.cmd('disk-encryption-set update -g {rg} -n {des} --source-vault {vault2} --key-url {kid2} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault.id', '{vault2_id}'),
+            self.check('rotationToLatestKeyVersionEnabled', False)
+        ])
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true', checks=[
+            self.check('activeKey.sourceVault', None)
+        ])
+
+        des2_sp_id = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()['identity']['principalId']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+        })
+        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --source-vault {vault3}', checks=[
+            self.check('activeKey.sourceVault.id', '{vault3_id}')
+        ])
+        self.cmd('disk-encryption-set delete -n {des2} -g{rg}')
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true',
+                 checks=[
+                     self.check('activeKey.sourceVault', None)
+                 ])
+
+        des2_sp_id = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()['identity'][
+            'principalId']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+        })
+        self.cmd('keyvault set-policy -n {vault2} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid2}', checks=[
+            self.check('activeKey.keyUrl', '{kid2}'),
+            self.check('activeKey.sourceVault', None)
+        ])
+        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid3} --source-vault {vault3} --enable-auto-key-rotation false', checks=[
+            self.check('activeKey.keyUrl', '{kid3}'),
+            self.check('activeKey.sourceVault.id', '{vault3_id}'),
             self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 

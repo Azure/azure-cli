@@ -4425,15 +4425,19 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
                                enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
+
     if source_vault:
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
         instance.active_key.source_vault = {'id': source_vault}
+
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
+
     return instance
 
 # endregion
