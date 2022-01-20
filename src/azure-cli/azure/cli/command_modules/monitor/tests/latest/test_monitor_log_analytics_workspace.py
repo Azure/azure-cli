@@ -479,22 +479,35 @@ class TestLogProfileScenarios(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_data_export', location='eastus')
-    def test_monitor_log_analytics_workspace_table(self, resource_group_name):
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table(self, resource_group):
 
         self.kwargs.update({
             'ws_name':self.create_random_name('ws-', 10),
-            'table_name': self.create_random_name('table-', 15),
+            'table_name': 'test_table1_CL',
 
         })
 
-        self.cmd('monitor log-analytics workspace create -g {rg} -n {workspace_name}')
-        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
-
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime --search "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT" --display-name test-table --description "a test table"', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 45),
+            self.check('totalRetentionInDays', 70),
+            self.check('schema.columns[0].name', 'col1'),
+            self.check('schema.columns[0].type', 'guid'),
+            self.check('schema.columns[1].name', 'TimeGenerated'),
+            self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspcae table update -g {rg} -n {table_name} --workspace-name {ws_name}',checks=[
-
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 50),
+            self.check('totalRetentionInDays', 80),
         ])
-        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}')
-        self.cmd('monitor log-analytics workspace table list -g {rg} --workspace-name {ws_name}')
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 50),
+            self.check('totalRetentionInDays', 80),
+        ])
+
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name}')

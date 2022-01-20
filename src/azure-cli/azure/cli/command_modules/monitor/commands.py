@@ -387,12 +387,12 @@ def load_command_table(self, _):
         g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
         g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
 
-    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables) as g:
+    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
-        g.custom_command('create', 'create_log_analytics_workspace_table')
-        g.custom_command('update', 'update_log_analytics_workspace_table')
-        g.command('delete', 'begin_delete')
+        g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_log_analytics_workspace_table', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
