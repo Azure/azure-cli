@@ -937,12 +937,16 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
             'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
             'cert2': 'cert2',
             'cert2_file': os.path.join(TEST_DIR, 'AuthCert2.pfx'),
+            'cert3': 'cert3',
+            'cert3_file': os.path.join(TEST_DIR, 'AuthCert3.pfx'),
             'settings': 'https_settings'
         })
         self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+
+        self.cmd( 'network application-gateway auth-cert update -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert3_file}" --no-wait')
 
         # test command of auth-cert list
         self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
@@ -1751,6 +1755,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}')
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.check('length(@)', 1))
+
+        # test waf-policy delete
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy list -g {rg}',
+                 checks=[
+                     self.check('length(@)', 0)
+                 ])
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
 
         # add two custom rules of this waf-policy
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
@@ -5076,6 +5088,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
         self.cmd('network watcher configure --locations westus westus2 eastus canadaeast --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
+
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
