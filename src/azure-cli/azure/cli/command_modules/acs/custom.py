@@ -110,6 +110,7 @@ from .addonconfiguration import (
     ensure_container_insights_for_monitoring,
 )
 from ._resourcegroup import get_rg_location
+from ._validators import extract_comma_separated_string
 
 logger = get_logger(__name__)
 
@@ -3112,7 +3113,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,
-                      no_wait=False):
+                      no_wait=False,
+                      aks_custom_headers=None):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
@@ -3186,6 +3188,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3193,6 +3203,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         cluster_name,
         nodepool_name,
         agent_pool,
+        headers=aks_custom_headers,
     )
 
 
@@ -3275,7 +3286,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          max_surge=None,
                          mode=None,
                          labels=None,
-                         no_wait=False):
+                         no_wait=False,
+                         aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -3339,6 +3351,14 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     if labels is not None:
         instance.node_labels = labels
 
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3346,6 +3366,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
