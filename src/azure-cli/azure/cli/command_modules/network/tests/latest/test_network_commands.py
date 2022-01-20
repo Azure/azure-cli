@@ -4843,7 +4843,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
 
-class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
