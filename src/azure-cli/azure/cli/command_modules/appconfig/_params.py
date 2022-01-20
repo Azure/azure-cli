@@ -126,7 +126,7 @@ def load_arguments(self, _):
         # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
-        c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
+        c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label", is_preview=True)
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:
         c.argument('src_name', help='The name of the source App Configuration.')
