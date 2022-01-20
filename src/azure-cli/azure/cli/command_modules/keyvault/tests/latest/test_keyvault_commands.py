@@ -2405,7 +2405,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
                  checks=[self.check('length(@)', 2)])
 
         # update the sas definitions
-        self.cmd('keyvault storage sas-definition create --vault-name {kv} --account-name {sa} -n {blob_sas_name} '
+        self.cmd('keyvault storage sas-definition update --vault-name {kv} --account-name {sa} -n {blob_sas_name} '
                  '--sas-type service --validity-period PT12H --template-uri "{blob_temp}" --disabled',
                  checks=[self.check('attributes.enabled', False), self.check('validityPeriod', 'PT12H')])
 
@@ -2455,6 +2455,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         self.cmd('keyvault storage remove --id {sa_id}')
         self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
         self.cmd('keyvault storage list-deleted --vault-name {kv}', checks=[self.check('length(@)', 1)])
+        self.cmd('keyvault storage show-deleted -n {sa} --vault-name {kv}', checks=[self.exists('recoveryId')])
 
         # recover the deleted storage account
         self.cmd('keyvault storage recover -n {sa} --vault-name {kv}')
@@ -2469,7 +2470,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
         # permanently delete the storage account
         self.cmd('keyvault storage remove -n {sa} --vault-name {kv}')
-        with self.assertRaisesRegex(CLIError, f'{storage_account} was not found in this key vault'):
+        with self.assertRaisesRegex(CLIError, 'not found'):  # CLIError will be raised saying storage account not found, this need to be refined later
             self.cmd('keyvault storage purge -n {sa} --vault-name {kv}')
         self.cmd('keyvault storage list --vault-name {kv}', checks=[self.check('length(@)', 0)])
         self.cmd('keyvault storage list-deleted --vault-name {kv}', checks=[self.check('length(@)', 0)])
