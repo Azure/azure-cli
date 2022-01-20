@@ -3234,7 +3234,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
-                          no_wait=False):
+                          no_wait=False,
+                          aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
@@ -3267,6 +3268,14 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
 
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3274,6 +3283,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
