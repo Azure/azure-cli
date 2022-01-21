@@ -260,7 +260,8 @@ def acr_repository_show_manifest(cmd,
         username=username,
         password=password)
 
-    return raw_result
+    print(raw_result)
+    return #raw_result
 
 
 def acr_repository_show_manifest_metadata(cmd,
