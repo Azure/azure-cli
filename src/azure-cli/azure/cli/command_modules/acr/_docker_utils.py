@@ -9,6 +9,7 @@ except ImportError:
     from urllib import urlencode
     from urlparse import urlparse, urlunparse
 
+from encodings import utf_8
 import time
 from json import loads
 from enum import Enum
@@ -558,7 +559,7 @@ def request_data_from_registry(http_method,
 
             if manifest_headers and response.status_code == 200:
                 next_link = response.headers['link'] if 'link' in response.headers else None
-                return response.content, next_link
+                return response.content.decode('utf-8'), next_link
 
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
