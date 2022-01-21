@@ -51,7 +51,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('linuxFxVersion', 'NODE|12-lts'),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
