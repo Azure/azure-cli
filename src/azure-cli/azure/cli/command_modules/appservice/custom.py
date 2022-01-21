@@ -2821,7 +2821,7 @@ class _StackRuntimeHelper:
         if site_config.app_settings is None:
             site_config.app_settings = []
 
-        for k, v in stack['configs'].items():
+        for k, v in stack.configs.items():
             already_in_appsettings = False
             for app_setting in site_config.app_settings:
                 if app_setting.name == k:
