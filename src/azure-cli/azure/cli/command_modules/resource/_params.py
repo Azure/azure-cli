@@ -644,7 +644,7 @@ def load_arguments(self, _):
     
     with self.argument_context('stack sub create') as c:
         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='[Optional] The resource group where the deployment stack will be created.')
+        c.argument('resource_group', arg_type=resource_group_name_type, help='[Optional] The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
         c.argument('location', options_list=['--location', '-l'], help='The location to store deployment stack.')
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
