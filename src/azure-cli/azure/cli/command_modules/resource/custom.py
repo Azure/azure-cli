@@ -2087,6 +2087,8 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if not update_behavior:
         update_behavior = "detachResources"
+    if [template_file, template_spec, template_uri].count(None) != 2:
+        raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
         get_subscription_response = rcf.deployment_stacks.get_at_subscription(name)
         if get_subscription_response:
@@ -2188,6 +2190,8 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if not update_behavior:
         update_behavior = "detachResources"
+    if [template_file, template_spec, template_uri].count(None) != 2:
+        raise InvalidArgumentValueError("Please enter only one of the following: template file, template spec, or template url")
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             from knack.prompting import prompt_y_n
