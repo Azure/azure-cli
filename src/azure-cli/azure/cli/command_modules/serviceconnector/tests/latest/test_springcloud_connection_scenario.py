@@ -11,8 +11,8 @@ from azure.cli.testsdk import (
     ScenarioTest,
     record_only
 )
-from azure_devtools.scenario_tests import RecordingProcessor
-from azure_devtools.scenario_tests.utilities import is_text_payload
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
     SOURCE_RESOURCES,

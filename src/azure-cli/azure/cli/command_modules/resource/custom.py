@@ -58,6 +58,8 @@ from ._bicep import (
     supports_bicep_publish
 )
 
+from ._utils import _build_preflight_error_message, _build_http_response_error_message
+
 logger = get_logger(__name__)
 
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
@@ -369,8 +371,9 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = deployment_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, deployment)
@@ -489,8 +492,9 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate_at_subscription_scope(deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
@@ -579,8 +583,9 @@ def _deploy_arm_template_at_resource_group(cmd,
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         try:
             validation_poller = mgmt_client.begin_validate(resource_group_name, deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment)
@@ -667,8 +672,9 @@ def _deploy_arm_template_at_management_group(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_management_group_scope(management_group_id,
                                                                                      deployment_name, deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -750,8 +756,9 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         try:
             validation_poller = mgmt_client.begin_validate_at_tenant_scope(deployment_name=deployment_name,
                                                                            parameters=deployment)
-        except HttpResponseError as cx:
-            raise_subdivision_deployment_error(cx.response.internal_response.text, cx.error.code if cx.error else None)
+        except HttpResponseError as err:
+            err_message = _build_http_response_error_message(err)
+            raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -927,13 +934,6 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, 
             init()
 
     return what_if_result
-
-
-def _build_preflight_error_message(preflight_error):
-    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
-    for detail in preflight_error.details or []:
-        err_messages.append(_build_preflight_error_message(detail))
-    return '\n'.join(err_messages)
 
 
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
@@ -2237,6 +2237,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None, location=None, assign_identity=None,
+                             mi_system_assigned=None, mi_user_assigned=None,
                              identity_scope=None, identity_role='Contributor', enforcement_mode='Default',
                              description=None):
     """Creates a policy assignment
@@ -2266,12 +2267,18 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                     raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
             assignment.not_scopes = kwargs_list
 
+    identities = None
     if cmd.supported_api_version(min_api='2018-05-01'):
         if location:
             assignment.location = location
+        if mi_system_assigned is not None or assign_identity is not None:
+            identities = [MSI_LOCAL_ID]
+        elif mi_user_assigned is not None:
+            identities = [mi_user_assigned]
+
         identity = None
-        if assign_identity is not None:
-            identity = _build_identities_info(cmd, assign_identity)
+        if identities is not None:
+            identity = _build_identities_info(cmd, identities, resource_group_name)
         assignment.identity = identity
 
     if name is None:
@@ -2280,20 +2287,47 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
-    if assign_identity is not None and identity_scope:
+    if identities is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
         _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
 
     return createdAssignment
 
 
-def _build_identities_info(cmd, identities):
+def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_namespace):
+    from msrestazure.tools import resource_id
+    if is_valid_resource_id(val):
+        return val
+
+    kwargs = {
+        'name': val,
+        'resource_group': resource_group,
+        'namespace': resource_namespace,
+        'type': resource_type,
+        'subscription': get_subscription_id(cli_ctx)
+    }
+    missing_kwargs = {k: v for k, v in kwargs.items() if not v}
+
+    return resource_id(**kwargs) if not missing_kwargs else None
+
+
+def _build_identities_info(cmd, identities, resourceGroupName):
     identities = identities or []
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    ResourceIdentity = cmd.get_models('Identity')
     identity_type = ResourceIdentityType.none
     if not identities or MSI_LOCAL_ID in identities:
-        identity_type = ResourceIdentityType.system_assigned
-    ResourceIdentity = cmd.get_models('Identity')
+        return ResourceIdentity(type=ResourceIdentityType.system_assigned)
+
+    user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if user_assigned_identities and len(user_assigned_identities) > 0:
+        msiId = _get_resource_id(cmd.cli_ctx, user_assigned_identities[0], resourceGroupName,
+                                 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
+
+        UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
+        userAssignedIdentity = {msiId: UserAssignedIdentitiesValue()}
+        return ResourceIdentity(type=ResourceIdentityType.user_assigned, user_assigned_identities=userAssignedIdentity)
+
     return ResourceIdentity(type=identity_type)
 
 
@@ -2438,16 +2472,24 @@ def _is_non_compliance_message_equivalent(first, second):
     return first_message.lower() == seccond_message.lower() and first_reference_id.lower() == second_reference_id.lower()
 
 
-def set_identity(cmd, name, scope=None, resource_group_name=None, identity_role='Contributor', identity_scope=None):
+def set_identity(cmd, name, scope=None, resource_group_name=None,
+                 mi_system_assigned=None, mi_user_assigned=None,
+                 identity_role='Contributor', identity_scope=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     scope = _build_policy_scope(subscription_id, resource_group_name, scope)
+    # Backward compatibility that assign system assigned MSI when none specified.
+    identities = None
+    if mi_system_assigned is not None or mi_user_assigned is None:
+        identities = [MSI_LOCAL_ID]
+    else:
+        identities = [mi_user_assigned]
 
     def getter():
         return policy_client.policy_assignments.get(scope, name)
 
     def setter(policyAssignment):
-        policyAssignment.identity = _build_identities_info(cmd, [MSI_LOCAL_ID])
+        policyAssignment.identity = _build_identities_info(cmd, identities, resource_group_name)
         return policy_client.policy_assignments.create(scope, name, policyAssignment)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
@@ -3541,18 +3583,18 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
                                                   latest_include_preview=latest_include_preview)
 
 
-def install_bicep_cli(cmd, version=None):
+def install_bicep_cli(cmd, version=None, target_platform=None):
     # The parameter version is actually a git tag here.
-    ensure_bicep_installation(release_tag=version)
+    ensure_bicep_installation(release_tag=version, target_platform=target_platform)
 
 
 def uninstall_bicep_cli(cmd):
     remove_bicep_installation()
 
 
-def upgrade_bicep_cli(cmd):
+def upgrade_bicep_cli(cmd, target_platform=None):
     latest_release_tag = get_bicep_latest_release_tag()
-    ensure_bicep_installation(release_tag=latest_release_tag)
+    ensure_bicep_installation(release_tag=latest_release_tag, target_platform=target_platform)
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None):

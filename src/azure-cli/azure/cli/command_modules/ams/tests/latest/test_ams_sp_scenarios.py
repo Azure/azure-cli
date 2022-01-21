@@ -7,7 +7,7 @@ import time
 from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class AmsSpTests(ScenarioTest):
     @ResourceGroupPreparer()
@@ -32,26 +32,27 @@ class AmsSpTests(ScenarioTest):
             spNewPassword = self.create_random_name(prefix='spp1!', length=16)
 
             self.kwargs.update({
-                'spName': 'http://{}'.format(resource_group),
+                'spName': '{}-access-sp'.format(amsname),
                 'spPassword': spPassword,
                 'spNewPassword': spNewPassword,
                 'role': 'Owner'
             })
 
             try:
-                self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
+                spjson = self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
                     self.check('AadSecret', '{spPassword}'),
                     self.check('ResourceGroup', '{rg}'),
                     self.check('AccountName', '{amsname}')
-                ])
+                ]).get_output_in_json()
+                self.kwargs.update({'appId': spjson['AadClientId']})
 
                 # Wait 2 minutes for role assignment to be created.
-                time.sleep(120)
-                
-                self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p {spNewPassword} --role {role}', checks=[
+                time.sleep(300)
+
+                self.cmd('az ams account sp reset-credentials -a {amsname} -g {rg} -n {appId} -p {spNewPassword}', checks=[
                     self.check('AadSecret', '{spNewPassword}'),
                     self.check('ResourceGroup', '{rg}'),
                     self.check('AccountName', '{amsname}')
                 ])
             finally:
-                self.cmd('ad app delete --id {spName}')
+                self.cmd('ad app delete --id {appId}')

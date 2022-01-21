@@ -744,7 +744,7 @@ def validate_private_dns_zone(cmd, namespace):
 def validate_scale_unit_ranges(namespace):
     unit_num = namespace.scale_units
     err_msg = "The number of --scale-units should in range [2, 50]."
-    if unit_num < 2 or unit_num > 50:
+    if unit_num is not None and (unit_num < 2 or unit_num > 50):
         raise InvalidArgumentValueError(err_msg)
 
 

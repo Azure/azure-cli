@@ -294,7 +294,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None):
+                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
+                        public_network_access=None, accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -404,6 +405,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.security_profile = {'securityType': security_type}
     if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
+    if public_network_access is not None:
+        disk.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if disk.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            disk.supported_capabilities = supportedCapabilities
+        else:
+            disk.supported_capabilities.accelerated_network = accelerated_network
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -424,7 +433,8 @@ def list_managed_disks(cmd, resource_group_name=None):
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
-                        disk_mbps_read_only=None, enable_bursting=None):
+                        disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
+                        accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -463,6 +473,14 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.disk_access_id = disk_access
     if enable_bursting is not None:
         instance.bursting_enabled = enable_bursting
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.accelerated_network = accelerated_network
     return instance
 # endregion
 
@@ -544,7 +562,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
+                    public_network_access=None, accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -599,6 +618,14 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         snapshot.disk_access_id = disk_access
     if edge_zone:
         snapshot.extended_location = edge_zone
+    if public_network_access is not None:
+        snapshot.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if snapshot.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            snapshot.supported_capabilities = supportedCapabilities
+        else:
+            snapshot.supported_capabilities.accelerated_network = accelerated_network
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -617,7 +644,8 @@ def list_snapshots(cmd, resource_group_name=None):
 
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
+                    accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -641,6 +669,14 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.accelerated_network = accelerated_network
     return instance
 # endregion
 
@@ -742,7 +778,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              v_cpus_available=None, v_cpus_per_core=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -960,7 +997,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
-        user_data=user_data, capacity_reservation_group=capacity_reservation_group)
+        user_data=user_data, capacity_reservation_group=capacity_reservation_group,
+        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1380,7 +1418,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
-              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None, **kwargs):
+              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1442,6 +1481,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         else:
             vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
+    if enable_hibernation is not None:
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        else:
+            vm.additional_capabilities.hibernation_enabled = enable_hibernation
+
     if priority is not None:
         vm.priority = priority
 
@@ -1481,6 +1527,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             logger.warning("VM size is already %s", size)
         else:
             vm.hardware_profile.vm_size = size
+
+    if v_cpus_available is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
 
     if ephemeral_os_disk_placement is not None:
         if vm.storage_profile.os_disk.diff_disk_settings is not None:
@@ -1621,7 +1673,11 @@ class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
     def write(self, str_or_bytes):
         content = str_or_bytes
         if isinstance(str_or_bytes, bytes):
-            content = str_or_bytes.decode('utf8')
+            try:
+                content = str_or_bytes.decode('utf8')
+            except UnicodeDecodeError:
+                logger.warning("A few characters have been ignored because they were not valid unicode.")
+                content = str_or_bytes.decode('ascii', 'ignore')
         try:
             self.out.write(content)
         except UnicodeEncodeError:
@@ -2400,9 +2456,12 @@ def vm_run_command_show(client,
                         vm_name=None,
                         run_command_name=None,
                         expand=None,
+                        instance_view=False,
                         location=None,
                         command_id=None):
     if resource_group_name or vm_name is not None or run_command_name is not None:
+        if instance_view:
+            expand = 'instanceView'
         return client.get_by_virtual_machine(resource_group_name=resource_group_name,
                                              vm_name=vm_name,
                                              run_command_name=run_command_name,
@@ -3308,7 +3367,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, ephemeral_os_disk_placement=None, **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3388,9 +3447,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             else:
                 vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
-    if scale_in_policy is not None:
+    if scale_in_policy is not None or force_deletion is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
-        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
 
     if enable_spot_restore is not None:
         vmss.spot_restore_policy.enabled = enable_spot_restore
@@ -3862,7 +3921,10 @@ def vmss_run_command_show(client,
                           vmss_name,
                           instance_id,
                           run_command_name,
-                          expand=None):
+                          expand=None,
+                          instance_view=False):
+    if instance_view:
+        expand = 'instanceView'
     return client.get(resource_group_name=resource_group_name,
                       vm_scale_set_name=vmss_name,
                       instance_id=instance_id,
@@ -4340,20 +4402,21 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 # disk encryption set
 def create_disk_encryption_set(
-        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault, encryption_type=None,
+        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault=None, encryption_type=None,
         location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
-        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
+    DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
     encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
-    source_vault = SourceVault(id=source_vault)
-    key_vault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    if source_vault is not None:
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        source_vault = SourceVault(id=source_vault)
+    key_for_disk_emcryption_set = KeyForDiskEncryptionSet(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=key_vault_and_key_reference, encryption_type=encryption_type,
+                                            active_key=key_for_disk_emcryption_set, encryption_type=encryption_type,
                                             rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
@@ -4369,15 +4432,19 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
                                enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
+
     if source_vault:
-        instance.active_key.source_vault.id = source_vault
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        instance.active_key.source_vault = {'id': source_vault}
+
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
+
     return instance
 
 # endregion
@@ -4424,8 +4491,44 @@ def sig_shared_gallery_list(client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       shared_to=shared_to)
+    return client.list(location=location, shared_to=shared_to)
+
+
+def get_page_result(generator, marker, show_next_marker=None):
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
+    result = list_generator(pages=pages)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+def list_generator(pages, num_results=50):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result
 
 
 def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
@@ -4454,21 +4557,23 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
                                sharing_update=sharing_update)
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+def sig_shared_image_definition_list(client, location, gallery_unique_name,
+                                     shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       gallery_unique_name=gallery_unique_name,
-                       shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
+                                  shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, gallery_unique_name=gallery_unique_name,
-                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
+                            gallery_image_name=gallery_image_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
 def gallery_application_create(client,

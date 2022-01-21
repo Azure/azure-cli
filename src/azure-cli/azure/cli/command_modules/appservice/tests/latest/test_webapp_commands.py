@@ -9,14 +9,18 @@ from unittest import mock
 import os
 import time
 import tempfile
-from azure_devtools.scenario_tests.utilities import create_random_name
+from azure.cli.testsdk.scenario_tests.utilities import create_random_name
 import requests
 import datetime
+import urllib3
+from knack.util import CLIError
+import certifi
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+from azure.cli.command_modules.appservice.utils import get_pool_manager
 
 from azure.cli.core.azclierror import ResourceNotFoundError
 
@@ -142,8 +146,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        # default runtimes aren't deterministic (depends on API response order), so runtime is specified here
-        r = self.cmd('webapp create -g {} -n {} --plan {} -r "node|14-lts" --deployment-local-git'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftp://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
@@ -339,6 +342,54 @@ class AppServiceLogTest(ScenarioTest):
 
 class AppServicePlanScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_elastic_scale_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale false'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --sku free'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true'.format(resource_group, plan), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_elastic_scale_plan_max_workers(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", False),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 1)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 10)
+        ])
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 20'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 20)
+        ])
+
+        # ensure that we can't make --max-elastic-worker-count < the number of workers
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9 --number-of-workers 10'.format(resource_group, plan), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 10 --number-of-workers 10'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --max-elastic-worker-count 9'.format(resource_group, plan), expect_failure=True)
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_retain_plan(self, resource_group):
         webapp_name = self.create_random_name('web', 24)
         plan = self.create_random_name('web-plan', 24)
@@ -370,6 +421,106 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group),
                  checks=[JMESPathCheck('length(@)', 0)])
 
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_zone_redundant_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
+
+        # test with unsupported SKU
+        plan2 = self.create_random_name('plan', 24)
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # test with unsupported location
+        self.cmd('appservice plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # ensure non zone redundant
+        plan = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
+
+
+class WebappElasticScaleTest(ScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count 10'.format(resource_group, plan))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True)
+        ])
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 1),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 1)
+        ])
+
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {} --prewarmed-instance-count {}".format(resource_group, app, 3, 5))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 3),
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 5)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_prewarmed_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --prewarmed-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.preWarmedInstanceCount", 4)
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_elastic_scale_min_elastic_instance_count(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        app = self.create_random_name('app', 24)
+        self.cmd('appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+
+        self.cmd("webapp create -g {} -n {} --plan {}".format(resource_group, app, plan))
+
+        # ensure we can't set this without the ASP having elastic scale enabled
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd('appservice plan update -g {} -n {} --elastic-scale true --max-elastic-worker-count {}'.format(resource_group, plan, 4))
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck("properties.elasticScaleEnabled", True),
+            JMESPathCheck("properties.maximumElasticWorkerCount", 4)
+        ])
+
+        # ensure we can't set the prewarmed instance count too high
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 5), expect_failure=True)
+
+        self.cmd("webapp update -g {} -n {} --minimum-elastic-instance-count {}".format(resource_group, app, 4))
+
+        self.cmd("webapp show -g {} -n {}".format(resource_group, app), checks=[
+            JMESPathCheck("siteConfig.minimumElasticInstanceCount", 4)
+        ])
 
 class WebappConfigureTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -1516,6 +1667,32 @@ class WebappListLocationsFreeSKUTest(ScenarioTest):
         self.assertEqual(asp_F1, result)
 
 
+class ContainerWebappE2ETest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_long_server_url(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container-e2e', length=24)
+        plan = self.create_random_name(prefix='webapp-hyperv-plan', length=24)
+        self.cmd('appservice plan create --hyper-v -n {} -g {} --sku p1v3 -l westus2'.format(plan, resource_group))
+        container = "mcr.microsoft.com/azure-app-service/windows/parkingpage:latest"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test', location='westus2')
+    def test_container_webapp_docker_image_name(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-container', length=24)
+        plan = self.create_random_name(prefix='webapp-plan', length=24)
+        self.cmd('appservice plan create --is-linux -n {} -g {} -l westus2'.format(plan, resource_group))
+        container = "nginx"
+        self.cmd('webapp create -n {} -g {} -p {} -i {}'.format(webapp_name, resource_group, plan, container), checks=[
+            JMESPathCheck('state', 'Running'),
+            JMESPathCheck('name', webapp_name),
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+        ])
+
+
 @unittest.skip("Known issue with creating windows containers")
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
     @AllowLargeResponse()
@@ -2103,6 +2280,81 @@ class DomainScenarioTest(ScenarioTest):
         ).assert_with_checks([
             JMESPathCheck('agreement_keys', "['DNRA', 'DNPA']")
         ])
+
+
+class TunnelProxyTest(unittest.TestCase):
+    def setUp(self):
+        # Clean pre-existing proxy env vars
+        for env_var in [
+            'NO_PROXY',
+            'no_proxy',
+            'HTTPS_PROXY',
+            'https_proxy',
+            'AZURE_CLI_DISABLE_CONNECTION_VERIFICATION',
+            'REQUESTS_CA_BUNDLE',
+        ]:
+            if env_var in os.environ:
+                del os.environ[env_var]
+        os.environ['HTTPS_PROXY'] = 'http://myproxy.local:8888'
+
+    def test_with_proxy(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.proxy.netloc, 'myproxy.local:8888')
+        with self.assertRaises(KeyError):
+            http.proxy_headers['proxy-authorization']
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_REQUIRED')
+        self.assertIsInstance(http, urllib3.ProxyManager)
+
+    def test_without_proxy(self):
+        del os.environ['HTTPS_PROXY']
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_no_proxy(self):
+        os.environ['NO_PROXY'] = 'azurewebsites.net'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertIsNone(http.proxy)
+        self.assertIsInstance(http, urllib3.PoolManager)
+        self.assertNotIsInstance(http, urllib3.ProxyManager)
+
+    def test_proxy_auth(self):
+        os.environ['HTTPS_PROXY'] = 'http://test_user:secret_p@ss@myproxy.local:8888'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(
+            http.proxy_headers['proxy-authorization'],
+            'Basic dGVzdF91c2VyOnNlY3JldF9wQHNz',
+        )
+
+    def test_proxy_custom_ca_bundle(self):
+        with tempfile.TemporaryFile() as file:
+            file = tempfile.NamedTemporaryFile(suffix='-ca-certificates.crt')
+            os.environ['REQUESTS_CA_BUNDLE'] = file.name
+            http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], file.name)
+
+    def test_proxy_custom_ca_bundle_incorrect(self):
+        with tempfile.TemporaryDirectory() as empty_folder:
+            os.environ['REQUESTS_CA_BUNDLE'] = f'{empty_folder}/ca-certificates.crt'
+
+            self.assertRaises(CLIError, get_pool_manager, 'https://scm.azurewebsites.net')
+
+    def test_proxy_default_ca_bundle(self):
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['ca_certs'], certifi.where())
+
+    def test_proxy_unsafe_ssl(self):
+        os.environ['AZURE_CLI_DISABLE_CONNECTION_VERIFICATION'] = '1'
+        http = get_pool_manager('https://scm.azurewebsites.net')
+
+        self.assertEqual(http.connection_pool_kw['cert_reqs'], 'CERT_NONE')
 
 
 if __name__ == '__main__':

@@ -37,15 +37,10 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-ROLE_ASSIGNMENT_CREATE_WARNING = (
-    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
-    "If needed, use the --role argument to explicitly create a role assignment."
-)
-
-NAME_DEPRECATION_WARNING = \
-    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
-
 logger = get_logger(__name__)
+
+SCOPE_WARNING = "In a future release, --scopes argument will become required for creating a role assignment. " \
+                "Please explicitly specify --scopes."
 
 # pylint: disable=too-many-lines
 
@@ -604,7 +599,7 @@ def list_apps(cmd, app_id=None, display_name=None, identifier_uri=None, query_fi
     if identifier_uri:
         sub_filters.append("identifierUris/any(s:s eq '{}')".format(identifier_uri))
 
-    result = client.applications.list(filter=(' and '.join(sub_filters)))
+    result = client.applications.list(filter=' and '.join(sub_filters) if sub_filters else None)
     if sub_filters or include_all:
         return list(result)
 
@@ -647,7 +642,7 @@ def list_sps(cmd, spn=None, display_name=None, query_filter=None, show_mine=None
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    result = client.service_principals.list(filter=(' and '.join(sub_filters)))
+    result = client.service_principals.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
     if sub_filters or include_all:
         return result
@@ -675,7 +670,7 @@ def list_users(client, upn=None, display_name=None, query_filter=None):
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
 
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def create_user(client, user_principal_name, display_name, password,
@@ -756,7 +751,7 @@ def list_groups(client, display_name=None, query_filter=None):
         sub_filters.append(query_filter)
     if display_name:
         sub_filters.append("startswith(displayName,'{}')".format(display_name))
-    return client.list(filter=(' and ').join(sub_filters))
+    return client.list(filter=' and '.join(sub_filters) if sub_filters else None)
 
 
 def list_group_owners(cmd, group_id):
@@ -1404,14 +1399,18 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
+    if role and not scopes:
+        logger.warning(SCOPE_WARNING)
+        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None
@@ -1470,13 +1469,10 @@ def create_service_principal_for_rbac(
                     raise
     sp_oid = aad_sp.object_id
 
-    # retry while server replication is done
-    if not skip_assignment:
-        if not role:
-            role = "Contributor"
-            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
+    if role:
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
+            # retry till server replication is done
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
@@ -1500,7 +1496,6 @@ def create_service_principal_for_rbac(
                     raise
 
     logger.warning(CREDENTIAL_WARNING)
-    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1514,7 +1509,6 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }

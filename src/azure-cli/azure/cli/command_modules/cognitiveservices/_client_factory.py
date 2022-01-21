@@ -18,5 +18,17 @@ def cf_deleted_accounts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).deleted_accounts
 
 
+def cf_deployments(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).deployments
+
+
+def cf_commitment_tiers(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).commitment_tiers
+
+
+def cf_commitment_plans(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).commitment_plans
+
+
 def cf_resource_skus(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).resource_skus

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -78,7 +80,7 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
         'tokenType': creds[0],
         'accessToken': creds[1],
         # 'expires_on': creds[2].get('expires_on', None),
-        'expiresOn': creds[2].get('expiresOn', None),
+        'expiresOn': creds[2]['expiresOn'],
         'tenant': tenant
     }
     if subscription:
@@ -97,6 +99,8 @@ def set_active_subscription(cmd, subscription):
 
 def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
+    _remove_adal_token_cache()
+
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -160,6 +164,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
 def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
+    _remove_adal_token_cache()
+
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
 
@@ -204,3 +210,15 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
+
+
+def _remove_adal_token_cache():
+    """Remove ADAL token cache file ~/.azure/accessTokens.json, as it is no longer needed by MSAL-based Azure CLI.
+    """
+    from azure.cli.core._environment import get_config_dir
+    adal_token_cache = os.path.join(get_config_dir(), 'accessTokens.json')
+    try:
+        os.remove(adal_token_cache)
+        return True  # Deleted
+    except FileNotFoundError:
+        return False  # Not exist

@@ -156,6 +156,8 @@ def get_lang_from_content(src_path, html=False, is_linux=False):
                 break
             if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
+                if not os.path.isfile(package_netcore_file):
+                    package_netcore_file = os.path.join(_dirpath, file)
                 break
 
     if html:
@@ -367,11 +369,15 @@ def detect_os_form_src(src_dir, html=False):
 
 
 def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, plan=None):
-    _default_asp = "{}_asp_{:04}".format(user, randint(0, 9999))
+    _default_asp = _get_default_plan_name(user)
     if plan is None:  # --plan not provided by user
         # get the plan name to use
         return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
     return plan
+
+
+def _get_default_plan_name(user):
+    return "{}_asp_{:04}".format(user, randint(0, 9999))
 
 
 # Portal uses the current_stack property in the app metadata to display the correct stack
@@ -388,8 +394,9 @@ def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, 
     client = web_client_factory(cmd.cli_ctx)
     if create_rg:  # if new RG needs to be created use the default name
         return plan_name
+
     # get all ASPs in the RG & filter to the ones that contain the plan_name
-    _asp_generic = plan_name[:-len(plan_name.split("_")[4])]
+    _asp_generic = plan_name[:plan_name.rindex("_")]
     _asp_list = (list(filter(lambda x: _asp_generic in x.name,
                              client.app_service_plans.list_by_resource_group(resource_group_name))))
     _num_asp = len(_asp_list)

@@ -679,6 +679,13 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_waf_managed_rule_exclusion')
         g.custom_command('list', 'list_waf_managed_rule_exclusion')
 
+    with self.command_group('network application-gateway waf-policy managed-rule exclusion rule-set', network_ag_waf_sdk,
+                            client_factory=cf_app_gateway_waf_policy,
+                            min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_waf_exclusion_rule_set')
+        g.custom_command('remove', 'remove_waf_exclusion_rule_set')
+        g.custom_command('list', 'list_waf_exclusion_rule_set')
+
     with self.command_group('network application-gateway client-cert', network_ag_sdk, min_api='2020-06-01', is_preview=True) as g:
         g.custom_command('add', 'add_trusted_client_certificate')
         g.custom_command('remove', 'remove_trusted_client_certificate')
@@ -808,6 +815,10 @@ def load_command_table(self, _):
         g.show_command('show')
         g.command('list', 'list')
 
+    with self.command_group('network express-route peering connection ipv6-config', network_erconn_sdk) as g:
+        g.custom_command('set', 'set_express_route_peering_connection_config')
+        g.custom_command('remove', 'remove_express_route_peering_connection_config')
+
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
         g.show_command('show', is_preview=True)
         g.show_command('list', 'list', is_preview=True)
@@ -865,6 +876,16 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show')
         g.command('list', 'list')
+
+    with self.command_group('network private-endpoint ip-config', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_ip_config')
+        g.custom_command('remove', 'remove_private_endpoint_ip_config')
+        g.custom_command('list', 'list_private_endpoint_ip_config')
+
+    with self.command_group('network private-endpoint asg', network_private_endpoint_sdk, min_api='2021-05-01') as g:
+        g.custom_command('add', 'add_private_endpoint_asg')
+        g.custom_command('remove', 'remove_private_endpoint_asg')
+        g.custom_command('list', 'list_private_endpoint_asg')
     # endregion
 
     # region PrivateLinkServices
@@ -938,6 +959,8 @@ def load_command_table(self, _):
 
     with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_lb_backend_address_pool')
+        g.generic_update_command('update', setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_backend_address_pool')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('delete', 'delete_lb_backend_address_pool')

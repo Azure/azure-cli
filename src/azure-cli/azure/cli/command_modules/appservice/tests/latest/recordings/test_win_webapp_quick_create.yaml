@@ -3,7 +3,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -13,91 +13,36 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) AZURECLI/2.30.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2021-01-15
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-10-27T12:03:17Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Web/serverFarms/plan-quick000003''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '431'
+      - '230'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 27 Oct 2021 12:03:19 GMT
+      - Thu, 11 Nov 2021 23:56:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - gateway
     status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "plan-quick000003", "type": "Microsoft.Web/serverfarms", "location":
-      "japanwest", "properties": {"skuName": "B1", "capacity": 1}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '146'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2020-09-01
-  response:
-    body:
-      string: '{"status":"Success","error":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '33'
-      content-type:
-      - application/json
-      date:
-      - Wed, 27 Oct 2021 12:03:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
+      code: 404
+      message: Not Found
 - request:
     body: null
     headers:
@@ -112,21 +57,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-10-27T12:03:17Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-11-11T23:56:05Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '431'
+      - '313'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 27 Oct 2021 12:03:21 GMT
+      - Thu, 11 Nov 2021 23:56:18 GMT
       expires:
       - '-1'
       pragma:
@@ -159,24 +104,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"japanwest","properties":{"serverFarmId":30248,"name":"plan-quick000003","sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
-        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-013_30248","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"japanwest","properties":{"serverFarmId":18539,"name":"plan-quick000003","sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_18539","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1685'
+      - '1484'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:03:35 GMT
+      - Thu, 11 Nov 2021 23:56:30 GMT
       etag:
-      - '"1D7CB2AA937F280"'
+      - '"1D7D757BDB16B0B"'
       expires:
       - '-1'
       pragma:
@@ -194,7 +139,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -214,132 +159,23 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2020-09-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
-        West","properties":{"serverFarmId":30248,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
-        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-013_30248","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+        West","properties":{"serverFarmId":18539,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_18539","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1613'
+      - '1412'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:03:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"name": "webapp-quick000002", "type": "Microsoft.Web/sites", "location":
-      "Japan West", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '332'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -g -n --plan --deployment-local-git
-      User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2020-09-01
-  response:
-    body:
-      string: '{"status":"Success","error":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '33'
-      content-type:
-      - application/json
-      date:
-      - Wed, 27 Oct 2021 12:03:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --plan --deployment-local-git
-      User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2020-09-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
-        West","properties":{"serverFarmId":30248,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"e483435e-282d-4ac1-92b5-d6123f2aa360","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
-        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-013_30248","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1613'
-      content-type:
-      - application/json
-      date:
-      - Wed, 27 Oct 2021 12:03:38 GMT
+      - Thu, 11 Nov 2021 23:56:31 GMT
       expires:
       - '-1'
       pragma:
@@ -379,7 +215,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2021-01-15
   response:
@@ -393,7 +229,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:03:38 GMT
+      - Thu, 11 Nov 2021 23:56:32 GMT
       expires:
       - '-1'
       pragma:
@@ -437,26 +273,26 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002?api-version=2020-09-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002","name":"webapp-quick000002","type":"Microsoft.Web/sites","kind":"app","location":"Japan
-        West","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-013.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-10-27T12:03:46.2766667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        West","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-11-11T23:56:39.7566667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
         all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
-        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"sitePort":null},"deploymentId":"webapp-quick000002","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"30E3673979DFB5673924412D39370809E608E2DE4E889BD01C7B80FC38A57EED","kind":"app","inboundIpAddress":"40.74.100.129","possibleInboundIpAddresses":"40.74.100.129","ftpUsername":"webapp-quick000002\\$webapp-quick000002","ftpsHostName":"ftps://waws-prod-os1-013.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.100.129,40.74.85.64,40.74.126.115,40.74.125.67,40.74.128.17","possibleOutboundIpAddresses":"40.74.100.129,40.74.85.64,40.74.126.115,40.74.125.67,40.74.128.17,40.74.127.201,40.74.128.130,23.100.108.106,40.74.128.122,40.74.128.53","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-013","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"sitePort":null},"deploymentId":"webapp-quick000002","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"webapp-quick000002\\$webapp-quick000002","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6277'
+      - '6023'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:04 GMT
+      - Thu, 11 Nov 2021 23:56:59 GMT
       etag:
-      - '"1D7CB2AB25FB280"'
+      - '"1D7D757C55927C0"'
       expires:
       - '-1'
       pragma:
@@ -494,7 +330,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/web?api-version=2020-09-01
   response:
@@ -507,11 +343,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3770'
+      - '3693'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:06 GMT
+      - Thu, 11 Nov 2021 23:57:00 GMT
       expires:
       - '-1'
       pragma:
@@ -568,7 +404,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/web?api-version=2020-09-01
   response:
@@ -581,13 +417,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3760'
+      - '3683'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:10 GMT
+      - Thu, 11 Nov 2021 23:57:04 GMT
       etag:
-      - '"1D7CB2AB25FB280"'
+      - '"1D7D757C55927C0"'
       expires:
       - '-1'
       pragma:
@@ -625,21 +461,21 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Web/publishingUsers/web?api-version=2020-09-01
   response:
     body:
-      string: '{"id":null,"name":"web","type":"Microsoft.Web/publishingUsers/web","properties":{"name":null,"publishingUserName":"panchagnula","publishingPassword":null,"publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":null}}'
+      string: '{"id":null,"name":"web","type":"Microsoft.Web/publishingUsers/web","properties":{"name":null,"publishingUserName":null,"publishingPassword":null,"publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '267'
+      - '258'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:10 GMT
+      - Thu, 11 Nov 2021 23:57:04 GMT
       expires:
       - '-1'
       pragma:
@@ -675,7 +511,7 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/sourcecontrols/web?api-version=2020-09-01
   response:
@@ -686,13 +522,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '593'
+      - '516'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:11 GMT
+      - Thu, 11 Nov 2021 23:57:06 GMT
       etag:
-      - '"1D7CB2ABFCA7360"'
+      - '"1D7D757D3441520"'
       expires:
       - '-1'
       pragma:
@@ -732,29 +568,24 @@ interactions:
       ParameterSetName:
       - -g -n --plan --deployment-local-git
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/publishxml?api-version=2020-09-01
   response:
     body:
       string: <publishData><publishProfile profileName="webapp-quick000002 - Web Deploy"
         publishMethod="MSDeploy" publishUrl="webapp-quick000002.scm.azurewebsites.net:443"
-        msdeploySite="webapp-quick000002" userName="$webapp-quick000002" userPWD="rfCbTGXohe3Am6BPl5dkq2rRzlbXC2NRviPjkgthW26SzxweACkRrytJ4DNm"
+        msdeploySite="webapp-quick000002" userName="$webapp-quick000002" userPWD="hSiWEFToJY5qpBSCXxThY3DltFMj39LtEcxixAJu2gxivKZYdn32nQfseSYh"
         destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-quick000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-013.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="webapp-quick000002\$webapp-quick000002" userPWD="rfCbTGXohe3Am6BPl5dkq2rRzlbXC2NRviPjkgthW26SzxweACkRrytJ4DNm"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="webapp-quick000002\$webapp-quick000002" userPWD="hSiWEFToJY5qpBSCXxThY3DltFMj39LtEcxixAJu2gxivKZYdn32nQfseSYh"
         destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-quick000002
         - Zip Deploy" publishMethod="ZipDeploy" publishUrl="webapp-quick000002.scm.azurewebsites.net:443"
-        userName="$webapp-quick000002" userPWD="rfCbTGXohe3Am6BPl5dkq2rRzlbXC2NRviPjkgthW26SzxweACkRrytJ4DNm"
-        destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-quick000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-013dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="webapp-quick000002\$webapp-quick000002" userPWD="rfCbTGXohe3Am6BPl5dkq2rRzlbXC2NRviPjkgthW26SzxweACkRrytJ4DNm"
+        userName="$webapp-quick000002" userPWD="hSiWEFToJY5qpBSCXxThY3DltFMj39LtEcxixAJu2gxivKZYdn32nQfseSYh"
         destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -762,11 +593,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2247'
+      - '1589'
       content-type:
       - application/xml
       date:
-      - Wed, 27 Oct 2021 12:04:13 GMT
+      - Thu, 11 Nov 2021 23:57:07 GMT
       expires:
       - '-1'
       pragma:
@@ -802,7 +633,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/appsettings/list?api-version=2020-09-01
   response:
@@ -813,11 +644,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '362'
+      - '297'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:14 GMT
+      - Thu, 11 Nov 2021 23:57:09 GMT
       expires:
       - '-1'
       pragma:
@@ -855,7 +686,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.2 (macOS-10.16-x86_64-i386-64bit)
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/slotConfigNames?api-version=2020-09-01
   response:
@@ -866,11 +697,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '196'
+      - '190'
       content-type:
       - application/json
       date:
-      - Wed, 27 Oct 2021 12:04:16 GMT
+      - Thu, 11 Nov 2021 23:57:10 GMT
       expires:
       - '-1'
       pragma:

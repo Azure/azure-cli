@@ -4,11 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import requests
-from azure.core.credentials import AccessToken
 from knack.log import get_logger
 from msrestazure.azure_active_directory import MSIAuthentication
 
-from .util import _normalize_scopes, scopes_to_resource
+from .util import _normalize_scopes, scopes_to_resource, AccessToken
 
 logger = get_logger(__name__)
 
@@ -93,6 +92,13 @@ def _normalize_expires_on(expires_on):
         expires_on_epoch_int = int(expires_on)
     except ValueError:
         import datetime
+
+        # Python 3.6 doesn't recognize timezone as +00:00.
+        # These lines can be dropped after Python 3.6 is dropped.
+        # https://stackoverflow.com/questions/30999230/how-to-parse-timezone-with-colon
+        if expires_on[-3] == ":":
+            expires_on = expires_on[:-3] + expires_on[-2:]
+
         # Treat as datetime string "11/05/2021 15:18:31 +00:00"
         expires_on_epoch_int = int(datetime.datetime.strptime(expires_on, '%m/%d/%Y %H:%M:%S %z').timestamp())
 

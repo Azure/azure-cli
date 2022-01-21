@@ -11,7 +11,7 @@ import tempfile
 import requests
 import datetime
 
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
@@ -286,7 +286,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -469,7 +469,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 4' 
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Linux --runtime powershell --functions-version 4'
                  .format(resource_group, functionapp_name, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -483,7 +483,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathPatternCheck("[?name=='WEBSITE_CONTENTSHARE'].value|[0]", "^" + functionapp_name.lower()[0:50])])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -559,7 +559,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('powerShellVersion', '~6')])
+            JMESPathCheck('powerShellVersion', '~7')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -599,7 +599,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'dotnet-isolated')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('netFrameworkVersion', 'v5.0')])
+             JMESPathCheck('netFrameworkVersion', 'v4.0')])
+
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -686,6 +687,29 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+
+class FunctionAppASPZoneRedundant(ScenarioTest):
+    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_functionapp_zone_redundant_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku P1V2'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.zoneRedundant', True), JMESPathCheck('properties.numberOfWorkers', 3)])
+
+        # test with unsupported SKU
+        plan2 = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # test with unsupported location
+        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
+
+        # ensure non zone redundant
+        plan = self.create_random_name('plan', 24)
+        self.cmd('functionapp plan create -g {} -n {} -l {} --sku FREE'.format(resource_group, plan, LINUX_ASP_LOCATION_WEBAPP))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
 
 class FunctionAppWithAppInsightsDefault(ScenarioTest):
@@ -1248,6 +1272,35 @@ class FunctionAppFunctionTests(LiveScenarioTest):
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('scriptHref', 'https://{}.azurewebsites.net/admin/vfs/site/wwwroot/{}/run.csx'.format(functionapp_name, function_name))])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_windows_zip_deploy(self, resource_group, storage_account):
+        zip_file = os.path.join(TEST_DIR, 'sample_csx_function_httptrigger/sample_csx_function_httptrigger.zip')
+        functionapp_name = self.create_random_name('functionappkeys', 40)
+        plan_name = self.create_random_name(prefix='functionappkeysplan', length=40)
+        function_name = "HttpTrigger"
+
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+
+        requests.get('http://{}.scm.azurewebsites.net'.format(functionapp_name), timeout=240)
+        time.sleep(30)
+
+        self.cmd('functionapp show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('kind', 'functionapp'),
+            JMESPathCheck('name', functionapp_name),
+            JMESPathCheck('reserved', False),
+        ])
+
+        self.cmd('functionapp deployment source config-zip --build-remote -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)])
+
+        self.cmd('functionapp function show -g {} -n {} --function-name {}'.format(resource_group, functionapp_name, function_name)).assert_with_checks([
+            JMESPathCheck('name', '{}/{}'.format(functionapp_name, function_name)),
+            JMESPathCheck('resourceGroup', resource_group),
+            JMESPathCheck('scriptHref', 'https://{}.azurewebsites.net/admin/vfs/site/wwwroot/{}/run.csx'.format(functionapp_name, function_name))])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1505,6 +1558,61 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             'functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('length(@)', 0)
+        ])
+        self.cmd(
+            'functionapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg3")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg4")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg5")
+    @StorageAccountPreparer()
+    def test_functionapp_vnet_duplicate_name(self, storage_account, resource_group, rg2, rg3, rg4, rg5):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        plan = self.create_random_name('plan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+        slot_functionapp_name = "slot"
+        subnet_id_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}"
+        subnet_id = subnet_id_fmt.format(self.get_subscription_id(), resource_group, vnet_name, subnet_name)
+
+        for group in [resource_group, rg2, rg3, rg4, rg5]:
+            self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+                group, vnet_name, subnet_name))
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, functionapp_name, vnet_name, subnet_name), checks=[
+                JMESPathCheck('subnetResourceId', subnet_id)
+        ])
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name),
+            JMESPathCheck('[0].vnetResourceId', subnet_id)
+        ])
+        self.cmd(
+            'functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, functionapp_name, slot_functionapp_name))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --slot {}'.format(resource_group, functionapp_name, vnet_name, subnet_name, slot_functionapp_name), checks=[
+            JMESPathCheck('subnetResourceId', subnet_id)
+        ])
+        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name),
+            JMESPathCheck('[0].vnetResourceId', subnet_id)
         ])
         self.cmd(
             'functionapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name))

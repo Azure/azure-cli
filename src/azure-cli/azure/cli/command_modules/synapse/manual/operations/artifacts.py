@@ -8,13 +8,15 @@ import logging
 import os
 from azure.synapse.artifacts.models import (LinkedService, Dataset, PipelineResource, RunFilterParameters,
                                             Trigger, DataFlow, BigDataPoolReference, NotebookSessionProperties,
-                                            NotebookResource, SparkJobDefinition)
+                                            NotebookResource, SparkJobDefinition, SqlScriptResource, SqlScriptFolder,
+                                            SqlScriptContent, SqlScriptMetadata, SqlScript, SqlConnection,
+                                            NotebookFolder)
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from .._client_factory import (cf_synapse_linked_service, cf_synapse_dataset, cf_synapse_pipeline,
                                cf_synapse_pipeline_run, cf_synapse_trigger, cf_synapse_trigger_run,
                                cf_synapse_data_flow, cf_synapse_notebook, cf_synapse_spark_pool,
-                               cf_synapse_spark_job_definition, cf_synapse_library)
+                               cf_synapse_spark_job_definition, cf_synapse_library, cf_synapse_sql_script)
 from ..constant import EXECUTOR_SIZE, SPARK_SERVICE_ENDPOINT_API_VERSION
 
 
@@ -217,7 +219,7 @@ def delete_data_flow(cmd, workspace_name, data_flow_name, no_wait=False):
 
 # Notebook
 def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_name, spark_pool_name=None,
-                              executor_size="Small", executor_count=2, no_wait=False):
+                              folder_path=None, executor_size="Small", executor_count=2, no_wait=False):
     client = cf_synapse_notebook(cmd.cli_ctx, workspace_name)
     spark_pool_client = cf_synapse_spark_pool(cmd.cli_ctx, workspace_name)
     if spark_pool_name is not None:
@@ -247,6 +249,7 @@ def create_or_update_notebook(cmd, workspace_name, definition_file, notebook_nam
                                                                          executor_memory=options['memory'],
                                                                          executor_cores=options['cores'],
                                                                          num_executors=executor_count)
+        definition_file['folder'] = NotebookFolder(name=folder_path)
     properties = NotebookResource(name=notebook_name, properties=definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_notebook,
                        notebook_name, properties, polling=True)
@@ -456,8 +459,96 @@ def delete_spark_job_definition(cmd, workspace_name, spark_job_definition_name, 
 
 
 def create_or_update_spark_job_definition(cmd, workspace_name, spark_job_definition_name, definition_file,
-                                          no_wait=False):
+                                          folder_path=None, no_wait=False):
     client = cf_synapse_spark_job_definition(cmd.cli_ctx, workspace_name)
+    folder = {}
+    folder['name'] = folder_path
+    definition_file['folder'] = folder
     properties = SparkJobDefinition.from_dict(definition_file)
     return sdk_no_wait(no_wait, client.begin_create_or_update_spark_job_definition,
                        spark_job_definition_name, properties, polling=True)
+
+
+def list_sql_scripts(cmd, workspace_name):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return client.get_sql_scripts_by_workspace()
+
+
+def get_sql_script(cmd, workspace_name, sql_script_name):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return client.get_sql_script(sql_script_name)
+
+
+def delete_sql_script(cmd, workspace_name, sql_script_name, no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    return sdk_no_wait(no_wait, client.begin_delete_sql_script, sql_script_name, polling=True)
+
+
+def create_sql_script(cmd, workspace_name, sql_script_name, definition_file, result_limit=5000,
+                      folder_name=None, description=None, sql_pool_name=None,
+                      sql_database_name=None, additional_properties=None, no_wait=False):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    try:
+        with open(definition_file, 'r') as stream:
+            query = stream.read()
+    except:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        err_msg = 'Definition file path is invalid'
+        raise InvalidArgumentValueError(err_msg)
+    if sql_pool_name:
+        if sql_pool_name.lower() == 'built-in':
+            sql_pool_type = 'SqlOnDemand'
+            current_connection = SqlConnection(type=sql_pool_type,
+                                               pool_name='Built-in',
+                                               database_name=sql_database_name)
+        else:
+            sql_pool_type = 'SqlPool'
+            current_connection = SqlConnection(type=sql_pool_type,
+                                               pool_name=sql_pool_name,
+                                               database_name=sql_database_name)
+    else:
+        current_connection = SqlConnection(type='SqlOnDemand',
+                                           pool_name='Built-in',
+                                           database_name='master')
+
+    sql_script_content = SqlScriptContent(query=query,
+                                          current_connection=current_connection,
+                                          result_limit=result_limit,
+                                          metadata=SqlScriptMetadata(language='sql'))
+    sql_script_folder = SqlScriptFolder(name=folder_name)
+    properties = SqlScript(additional_properties=additional_properties,
+                           description=description,
+                           type='SqlQuery',
+                           content=sql_script_content,
+                           folder=sql_script_folder)
+    sql_script = SqlScriptResource(name=sql_script_name, properties=properties)
+    return sdk_no_wait(no_wait, client.begin_create_or_update_sql_script,
+                       sql_script_name, sql_script, polling=True)
+
+
+def export_sql_script(cmd, workspace_name, output_folder, sql_script_name=None):
+    client = cf_synapse_sql_script(cmd.cli_ctx, workspace_name)
+    if sql_script_name is not None:
+        sql_script_query = client.get_sql_script(sql_script_name).properties.content.query
+        path = os.path.join(output_folder, sql_script_name + '.sql')
+        try:
+            with open(path, 'w') as f:
+                f.write(sql_script_query)
+            print(sql_script_name + 'export success')
+        except:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            err_msg = 'Unable to export to file: {}'.format(path)
+            raise InvalidArgumentValueError(err_msg)
+    else:
+        sql_scripts = client.get_sql_scripts_by_workspace()
+        for sql_script in sql_scripts:
+            sql_script_query = client.get_sql_script(sql_script.name).properties.content.query
+            path = os.path.join(output_folder, sql_script.name + '.sql')
+            try:
+                with open(path, 'w') as f:
+                    f.write(sql_script_query)
+                print(sql_script.name + 'export success')
+            except:
+                from azure.cli.core.azclierror import InvalidArgumentValueError
+                err_msg = 'Unable to export to file: {}'.format(path)
+                raise InvalidArgumentValueError(err_msg)

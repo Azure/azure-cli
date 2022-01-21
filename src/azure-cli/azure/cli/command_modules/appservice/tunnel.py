@@ -18,6 +18,7 @@ from threading import Thread
 import websocket
 from websocket import create_connection, WebSocket
 
+from .utils import get_pool_manager
 from knack.util import CLIError
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -79,9 +80,7 @@ class TunnelServer:
             return is_port_open
 
     def is_webapp_up(self):
-        import certifi
         import urllib3
-        from azure.cli.core.util import should_disable_connection_verify
 
         try:
             import urllib3.contrib.pyopenssl
@@ -89,11 +88,9 @@ class TunnelServer:
         except ImportError:
             pass
 
-        http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        if should_disable_connection_verify():
-            http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
+        http = get_pool_manager(url)
         if self.instance is not None:
             headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(

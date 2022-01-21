@@ -6,7 +6,7 @@
 # pylint: disable=protected-access
 
 import unittest
-from ..util import scopes_to_resource, resource_to_scopes, _normalize_scopes, _generate_login_command
+from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _normalize_scopes, _generate_login_command
 
 
 class TestUtil(unittest.TestCase):

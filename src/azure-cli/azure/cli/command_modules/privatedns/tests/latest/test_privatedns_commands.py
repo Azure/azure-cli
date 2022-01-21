@@ -376,7 +376,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutZone_ZoneExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
-        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns zone create -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -392,7 +392,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     def test_PatchZone_ZoneExistsIfMatchFailure_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         self.kwargs['etag'] = self.create_guid()
-        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
+        with self.assertRaisesRegex(HttpResponseError, 'etag mismatch'):
             self.cmd('az network private-dns zone update -g {rg} -n {zone} --if-match {etag}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -439,7 +439,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchZone_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns zone update -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -462,7 +462,7 @@ class PrivateDnsZonesTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetZone_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az network private-dns zone show -g {rg} -n {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -511,7 +511,7 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutLink_LinkExistsIfNoneMatchFailure_ExpectError(self, resource_group):
         self._Create_VirtualNetworkLink()
-        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns link vnet create -g {rg} -n {link} -z {zone} -v {vnet} -e {registrationEnabled}')
 
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
@@ -531,21 +531,21 @@ class PrivateDnsLinksTests(BaseScenarioTests):
         self._Create_VirtualNetworkLink()
         self.kwargs['etag'] = self.create_guid()
         cmd = "az network private-dns link vnet update -g {rg} -n {link} -z {zone} --if-match '{etag}'"
-        with self.assertRaisesRegexp(HttpResponseError, 'etag mismatch'):
+        with self.assertRaisesRegex(HttpResponseError, 'etag mismatch'):
             self.cmd(cmd)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PatchLink_LinkNotExists_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns link vnet update -g {rg} -n {link} -z {zone}')
 
     @live_only()    # live only until https://github.com/Azure/azure-python-devtools/pull/58 fixed
@@ -627,14 +627,14 @@ class PrivateDnsLinksTests(BaseScenarioTests):
     def test_GetLink_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_GetLink_LinkNotExists_ExpectError(self, resource_group):
         self._Create_PrivateZone()
         GenerateVirtualNetworkLinkName(self)
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az network private-dns link vnet show -g {rg} -n {link} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -685,14 +685,14 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
     def test_PutRecordSet_ZoneNotExists_ExpectError(self, resource_group):
         GeneratePrivateZoneName(self)
         GenerateRecordSetName(self)
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'ResourceNotFound'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'ResourceNotFound'):
             self.cmd('az network private-dns record-set a create -g {rg} -n {recordset} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
     def test_PutRecordSet_IfNoneMatchFailure_ExpectError(self, resource_group):
         zone = self._Create_PrivateZone()
         self._Create_RecordSet('a', zone['name'])
-        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
             self.cmd('az network private-dns record-set {recordType} create -g {rg} -n {recordset} -z {zone}')
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -706,7 +706,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         zone = self._Create_PrivateZone()
         recordset = self._Create_RecordSet('a', zone['name'])
         etag = self.create_guid()
-        with self.assertRaisesRegexp(HttpResponseError, 'PreconditionFailed'):
+        with self.assertRaisesRegex(HttpResponseError, 'PreconditionFailed'):
             self._Update_RecordSet(recordset['name'], 'a', zone['name'], etag)
 
     @ResourceGroupPreparer(name_prefix='clitest_privatedns')
@@ -969,15 +969,15 @@ class PrivateDnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_PrivateDnsZone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
             self._test_PrivateDnsZone('404zone.com', '')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
             self._test_PrivateDnsZone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
@@ -988,12 +988,12 @@ class PrivateDnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_PrivateDnsZone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
         # Difference with Linux platform while reading a directory
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
             self._test_PrivateDnsZone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 

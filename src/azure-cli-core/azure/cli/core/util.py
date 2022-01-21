@@ -60,7 +60,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
     from requests.exceptions import SSLError, HTTPError
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -185,8 +185,8 @@ def extract_http_operation_error(ex):
 
 
 def get_error_type_by_azure_error(ex):
-    import azure.core.exceptions as exceptions
-    import azure.cli.core.azclierror as azclierror
+    from azure.core import exceptions
+    from azure.cli.core import azclierror
 
     if isinstance(ex, exceptions.HttpResponseError):
         status_code = str(ex.status_code)
@@ -205,7 +205,7 @@ def get_error_type_by_azure_error(ex):
 
 # pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
-    import azure.cli.core.azclierror as azclierror
+    from azure.cli.core import azclierror
 
     if status_code == '400':
         return azclierror.BadRequestError
@@ -380,6 +380,13 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
+
+    _print('Dependencies:')
+    dependencies_versions = get_dependency_versions()
+    for k, v in dependencies_versions.items():
+        _print(k.ljust(20) + v.rjust(20))
+    _print()
+
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
@@ -412,6 +419,31 @@ def get_az_version_json():
     if extensions:
         for ext in extensions:
             versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
+def get_dependency_versions():
+    versions = {}
+    # Add msal version
+    try:
+        from msal import __version__ as msal_version
+    except ImportError:
+        msal_version = "N/A"
+    versions['msal'] = msal_version
+
+    # Add azure-mgmt-resource version
+    try:
+        # Track 2 >=15.0.0
+        # pylint: disable=protected-access
+        from azure.mgmt.resource._version import VERSION as azure_mgmt_resource_version
+    except ImportError:
+        try:
+            # Track 1 <=13.0.0
+            from azure.mgmt.resource.version import VERSION as azure_mgmt_resource_version
+        except ImportError:
+            azure_mgmt_resource_version = "N/A"
+    versions['azure-mgmt-resource'] = azure_mgmt_resource_version
+
     return versions
 
 

@@ -395,7 +395,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
     return params
 
 
-def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+def server_delete_func(cmd, client, resource_group_name, server_name, yes=None):
     result = None  # default return value
 
     if not yes:
@@ -677,7 +677,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
 
     if charset is None and collation is None:
         charset = 'utf8'

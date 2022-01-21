@@ -1170,9 +1170,9 @@ short-summary: Retrieves the list of cosmosdb locations and their properties.
 
 helps['cosmosdb locations show'] = """
 type: command
-short-summary: Show the Azure CosmosDB location properties in the given location.
+short-summary: Show the Azure Cosmos DB location properties in the given location.
 examples:
-  - name: Shows the Azure CosmosDB location properties in the given location.
+  - name: Shows the Azure Cosmos DB location properties in the given location.
     text: az cosmosdb locations show --location 'East US'
 """
 

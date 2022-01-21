@@ -2323,7 +2323,7 @@ helps['staticwebapp show'] = """
 
 helps['staticwebapp create'] = """
     type: command
-    short-summary: Create a static app with content from GitHubRepository URL provided in source on provided branch. Return the app created.
+    short-summary: Create a static app with content from a GitHub repository URL and on the provided branch. If the repo is under a Github organization, please ensure that the Azure CLI Github App has access to the organization. Access can be requested in the browser when using the "--login-with-github" argument. Access must be granted by the organization's admin.
     examples:
     - name: Create static app in a subscription.
       text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
@@ -2447,28 +2447,28 @@ helps['staticwebapp hostname delete'] = """
 
 helps['staticwebapp appsettings'] = """
     type: group
-    short-summary: Manage app settings of Functions of the static app.
+    short-summary: Manage app settings the static app.
 """
 
 helps['staticwebapp appsettings list'] = """
     type: command
-    short-summary: List function app settings of the static app. A function must first be deployed to use this method.
+    short-summary: List app settings of the static app.
     examples:
-    - name: List function app settings of the static app.
+    - name: List app settings of the static app.
       text: az staticwebapp appsettings list -n MyStaticAppName
 """
 
 helps['staticwebapp appsettings set'] = """
     type: command
-    short-summary: Set (replace) function app settings of the static app.
+    short-summary: Add to or change the app settings of the static app.
     examples:
-    - name: Set (replace) function app settings of the static app.
+    - name: Add to or change the app settings of the static app.
       text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
 """
 
 helps['staticwebapp appsettings delete'] = """
     type: command
-    short-summary: Delete function app settings with given keys of the static app.
+    short-summary: Delete app settings with given keys of the static app.
     examples:
     - name: Delete given app settings of the static app.
       text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2

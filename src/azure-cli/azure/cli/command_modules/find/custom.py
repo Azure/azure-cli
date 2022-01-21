@@ -97,6 +97,7 @@ def call_aladdin_service(query):
     version = str(parse(core_version))
     correlation_id = telemetry_core._session.correlation_id   # pylint: disable=protected-access
     subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
+    event_id = telemetry_core._session.event_id  # pylint: disable=protected-access
 
     # Used for DDOS protection and rate limiting
     user_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
@@ -112,6 +113,9 @@ def call_aladdin_service(query):
 
     if telemetry_core.is_telemetry_enabled() and subscription_id is not None:
         context['subscriptionId'] = subscription_id
+
+    if telemetry_core.is_telemetry_enabled():
+        context['eventId'] = event_id
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {

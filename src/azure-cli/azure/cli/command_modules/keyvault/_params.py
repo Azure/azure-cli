@@ -287,7 +287,7 @@ def load_arguments(self, _):
                 try:
                     if cmd in ['list']:
                         c.extra('identifier', options_list=['--id'],
-                                help='Id of the Vault or HSM. '
+                                help='Full URI of the Vault or HSM. '
                                      'If specified all other \'Id\' arguments should be omitted.',
                                 validator=validate_vault_or_hsm)
                     else:
@@ -322,7 +322,7 @@ def load_arguments(self, _):
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 if cmd in ['list-deleted']:
                     c.extra('identifier', options_list=['--id'],
-                            help='Id of the Vault{}. '
+                            help='Full URI of the Vault{}. '
                                  'If specified all other \'Id\' arguments should be '
                                  'omitted.'.format(' or HSM' if item == 'key' else ''),
                             validator=validate_vault_or_hsm)
@@ -351,7 +351,7 @@ def load_arguments(self, _):
 
             if item in ['list', 'list-deleted']:
                 c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
-                        help='Id of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
+                        help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
             elif item in ['show-deleted', 'purge', 'recover']:
                 c.extra('identifier', options_list=['--id'], validator=validate_key_id('deletedkey'),
                         help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.')
@@ -382,7 +382,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault key restore', arg_group='Id') as c:
         c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
         c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
-                   help='Id of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
+                   help='Full URI of the Vault or HSM. If specified all other \'Id\' arguments should be omitted.')
         c.argument('hsm_name', data_plane_hsm_name_type, validator=None)
 
     with self.argument_context('keyvault key restore') as c:
@@ -490,7 +490,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault key random') as c:
         c.extra('hsm_name', hsm_url_type, arg_group='Id', required=False)
         c.extra('identifier', options_list=['--id'], arg_group='Id',
-                help='Id of the HSM.', validator=validate_vault_or_hsm)
+                help='Full URI of the HSM.', validator=validate_vault_or_hsm)
         c.argument('count', type=int, help='The requested number of random bytes.')
 
     with self.argument_context('keyvault key set-attributes') as c:
@@ -557,7 +557,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
             c.argument('hsm_name', hsm_url_type, required=False,
                        help='Name of the HSM. Can be omitted if --id is specified.')
-            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
             c.ignore('vault_base_url')
 
     with self.argument_context('keyvault security-domain init-recovery') as c:
@@ -584,7 +584,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain wait') as c:
         c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
                    required=False)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
         c.argument('resource_group_name', options_list=['--resource-group', '-g'],
                    help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
@@ -598,7 +598,7 @@ def load_arguments(self, _):
             with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
                 c.argument('hsm_name', hsm_url_type, required=False,
                            help='Name of the HSM. Can be omitted if --id is specified.')
-                c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Id of the HSM.')
+                c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
                 c.ignore('cls')
 
     with self.argument_context('keyvault backup start', arg_group='Storage Id') as c:
@@ -791,7 +791,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault role', arg_group='Id') as c:
         c.argument('hsm_name', hsm_url_type)
         c.argument('identifier', options_list=['--id'],
-                   help='Id of the HSM. If specified all other \'Id\' arguments should be omitted.',
+                   help='Full URI of the HSM. If specified all other \'Id\' arguments should be omitted.',
                    validator=process_hsm_name)
 
     with self.argument_context('keyvault role assignment') as c:

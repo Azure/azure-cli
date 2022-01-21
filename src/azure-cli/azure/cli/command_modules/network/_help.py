@@ -1463,6 +1463,38 @@ type: command
 short-summary: List all OWASP CRS exclusion rules that are applied on a Waf policy managed rules.
 """
 
+helps['network application-gateway waf-policy managed-rule exclusion rule-set'] = """
+type: group
+short-summary: Define a managed rule set for exclusions.
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set add'] = """
+type: command
+short-summary: Add a managed rule set to an exclusion.
+examples:
+  - name: Add a managed rule set to an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set add -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup --rule-ids 921140 921150
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set remove'] = """
+type: command
+short-summary: Remove managed rule set within an exclusion.
+examples:
+  - name: Remove managed rule set within an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set remove -g MyResourceGroup --policy-name MyPolicy --match-variable RequestHeaderNames --match-operator StartsWith --selector Bing --type OWASP --version 3.2 --group-name MyRuleGroup
+"""
+
+helps['network application-gateway waf-policy managed-rule exclusion rule-set list'] = """
+type: command
+short-summary: List all managed rule sets of an exclusion.
+examples:
+  - name: List all managed rule sets of an exclusion.
+    text: |
+        az network application-gateway waf-policy managed-rule exclusion rule-set list -g MyResourceGroup --policy-name MyPolicy
+"""
+
 helps['network application-gateway waf-policy show'] = """
 type: command
 short-summary: Get the details of an application gateway WAF policy.
@@ -2836,6 +2868,31 @@ examples:
         az network express-route peering connection list --circuit-name MyCircuit --peering-name MyPeering --resource-group MyResourceGroup
 """
 
+helps['network express-route peering connection ipv6-config'] = """
+type: group
+short-summary: Manage ExpressRoute circuit connection configs.
+"""
+
+helps['network express-route peering connection ipv6-config set'] = """
+type: command
+short-summary: Set connection config to ExpressRoute circuit connection.
+examples:
+  - name: Set connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config set -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection --address-prefix .../125
+"""
+
+helps['network express-route peering connection ipv6-config remove'] = """
+type: command
+short-summary: Remove connection config to ExpressRoute circuit connection.
+examples:
+  - name: Remove connection config to ExpressRoute circuit connection.
+    text: |
+        az network express-route peering connection ipv6-config remove -g MyResourceGroup --circuit-name \\
+            MyCircuit --peering-name AzurePrivatePeering -n myConnection
+"""
+
 helps['network express-route peering create'] = """
 type: command
 short-summary: Create peering settings for an ExpressRoute circuit.
@@ -3495,6 +3552,55 @@ examples:
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
   - name: Create an address pool with several backend addresses using config file
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
+"""
+
+helps['network lb address-pool update'] = """
+type: command
+short-summary: Update an address pool.
+parameters:
+  - name: --backend-address
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is required or subnet is required.
+    long-summary: |
+        Usage1: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
+        Usage2: --backend-address name=addr1 ip-address=10.0.0.1 subnet=/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1
+        Usage3: --backend-address name=addr1 ip-address=10.0.0.1 subnet=subnet1 --vnet MyVnet
+
+        name: Required. The name of the backend address.
+        ip-address: Required. Ip Address within the Virtual Network.
+        subnet: Name or Id of the subnet.
+
+        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
+  - name: --backend-addresses-config-file
+    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
+    long-summary: |
+        Usage: --backend-addresses-config-file @"{config_file.json}"
+
+        A example config file is
+        [
+          {
+            "name": "address1",
+            "virtualNetwork": "clitestvnet",
+            "ipAddress": "10.0.0.4"
+          },
+          {
+            "name": "address2",
+            "virtualNetwork": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/virtualNetworks/clitestvnet",
+            "ipAddress": "10.0.0.5"
+          },
+          {
+            "name": "address3",
+            "subnet": "subnet3",
+            "ipAddress": "10.0.0.6"
+          },
+          {
+            "name": "address4",
+            "subnet": "/subscriptions/000/resourceGroups/MyRg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet4",
+            "ipAddress": "10.0.0.7"
+          }
+        ]
+examples:
+  - name: Update an address pool with several backend addresses using key-value arguments.
+    text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
 """
 
 helps['network lb address-pool delete'] = """
@@ -4538,6 +4644,64 @@ examples:
     text: |
         az network private-endpoint dns-zone-group show --endpoint-name MyEndpoint --name MyPrivateDnsZoneGroup --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network private-endpoint ip-config'] = """
+type: group
+short-summary: Manage private endpoint ip configurations.
+"""
+
+helps['network private-endpoint ip-config add'] = """
+type: command
+short-summary: Add a private endpoint ip configuration.
+examples:
+  - name: Add a private endpoint ip configuration.
+    text: az network private-endpoint ip-config add --endpoint-name MyPE -g MyRG -n MyIpConfig --group-id MyGroup --member-name MyMember --private-ip-address MyPrivateIPAddress
+"""
+
+helps['network private-endpoint ip-config remove'] = """
+type: command
+short-summary: Remove a private endpoint ip configuration.
+examples:
+  - name: Remove a private endpoint ip configuration.
+    text: az network private-endpoint ip-config remove --endpoint-name MyPE -g MyRG -n MyIpConfig
+"""
+
+helps['network private-endpoint ip-config list'] = """
+type: command
+short-summary: List ip configuration within a private endpoint.
+examples:
+  - name: List ip configuration within a private endpoint.
+    text: az network private-endpoint ip-config list --endpoint-name MyPE -g MyRG
+"""
+
+helps['network private-endpoint asg'] = """
+type: group
+short-summary: Manage private endpoint application security groups.
+"""
+
+helps['network private-endpoint asg add'] = """
+type: command
+short-summary: Add a private endpoint application security group.
+examples:
+  - name: Add a private endpoint application security group.
+    text: az network private-endpoint asg add --endpoint-name MyPE -g MyRG --asg-id MyApplicationSecurityGroupId
+"""
+
+helps['network private-endpoint asg remove'] = """
+type: command
+short-summary: Remove a private endpoint application security group.
+examples:
+  - name: Remove a private endpoint application security group.
+    text: az network private-endpoint asg remove --endpoint-name MyPE -g MyRG --asg-id MyApplicationSecurityGroupId
+"""
+
+helps['network private-endpoint asg list'] = """
+type: command
+short-summary: List application security group within a private endpoint.
+examples:
+  - name: List application security group within a private endpoint.
+    text: az network private-endpoint asg list --endpoint-name MyPE -g MyRG
 """
 
 helps['network private-link-service'] = """

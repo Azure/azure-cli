@@ -6,7 +6,7 @@
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServerPreparer
 
 
@@ -106,13 +106,13 @@ class MonitorTests(ScenarioTest):
         })
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'
                      ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
 
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'

@@ -41,8 +41,7 @@ def load_command_table(self, _):
     mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
     mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
     data_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT)
-    latest_data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS, 'latest')
-    stable_data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS, 'stable')
+    data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
 
     if not is_azure_stack_profile(self):
         mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
@@ -171,24 +170,22 @@ def load_command_table(self, _):
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('download', 'download_key')
 
-    with self.command_group('keyvault key', latest_data_key_entity.command_type) as g:
+    with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output,
                           doc_string_source=data_entity.operations_docs_tmpl.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_output)
         g.keyvault_command('show', 'get_key', transform=transform_key_output)
         g.keyvault_custom('import', 'import_key', transform=transform_key_output)
         g.keyvault_custom('get-policy-template', 'get_policy_template', is_preview=True)
-
-    with self.command_group('keyvault key', stable_data_key_entity.command_type) as g:
         g.keyvault_custom('encrypt', 'encrypt_key', is_preview=True, transform=transform_key_encryption_output)
         g.keyvault_custom('decrypt', 'decrypt_key', is_preview=True, transform=transform_key_decryption_output)
 
     if not is_azure_stack_profile(self):
-        with self.command_group('keyvault key', latest_data_key_entity.command_type) as g:
+        with self.command_group('keyvault key', data_key_entity.command_type) as g:
             g.keyvault_command('random', 'get_random_bytes', is_preview=True)
             g.keyvault_command('rotate', 'rotate_key', transform=transform_key_output, is_preview=True)
 
-        with self.command_group('keyvault key rotation-policy', latest_data_key_entity.command_type,
+        with self.command_group('keyvault key rotation-policy', data_key_entity.command_type,
                                 is_preview=True) as g:
             g.keyvault_command('show', 'get_key_rotation_policy', )
             g.keyvault_custom('update', 'update_key_rotation_policy')

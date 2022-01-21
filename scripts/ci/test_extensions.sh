@@ -19,8 +19,7 @@ output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
 # azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
-# azure-iot: https://github.com/Azure/azure-cli/pull/17456
-ignore_list='azure-cli-ml azure-iot fzf'
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s'
 
 for ext in $output; do
     echo

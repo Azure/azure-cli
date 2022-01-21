@@ -272,7 +272,6 @@ def load_arguments(self, _):
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
-        c.argument('ssl_profile', min_api='2020-06-01', help='SSL profile resource of the application gateway.', completer=get_ag_subresource_completion_list('ssl_profiles'))
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -508,7 +507,7 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1', '3.2']),
                    help='The version of the web application firewall rule set type. '
                         '0.1 is used for Microsoft_BotManagerRuleSet')
 
@@ -584,11 +583,19 @@ def load_arguments(self, _):
                    help='The variable to be excluded.')
         c.argument('selector_match_operator',
                    arg_type=get_enum_type(OwaspCrsExclusionEntrySelectorMatchOperator),
+                   options_list=['--selector-match-operator', '--match-operator'],
                    help='When matchVariable is a collection, operate on the selector to '
                         'specify which elements in the collection this exclusion applies to.')
         c.argument('selector',
                    help='When matchVariable is a collection, operator used to '
                         'specify which elements in the collection this exclusion applies to.')
+
+    with self.argument_context('network application-gateway waf-policy managed-rule exclusion rule-set',
+                               min_api='2021-05-01') as c:
+        c.argument('rule_group_name',
+                   options_list='--group-name',
+                   help='The managed rule group for exclusion.')
+        c.argument('rule_ids', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too.')
     # region
 
     # region ApplicationSecurityGroups
@@ -794,6 +801,9 @@ def load_arguments(self, _):
         c.argument('circuit_name', id_part=None)
         c.argument('peering_name', id_part=None)
 
+    with self.argument_context('network express-route peering connection ipv6-config') as c:
+        c.argument('address_prefix', help='/125 IP address space to carve out customer addresses for global reach.')
+
     with self.argument_context('network express-route peering peer-connection') as c:
         c.argument('circuit_name', circuit_name_type, id_part=None)
         c.argument('peering_name', options_list=['--peering-name'], help='Name of BGP peering (i.e. AzurePrivatePeering).', id_part=None)
@@ -887,12 +897,24 @@ def load_arguments(self, _):
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
         c.argument('edge_zone', edge_zone)
+        c.argument('custom_interface_name', nic_type, options_list='--nic-name', min_api='2021-05-01', help='The custom name of the network interface attached to the private endpoint.')
 
     with self.argument_context('network private-endpoint dns-zone-group') as c:
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
         c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
         c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+
+    with self.argument_context('network private-endpoint ip-config') as c:
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+        c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
+        c.argument('group_id', help='The ID of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('member_name', help='The member name of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('private_ip_address', private_ip_address_type, help="A private ip address obtained from the private endpoint's subnet.")
+
+    with self.argument_context('network private-endpoint asg') as c:
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+        c.argument('application_security_group_id', options_list='--asg-id', help='ID of application security group in which the private endpoint IP configuration is included.')
     # endregion
 
     # region PrivateLinkService
@@ -1877,6 +1899,7 @@ def load_arguments(self, _):
     # endregion
 
     # region VirtualNetworks
+    encryption_policy_types = ['dropUnencrypted', 'allowUnencrypted']
     with self.argument_context('network vnet') as c:
         c.argument('virtual_network_name', virtual_network_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list='--address-prefixes', metavar='PREFIX')
@@ -1886,6 +1909,8 @@ def load_arguments(self, _):
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
         c.argument('flowtimeout', type=int, help='The FlowTimeout value (in minutes) for the Virtual Network', min_api='2021-02-01', is_preview=True)
         c.argument('bgp_community', help='The BGP community associated with the virtual network.')
+        c.argument('enable_encryption', arg_type=get_three_state_flag(), help='Enable encryption on the virtual network.', min_api='2021-05-01', is_preview=True)
+        c.argument('encryption_enforcement_policy', options_list=['--encryption-enforcement-policy', '--encryption-policy'], arg_type=get_enum_type(encryption_policy_types), help='To control if the Virtual Machine without encryption is allowed in encrypted Virtual Network or not.', min_api='2021-05-01', is_preview=True)
 
     with self.argument_context('network vnet check-ip-address') as c:
         c.argument('ip_address', required=True)

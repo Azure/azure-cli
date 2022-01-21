@@ -178,11 +178,24 @@ class TestServicePrincipalAuth(unittest.TestCase):
         cred = ServicePrincipalAuth.build_credential("test_secret")
         assert cred == {"client_secret": "test_secret"}
 
+        # secret with '~', which is preserved as-is
+        cred = ServicePrincipalAuth.build_credential("~test_secret")
+        assert cred == {"client_secret": "~test_secret"}
+
         # certificate
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'sp_cert.pem')
         cred = ServicePrincipalAuth.build_credential(test_cert_file)
         assert cred == {'certificate': test_cert_file}
+
+        # certificate path with '~', which expands to HOME folder
+        import shutil
+        home = os.path.expanduser('~')
+        home_cert = os.path.join(home, 'sp_cert.pem')  # C:\Users\username\sp_cert.pem
+        shutil.copyfile(test_cert_file, home_cert)
+        cred = ServicePrincipalAuth.build_credential(os.path.join('~', 'sp_cert.pem'))  # ~\sp_cert.pem
+        assert cred == {'certificate': home_cert}
+        os.remove(home_cert)
 
         cred = ServicePrincipalAuth.build_credential(test_cert_file, use_cert_sn_issuer=True)
         assert cred == {'certificate': test_cert_file, 'use_cert_sn_issuer': True}
@@ -192,7 +205,7 @@ class TestServicePrincipalAuth(unittest.TestCase):
         assert cred == {"client_assertion": "test_jwt"}
 
 
-class TestMsalSecretStore(unittest.TestCase):
+class TestServicePrincipalStore(unittest.TestCase):
 
     test_sp = {
         'client_id': 'myapp',
@@ -200,31 +213,25 @@ class TestMsalSecretStore(unittest.TestCase):
         'client_secret': 'test_secret'
     }
 
-    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_load_entry(self, load_secret_store_mock):
+    def test_load_entry(self):
         store = MemoryStore()
-        load_secret_store_mock.return_value = store
 
-        secret_store = ServicePrincipalStore(None, None)
+        secret_store = ServicePrincipalStore(store)
         store._content = [self.test_sp]
 
         entry = secret_store.load_entry("myapp", "mytenant")
         self.assertEqual(entry['client_secret'], "test_secret")
 
-    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_entry(self, load_secret_store_mock):
+    def test_save_entry(self):
         store = MemoryStore()
-        load_secret_store_mock.return_value = store
 
-        secret_store = ServicePrincipalStore(None, None)
+        secret_store = ServicePrincipalStore(store)
         secret_store.save_entry(self.test_sp)
 
         assert store._content == [self.test_sp]
 
-    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_entry_add_new(self, load_secret_store_mock):
+    def test_save_entry_add_new(self):
         store = MemoryStore()
-        load_secret_store_mock.return_value = store
 
         test_sp2 = {
             'client_id': "myapp2",
@@ -233,30 +240,26 @@ class TestMsalSecretStore(unittest.TestCase):
         }
 
         store._content = [self.test_sp]
-        secret_store = ServicePrincipalStore(None, None)
+        secret_store = ServicePrincipalStore(store)
         secret_store.save_entry(test_sp2)
         assert store._content == [self.test_sp, test_sp2]
 
-    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_save_entry_update_existing(self, load_secret_store_mock):
+    def test_save_entry_update_existing(self):
         store = MemoryStore()
-        load_secret_store_mock.return_value = store
 
         store._content = [self.test_sp]
         new_creds = self.test_sp.copy()
         new_creds['client_secret'] = 'test_secret'
 
-        secret_store = ServicePrincipalStore(None, None)
+        secret_store = ServicePrincipalStore(store)
         secret_store.save_entry(new_creds)
         assert store._content == [new_creds]
 
-    @mock.patch('azure.cli.core.auth.persistence.load_secret_store')
-    def test_remove_entry(self, load_secret_store_mock):
+    def test_remove_entry(self):
         store = MemoryStore()
-        load_secret_store_mock.return_value = store
 
         store._content = [self.test_sp]
-        secret_store = ServicePrincipalStore(None, None)
+        secret_store = ServicePrincipalStore(store)
         secret_store.remove_entry('myapp')
         assert store._content == []
 

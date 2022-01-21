@@ -7,7 +7,7 @@ import time
 from datetime import datetime, timedelta, tzinfo
 from time import sleep
 from dateutil.tz import tzutc
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.local_context import AzCLILocalContext, ALL, LOCAL_CONTEXT_FILE
 from azure.cli.core.util import CLIError

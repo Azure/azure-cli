@@ -313,11 +313,11 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         })
 
         # Vnet name with no subnet
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+        with self.assertRaisesRegex(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx --vnet {vnet_name}')
 
         # Subnet name with no vnet name
-        with self.assertRaisesRegexp(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
+        with self.assertRaisesRegex(CLIError, "usage error: --vnet NAME --subnet NAME | --vnet ID --subnet NAME | --subnet ID"):
             self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
                      '--subnet {subnet_name} ')
 

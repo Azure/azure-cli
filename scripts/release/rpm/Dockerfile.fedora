@@ -1,4 +1,4 @@
-ARG tag=29
+ARG tag=35
 
 FROM fedora:${tag} AS build-env
 ARG cli_version=dev
@@ -19,4 +19,5 @@ FROM fedora:${tag} AS execution-env
 RUN dnf install -y python3 python3-virtualenv
 
 COPY --from=build-env /azure-cli-dev.rpm ./
-RUN rpm -i ./azure-cli-dev.rpm
+RUN rpm -i ./azure-cli-dev.rpm && \
+    az --version
