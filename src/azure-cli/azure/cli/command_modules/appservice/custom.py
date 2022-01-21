@@ -2763,7 +2763,7 @@ class _StackRuntimeHelper:
         if linux:
             return cls.update_site_config
         return (cls.update_site_appsettings if 'node' in
-                    runtime['displayName'].lower() else cls.update_site_config)
+                    runtime.display_name.lower() else cls.update_site_config)
 
     # assumes non-java
     def get_default_version(self, lang, linux=False, get_windows_config_version=False):
