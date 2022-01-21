@@ -930,6 +930,9 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1009,6 +1012,9 @@ parameters:
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1031,6 +1037,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 """
 
 helps['aks remove-dev-spaces'] = """
