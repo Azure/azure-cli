@@ -556,6 +556,10 @@ def request_data_from_registry(http_method,
 
             log_registry_response(response)
 
+            #if manifest_headers and response.status_code == 200:
+             #   next_link = response.headers['link'] if 'link' in response.headers else None
+              #  return response.json(), next_link
+
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
