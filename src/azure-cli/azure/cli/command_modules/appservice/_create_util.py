@@ -12,11 +12,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json
 from azure.mgmt.web.models import SkuDescription
 
-from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
-                         NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
-                         ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
-                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS,
+from ._constants import (NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, STATIC_RUNTIME_NAME,
+                         PYTHON_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
                          DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES)
 
 logger = get_logger(__name__)
@@ -81,19 +78,14 @@ def get_runtime_version_details(file_path, lang_name, is_linux=False, stack_help
     if lang_name.lower() != STATIC_RUNTIME_NAME:
         versions = stack_helper.get_version_list(lang_name, is_linux)
         default_version = stack_helper.get_default_version(lang_name, is_linux)
-
-    if lang_name.lower() == DOTNET_RUNTIME_NAME:
+        version_to_create = default_version
+    if lang_name.lower() in [DOTNET_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME]:
         version_detected = parse_dotnet_version(file_path, default_version)
         version_to_create = detect_dotnet_version_tocreate(version_detected, default_version, versions)
     elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
-        version_to_create = detect_netcore_version_tocreate(version_detected)
-    elif lang_name.lower() == ASPDOTNET_RUNTIME_NAME:
-        # method returns list in DESC, pick the first
-        version_detected = parse_dotnet_version(file_path, default_version)
-        version_to_create = detect_dotnet_version_tocreate(version_detected,
-                                                           default_version, versions)
+        version_to_create = detect_dotnet_version_tocreate(version_detected, default_version, versions)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
         if file_path == '':
             version_detected = "-"
@@ -275,12 +267,6 @@ def parse_node_version(file_path):
     return version_detected or ['0.0']
 
 
-def detect_netcore_version_tocreate(detected_ver):
-    if detected_ver in NETCORE_VERSIONS:
-        return detected_ver
-    return NETCORE_VERSION_DEFAULT
-
-
 def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list):
     min_ver = versions_list[0]
     if detected_ver in versions_list:
@@ -295,6 +281,7 @@ def detect_node_version_tocreate(detected_ver, node_versions, default_node_versi
     if detected_ver in node_versions:
         return detected_ver
     return default_node_version
+
 
 def find_key_in_json(json_data, key):
     for k, v in json_data.items():

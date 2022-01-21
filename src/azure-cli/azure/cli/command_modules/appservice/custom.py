@@ -66,8 +66,9 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
-                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+                         RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME)
 from ._github_oauth import (get_github_access_token)
 
 logger = get_logger(__name__)
@@ -1040,11 +1041,12 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, linux=False, windows=False, yolo=None):
+def list_runtimes(cmd, linux=False, windows=False):
     if not linux and not windows:
         raise ArgumentUsageError("Use one or both of the --linux/--windows options")
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     return runtime_helper.get_stack_names_only()
+
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
@@ -2696,6 +2698,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper:
+    # pylint: disable=too-few-public-methods
     class Runtime:
         def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
             self.display_name = display_name
@@ -2734,8 +2737,7 @@ class _StackRuntimeHelper:
 
     def resolve(self, display_name, linux=False):
         display_name = display_name.lower()
-        stack = next((s for s in self.stacks if s.linux==linux and s.display_name.lower() == display_name),
-                    None)
+        stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
                 "node|12-lts": "node|12lts",
@@ -2752,48 +2754,39 @@ class _StackRuntimeHelper:
                 display_name = old_to_new_linux.get(display_name)
             else:
                 display_name = old_to_new_windows.get(display_name)
-            stack = next((s for s in self.stacks if s.linux==linux and s.display_name.lower() == display_name),
-                    None)
+            stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
         return stack
-
-
 
     @classmethod
     def get_site_config_setter(cls, runtime, linux=False):
         if linux:
             return cls.update_site_config
-        return (cls.update_site_appsettings if 'node' in
-                    runtime.display_name.lower() else cls.update_site_config)
+        return cls.update_site_appsettings if 'node' in runtime.display_name.lower() else cls.update_site_config
 
     # assumes non-java
     def get_default_version(self, lang, linux=False, get_windows_config_version=False):
-        self._load_stacks()
-        lang = lang.upper()
-
-        for s in self.stacks:
-            if s.linux == linux:
-                l, v, *_ = s.display_name.upper().split("|")
-                if l == lang:
-                    if get_windows_config_version:
-                        return s.configs[self.windows_config_mappings[lang.lower()]]
-                    return v
-
-        os = "windows" if not linux else "linux"
-        raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
+        versions = self.get_version_list(lang, linux, get_windows_config_version)
+        versions.sort()
+        if not versions:
+            os = "windows" if not linux else "linux"
+            raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
+        return versions[0]
 
     # assumes non-java
-    def get_version_list(self, lang, linux=False):
+    def get_version_list(self, lang, linux=False, get_windows_config_version=False):
         lang = lang.upper()
         versions = []
 
         for s in self.stacks:
             if s.linux == linux:
-                l, v, *_ = s.display_name.upper().split("|")
-                if l == lang:
-                    versions.append(v)
+                l_name, v, *_ = s.display_name.upper().split("|")
+                if l_name == lang:
+                    if get_windows_config_version:
+                        versions.append(s.configs[self.windows_config_mappings[lang.lower()]])
+                    else:
+                        versions.append(v)
 
         return versions
-
 
     @property
     def stacks(self):
@@ -2832,11 +2825,14 @@ class _StackRuntimeHelper:
         return site_config
 
     # format a (non-java) windows runtime display text
+    # TODO get API to return more CLI-friendly display text for windows stacks
     @classmethod
     def _format_windows_display_text(cls, display_text):
         import re
         t = display_text.upper()
-        t = t.replace(".NET CORE", "DOTNETCORE").replace("ASP.NET", "ASPNET").replace(".NET", "DOTNET")
+        t = t.replace(".NET CORE", NETCORE_RUNTIME_NAME.upper())
+        t = t.replace("ASP.NET", ASPDOTNET_RUNTIME_NAME.upper())
+        t = t.replace(".NET", DOTNET_RUNTIME_NAME)
         t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
         return t.replace(" ", "|", 1).replace(" ", "")
 
@@ -2856,13 +2852,13 @@ class _StackRuntimeHelper:
 
     @classmethod
     def _get_valid_minor_versions(cls, major_version, linux, java=False):
-        _filter = lambda minor_version : cls._is_valid_runtime_setting(
-            cls._get_runtime_setting(minor_version, linux, java))
+        def _filter(minor_version):
+            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
         return [m for m in major_version.minor_versions if _filter(m)]
 
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
         minor_java_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
-        default_java_version= next(iter(minor_java_versions), None)
+        default_java_version = next(iter(minor_java_versions), None)
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
             # TODO get the API to return java versions in a more parseable way
@@ -2949,8 +2945,7 @@ class _StackRuntimeHelper:
                 if self._linux:
                     self._parse_major_version_linux(major_version, self._stacks)
                 if self._windows:
-                    self._parse_major_version_windows(major_version, self._stacks,
-                    self.windows_config_mappings)
+                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -3982,8 +3977,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if runtime and html:
         raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
-
-
 
     if runtime:
         runtime = helper.remove_delimiters(runtime)
