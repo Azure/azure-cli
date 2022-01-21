@@ -953,7 +953,7 @@ jobs:
       . env/bin/activate
       python scripts/ci/service_name.py
       if [[ "$(System.PullRequest.TargetBranch)" == "cmdcov-demo-target" ]]; then
-        azdev linter --ci-exclusions --rule-types command_coverage --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+        azdev linter --ci-exclusions --rule-types command_test_coverage --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       fi
 
 - job: VerifySphinxDocumentGenerator
