@@ -172,8 +172,7 @@ def acr_repository_list_manifest_referrers(cmd,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
-    if not id and not registry_name:
-        registry_name =
+
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
 
