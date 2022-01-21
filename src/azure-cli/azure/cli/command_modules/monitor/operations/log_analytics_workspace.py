@@ -5,7 +5,7 @@
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
 from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
-    Schema, Column, SearchResults, RestoredLogs, ResultStatistics, ColumnTypeEnum
+    Schema, Column, SearchResults, RestoredLogs, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from knack.util import CLIError
@@ -147,6 +147,7 @@ def update_log_analytics_workspace_data_exports(cmd, instance, table_names, dest
     return instance
 
 
+# pylint:disable=too-many-locals
 def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns,
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          display_name=None, description=None, query=None, search_description=None,
@@ -179,19 +180,17 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
                        workspace_name, table_name, table)
 
 
-def update_log_analytics_workspace_table(instance, resource_group_name, workspace_name, table_name,
-                                         retention_in_days=None, total_retention_in_days=None, plan=None,
+def update_log_analytics_workspace_table(instance, retention_in_days=None, total_retention_in_days=None, plan=None,
                                          display_name=None, description=None):
     if retention_in_days is not None:
-        instance.retention_in_days=retention_in_days
+        instance.retention_in_days = retention_in_days
     if total_retention_in_days is not None:
-        instance.total_retention_in_days=total_retention_in_days
+        instance.total_retention_in_days = total_retention_in_days
     if plan is not None:
-        instance.plan=plan
+        instance.plan = plan
     if display_name is not None:
-        instance.schema.displayName=display_name
+        instance.schema.displayName = display_name
     if description is not None:
-        instance.schema.description
+        instance.schema.description = description
 
     return instance
-

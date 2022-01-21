@@ -1113,7 +1113,7 @@ short-summary: Create a Log Analytics workspace table..
 examples:
   - name: Create a Log Analytics workspace table.
     text: |
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --schema-name MySchema --retention-time 45 --columns MyColumn1=string
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 45 --columns MyColumn1=string
 """
 
 helps['monitor log-analytics workspace table update'] = """
