@@ -273,6 +273,9 @@ def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list)
     min_ver = versions_list[0]
     if detected_ver in versions_list:
         return detected_ver
+    # The API may return "dotnet|6.0" as "dotnet|6" and likewise with dotnet 5.0
+    if detected_ver.replace(".0", "", 1) in versions_list:
+        return detected_ver.replace(".0", "", 1)
     if detected_ver < min_ver:
         return min_ver
     return default_version
