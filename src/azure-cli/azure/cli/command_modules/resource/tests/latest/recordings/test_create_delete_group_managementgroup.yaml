@@ -17,8 +17,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
   response:
@@ -32,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:00 GMT
+      - Thu, 20 Jan 2022 22:07:56 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +45,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -64,8 +63,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
   response:
@@ -79,7 +77,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:10 GMT
+      - Thu, 20 Jan 2022 22:08:06 GMT
       expires:
       - '-1'
       pragma:
@@ -113,29 +111,85 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"Microsoft.Management/managementGroups","name":"testcligroup","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligroup","details":{"version":1,"updatedTime":"2022-01-11T22:51:25.7418933Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/c7a87cda-9a66-4920-b0f8-869baa04efe0","name":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"Root
-        Management Group"}}}}'
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '541'
+      - '161'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:11 GMT
+      - Thu, 20 Jan 2022 22:08:07 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2021-04-01
       pragma:
       - no-cache
       request-id:
-      - d575d050-1914-4d47-a9d6-d4fa27f9bfc5
+      - 4557eb31-a656-41d4-8bdb-c69987bfd850
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-managementgroups-requests:
+      - '59'
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup","name":"testcligroup","status":"Running"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '157'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Jan 2022 22:08:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2021-04-01
+      pragma:
+      - no-cache
+      request-id:
+      - 0fa15707-d615-4bfe-94fd-0c5d637a6841
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -148,10 +202,107 @@ interactions:
       - 1.0.3.2425
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-managementgroups-requests:
-      - '59'
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligroup","name":"testcligroup","status":"Succeeded","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligroup","details":{"version":111,"updatedTime":"2022-01-20T22:08:12.7920935Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '375'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Jan 2022 22:08:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - e2a30348-c635-4b6c-b1f7-11f5534671db
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"Microsoft.Management/managementGroups","name":"testcligroup","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligroup","details":{"version":111,"updatedTime":"2022-01-20T22:08:12.7920935Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/c7a87cda-9a66-4920-b0f8-869baa04efe0","name":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"Root
+        Management Group"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '543'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Jan 2022 22:08:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 55089ff6-e696-4bb3-875d-aaa45c2ad117
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -173,8 +324,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
   response:
@@ -188,7 +338,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:12 GMT
+      - Thu, 20 Jan 2022 22:08:29 GMT
       expires:
       - '-1'
       pragma:
@@ -220,8 +370,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
   response:
@@ -235,7 +384,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:22 GMT
+      - Thu, 20 Jan 2022 22:08:40 GMT
       expires:
       - '-1'
       pragma:
@@ -267,8 +416,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: DELETE
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2021-04-01
   response:
@@ -284,7 +432,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:23 GMT
+      - Thu, 20 Jan 2022 22:08:42 GMT
       expires:
       - '-1'
       location:
@@ -292,7 +440,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - 49ec8c6a-1e5d-4111-8fc8-08813b59257e
+      - 928c9094-c7ff-4246-810c-6792d0388b18
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -322,8 +470,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.32.0 (MSI) azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8
-        (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/asyncOperation/status/managementGroups/testcligroup?api-version=2021-04-01
   response:
@@ -337,13 +484,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 11 Jan 2022 22:52:34 GMT
+      - Thu, 20 Jan 2022 22:08:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - b0dcb027-62ab-4aa5-abda-65ba77ad92d5
+      - 8a0a00b8-14e5-4e1a-8287-84975c4f9976
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
