@@ -38,6 +38,8 @@ ORDERBY_PARAMS = {
 }
 DEFAULT_PAGINATION = 100
 
+BAD_ARGS_ERROR_REPO = "Error: You must provide either a fully qualified repository specifier such as myreg.azurecr.io/myrepo as a positional parameter or provide -r myreg -n myrepo argument values."
+BAD_ARGS_ERROR_MANIFEST ="Error: You must provide either a fully qualified manifest specifier such as myreg.azurecr.io/myrepo:mytag as a positional parameter or provide -r myreg -n myrepo:mytag argument values."
 
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
@@ -94,6 +96,9 @@ def acr_repository_list_manifests(cmd,
                                   username=None,
                                   password=None
                                   ):
+    if (id and repository) or (not id and not (registry_name and repository)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
+
     if id:
         registry_name, repository, _, _ = _parse_fqdn(cmd, id[0])
 
@@ -139,6 +144,8 @@ def acr_repository_list_manifest_metadata(cmd,
                                   username=None,
                                   password=None
                                   ):
+    if (id and repository) or (not id and not (registry_name and repository)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
     if id:
         registry_name, repository, _, _ = _parse_fqdn(cmd, id[0])
@@ -172,6 +179,8 @@ def acr_repository_list_manifest_referrers(cmd,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
+    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
@@ -223,6 +232,8 @@ def acr_repository_show_manifest(cmd,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
+    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
@@ -259,6 +270,8 @@ def acr_repository_show_manifest_metadata(cmd,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
+    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
@@ -299,6 +312,8 @@ def acr_repository_update_manifest_metadata(cmd,
                           list_enabled=None,
                           read_enabled=None,
                           write_enabled=None):
+    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
@@ -354,6 +369,8 @@ def acr_repository_delete_manifests(cmd,
                                     username=None,
                                     password=None,
                                     yes=False):
+    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+        raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
     if id:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
