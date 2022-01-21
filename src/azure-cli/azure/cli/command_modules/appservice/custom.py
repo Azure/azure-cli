@@ -2769,16 +2769,16 @@ class _StackRuntimeHelper:
     def get_default_version(self, lang, linux=False, get_windows_config_version=False):
         self._load_stacks()
         lang = lang.upper()
+
+        for s in self.stacks:
+            if s.linux == linux:
+                l, v, *_ = s.display_name.upper().split("|")
+                if l == lang:
+                    if get_windows_config_version:
+                        return s.configs[self.windows_config_mappings[lang.lower()]]
+                    return v
+
         os = "windows" if not linux else "linux"
-
-        for s in self.stacks[os]:
-            l, v, *_ = s["displayName"].upper().split("|")
-            if l == lang:
-                if get_windows_config_version:
-                    print(s)
-                    return s["configs"][self.windows_config_mappings[lang.lower()]]
-                return v
-
         raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
 
     # assumes non-java
@@ -2811,7 +2811,7 @@ class _StackRuntimeHelper:
 
     @staticmethod
     def update_site_config(stack, site_config, cmd=None):
-        for k, v in stack['configs'].items():
+        for k, v in stack.configs.items():
             setattr(site_config, k, v)
         return site_config
 
@@ -4116,10 +4116,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         match = helper.resolve(runtime_version, _is_linux)
 
         if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
-            if match and site_config.linux_fx_version != match['configs']['linux_fx_version']:
+            if match and site_config.linux_fx_version != match.configs['linux_fx_version']:
                 logger.warning('Updating runtime version from %s to %s',
-                               site_config.linux_fx_version, match['configs']['linux_fx_version'])
-                update_site_configs(cmd, rg_name, name, linux_fx_version=match['configs']['linux_fx_version'])
+                               site_config.linux_fx_version, match.configs['linux_fx_version'])
+                update_site_configs(cmd, rg_name, name, linux_fx_version=match.configs['linux_fx_version'])
                 logger.warning('Waiting for runtime version to propagate ...')
                 time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
             elif not match:
@@ -4163,7 +4163,7 @@ def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_c
     update_needed = False
     if 'node' in runtime_version:
         settings = []
-        for k, v in match['configs'].items():
+        for k, v in match.configs.items():
             for app_setting in site_config.app_settings:
                 if app_setting.name == k and app_setting.value != v:
                     update_needed = True
@@ -4172,7 +4172,7 @@ def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_c
             logger.warning('Updating runtime version to %s', runtime_version)
             update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
     else:
-        for k, v in match['configs'].items():
+        for k, v in match.configs.items():
             if getattr(site_config, k, None) != v:
                 update_needed = True
                 setattr(site_config, k, v)
