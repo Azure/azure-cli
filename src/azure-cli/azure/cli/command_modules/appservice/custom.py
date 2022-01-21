@@ -2696,11 +2696,10 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper:
-    # TODO replace the stacks with a list of these objects for a clearer interface
     class Runtime:
-        def __init__(self, display_name=None, configs=dict(), github_actions_properties=None, linux=False):
+        def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
             self.display_name = display_name
-            self.configs = configs
+            self.configs = configs if configs is not None else dict()
             self.github_actions_properties = github_actions_properties
             self.linux = linux
 
@@ -2710,14 +2709,16 @@ class _StackRuntimeHelper:
         self._linux = linux
         self._windows = windows
         self._stacks = []
+
+        # TODO try and get API support for this so it isn't hardcoded
         self.windows_config_mappings = {
-                'node': 'WEBSITE_NODE_DEFAULT_VERSION',
-                'python': 'python_version',
-                'php': 'php_version',
-                'aspnet': 'net_framework_version',
-                'dotnet': 'net_framework_version',
-                'dotnetcore': None
-            }
+            'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+            'python': 'python_version',
+            'php': 'php_version',
+            'aspnet': 'net_framework_version',
+            'dotnet': 'net_framework_version',
+            'dotnetcore': None
+        }
 
     @staticmethod
     def remove_delimiters(runtime):
@@ -2732,10 +2733,30 @@ class _StackRuntimeHelper:
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        os_type = "windows" if not linux else "linux"
-        self._load_stacks()
-        return next((s for s in self._stacks[os_type] if s['displayName'].lower() == display_name.lower()),
+        display_name = display_name.lower()
+        stack = next((s for s in self.stacks if s.linux==linux and s.display_name.lower() == display_name),
                     None)
+        if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
+            old_to_new_windows = {
+                "node|12-lts": "node|12lts",
+                "node|14-lts": "node|14lts",
+                "node|16-lts": "node|16lts",
+                "dotnet|5.0": "dotnet|5",
+                "dotnet|6.0": "dotnet|6",
+            }
+            old_to_new_linux = {
+                "dotnet|5.0": "dotnetcore|5.0",
+                "dotnet|6.0": "dotnetcore|6.0",
+            }
+            if linux:
+                display_name = old_to_new_linux.get(display_name)
+            else:
+                display_name = old_to_new_windows.get(display_name)
+            stack = next((s for s in self.stacks if s.linux==linux and s.display_name.lower() == display_name),
+                    None)
+        return stack
+
+
 
     @classmethod
     def get_site_config_setter(cls, runtime, linux=False):
@@ -2746,6 +2767,7 @@ class _StackRuntimeHelper:
 
     # assumes non-java
     def get_default_version(self, lang, linux=False, get_windows_config_version=False):
+        self._load_stacks()
         lang = lang.upper()
         os = "windows" if not linux else "linux"
 
@@ -2762,14 +2784,13 @@ class _StackRuntimeHelper:
     # assumes non-java
     def get_version_list(self, lang, linux=False):
         lang = lang.upper()
-        os = "windows" if not linux else "linux"
-
         versions = []
 
-        for s in self.stacks[os]:
-            l, v, *_ = s["displayName"].upper().split("|")
-            if l == lang:
-                versions.append(v)
+        for s in self.stacks:
+            if s.linux == linux:
+                l, v, *_ = s.display_name.upper().split("|")
+                if l == lang:
+                    versions.append(v)
 
         return versions
 
@@ -2780,8 +2801,8 @@ class _StackRuntimeHelper:
         return self._stacks
 
     def get_stack_names_only(self):
-        windows_stacks = [s["displayName"] for s in self.stacks["windows"]]
-        linux_stacks = [s["displayName"] for s in self.stacks["linux"]]
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux]
         if self._linux and not self._windows:
             return linux_stacks
         if self._windows and not self._linux:
@@ -2844,6 +2865,7 @@ class _StackRuntimeHelper:
         default_java_version= next(iter(minor_java_versions), None)
         if default_java_version:
             container_settings = default_java_version.stack_settings.windows_container_settings
+            # TODO get the API to return java versions in a more parseable way
             for java_version in ["1.8", "11"]:
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
@@ -2857,35 +2879,35 @@ class _StackRuntimeHelper:
                                                     java_version,
                                                     java_container,
                                                     container_version)
-                runtime = {"displayName": runtime_name}
-                runtime["configs"] = {"java_version": java_version,
-                                        "java_container": java_container,
-                                        "java_container_version": container_version}
                 gh_actions_version = "8" if java_version == "1.8" else java_version
                 gh_actions_runtime = "{}, {}, {}".format(java_version,
-                                                            java_container.lower().replace(" se", ""),
-                                                            container_settings.java_container_version.lower()
-                                                            )
-                runtime["github_actions_properties"] = {"github_actions_version": gh_actions_version,
-                                                        "app_runtime": "java",
-                                                        "app_runtime_version": gh_actions_runtime
-                                                        }
+                                                         java_container.lower().replace(" se", ""),
+                                                         container_settings.java_container_version.lower())
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"java_version": java_version,
+                                                "java_container": java_container,
+                                                "java_container_version": container_version},
+                                       github_actions_properties={"github_actions_version": gh_actions_version,
+                                                                  "app_runtime": "java",
+                                                                  "app_runtime_version": gh_actions_runtime},
+                                       linux=False)
                 parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
                 runtime_name = self._format_windows_display_text(minor_version.display_text)
-                runtime = {"displayName": runtime_name}
+
+                runtime = self.Runtime(display_name=runtime_name, linux=False)
                 lang_name = runtime_name.split("|")[0].lower()
                 config_key = config_mappings.get(lang_name)
-                runtime["configs"] = {}
+
                 if config_key:
-                    runtime["configs"][config_key] = settings.runtime_version
+                    runtime.configs[config_key] = settings.runtime_version
                 gh_properties = settings.git_hub_action_settings
                 if gh_properties.is_supported:
-                    runtime["github_actions_properties"] = {"github_actions_version":
-                        gh_properties.supported_version}
+                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+
                 parsed_results.append(runtime)
 
     def _parse_major_version_linux(self, major_version, parsed_results):
@@ -2895,21 +2917,24 @@ class _StackRuntimeHelper:
             linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
             runtimes = [(linux_container_settings.java11_runtime, "11"), (linux_container_settings.java8_runtime, "8")]
             for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
-                runtime = {"displayName": runtime_name,
-                            "configs": {"linux_fx_version": runtime_name}}
-                runtime["github_actions_properties"] = {"github_actions_version": version}
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"linux_fx_version": runtime_name},
+                                       github_actions_properties={"github_actions_version": version},
+                                       linux=True,
+                                       )
                 parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
                 runtime_name = settings.runtime_version
-                runtime = {"displayName": runtime_name,
-                            "configs": {"linux_fx_version": runtime_name}}
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"linux_fx_version": runtime_name},
+                                       linux=True,
+                                       )
                 gh_properties = settings.git_hub_action_settings
                 if gh_properties.is_supported:
-                    runtime["github_actions_properties"] = {"github_actions_version":
-                        gh_properties.supported_version}
+                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
                 parsed_results.append(runtime)
 
     def _load_stacks(self):
@@ -2917,20 +2942,15 @@ class _StackRuntimeHelper:
             return
         stacks = list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
-        parsed_stacks = {"windows": [], "linux": []}  # emulates the form of the old hardcoded JSON for ease of use
-        # TODO try and get API support for this so it isn't hardcoded
-
         for lang in stacks:
             if lang.display_text.lower() == "java":
                 continue  # info on java stacks is taken from the "java containers" stacks
             for major_version in lang.major_versions:
                 if self._linux:
-                    self._parse_major_version_linux(major_version, parsed_stacks["linux"])
+                    self._parse_major_version_linux(major_version, self._stacks)
                 if self._windows:
-                    self._parse_major_version_windows(major_version, parsed_stacks["windows"],
+                    self._parse_major_version_windows(major_version, self._stacks,
                     self.windows_config_mappings)
-
-        self._stacks = parsed_stacks
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
