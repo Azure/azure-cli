@@ -8,6 +8,7 @@ try:
 except ImportError:
     from urllib import unquote
 
+from cmath import e
 from operator import contains
 from knack.util import CLIError
 from knack.log import get_logger
@@ -30,6 +31,10 @@ from ._docker_utils import (
     RepoAccessTokenPermission
 )
 
+from ._validators import (
+    BAD_MANIFEST_FQDN,
+    BAD_REPO_FQDN
+)
 logger = get_logger(__name__)
 
 ORDERBY_PARAMS = {
@@ -55,12 +60,14 @@ def _get_references_path(repository, manifest, artifact_type=None):
 def _obtain_manifest_from_registry(login_server,
                                path,
                                username,
-                               password):
+                               password,
+                               raw=False):
 
     result, next_link = request_data_from_registry(
             http_method='get',
             login_server=login_server,
             path=path,
+            raw=raw,
             username=username,
             password=password,
             result_index=None,
@@ -68,14 +75,21 @@ def _obtain_manifest_from_registry(login_server,
 
     return result
 
-def _parse_fqdn(cmd, id):
-    id = id.lstrip('https://')
-    reg_addr = id.split('/', 1)[0]
-    registry_name = reg_addr.split('.', 1)[0]
-    reg_suffix= '.' + reg_addr.split('.', 1)[1]
-    manifest_id = id.split('/', 1)[1]
-    _validate_login_server_suffix(cmd, reg_suffix)
-    repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+def _parse_fqdn(cmd, id, is_manifest=True):
+    try:
+        id = id.lstrip('https://')
+        reg_addr = id.split('/', 1)[0]
+        registry_name = reg_addr.split('.', 1)[0]
+        reg_suffix= '.' + reg_addr.split('.', 1)[1]
+        manifest_id = id.split('/', 1)[1]
+        _validate_login_server_suffix(cmd, reg_suffix)
+        repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
+
+    except IndexError as e:
+        if is_manifest:
+            raise InvalidArgumentValueError(BAD_MANIFEST_FQDN) from e
+        else:
+            raise InvalidArgumentValueError(BAD_REPO_FQDN) from e
 
     return registry_name, repository, tag, manifest
 
@@ -84,7 +98,7 @@ def _validate_login_server_suffix(cmd, reg_suffix):
     login_server_suffix = get_login_server_suffix(cli_ctx)
 
     if(reg_suffix != login_server_suffix):
-        raise InvalidArgumentValueError(f'Error: Provided registry suffix \'{reg_suffix}\' does not match the configured az cli login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+        raise InvalidArgumentValueError(f'Error: Provided registry suffix \'{reg_suffix}\' does not match the configured az cli acr login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
 
 def acr_repository_list_manifests(cmd,
                                   registry_name=None,
@@ -100,7 +114,7 @@ def acr_repository_list_manifests(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
     if id:
-        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0])
+        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0], is_manifest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -148,7 +162,7 @@ def acr_repository_list_manifest_metadata(cmd,
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
     if id:
-        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0])
+        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0], is_manifest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -229,6 +243,7 @@ def acr_repository_show_manifest(cmd,
                                   registry_name=None,
                                   manifest_id=None,
                                   id=None,
+                                  raw_output=None,
                                   tenant_suffix=None,
                                   username=None,
                                   password=None):
@@ -257,11 +272,15 @@ def acr_repository_show_manifest(cmd,
     raw_result = _obtain_manifest_from_registry(
         login_server=login_server,
         path=_get_v2_manifest_path(repository, manifest),
+        raw=raw_output,
         username=username,
         password=password)
 
-    print(raw_result, end='')
-    return
+    if raw_output:
+        print(raw_result, end='')
+        return
+
+    return raw_result
 
 
 def acr_repository_show_manifest_metadata(cmd,
@@ -361,6 +380,7 @@ def acr_repository_update_manifest_metadata(cmd,
         tenant_suffix=tenant_suffix,
         username=username,
         password=password)
+
 
 def acr_repository_delete_manifests(cmd,
                                     registry_name=None,

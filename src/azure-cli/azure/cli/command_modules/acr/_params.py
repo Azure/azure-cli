@@ -7,6 +7,7 @@
 import argparse
 import os.path
 import platform
+from wsgiref.validate import validator
 
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
@@ -36,7 +37,9 @@ from ._validators import (
     validate_set_secret,
     validate_retention_days,
     validate_registry_name,
-    validate_expiration_time
+    validate_expiration_time,
+    validate_manifest_id,
+    validate_repo_id
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
@@ -147,25 +150,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('manifest_id', options_list=['--name', '-n'])
 
     with self.argument_context('acr manifest show') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
+        c.argument('raw_output', options_list=['--raw'], arg_type=get_three_state_flag())
 
     with self.argument_context('acr manifest list') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=validate_repo_id)
 
     with self.argument_context('acr manifest delete') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
 
     with self.argument_context('acr manifest show-metadata') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
 
     with self.argument_context('acr manifest list-metadata') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_repo_id)
 
     with self.argument_context('acr manifest update-metadata') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
 
     with self.argument_context('acr manifest list-referrers') as c:
-        c.positional('id', nargs='*', default=None)
+        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

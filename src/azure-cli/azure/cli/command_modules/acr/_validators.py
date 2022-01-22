@@ -6,6 +6,10 @@
 import os
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.azclierror import InvalidArgumentValueError
+
+BAD_REPO_FQDN="Invalid Argument: The positional parameter id must be a fully qualified repository specifier such as myreg.azurecr.io/myrepo"
+BAD_MANIFEST_FQDN="Invalid Argument: The positional parameter id must be a fully qualified manifest specifier such as myreg.azurecr.io/myrepo:latest or myreg.azurecr.io/myrepo@sha256:844f934b1ed1919a8ce43409519c0f853c6e8c1d58dd58df0a14e1dcad69a325"
 
 logger = get_logger(__name__)
 
@@ -112,3 +116,13 @@ def validate_expiration_time(namespace):
         except ValueError:
             raise CLIError("Input '{}' is not valid datetime. Valid example: 2025-12-31T12:59:59Z".format(
                 namespace.expiration))
+
+def validate_repo_id(namespace):
+    id = namespace.id[0]
+    if '.' not in id or '/' not in id:
+        raise InvalidArgumentValueError(BAD_REPO_FQDN)
+
+def validate_manifest_id(namespace):
+    id = namespace.id[0]
+    if '.' not in id or '/' not in id:
+        raise InvalidArgumentValueError(BAD_MANIFEST_FQDN)

@@ -506,6 +506,7 @@ def request_data_from_registry(http_method,
                                file_payload=None,
                                params=None,
                                manifest_headers=False,
+                               raw=False,
                                retry_times=3,
                                retry_interval=5,
                                timeout=300):
@@ -557,7 +558,7 @@ def request_data_from_registry(http_method,
 
             log_registry_response(response)
 
-            if manifest_headers and response.status_code == 200:
+            if manifest_headers and raw and response.status_code == 200:
                 next_link = response.headers['link'] if 'link' in response.headers else None
                 return response.content.decode('utf-8'), next_link
 
