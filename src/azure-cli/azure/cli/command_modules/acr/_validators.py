@@ -118,11 +118,13 @@ def validate_expiration_time(namespace):
                 namespace.expiration))
 
 def validate_repo_id(namespace):
-    id = namespace.id[0]
-    if '.' not in id or '/' not in id:
-        raise InvalidArgumentValueError(BAD_REPO_FQDN)
+    if namespace.id:
+        id = namespace.id[0]
+        if '.' not in id or '/' not in id:
+            raise InvalidArgumentValueError(BAD_REPO_FQDN)
 
 def validate_manifest_id(namespace):
-    id = namespace.id[0]
-    if '.' not in id or '/' not in id:
-        raise InvalidArgumentValueError(BAD_MANIFEST_FQDN)
+    if namespace.id:
+        id = namespace.id[0]
+        if '.' not in id or '/' not in id:
+            raise InvalidArgumentValueError(BAD_MANIFEST_FQDN)
