@@ -8,7 +8,7 @@ from azure.cli.core.util import CLIError
 
 def managementgroups_exception_handler(ex):
     from azure.core.exceptions import HttpResponseError
-    if isinstance(ex, ErrorResponseException):
+    if isinstance(ex, HttpResponseError):
         if ex.error.error:
             raise CLIError(ex.error.error)
         raise CLIError(ex.error)

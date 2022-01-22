@@ -589,7 +589,7 @@ def load_arguments(self, _):
 
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
-        c.argument('parent_id', options_list=['--parent', '-p'])
+        c.argument('parent', options_list=['--parent', '-p'])
 
     with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')

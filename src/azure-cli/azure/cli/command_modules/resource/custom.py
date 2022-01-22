@@ -2884,6 +2884,7 @@ def cli_managementgroups_group_create(
         details=create_mgmt_grp_details)
     return client.begin_create_or_update(group_name, create_mgmt_grp_request)
 
+
 def cli_managementgroups_group_update_custom_func(
         instance,
         display_name=None,
