@@ -2978,6 +2978,9 @@ class _StackRuntimeHelper:
                 gh_actions_runtime = "{}, {}, {}".format(java_version,
                                                          java_container.lower().replace(" se", ""),
                                                          container_settings.java_container_version.lower())
+                if java_container == "Java SE":  # once runtime name is set, reset configs to correct values
+                    java_container = "JAVA"
+                    container_version = "SE"
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"java_version": java_version,
                                                 "java_container": java_container,
