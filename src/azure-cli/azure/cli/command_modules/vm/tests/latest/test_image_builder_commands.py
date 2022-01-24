@@ -223,8 +223,8 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('buildTimeoutInMinutes', 22)
                  ])
 
-        self.cmd('image builder list -g {rg}', checks=self.check('length(@)', 1))
-        self.cmd('image builder delete -n {templ_02} -g {rg}')
+        self.cmd('image builder list -g {rg}', checks=self.check('length(@)', 2))
+        self.cmd('image builder delete -n {tmpl_02} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
