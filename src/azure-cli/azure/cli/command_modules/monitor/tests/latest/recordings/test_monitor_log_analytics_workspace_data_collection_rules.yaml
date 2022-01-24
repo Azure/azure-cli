@@ -1,0 +1,458 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor data-collection rule show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-monitor/0.1.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1?api-version=2021-04-01
+  response:
+    body:
+      string: '{"properties":{"immutableId":"dcr-53703e21510e49fcb46b80274508f48f","dataSources":{"performanceCounters":[{"streams":["Microsoft-InsightsMetrics"],"samplingFrequencyInSeconds":10,"counterSpecifiers":["\\Processor
+        Information(_Total)\\% Processor Time","\\Processor Information(_Total)\\%
+        Privileged Time","\\Processor Information(_Total)\\% User Time","\\Processor
+        Information(_Total)\\Processor Frequency","\\System\\Processes","\\Process(_Total)\\Thread
+        Count","\\Process(_Total)\\Handle Count","\\System\\System Up Time","\\System\\Context
+        Switches/sec","\\System\\Processor Queue Length","\\Memory\\% Committed Bytes
+        In Use","\\Memory\\Available Bytes","\\Memory\\Committed Bytes","\\Memory\\Cache
+        Bytes","\\Memory\\Pool Paged Bytes","\\Memory\\Pool Nonpaged Bytes","\\Memory\\Pages/sec","\\Memory\\Page
+        Faults/sec","\\Process(_Total)\\Working Set","\\Process(_Total)\\Working Set
+        - Private","\\LogicalDisk(_Total)\\% Disk Time","\\LogicalDisk(_Total)\\%
+        Disk Read Time","\\LogicalDisk(_Total)\\% Disk Write Time","\\LogicalDisk(_Total)\\%
+        Idle Time","\\LogicalDisk(_Total)\\Disk Bytes/sec","\\LogicalDisk(_Total)\\Disk
+        Read Bytes/sec","\\LogicalDisk(_Total)\\Disk Write Bytes/sec","\\LogicalDisk(_Total)\\Disk
+        Transfers/sec","\\LogicalDisk(_Total)\\Disk Reads/sec","\\LogicalDisk(_Total)\\Disk
+        Writes/sec","\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer","\\LogicalDisk(_Total)\\Avg.
+        Disk sec/Read","\\LogicalDisk(_Total)\\Avg. Disk sec/Write","\\LogicalDisk(_Total)\\Avg.
+        Disk Queue Length","\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length","\\LogicalDisk(_Total)\\Avg.
+        Disk Write Queue Length","\\LogicalDisk(_Total)\\% Free Space","\\LogicalDisk(_Total)\\Free
+        Megabytes","\\Network Interface(*)\\Bytes Total/sec","\\Network Interface(*)\\Bytes
+        Sent/sec","\\Network Interface(*)\\Bytes Received/sec","\\Network Interface(*)\\Packets/sec","\\Network
+        Interface(*)\\Packets Sent/sec","\\Network Interface(*)\\Packets Received/sec","\\Network
+        Interface(*)\\Packets Outbound Errors","\\Network Interface(*)\\Packets Received
+        Errors"],"name":"perfCounterDataSource10"}]},"destinations":{"azureMonitorMetrics":{"name":"azureMonitorMetrics-default"}},"dataFlows":[{"streams":["Microsoft-InsightsMetrics"],"destinations":["azureMonitorMetrics-default"]}],"provisioningState":"Succeeded"},"location":"westeurope","tags":{},"kind":"Windows","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1","name":"rule1","type":"Microsoft.Insights/dataCollectionRules","etag":"\"88009f7d-0000-0d00-0000-61ee61650000\"","systemData":{"createdBy":"v-jingszhang@microsoft.com","createdByType":"User","createdAt":"2022-01-24T08:20:53.5209504Z","lastModifiedBy":"v-jingszhang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-01-24T08:20:53.5209504Z"}}'
+    headers:
+      api-supported-versions:
+      - 2019-11-01-preview, 2021-04-01, 2021-09-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2832'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 24 Jan 2022 08:21:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2bbfbac8-e1b0-44af-b9c6-3a40669d37e3
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"c6ae1a7b-1ab4-4dd6-80a4-39292d0514b7\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Thu, 20 Jan 2022 03:29:11 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 25 Jan 2022 06:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 20 Jan 2022 03:29:11 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 24 Jan 2022 07:56:05 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/microsoft.operationalinsights/workspaces/wsn1\",\r\n
+        \ \"name\": \"wsn1\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1037'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:21:59 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"provisioningState": "Succeeded",
+      "sku": {"name": "pergb2018"}, "retentionInDays": 30, "workspaceCapping": {"dailyQuotaGb":
+      -1.0}, "publicNetworkAccessForIngestion": "Enabled", "publicNetworkAccessForQuery":
+      "Enabled", "features": {"legacy": 0, "searchVersion": 1, "enableLogAccessUsingOnlyResourcePermissions":
+      true}, "defaultDataCollectionRuleResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '532'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"BadRequest","message":"This workspace is missing
+        from data collection rule \/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/tbtest\/providers\/Microsoft.Insights\/dataCollectionRules\/rule1
+        destination list.","target":"defaultDcrFullResourceId"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:22:08 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"c6ae1a7b-1ab4-4dd6-80a4-39292d0514b7\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Thu, 20 Jan 2022 03:29:11 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 25 Jan 2022 06:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 20 Jan 2022 03:29:11 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 24 Jan 2022 08:22:33 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/microsoft.operationalinsights/workspaces/wsn1\",\r\n
+        \ \"name\": \"wsn1\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1037'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:22:53 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"provisioningState": "Succeeded",
+      "sku": {"name": "pergb2018"}, "retentionInDays": 30, "workspaceCapping": {"dailyQuotaGb":
+      -1.0}, "publicNetworkAccessForIngestion": "Enabled", "publicNetworkAccessForQuery":
+      "Enabled", "features": {"legacy": 0, "searchVersion": 1, "enableLogAccessUsingOnlyResourcePermissions":
+      true}, "defaultDataCollectionRuleResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '532'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"c6ae1a7b-1ab4-4dd6-80a4-39292d0514b7\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Thu, 20 Jan 2022 03:29:11 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 25 Jan 2022 06:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 20 Jan 2022 03:29:11 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 24 Jan 2022 08:22:33 GMT\",\r\n    \"defaultDataCollectionRuleResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/microsoft.operationalinsights/workspaces/wsn1\",\r\n
+        \ \"name\": \"wsn1\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1213'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:22:56 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"c6ae1a7b-1ab4-4dd6-80a4-39292d0514b7\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Thu, 20 Jan 2022 03:29:11 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 25 Jan 2022 06:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 20 Jan 2022 03:29:11 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 24 Jan 2022 08:22:56 GMT\",\r\n    \"defaultDataCollectionRuleResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/microsoft.operationalinsights/workspaces/wsn1\",\r\n
+        \ \"name\": \"wsn1\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1213'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:25:07 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"provisioningState": "Succeeded",
+      "sku": {"name": "pergb2018"}, "retentionInDays": 30, "workspaceCapping": {"dailyQuotaGb":
+      -1.0}, "publicNetworkAccessForIngestion": "Enabled", "publicNetworkAccessForQuery":
+      "Enabled", "features": {"legacy": 0, "searchVersion": 1, "enableLogAccessUsingOnlyResourcePermissions":
+      true}, "defaultDataCollectionRuleResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '532'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --data-collection-rule
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/7.0.0b1 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/Microsoft.OperationalInsights/workspaces/wsn1?api-version=2021-12-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"c6ae1a7b-1ab4-4dd6-80a4-39292d0514b7\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Thu, 20 Jan 2022 03:29:11 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 25 Jan 2022 06:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 20 Jan 2022 03:29:11 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 24 Jan 2022 08:22:56 GMT\",\r\n    \"defaultDataCollectionRuleResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule1\"\r\n
+        \ },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/tbtest/providers/microsoft.operationalinsights/workspaces/wsn1\",\r\n
+        \ \"name\": \"wsn1\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1213'
+      content-type:
+      - application/json
+      date:
+      - Mon, 24 Jan 2022 08:25:24 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

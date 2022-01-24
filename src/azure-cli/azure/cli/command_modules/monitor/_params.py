@@ -417,7 +417,7 @@ def load_arguments(self, _):
         c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
     with self.argument_context('monitor log-analytics workspace update') as c:
-        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace.')
+        c.argument('default_data_collection_rule_resource_id', options_list='--data-collection-rule', help='The resource ID of the default Data Collection Rule to use for this workspace. Expected format is /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}.')
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])

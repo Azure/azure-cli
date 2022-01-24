@@ -477,6 +477,20 @@ class TestLogProfileScenarios(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
 
+    @record_only()
+    def test_monitor_log_analytics_workspace_data_collection_rules(self):
+        self.kwargs.update({
+            'ws_name': 'wsn1',
+            'rule_name': 'rule11'
+        })
+        rule = self.cmd('az monitor data-collection rule show -g tbtest -n rule1').get_output_in_json()
+        self.kwargs.update({
+            'rule_id': rule['id']
+        })
+        self.cmd('monitor log-analytics workspace update -g tbtest -n {ws_name} --data-collection-rule {rule_id}', checks=[
+            self.check('defaultDataCollectionRuleResourceId', '{rule_id}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_table(self, resource_group):

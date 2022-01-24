@@ -1109,7 +1109,7 @@ examples:
 
 helps['monitor log-analytics workspace table create'] = """
 type: command
-short-summary: Create a Log Analytics workspace table..
+short-summary: Create a Log Analytics workspace table.
 examples:
   - name: Create a Log Analytics workspace table.
     text: |
@@ -1118,11 +1118,20 @@ examples:
 
 helps['monitor log-analytics workspace table update'] = """
 type: command
+short-summary: Update the properties of a Log Analytics workspace table.
+examples:
+  - name: Update the properties of a Log Analytics workspace table.
+    text: |
+        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
+"""
+
+helps['monitor log-analytics workspace table delete'] = """
+type: command
 short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.
 examples:
   - name: Update the retention time of a Log Analytics workspace table
     text: |
-        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
+        az monitor log-analytics workspace table delete --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable 
 """
 
 helps['monitor log-analytics workspace pack'] = """
@@ -1173,6 +1182,9 @@ examples:
     text: |
         az monitor log-analytics workspace update --resource-group myresourcegroup --retention-time 30 --workspace-name myworkspace
     crafted: true
+  - name: Update the defaultDataCollectionRuleResourceId of the workspace
+      text: |
+          az monitor log-analytics workspace update --resource-group myresourcegroup --workspace-name myworkspace --data-collection-rule "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/dataCollectionRules/{dcrName}".
 """
 
 helps['monitor log-analytics workspace linked-service'] = """
