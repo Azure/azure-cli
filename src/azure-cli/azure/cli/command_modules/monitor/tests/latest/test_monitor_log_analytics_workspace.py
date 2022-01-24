@@ -250,7 +250,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('publicNetworkAccessForQuery', 'Disabled')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='WestEurope')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_recover(self, resource_group):
         workspace_name = self.create_random_name('clitest', 20)
@@ -272,10 +272,6 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
 
-        self.cmd("monitor log-analytics workspace table list -g {rg} --workspace-name {name}", checks=[
-            # self.check('length(@)', 0)
-        ])
-
         self.kwargs.update({
             'table_name': 'Syslog'
         })
@@ -284,35 +280,37 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 30)
         ])
 
-        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 0)
-        ])
+        # not supported in api_version = 2021-12-01-preview
+        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+        #     self.check('length(@)', 0)
+        # ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
-        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 1)
-        ])
+        # not supported in api_version = 2021-12-01-preview
+        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+        #     self.check('length(@)', 1)
+        # ])
 
-        self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
-            self.check('sku.capacityReservationLevel', 200),
-            self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        ])
+        # self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
+        #     self.check('provisioningState', 'Succeeded'),
+        #     self.check('retentionInDays', 30),
+        #     self.check('sku.name', 'capacityreservation'),
+        #     self.check('sku.capacityReservationLevel', 200),
+        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        # ])
 
-        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
-            self.check('sku.capacityReservationLevel', 200),
-            self.check('workspaceCapping.dailyQuotaGb', 2.0)
-        ])
+        # self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+        #     self.check('provisioningState', 'Succeeded'),
+        #     self.check('retentionInDays', 30),
+        #     self.check('sku.name', 'capacityreservation'),
+        #     self.check('sku.capacityReservationLevel', 200),
+        #     self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        # ])
 
-        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 0)
-        ])
+        # self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+        #     self.check('length(@)', 0)
+        # ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")
 
