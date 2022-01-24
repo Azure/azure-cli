@@ -395,6 +395,17 @@ def validate_assign_kubelet_identity(namespace):
         if not is_valid_resource_id(namespace.assign_kubelet_identity):
             raise InvalidArgumentValueError("--assign-kubelet-identity is not a valid Azure resource ID.")
 
+def validate_nodepool_id(namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.nodepool_id):
+        raise InvalidArgumentValueError("--nodepool-id is not a valid Azure resource ID.")
+
+
+def validate_snapshot_id(namespace):
+    if namespace.snapshot_id:
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.snapshot_id):
+            raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
 
 def extract_comma_separated_string(
     raw_string,

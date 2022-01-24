@@ -136,6 +136,31 @@ def aks_versions_table_format(result):
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
 
 
+def aks_list_snapshot_table_format(results):
+    """"Format a list of snapshots as summary results for display with "-o table"."""
+    return [_aks_snapshot_table_format(r) for r in results]
+
+
+def aks_show_snapshot_table_format(result):
+    """Format a snapshot as summary results for display with "-o table"."""
+    return [_aks_snapshot_table_format(result)]
+
+
+def _aks_snapshot_table_format(result):
+    parsed = compile_jmes("""{
+        name: name,
+        location: location,
+        resourceGroup: resourceGroup,
+        nodeImageVersion: nodeImageVersion,
+        kubernetesVersion: kubernetesVersion,
+        osType: osType,
+        osSku: osSku,
+        enableFIPS: enableFIPS
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
+
+
 def version_to_tuple(version):
     """Removes preview suffix"""
     if version.endswith('(preview)'):

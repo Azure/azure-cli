@@ -79,6 +79,8 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
+from ._client_factory import cf_snapshots
+from ._client_factory import cf_snapshots_client
 from ._client_factory import get_msi_client
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
@@ -847,6 +849,30 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
 
 def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
     return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
+
+
+_re_snapshot_resource_id = re.compile(
+    r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.containerservice/snapshots/(.*)',
+    flags=re.IGNORECASE)
+
+
+def _get_snapshot(cli_ctx, snapshot_id):
+    snapshot_id = snapshot_id.lower()
+    match = _re_snapshot_resource_id.search(snapshot_id)
+    if match:
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        snapshot_name = match.group(3)
+        snapshot_client = cf_snapshots_client(cli_ctx, subscription_id=subscription_id)
+        try:
+            snapshot = snapshot_client.get(resource_group_name, snapshot_name)
+        except CloudError as ex:
+            if 'was not found' in ex.message:
+                raise InvalidArgumentValueError("Snapshot {} not found.".format(snapshot_id))
+            raise CLIError(ex.message)
+        return snapshot
+    raise InvalidArgumentValueError(
+        "Cannot parse snapshot name from provided resource id {}.".format(snapshot_id))
 
 
 # pylint: disable=too-many-locals
@@ -1959,7 +1985,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_password=None,
                enable_ahub=False,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
+               node_vm_size=None,
                node_osdisk_type=None,
                node_osdisk_size=0,
                node_osdisk_diskencryptionset_id=None,
@@ -2035,7 +2061,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                no_wait=False,
                yes=False,
                enable_azure_rbac=False,
-               aks_custom_headers=None):
+               aks_custom_headers=None,
+               snapshot_id=None,
+               ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
@@ -2425,6 +2453,7 @@ def aks_upgrade(cmd,
     if upgrade_all:
         for agent_profile in instance.agent_pool_profiles:
             agent_profile.orchestrator_version = kubernetes_version
+            agent_profile.creation_data = None
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
@@ -2433,14 +2462,12 @@ def aks_upgrade(cmd,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
-    return sdk_no_wait(
-        no_wait,
-        client.begin_upgrade_node_image_version,
-        resource_group_name,
-        cluster_name,
-        nodepool_name,
-    )
+def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name, snapshot_id=None):
+    headers = {}
+    if snapshot_id:
+        headers["AKSSnapshotId"] = snapshot_id
+
+    return sdk_no_wait(no_wait, client.begin_upgrade_node_image_version, resource_group_name, cluster_name, nodepool_name, headers=headers)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -3096,7 +3123,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       vnet_subnet_id=None,
                       ppg=None,
                       max_pods=0,
-                      os_type="Linux",
+                      os_type=None,
                       os_sku=None,
                       min_count=None,
                       max_count=None,
@@ -3112,10 +3139,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
                       enable_fips_image=False,
+                      gpu_instance_profile=None,
+                      snapshot_id=None,
                       no_wait=False):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
+    CreationData = cmd.get_models('CreationData',
+                                  resource_type=ResourceType.MGMT_COMPUTE)
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -3127,6 +3158,25 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
+
+    creationData = None
+    if snapshot_id:
+        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version:
+            kubernetes_version = snapshot.kubernetes_version
+        if not os_type:
+            os_type = snapshot.os_type
+        if not os_sku:
+            os_sku = snapshot.os_sku
+        if not node_vm_size:
+            node_vm_size = snapshot.vm_size
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    if not os_type:
+        os_type = "Linux"
 
     if node_taints is not None:
         for taint in node_taints.split(','):
@@ -3168,7 +3218,9 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
         mode=mode,
-        enable_fips=enable_fips_image
+        enable_fips=enable_fips_image,
+        gpu_instance_profile=gpu_instance_profile,
+        creation_data=creationData
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
@@ -3223,8 +3275,12 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
-                          no_wait=False):
+                          no_wait=False,
+                          aks_custom_headers=None,
+                          snapshot_id=None,):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
+    CreationData = cmd.get_models('CreationData',
+                                 resource_type=ResourceType.MGMT_COMPUTE)
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
@@ -3245,10 +3301,22 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       client,
                                                       resource_group_name,
                                                       cluster_name,
-                                                      nodepool_name)
+                                                      nodepool_name,
+                                                      snapshot_id)
+
+    creationData = None
+    if snapshot_id:
+        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version and not node_image_only:
+            kubernetes_version = snapshot.kubernetes_version
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     instance.orchestrator_version = kubernetes_version
+    instance.creation_data = creationData
 
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
@@ -4040,3 +4108,74 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
+
+
+def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                        client,
+                        resource_group_name,
+                        name,
+                        nodepool_id,
+                        location=None,
+                        tags=None,
+                        aks_custom_headers=None,
+                        no_wait=False):
+
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = rg_location
+    CreationData = cmd.get_models('CreationData',
+                                  resource_type=ResourceType.MGMT_COMPUTE)
+    Snapshot = cmd.get_models('Snapshot',
+                                  resource_type=ResourceType.MGMT_COMPUTE)
+    creationData = CreationData(
+        source_resource_id=nodepool_id
+    )
+      
+    snapshot = Snapshot(
+        name=_trim_nodepoolname(name),
+        tags=tags,
+        location=location,
+        creation_data=creationData
+    )
+
+    headers = get_aks_custom_headers(aks_custom_headers)
+    return client.create_or_update(resource_group_name, _trim_nodepoolname(name), snapshot, headers=headers)
+
+
+def get_aks_custom_headers(aks_custom_headers=None):
+    headers = {}
+    if aks_custom_headers is not None:
+        if aks_custom_headers != "":
+            for pair in aks_custom_headers.split(','):
+                parts = pair.split('=')
+                if len(parts) != 2:
+                    raise CLIError('custom headers format is incorrect')
+                headers[parts[0]] = parts[1]
+    return headers
+
+
+def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, name)
+    return snapshot
+
+
+def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        name,
+                        no_wait=False,
+                        yes=False):
+
+    from knack.prompting import prompt_y_n
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
+    return client.delete(resource_group_name, name)
+
+
+def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+    if resource_group_name is None or resource_group_name == '':
+        return client.list()
+
+    return client.list_by_resource_group(resource_group_name)
