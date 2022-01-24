@@ -1056,11 +1056,13 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
     routing_type = profile.traffic_routing_method  # pylint: disable=no-member
     endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', 'endpoint_location']
+    all_options = ['target_resource_id', 'target', 'min_child_endpoints', 'min_child_IPv4', 'min_child_IPv6' 'priority', 'weight', 'endpoint_location']
     props_to_options = {
         'target_resource_id': '--target-resource-id',
         'target': '--target',
         'min_child_endpoints': '--min-child-endpoints',
+        'min_child_IPv4': '--min-child-endpoints_IPv4',
+        'min_child_IPv6': '--min-child-endpoints_IPv4',
         'priority': '--priority',
         'weight': '--weight',
         'endpoint_location': '--endpoint-location',

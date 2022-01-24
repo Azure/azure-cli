@@ -6600,8 +6600,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None, geo_mapping=None,
-                                    monitor_custom_headers=None, subnets=None):
+                                    min_child_endpoints=None, min_child_IPv4=None, min_child_IPv6=None, 
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
@@ -6611,6 +6611,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
                         min_child_endpoints=min_child_endpoints,
+                        min_child_IPv4=min_child_IPv4,
+                        min_child_IPv6=min_child_IPv6,
                         geo_mapping=geo_mapping,
                         subnets=subnets,
                         custom_headers=monitor_custom_headers)
@@ -6622,8 +6624,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None, geo_mapping=None,
-                                    subnets=None, monitor_custom_headers=None):
+                                    weight=None, min_child_endpoints=None, min_child_IPv4=None, min_child_IPv6=None, 
+                                    geo_mapping=None, subnets=None, monitor_custom_headers=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
     if endpoint_status is not None:
@@ -6640,6 +6642,10 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.weight = weight
     if min_child_endpoints is not None:
         instance.min_child_endpoints = min_child_endpoints
+    if min_child_IPv4 is not None:
+        instance.min_child_IPv4 = min_child_IPv4
+    if min_child_IPv6 is not None:
+        instance.min_child_IPv6 = min_child_IPv6
     if geo_mapping is not None:
         instance.geo_mapping = geo_mapping
     if subnets is not None:
