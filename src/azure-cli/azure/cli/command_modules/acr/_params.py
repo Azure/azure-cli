@@ -43,6 +43,20 @@ from ._validators import (
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
+repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_repo_id,
+    help="A fully qualified repository specifier such as 'myreg.azurecr.io/myrepo'."
+    )
+
+manifest_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_manifest_id,
+    help="A fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:mytag'."
+    )
+
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
     help="The name of the image. May include a tag in the format 'name:tag' or digest in the format 'name@digest'."
@@ -146,30 +160,30 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
-        c.argument('repository', options_list=['--name', '-n'])
-        c.argument('manifest_id', options_list=['--name', '-n'])
+        c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'])
+        c.argument('manifest_id', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
 
     with self.argument_context('acr manifest show') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
-        c.argument('raw_output', options_list=['--raw'], arg_type=get_three_state_flag())
+        c.positional('id', arg_type=manifest_id_type)
+        c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
 
     with self.argument_context('acr manifest list') as c:
-        c.positional('id', nargs='*', default=validate_repo_id)
+        c.positional('id', arg_type=repo_id_type)
 
     with self.argument_context('acr manifest delete') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
+        c.positional('id', arg_type=manifest_id_type)
 
     with self.argument_context('acr manifest show-metadata') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
+        c.positional('id', arg_type=manifest_id_type)
 
     with self.argument_context('acr manifest list-metadata') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_repo_id)
+        c.positional('id',  arg_type=repo_id_type)
 
     with self.argument_context('acr manifest update-metadata') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
+        c.positional('id', arg_type=manifest_id_type)
 
     with self.argument_context('acr manifest list-referrers') as c:
-        c.positional('id', nargs='*', default=None, validator=validate_manifest_id)
+        c.positional('id',arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

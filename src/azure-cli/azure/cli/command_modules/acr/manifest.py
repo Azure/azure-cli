@@ -43,8 +43,8 @@ ORDERBY_PARAMS = {
 }
 DEFAULT_PAGINATION = 100
 
-BAD_ARGS_ERROR_REPO = "Error: You must provide either a fully qualified repository specifier such as myreg.azurecr.io/myrepo as a positional parameter or provide -r myreg -n myrepo argument values."
-BAD_ARGS_ERROR_MANIFEST ="Error: You must provide either a fully qualified manifest specifier such as myreg.azurecr.io/myrepo:mytag as a positional parameter or provide -r myreg -n myrepo:mytag argument values."
+BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as 'myreg.azurecr.io/myrepo' as a positional parameter or provide '-r myreg -n myrepo' argument values."
+BAD_ARGS_ERROR_MANIFEST ="You must provide either a fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:mytag' as a positional parameter or provide '-r myreg -n myrepo:mytag' argument values."
 
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
@@ -98,7 +98,7 @@ def _validate_login_server_suffix(cmd, reg_suffix):
     login_server_suffix = get_login_server_suffix(cli_ctx)
 
     if(reg_suffix != login_server_suffix):
-        raise InvalidArgumentValueError(f'Error: Provided registry suffix \'{reg_suffix}\' does not match the configured az cli acr login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+        raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az cli acr login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
 
 def acr_repository_list_manifests(cmd,
                                   registry_name=None,
