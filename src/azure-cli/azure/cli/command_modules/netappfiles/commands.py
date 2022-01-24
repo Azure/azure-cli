@@ -113,6 +113,12 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.generic_update_command('update',
+                                 setter_name='begin_update',
+                                 custom_func_name='update_active_directory',
+                                 setter_arg_name='body',
+                                 doc_string_source='azure.mgmt.netapp.models#NetAppAccountPatch',
+                                 exception_handler=netappfiles_exception_handler)
         g.custom_command('list', 'list_active_directories',
                          client_factory=accounts_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
