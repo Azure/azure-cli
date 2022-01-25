@@ -39,8 +39,8 @@ from azure.cli.command_modules.acs.custom import (
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
+    _get_snapshot,
 )
-from azure.cli.command_modules.acs.custom import _get_snapshot
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
