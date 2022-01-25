@@ -6663,9 +6663,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
     profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 
-def check_traffic_manager_name(cmd, client, name, type):
+
+def check_traffic_manager_name(cmd, client, name, routing_method):
     from azure.mgmt.trafficmanager.models import CheckTrafficManagerRelativeDnsNameAvailabilityParameters
-    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type=type)
+    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type=routing_method)
     return client.check_traffic_manager_relative_dns_name_availability(checknameParameters)
 
 # endregion
