@@ -36,9 +36,9 @@ class RESOURCE(Enum):
     # Redis = 'redis'
     # RedisEnterprise = 'redis-enterprise'
     KeyVault = 'keyvault'
-    # EventHub = 'eventhub'
-    # AppConfig = 'appconfig'
-    # ServiceBus = 'servicebus'
+    EventHub = 'eventhub'
+    AppConfig = 'appconfig'
+    ServiceBus = 'servicebus'
     SignalR = 'signalr'
     ConfluentKafka = 'confluent-cloud'
 
@@ -101,9 +101,9 @@ TARGET_RESOURCES = {
     RESOURCE.StorageTable: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.Storage/storageAccounts/{account}/tableServices/default',
 
     RESOURCE.KeyVault: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.KeyVault/vaults/{vault}',
-    # RESOURCE.AppConfig: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.AppConfiguration/configurationStores/{config_store}',
-    # RESOURCE.EventHub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.EventHub/namespaces/{namespace}',
-    # RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}',
+    RESOURCE.AppConfig: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.AppConfiguration/configurationStores/{config_store}',
+    RESOURCE.EventHub: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.EventHub/namespaces/{namespace}',
+    RESOURCE.ServiceBus: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.ServiceBus/namespaces/{namespace}',
     RESOURCE.SignalR: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.SignalRService/SignalR/{signalr}',
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
 }
@@ -423,42 +423,42 @@ TARGET_RESOURCES_PARAMS = {
             'placeholder': 'MyVault'
         }
     },
-    # RESOURCE.AppConfig: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the app configuration',
-    #         'placeholder': 'AppconfigRG'
-    #     },
-    #     'config_store': {
-    #         'options': ['--app-config'],
-    #         'help': 'Name of the app configuration',
-    #         'placeholder': 'MyConfigStore'
-    #     }
-    # },
-    # RESOURCE.EventHub: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the eventhub',
-    #         'placeholder': 'EventhubRG'
-    #     },
-    #     'namespace': {
-    #         'options': ['--namespace'],
-    #         'help': 'Name of the eventhub namespace',
-    #         'placeholder': 'MyNamespace'
-    #     }
-    # },
-    # RESOURCE.ServiceBus: {
-    #     'target_resource_group': {
-    #         'options': ['--target-resource-group', '--tg'],
-    #         'help': 'The resource group which contains the servicebus',
-    #         'placeholder': 'ServicebusRG'
-    #     },
-    #     'namespace': {
-    #         'options': ['--namespace'],
-    #         'help': 'Name of the servicebus namespace',
-    #         'placeholder': 'MyNamespace'
-    #     }
-    # },
+    RESOURCE.AppConfig: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the app configuration',
+            'placeholder': 'AppconfigRG'
+        },
+        'config_store': {
+            'options': ['--app-config'],
+            'help': 'Name of the app configuration',
+            'placeholder': 'MyConfigStore'
+        }
+    },
+    RESOURCE.EventHub: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the eventhub',
+            'placeholder': 'EventhubRG'
+        },
+        'namespace': {
+            'options': ['--namespace'],
+            'help': 'Name of the eventhub namespace',
+            'placeholder': 'MyNamespace'
+        }
+    },
+    RESOURCE.ServiceBus: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the servicebus',
+            'placeholder': 'ServicebusRG'
+        },
+        'namespace': {
+            'options': ['--namespace'],
+            'help': 'Name of the servicebus namespace',
+            'placeholder': 'MyNamespace'
+        }
+    },
     RESOURCE.SignalR: {
         'target_resource_group': {
             'options': ['--target-resource-group', '--tg'],
@@ -538,9 +538,9 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     },
@@ -565,9 +565,9 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.StorageTable: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.KeyVault: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        # RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.AppConfig: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.EventHub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.ServiceBus: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
     }
 }
@@ -719,28 +719,28 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Nodejs,
             CLIENT_TYPE.SpringBoot
         ],
-        # RESOURCE.AppConfig: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs
-        # ],
-        # RESOURCE.EventHub: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs,
-        #     CLIENT_TYPE.Go,
-        #     CLIENT_TYPE.SpringBoot
-        # ],
-        # RESOURCE.ServiceBus: [
-        #     CLIENT_TYPE.Dotnet,
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Python,
-        #     CLIENT_TYPE.Nodejs,
-        #     CLIENT_TYPE.Go,
-        #     CLIENT_TYPE.SpringBoot
-        # ],
+        RESOURCE.AppConfig: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs
+        ],
+        RESOURCE.EventHub: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot
+        ],
+        RESOURCE.ServiceBus: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.SpringBoot
+        ],
         RESOURCE.SignalR: [
             CLIENT_TYPE.Dotnet
         ],
@@ -835,20 +835,20 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Dotnet
         ],
-        # RESOURCE.AppConfig: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.Dotnet
-        # ],
-        # RESOURCE.EventHub: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Dotnet
-        # ],
-        # RESOURCE.ServiceBus: [
-        #     CLIENT_TYPE.Java,
-        #     CLIENT_TYPE.SpringBoot,
-        #     CLIENT_TYPE.Dotnet
-        # ],
+        RESOURCE.AppConfig: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Dotnet
+        ],
+        RESOURCE.EventHub: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet
+        ],
+        RESOURCE.ServiceBus: [
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Dotnet
+        ],
         RESOURCE.ConfluentKafka: [
             CLIENT_TYPE.Java,
             CLIENT_TYPE.SpringBoot,
