@@ -78,4 +78,5 @@ class ConditionalAccessScenarioTest(LiveScenarioTest):
         assert decoded['aud'] in scope
         assert decoded['amr'] == ['pwd', 'mfa']
 
+        self.cmd('logout')
         # endregion

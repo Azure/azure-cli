@@ -4137,6 +4137,46 @@ class NetworkVNetPeeringScenarioTest(ScenarioTest):
         self.cmd('network vnet peering delete -g {rg} -n peering2 --vnet-name vnet2')
         self.cmd('network vnet-gateway delete -g {rg} -n gateway1')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_peering')
+    def test_network_vnet_peering_sync(self, resource_group):
+
+        # create two vnets with non-overlapping prefixes
+        self.cmd('network vnet create -g {rg} -n vnet1')
+        self.cmd('network vnet create -g {rg} -n vnet2 --subnet-name GatewaySubnet --address-prefix 11.0.0.0/16 --subnet-prefix 11.0.0.0/24')
+        # create supporting resources for gateway
+        self.cmd('network public-ip create -g {rg} -n ip1')
+        ip_id = self.cmd('network public-ip show -g {rg} -n ip1 --query id').get_output_in_json()
+        vnet_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'ip_id': ip_id,
+            'vnet_id': vnet_id
+        })
+        # create the gateway on vnet2
+        self.cmd('network vnet-gateway create -g {rg} -n gateway1 --public-ip-address {ip_id} --vnet {vnet_id} --tags foo=doo')
+
+        vnet1_id = self.cmd('network vnet show -g {rg} -n vnet1 --query id').get_output_in_json()
+        vnet2_id = self.cmd('network vnet show -g {rg} -n vnet2 --query id').get_output_in_json()
+
+        self.kwargs.update({
+            'vnet1_id': vnet1_id,
+            'vnet2_id': vnet2_id
+        })
+        # set up gateway sharing from vnet1 to vnet2. test that remote-vnet indeed accepts name or id.
+        self.cmd('network vnet peering create -g {rg} -n peering2 --vnet-name vnet2 --remote-vnet {vnet1_id} --allow-gateway-transit', checks=[
+            self.check('allowGatewayTransit', True),
+            self.check('remoteVirtualNetwork.id', '{vnet1_id}'),
+            self.check('peeringState', 'Initiated')
+        ])
+        self.cmd('network vnet peering create -g {rg} -n peering1 --vnet-name vnet1 --remote-vnet vnet2 --use-remote-gateways --allow-forwarded-traffic', checks=[
+            self.check('useRemoteGateways', True),
+            self.check('remoteVirtualNetwork.id', '{vnet2_id}'),
+            self.check('peeringState', 'Connected'),
+            self.check('allowVirtualNetworkAccess', False)
+        ])
+
+        self.cmd('network vnet peering sync -g {rg} -n peering1 --vnet-name vnet1')
+
 
 class NetworkVpnConnectionIpSecPolicy(ScenarioTest):
 
@@ -4945,7 +4985,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
 
-class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
@@ -4963,6 +5003,14 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {public_ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+
+        # test vnet-gateway revoked-cert create
+        # self.cmd('network vnet-gateway update -g {rg} -n {vg} --address-prefixes 40.1.0.0/24')
+        self.cmd('network vnet-gateway revoked-cert create -g {rg} -n MyCer --gateway-name {gateway} --thumbprint e806da0b7fe24f47e76fa269dc4ed76dac4b39d0')
+
+        # test vnet-gateway revoked-cert delete
+        self.cmd('network vnet-gateway revoked-cert delete -g {rg} -n MyCer --gateway-name {gateway}')
+
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
         output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()

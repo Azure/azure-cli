@@ -68,6 +68,54 @@ examples:
         az netappfiles account ad add -g mygroup --name myname --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
 """
 
+helps['netappfiles account ad update'] = """
+type: command
+short-summary: Updates an active directory to the account.
+parameters:
+  - name: --account-name --name -a -n
+    short-summary: The name of the ANF account
+  - name: --active-directory-id
+    short-summary: The id of the Active Directory
+  - name: --username
+    short-summary: Username of Active Directory domain administrator
+  - name: --password
+    short-summary: Plain text password of Active Directory domain administrator
+  - name: --domain
+    short-summary: Name of the Active Directory domain
+  - name: --dns
+    short-summary: Comma separated list of DNS server IP addresses for the Active Directory domain
+  - name: --smb-server-name
+    short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
+  - name: --organizational-unit
+    short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --kdc-ip
+    short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
+  - name: --ad-name
+    short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
+  - name: --server-root-ca-cert
+    short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
+  - name: --backup-operators
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+  - name: --aes-encryption
+    short-summary: If enabled, AES encryption will be enabled for SMB communication
+  - name: --ldap-signing
+    short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+  - name: --ldap-over-tls
+    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
+  - name: --administrators
+    short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+  - name: --encrypt-dc-conn
+    short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
+examples:
+  - name: Update an active directory on the account
+    text: >
+        az netappfiles account ad update -g mygroup --name myname --active-directory-id 123 --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
+"""
+
 helps['netappfiles account ad list'] = """
 type: command
 short-summary: List the active directories of an account.

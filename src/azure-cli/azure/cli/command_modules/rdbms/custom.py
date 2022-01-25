@@ -820,7 +820,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             'jdbc': "jdbc:mysql://{host}:3306/{database}?user={user}@{server}&password={password}",
             'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
                        "password: {password}, database: {database}, port: 3306}});",
-            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'php': "$con=mysqli_init(); [mysqli_ssl_set($con, NULL, NULL, {{ca-cert filename}}, NULL, NULL);] mysqli_real_connect($con, '{host}', '{user}@{server}', '{password}', '{database}', 3306);",
             'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
                       "port=3306, database='{database}')",
             'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "
@@ -873,7 +873,7 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             'jdbc': "jdbc:mariadb://{host}:3306/{database}?user={user}@{server}&password={password}",
             'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
                        "password: {password}, database: {database}, port: 3306}});",
-            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'php': "$con=mysqli_init(); [mysqli_ssl_set($con, NULL, NULL, {{ca-cert filename}}, NULL, NULL);] mysqli_real_connect($con, '{host}', '{user}@{server}', '{password}', '{database}', 3306);",
             'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
                       "port=3306, database='{database}')",
             'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "

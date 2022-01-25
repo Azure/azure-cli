@@ -154,7 +154,6 @@ def _aks_snapshot_table_format(result):
         nodeImageVersion: nodeImageVersion,
         kubernetesVersion: kubernetesVersion,
         osType: osType,
-        osSku: osSku,
         enableFIPS: enableFIPS
     }""")
     # use ordered dicts so headers are predictable

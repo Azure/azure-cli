@@ -195,6 +195,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'action_groups': '2021-09-01',
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
@@ -233,7 +234,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-09-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-10-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })
