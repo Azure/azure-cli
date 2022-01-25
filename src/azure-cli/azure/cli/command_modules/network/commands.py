@@ -1334,7 +1334,7 @@ def load_command_table(self, _):
 
     # region TrafficManagers
     with self.command_group('network traffic-manager profile', network_tmp_sdk) as g:
-        g.command('check-dns', 'check_traffic_manager_relative_dns_name_availability')
+        g.custom_command('check-dns', 'check_traffic_manager_name', client_factory=cf_traffic_manager_mgmt_profiles)
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_traffic_manager_profiles')
@@ -1348,7 +1348,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_traffic_manager_endpoints')
         g.generic_update_command('update', custom_func_name='update_traffic_manager_endpoint')
 
-        tm_geographic_path = 'azure.mgmt.trafficmanager.operations.geographic_hierarchies_operations#GeographicHierarchiesOperations.{}'
+        tm_geographic_path = 'azure.mgmt.trafficmanager.operations#GeographicHierarchiesOperations.{}'
         g.command('show-geographic-hierarchy', 'get_default', client_factory=cf_tm_geographic, operations_tmpl=tm_geographic_path, table_transformer=transform_geographic_hierachy_table_output)
 
     # endregion
