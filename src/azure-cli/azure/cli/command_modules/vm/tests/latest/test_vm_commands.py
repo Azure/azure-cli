@@ -484,6 +484,26 @@ class VMCustomImageTest(ScenarioTest):
             self.check('hyperVGeneration', 'V1')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_mgmt_')
+    def test_vm_custom_image_management(self, resource_group):
+        self.kwargs.update({
+            'vm1':'vm1',
+            'vm2':'vm2',
+            'image1':'myImage1',
+            'image2':'myImage2'
+        })
+
+        vm1 = self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image centos --admin-password testPassword0 --authentication-type password --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')    
+
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('image update -n {image1} -g {rg} --tags foo=bar', checks=self.check('tags.foo', 'bar'))
+        self.cmd('image delete -n {image1} -g {rg}')
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 0))
+
 
 class VMImageWithPlanTest(ScenarioTest):
 
@@ -589,6 +609,7 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd(vm_create_cmd)
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 2')
+        self.cmd('vm unmanaged-disk list -g {rg} --vm-name {vm}', checks=self.check('length(@)', 2))
         vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         self.kwargs['disk_uri'] = vm1_info['storageProfile']['osDisk']['vhd']['uri']
         self.kwargs['data_disk'] = vm1_info['storageProfile']['dataDisks'][0]['vhd']['uri']
@@ -606,6 +627,55 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].caching', 'ReadOnly'),
             self.check('storageProfile.dataDisks[1].lun', 1)
         ])
+
+
+class VMRedeployTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')
+    def test_vm_redeploy(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })        
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm reapply -n {vm} -g {rg}')
+        self.cmd('vm redeploy -n {vm} -g {rg}')
+
+
+class VMConvertTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_convert_')
+    def test_vm_convert(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+
+        output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertFalse(output[0]['managedDisk'])
+        self.assertTrue(output[0]['vhd'])
+
+        self.cmd('vm deallocate -n {vm} -g {rg}')
+        self.cmd('vm convert -n {vm} -g {rg}')
+        
+        converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertTrue(converted[0]['managedDisk'])
+        self.assertFalse(converted[0]['vhd'])
+
+
+class TestSnapShotAccess(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
+    def test_snapshot_access(self, resource_group):
+        self.kwargs.update({
+            'snapshot':'snapshot'
+        })
+        
+        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
 
 class VMAttachDisksOnCreate(ScenarioTest):
@@ -5807,6 +5877,8 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('activeKey.sourceVault.id', '{vault2_id}'),
             self.check('rotationToLatestKeyVersionEnabled', False)
         ])
+
+        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
 
         self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true', checks=[
             self.check('activeKey.sourceVault', None)
