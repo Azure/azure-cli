@@ -1602,13 +1602,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --no-wait', checks=[self.is_empty()])
 
         # nodepool update nodepool2 to system pool
+        # make sure no input won't wipe out exsiting labels
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --mode System', checks=[
-            self.check('mode', 'System')
+            self.check('mode', 'System'),
+            self.check('nodeLabels.label1', 'value1')
         ])
 
         # nodepool show
         self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name}', checks=[
-            self.check('mode', 'System')
+            self.check('mode', 'System'),
+            self.check('nodeLabels.label1', 'value1')
         ])
 
         # delete
@@ -4016,6 +4019,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('nodeLabels.label1', 'value2')
         ])
 
+        # nodepool delete nodepool2 label
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels ', checks=[
+            self.check('nodeLabels.label1', None)
+        ])
+
+        # nodepool show
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name}', checks=[
+            self.check('nodeLabels.label1', None)
+        ])
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -6012,10 +6024,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--nodepool-labels label1=value11'
+                     '--nodepool-labels '
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value11'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', None),
             self.check('agentPoolProfiles[0].nodeLabels.label2', None),
         ])
 
