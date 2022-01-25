@@ -99,7 +99,8 @@ class NetworkPrivateEndpoints(ScenarioTest):
             'lks1': 'lks1',
             'lks2': 'lks2',
             'pe': 'pe1',
-            'rg': resource_group
+            'rg': resource_group,
+            'nic': 'nic1',
         })
 
         # Create PLS
@@ -116,12 +117,13 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.kwargs['pls_id'] = pls1['id']
         self.cmd('network private-endpoint list-types -l {location}')
 
-        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location}', checks=[
+        self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet2} --private-connection-resource-id {pls_id} --connection-name tttt -l {location} --nic-name {nic}', checks=[
             self.check('name', 'pe1'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            self.check('customNetworkInterfaceName', self.kwargs['nic']),
         ])
 
-        # temporalily disable the test
+        # temporarily disable the test
         '''
         self.cmd('network private-endpoint update -g {rg} -n {pe} --request-message "test"', checks=[
             self.check('privateLinkServiceConnections[0].requestMessage', 'test')
@@ -145,6 +147,94 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(privateEndpointConnections)', 0)
         ])
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+    @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
+    @StorageAccountPreparer(name_prefix="ipconfig", kind="StorageV2")
+    def test_network_private_endpoint_ip_config(self, storage_account):
+        self.kwargs.update({
+            "sa": storage_account,
+            "loc": "eastus",
+            "vnet": self.create_random_name("vnet-", 24),
+            "subnet": self.create_random_name("subnet-", 24),
+            "pe": self.create_random_name("pe-", 24),
+            "connection": self.create_random_name("connection-", 24),
+            "ipconfig1": "ipconfig1",
+            "ipconfig2": "ipconfig2",
+        })
+
+        # prepare network
+        self.cmd("network vnet create -n {vnet} -l {loc} -g {rg} --address-prefixes 10.0.0.0/16 --subnet-name {subnet} --subnet-prefixes 10.0.0.0/24")
+        self.cmd("network vnet subnet update -n {subnet} -g {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true")
+
+        # create private endpoint connection
+        pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
+        self.kwargs["group_id"] = pl_resources[0]["groupId"]
+        self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
+        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
+
+        # check ip configuration operations
+        self.cmd(
+            "network private-endpoint ip-config add -n {ipconfig1} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob --private-ip-address 10.0.0.4",
+            checks=[
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+                self.check("length(ipConfigurations)", 1),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config add -n {ipconfig2} -g {rg} --endpoint-name {pe} --group-id {group_id} --member-name blob2 --private-ip-address 10.0.0.6",
+            checks=[
+                self.check("ipConfigurations[1].name", self.kwargs["ipconfig2"]),
+                self.check("length(ipConfigurations)", 2),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config remove -n {ipconfig2} -g {rg} --endpoint-name {pe}",
+            checks=[
+                self.check("ipConfigurations[0].name", self.kwargs["ipconfig1"]),
+            ]
+        )
+        self.cmd(
+            "network private-endpoint ip-config list -g {rg} --endpoint-name {pe}",
+            checks=[
+                self.check("length(@)", 1),
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix="cli_test_network_private_endpoint_", location="eastus")
+    @StorageAccountPreparer(name_prefix="asg", kind="StorageV2")
+    def test_network_private_endpoint_asg(self, storage_account):
+        self.kwargs.update({
+            "sa": storage_account,
+            "loc": "eastus",
+            "vnet": self.create_random_name("vnet-", 24),
+            "subnet": self.create_random_name("subnet-", 24),
+            "pe": self.create_random_name("pe-", 24),
+            "connection": self.create_random_name("connection-", 24),
+            "asg": "asg1",
+        })
+
+        # prepare network
+        self.cmd("network vnet create -n {vnet} -l {loc} -g {rg} --address-prefixes 10.0.0.0/16 --subnet-name {subnet} --subnet-prefixes 10.0.0.0/24")
+        self.cmd("network vnet subnet update -n {subnet} -g {rg} --vnet-name {vnet} --disable-private-endpoint-network-policies true")
+
+        # create private endpoint connection
+        pl_resources = self.cmd("storage account private-link-resource list --account-name {sa} -g {rg}").get_output_in_json()
+        self.kwargs["group_id"] = pl_resources[0]["groupId"]
+        self.kwargs["sa_id"] = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()["id"]
+        self.cmd("network private-endpoint create -n {pe} -g {rg} --vnet-name {vnet} --subnet {subnet} --connection-name {connection} --group-id {group_id} --private-connection-resource-id {sa_id}")
+
+        # check application security group operations
+        self.kwargs["asg_id"] = self.cmd("network asg create -n {asg} -g {rg}").get_output_in_json()["id"]
+        self.cmd(
+            "network private-endpoint asg add -g {rg} --endpoint-name {pe} --asg-id {asg_id}",
+            checks=[
+                self.check("applicationSecurityGroups[0].id", self.kwargs["asg_id"]),
+                self.check("length(applicationSecurityGroups)", 1),
+            ]
+        )
+        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.check("length(@)", 1))
+        self.cmd("network private-endpoint asg remove -g {rg} --endpoint-name {pe} --asg-id {asg_id}")
+        self.cmd("network private-endpoint asg list -g {rg} --endpoint-name {pe}", checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
@@ -847,12 +937,16 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
             'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
             'cert2': 'cert2',
             'cert2_file': os.path.join(TEST_DIR, 'AuthCert2.pfx'),
+            'cert3': 'cert3',
+            'cert3_file': os.path.join(TEST_DIR, 'AuthCert3.pfx'),
             'settings': 'https_settings'
         })
         self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+
+        self.cmd( 'network application-gateway auth-cert update -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert3_file}" --no-wait')
 
         # test command of auth-cert list
         self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
@@ -861,6 +955,13 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
         # test command of auth-cert show
         self.cmd('network application-gateway auth-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
                  checks=self.check('name', 'cert1'))
+
+        # test command of auth-cert delete
+        self.cmd('network application-gateway auth-cert delete -g {rg} --gateway-name {gateway} -n {cert1} --no-wait')
+        self.cmd('network application-gateway auth-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
 
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
@@ -893,6 +994,12 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
         # test root-cert show
         self.cmd('network application-gateway root-cert show -g {rg} --gateway-name {gateway} -n {cert1}',
                  checks=self.check('name', 'cert1'))
+
+        # test root-cert delete
+        self.cmd('network application-gateway root-cert delete -g {rg} --gateway-name {gateway} -n {cert2} --no-wait')
+        self.cmd('network application-gateway root-cert list -g {rg} --gateway-name {gateway}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
 
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
@@ -1008,6 +1115,13 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         # test ssl-cert show
         self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name ag3 -n ag3SslCert',
                  checks=[self.check('name', 'ag3SslCert')])
+
+        self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert.pfx')
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name ag3 -n ag3SslCert01 --cert-file "{path}" --cert-password {pass} --no-wait')
+        # test ssl-cert delete
+        self.cmd('network application-gateway ssl-cert delete -g {rg} --gateway-name ag3 -n ag3SslCert01 --no-wait')
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name ag3', checks=[
+            self.check('length(@)', 1)])
 
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols TLSv1_0 TLSv1_1 --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
@@ -1382,6 +1496,10 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.assertTrue(rule['httpListener']['id'].endswith('mylistener2'))
 
         self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+
+        # test rewrite-rule set update command
+        self.cmd('network application-gateway rewrite-rule set update -g {rg} --gateway-name {ag} -n {set}')
+
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name2} --no-wait --rewrite-rule-set {set} --http-listener mylistener --priority 10')
         rule = self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name2}').get_output_in_json()
         self.kwargs['set_id'] = rule['rewriteRuleSet']['id']
@@ -1637,6 +1755,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy show -g {rg} -n {waf}')
         self.cmd('network application-gateway waf-policy list -g {rg}',
                  checks=self.check('length(@)', 1))
+
+        # test waf-policy delete
+        self.cmd('network application-gateway waf-policy delete -g {rg} -n {waf}')
+        self.cmd('network application-gateway waf-policy list -g {rg}',
+                 checks=[
+                     self.check('length(@)', 0)
+                 ])
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
 
         # add two custom rules of this waf-policy
         self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
@@ -4819,7 +4945,7 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.cmd('network vnet-gateway packet-capture stop -g {rg} -n {gw1} --sas-url {sas_url}')
 
 
-class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
+class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
@@ -4837,6 +4963,14 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {public_ip}')
         self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
         self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+
+        # test vnet-gateway revoked-cert create
+        # self.cmd('network vnet-gateway update -g {rg} -n {vg} --address-prefixes 40.1.0.0/24')
+        self.cmd('network vnet-gateway revoked-cert create -g {rg} -n MyCer --gateway-name {gateway} --thumbprint e806da0b7fe24f47e76fa269dc4ed76dac4b39d0')
+
+        # test vnet-gateway revoked-cert delete
+        self.cmd('network vnet-gateway revoked-cert delete -g {rg} -n MyCer --gateway-name {gateway}')
+
         output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
         self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
         output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
@@ -4962,6 +5096,7 @@ class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
         self.cmd('network watcher configure --locations westus westus2 eastus canadaeast --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
+
 
 
 class NetworkWatcherScenarioTest(ScenarioTest):
