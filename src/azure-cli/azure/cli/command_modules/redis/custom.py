@@ -88,8 +88,8 @@ def cli_redis_create(cmd, client,
         for item in tenant_settings:
             tenant_settings_in_json.update(get_key_value_pair(item))
     from azure.mgmt.redis.models import RedisCreateParameters, Sku, RedisCommonPropertiesRedisConfiguration
-    identity=build_identity(mi_system_assigned, mi_user_assigned)
-    if (identity.type == "None"):
+    identity = build_identity(mi_system_assigned, mi_user_assigned)
+    if identity.type == "None":
         identity = None
     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
