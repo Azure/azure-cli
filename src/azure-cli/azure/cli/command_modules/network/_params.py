@@ -1874,7 +1874,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network traffic-manager profile check-dns') as c:
         c.argument('name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-        c.argument('resource_type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
+        c.argument('resource_type', options_list='--type', default='Microsoft.Network/trafficManagerProfiles')
 
     endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
     with self.argument_context('network traffic-manager endpoint') as c:
