@@ -41,9 +41,6 @@ from azure.cli.command_modules.acs.custom import (
     subnet_role_assignment_exists,
 )
 from azure.cli.command_modules.acs.custom import _get_snapshot
-from ._client_factory import (
-    cf_snapshots_client,
-)
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile

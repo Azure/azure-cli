@@ -3152,8 +3152,6 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
-    CreationData = cmd.get_models('CreationData',
-                                  resource_type=ResourceType.MGMT_COMPUTE)
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -3294,8 +3292,6 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           aks_custom_headers=None,
                           snapshot_id=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
-    CreationData = cmd.get_models('CreationData',
-                                 resource_type=ResourceType.MGMT_COMPUTE)
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
