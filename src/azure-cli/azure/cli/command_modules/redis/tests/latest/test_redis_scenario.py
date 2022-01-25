@@ -417,7 +417,7 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
         if self.is_live:
             time.sleep(5*60)
-        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"', checks=[
-            self.check("publicNetworkAccess","Disabled")
-        ])
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        if self.is_live:
+            time.sleep(5*60)
         self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
