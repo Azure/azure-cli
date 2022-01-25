@@ -3292,7 +3292,6 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           aks_custom_headers=None,
                           snapshot_id=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
-
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
             'Conflicting flags. Upgrading the Kubernetes version will also '
