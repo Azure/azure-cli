@@ -2720,7 +2720,7 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
         
 class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
     @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_hybridcompute_pe'，random_name_length=40)
+    @ResourceGroupPreparer(name_prefix='cli_test_hybridcompute_pe', random_name_length=40)
     def test_hybridcompute_private_endpoint(self, resource_group):
         self.kwargs.update({
             'scope': 'clitestscopename',
