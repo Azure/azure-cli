@@ -5613,6 +5613,15 @@ examples:
             --remote-vnet MyVnet2Id --allow-vnet-access
 """
 
+helps['network vnet peering sync'] = """
+type: command
+short-summary: Sync a virtual network peering connection.
+examples:
+  - name: Sync a peering connection.
+    text: |
+        az network vnet peering sync -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
+"""
+
 helps['network vnet peering delete'] = """
 type: command
 short-summary: Delete a peering.
