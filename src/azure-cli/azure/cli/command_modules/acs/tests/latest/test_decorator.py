@@ -283,6 +283,18 @@ class AKSModelsTestCase(unittest.TestCase):
             models.lb_models.get("ResourceReference"),
             getattr(module, "ResourceReference"),
         )
+        self.assertEqual(models.CreationData, getattr(module, "CreationData"))
+        # nat gateway models
+        self.assertEqual(
+            models.nat_gateway_models.get("ManagedClusterNATGatewayProfile"),
+            getattr(module, "ManagedClusterNATGatewayProfile"),
+        )
+        self.assertEqual(
+            models.nat_gateway_models.get(
+                "ManagedClusterManagedOutboundIPProfile"
+            ),
+            getattr(module, "ManagedClusterManagedOutboundIPProfile"),
+        )
 
 
 class AKSParamDictTestCase(unittest.TestCase):
@@ -674,24 +686,6 @@ class AKSContextTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             ctx_2.get_dns_name_prefix()
 
-    def test_get_kubernetes_version(self):
-        # default
-        ctx_1 = AKSContext(
-            self.cmd,
-            {"kubernetes_version": ""},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_kubernetes_version(), "")
-        mc = self.models.ManagedCluster(
-            location="test_location",
-            kubernetes_version="test_mc_kubernetes_version",
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(
-            ctx_1.get_kubernetes_version(), "test_mc_kubernetes_version"
-        )
-
     def test_get_vm_set_type(self):
         # default & dynamic completion
         ctx_1 = AKSContext(
@@ -819,42 +813,6 @@ class AKSContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_1.get_nodepool_labels(), {"key1": "value1", "key2": "value2"}
         )
-
-    def test_get_node_vm_size(self):
-        # default
-        ctx_1 = AKSContext(
-            self.cmd,
-            {"node_vm_size": "Standard_DS2_v2"},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_DS2_v2")
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", vm_size="Standard_ABCD_v2"
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", agent_pool_profiles=[agent_pool_profile]
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
-
-    def test_get_os_sku(self):
-        # default
-        ctx_1 = AKSContext(
-            self.cmd,
-            {"os_sku": None},
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        self.assertEqual(ctx_1.get_os_sku(), None)
-        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
-            name="test_nodepool_name", os_sku="test_mc_os_sku"
-        )
-        mc = self.models.ManagedCluster(
-            location="test_location", agent_pool_profiles=[agent_pool_profile]
-        )
-        ctx_1.attach_mc(mc)
-        self.assertEqual(ctx_1.get_os_sku(), "test_mc_os_sku")
 
     def test_get_vnet_subnet_id(self):
         # default
@@ -4452,6 +4410,198 @@ class AKSContextTestCase(unittest.TestCase):
             ctx_4.get_assignee_from_identity_or_sp_profile(),
             ("test_client_id", True),
         )
+    def test_get_snapshot_id(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "snapshot_id": None,
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_snapshot_id(), None)
+        creation_data = self.models.CreationData(
+            source_resource_id="test_source_resource_id"
+        )
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", creation_data=creation_data
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_snapshot_id(), "test_source_resource_id")
+
+    def test_get_snapshot(self):
+        # custom value
+        ctx_1 = AKSContext(
+            self.cmd,
+            {
+                "snapshot_id": "test_source_resource_id",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock()
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
+        # test cache
+        self.assertEqual(ctx_1.get_snapshot(), mock_snapshot)
+
+    def test_get_kubernetes_version(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"kubernetes_version": ""},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_kubernetes_version(), "")
+        mc = self.models.ManagedCluster(
+            location="test_location",
+            kubernetes_version="test_mc_kubernetes_version",
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(
+            ctx_1.get_kubernetes_version(), "test_mc_kubernetes_version"
+        )
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"kubernetes_version": "", "snapshot_id": "test_snapshot_id"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(
+                ctx_2.get_kubernetes_version(), "test_kubernetes_version"
+            )
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "kubernetes_version": "custom_kubernetes_version",
+                "snapshot_id": "test_snapshot_id",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(kubernetes_version="test_kubernetes_version")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(
+                ctx_3.get_kubernetes_version(), "custom_kubernetes_version"
+            )
+
+    def test_get_os_sku(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"os_sku": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_os_sku(), None)
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", os_sku="test_mc_os_sku"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_os_sku(), "test_mc_os_sku")
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"os_sku": None, "snapshot_id": "test_snapshot_id"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(os_sku="test_os_sku")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_os_sku(), "test_os_sku")
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "os_sku": "custom_os_sku",
+                "snapshot_id": "test_snapshot_id",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(os_sku="test_os_sku")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_os_sku(), "custom_os_sku")
+
+    def test_get_node_vm_size(self):
+        # default
+        ctx_1 = AKSContext(
+            self.cmd,
+            {"node_vm_size": None},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_DS2_v2")
+        agent_pool_profile = self.models.ManagedClusterAgentPoolProfile(
+            name="test_nodepool_name", vm_size="Standard_ABCD_v2"
+        )
+        mc = self.models.ManagedCluster(
+            location="test_location", agent_pool_profiles=[agent_pool_profile]
+        )
+        ctx_1.attach_mc(mc)
+        self.assertEqual(ctx_1.get_node_vm_size(), "Standard_ABCD_v2")
+
+        # custom value
+        ctx_2 = AKSContext(
+            self.cmd,
+            {"node_vm_size": None, "snapshot_id": "test_snapshot_id"},
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_2.get_node_vm_size(), "test_vm_size")
+
+        # custom value
+        ctx_3 = AKSContext(
+            self.cmd,
+            {
+                "node_vm_size": "custom_node_vm_size",
+                "snapshot_id": "test_snapshot_id",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        mock_snapshot = Mock(vm_size="test_vm_size")
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            self.assertEqual(ctx_3.get_node_vm_size(), "custom_node_vm_size")
 
 
 class AKSCreateDecoratorTestCase(unittest.TestCase):
@@ -4514,6 +4664,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "min_count": None,
                 "max_count": None,
                 "enable_fips_image": False,
+                "snapshot_id": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4547,6 +4698,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             min_count=None,
             max_count=None,
             enable_fips=False,
+            creation_data=None,
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_1.agent_pool_profiles = [agent_pool_profile_1]
@@ -4577,11 +4729,21 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "min_count": 5,
                 "max_count": 20,
                 "enable_fips_image": True,
+                "snapshot_id": "test_snapshot_id",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         mc_2 = self.models.ManagedCluster(location="test_location")
-        dec_mc_2 = dec_2.set_up_agent_pool_profiles(mc_2)
+        mock_snapshot = Mock(
+            kubernetes_version="",
+            os_sku="snapshot_os_sku",
+            vm_size="snapshot_vm_size",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.decorator._get_snapshot",
+            return_value=mock_snapshot,
+        ):
+            dec_mc_2 = dec_2.set_up_agent_pool_profiles(mc_2)
         agent_pool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
             # Must be 12 chars or less before ACS RP adds to it
             name="test_np_name",
@@ -4590,7 +4752,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             count=10,
             vm_size="Standard_DSx_vy",
             os_type="Linux",
-            os_sku="CBLMariner",
+            os_sku="snapshot_os_sku",
             vnet_subnet_id="test_vnet_subnet_id",
             proximity_placement_group_id="test_ppg_id",
             availability_zones=["tz1", "tz2"],
@@ -4607,6 +4769,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
             min_count=5,
             max_count=20,
             enable_fips=True,
+            creation_data=self.models.CreationData(
+                source_resource_id="test_snapshot_id"
+            ),
         )
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_2.agent_pool_profiles = [agent_pool_profile_2]
