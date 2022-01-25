@@ -69,7 +69,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
-from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes, CreationData, Snapshot
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -4157,23 +4157,20 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
         location = rg_location
-    CreationData = cmd.get_models('CreationData',
-                                  resource_type=ResourceType.MGMT_COMPUTE)
-    Snapshot = cmd.get_models('Snapshot',
-                                  resource_type=ResourceType.MGMT_COMPUTE)
+
     creationData = CreationData(
         source_resource_id=nodepool_id
     )
-      
+
     snapshot = Snapshot(
-        name=_trim_nodepoolname(name),
+        name=name,
         tags=tags,
         location=location,
         creation_data=creationData
     )
 
     headers = get_aks_custom_headers(aks_custom_headers)
-    return client.create_or_update(resource_group_name, _trim_nodepoolname(name), snapshot, headers=headers)
+    return client.create_or_update(resource_group_name, name, snapshot, headers=headers)
 
 
 def get_aks_custom_headers(aks_custom_headers=None):
