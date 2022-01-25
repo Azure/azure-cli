@@ -46,14 +46,10 @@ def cf_container_registry_service(cli_ctx, subscription_id=None):
 
 
 def cf_snapshots_client(cli_ctx, subscription_id=None):
-    #from azure.mgmt.containerservice import ContainerServiceClient
-
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE, subscription_id=subscription_id).snapshots
 
 
 def cf_snapshots(cli_ctx, *_):
-    #from azure.mgmt.containerservice import ContainerServiceClient
-
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE).snapshots
 
 
