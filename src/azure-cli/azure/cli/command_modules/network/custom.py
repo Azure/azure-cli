@@ -6915,6 +6915,19 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
 
 
+def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[subscription_id])
+
+    try:
+        peering = ncf.virtual_network_peerings.get(resource_group_name, virtual_network_name, virtual_network_peering_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Virtual network peering {} doesn\'t exist.'.format(virtual_network_peering_name))
+
+    return ncf.virtual_network_peerings.begin_create_or_update(
+        resource_group_name, virtual_network_name, virtual_network_peering_name, peering, sync_remote_address_space=True)
+
+
 def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name, **kwargs):
     peering = kwargs['parameters']
     aux_subscription = parse_resource_id(peering.remote_virtual_network.id)['subscription']

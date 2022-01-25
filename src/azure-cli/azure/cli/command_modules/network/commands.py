@@ -1366,6 +1366,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_peering')
+        g.custom_command('sync', 'sync_vnet_peering')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'begin_delete')
