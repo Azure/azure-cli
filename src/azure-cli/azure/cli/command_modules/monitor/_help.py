@@ -1140,6 +1140,14 @@ examples:
         az monitor log-analytics workspace table delete --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
 """
 
+helps['monitor log-analytics workspace table wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the workspace table is met.
+examples:
+  - name: Pause executing next line of CLI script until the workspace table is successfully provisioned.
+    text: az monitor log-analytics workspace table wait -n MyTable -g MyResourceGroup --workspace-name MyWorkspace --created
+"""
+
 helps['monitor log-analytics workspace pack'] = """
 type: group
 short-summary: Manage intelligent packs for log analytics workspace.
