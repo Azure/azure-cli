@@ -1095,8 +1095,9 @@ def list_instances(cmd, resource_group_name, name, slot=None):
 
 
 def list_runtimes(cmd, linux=False, windows=False):
-    if not linux and not windows:
-        raise ArgumentUsageError("Use one or both of the --linux/--windows options")
+    if not linux and not windows:  # show both linux and windows stacks by default
+        linux = True
+        windows = True
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     return runtime_helper.get_stack_names_only()
 
