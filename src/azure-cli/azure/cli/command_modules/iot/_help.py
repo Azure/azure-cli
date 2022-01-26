@@ -723,7 +723,7 @@ examples:
 helps['iot hub route update'] = """
 type: command
 short-summary: Update a route in IoT Hub.
-long-summary: Updates a route in IoT Hub. You can change the source, enpoint or query on the route.
+long-summary: Updates a route in IoT Hub. You can change the source, endpoint or query on the route.
 examples:
   - name: Update source type of route "R1" from "MyIotHub" IoT Hub.
     text: >
