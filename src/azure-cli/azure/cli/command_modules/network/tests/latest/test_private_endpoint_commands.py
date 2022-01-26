@@ -2717,7 +2717,100 @@ class NetworkPrivateLinkDataFactoryScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --id {private-endpoint-connection-id}',
                  expect_failure=True)
 
+        
+class NetworkHybridComputePrivateLinkScopesTest(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_hybridcompute_pe', random_name_length=40)
+    def test_hybridcompute_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'scope': 'clitestscopename',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'private_endpoint': self.create_random_name('cli-pe-', 24),
+            'private_endpoint2': self.create_random_name('cli-pe-', 24),
+            'private_endpoint_connection': self.create_random_name('cli-pec-', 24),
+            'private_endpoint_connection2': self.create_random_name('cli-pec-', 24),
+            'location': 'eastus2euap',
+            'approve_desc': 'ApprovedByTest',
+            'reject_desc': 'RejectedByTest'
+        })
 
+        # install az connectedmachine
+        self.cmd('extension add --name connectedmachine')
+
+        # Test connectedmachine private-link-scope funcitons and create a private link scope
+        self.cmd('connectedmachine private-link-scope create --scope-name {scope} -g {rg}', checks=[
+            self.check('name', '{scope}')
+        ])
+
+        self.cmd('connectedmachine private-link-scope update --scope-name {scope} -g {rg} --tags tag1=d1', checks=[
+            self.check('tags.tag1', 'd1')
+        ])
+
+        self.cmd('connectedmachine private-link-scope show --scope-name {scope} -g {rg}', checks=[
+            self.check('tags.tag1', 'd1')
+        ])
+        self.cmd('connectedmachine private-link-scope list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {location} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Test private link resource list
+        pr = self.cmd('network private-link-resource list --name {scope} -g {rg} --type microsoft.HybridCompute/privateLinkScopes', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        # Add an endpoint that gets auto approved
+        self.kwargs['group_id'] = pr[0]['groupId']
+        private_link_scope = self.cmd('connectedmachine private-link-scope show --scope-name {scope} -g {rg}').get_output_in_json()
+        self.kwargs['scope_id'] = private_link_scope['id']
+
+        result = self.cmd('network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} --private-connection-resource-id {scope_id} '
+        '--connection-name {private_endpoint_connection} --group-id {group_id}').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint_connection'].lower() in result['name'].lower())
+
+        # Add an endpoint and approve it
+        result = self.cmd('network private-endpoint create -g {rg} -n {private_endpoint2} --vnet-name {vnet} --subnet {subnet} --private-connection-resource-id {scope_id} '
+        '--connection-name {private_endpoint_connection2} --group-id {group_id} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['private_endpoint_connection2'].lower() in result['name'].lower())
+
+        self.cmd('network private-endpoint-connection approve -g {rg} -n {private_endpoint_connection2} --resource-name {scope} --type Microsoft.HybridCompute/privateLinkScopes --description {approve_desc}',
+        checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{approve_desc}')
+        ])
+
+        # Reject previous approved endpoint
+        self.cmd('network private-endpoint-connection reject -g {rg} -n {private_endpoint_connection2} --resource-name {scope} --type Microsoft.HybridCompute/privateLinkScopes --description {reject_desc}',
+        checks= [
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{reject_desc}')
+        ])
+
+        # List endpoints
+        self.cmd('network private-endpoint-connection list -g {rg} --name {scope} --type Microsoft.HybridCompute/privateLinkScopes', checks=[
+            self.check('length(@)', '2')
+        ])
+        # Remove endpoints
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection2} --type Microsoft.HybridCompute/privateLinkScopes -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list -g {rg} --name {scope} --type Microsoft.HybridCompute/privateLinkScopes', checks=[
+            self.check('length(@)', '1')
+        ])
+        # Show endpoint
+        self.cmd('az network private-endpoint-connection show -g {rg} --type Microsoft.HybridCompute/privateLinkScopes --resource-name {scope} -n {private_endpoint_connection}', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', 'Auto-Approved')
+        ])
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {scope} -n {private_endpoint_connection} --type Microsoft.HybridCompute/privateLinkScopes -y')
+
+        
 class NetworkPrivateLinkDatabricksScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='test_databricks_private_endpoint', random_name_length=40, location="westus")
