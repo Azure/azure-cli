@@ -79,7 +79,6 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
-from ._client_factory import cf_snapshots
 from ._client_factory import cf_snapshots_client
 from ._client_factory import get_msi_client
 
@@ -2463,7 +2462,8 @@ def aks_upgrade(cmd,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name, snapshot_id=None):
+def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
+                                           snapshot_id=None):
     headers = {}
     if snapshot_id:
         headers["AKSSnapshotId"] = snapshot_id
@@ -4193,7 +4193,6 @@ def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
                         no_wait=False,
                         yes=False):
 
-    from knack.prompting import prompt_y_n
     msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
     if not yes and not prompt_y_n(msg, default="n"):
         return None
@@ -4206,4 +4205,3 @@ def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
-    

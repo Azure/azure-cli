@@ -4720,6 +4720,7 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "max_count": 20,
                 "enable_fips_image": True,
                 "snapshot_id": "test_snapshot_id",
+                "os_sku": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
