@@ -88,6 +88,9 @@ def cli_redis_create(cmd, client,
         for item in tenant_settings:
             tenant_settings_in_json.update(get_key_value_pair(item))
     from azure.mgmt.redis.models import RedisCreateParameters, Sku, RedisCommonPropertiesRedisConfiguration
+    identity = build_identity(mi_system_assigned, mi_user_assigned)
+    if identity.type == "None":
+        identity = None
     # pylint: disable=too-many-function-args
     params = RedisCreateParameters(
         sku=Sku(name=sku, family=vm_size[0], capacity=vm_size[1:]),
@@ -102,7 +105,8 @@ def cli_redis_create(cmd, client,
         static_ip=static_ip,
         zones=zones,
         redis_version=redis_version,
-        identity=build_identity(mi_system_assigned, mi_user_assigned),
+        identity=identity,
+        public_network_access=None,
         tags=tags)
     return client.begin_create(resource_group_name, name, params)
 
