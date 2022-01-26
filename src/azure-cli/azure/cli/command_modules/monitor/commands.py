@@ -393,6 +393,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_log_analytics_workspace_table', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_workspace_table', supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')
 
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
