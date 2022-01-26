@@ -69,7 +69,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     GetObjectsParameters,
                                     ResourceAccess, RequiredResourceAccess)
 
-from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes, CreationData, Snapshot
+from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -3164,7 +3164,9 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
 
-    creationData = None
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData= AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
     if snapshot_id:
         snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
         if not kubernetes_version:
@@ -3314,6 +3316,10 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       cluster_name,
                                                       nodepool_name,
                                                       snapshot_id)
+
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
 
     creationData = None
     if snapshot_id:
@@ -4153,6 +4159,11 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
     if location is None:
         location = rg_location
+
+    # load model CreationData, Snapshot 
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
 
     creationData = CreationData(
         source_resource_id=nodepool_id
