@@ -82,7 +82,13 @@ def _parse_fqdn(cmd, id, is_manifest=True):
         registry_name = reg_addr.split('.', 1)[0]
         reg_suffix= '.' + reg_addr.split('.', 1)[1]
         manifest_id = id.split('/', 1)[1]
+
         _validate_login_server_suffix(cmd, reg_suffix)
+
+        #We must check for this here as the default tag latest gets added in _parse_image_name
+        if not is_manifest and ':' in manifest_id:
+            raise(InvalidArgumentValueError("The positional parameter 'ID' should not include a tag or digest."))
+
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
 
     except IndexError as e:
@@ -100,7 +106,7 @@ def _validate_login_server_suffix(cmd, reg_suffix):
     if(reg_suffix != login_server_suffix):
         raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az cli acr login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
 
-def acr_repository_list_manifests(cmd,
+def acr_list_manifests(cmd,
                                   registry_name=None,
                                   repository=None,
                                   id=None,
@@ -148,7 +154,7 @@ def acr_repository_list_manifests(cmd,
     return manifest_list
 
 
-def acr_repository_list_manifest_metadata(cmd,
+def acr_list_manifest_metadata(cmd,
                                   registry_name=None,
                                   repository=None,
                                   id=None,
@@ -184,7 +190,7 @@ def acr_repository_list_manifest_metadata(cmd,
 
     return raw_result
 
-def acr_repository_list_manifest_referrers(cmd,
+def acr_list_manifest_referrers(cmd,
                                   registry_name=None,
                                   manifest_id=None,
                                   artifact_type=None,
@@ -239,7 +245,7 @@ def acr_repository_list_manifest_referrers(cmd,
     return raw_result
 
 
-def acr_repository_show_manifest(cmd,
+def acr_show_manifest(cmd,
                                   registry_name=None,
                                   manifest_id=None,
                                   id=None,
@@ -283,7 +289,7 @@ def acr_repository_show_manifest(cmd,
     return raw_result
 
 
-def acr_repository_show_manifest_metadata(cmd,
+def acr_show_manifest_metadata(cmd,
                                   registry_name=None,
                                   manifest_id=None,
                                   id=None,
@@ -321,7 +327,7 @@ def acr_repository_show_manifest_metadata(cmd,
     return raw_result
 
 
-def acr_repository_update_manifest_metadata(cmd,
+def acr_update_manifest_metadata(cmd,
                           registry_name=None,
                           manifest_id=None,
                           id=None,
@@ -382,7 +388,7 @@ def acr_repository_update_manifest_metadata(cmd,
         password=password)
 
 
-def acr_repository_delete_manifests(cmd,
+def acr_delete_manifests(cmd,
                                     registry_name=None,
                                     manifest_id=None,
                                     id=None,

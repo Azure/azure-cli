@@ -39,7 +39,8 @@ from ._validators import (
     validate_registry_name,
     validate_expiration_time,
     validate_manifest_id,
-    validate_repo_id
+    validate_repo_id,
+    validate_repository
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
@@ -143,7 +144,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help="The name of the repository.")
-        c.argument('image', arg_type=image_by_tag_or_digest_type, deprecate_info=c.deprecate(hide=True))
+        c.argument('image', arg_type=image_by_tag_or_digest_type, deprecate_info=c.deprecate(hide=True, redirect='az acr manifest metadata show'))
         c.argument('top', type=int, help='Limit the number of items in the results.')
         c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
         c.argument('detail', help='Show detailed information.', action='store_true')
@@ -160,7 +161,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
-        c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'])
+        c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'], validator=validate_repository)
         c.argument('manifest_id', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
 
     with self.argument_context('acr manifest show') as c:
@@ -173,17 +174,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest delete') as c:
         c.positional('id', arg_type=manifest_id_type)
 
-    with self.argument_context('acr manifest show-metadata') as c:
-        c.positional('id', arg_type=manifest_id_type)
-
-    with self.argument_context('acr manifest list-metadata') as c:
-        c.positional('id',  arg_type=repo_id_type)
-
-    with self.argument_context('acr manifest update-metadata') as c:
-        c.positional('id', arg_type=manifest_id_type)
-
     with self.argument_context('acr manifest list-referrers') as c:
         c.positional('id',arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata show') as c:
+        c.positional('id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata list') as c:
+        c.positional('id',  arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest metadata update') as c:
+        c.positional('id', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

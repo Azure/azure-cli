@@ -492,6 +492,98 @@ examples:
     text: az acr repository update -n MyRegistry --image hello-world@sha256:abc123 --write-enabled false
 """
 
+helps['acr manifest'] = """
+type: group
+short-summary: Manage artifact manifests in Azure Container Registries.
+"""
+
+helps['acr manifest show'] = """
+type: command
+short-summary: Get the manifest of an artifact in an Azure Container Registry.
+examples:
+  - name: Get the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show -r MyRegistry -n hello-world:latest
+  - name: Get the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show MyRegistry.azurecr.io/hello-world:latest
+  - name: Get the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest show -r MyRegistry -n hello-world@sha256:abc123
+  - name: Get the raw, unformatted manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest show -r MyRegistry -n hello-world:latest --raw
+"""
+
+helps['acr manifest list'] = """
+type: command
+short-summary: List the manifests in a repository in an Azure Container Registry.
+examples:
+  - name: List the manifests of the repository'hello-world'.
+    text: az acr manifest list -r MyRegistry -n hello-world
+  - name: Get the manifest of the artifact 'hello-world'.
+    text: az acr manifest list MyRegistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest delete'] = """
+type: command
+short-summary: Delete the manifest of an artifact in an Azure Container Registry.
+examples:
+  - name: Delete the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest delete -r MyRegistry -n hello-world:latest
+  - name: Delete the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest delete MyRegistry.azurecr.io/hello-world:latest
+  - name: Delete the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest delete -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest list-referrers'] = """
+type: command
+short-summary: List the referrers to a manifest of an artifact in an Azure Container Registry.
+examples:
+  - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest
+  - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
+    text: az acr manifest list-referrers MyRegistry.azurecr.io/hello-world:latest
+  - name: List the referrers to the manifest of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest list-referrers -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest metadata'] = """
+type: group
+short-summary: Manage artifact manifest metadata in Azure Container Registries.
+"""
+
+helps['acr manifest metadata show'] = """
+type: command
+short-summary: Get the manifest metadata of an artifact in an Azure Container Registry.
+examples:
+  - name: Get the manifest metadata of the artifact 'hello-world:latest'.
+    text: az acr manifest metadata show -r MyRegistry -n hello-world:latest
+  - name: Get the manifest metadata of the artifact 'hello-world:latest'.
+    text: az acr manifest metadata show MyRegistry.azurecr.io/hello-world:latest
+  - name: Get the manifest metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest metadata show -r MyRegistry -n hello-world@sha256:abc123
+"""
+
+helps['acr manifest metadata list'] = """
+type: command
+short-summary: List the manifest metadata of the artifacts in a repository in an Azure Container Registry.
+examples:
+  - name: List the manifest metadata of the repository 'hello-world'.
+    text: az acr manifest metadata list -r MyRegistry -n hello-world
+  - name: Get the manifest of the artifact 'hello-world'.
+    text: az acr manifest metadata list MyRegistry.azurecr.io/hello-world
+"""
+
+helps['acr manifest metadata update'] = """
+type: command
+short-summary: Update the manifest metadata of an artifact in an Azure Container Registry.
+examples:
+  - name: Update the manifest metadata of the artifact 'hello-world:latest'.
+    text: az acr manifest metadata update -r MyRegistry -n hello-world:latest --write-enabled false
+  - name: Update the manifest metadata of the artifact 'hello-world:latest'.
+    text: az acr manifest metadata update MyRegistry.azurecr.io/hello-world:latest --write-enabled false
+  - name: Update the manifest metadata of the artifact referenced by digest 'hello-world@sha256:abc123'.
+    text: az acr manifest metadata update -r MyRegistry -n hello-world@sha256:abc123 --write-enabled false
+"""
+
 helps['acr run'] = """
 type: command
 short-summary: Queues a quick run providing streamed logs for an Azure Container Registry.
