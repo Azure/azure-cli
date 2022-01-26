@@ -4165,20 +4165,14 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
         creation_data=creationData
     )
 
-    headers = get_aks_custom_headers(aks_custom_headers)
-    return client.create_or_update(resource_group_name, name, snapshot, headers=headers)
-
-
-def get_aks_custom_headers(aks_custom_headers=None):
-    headers = {}
-    if aks_custom_headers is not None:
-        if aks_custom_headers != "":
-            for pair in aks_custom_headers.split(','):
-                parts = pair.split('=')
-                if len(parts) != 2:
-                    raise CLIError('custom headers format is incorrect')
-                headers[parts[0]] = parts[1]
-    return headers
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
 
 
 def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
