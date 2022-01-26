@@ -270,7 +270,7 @@ class AKSModels:
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
-        self.Snapshot= self.__cmd.get_models(
+        self.Snapshot = self.__cmd.get_models(
             "Snapshot",
             resource_type=self.resource_type,
             operation_group="managed_clusters",

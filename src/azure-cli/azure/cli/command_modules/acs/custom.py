@@ -868,7 +868,7 @@ def _get_snapshot(cli_ctx, snapshot_id):
             snapshot = snapshot_client.get(resource_group_name, snapshot_name)
         except CloudError as ex:
             if 'was not found' in ex.message:
-                raise InvalidArgumentValueError("Snapshot {} not found.".format(snapshot_id))
+                raise ResourceNotFoundError("Snapshot {} not found.".format(snapshot_id))
             raise CLIError(ex.message)
         return snapshot
     raise InvalidArgumentValueError(
@@ -3163,10 +3163,10 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
-
+    creationData = None
     # load model CreationData
     from azure.cli.command_modules.acs.decorator import AKSModels
-    CreationData= AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
     if snapshot_id:
         snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
         if not kubernetes_version:
@@ -4160,7 +4160,7 @@ def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-state
     if location is None:
         location = rg_location
 
-    # load model CreationData, Snapshot 
+    # load model CreationData, Snapshot
     from azure.cli.command_modules.acs.decorator import AKSModels
     CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
     Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
