@@ -477,18 +477,20 @@ class TestLogProfileScenarios(ScenarioTest):
         with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace data-export show -g {rg} --workspace-name {workspace_name} -n {data_export_name}')
 
-    # @record_only()
+    @record_only()
     def test_monitor_log_analytics_workspace_data_collection_rules(self):
         self.kwargs.update({
             'ws_name': 'wsn1',
-            'rule_name': 'rule11'
+            'rule_name': 'rule11',
+            'rule_id': '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/tbtest/providers/Microsoft.Insights/dataCollectionRules/rule11'
         })
-        rule = self.cmd('monitor data-collection rule show -g tbtest -n rule11').get_output_in_json()
-        self.kwargs.update({
-            'rule_id': rule['id']
-        })
+        # extension command
+        # rule = self.cmd('monitor data-collection rule show -g tbtest -n rule11').get_output_in_json()
+        # self.kwargs.update({
+        #     'rule_id': rule['id']
+        # })
         self.cmd('monitor log-analytics workspace update -g tbtest -n {ws_name} --data-collection-rule {rule_id}', checks=[
-            self.check('defaultDataCollectionRuleResourceId', '{rule_id}')
+            # self.check('defaultDataCollectionRuleResourceId', '{rule_id}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
