@@ -77,15 +77,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             recording_processors=[CredentialReplacer()]
         )
 
-    # @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
+    @record_only()
     def test_webapp_appconfig_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-config-app2',
-            'config_store': 'servicelinker-app-configuration'
+            'config_store': 'servicelinker-app-configuration2'
         })
 
         # prepare params
@@ -121,7 +120,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_cosmoscassandra_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -165,7 +164,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_cosmosgremlin_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -210,7 +209,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_cosmosmongo_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -254,7 +253,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_cosmossql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -298,7 +297,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_cosmostable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -342,8 +341,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
+    @record_only()
     def test_webapp_eventhub_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -386,15 +384,14 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
-    @unittest.skip('Temporarily removed from supported target resources')
+    @record_only()
     def test_webapp_servicebus_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-servicebus-app2',
-            'namespace': 'servicelinkertestservicebus' 
+            'namespace': 'servicelinkertestservicebus2' 
         })
 
         # prepare params
@@ -430,7 +427,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_signalr_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -473,7 +470,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_keyvault_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -516,7 +513,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_postgresflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -565,7 +562,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redis_e2e(self):
         self.kwargs.update({
@@ -610,7 +607,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_redisenterprise_e2e(self):
         self.kwargs.update({
@@ -655,7 +652,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_mysql_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -704,7 +701,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_mysqlflexible_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -753,7 +750,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_postgres_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -802,7 +799,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     @unittest.skip('Temporarily removed from supported target resources')
     def test_webapp_sql_e2e(self):
         self.kwargs.update({
@@ -852,7 +849,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_storageblob_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -895,7 +892,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
     
 
-    # @record_only()
+    @record_only()
     def test_webapp_storagequeue_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -938,7 +935,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_storagefile_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -981,7 +978,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_storagetable_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1024,7 +1021,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    # @record_only()
+    @record_only()
     def test_webapp_confluentkafka_e2e(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),

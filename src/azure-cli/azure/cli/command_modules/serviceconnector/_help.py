@@ -228,7 +228,7 @@ for source in SOURCE_RESOURCES:
                 Usage: --service-principal client-id=XX object-id=XX secret=XX
 
                 client-id      : Required. Client id of the service principal.
-                object-id      : Required. Object id of the service principal.
+                object-id      : Required. Object id (Enterprise Application) of the service principal.
                 secret         : Required. Secret of the service principal.
         ''' if AUTH_TYPE.ServicePrincipalSecret in auth_types else ''
 

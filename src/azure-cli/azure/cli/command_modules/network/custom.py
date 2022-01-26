@@ -6600,8 +6600,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None, geo_mapping=None,
-                                    monitor_custom_headers=None, subnets=None):
+                                    min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
@@ -6611,6 +6611,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
                         min_child_endpoints=min_child_endpoints,
+                        min_child_endpoints_i_pv4=min_child_ipv4,
+                        min_child_endpoints_i_pv6=min_child_ipv6,
                         geo_mapping=geo_mapping,
                         subnets=subnets,
                         custom_headers=monitor_custom_headers)
@@ -6622,7 +6624,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None, geo_mapping=None,
+                                    weight=None, min_child_endpoints=None, min_child_ipv4=None,
+                                    min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
@@ -6640,6 +6643,10 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.weight = weight
     if min_child_endpoints is not None:
         instance.min_child_endpoints = min_child_endpoints
+    if min_child_ipv4 is not None:
+        instance.min_child_endpoints_i_pv4 = min_child_ipv4
+    if min_child_ipv6 is not None:
+        instance.min_child_endpoints_i_pv6 = min_child_ipv6
     if geo_mapping is not None:
         instance.geo_mapping = geo_mapping
     if subnets is not None:
@@ -6656,6 +6663,11 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
     profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 
+
+def check_traffic_manager_name(cmd, client, name):
+    from azure.mgmt.trafficmanager.models import CheckTrafficManagerRelativeDnsNameAvailabilityParameters
+    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type='Microsoft.Network/trafficManagerProfiles')
+    return client.check_traffic_manager_relative_dns_name_availability(checknameParameters)
 
 # endregion
 
@@ -6913,6 +6925,19 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
     ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
     return ncf.virtual_network_peerings.begin_create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+
+
+def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[subscription_id])
+
+    try:
+        peering = ncf.virtual_network_peerings.get(resource_group_name, virtual_network_name, virtual_network_peering_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Virtual network peering {} doesn\'t exist.'.format(virtual_network_peering_name))
+
+    return ncf.virtual_network_peerings.begin_create_or_update(
+        resource_group_name, virtual_network_name, virtual_network_peering_name, peering, sync_remote_address_space=True)
 
 
 def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name, **kwargs):
