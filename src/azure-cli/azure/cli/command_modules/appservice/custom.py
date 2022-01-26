@@ -73,7 +73,8 @@ from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_K
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
                          RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME)
+                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
+                         WINDOWS_OS_NAME)
 from ._github_oauth import (get_github_access_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -1094,10 +1095,22 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, linux=False, windows=False):
-    if not linux and not windows:  # show both linux and windows stacks by default
+def list_runtimes(cmd, os_type=None, linux=False):
+    if os_type is not None and linux:
+        raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
+
+    if linux:
+        linux = True
+        windows = False
+    else:
+        # show both linux and windows stacks by default
         linux = True
         windows = True
+        if os_type == WINDOWS_OS_NAME:
+            linux = False
+        if os_type == LINUX_OS_NAME:
+            windows = False
+
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
     return runtime_helper.get_stack_names_only()
 
@@ -4053,11 +4066,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
-            if _is_linux:
-                raise ValidationError("Linux runtime '{}' is not supported."
-                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
-            raise ValidationError("Windows runtime '{}' is not supported."
-                                  " Please invoke 'az webapp list-runtimes --windows' to cross check".format(runtime))
+            os_name = WINDOWS_OS_NAME if not _is_linux else LINUX_OS_NAME
+            raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
+                                  "'az webapp list-runtimes --os {0}'".format(os_name, runtime))
 
         language = runtime.split('|')[0]
         version_used_create = '|'.join(runtime.split('|')[1:])

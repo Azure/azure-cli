@@ -16,7 +16,9 @@ from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
+from ._constants import (FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
+                         WINDOWS_OS_NAME, LINUX_OS_NAME)
+
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
@@ -170,8 +172,8 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', options_list=['--linux', '-l'], action='store_true', help='list runtime stacks for linux based web apps')
-        c.argument('windows', options_list=['--windows', '-w'], action='store_true', help='list runtime stacks for windows based web apps')
+        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps. Use "--os-type linux" instead', deprecate_info=c.deprecate())
+        c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

@@ -136,8 +136,9 @@ class WebappBasicE2ETest(ScenarioTest):
         ])
 
     def test_webapp_runtimes(self):
-        self.cmd('webapp list-runtimes --linux')
-        self.cmd('webapp list-runtimes --windows')
+        self.cmd('webapp list-runtimes')
+        self.cmd('webapp list-runtimes --os windows')
+        self.cmd('webapp list-runtimes --os linux')
 
 
 class WebappQuickCreateTest(ScenarioTest):
