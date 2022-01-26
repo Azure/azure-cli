@@ -4206,3 +4206,4 @@ def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
+    

@@ -4651,7 +4651,7 @@ class AKSCreateDecorator:
                 source_resource_id=snapshot_id
             )
         agent_pool_profile.creation_data = creation_data
-        
+
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
 
