@@ -303,7 +303,7 @@ def load_arguments(self, _):
                    '--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_fips_image', action='store_true')
-        c.argument('snapshot_id', type=str, validator=validate_snapshot_id)
+        c.argument('snapshot_id', validator=validate_snapshot_id)
 
     with self.argument_context('aks update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -517,12 +517,11 @@ def load_arguments(self, _):
         c.argument(
             'workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
 
-    for scope in ['aks snapshot create']:
-        with self.argument_context(scope) as c:
-            c.argument('snapshot_name', type=str, options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
-            c.argument('tags', tags_type)
-            c.argument('nodepool_id', type=str, required=True, validator=validate_nodepool_id, help='The nodepool id.')
-            c.argument('aks_custom_headers')
+    with self.argument_context('aks snapshot create') as c:
+        c.argument('snapshot_name', type=str, options_list=['--name', '-n'], required=True, validator=validate_linux_host_name, help='The snapshot name.')
+        c.argument('tags', tags_type)
+        c.argument('nodepool_id', type=str, required=True, validator=validate_nodepool_id, help='The nodepool id.')
+        c.argument('aks_custom_headers')
 
     for scope in ['aks snapshot show', 'aks snapshot delete']:
         with self.argument_context(scope) as c:
