@@ -11,7 +11,6 @@ except ImportError:
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
-import json
 
 from ._docker_utils import (
     request_data_from_registry,
@@ -195,7 +194,7 @@ def acr_repository_show_tags(cmd,
     return raw_result
 
 
-#This command lists manifest metadata, legacy and deprecated
+# This command lists manifest metadata; deprecated for manifest metadata list
 def acr_repository_show_manifests(cmd,
                                   registry_name,
                                   repository,
@@ -233,7 +232,6 @@ def acr_repository_show_manifests(cmd,
         } for item in raw_result]
 
     return raw_result
-
 
 
 def acr_repository_show(cmd,

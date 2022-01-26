@@ -7,7 +7,6 @@
 import argparse
 import os.path
 import platform
-from wsgiref.validate import validator
 
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
@@ -49,14 +48,14 @@ repo_id_type = CLIArgumentType(
     default=None,
     validator=validate_repo_id,
     help="A fully qualified repository specifier such as 'myreg.azurecr.io/myrepo'."
-    )
+)
 
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_manifest_id,
-    help="A fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:mytag'."
-    )
+    help="A fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:latest'."
+)
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -165,26 +164,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('manifest_id', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
 
     with self.argument_context('acr manifest show') as c:
-        c.positional('id', arg_type=manifest_id_type)
+        c.positional('ID', arg_type=manifest_id_type)
         c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
 
     with self.argument_context('acr manifest list') as c:
-        c.positional('id', arg_type=repo_id_type)
+        c.positional('ID', arg_type=repo_id_type)
 
     with self.argument_context('acr manifest delete') as c:
-        c.positional('id', arg_type=manifest_id_type)
+        c.positional('ID', arg_type=manifest_id_type)
 
     with self.argument_context('acr manifest list-referrers') as c:
-        c.positional('id',arg_type=manifest_id_type)
+        c.positional('ID', arg_type=manifest_id_type)
+        c.argument('artifact_type', help='Filter referrers based on artifact type.')
 
     with self.argument_context('acr manifest metadata show') as c:
-        c.positional('id', arg_type=manifest_id_type)
+        c.positional('ID', arg_type=manifest_id_type)
 
     with self.argument_context('acr manifest metadata list') as c:
-        c.positional('id',  arg_type=repo_id_type)
+        c.positional('ID', arg_type=repo_id_type)
 
     with self.argument_context('acr manifest metadata update') as c:
-        c.positional('id', arg_type=manifest_id_type)
+        c.positional('ID', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

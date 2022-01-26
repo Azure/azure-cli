@@ -30,8 +30,7 @@ from ._format import (
     connected_registry_output_format,
     connected_registry_list_output_format,
     list_references_output_format,
-    show_manifest_output_format,
-    list_manifest_output_format
+    manifest_output_format,
 )
 from ._client_factory import (
     cf_acr_registries,
@@ -49,7 +48,9 @@ from ._client_factory import (
 )
 
 
-def load_command_table(self, _):  # pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+def load_command_table(self, _):
 
     acr_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.custom#{}',
@@ -205,15 +206,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'acr_repository_list')
         g.command('show-tags', 'acr_repository_show_tags')
         g.command('show-manifests', 'acr_repository_show_manifests',
-                deprecate_info=self.deprecate(redirect='manifest list', hide=True))
+                  deprecate_info=self.deprecate(redirect='acr manifest metadata list', hide=True))
         g.show_command('show', 'acr_repository_show')
         g.command('update', 'acr_repository_update')
         g.command('delete', 'acr_repository_delete')
         g.command('untag', 'acr_repository_untag')
 
     with self.command_group('acr manifest', acr_manifest_util, is_preview=True) as g:
-        g.show_command('show', 'acr_show_manifest', table_transformer=show_manifest_output_format)
-        g.command('list', 'acr_list_manifests', table_transformer=list_manifest_output_format)
+        g.show_command('show', 'acr_show_manifest', table_transformer=manifest_output_format)
+        g.command('list', 'acr_list_manifests', table_transformer=manifest_output_format)
         g.command('delete', 'acr_delete_manifests')
         g.command('list-referrers', 'acr_list_manifest_referrers', table_transformer=list_references_output_format)
 

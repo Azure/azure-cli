@@ -8,8 +8,10 @@ from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
-BAD_REPO_FQDN="The positional parameter 'ID' must be a fully qualified repository specifier such as 'myreg.azurecr.io/myrepo'."
-BAD_MANIFEST_FQDN="The positional parameter 'ID' must be a fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:latest' or 'myreg.azurecr.io/myrepo@sha256:844f934b1ed1919a8ce43409519c0f853c6e8c1d58dd58df0a14e1dcad69a325'."
+BAD_REPO_FQDN = "The positional parameter 'ID' must be a fully qualified repository specifier such"\
+                " as 'myreg.azurecr.io/myrepo'."
+BAD_MANIFEST_FQDN = "The positional parameter 'ID' must be a fully qualified manifest specifier such"\
+                    " as 'myreg.azurecr.io/myrepo:latest' or 'myreg.azurecr.io/myrepo@sha256:abc123'."
 
 logger = get_logger(__name__)
 
@@ -117,19 +119,23 @@ def validate_expiration_time(namespace):
             raise CLIError("Input '{}' is not valid datetime. Valid example: 2025-12-31T12:59:59Z".format(
                 namespace.expiration))
 
+
 def validate_repo_id(namespace):
-    if namespace.id:
-        id = namespace.id[0]
-        if '.' not in id or '/' not in id:
+    if namespace.ID:
+        ID = namespace.ID[0]
+        if '.' not in ID or '/' not in ID:
             raise InvalidArgumentValueError(BAD_REPO_FQDN)
 
+
 def validate_manifest_id(namespace):
-    if namespace.id:
-        id = namespace.id[0]
-        if '.' not in id or '/' not in id:
+    if namespace.ID:
+        ID = namespace.ID[0]
+        if '.' not in ID or '/' not in ID:
             raise InvalidArgumentValueError(BAD_MANIFEST_FQDN)
+
 
 def validate_repository(namespace):
     if namespace.repository:
         if ':' in namespace.repository:
-            raise InvalidArgumentValueError("Parameter 'name' refers to a repository and should not include a tag or digest.")
+            raise InvalidArgumentValueError("Parameter 'name' refers to a repository and"
+                                            " should not include a tag or digest.")

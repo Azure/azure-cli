@@ -3,14 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import unquote
-except ImportError:
-    from urllib import unquote
-
-from cmath import e
-from operator import contains
-from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -21,13 +13,11 @@ from .repository import (
     _get_manifest_path,
     _acr_repository_attributes_helper
 )
-import json
 
 from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,
     get_login_server_suffix,
-    RegistryException,
     RepoAccessTokenPermission
 )
 
@@ -43,84 +33,94 @@ ORDERBY_PARAMS = {
 }
 DEFAULT_PAGINATION = 100
 
-BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as 'myreg.azurecr.io/myrepo' as a positional parameter or provide '-r myreg -n myrepo' argument values."
-BAD_ARGS_ERROR_MANIFEST ="You must provide either a fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:mytag' as a positional parameter or provide '-r myreg -n myrepo:mytag' argument values."
+BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
+                      " 'myreg.azurecr.io/myrepo' as a positional parameter or provide '-r myreg -n myrepo'"\
+                      " argument values."
+BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest specifier such as"\
+                          " 'myreg.azurecr.io/myrepo:mytag' as a positional parameter or provide"\
+                          "  '-r myreg -n myrepo:mytag' argument values."
+
 
 def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
 
 def _get_references_path(repository, manifest, artifact_type=None):
-    if(artifact_type):
-        return '/oras/artifacts/v1/{}/manifests/{}/referrers?artifactType={}'.format(repository, manifest, artifact_type)
-    else:
-        return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
+    if artifact_type:
+        return '/oras/artifacts/v1/{}/manifests/{}/referrers?artifactType={}'.format(repository,
+                                                                                     manifest,
+                                                                                     artifact_type)
+
+    return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
 
 
 def _obtain_manifest_from_registry(login_server,
-                               path,
-                               username,
-                               password,
-                               raw=False):
+                                   path,
+                                   username,
+                                   password,
+                                   raw=False):
 
-    result, next_link = request_data_from_registry(
-            http_method='get',
-            login_server=login_server,
-            path=path,
-            raw=raw,
-            username=username,
-            password=password,
-            result_index=None,
-            manifest_headers=True)
+    result, _ = request_data_from_registry(http_method='get',
+                                           login_server=login_server,
+                                           path=path,
+                                           raw=raw,
+                                           username=username,
+                                           password=password,
+                                           result_index=None,
+                                           manifest_headers=True)
 
     return result
 
-def _parse_fqdn(cmd, id, is_manifest=True):
+
+def _parse_fqdn(cmd, fqdn, is_manifest=True):
     try:
-        id = id.lstrip('https://')
-        reg_addr = id.split('/', 1)[0]
+        fqdn = fqdn.lstrip('https://')
+        reg_addr = fqdn.split('/', 1)[0]
         registry_name = reg_addr.split('.', 1)[0]
-        reg_suffix= '.' + reg_addr.split('.', 1)[1]
-        manifest_id = id.split('/', 1)[1]
+        reg_suffix = '.' + reg_addr.split('.', 1)[1]
+        manifest_id = fqdn.split('/', 1)[1]
 
         _validate_login_server_suffix(cmd, reg_suffix)
 
-        #We must check for this here as the default tag latest gets added in _parse_image_name
+        # We must check for this here as the default tag 'latest' gets added in _parse_image_name
         if not is_manifest and ':' in manifest_id:
-            raise(InvalidArgumentValueError("The positional parameter 'ID' should not include a tag or digest."))
+            raise InvalidArgumentValueError("The positional parameter 'ID' should not include a tag or digest.")
 
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
 
     except IndexError as e:
         if is_manifest:
             raise InvalidArgumentValueError(BAD_MANIFEST_FQDN) from e
-        else:
-            raise InvalidArgumentValueError(BAD_REPO_FQDN) from e
+
+        raise InvalidArgumentValueError(BAD_REPO_FQDN) from e
 
     return registry_name, repository, tag, manifest
+
 
 def _validate_login_server_suffix(cmd, reg_suffix):
     cli_ctx = cmd.cli_ctx
     login_server_suffix = get_login_server_suffix(cli_ctx)
 
-    if(reg_suffix != login_server_suffix):
-        raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az cli acr login server suffix \'{login_server_suffix}\'. Check the \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+    if reg_suffix != login_server_suffix:
+        raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az'
+                                        f'cli acr login server suffix \'{login_server_suffix}\'. Check the'
+                                        '\'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+
 
 def acr_list_manifests(cmd,
-                                  registry_name=None,
-                                  repository=None,
-                                  id=None,
-                                  top=None,
-                                  orderby=None,
-                                  tenant_suffix=None,
-                                  username=None,
-                                  password=None
-                                  ):
-    if (id and repository) or (not id and not (registry_name and repository)):
+                       registry_name=None,
+                       repository=None,
+                       ID=None,
+                       top=None,
+                       orderby=None,
+                       tenant_suffix=None,
+                       username=None,
+                       password=None):
+    if (ID and repository) or (not ID and not (registry_name and repository)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
-    if id:
-        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0], is_manifest=False)
+    if ID:
+        registry_name, repository, _, _ = _parse_fqdn(cmd, ID[0], is_manifest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -140,7 +140,6 @@ def acr_list_manifests(cmd,
         result_index='manifests',
         orderby=orderby)
 
-
     digest_list = [x['digest'] for x in raw_result]
     manifest_list = []
 
@@ -155,20 +154,19 @@ def acr_list_manifests(cmd,
 
 
 def acr_list_manifest_metadata(cmd,
-                                  registry_name=None,
-                                  repository=None,
-                                  id=None,
-                                  top=None,
-                                  orderby=None,
-                                  tenant_suffix=None,
-                                  username=None,
-                                  password=None
-                                  ):
-    if (id and repository) or (not id and not (registry_name and repository)):
+                               registry_name=None,
+                               repository=None,
+                               ID=None,
+                               top=None,
+                               orderby=None,
+                               tenant_suffix=None,
+                               username=None,
+                               password=None):
+    if (ID and repository) or (not ID and not (registry_name and repository)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
-    if id:
-        registry_name, repository, _, _ = _parse_fqdn(cmd, id[0], is_manifest=False)
+    if ID:
+        registry_name, repository, _, _ = _parse_fqdn(cmd, ID[0], is_manifest=False)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
@@ -190,20 +188,21 @@ def acr_list_manifest_metadata(cmd,
 
     return raw_result
 
+
 def acr_list_manifest_referrers(cmd,
-                                  registry_name=None,
-                                  manifest_id=None,
-                                  artifact_type=None,
-                                  id=None,
-                                  recurse=False,
-                                  tenant_suffix=None,
-                                  username=None,
-                                  password=None):
-    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+                                registry_name=None,
+                                manifest_id=None,
+                                artifact_type=None,
+                                ID=None,
+                                recursive=False,
+                                tenant_suffix=None,
+                                username=None,
+                                password=None):
+    if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
-    if id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
+    if ID:
+        registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
 
     else:
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
@@ -228,15 +227,15 @@ def acr_list_manifest_referrers(cmd,
         password=password)
 
     ref_key = "references"
-    if recurse:
-        #checking for ref_key only necessary because of backend bug when manifest has no referrers
+    if recursive:
+        # checking for ref_key only necessary because of backend bug when manifest has no referrers
         if ref_key in raw_result:
             for referrers_obj in raw_result[ref_key]:
                 internal_referrers_obj = _obtain_manifest_from_registry(
-                                login_server=login_server,
-                                path=_get_references_path(repository, referrers_obj["digest"]),
-                                username=username,
-                                password=password)
+                    login_server=login_server,
+                    path=_get_references_path(repository, referrers_obj["digest"]),
+                    username=username,
+                    password=password)
 
                 if ref_key in internal_referrers_obj:
                     for ref in internal_referrers_obj[ref_key]:
@@ -246,18 +245,18 @@ def acr_list_manifest_referrers(cmd,
 
 
 def acr_show_manifest(cmd,
-                                  registry_name=None,
-                                  manifest_id=None,
-                                  id=None,
-                                  raw_output=None,
-                                  tenant_suffix=None,
-                                  username=None,
-                                  password=None):
-    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+                      registry_name=None,
+                      manifest_id=None,
+                      ID=None,
+                      raw_output=None,
+                      tenant_suffix=None,
+                      username=None,
+                      password=None):
+    if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
-    if id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
+    if ID:
+        registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
 
     else:
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
@@ -290,17 +289,17 @@ def acr_show_manifest(cmd,
 
 
 def acr_show_manifest_metadata(cmd,
-                                  registry_name=None,
-                                  manifest_id=None,
-                                  id=None,
-                                  tenant_suffix=None,
-                                  username=None,
-                                  password=None):
-    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+                               registry_name=None,
+                               manifest_id=None,
+                               ID=None,
+                               tenant_suffix=None,
+                               username=None,
+                               password=None):
+    if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
-    if id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
+    if ID:
+        registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
 
     else:
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
@@ -328,21 +327,21 @@ def acr_show_manifest_metadata(cmd,
 
 
 def acr_update_manifest_metadata(cmd,
-                          registry_name=None,
-                          manifest_id=None,
-                          id=None,
-                          tenant_suffix=None,
-                          username=None,
-                          password=None,
-                          delete_enabled=None,
-                          list_enabled=None,
-                          read_enabled=None,
-                          write_enabled=None):
-    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+                                 registry_name=None,
+                                 manifest_id=None,
+                                 ID=None,
+                                 tenant_suffix=None,
+                                 username=None,
+                                 password=None,
+                                 delete_enabled=None,
+                                 list_enabled=None,
+                                 read_enabled=None,
+                                 write_enabled=None):
+    if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
-    if id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
+    if ID:
+        registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
 
     else:
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
@@ -389,18 +388,18 @@ def acr_update_manifest_metadata(cmd,
 
 
 def acr_delete_manifests(cmd,
-                                    registry_name=None,
-                                    manifest_id=None,
-                                    id=None,
-                                    tenant_suffix=None,
-                                    username=None,
-                                    password=None,
-                                    yes=False):
-    if (id and manifest_id) or (not id and not (registry_name and manifest_id)):
+                         registry_name=None,
+                         manifest_id=None,
+                         ID=None,
+                         tenant_suffix=None,
+                         username=None,
+                         password=None,
+                         yes=False):
+    if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
-    if id:
-        registry_name, repository, tag, manifest = _parse_fqdn(cmd, id[0])
+    if ID:
+        registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
 
     else:
         repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
@@ -418,11 +417,11 @@ def acr_delete_manifests(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.DELETE.value)
 
-    user_confirmation("Are you sure you want to delete the artifact '{}' "
-                          "and all manifests that refer to it?".format(manifest), yes)
+    user_confirmation("Are you sure you want to delete the artifact '{}'"
+                      " and all manifests that refer to it?".format(manifest), yes)
 
     path = _get_v2_manifest_path(repository, manifest)
-    request_data_from_registry(
+    return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
         path=path,

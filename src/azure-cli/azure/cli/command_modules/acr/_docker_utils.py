@@ -9,7 +9,6 @@ except ImportError:
     from urllib import urlencode
     from urlparse import urlparse, urlunparse
 
-from encodings import utf_8
 import time
 from json import loads
 from enum import Enum
@@ -493,9 +492,12 @@ def get_manifest_authorization_header(username, password):
         auth = _get_bearer_auth_str(password)
     else:
         auth = _get_basic_auth_str(username, password)
-    return {'Authorization': auth, 'Accept': '*/*, application/vnd.cncf.oras.artifact.manifest.v1+json, application/vnd.oci.image.manifest.v1+json'}
+    return {'Authorization': auth,
+            'Accept': '*/*, application/vnd.cncf.oras.artifact.manifest.v1+json'
+            ', application/vnd.oci.image.manifest.v1+json'}
 
 
+# pylint: disable=too-many-statements
 def request_data_from_registry(http_method,
                                login_server,
                                path,
@@ -523,7 +525,6 @@ def request_data_from_registry(http_method,
         raise ValueError("Non-empty payload is required for http method: {}".format(http_method))
 
     url = 'https://{}{}'.format(login_server, path)
-
 
     if manifest_headers:
         headers = get_manifest_authorization_header(username, password)
