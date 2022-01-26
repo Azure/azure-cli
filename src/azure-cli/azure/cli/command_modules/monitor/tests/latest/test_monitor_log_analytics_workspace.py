@@ -483,7 +483,7 @@ class TestLogProfileScenarios(ScenarioTest):
             'ws_name': 'wsn1',
             'rule_name': 'rule11'
         })
-        rule = self.cmd('az monitor data-collection rule show -g tbtest -n rule1').get_output_in_json()
+        rule = self.cmd('az monitor data-collection rule show -g tbtest -n rule11').get_output_in_json()
         self.kwargs.update({
             'rule_id': rule['id']
         })
@@ -497,12 +497,14 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.kwargs.update({
             'ws_name':self.create_random_name('ws-', 10),
-            'table_name': 'test_table1_CL',
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+            'table2_name': self.create_random_name('TB', 10) + '_SRCH',
+            'table3_name': self.create_random_name('TB', 10) +'RST'
 
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
-        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime --search "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT" --display-name test-table --description "a test table"', checks=[
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 45),
             self.check('totalRetentionInDays', 70),
@@ -511,10 +513,12 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.columns[1].name', 'TimeGenerated'),
             self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80', checks=[
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 50),
             self.check('totalRetentionInDays', 80),
+            self.check('schema.columns[0].name', 'col2'),
+            self.check('schema.columns[0].type', 'guid'),
         ])
         self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
             self.check('name', '{table_name}'),
@@ -522,4 +526,18 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('totalRetentionInDays', 80),
         ])
 
-        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name}')
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+        # self.cmd('monitor log-analytics workspace table create -g {rg} -n {table2_name} --workspace-name {ws_name} --search "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --description "a test table"', checks=[
+        #     self.check('name', '{table_name}'),
+        #     self.check('searchResults.query', 'Heartbeat | where SourceSystem != '' | project SourceSystem'),
+        #     self.check('searchResults.limit', 1000),
+        #     self.check('searchResults.sourceTable', "Heartbeat"),
+        #     self.check('searchResults.type', 'datetime'),
+        # ])
+
+        # self.cmd('monitor log-analytics workspace table create -g {rg} -n {table3_name} --workspace-name {ws_name} --start-restore-time "2021-08-01 05:29:18" --end-restore-time "2021-08-02 05:29:18"', checks=[
+        #     self.check('name', '{table_name}'),
+        #     self.check('restoredLogs.startRestoreTime', ''),
+        #     self.check('restoredLogs.endRestoreTime', ''),
+        # ])

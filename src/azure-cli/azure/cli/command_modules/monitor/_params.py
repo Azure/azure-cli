@@ -443,15 +443,14 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
+        c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
-        c.argument('display_name', help='Table display name.')
-        c.argument('description', help='Table description.')
+        c.argument('description', help='Schema description.')
         c.argument('query', options_list=['--search'], help='Search job query.')
         c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
         c.argument('start_search_time', arg_type=get_datetime_type(help='The timestamp to start the search from (UTC).'))
@@ -462,10 +461,12 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
+        c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
         c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
-        c.argument('display_name', help='Table display name.')
         c.argument('description', help='Table description.')
+        c.argument('start_restore_time', arg_type=get_datetime_type(help='The timestamp to start the restore from (UTC).'))
+        c.argument('end_restore_time', arg_type=get_datetime_type(help='The timestamp to end the restore by (UTC).'))
     # endregion
 
     # region Log Analytics Workspace Data Export

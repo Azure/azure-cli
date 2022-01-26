@@ -147,17 +147,21 @@ def update_log_analytics_workspace_data_exports(cmd, instance, table_names, dest
     return instance
 
 
-# pylint:disable=too-many-locals
-def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns,
+# pylint:disable=too-many-locals dangerous-default-value
+def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
-                                         display_name=None, description=None, query=None, search_description=None,
-                                         limit=None, start_search_time=None, end_search_time=None,
-                                         start_restore_time=None, end_restore_time=None, no_wait=False):
-
-    search_results = SearchResults(query=query, description=search_description, limit=limit,
-                                   start_search_time=start_search_time, end_search_time=end_search_time)
-    restored_logs = RestoredLogs(start_restore_time=start_restore_time, end_restore_time=end_restore_time)
-    columns_list = []
+                                         description=None, query=None, search_description=None, limit=None,
+                                         start_search_time=None, end_search_time=None, start_restore_time=None,
+                                         end_restore_time=None, no_wait=False):
+    search_results = None
+    if query is not None or limit is not None or start_search_time is not None or end_search_time is not None or\
+            search_description is not None:
+        search_results = SearchResults(query=query, description=search_description, limit=limit,
+                                       start_search_time=start_search_time, end_search_time=end_search_time)
+    restored_logs = None
+    if start_restore_time is not None or end_restore_time is not None:
+        restored_logs = RestoredLogs(start_restore_time=start_restore_time, end_restore_time=end_restore_time)
+    columns_list = [] if columns else None
     for col in columns:
         if '=' in col:
             n, t = col.split('=', 1)
@@ -168,7 +172,14 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
         else:
             raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
         columns_list.append(Column(name=n, type=t))
-    schema = Schema(name=table_name, columns=columns_list, display_name=display_name, description=description)
+    schema = None
+    if columns or description is not None:
+        if not columns:
+            raise ArgumentUsageError('Usage error: When using --description, --columns must be provided')
+        schema = Schema(name=table_name, columns=columns_list, description=description)
+    if not search_results and not restored_logs and not schema:
+        raise ArgumentUsageError('Usage error: Provide parameters for at least one of the tables. '
+                                 'Available types: _CL _SRCH _RST.')
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
                   search_results=search_results,
@@ -180,17 +191,31 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
                        workspace_name, table_name, table)
 
 
-def update_log_analytics_workspace_table(instance, retention_in_days=None, total_retention_in_days=None, plan=None,
-                                         display_name=None, description=None):
-    if retention_in_days is not None:
-        instance.retention_in_days = retention_in_days
-    if total_retention_in_days is not None:
-        instance.total_retention_in_days = total_retention_in_days
-    if plan is not None:
-        instance.plan = plan
-    if display_name is not None:
-        instance.schema.displayName = display_name
-    if description is not None:
-        instance.schema.description = description
-
-    return instance
+def update_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
+                                         retention_in_days=None, total_retention_in_days=None, plan=None,
+                                         description=None, start_restore_time=None, end_restore_time=None,
+                                         no_wait=False):
+    restored_logs = None
+    if start_restore_time is not None or end_restore_time is not None:
+        restored_logs = RestoredLogs(start_restore_time=start_restore_time, end_restore_time=end_restore_time)
+    columns_list = [] if columns else None
+    for col in columns:
+        if '=' in col:
+            n, t = col.split('=', 1)
+            if t.lower() not in [x.value.lower() for x in ColumnTypeEnum]:
+                raise InvalidArgumentValueError('InvalidArgumentValueError: "{}" is not a valid value for type_name. '
+                                                'Allowed values: string, int, long, real, boolean, dateTime, guid, '
+                                                'dynamic".'.format(t))
+        else:
+            raise ArgumentUsageError('Usage error: --columns should be provided in colunm_name=colunm_type format')
+        columns_list.append(Column(name=n, type=t))
+    schema = None
+    if columns or description is not None:
+        schema = Schema(name=table_name, columns=columns_list, description=description)
+    table = Table(retention_in_days=retention_in_days,
+                  total_retention_in_days=total_retention_in_days,
+                  restored_logs=restored_logs,
+                  schema=schema,
+                  plan=plan
+                  )
+    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, workspace_name, table_name, table)
