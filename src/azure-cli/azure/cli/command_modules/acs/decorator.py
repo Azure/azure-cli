@@ -5546,7 +5546,8 @@ class AKSUpdateDecorator:
         # some parameters support the use of empty string or dictionary to update/remove previously set values
         is_default = (
             self.context.get_cluster_autoscaler_profile() is None and
-            self.context.get_api_server_authorized_ip_ranges() is None
+            self.context.get_api_server_authorized_ip_ranges() is None and
+            self.context.get_nodepool_labels() is None
         )
 
         if not is_changed and is_default:
