@@ -150,6 +150,11 @@ def acr_update_custom(cmd,
 def _configure_public_network_access(cmd, registry, enabled):
     PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
     registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
+    if enabled:
+        registry.public_network_access = PublicNetworkAccess.enabled
+    else:
+        registry.public_network_access = PublicNetworkAccess.disabled
+        logger.warning('Disabling the public endpoint overrides all firewall configurations.')
 
 
 def _handle_network_bypass(cmd, registry, allow_trusted_services):
