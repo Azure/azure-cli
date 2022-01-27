@@ -34,6 +34,7 @@ def list_collection_output(result):
 def collection_output(result):
     return collection_output_helper(result['collection'])
 
+
 def collection_output_helper(result):
     result = OrderedDict([('Collection Id', result['id']),
                           ('_conflicts', result['_conflicts']),
@@ -53,12 +54,14 @@ def list_connection_strings_output(result):
         table.append(item)
     return table
 
+
 def mc_cluster_status_output_table(result):
-    # iterate on dataCenters, skip connectionErrors and reaperStatus in table output 
+    # iterate on dataCenters, skip connectionErrors and reaperStatus in table output
     return mc_status_dataCenters(result['dataCenters'])
 
+
 def mc_status_dataCenters(dataCenters):
-    dataCentersTable=[]
+    dataCentersTable = []
     for dc in dataCenters:
         nodeTable = mc_status_nodes(dc['nodes'], dc['name'])
         for row in nodeTable:
@@ -66,11 +69,13 @@ def mc_status_dataCenters(dataCenters):
 
     return dataCentersTable
 
+
 def mc_status_nodes(nodes, dataCenterName):
-    table=[]
+    table = []
     for node in nodes:
         table.append(mc_status_node(node, dataCenterName))
     return table
+
 
 def mc_status_node(node, dataCenterName):
     # include dataCenterName in each formated node
@@ -91,7 +96,5 @@ def mc_status_node(node, dataCenterName):
                         ('memoryFreeKb', node['memoryFreeKb']),
                         ('memoryTotalKb', node['memoryTotalKb']),
                         ('hostId', node['hostId']),
-                        ('timestamp', node['timestamp'])
-                        ])
+                        ('timestamp', node['timestamp'])])
     return result
-
