@@ -1077,6 +1077,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
 
 class VMBootDiagnostics(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
     @StorageAccountPreparer(name_prefix='clitestbootdiag')
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
@@ -1343,7 +1344,7 @@ class VMCreateCustomIP(ScenarioTest):
             'public_ip_sku': 'Standard'
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
+        self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
             self.check('publicIpAllocationMethod', 'Static'),
@@ -1354,7 +1355,7 @@ class VMCreateCustomIP(ScenarioTest):
                  checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
 
         # verify the default should be "Basic" sku with "Dynamic" allocation method
-        self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
+        self.cmd('vm create -n {vm2} -g {rg} --image UbuntuLTS --admin-username user11 --generate-ssh-keys')
         self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
             self.check('publicIpAllocationMethod', 'Dynamic'),
             self.check('sku.name', 'Basic')
@@ -1490,6 +1491,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -2130,7 +2132,7 @@ class VMZoneScenarioTest(ScenarioTest):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
         except Exception as ex:
-            self.assertTrue('availability zone is not yet supported' in str(ex))
+            self.assertTrue('does not support availability zones at location' in str(ex))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
     @AllowLargeResponse(size_kb=8192)

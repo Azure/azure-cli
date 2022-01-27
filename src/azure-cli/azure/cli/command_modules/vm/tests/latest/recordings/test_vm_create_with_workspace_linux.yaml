@@ -1,48 +1,6 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network nsg create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001?api-version=2021-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001","name":"cli_test_vm_create_with_workspace_linux000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-14T06:04:13Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '368'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:04:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus"}'
+    body: '{"location": "westus"}'
     headers:
       Accept:
       - application/json
@@ -59,19 +17,19 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"clinsg000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003\",\r\n
-        \ \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"f883c81e-64ca-4a7c-ad01-de239d2f7def\",\r\n    \"securityRules\": [],\r\n
+        \"c7e8b329-7609-4562-9898-3c2c09763fdd\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -83,7 +41,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -95,7 +53,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -106,7 +64,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -118,7 +76,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -130,7 +88,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"41b908ed-0db3-479f-807b-8df728ba5fb0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b99e2d1c-d14e-4f17-92c1-95065e8656c7\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -145,7 +103,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/2ec2b220-6caa-49aa-af57-f0a63b0e3104?api-version=2021-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/33d43e20-02a2-43b5-a754-9c4d425d38b3?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -153,7 +111,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:23 GMT
+      - Wed, 26 Jan 2022 23:31:59 GMT
       expires:
       - '-1'
       pragma:
@@ -166,9 +124,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1ac2ec71-9302-47c5-9542-7fe185bed5f5
+      - 6b9424d7-f8f2-485c-8d6e-9440954011d9
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -186,9 +144,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/2ec2b220-6caa-49aa-af57-f0a63b0e3104?api-version=2021-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/33d43e20-02a2-43b5-a754-9c4d425d38b3?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -200,7 +158,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:26 GMT
+      - Wed, 26 Jan 2022 23:32:02 GMT
       expires:
       - '-1'
       pragma:
@@ -217,7 +175,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4d9948e3-20d3-44bf-9fdb-d401bece5173
+      - 5db4d3b5-a2d7-45f8-834e-b2446e362507
     status:
       code: 200
       message: OK
@@ -235,19 +193,19 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"clinsg000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003\",\r\n
-        \ \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"f883c81e-64ca-4a7c-ad01-de239d2f7def\",\r\n    \"securityRules\": [],\r\n
+        \"c7e8b329-7609-4562-9898-3c2c09763fdd\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -259,7 +217,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -271,7 +229,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -282,7 +240,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -294,7 +252,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -306,7 +264,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -325,9 +283,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:26 GMT
+      - Wed, 26 Jan 2022 23:32:03 GMT
       etag:
-      - W/"116d67e6-3180-45b7-9035-dea28dab8df5"
+      - W/"6cd81b3e-a338-4527-8131-6967ac401142"
       expires:
       - '-1'
       pragma:
@@ -344,49 +302,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 256e52d9-8552-4a75-9c5e-8ff7128e4c08
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001?api-version=2021-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001","name":"cli_test_vm_create_with_workspace_linux000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-14T06:04:13Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '368'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:04:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
+      - 58076f8e-7ba3-4633-95b6-2f901cc2e6a3
     status:
       code: 200
       message: OK
@@ -416,19 +332,16 @@ interactions:
         \         },\n          \"Flatcar\": {\n            \"publisher\": \"kinvolk\",\n
         \           \"offer\": \"flatcar-container-linux-free\",\n            \"sku\":
         \"stable\",\n            \"version\": \"latest\"\n          },\n          \"openSUSE-Leap\":
-        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"opensuse-leap-15-3\",\n
-        \           \"sku\": \"gen2\",\n            \"version\": \"latest\"\n          },\n
+        {\n            \"publisher\": \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n
+        \           \"sku\": \"42.3\",\n            \"version\": \"latest\"\n          },\n
         \         \"RHEL\": {\n            \"publisher\": \"RedHat\",\n            \"offer\":
         \"RHEL\",\n            \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n
         \         },\n          \"SLES\": {\n            \"publisher\": \"SUSE\",\n
-        \           \"offer\": \"sles-15-sp3\",\n            \"sku\": \"gen2\",\n
-        \           \"version\": \"latest\"\n          },\n          \"UbuntuLTS\":
-        {\n            \"publisher\": \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n
-        \           \"sku\": \"18.04-LTS\",\n            \"version\": \"latest\"\n
-        \         }\n        },\n        \"Windows\": {\n          \"Win2022Datacenter\":
-        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
-        \"WindowsServer\",\n            \"sku\": \"2022-Datacenter\",\n            \"version\":
-        \"latest\"\n          },\n          \"Win2019Datacenter\": {\n            \"publisher\":
+        \           \"offer\": \"SLES\",\n            \"sku\": \"15\",\n            \"version\":
+        \"latest\"\n          },\n          \"UbuntuLTS\": {\n            \"publisher\":
+        \"Canonical\",\n            \"offer\": \"UbuntuServer\",\n            \"sku\":
+        \"18.04-LTS\",\n            \"version\": \"latest\"\n          }\n        },\n
+        \       \"Windows\": {\n          \"Win2019Datacenter\": {\n            \"publisher\":
         \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
         \"2019-Datacenter\",\n            \"version\": \"latest\"\n          },\n
         \         \"Win2016Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
@@ -453,19 +366,19 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2744'
+      - '2525'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:28 GMT
+      - Wed, 26 Jan 2022 23:32:03 GMT
       etag:
-      - W/"d5acead0b38a79d988c245a7a15ec01f999da9244c97bbdc1fa2ec70d9e433f5"
+      - W/"54bceef15b892f2aa7f4c2145a49f1b5e33608722acdbb47933d7b6cbebbd7f4"
       expires:
-      - Tue, 14 Dec 2021 06:09:28 GMT
+      - Wed, 26 Jan 2022 23:37:03 GMT
       source-age:
-      - '191'
+      - '213'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -479,17 +392,124 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 879321b419c2af0e95119735ab78934f717da0b2
+      - 4fb7b8c5b5d1c21cd74ba4f2fd014fad6ff4def1
       x-frame-options:
       - deny
       x-github-request-id:
-      - 8C06:69A6:13B8AC:1B9997:61B6F1BD
+      - A1EC:138E:3E21E2:51FEA6:61F19231
       x-served-by:
-      - cache-qpg1264-QPG
+      - cache-qpg1269-QPG
       x-timer:
-      - S1639461868.133013,VS0,VE1
+      - S1643239924.883301,VS0,VE0
       x-xss-protection:
       - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions?$top=1&$orderby=name%20desc&api-version=2021-07-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"westus\",\r\n    \"name\": \"18.04.202201180\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202201180\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Jan 2022 23:32:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15994,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43975
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18.04-LTS/versions/18.04.202201180?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 31,\r\n      \"sizeInBytes\":
+        32213303808\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"westus\",\r\n  \"name\": \"18.04.202201180\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202201180\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '753'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 26 Jan 2022 23:32:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12997,Microsoft.Compute/GetVMImageFromLocation30Min;73985
     status:
       code: 200
       message: OK
@@ -507,7 +527,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -521,7 +541,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:28 GMT
+      - Wed, 26 Jan 2022 23:32:05 GMT
       expires:
       - '-1'
       pragma:
@@ -549,7 +569,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network?api-version=2021-04-01
   response:
@@ -597,9 +617,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
@@ -619,10 +640,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East
-        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
         US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1"]},{"location":"Canada
         Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
         US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
@@ -648,10 +669,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East
-        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
         US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1"]},{"location":"Canada
         Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
         US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
@@ -796,10 +817,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East
-        US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"locationMappings":[{"location":"East US 2 EUAP","type":"EdgeZone","extendedLocations":["eastus2euapmockedge","onefleetedge1mockedge","microsoftrrdclab1","microsoftrrdclab2","microsoftrrdclab3","microsoftrrdclab4","microsoftrrdclab5","microsoftrrdclab6","microsoftrrdclab7","microsoftrrdclab8","microsoftrrdclab9","microsoftrrdclab10","microsoftdclabs1","microsoftb25lab1"]},{"location":"West
         US","type":"EdgeZone","extendedLocations":["microsoftlosangeles1","microsoftlasvegas1"]},{"location":"Canada
         Central","type":"EdgeZone","extendedLocations":["microsoftvancouver1"]},{"location":"East
         US 2","type":"EdgeZone","extendedLocations":["microsoftmiami1","attatlanta1"]},{"location":"East
@@ -895,10 +916,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags,
-        SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -1278,10 +1299,10 @@ interactions:
         Central US","zones":[]},{"location":"North Europe","zones":["2","3","1"]},{"location":"Norway
         East","zones":["2","3","1"]},{"location":"South Africa North","zones":["2","3","1"]},{"location":"South
         Central US","zones":["2","3","1"]},{"location":"Southeast Asia","zones":["2","3","1"]},{"location":"Sweden
-        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UK
-        South","zones":["2","3","1"]},{"location":"West Europe","zones":["2","3","1"]},{"location":"West
-        US 2","zones":["2","3","1"]},{"location":"West US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags,
-        SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
+        Central","zones":["2","3","1"]},{"location":"Switzerland North","zones":[]},{"location":"UAE
+        North","zones":[]},{"location":"UK South","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"West
+        US 3","zones":["2","3","1"]}],"capabilities":"SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
         Central US","South Central US","Central US","East US 2","Japan East","Japan
         West","Brazil South","Australia East","Australia Southeast","Central India","South
@@ -1486,11 +1507,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '135217'
+      - '135433'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:29 GMT
+      - Wed, 26 Jan 2022 23:32:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1518,19 +1539,19 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"clinsg000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003\",\r\n
-        \ \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"f883c81e-64ca-4a7c-ad01-de239d2f7def\",\r\n    \"securityRules\": [],\r\n
+        \"c7e8b329-7609-4562-9898-3c2c09763fdd\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -1542,7 +1563,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -1554,7 +1575,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -1565,7 +1586,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -1577,7 +1598,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -1589,7 +1610,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"116d67e6-3180-45b7-9035-dea28dab8df5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6cd81b3e-a338-4527-8131-6967ac401142\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1608,9 +1629,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:31 GMT
+      - Wed, 26 Jan 2022 23:32:08 GMT
       etag:
-      - W/"116d67e6-3180-45b7-9035-dea28dab8df5"
+      - W/"6cd81b3e-a338-4527-8131-6967ac401142"
       expires:
       - '-1'
       pragma:
@@ -1627,7 +1648,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 647c8cc3-17d3-4a9b-b35a-54cf60759aa7
+      - 8d771348-fb3a-439f-9de4-fecc621eaa55
     status:
       code: 200
       message: OK
@@ -1645,7 +1666,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2021-06-01
   response:
@@ -1661,7 +1682,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:32 GMT
+      - Wed, 26 Jan 2022 23:32:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1689,12 +1710,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001","name":"cli_test_vm_create_with_workspace_linux000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-14T06:04:13Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001","name":"cli_test_vm_create_with_workspace_linux000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2022-01-26T23:31:49Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1703,7 +1724,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:04:33 GMT
+      - Wed, 26 Jan 2022 23:32:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1737,22 +1758,22 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"af1f5db1-7dfa-46f3-84e7-e9c16f1ee051\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"d3a931a8-d1dc-4c36-bce5-67630559885d\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Tue, 14 Dec 2021 06:04:39 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Wed, 26 Jan 2022 23:32:16 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Tue, 14 Dec 2021 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Thu, 27 Jan 2022 17:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Tue, 14 Dec 2021 06:04:39 GMT\",\r\n
-        \   \"modifiedDate\": \"Tue, 14 Dec 2021 06:04:39 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Wed, 26 Jan 2022 23:32:16 GMT\",\r\n
+        \   \"modifiedDate\": \"Wed, 26 Jan 2022 23:32:16 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002\",\r\n
         \ \"name\": \"cliworkspace000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\"\r\n}"
@@ -1764,7 +1785,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 14 Dec 2021 06:04:40 GMT
+      - Wed, 26 Jan 2022 23:32:17 GMT
       pragma:
       - no-cache
       server:
@@ -1775,7 +1796,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -1796,22 +1817,22 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"af1f5db1-7dfa-46f3-84e7-e9c16f1ee051\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"d3a931a8-d1dc-4c36-bce5-67630559885d\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Tue, 14 Dec 2021 06:04:39 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Wed, 26 Jan 2022 23:32:16 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Tue, 14 Dec 2021 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Thu, 27 Jan 2022 17:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Tue, 14 Dec 2021 06:04:39 GMT\",\r\n
-        \   \"modifiedDate\": \"Tue, 14 Dec 2021 06:04:40 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Wed, 26 Jan 2022 23:32:16 GMT\",\r\n
+        \   \"modifiedDate\": \"Wed, 26 Jan 2022 23:32:17 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002\",\r\n
         \ \"name\": \"cliworkspace000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\"\r\n}"
@@ -1823,7 +1844,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 14 Dec 2021 06:05:10 GMT
+      - Wed, 26 Jan 2022 23:32:47 GMT
       pragma:
       - no-cache
       server:
@@ -1848,13 +1869,13 @@ interactions:
       "contentVersion": "1.0.0.0", "parameters": {"workspaceId": {"type": "securestring",
       "metadata": {"description": "Secure workspaceId"}}}, "variables": {}, "resources":
       [{"name": "monitorvmVNET", "type": "Microsoft.Network/virtualNetworks", "location":
-      "eastus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
       "monitorvmSubnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"apiVersion":
       "2018-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "monitorvmPublicIP",
-      "location": "eastus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
+      "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
       null}}, {"apiVersion": "2015-06-15", "type": "Microsoft.Network/networkInterfaces",
-      "name": "monitorvmVMNic", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/monitorvmVNET",
+      "name": "monitorvmVMNic", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/monitorvmVNET",
       "Microsoft.Network/publicIpAddresses/monitorvmPublicIP"], "properties": {"ipConfigurations":
       [{"name": "ipconfigmonitorvm", "properties": {"privateIPAllocationMethod": "Dynamic",
       "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET/subnets/monitorvmSubnet"},
@@ -1867,9 +1888,9 @@ interactions:
       ''2015-11-01-preview'').customerId]", "stopOnMultipleConnections": "true"},
       "protectedSettings": {"workspaceKey": "[listKeys(parameters(''workspaceId''),
       ''2015-11-01-preview'').primarySharedKey]"}}, "name": "monitorvm/OmsAgentForLinux",
-      "location": "eastus", "dependsOn": ["Microsoft.Compute/virtualMachines/monitorvm"]},
+      "location": "westus", "dependsOn": ["Microsoft.Compute/virtualMachines/monitorvm"]},
       {"apiVersion": "2021-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "monitorvm", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/monitorvmVMNic"],
+      "monitorvm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/monitorvmVMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic",
       "properties": {"deleteOption": null}}]}, "storageProfile": {"osDisk": {"createOption":
@@ -1877,7 +1898,7 @@ interactions:
       null}}, "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer",
       "sku": "18.04-LTS", "version": "latest"}}, "osProfile": {"computerName": "monitorvm",
       "adminUsername": "azureuser", "linuxConfiguration": {"disablePasswordAuthentication":
-      true, "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL2PtV5sp++a43U/dRJ2Fyjso9qDFNbWEnbYk7mA4CfXy0gvxm65oYVd90JysNmGBF/89hIvCTN3ul4aEIuPkzywozRbdyWiJngSd/7OrNBJzpQQSjsGXwoVNDRAJSzlvuQVUR2vwBHeN2xMIvufSvzO3LGI3xcSIWIYlSvU9urnV+Pefd4T6x/OXgTpE02AgMWOspdZTzg0ZKsSU3sG5nYSNoq+8qrHQSXLbLLdWzz5lYKe8p64fQC/xhXrNa3/Nw5vy8YGsyqGueM/Rj6gCI+ivgBlQg908Aa50yQLvwsMLIKxhgPlj73Am8zm27PS3DKVjkr0nTjbEp/3FzZnyB",
+      true, "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRUxHnTSwVC2KG4KOmwmJoVqO8XQdhUuU/AYgHaCK8sNWgvXerEw/vWus6IMDJkacZxf3QoIN2feWl9l6vxTrK0ePpBrvVX1XQJ710wB4dW5XuKfQwNohLFfIshaoe8JXyU9bzHa4LmkYORB1JhOOHbQuYwtEpTApF5vPqjXA5viSP1wbyTlhdJ4GjE9oVTGKBeP/R6trnaD8x2rWwysXh3kb1x4KgmHWEevsMemA2RglfdWoru5Vke77zoyEsSQwJvoUGEvaGNxj5mDEje+nMNOJUYClsxB6nhPxpikbKm+R5V3ANhA+F2h+ID1yFawlt+tdeKrNS8g6XZ4VTIZ99",
       "path": "/home/azureuser/.ssh/authorized_keys"}]}}}, "additionalCapabilities":
       {}}}], "outputs": {}}, "parameters": {"workspaceId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002"}},
       "mode": "incremental"}}'
@@ -1897,23 +1918,23 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_5nNQMTIGEZrKB113eydUfNv0xOo9eO8O","name":"vm_deploy_5nNQMTIGEZrKB113eydUfNv0xOo9eO8O","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8806065422846274903","parameters":{"workspaceId":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-12-14T06:05:16.3523251Z","duration":"PT0.0006471S","correlationId":"79866031-dfb3-4731-a202-3d7f8cf1404e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/OmsAgentForLinux"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_M3KXYTbYUEUryCGsnKdU1ym3GEnKODvz","name":"vm_deploy_M3KXYTbYUEUryCGsnKdU1ym3GEnKODvz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18346529651271473569","parameters":{"workspaceId":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2022-01-26T23:32:55.2917639Z","duration":"PT0.0008338S","correlationId":"7c14b3b9-9fc2-442f-9524-1dab5f4459fb","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["westus"]},{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/OmsAgentForLinux"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_5nNQMTIGEZrKB113eydUfNv0xOo9eO8O/operationStatuses/08585621449718953364?api-version=2021-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_M3KXYTbYUEUryCGsnKdU1ym3GEnKODvz/operationStatuses/08585583669131554474?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '3616'
+      - '3617'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:05:17 GMT
+      - Wed, 26 Jan 2022 23:32:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1923,7 +1944,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -1941,9 +1962,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585583669131554474?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1955,7 +1976,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:05:48 GMT
+      - Wed, 26 Jan 2022 23:33:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1983,9 +2004,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585583669131554474?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -1997,7 +2018,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:06:18 GMT
+      - Wed, 26 Jan 2022 23:33:57 GMT
       expires:
       - '-1'
       pragma:
@@ -2025,9 +2046,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585583669131554474?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2039,7 +2060,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:06:49 GMT
+      - Wed, 26 Jan 2022 23:34:27 GMT
       expires:
       - '-1'
       pragma:
@@ -2067,177 +2088,9 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:07:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:07:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:08:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Dec 2021 06:08:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
-      User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585621449718953364?api-version=2021-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585583669131554474?api-version=2021-04-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -2249,7 +2102,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:22 GMT
+      - Wed, 26 Jan 2022 23:34:58 GMT
       expires:
       - '-1'
       pragma:
@@ -2277,21 +2130,21 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_5nNQMTIGEZrKB113eydUfNv0xOo9eO8O","name":"vm_deploy_5nNQMTIGEZrKB113eydUfNv0xOo9eO8O","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8806065422846274903","parameters":{"workspaceId":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-14T06:08:56.7130314Z","duration":"PT3M40.3613534S","correlationId":"79866031-dfb3-4731-a202-3d7f8cf1404e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/OmsAgentForLinux"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Resources/deployments/vm_deploy_M3KXYTbYUEUryCGsnKdU1ym3GEnKODvz","name":"vm_deploy_M3KXYTbYUEUryCGsnKdU1ym3GEnKODvz","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18346529651271473569","parameters":{"workspaceId":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2022-01-26T23:34:38.0090049Z","duration":"PT1M42.7180748S","correlationId":"7c14b3b9-9fc2-442f-9524-1dab5f4459fb","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["westus"]},{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/OmsAgentForLinux"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4582'
+      - '4583'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:23 GMT
+      - Wed, 26 Jan 2022 23:34:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2319,30 +2172,30 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm?$expand=instanceView&api-version=2021-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"monitorvm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"0bc88ea1-d032-43db-9eec-a66a157f7691\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"e56c97df-bc85-4244-8cf5-6e6300b767d1\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202112020\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"monitorvm_OsDisk_1_aec2b041354d4c5fa0946723cb8c6c15\",\r\n
+        \"18.04.202201180\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"monitorvm_disk1_d923cfe8a0004d6ba0b61b56b808ff4e\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/disks/monitorvm_OsDisk_1_aec2b041354d4c5fa0946723cb8c6c15\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/disks/monitorvm_disk1_d923cfe8a0004d6ba0b61b56b808ff4e\"\r\n
         \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
         30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\":
         {\r\n      \"computerName\": \"monitorvm\",\r\n      \"adminUsername\": \"azureuser\",\r\n
         \     \"linuxConfiguration\": {\r\n        \"disablePasswordAuthentication\":
         true,\r\n        \"ssh\": {\r\n          \"publicKeys\": [\r\n            {\r\n
         \             \"path\": \"/home/azureuser/.ssh/authorized_keys\",\r\n              \"keyData\":
-        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL2PtV5sp++a43U/dRJ2Fyjso9qDFNbWEnbYk7mA4CfXy0gvxm65oYVd90JysNmGBF/89hIvCTN3ul4aEIuPkzywozRbdyWiJngSd/7OrNBJzpQQSjsGXwoVNDRAJSzlvuQVUR2vwBHeN2xMIvufSvzO3LGI3xcSIWIYlSvU9urnV+Pefd4T6x/OXgTpE02AgMWOspdZTzg0ZKsSU3sG5nYSNoq+8qrHQSXLbLLdWzz5lYKe8p64fQC/xhXrNa3/Nw5vy8YGsyqGueM/Rj6gCI+ivgBlQg908Aa50yQLvwsMLIKxhgPlj73Am8zm27PS3DKVjkr0nTjbEp/3FzZnyB\"\r\n
+        \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRUxHnTSwVC2KG4KOmwmJoVqO8XQdhUuU/AYgHaCK8sNWgvXerEw/vWus6IMDJkacZxf3QoIN2feWl9l6vxTrK0ePpBrvVX1XQJ710wB4dW5XuKfQwNohLFfIshaoe8JXyU9bzHa4LmkYORB1JhOOHbQuYwtEpTApF5vPqjXA5viSP1wbyTlhdJ4GjE9oVTGKBeP/R6trnaD8x2rWwysXh3kb1x4KgmHWEevsMemA2RglfdWoru5Vke77zoyEsSQwJvoUGEvaGNxj5mDEje+nMNOJUYClsxB6nhPxpikbKm+R5V3ANhA+F2h+ID1yFawlt+tdeKrNS8g6XZ4VTIZ99\"\r\n
         \           }\r\n          ]\r\n        },\r\n        \"provisionVMAgent\":
         true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
         \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
@@ -2354,46 +2207,46 @@ interactions:
         [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2021-12-14T06:08:50+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        \"2022-01-26T23:34:25+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
         [\r\n          {\r\n            \"type\": \"Microsoft.EnterpriseCloud.Monitoring.OmsAgentForLinux\",\r\n
-        \           \"typeHandlerVersion\": \"1.13.40\",\r\n            \"status\":
+        \           \"typeHandlerVersion\": \"1.14.9\",\r\n            \"status\":
         {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n              \"level\":
         \"Info\",\r\n              \"displayStatus\": \"Ready\",\r\n              \"message\":
         \"Plugin enabled\"\r\n            }\r\n          }\r\n        ]\r\n      },\r\n
-        \     \"disks\": [\r\n        {\r\n          \"name\": \"monitorvm_OsDisk_1_aec2b041354d4c5fa0946723cb8c6c15\",\r\n
+        \     \"disks\": [\r\n        {\r\n          \"name\": \"monitorvm_disk1_d923cfe8a0004d6ba0b61b56b808ff4e\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-12-14T06:05:44.5734581+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2022-01-26T23:33:20.7031789+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"extensions\":
         [\r\n        {\r\n          \"name\": \"OmsAgentForLinux\",\r\n          \"type\":
         \"Microsoft.EnterpriseCloud.Monitoring.OmsAgentForLinux\",\r\n          \"typeHandlerVersion\":
-        \"1.13.40\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\":
+        \"1.14.9\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\":
         \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\n
         \             \"displayStatus\": \"Provisioning succeeded\",\r\n              \"message\":
         \"Enable succeeded\"\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n
         \     \"hyperVGeneration\": \"V1\",\r\n      \"statuses\": [\r\n        {\r\n
         \         \"code\": \"ProvisioningState/succeeded\",\r\n          \"level\":
         \"Info\",\r\n          \"displayStatus\": \"Provisioning succeeded\",\r\n
-        \         \"time\": \"2021-12-14T06:08:52.107048+00:00\"\r\n        },\r\n
+        \         \"time\": \"2022-01-26T23:34:34.3285892+00:00\"\r\n        },\r\n
         \       {\r\n          \"code\": \"PowerState/running\",\r\n          \"level\":
         \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n        }\r\n
         \     ]\r\n    }\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"name\":
         \"OmsAgentForLinux\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/OmsAgentForLinux\",\r\n
         \     \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\":
-        \"eastus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
+        \"westus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
         true,\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"publisher\":
         \"Microsoft.EnterpriseCloud.Monitoring\",\r\n        \"type\": \"OmsAgentForLinux\",\r\n
-        \       \"typeHandlerVersion\": \"1.0\",\r\n        \"settings\": {\"workspaceId\":\"af1f5db1-7dfa-46f3-84e7-e9c16f1ee051\",\"stopOnMultipleConnections\":\"true\"}\r\n
+        \       \"typeHandlerVersion\": \"1.0\",\r\n        \"settings\": {\"workspaceId\":\"d3a931a8-d1dc-4c36-bce5-67630559885d\",\"stopOnMultipleConnections\":\"true\"}\r\n
         \     }\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5451'
+      - '5441'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:24 GMT
+      - Wed, 26 Jan 2022 23:34:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2410,7 +2263,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31995
+      - Microsoft.Compute/LowCostGet3Min;3956,Microsoft.Compute/LowCostGet30Min;31840
     status:
       code: 200
       message: OK
@@ -2428,18 +2281,18 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"monitorvmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"bd3aecb1-5d4a-450d-805c-9b495f67a1fa\\\"\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"4d08e813-b80c-41b8-a8e0-bd14e3d7ee8a\",\r\n
+        \ \"etag\": \"W/\\\"247e31ae-8ca1-4f0f-ad1a-a30f1a41db3f\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"02db8178-592a-4c83-9ee0-dd3613654558\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigmonitorvm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic/ipConfigurations/ipconfigmonitorvm\",\r\n
-        \       \"etag\": \"W/\\\"bd3aecb1-5d4a-450d-805c-9b495f67a1fa\\\"\",\r\n
+        \       \"etag\": \"W/\\\"247e31ae-8ca1-4f0f-ad1a-a30f1a41db3f\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -2448,8 +2301,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"tghwfw505kbefawwqmr40ehgla.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-2C-E1-17\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"rcwkku0pz0genayo0k5n3rpgfc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-0A-1C-1C\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkSecurityGroups/clinsg000003\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -2463,9 +2316,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:25 GMT
+      - Wed, 26 Jan 2022 23:35:00 GMT
       etag:
-      - W/"bd3aecb1-5d4a-450d-805c-9b495f67a1fa"
+      - W/"247e31ae-8ca1-4f0f-ad1a-a30f1a41db3f"
       expires:
       - '-1'
       pragma:
@@ -2482,7 +2335,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d268c309-6361-46dc-a11c-ebcecd2a8363
+      - 37cf8723-32e0-4bf8-81e0-869a0e6a109b
     status:
       code: 200
       message: OK
@@ -2500,16 +2353,16 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"monitorvmPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"fe491477-a734-4bf8-b755-0a9a8db82799\\\"\",\r\n  \"location\":
-        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"59466fc6-e321-4321-9aa6-2c0947c45a64\",\r\n
-        \   \"ipAddress\": \"23.96.61.220\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \ \"etag\": \"W/\\\"9263f6d4-2cd1-4a40-9f69-82ec3ce17bdc\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"c4bf99d0-0f26-4bfa-9afd-2548fbe47a43\",\r\n
+        \   \"ipAddress\": \"168.62.208.89\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic/ipConfigurations/ipconfigmonitorvm\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -2518,13 +2371,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '960'
+      - '961'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:25 GMT
+      - Wed, 26 Jan 2022 23:35:01 GMT
       etag:
-      - W/"fe491477-a734-4bf8-b755-0a9a8db82799"
+      - W/"9263f6d4-2cd1-4a40-9f69-82ec3ce17bdc"
       expires:
       - '-1'
       pragma:
@@ -2541,7 +2394,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1b673e84-6cef-4ab6-8a86-664f9ac9037e
+      - a190ac19-a6af-4ac7-91bb-c7efed9f768f
     status:
       code: 200
       message: OK
@@ -2563,12 +2416,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001?api-version=2020-08-01
   response:
     body:
-      string: '{"kind":"LinuxPerformanceCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2021-12-14T06%3A09%3A28.1537636Z''\"","name":"DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+      string: '{"kind":"LinuxPerformanceCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2022-01-26T23%3A35%3A02.0201282Z''\"","name":"DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2577,7 +2430,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:28 GMT
+      - Wed, 26 Jan 2022 23:35:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2593,7 +2446,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -2620,14 +2473,14 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002?api-version=2020-08-01
   response:
     body:
       string: '{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Memory","performanceCounters":[{"counterName":"Available
         MBytes Memory"},{"counterName":"% Used Memory"},{"counterName":"% Used Swap
-        Space"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","etag":"W/\"datetime''2021-12-14T06%3A09%3A28.9564670Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+        Space"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","etag":"W/\"datetime''2022-01-26T23%3A35%3A02.7340559Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2636,7 +2489,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:28 GMT
+      - Wed, 26 Jan 2022 23:35:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2652,7 +2505,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -2678,13 +2531,13 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003?api-version=2020-08-01
   response:
     body:
       string: '{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Processor","performanceCounters":[{"counterName":"%
-        Processor Time"},{"counterName":"% Privileged Time"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","etag":"W/\"datetime''2021-12-14T06%3A09%3A29.5642035Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+        Processor Time"},{"counterName":"% Privileged Time"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","etag":"W/\"datetime''2022-01-26T23%3A35%3A03.3694269Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2693,7 +2546,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:29 GMT
+      - Wed, 26 Jan 2022 23:35:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2709,7 +2562,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1197'
       x-powered-by:
       - ASP.NET
     status:
@@ -2737,7 +2590,7 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004?api-version=2020-08-01
   response:
@@ -2745,7 +2598,7 @@ interactions:
       string: '{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Logical
         Disk","performanceCounters":[{"counterName":"% Used Inodes"},{"counterName":"Free
         Megabytes"},{"counterName":"% Used Space"},{"counterName":"Disk Transfers/sec"},{"counterName":"Disk
-        Reads/sec"},{"counterName":"Disk Writes/sec"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","etag":"W/\"datetime''2021-12-14T06%3A09%3A30.2301834Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+        Reads/sec"},{"counterName":"Disk Writes/sec"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","etag":"W/\"datetime''2022-01-26T23%3A35%3A04.0244199Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2754,7 +2607,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:30 GMT
+      - Wed, 26 Jan 2022 23:35:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2770,7 +2623,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -2796,13 +2649,13 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005?api-version=2020-08-01
   response:
     body:
       string: '{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Network","performanceCounters":[{"counterName":"Total
-        Bytes Transmitted"},{"counterName":"Total Bytes Received"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","etag":"W/\"datetime''2021-12-14T06%3A09%3A30.9688980Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+        Bytes Transmitted"},{"counterName":"Total Bytes Received"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","etag":"W/\"datetime''2022-01-26T23%3A35%3A04.9636778Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2811,7 +2664,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:31 GMT
+      - Wed, 26 Jan 2022 23:35:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2827,7 +2680,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1195'
       x-powered-by:
       - ASP.NET
     status:
@@ -2851,12 +2704,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006?api-version=2020-08-01
   response:
     body:
-      string: '{"kind":"LinuxSyslogCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","etag":"W/\"datetime''2021-12-14T06%3A09%3A31.6918188Z''\"","name":"DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+      string: '{"kind":"LinuxSyslogCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","etag":"W/\"datetime''2022-01-26T23%3A35%3A05.6977128Z''\"","name":"DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2865,7 +2718,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:32 GMT
+      - Wed, 26 Jan 2022 23:35:05 GMT
       expires:
       - '-1'
       pragma:
@@ -2881,7 +2734,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1194'
       x-powered-by:
       - ASP.NET
     status:
@@ -2906,12 +2759,12 @@ interactions:
       ParameterSetName:
       - -n -g --image --workspace --nsg --generate-ssh-keys --admin-username
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007?api-version=2020-08-01
   response:
     body:
-      string: '{"kind":"LinuxSyslog","properties":{"syslogName":"syslog","syslogSeverities":[{"severity":"notice"},{"severity":"info"},{"severity":"debug"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","etag":"W/\"datetime''2021-12-14T06%3A09%3A32.6469258Z''\"","name":"DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
+      string: '{"kind":"LinuxSyslog","properties":{"syslogName":"syslog","syslogSeverities":[{"severity":"notice"},{"severity":"info"},{"severity":"debug"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","etag":"W/\"datetime''2022-01-26T23%3A35%3A06.7727767Z''\"","name":"DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
     headers:
       cache-control:
       - no-cache
@@ -2920,7 +2773,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:32 GMT
+      - Wed, 26 Jan 2022 23:35:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2936,7 +2789,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1193'
       x-powered-by:
       - ASP.NET
     status:
@@ -2956,22 +2809,22 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.8.9 (Windows-10-10.0.22000-SP0)
+      - AZURECLI/2.32.0 azsdk-python-mgmt-loganalytics/12.0.0 Python/3.9.5 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"af1f5db1-7dfa-46f3-84e7-e9c16f1ee051\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"d3a931a8-d1dc-4c36-bce5-67630559885d\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Tue, 14 Dec 2021 06:04:39 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Wed, 26 Jan 2022 23:32:16 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Tue, 14 Dec 2021 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \"Thu, 27 Jan 2022 17:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
         \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
-        \"Enabled\",\r\n    \"createdDate\": \"Tue, 14 Dec 2021 06:04:39 GMT\",\r\n
-        \   \"modifiedDate\": \"Tue, 14 Dec 2021 06:04:40 GMT\"\r\n  },\r\n  \"id\":
+        \"Enabled\",\r\n    \"createdDate\": \"Wed, 26 Jan 2022 23:32:16 GMT\",\r\n
+        \   \"modifiedDate\": \"Wed, 26 Jan 2022 23:32:17 GMT\"\r\n  },\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002\",\r\n
         \ \"name\": \"cliworkspace000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"eastus\"\r\n}"
@@ -2983,7 +2836,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 14 Dec 2021 06:09:33 GMT
+      - Wed, 26 Jan 2022 23:35:08 GMT
       pragma:
       - no-cache
       server:
@@ -3017,12 +2870,12 @@ interactions:
       ParameterSetName:
       - --method --uri
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.31.0
+      - python/3.9.5 (Windows-10-10.0.19044-SP0) AZURECLI/2.32.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'LinuxPerformanceCollection'&api-version=2020-03-01-preview
   response:
     body:
-      string: '{"value":[{"kind":"LinuxPerformanceCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2021-12-14T06%3A09%3A28.1537636Z''\"","name":"DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
+      string: '{"value":[{"kind":"LinuxPerformanceCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2022-01-26T23%3A35%3A02.0201282Z''\"","name":"DataSource_LinuxPerformanceCollection_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
     headers:
       cache-control:
       - no-cache
@@ -3031,7 +2884,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:37 GMT
+      - Wed, 26 Jan 2022 23:35:10 GMT
       expires:
       - '-1'
       pragma:
@@ -3065,12 +2918,12 @@ interactions:
       ParameterSetName:
       - --method --uri
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.31.0
+      - python/3.9.5 (Windows-10-10.0.19044-SP0) AZURECLI/2.32.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'LinuxSyslog'&api-version=2020-03-01-preview
   response:
     body:
-      string: '{"value":[{"kind":"LinuxSyslog","properties":{"syslogName":"syslog","syslogSeverities":[{"severity":"notice"},{"severity":"info"},{"severity":"debug"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","etag":"W/\"datetime''2021-12-14T06%3A09%3A32.6469258Z''\"","name":"DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
+      string: '{"value":[{"kind":"LinuxSyslog","properties":{"syslogName":"syslog","syslogSeverities":[{"severity":"notice"},{"severity":"info"},{"severity":"debug"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","etag":"W/\"datetime''2022-01-26T23%3A35%3A06.7727767Z''\"","name":"DataSource_LinuxSyslog_88888888-0000-0000-0000-000000000007","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
     headers:
       cache-control:
       - no-cache
@@ -3079,7 +2932,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:39 GMT
+      - Wed, 26 Jan 2022 23:35:10 GMT
       expires:
       - '-1'
       pragma:
@@ -3113,12 +2966,12 @@ interactions:
       ParameterSetName:
       - --method --uri
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.31.0
+      - python/3.9.5 (Windows-10-10.0.19044-SP0) AZURECLI/2.32.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'LinuxSyslogCollection'&api-version=2020-03-01-preview
   response:
     body:
-      string: '{"value":[{"kind":"LinuxSyslogCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","etag":"W/\"datetime''2021-12-14T06%3A09%3A31.6918188Z''\"","name":"DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
+      string: '{"value":[{"kind":"LinuxSyslogCollection","properties":{"state":"Enabled"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","etag":"W/\"datetime''2022-01-26T23%3A35%3A05.6977128Z''\"","name":"DataSource_LinuxSyslogCollection_88888888-0000-0000-0000-000000000006","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
     headers:
       cache-control:
       - no-cache
@@ -3127,7 +2980,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:41 GMT
+      - Wed, 26 Jan 2022 23:35:12 GMT
       expires:
       - '-1'
       pragma:
@@ -3161,19 +3014,19 @@ interactions:
       ParameterSetName:
       - --method --uri
       User-Agent:
-      - python/3.8.9 (Windows-10-10.0.22000-SP0) AZURECLI/2.31.0
+      - python/3.9.5 (Windows-10-10.0.19044-SP0) AZURECLI/2.32.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_linux000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'LinuxPerformanceObject'&api-version=2020-03-01-preview
   response:
     body:
       string: '{"value":[{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Memory","performanceCounters":[{"counterName":"Available
         MBytes Memory"},{"counterName":"% Used Memory"},{"counterName":"% Used Swap
-        Space"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","etag":"W/\"datetime''2021-12-14T06%3A09%3A28.9564670Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Logical
+        Space"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","etag":"W/\"datetime''2022-01-26T23%3A35%3A02.7340559Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000002","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Processor","performanceCounters":[{"counterName":"%
+        Processor Time"},{"counterName":"% Privileged Time"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","etag":"W/\"datetime''2022-01-26T23%3A35%3A03.3694269Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Logical
         Disk","performanceCounters":[{"counterName":"% Used Inodes"},{"counterName":"Free
         Megabytes"},{"counterName":"% Used Space"},{"counterName":"Disk Transfers/sec"},{"counterName":"Disk
-        Reads/sec"},{"counterName":"Disk Writes/sec"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","etag":"W/\"datetime''2021-12-14T06%3A09%3A30.2301834Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Processor","performanceCounters":[{"counterName":"%
-        Processor Time"},{"counterName":"% Privileged Time"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","etag":"W/\"datetime''2021-12-14T06%3A09%3A29.5642035Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000003","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Network","performanceCounters":[{"counterName":"Total
-        Bytes Transmitted"},{"counterName":"Total Bytes Received"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","etag":"W/\"datetime''2021-12-14T06%3A09%3A30.9688980Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
+        Reads/sec"},{"counterName":"Disk Writes/sec"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","etag":"W/\"datetime''2022-01-26T23%3A35%3A04.0244199Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000004","type":"Microsoft.OperationalInsights/workspaces/datasources"},{"kind":"LinuxPerformanceObject","properties":{"instanceName":"*","intervalSeconds":10,"objectName":"Network","performanceCounters":[{"counterName":"Total
+        Bytes Transmitted"},{"counterName":"Total Bytes Received"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_linux000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","etag":"W/\"datetime''2022-01-26T23%3A35%3A04.9636778Z''\"","name":"DataSource_LinuxPerformanceObject_88888888-0000-0000-0000-000000000005","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
     headers:
       cache-control:
       - no-cache
@@ -3182,7 +3035,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Dec 2021 06:09:42 GMT
+      - Wed, 26 Jan 2022 23:35:13 GMT
       expires:
       - '-1'
       pragma:

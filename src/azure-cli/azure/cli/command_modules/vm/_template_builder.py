@@ -498,6 +498,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
         return profile
 
+    vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
+                     'storageProfile': _build_storage_profile()}
+
     vm_size_properties = {}
     if v_cpus_available is not None:
         vm_size_properties['vCPUsAvailable'] = v_cpus_available
@@ -505,8 +508,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if v_cpus_per_core is not None:
         vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
 
-    vm_properties = {'hardwareProfile': {'vmSize': size, 'vmSizeProperties': vm_size_properties},
-                     'networkProfile': {'networkInterfaces': nics}, 'storageProfile': _build_storage_profile()}
+    if vm_size_properties:
+        vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
@@ -529,12 +532,13 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             }
         }
 
-    vm_properties['additionalCapabilities'] = {}
-    if ultra_ssd_enabled is not None:
-        vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
+    if cmd.supported_api_version(min_api='2018-06-01'):
+        vm_properties['additionalCapabilities'] = {}
+        if ultra_ssd_enabled is not None:
+            vm_properties['additionalCapabilities']['ultraSSDEnabled'] = ultra_ssd_enabled
 
-    if enable_hibernation is not None:
-        vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
+        if enable_hibernation is not None:
+            vm_properties['additionalCapabilities']['hibernationEnabled'] = enable_hibernation
 
     if proximity_placement_group:
         vm_properties['proximityPlacementGroup'] = {'id': proximity_placement_group}

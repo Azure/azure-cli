@@ -3992,7 +3992,7 @@ class VMZoneScenarioTest(ScenarioTest):
         try:
             self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
         except Exception as ex:
-            self.assertTrue('availability zone is not yet supported' in str(ex))
+            self.assertTrue('does not support availability zones at location' in str(ex))
 
     @unittest.skip('Can\'t test due to no qualified subscription')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
@@ -5367,7 +5367,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm delete --name vm2 -g {rg2} --yes')
         self.cmd('vm host delete --name {host-name} --host-group {host-group} -g {rg2} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host3_', location='eastus2')
     def test_update_dedicated_host_e2e(self, resource_group, resource_group_location):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -5375,23 +5375,25 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host2-group': 'my-host2-group',
             'host2-name': 'my-host2',
             'vm-name': 'ded-host-vm',
+            'rg': resource_group,
+            'location': resource_group_location,
         })
 
         # create resources
-        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg} -l {location} --tags "foo=bar"', checks=[
             self.check('name', '{host-group}'),
             self.check('platformFaultDomainCount', 3),
             self.check('tags.foo', 'bar')
         ])
 
-        self.cmd('vm host group create -n {host2-group} -c 3 -g {rg} --tags "foo=bar"', checks=[
+        self.cmd('vm host group create -n {host2-group} -c 3 -g {rg} -l {location} --tags "foo=bar"', checks=[
             self.check('name', '{host2-group}'),
             self.check('platformFaultDomainCount', 3),
             self.check('tags.foo', 'bar')
         ])
 
         try:
-            self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} '
+            self.cmd('vm host create -n {host-name} --host-group {host-group} -d 2 -g {rg} -l {location} '
                      '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
                 self.check('name', '{host-name}'),
                 self.check('platformFaultDomain', 2),
@@ -5405,7 +5407,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
                 return
 
         try:
-            self.cmd('vm host create -n {host2-name} --host-group {host2-group} -d 2 -g {rg} '
+            self.cmd('vm host create -n {host2-name} --host-group {host2-group} -d 2 -g {rg} -l {location} '
                      '--sku DSv3-Type1 --auto-replace false --tags "bar=baz" ', checks=[
                 self.check('name', '{host2-name}'),
                 self.check('platformFaultDomain', 2),
@@ -5447,7 +5449,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host2_id': host2_id
         })
 
-        self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
+        self.cmd('vm create -n {vm-name} --image debian -g {rg} -l {location} --size Standard_D4s_v3 '
                  '--generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
 
         # validate resources created successfully
@@ -5497,20 +5499,20 @@ class DedicatedHostScenarioTest(ScenarioTest):
         time.sleep(30)
 
         # Test --automatic-placement
-        self.cmd('vm host group create -n {host-group} -c 1 -g {rg} --automatic-placement', checks=[
+        self.cmd('vm host group create -n {host-group} -c 1 -g {rg} -l {location} --automatic-placement', checks=[
             self.check('supportAutomaticPlacement', True),
         ])
-        self.cmd('vm host group create -n {host2-group} -c 1 -g {rg} --automatic-placement', checks=[
+        self.cmd('vm host group create -n {host2-group} -c 1 -g {rg} -l {location} --automatic-placement', checks=[
             self.check('supportAutomaticPlacement', True),
         ])
-        host_id = self.cmd('vm host create -n {host-name} --host-group {host-group} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
-        host2_id = self.cmd('vm host create -n {host2-name} --host-group {host2-group} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
+        host_id = self.cmd('vm host create -n {host-name} --host-group {host-group} -l {location} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
+        host2_id = self.cmd('vm host create -n {host2-name} --host-group {host2-group} -l {location} -d 0 -g {rg} --sku DSv3-Type1').get_output_in_json()['id']
         self.kwargs.update({
             'host_id': host_id,
             'host2_id': host2_id
         })
-        self.cmd('vm create -g {rg} -n vm1 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
-        self.cmd('vm create -g {rg} -n vm2 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg} -l {location} -n vm1 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
+        self.cmd('vm create -g {rg} -l {location} -n vm2 --image centos --size Standard_D4s_v3 --nsg-rule NONE --generate-ssh-keys --admin-username azureuser')
         self.cmd('vm show -g {rg} -n vm1', checks=[
             self.check('host', None)
         ])
@@ -6728,7 +6730,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2012Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
         vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
         self.kwargs['vm'] = vm
 
