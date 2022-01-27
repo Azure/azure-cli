@@ -62,6 +62,9 @@ def acr_create(cmd,
     if sku not in get_managed_sku(cmd):
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
+    if registry_name.isupper():
+        raise CLIError("argument error: Connected registry name must be only lowercase.")
+
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
                         zone_redundancy=zone_redundancy, tags=tags)
