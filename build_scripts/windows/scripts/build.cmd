@@ -113,13 +113,13 @@ copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
-for /f %%a in ('dir /b /s *_py3.py') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
+for /f %%a in ('dir /b /s _models.py') do (
+    set PY2_FILE=%%a
+    if exist !PY2_FILE! del !PY2_FILE!
 )
-for /f %%a in ('dir /b /s *_py3.*.pyc') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
+for /f %%a in ('dir /b /s _models.*.pyc') do (
+    set PY2_FILE=%%a
+    if exist !PY2_FILE! del !PY2_FILE!
 )
 popd
 
