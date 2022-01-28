@@ -111,18 +111,6 @@ copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
-:: Use universal files and remove Py3 only files
-pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
-for /f %%a in ('dir /b /s *_py3.py') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
-)
-for /f %%a in ('dir /b /s *_py3.*.pyc') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
-)
-popd
-
 :: Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
