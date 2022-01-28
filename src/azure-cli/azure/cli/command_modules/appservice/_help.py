@@ -1821,6 +1821,11 @@ type: command
 short-summary: List available built-in stacks which can be used for web apps.
 """
 
+helps['functionapp list-runtimes'] = """
+type: command
+short-summary: List available built-in stacks which can be used for function apps. Runtimes are shown in the form "runtime|version"
+"""
+
 helps['webapp log'] = """
 type: group
 short-summary: Manage web app logs.

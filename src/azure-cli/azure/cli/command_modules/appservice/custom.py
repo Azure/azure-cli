@@ -1115,6 +1115,19 @@ def list_runtimes(cmd, os_type=None, linux=False):
     return runtime_helper.get_stack_names_only()
 
 
+def list_function_app_runtimes(cmd, os_type=None):
+    # show both linux and windows stacks by default
+    linux = True
+    windows = True
+    if os_type == WINDOWS_OS_NAME:
+        linux = False
+    if os_type == LINUX_OS_NAME:
+        windows = False
+
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
+    return runtime_helper.get_stack_names_only()
+
+
 def delete_function_app(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'delete', slot)
 
@@ -2810,7 +2823,44 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
-class _StackRuntimeHelper:
+class _AbstractStackRuntimeHelper:
+    def __init__(self, cmd, linux=False, windows=False):
+        self._cmd = cmd
+        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
+        self._linux = linux
+        self._windows = windows
+        self._stacks = []
+
+    @property
+    def stacks(self):
+        self._load_stacks()
+        return self._stacks
+
+    def get_stack_names_only(self):
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux]
+        if self._linux and not self._windows:
+            return linux_stacks
+        if self._windows and not self._linux:
+            return windows_stacks
+        return {"linux": linux_stacks, "windows": windows_stacks}
+
+    def _get_raw_stacks_from_api(self):
+        raise NotImplementedError
+
+    # updates self._stacks
+    def _parse_raw_stacks(self, stacks):
+        raise NotImplementedError
+
+    def _load_stacks(self):
+        if self._stacks:
+            return
+        stacks = self._get_raw_stacks_from_api()
+        self._parse_raw_stacks(stacks)
+
+
+# WebApps stack class
+class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     # pylint: disable=too-few-public-methods
     class Runtime:
         def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
@@ -2820,12 +2870,6 @@ class _StackRuntimeHelper:
             self.linux = linux
 
     def __init__(self, cmd, linux=False, windows=False):
-        self._cmd = cmd
-        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
-        self._linux = linux
-        self._windows = windows
-        self._stacks = []
-
         # TODO try and get API support for this so it isn't hardcoded
         self.windows_config_mappings = {
             'node': 'WEBSITE_NODE_DEFAULT_VERSION',
@@ -2835,6 +2879,20 @@ class _StackRuntimeHelper:
             'dotnet': 'net_framework_version',
             'dotnetcore': None
         }
+        super().__init__(cmd, linux=linux, windows=windows)
+
+    def _get_raw_stacks_from_api(self):
+        return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
+
+    def _parse_raw_stacks(self, stacks):
+        for lang in stacks:
+            if lang.display_text.lower() == "java":
+                continue  # info on java stacks is taken from the "java containers" stacks
+            for major_version in lang.major_versions:
+                if self._linux:
+                    self._parse_major_version_linux(major_version, self._stacks)
+                if self._windows:
+                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
     @staticmethod
     def remove_delimiters(runtime):
@@ -2900,20 +2958,6 @@ class _StackRuntimeHelper:
                         versions.append(v)
 
         return versions
-
-    @property
-    def stacks(self):
-        self._load_stacks()
-        return self._stacks
-
-    def get_stack_names_only(self):
-        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
-        linux_stacks = [s.display_name for s in self.stacks if s.linux]
-        if self._linux and not self._windows:
-            return linux_stacks
-        if self._windows and not self._linux:
-            return windows_stacks
-        return {"linux": linux_stacks, "windows": windows_stacks}
 
     @staticmethod
     def update_site_config(stack, site_config, cmd=None):
@@ -3049,19 +3093,97 @@ class _StackRuntimeHelper:
                     runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
                 parsed_results.append(runtime)
 
-    def _load_stacks(self):
-        if self._stacks:
-            return
-        stacks = list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
-        for lang in stacks:
-            if lang.display_text.lower() == "java":
-                continue  # info on java stacks is taken from the "java containers" stacks
-            for major_version in lang.major_versions:
-                if self._linux:
-                    self._parse_major_version_linux(major_version, self._stacks)
-                if self._windows:
-                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
+class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
+    # pylint: disable=too-few-public-methods
+    class Runtime:
+        def __init__(self, name=None, version=None, is_preview=False, linux=False):
+            self.name = name
+            self.version = version
+            self.is_preview = is_preview
+            # self.configs = configs if configs is not None else dict()
+            self.linux = linux
+            self.display_name = "{}|{}".format(name, version) if version else name
+
+    def __init__(self, cmd, linux=False, windows=False):
+        self.disallowed_functions_versions = {"~1", "~2"}
+        self.KEYS = FUNCTIONS_STACKS_API_KEYS()
+        super().__init__(cmd, linux=linux, windows=windows)
+
+    def _get_raw_stacks_from_api(self):
+        return list(self._client.provider.get_function_app_stacks(stack_os_type=None))
+
+    # remove non-digit or non-"." chars, unless name used already
+    @classmethod
+    def _format_version_name(cls, name):
+        import re
+        return re.sub(r"[^\d\.]", "", name)
+
+    # format version names while maintaining uniqueness
+    def _format_version_names(self, runtime_to_version):
+        formatted_runtime_to_version = {}
+        for runtime, versions in runtime_to_version.items():
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            for version_name, version_info in versions.items():
+                formatted_name = self._format_version_name(version_name)
+                if formatted_name in formatted_runtime_to_version[runtime]:
+                    formatted_name = version_name.lower().replace(" ", "-")
+                formatted_runtime_to_version[runtime][formatted_name] = version_info
+        return formatted_runtime_to_version
+
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
+        if not runtime_settings.is_deprecated:
+            supported_function_versions = runtime_settings.supported_functions_extension_versions
+            # check if the runtime supports function good versions
+            if [v for v in supported_function_versions if v not in self.disallowed_functions_versions]:
+                runtime_version_properties = {
+                    self.KEYS.IS_PREVIEW: runtime_settings.is_preview,
+                }
+
+                runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
+                                major_version_name)
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+    def _parse_raw_stacks(self, stacks):
+        # build a map of runtime -> runtime version -> runtime version properties
+        runtime_to_version_linux = {}
+        runtime_to_version_windows = {}
+        for runtime in stacks:
+            for major_version in runtime.major_versions:
+                for minor_version in major_version.minor_versions:
+                    runtime_version = minor_version.value
+                    linux_settings = minor_version.stack_settings.linux_runtime_settings
+                    windows_settings = minor_version.stack_settings.windows_runtime_settings
+
+                    if linux_settings is not None:
+                        self._parse_minor_version(runtime_settings=linux_settings,
+                                                  major_version_name=runtime.name,
+                                                  minor_version_name=runtime_version,
+                                                  runtime_to_version=runtime_to_version_linux)
+
+                    if windows_settings is not None:
+                        self._parse_minor_version(runtime_settings=windows_settings,
+                                                  major_version_name=runtime.name,
+                                                  minor_version_name=runtime_version,
+                                                  runtime_to_version=runtime_to_version_windows)
+
+        runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
+        runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
+
+        for runtime_name, versions in runtime_to_version_windows.items():
+            for version_name, version_properties in versions.items():
+                self._stacks.append(self.Runtime(name=runtime_name,
+                                                 version=version_name,
+                                                 is_preview=version_properties[self.KEYS.IS_PREVIEW],
+                                                 linux=False))
+
+        for runtime_name, versions in runtime_to_version_linux.items():
+            for version_name, version_properties in versions.items():
+                self._stacks.append(self.Runtime(name=runtime_name,
+                                                 version=version_name,
+                                                 is_preview=version_properties[self.KEYS.IS_PREVIEW],
+                                                 linux=True))
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
