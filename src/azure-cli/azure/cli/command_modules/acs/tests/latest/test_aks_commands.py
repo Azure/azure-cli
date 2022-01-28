@@ -4105,7 +4105,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # nodepool update nodepool2 taint
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints key1=value2:NoSchedule', checks=[
-            self.check('[0].nodeTaints[0]', 'key1=value2:NoSchedule'),
+            self.check('nodeTaints[0]', 'key1=value2:NoSchedule'),
         ])
 
         # nodepool show
