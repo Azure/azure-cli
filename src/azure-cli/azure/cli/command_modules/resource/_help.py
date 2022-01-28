@@ -2571,7 +2571,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: Manage deployment stacks at subscription or resource group scope.
+short-summary: (Version 1.0.0) Manage deployment stacks at subscription or resource group scope
 """
 
 helps['stack sub create'] = """
@@ -2594,7 +2594,7 @@ examples:
 
 helps['stack sub list'] = """
 type: command
-short-summary: V6 List all deployment stacks in subscription
+short-summary: List all deployment stacks in subscription
 examples:
   - name: List all stacks 
     text: az stack sub list
