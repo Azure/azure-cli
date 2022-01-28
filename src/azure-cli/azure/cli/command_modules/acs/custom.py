@@ -3359,6 +3359,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         headers=aks_custom_headers,
     )
 
+
 # pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
