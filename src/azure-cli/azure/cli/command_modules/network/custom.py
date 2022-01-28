@@ -8049,8 +8049,13 @@ def _get_ssh_path(ssh_command="ssh"):
 
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    elif platform.system() in ('Linux', 'Darwin'):
+        import shutil
+        ssh_path = shutil.which(ssh_command)
+        if not ssh_path:
+            raise UnrecognizedArgumentError(f"{ssh_command} not found in path. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows, Darwin, Linux")
 
     return ssh_path
 
