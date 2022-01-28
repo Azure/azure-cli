@@ -73,7 +73,7 @@ Release History
 
 **Network**
 
-* Add microsoft.datafactory to supported private endpoints (#20895)
+* Add Microsoft.DataFactory/factories to supported Private Endpoints (#20895)
 * Add microsoft.databricks to supported private endpoints (#20992)
 * `az network private-endpoint`: Add parameter and subgroup to support IP Configuration, ASG and NicName (#21039)
 * `az network traffic-manager endpoint create/update`: Add new arguments `--min-child-ipv4` and `--min-child-ipv6`. (#21100)
