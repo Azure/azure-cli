@@ -13,12 +13,11 @@ Release History
 
 **AKS**
 
-* `az aks nodepool add/update/upgrade`: Add new parameter `--aks-custom-headers` to support custom headers. (#21064)
-* `az aks create`: Add new parameter `--snapshot-id` to support creating a nodepool from snapshot when creating a cluster. (#21115)
-* `az aks nodepool add/upgrade`: Add new parameter  `--snapshot-id` to support creating a nodepool from snapshot. (#21115)
-* `az aks snapshot create/delete/list/show`: Add new commands to support the management of snapshot related operations. (#21115)
-* Aks nodepool update --labels (#21095)
-* Aks update --nodepool-labels (#21095)
+* `az aks nodepool add/update/upgrade`: Add new parameter `--aks-custom-headers` to support custom headers (#21064)
+* `az aks create`: Add new parameter `--snapshot-id` to support creating a nodepool from snapshot when creating a cluster (#21115)
+* `az aks nodepool add/upgrade`: Add new parameter `--snapshot-id` to support creating a nodepool from snapshot (#21115)
+* `az aks snapshot create/delete/list/show`: Add new commands to support the management of snapshot related operations (#21115)
+* `az aks update/az aks nodepool update`: Allow empty string as label value
 
 **App Config**
 
@@ -26,10 +25,10 @@ Release History
 
 **App Service**
 
-* `az webapp vnet-integration add `: Fix a bug that prevented adding a vnet in a different subscription from the webapp (#20910)
-* `az functionapp vnet-integration add `: Fix a bug that prevented adding a vnet in a different subscription from the functionapp (#20910)
-* `az webapp create `: Support joining a vnet in a different subscription (#20910)
-* `az functionapp create `: Support joining a vnet in a different subscription (#20910)
+* `az webapp vnet-integration add`: Fix a bug that prevented adding a vnet in a different subscription from the webapp (#20910)
+* `az functionapp vnet-integration add`: Fix a bug that prevented adding a vnet in a different subscription from the functionapp (#20910)
+* `az webapp create`: Support joining a vnet in a different subscription (#20910)
+* `az functionapp create`: Support joining a vnet in a different subscription (#20910)
 * `az functionapp create` : Remove preview from PowerShell runtime for linux (#20928)
 * `az appservice plan update`: Add `--elastic-scale` and `--max-elastic-worker-count` parameters to support elastic scale (#20748)
 * `az webapp update`: Add `--minimum-elastic-instance-count` and `--prewarmed-instance-count` parameters to support setting instance count (#20748)
@@ -55,7 +54,7 @@ Release History
 
 **Cosmos DB**
 
-* `az managed-cassandra cluster status`: Add table format support to /status api (#21131)
+* `az managed-cassandra cluster status`: Add table format support (#21131)
 
 **Key Vault**
 
