@@ -67,9 +67,9 @@ Release History
 
 **NetAppFiles**
 
-* `az netappfiles account ad add`: Added new optional parameter named encrypt-dc-connections (#20919)
-* `az netappfiles volume export-policy add`: Added missing optional parameters kerberos5_read_only, kerberos5_read_write, kerberos5i_read_only, kerberos5i_read_write, kerberos5_p_read_only, kerberos5_p_read_write, has_root_access, chown_mode (#20919)
-* `az netappfiles account ad update`: Command added (#21043)
+* `az netappfiles account ad add`: Add new optional parameter named encrypt-dc-connections (#20919)
+* `az netappfiles volume export-policy add`: Add missing optional parameters kerberos5_read_only, kerberos5_read_write, kerberos5i_read_only, kerberos5i_read_write, kerberos5_p_read_only, kerberos5_p_read_write, has_root_access, chown_mode (#20919)
+* `az netappfiles account ad update`: Add command (#21043)
 
 **Network**
 
