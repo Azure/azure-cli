@@ -474,6 +474,7 @@ def load_arguments(self, _):
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', type=str, validator=validate_max_surge)
         c.argument('labels', nargs='*', validator=validate_nodepool_labels)
+        c.argument('node_taints', type=str, validator=validate_taints)
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', type=str, options_list=[
