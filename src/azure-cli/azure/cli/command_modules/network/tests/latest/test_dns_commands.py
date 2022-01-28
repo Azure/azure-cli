@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 from azure.cli.command_modules.network.zone_file import parse_zone_file
 
@@ -59,6 +59,43 @@ class DnsZoneImportTest(ScenarioTest):
         # verify that each record in the original import is unchanged after export/re-import
         self._check_records(records1, records2)
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
+    def test_dns_import_file_operation_error(self, resource_group):
+        import sys
+        if sys.platform != 'linux':
+            self.skipTest('This test should run on Linux platform')
+
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
+            self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
+            self._test_zone('404zone.com', '')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
+            self._test_zone('404zone.com', '/root/')
+            self.assertEqual(e.errno, 1)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_operation_error_windows')
+    def test_dns_import_file_operation_error_windows(self, resource_group):
+        import sys
+        if sys.platform != 'win32':
+            self.skipTest('This test should run on Windows platform')
+
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
+            self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        # Difference with Linux platform while reading a directory
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
+            self._test_zone('404zone.com', '.')
+            self.assertEqual(e.errno, 1)
+
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
     def test_dns_zone1_import(self, resource_group):
         self._test_zone('zone1.com', 'zone1.txt')
@@ -91,13 +128,17 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone8_import(self, resource_group):
         self._test_zone('zone8.com', 'zone8.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
+    def test_dns_zone9_import(self, resource_group):
+        self._test_zone('zone9.com', 'zone9.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns')
     def test_dns(self, resource_group):
 
-        self.kwargs['zone'] = 'myzone.com'
+        self.kwargs['zone'] = 'myzonex.com'
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
         self.cmd('network dns zone create -n {zone} -g {rg}')
@@ -128,6 +169,8 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} create -n myrs{0} -g {{rg}} --zone-name {{zone}}'.format(t))
             add_command = 'set-record' if t == 'cname' else 'add-record'
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
+            # Issue 10467: FIX add-record is not idempotent
+            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
             # test creating the record set at the same time you add records
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0}alt {1}'.format(t, args[t], add_command))
 
@@ -141,7 +184,7 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
+                 checks=self.check('length(aRecords)', 2))
 
         # test list vs. list type
         self.cmd('network dns record-set list -g {rg} -z {zone}',
@@ -154,7 +197,77 @@ class DnsScenarioTest(ScenarioTest):
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
+                 checks=self.check('length(aRecords)', 1))
+
+        self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
+
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
+
+        self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
+
+        self.cmd('network dns record-set cname delete -n myrscname -g {rg} --zone-name {zone} -y')
+
+        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
+                 checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_if_none_match')
+    def test_dns_if_none_match(self, resource_group):
+
+        self.kwargs['zone'] = 'myzonex.com'
+
+        self.cmd('network dns zone list')  # just verify is works (no Exception raised)
+        self.cmd('network dns zone create -n {zone} -g {rg}')
+        self.cmd('network dns zone list -g {rg}',
+                 checks=self.check('length(@)', 1))
+
+        base_record_sets = 2
+        self.cmd('network dns zone show -n {zone} -g {rg}',
+                 checks=self.check('numberOfRecordSets', base_record_sets))
+
+        args = {
+            'a': '--ipv4-address 10.0.0.10',
+            'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
+            'caa': '--flags 0 --tag foo --value "my value"',
+            'cname': '--cname mycname',
+            'mx': '--exchange 12 --preference 13',
+            'ns': '--nsdname foobar.com',
+            'ptr': '--ptrdname foobar.com',
+            'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
+            'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'txt': '--value some_text'
+        }
+
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+
+        for t in record_types:
+            add_command = 'set-record' if t == 'cname' else 'add-record'
+            # test creating the record set at the same time you add records
+            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1} --if-none-match'.format(t, args[t], add_command))
+
+        self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
+        self.cmd('network dns record-set soa update -g {{rg}} --zone-name {{zone}} {0}'.format(args['soa']))
+
+        long_value = '0123456789' * 50
+        self.cmd('network dns record-set txt add-record -g {{rg}} -z {{zone}} -n longtxt -v {0}'.format(long_value))
+
+        typed_record_sets = len(record_types) + 1
+        self.cmd('network dns zone show -n {zone} -g {rg}',
+                 checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
+                 checks=self.check('length(aRecords)', 2))
+
+        # test list vs. list type
+        self.cmd('network dns record-set list -g {rg} -z {zone}',
+                 checks=self.check('length(@)', base_record_sets + typed_record_sets))
+
+        self.cmd('network dns record-set txt list -g {rg} -z {zone}',
+                 checks=self.check('length(@)', 2))
+
+        for t in record_types:
+            self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
+
+        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
+                 checks=self.check('length(aRecords)', 1))
 
         self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
@@ -194,86 +307,6 @@ class DnsScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
         self.cmd('network dns zone delete -g {rg} -n {child_zone_name} -y',
-                 checks=self.is_empty())
-
-    @ResourceGroupPreparer(name_prefix='cli_test_dns')
-    def test_private_dns(self, resource_group):
-
-        self.kwargs['zone'] = 'myprivatezone.com'
-        self.kwargs['regvnet'] = 'regvnet'
-        self.kwargs['resvnet'] = 'resvnet'
-
-        self.cmd('network vnet create -n {regvnet} -g {rg}')
-        self.cmd('network vnet create -n {resvnet} -g {rg}')
-
-        self.cmd('network dns zone list')  # just verify is works (no Exception raised)
-        self.cmd('network dns zone create -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet} --tags foo=doo')
-        self.cmd('network dns zone list -g {rg}',
-                 checks=self.check('length(@)', 1))
-
-        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets "" --tags foo=boo')
-        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
-
-        base_record_sets = 1
-        self.cmd('network dns zone show -n {zone} -g {rg}',
-                 checks=self.check('numberOfRecordSets', base_record_sets))
-
-        args = {
-            'a': '--ipv4-address 10.0.0.10',
-            'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
-            'caa': '--flags 0 --tag foo --value "my value"',
-            'cname': '--cname mycname',
-            'mx': '--exchange 12 --preference 13',
-            'ptr': '--ptrdname foobar.com',
-            'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
-            'srv': '--port 1234 --priority 1 --target target.com --weight 50',
-            'txt': '--value some_text'
-        }
-
-        # Private Zones do NOT support delegation through NS records
-        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ptr', 'srv', 'txt']
-
-        for t in record_types:
-            # test creating the record set and then adding records
-            self.cmd('network dns record-set {0} create -n myrs{0} -g {{rg}} --zone-name {{zone}}'.format(t))
-            add_command = 'set-record' if t == 'cname' else 'add-record'
-            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t], add_command))
-            # test creating the record set at the same time you add records
-            self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0}alt {1}'.format(t, args[t], add_command))
-
-        self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
-        self.cmd('network dns record-set soa update -g {{rg}} --zone-name {{zone}} {0}'.format(args['soa']))
-
-        long_value = '0123456789' * 50
-        self.cmd('network dns record-set txt add-record -g {{rg}} -z {{zone}} -n longtxt -v {0}'.format(long_value))
-
-        typed_record_sets = 2 * len(record_types) + 1
-        self.cmd('network dns zone show -n {zone} -g {rg}',
-                 checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 2))
-
-        # test list vs. list type
-        self.cmd('network dns record-set list -g {rg} -z {zone}',
-                 checks=self.check('length(@)', base_record_sets + typed_record_sets))
-
-        self.cmd('network dns record-set txt list -g {rg} -z {zone}',
-                 checks=self.check('length(@)', 3))
-
-        for t in record_types:
-            self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
-
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
-                 checks=self.check('length(arecords)', 1))
-
-        self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
-
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
-
-        self.cmd('network dns record-set a delete -n myrsa -g {rg} --zone-name {zone} -y')
-        self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
-
-        self.cmd('network dns zone delete -g {rg} -n {zone} -y',
                  checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns_alias')
@@ -401,8 +434,8 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
         self._check_aaaa(zone, 'myaaaa.' + zn, [(3600, '2001:4898:e0:99:6dc4:6329:1c99:4e69')])
         self._check_cname(zone, 'mycname.' + zn, 3600, 'contoso.com.')
-        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname')])
-        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com')])
+        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname.')])
+        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com.')])
         self._check_txt(zone, 'myname2.' + zn, [(3600, 9, 'manualtxt')])
         self._check_txt(zone, 'mytxt2.' + zn, [
             (7200, 7, 'abc def'),

@@ -6,7 +6,11 @@ import copy
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.directives import ObjectDescription
-from sphinx.util.compat import Directive
+try:
+    # Deprecated in 1.6 and removed in 1.7
+    from sphinx.util.compat import Directive
+except ImportError:
+    from docutils.parsers.rst import Directive  # pylint: disable=import-error
 from sphinx.util.docfields import Field
 
 cli_field_types = [

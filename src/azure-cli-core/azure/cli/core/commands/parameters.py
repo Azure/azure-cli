@@ -12,6 +12,7 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
@@ -30,7 +31,7 @@ def get_subscription_locations(cli_ctx):
 @Completer
 def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 # pylint: disable=redefined-builtin
@@ -94,8 +95,8 @@ def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
             # if display name is provided, attempt to convert to short form name
-            name = next((l.name for l in get_subscription_locations(cli_ctx)
-                         if l.display_name.lower() == name.lower()), name)
+            name = next((location.name for location in get_subscription_locations(cli_ctx)
+                         if location.display_name.lower() == name.lower()), name)
         return name
     return location_name_type
 
@@ -116,7 +117,7 @@ def get_resource_groups(cli_ctx):
 @Completer
 def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_resource_groups(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 def get_resources_in_resource_group(cli_ctx, resource_group_name, resource_type=None):
@@ -238,9 +239,16 @@ resource_group_name_type = CLIArgumentType(
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
-    configured_default='group')
+    configured_default='group',
+    local_context_attribute=LocalContextAttribute(
+        name='resource_group_name',
+        actions=[LocalContextAction.SET, LocalContextAction.GET],
+        scopes=[ALL]
+    ))
 
 name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
+
+edge_zone_type = CLIArgumentType(options_list='--edge-zone', help='The name of edge zone.', is_preview=True)
 
 
 def get_location_type(cli_ctx):
@@ -251,7 +259,12 @@ def get_location_type(cli_ctx):
         help="Location. Values from: `az account list-locations`. "
              "You can configure the default location using `az configure --defaults location=<location>`.",
         metavar='LOCATION',
-        configured_default='location')
+        configured_default='location',
+        local_context_attribute=LocalContextAttribute(
+            name='location',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        ))
     return location_type
 
 
@@ -266,7 +279,7 @@ quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space-separated tags in 'key[=value]' format. {}".format(quote_text),
+    help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
     nargs='*'
 )
 
@@ -296,6 +309,13 @@ zone_type = CLIArgumentType(
     choices=['1', '2', '3'],
     nargs=1
 )
+
+vnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
+)
+
+subnet_name_type = CLIArgumentType(
+    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
 
 def patch_arg_make_required(argument):

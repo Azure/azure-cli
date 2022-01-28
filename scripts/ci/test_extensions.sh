@@ -18,15 +18,17 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-for ext in $output; do
+# azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s'
 
-    # TODO: Remove when ML extension is compatible with CLI 2.0.69 core
-    # https://github.com/Azure/azure-cli-extensions/issues/826
-    if [ $ext == 'azure-cli-ml' ]; then
+for ext in $output; do
+    echo
+    # Use regex to detect if $ext is in $ignore_list
+    if [[ $ignore_list =~ $ext ]]; then
+        echo "Ignore extension: $ext"
         continue
     fi
 
-    echo
     echo "Verifying extension:" $ext
     az extension add -n $ext
     if [ $? != 0 ]
@@ -36,7 +38,7 @@ for ext in $output; do
     fi
 done
 
-az self-test
+az self-test --debug
 if [ $? != 0 ]
 then
     exit_code=1

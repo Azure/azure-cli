@@ -38,7 +38,7 @@ def acr_webhook_create(cmd,
     from msrest.exceptions import ValidationError
     try:
         WebhookCreateParameters = cmd.get_models('WebhookCreateParameters')
-        return client.create(
+        return client.begin_create(
             resource_group_name,
             registry_name,
             webhook_name,
@@ -63,7 +63,7 @@ def acr_webhook_delete(cmd,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
-    return client.delete(resource_group_name, registry_name, webhook_name)
+    return client.begin_delete(resource_group_name, registry_name, webhook_name)
 
 
 def acr_webhook_show(cmd,
@@ -119,7 +119,7 @@ def acr_webhook_update_set(cmd,
                            parameters=None):
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
-    return client.update(resource_group_name, registry_name, webhook_name, parameters)
+    return client.begin_update(resource_group_name, registry_name, webhook_name, parameters)
 
 
 def acr_webhook_get_config(cmd,

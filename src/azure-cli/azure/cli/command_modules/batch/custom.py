@@ -4,23 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 import base64
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
-from six.moves import configparser
+from urllib.parse import urlsplit
+import configparser
 
 from knack.log import get_logger
 
 from msrest.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagementClient
-from azure.mgmt.batch.models import (BatchAccountCreateParameters,
-                                     AutoStorageBaseProperties,
-                                     Application)
+from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
+                                     AutoStorageBaseProperties, ActivateApplicationPackageParameters,
+                                     Application, EncryptionProperties,
+                                     KeyVaultProperties, BatchAccountIdentity,
+                                     BatchAccountRegenerateKeyParameters)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
-                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
+                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation,
+                                )
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -73,29 +76,59 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
-                   keyvault=None, keyvault_url=None, no_wait=False):
+                   keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
+                   encryption_key_source=None, encryption_key_identifier=None, identity_type=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+    if (encryption_key_source and
+            encryption_key_source.lower() == "microsoft.keyvault" and not encryption_key_identifier):
+        raise ValueError("The --encryption-key-identifier property is required when "
+                         "--encryption-key-source is set to Microsoft.KeyVault")
+    encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
+        if encryption_key_identifier else None
+    encryption = EncryptionProperties(
+        key_source=encryption_key_source,
+        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
-                                              auto_storage=properties)
+                                              auto_storage=properties,
+                                              public_network_access=public_network_access,
+                                              encryption=encryption,
+                                              identity=identity)
     if keyvault:
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name,
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name=resource_group_name,
                        account_name=account_name, parameters=parameters)
 
 
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
-                   tags=None, storage_account=None):
+                   tags=None, storage_account=None, encryption_key_source=None,
+                   encryption_key_identifier=None, identity_type=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    if (encryption_key_source and
+            encryption_key_source.lower() == "microsoft.keyvault" and not
+            encryption_key_identifier):
+        raise ValueError("The --encryption-key-identifier property is required when "
+                         "--encryption-key-source is set to Microsoft.KeyVault")
+    encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
+        if encryption_key_identifier else None
+    encryption = EncryptionProperties(
+        key_source=encryption_key_source,
+        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
+    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+    parameters = BatchAccountUpdateParameters(
+        tags=tags,
+        encryption=encryption,
+        identity=identity,
+        auto_storage=properties)
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
-                         tags=tags,
-                         auto_storage=properties)
+                         parameters=parameters)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -137,6 +170,13 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
                 'tenant': tenant,
                 'resource': resource
             }
+
+
+def renew_accounts_keys(client, resource_group_name, account_name, key_name=None):
+    parameters = BatchAccountRegenerateKeyParameters(key_name=key_name)
+
+    return client.regenerate_key(resource_group_name=resource_group_name,
+                                 account_name=account_name, parameters=parameters)
 
 
 @transfer_doc(Application)
@@ -196,8 +236,16 @@ def create_application_package(cmd, client,
     _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
-    client.activate(resource_group_name, account_name, application_name, version_name, "zip")
+    parameters = ActivateApplicationPackageParameters(format="zip")
+    client.activate(resource_group_name, account_name, application_name, version_name, parameters)
     return client.get(resource_group_name, account_name, application_name, version_name)
+
+
+@transfer_doc(ApplicationPackageOperations.activate)
+def activate_application_package(client, resource_group_name, account_name, application_name, version_name, f_ormat):
+    # activate the application package
+    parameters = ActivateApplicationPackageParameters(format=f_ormat)
+    return client.activate(resource_group_name, account_name, application_name, version_name, parameters)
 
 
 # Data plane custom commands
@@ -206,7 +254,7 @@ def create_application_package(cmd, client,
 @transfer_doc(CertificateAddParameter)
 def create_certificate(client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
-    certificate_format = 'pfx' if password else 'cer'
+    certificate_format = 'pfx' if password or certificate_file.endswith('.pfx') else 'cer'
     with open(certificate_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')

@@ -5,7 +5,7 @@
 
 
 def process_condition_parameter(namespace):
-    from azure.mgmt.monitor.models import ActivityLogAlertAllOfCondition
+    from azure.mgmt.monitor.models import AlertRuleAllOfCondition
     from knack.util import CLIError
 
     try:
@@ -15,7 +15,7 @@ def process_condition_parameter(namespace):
     except AttributeError:
         return
 
-    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALIE[ and FIELD=VALUE...]'
+    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALUE[ and FIELD=VALUE...]'
 
     if not expression:
         raise CLIError(error)
@@ -35,12 +35,12 @@ def process_condition_parameter(namespace):
 
     # Ensure all the string at even options are AND operator
     operators = [expression[i] for i in range(1, len(expression), 2)]
-    if any([op != 'and' for op in operators]):
+    if any(op != 'and' for op in operators):
         raise CLIError(error)
 
     # Pick the strings at odd position and convert them into condition leaf.
     conditions = dict(_normalize_condition(expression[i]) for i in range(0, len(expression), 2))
-    setattr(namespace, 'condition', ActivityLogAlertAllOfCondition(all_of=list(conditions.values())))
+    setattr(namespace, 'condition', AlertRuleAllOfCondition(all_of=list(conditions.values())))
 
 
 def list_activity_logs_alert(client, resource_group_name=None):
@@ -53,9 +53,9 @@ def list_activity_logs_alert(client, resource_group_name=None):
 def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=None, condition=None,
            action_groups=frozenset(), tags=None, disable=False, description=None, webhook_properties=None):
     from msrestazure.tools import resource_id
-    from azure.mgmt.monitor.models import (ActivityLogAlertResource, ActivityLogAlertAllOfCondition,
-                                           ActivityLogAlertLeafCondition, ActivityLogAlertActionList)
-    from azure.mgmt.monitor.models import ActivityLogAlertActionGroup as ActionGroup
+    from azure.mgmt.monitor.models import (ActivityLogAlertResource, AlertRuleAllOfCondition,
+                                           AlertRuleLeafCondition, ActionList)
+    from azure.mgmt.monitor.models import ActionGroup
     from azure.cli.core.commands.client_factory import get_subscription_id
     from knack.util import CLIError
 
@@ -67,14 +67,14 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
                                                                                                resource_group_name))
 
     # Add alert conditions
-    condition = condition or ActivityLogAlertAllOfCondition(
-        all_of=[ActivityLogAlertLeafCondition(field='category', equals='ServiceHealth')])
+    condition = condition or AlertRuleAllOfCondition(
+        all_of=[AlertRuleLeafCondition(field='category', equals='ServiceHealth')])
 
     # Add action groups
     action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
                                          'actionGroups')
     action_groups = [ActionGroup(action_group_id=i, webhook_properties=webhook_properties) for i in action_group_rids]
-    alert_actions = ActivityLogAlertActionList(action_groups=action_groups)
+    alert_actions = ActionList(action_groups=action_groups)
 
     settings = ActivityLogAlertResource(location='global', scopes=scopes, condition=condition,
                                         actions=alert_actions, enabled=not disable, description=description, tags=tags)
@@ -114,7 +114,7 @@ def remove_scope(client, resource_group_name, activity_log_alert_name, scopes):
 
 def add_action_group(cmd, client, resource_group_name, activity_log_alert_name, action_group_ids, reset=False,
                      webhook_properties=None, strict=False):
-    from azure.mgmt.monitor.models import ActivityLogAlertActionGroup as ActionGroup
+    from azure.mgmt.monitor.models import ActionGroup
 
     settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
 
@@ -174,16 +174,16 @@ def update(instance, condition=None, enabled=None, tags=None, description=None):
 
 # pylint: disable=inconsistent-return-statements
 def _normalize_condition(condition_instance):
-    from azure.mgmt.monitor.models import ActivityLogAlertLeafCondition
+    from azure.mgmt.monitor.models import AlertRuleLeafCondition
 
     if isinstance(condition_instance, str):
         try:
             field, value = condition_instance.split('=')
-            return '{}={}'.format(field.lower(), value), ActivityLogAlertLeafCondition(field=field, equals=value)
+            return '{}={}'.format(field.lower(), value), AlertRuleLeafCondition(field=field, equals=value)
         except ValueError:
             # too many values to unpack or not enough values to unpack
             raise ValueError('Condition "{}" does not follow format FIELD=VALUE'.format(condition_instance))
-    elif isinstance(condition_instance, ActivityLogAlertLeafCondition):
+    elif isinstance(condition_instance, AlertRuleLeafCondition):
         return '{}={}'.format(condition_instance.field.lower(), condition_instance.equals), condition_instance
 
 
@@ -212,13 +212,13 @@ def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resourc
 
 
 def _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=True):
-    from azure.mgmt.monitor.v2017_04_01.models import ErrorResponseException
+    from azure.core.exceptions import HttpResponseError
 
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)
-    except ErrorResponseException as ex:
+    except HttpResponseError as ex:
         from knack.util import CLIError
-        if ex.response.status_code == 404:
+        if ex.status_code == 404:
             if throw_if_missing:
                 raise CLIError('Can\'t find activity log alert {} in resource group {}.'.format(activity_log_alert_name,
                                                                                                 resource_group_name))

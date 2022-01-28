@@ -12,10 +12,7 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -30,9 +27,8 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml',
+    'pyyaml~=5.2',
     'knack',
-    'six>=1.10.0',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'
 ]
@@ -62,7 +58,7 @@ setup(
         ]
     },
     install_requires=DEPENDENCIES,
-    extras_require={ 
+    extras_require={
         ":python_version<'3.0'": ['pylint==1.9.2'],
         ":python_version>='3.0'": ['pylint==2.0.0']
     }

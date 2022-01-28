@@ -2,38 +2,48 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import traceback
 import json
 import re
+from distutils.sysconfig import get_python_lib
 
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-
+import pkginfo
 from knack.config import CLIConfig
 from knack.log import get_logger
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)
 _DEV_EXTENSION_SOURCES = az_config.get('extension', 'dev_sources', None)
+_CUSTOM_EXT_SYS_DIR = az_config.get('extension', 'sys_dir', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
+EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join(get_python_lib(), 'azure-cli-extensions')
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
-WHL_METADATA_FILENAME = 'metadata.json'
-EGG_INFO_METADATA_FILE_NAME = 'PKG-INFO'  # used for dev packages
 AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
+EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
+
+# If this Azure CLI core version has breaking changes that do not support older versions of extensions,
+# put the requirements of the minimum extension versions here.
+# Example:
+# {'azure-devops': {'minExtVersion': '1.0.0'}}
+EXTENSION_VERSION_REQUIREMENTS = {}
+MIN_EXT_VERSION = 'minExtVersion'
 
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
     ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
-    \.whl|\.dist-info)$""",
+    \.whl|\.dist-info|\.egg-info)$""",
     re.VERBOSE).match
 
 logger = get_logger(__name__)
@@ -48,7 +58,7 @@ class ExtensionNotInstalledException(Exception):
         return "The extension {} is not installed.".format(self.extension_name)
 
 
-class Extension(object):
+class Extension:
 
     def __init__(self, name, ext_type, path=None):
         self.name = name
@@ -57,6 +67,7 @@ class Extension(object):
         self._version = None
         self._metadata = None
         self._preview = None
+        self._experimental = None
 
     @property
     def version(self):
@@ -95,6 +106,19 @@ class Extension(object):
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
 
+    @property
+    def experimental(self):
+        """
+        Lazy load experimental status.
+        Returns the experimental status of the extension.
+        """
+        try:
+            if not isinstance(self._experimental, bool):
+                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
+        except Exception:  # pylint: disable=broad-except
+            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
+        return self._experimental
+
     def get_version(self):
         raise NotImplementedError()
 
@@ -116,28 +140,39 @@ class WheelExtension(Extension):
 
     def get_metadata(self):
         from glob import glob
-        if not extension_exists(self.name):
-            return None
+
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        info_dirs = glob(os.path.join(ext_dir, '*.*-info'))
+        if not ext_dir or not os.path.isdir(ext_dir):
+            return None
+
+        # include *.egg-info and *.dist-info
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+        if not info_dirs:
+            return None
+
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
 
         for dist_info_dirname in info_dirs:
-            parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            if not parsed_dist_info_dir:
-                continue
+            try:
+                if dist_info_dirname.endswith('.egg-info'):
+                    ext_whl_metadata = pkginfo.Develop(dist_info_dirname)
+                elif dist_info_dirname.endswith('.dist-info'):
+                    ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                else:
+                    raise ValueError()
 
-            parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
-            if os.path.split(parsed_dist_info_dir)[-1] == self.name.replace('-', '_'):
-                whl_metadata_filepath = os.path.join(dist_info_dirname, WHL_METADATA_FILENAME)
-                if os.path.isfile(whl_metadata_filepath):
-                    with open(whl_metadata_filepath) as f:
-                        metadata.update(json.loads(f.read()))
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
+            except ValueError:
+                logger.warning('extension %s contains invalid metadata for Python Package', self.name)
 
         return metadata
+
+    def __eq__(self, other):
+        return other.name == self.name
 
     @staticmethod
     def get_azext_metadata(ext_dir):
@@ -159,9 +194,17 @@ class WheelExtension(Extension):
         if os.path.isdir(EXTENSIONS_DIR):
             for ext_name in os.listdir(EXTENSIONS_DIR):
                 ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.*-info')
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
+        if os.path.isdir(EXTENSIONS_SYS_DIR):
+            for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
+                ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
+                if os.path.isdir(ext_path) and glob(pattern):
+                    ext = WheelExtension(ext_name, ext_path)
+                    if ext not in exts:
+                        exts.append(ext)
         return exts
 
 
@@ -173,32 +216,27 @@ class DevExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
-
-        if not extension_exists(self.name):
-            return None
         metadata = {}
         ext_dir = self.path
+        if not ext_dir or not os.path.isdir(ext_dir):
+            return None
+
         egg_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.egg-info')]
+        if not egg_info_dirs:
+            return None
+
         azext_metadata = DevExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
 
-        def _apply_egginfo_metadata(filename):
-            # extract version info for dev extensions from PKG-INFO
-            if os.path.isfile(filename):
-                with open(filename) as f:
-                    for line in f.readlines():
-                        try:
-                            key, val = line.split(':', 1)
-                            key = key.lower()
-                            if key == 'version':
-                                metadata[key] = '{}'.format(val.strip())
-                        except ValueError:
-                            continue
-
         for egg_info_dirname in egg_info_dirs:
-            egg_metadata_filepath = os.path.join(ext_dir, egg_info_dirname, EGG_INFO_METADATA_FILE_NAME)
-            _apply_egginfo_metadata(egg_metadata_filepath)
+            egg_metadata_path = os.path.join(ext_dir, egg_info_dirname, )
+            try:
+                ext_whl_metadata = pkginfo.Develop(egg_metadata_path)
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
+            except ValueError:
+                logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
         return metadata
 
@@ -242,17 +280,24 @@ EXTENSION_TYPES = [WheelExtension, DevExtension]
 
 def ext_compat_with_cli(azext_metadata):
     from azure.cli.core import __version__ as core_version
-    from pkg_resources import parse_version
+    from packaging.version import parse
     is_compatible, min_required, max_required = (True, None, None)
     if azext_metadata:
         min_required = azext_metadata.get(EXT_METADATA_MINCLICOREVERSION)
         max_required = azext_metadata.get(EXT_METADATA_MAXCLICOREVERSION)
-        parsed_cli_version = parse_version(core_version)
-        if min_required and parsed_cli_version < parse_version(min_required):
+        parsed_cli_version = parse(core_version)
+        if min_required and parsed_cli_version < parse(min_required):
             is_compatible = False
-        elif max_required and parsed_cli_version > parse_version(max_required):
+        elif max_required and parsed_cli_version > parse(max_required):
             is_compatible = False
-    return is_compatible, core_version, min_required, max_required
+
+    try:
+        min_ext_required = EXTENSION_VERSION_REQUIREMENTS.get(azext_metadata.get('name')).get(MIN_EXT_VERSION)
+        if parse(azext_metadata.get('version')) < parse(min_ext_required):
+            is_compatible = False
+    except AttributeError:
+        min_ext_required = None
+    return is_compatible, core_version, min_required, max_required, min_ext_required
 
 
 def get_extension_modname(ext_name=None, ext_dir=None):
@@ -266,19 +311,26 @@ def get_extension_modname(ext_name=None, ext_dir=None):
 
 
 def get_extension_path(ext_name):
+    # This will return the path for a WHEEL extension if exists.
+    ext_sys_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
+    ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
+    return ext_path if os.path.isdir(ext_path) else (
+        ext_sys_path if os.path.isdir(ext_sys_path) else None)
+
+
+def build_extension_path(ext_name, system=None):
     # This will simply form the path for a WHEEL extension.
-    return os.path.join(EXTENSIONS_DIR, ext_name)
+    return os.path.join(EXTENSIONS_SYS_DIR, ext_name) if system else os.path.join(EXTENSIONS_DIR, ext_name)
 
 
 def get_extensions(ext_type=None):
-    logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
     extensions = []
     if not ext_type:
         ext_type = EXTENSION_TYPES
     elif not isinstance(ext_type, list):
         ext_type = [ext_type]
     for t in ext_type:
-        extensions.extend([ext for ext in t.get_all()])
+        extensions.extend(t.get_all())
     return extensions
 
 

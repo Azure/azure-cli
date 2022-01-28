@@ -1,114 +1,77 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"date": "2018-08-17T17:26:26Z",
-      "product": "azurecli", "cause": "automation"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_dest000001?api-version=2018-02-01
-  response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001","name":"cli_test_resource_move_dest000001","location":"westus","tags":{"date":"2018-08-17T17:26:26Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
-    body: !!python/unicode '{"location": "westus", "tags": {"date": "2018-08-17T17:26:26Z",
-      "product": "azurecli", "cause": "automation"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_source000002?api-version=2018-02-01
-  response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002","name":"cli_test_resource_move_source000002","location":"westus","tags":{"date":"2018-08-17T17:26:26Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_source000002?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002","name":"cli_test_resource_move_source000002","location":"westus","tags":{"date":"2018-08-17T17:26:26Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002","name":"cli_test_resource_move_source000002","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-04-16T09:04:06Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"location": "westus"}'
+    body: '{"location": "westus"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      Content-Length: ['22']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
-        \ \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
+        \ \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"0cb3ca99-c5df-45f9-88f4-85a091a1bed9\",\r\n    \"securityRules\": [],\r\n
+        \"eaf35800-42de-4c35-8cb9-8f6b64c7e1a4\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -120,7 +83,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -132,7 +95,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -143,7 +106,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -155,7 +118,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -167,7 +130,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"f5c51703-3f29-4aaa-b32b-78608f855556\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4ec4b52d-2b47-4775-b33a-f51253340d48\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -177,69 +140,114 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a568b7b-dac0-43b3-b585-feb5d3851de1?api-version=2017-10-01']
-      cache-control: [no-cache]
-      content-length: ['7053']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/06fd64c7-9f9a-4a8a-84e7-280b917e378a?api-version=2017-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '7053'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6dae3f67-b206-49f9-bbfd-fd273780fae2
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a568b7b-dac0-43b3-b585-feb5d3851de1?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/06fd64c7-9f9a-4a8a-84e7-280b917e378a?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"status\": \"Succeeded\"\r\n}"}
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['29']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:38 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7f67a936-e14b-41a3-b68d-7d0a69e749a1
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
-        \ \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
+        \ \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"0cb3ca99-c5df-45f9-88f4-85a091a1bed9\",\r\n    \"securityRules\": [],\r\n
+        \"eaf35800-42de-4c35-8cb9-8f6b64c7e1a4\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -251,7 +259,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -263,7 +271,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -274,7 +282,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -286,7 +294,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -298,7 +306,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"1244ee24-f6c4-42ea-a586-ef500bfc79a1\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5bc1cffe-b9df-47df-af8f-720dbb454eab\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -308,73 +316,111 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['7060']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:38 GMT']
-      etag: [W/"1244ee24-f6c4-42ea-a586-ef500bfc79a1"]
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '7060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:17 GMT
+      etag:
+      - W/"5bc1cffe-b9df-47df-af8f-720dbb454eab"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7adb1d5a-9a77-46f9-90e3-5be85ffbe524
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_source000002?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002","name":"cli_test_resource_move_source000002","location":"westus","tags":{"date":"2018-08-17T17:26:26Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002","name":"cli_test_resource_move_source000002","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-04-16T09:04:06Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"location": "westus"}'
+    body: '{"location": "westus"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      Content-Length: ['22']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
-        \ \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
+        \ \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"be20246f-cddc-49ee-8382-e2a5e642606f\",\r\n    \"securityRules\": [],\r\n
+        \"05d197f9-a7f4-406b-9f54-1211125ac30d\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -386,7 +432,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -398,7 +444,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -409,7 +455,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -421,7 +467,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -433,7 +479,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"8c82d594-6288-4010-9b16-2480091f516a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a7a7e6ca-ffb6-4e2b-8ada-2327dcf1dec2\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -443,69 +489,114 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e13f6aca-9f8e-457d-9812-01558fa6b73c?api-version=2017-10-01']
-      cache-control: [no-cache]
-      content-length: ['7053']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:40 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fa73cd16-4948-4751-9496-2806e27665de?api-version=2017-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '7053'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b8076cfd-eaea-4daa-a491-14fcde5f2950
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e13f6aca-9f8e-457d-9812-01558fa6b73c?api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fa73cd16-4948-4751-9496-2806e27665de?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"status\": \"Succeeded\"\r\n}"}
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['29']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 636c0415-aa38-4dda-9860-79a349267a50
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
-        \ \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
+        \ \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"be20246f-cddc-49ee-8382-e2a5e642606f\",\r\n    \"securityRules\": [],\r\n
+        \"05d197f9-a7f4-406b-9f54-1211125ac30d\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -517,7 +608,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -529,7 +620,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -540,7 +631,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -552,7 +643,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -564,7 +655,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"4422d93d-934c-41e4-bd47-a6a3204246f4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"df017712-e2ac-40a3-9abb-a65add9dc677\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -574,409 +665,669 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['7060']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:26:51 GMT']
-      etag: [W/"4422d93d-934c-41e4-bd47-a6a3204246f4"]
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '7060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:04:26 GMT
+      etag:
+      - W/"df017712-e2ac-40a3-9abb-a65add9dc677"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 77be3fd6-22da-42a0-83a3-6f9d5da379c7
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"targetResourceGroup": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001",
-      "resources": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003",
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004"]}'
+    body: '{"resources": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004"],
+      "targetResourceGroup": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      Content-Length: ['618']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '618'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_source000002/moveResources?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:26:54 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:04:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:27:09 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:04:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:27:24 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:05:02 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:27:39 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:05:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:27:55 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:05:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:28:10 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:05:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:28:26 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:06:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:28:41 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:06:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:28:56 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:06:35 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:29:12 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:06:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:29:27 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:07:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:29:42 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:07:22 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:29:58 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:07:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:30:13 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 16 Apr 2021 09:07:52 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [resource move]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - resource move
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids --destination-group
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VXVENSQjc0V0pBfDE5NUY4OTRCRkY1OTVDRDYtV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFQkFUQ0hNT1ZFSk9CLUNMSTo1RlRFU1Q6NUZSRVNPVVJDRTo1Rk1PVkU6NUZTT1VSQ0VHS1pRUzdXMlU1fEUxNEU4QjIyOTIzMzYyQjctV0VTVFVTLU1PVkUiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      date: ['Fri, 17 Aug 2018 17:30:28 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-    status: {code: 204, message: No Content}
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 16 Apr 2021 09:08:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
-        \ \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003\",\r\n
+        \ \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"0cb3ca99-c5df-45f9-88f4-85a091a1bed9\",\r\n    \"securityRules\": [],\r\n
+        \"eaf35800-42de-4c35-8cb9-8f6b64c7e1a4\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -988,7 +1339,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -1000,7 +1351,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -1011,7 +1362,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -1023,7 +1374,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -1035,7 +1386,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000003/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"fcc02586-51fe-4a2a-984d-04b8339dafec\\\"\",\r\n
+        \       \"etag\": \"W/\\\"beb9a1ce-b256-46ae-98f0-45b42c08465c\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1045,45 +1396,65 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['7060']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:30:29 GMT']
-      etag: [W/"fcc02586-51fe-4a2a-984d-04b8339dafec"]
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '7060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:08:09 GMT
+      etag:
+      - W/"beb9a1ce-b256-46ae-98f0-45b42c08465c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 775aec11-5946-4f78-b619-a0f54a6895c9
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [network nsg show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 networkmanagementclient/2.0.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network nsg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-network/18.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004?api-version=2017-10-01
   response:
-    body: {string: !!python/unicode "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
-        \ \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n  \"type\":
+    body:
+      string: "{\r\n  \"name\": \"nsg-move000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004\",\r\n
+        \ \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"westus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"be20246f-cddc-49ee-8382-e2a5e642606f\",\r\n    \"securityRules\": [],\r\n
+        \"05d197f9-a7f4-406b-9f54-1211125ac30d\",\r\n    \"securityRules\": [],\r\n
         \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetInBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
@@ -1095,7 +1466,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
@@ -1107,7 +1478,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllInBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
@@ -1118,7 +1489,7 @@ interactions:
         \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
         \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowVnetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to all VMs
@@ -1130,7 +1501,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/AllowInternetOutBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
@@ -1142,7 +1513,7 @@ interactions:
         [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
         []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_move_dest000001/providers/Microsoft.Network/networkSecurityGroups/nsg-move000004/defaultSecurityRules/DenyAllOutBound\",\r\n
-        \       \"etag\": \"W/\\\"13ba145a-2374-49f4-bf06-a99e2ae4ccfe\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c1b0456-68cc-49e9-911a-226275f7b09b\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
@@ -1152,75 +1523,36 @@ interactions:
         \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
         [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
         [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
-        \   ]\r\n  }\r\n}"}
+        \   ]\r\n  }\r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['7060']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:30:30 GMT']
-      etag: [W/"13ba145a-2374-49f4-bf06-a99e2ae4ccfe"]
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_source000002?api-version=2018-02-01
-  response:
-    body: {string: !!python/unicode ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:30:32 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVTT1VSQ0U6NUZNT1ZFOjVGU09VUkNFV1RDUkI3NFdKQXwxOTVGODk0QkZGNTk1Q0Q2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_move_dest000001?api-version=2018-02-01
-  response:
-    body: {string: !!python/unicode ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:30:33 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVTT1VSQ0U6NUZNT1ZFOjVGREVTVDZVWjVCSFRIUkFZRHw0QjUwRjQzMEExNUM0MkZELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14997']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '7060'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:08:10 GMT
+      etag:
+      - W/"5c1b0456-68cc-49e9-911a-226275f7b09b"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - adbfc6ae-a8e9-4688-9787-15d5f8920d20
+    status:
+      code: 200
+      message: OK
 version: 1

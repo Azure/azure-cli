@@ -45,13 +45,13 @@ DOCKER_DAEMON_ERROR = ErrorClass(
 
 DOCKER_VERSION_ERROR = ErrorClass(
     "DOCKER_VERSION_ERROR",
-    "An error occured while retrieving Docker version. Please try verifying it manually."
+    "An error occurred while retrieving Docker version. Please try verifying it manually."
 )
 
 
 DOCKER_PULL_ERROR = ErrorClass(
     "DOCKER_PULL_ERROR",
-    "An error occurred while pulling a sample image. Please validate your network connection and verify if docker daemon is running properly."
+    "An error occurred while pulling a sample image. Please validate your network connection and verify if Docker daemon is running properly."
 )
 
 
@@ -64,6 +64,18 @@ HELM_COMMAND_ERROR = ErrorClass(
 HELM_VERSION_ERROR = ErrorClass(
     "HELM_VERSION_ERROR",
     "An error occurred while retrieving Helm version. Please make sure that you have the latest Azure CLI version, and that you are using the recommended Helm version."
+)
+
+
+# NOTARY ERRORS
+NOTARY_COMMAND_ERROR = ErrorClass(
+    "NOTARY_COMMAND_ERROR",
+    "Please verify if notary is installed."
+)
+
+NOTARY_VERSION_ERROR = ErrorClass(
+    "NOTARY_VERSION_ERROR",
+    "An error occurred while retrieving notary version. Please make sure that you have the latest Azure CLI version, and that you are using the recommended notary version."
 )
 
 
@@ -126,4 +138,9 @@ LOGIN_SERVER_ERROR = ErrorClass(
 UNEXPECTED_ERROR = ErrorClass(
     "UNEXPECTED_ERROR",
     "An unexpected error occurred."
+)
+
+CMK_MANAGED_IDENTITY_ERROR = ErrorClass(
+    "CMK_ERROR",
+    "The identity used for registry '{}' encryption doesn't exist."
 )

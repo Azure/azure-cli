@@ -24,7 +24,7 @@ class ResourceLockTests(ScenarioTest):
 
             locks_list = self.cmd('az lock list').get_output_in_json()
             self.assertTrue(locks_list)
-            self.assertIn(lock_name, [l['name'] for l in locks_list])
+            self.assertIn(lock_name, [lock['name'] for lock in locks_list])
 
             lock = self.cmd('az lock show -n {}'.format(lock_name)).get_output_in_json()
             lock_from_id = self.cmd('az lock show --ids {}'.format(lock_id)).get_output_in_json()

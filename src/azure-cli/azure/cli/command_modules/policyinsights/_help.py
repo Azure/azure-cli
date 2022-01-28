@@ -98,6 +98,9 @@ examples:
   - name: Create a remediation for a specific resource using the resource ID
     text: >
         az policy remediation create --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myRg/providers/Microsoft.Compute/virtualMachines/myVm" -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab
+  - name: Create a remediation that will re-evaluate compliance before remediating
+    text: >
+        az policy remediation create -g myRg -n myRemediation --policy-assignment eeb18edc813c42d0ad5a9eab --resource-discovery-mode ReEvaluateCompliance
 """
 
 helps['policy remediation delete'] = """
@@ -191,6 +194,15 @@ examples:
   - name: Get latest policy states for a resource including policy evaluation details.
     text: >
         az policy state list --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup" --expand PolicyEvaluationDetails
+  - name: Get latest component policy states for a resource (eg. vault) and policy assignment referencing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant')"
+  - name: Get latest component policy states for a resource (eg. vault) and policy assignment referencing an initiative containing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa' and policyDefinitionReferenceId eq 'myResourceProviderModeDefinitionReferenceId'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant')"
+  - name: Get latest component counts by compliance state for a resource (eg. vault) and policy assignment referencing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant' or ComplianceState eq 'Conflict';$apply=groupby((complianceState),aggregate($count as count)))"
 """
 
 helps['policy state summarize'] = """
@@ -236,4 +248,45 @@ examples:
   - name: Get latest non-compliant policy states summary in current subscription filtering results based on some property values.
     text: >
         az policy state summarize --filter "(policyDefinitionAction eq 'deny' or policyDefinitionAction eq 'audit') and resourceLocation ne 'eastus'"
+"""
+
+helps['policy state trigger-scan'] = """
+type: command
+short-summary: Trigger a policy compliance evaluation for a scope.
+examples:
+  - name: Trigger a policy compliance evaluation at the current subscription scope.
+    text: >
+        az policy state trigger-scan
+  - name: Trigger a policy compliance evaluation for a resource group.
+    text: >
+        az policy state trigger-scan -g "myRg"
+  - name: Trigger a policy compliance evaluation for a resource group and do not wait for it to complete.
+    text: >
+        az policy state trigger-scan -g "myRg" --no-wait
+"""
+
+helps['policy metadata'] = """
+type: group
+short-summary: Get policy metadata resources.
+"""
+
+helps['policy metadata list'] = """
+type: command
+short-summary: List policy metadata resources.
+examples:
+  - name: Get all policy metadata resources.
+    text: >
+        az policy metadata list
+  - name: Get policy metadata resources, limit the output to 5 resources.
+    text: >
+        az policy metadata list --top 5
+"""
+
+helps['policy metadata show'] = """
+type: command
+short-summary: Get a single policy metadata resource.
+examples:
+  - name: Get the policy metadata resource with the name 'ACF1000'.
+    text: >
+        az policy metadata show --name ACF1000
 """

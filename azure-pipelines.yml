@@ -7,13 +7,36 @@ trigger:
     include:
     - '*'
 
+pr:
+  branches:
+    include:
+      - '*'
+
 jobs:
+- job: CheckPullRequestTitle
+  displayName: "Check the Format of Pull Request Title"
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
+
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+    - bash: |
+        echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
+        title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
+          echo "Hotfix PR should target release branch."
+          exit 1
+        fi
+        [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
+        echo "Pull Request title should follow https://aka.ms/submitAzPR"
+        exit 1
+
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
   condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - bash: |
         echo "Reject pull request directly to master branch"
@@ -21,38 +44,30 @@ jobs:
 
 - job: CredScan
   displayName: "Credential Scan"
-
   pool:
     vmImage: "windows-2019"
   steps:
-  - task: CredScan@2
-    inputs:
-      toolMajorVersion: 'V2'
-      suppressionsFile: ./scripts/ci/credscan/CredScanSuppressions.json
-
-  - task: PostAnalysis@1
-    inputs:
-      AllTools: false
-      APIScan: false
-      BinSkim: false
-      CodesignValidation: false
-      CredScan: true
-      FortifySCA: false
-      FxCop: false
-      ModernCop: false
-      PoliCheck: false
-      RoslynAnalyzers: false
-      SDLNativeRules: false
-      Semmle: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-credscan.CredScan@2
+      displayName: 'Run Credential Scanner'
+      inputs:
+        toolMajorVersion: V2
+        suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis-devops.build-task-postanalysis.PostAnalysis@1
+      displayName: 'Post Analysis'
+      inputs:
+        AllTools: false
+        BinSkim: false
+        CredScan: true
+        RoslynAnalyzers: false
+        TSLint: false
+        ToolLogsNotFoundAction: 'Standard'
 
 - job: ExtractMetadata
   displayName: Extract Metadata
 
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Extract Version'
@@ -71,7 +86,7 @@ jobs:
   displayName: 'Verify src/azure-cli/requirements.*.Linux.txt'
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
 
   steps:
   - task: UsePythonVersion@0
@@ -82,19 +97,11 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
 
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py2.Linux.txt'
-
 - job: VerifyDarwinRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
 
   steps:
   - task: UsePythonVersion@0
@@ -105,71 +112,38 @@ jobs:
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
 
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - bash: ./scripts/ci/dependency_check.sh
-    displayName: 'Verify src/azure-cli/requirements.py2.Darwin.txt'
-
 - job: VerifyWindowsRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.x
+      versionSpec: 3.10
 
   - task: BatchScript@1
     inputs:
       filename: ./scripts/ci/dependency_check.bat
     displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
 
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2'
-    inputs:
-      versionSpec: 2.x
-
-  - task: BatchScript@1
-    inputs:
-      filename: ./scripts/ci/dependency_check.bat
-    displayName: 'Verify src/azure-cli/requirements.py2.Windows.txt'
-
 - job: VerifyVersions
   displayName: Verify Command Module Versions
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/release'), eq(variables['System.PullRequest.TargetBranch'], 'release')))
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.7
-
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      #!/usr/bin/env bash
-
       set -ev
-
-      pip install virtualenv
-      python -m virtualenv venv/
-      . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
-    displayName: 'Install azdev'
-
-  - bash: |
-      #!/usr/bin/env bash
-      . ./venv/bin/activate
-
-      set -ev
-
+      . env/bin/activate
       azdev verify history
 
     displayName: 'Verify History'
@@ -180,7 +154,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -206,11 +180,16 @@ jobs:
   displayName: Test Windows MSI
 
   dependsOn: BuildWindowsMSI
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  condition: false
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
   steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
     inputs:
@@ -222,18 +201,45 @@ jobs:
     inputs:
       targetType: inline
       script: |
+        if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+          # Start another Powershell process as Admin and execute this script again
+          $arguments = "& '" +$myinvocation.mycommand.definition + "'"
+          Start-Process powershell -Verb runAs -ArgumentList $arguments
+          # Stop if the PowerShell is not run as Admin
+          Break
+        }
+        # The following are executed by elevated PowerShell
+        az --version
+
         $InstallArgs = @(
-          "/I"
-          '"$env:SYSTEM_ARTIFACTSDIRECTORY/msi/Microsoft Azure CLI.msi"'
+          "/i"
+          "`"$env:SYSTEM_ARTIFACTSDIRECTORY\msi\Microsoft Azure CLI.msi`""
+          "/q"
           "/norestart"
-          "/L*v"
+          "/l*v"
           ".\install_logs.txt"
         )
+        $pre_installed_version=az version --query '\"azure-cli\"' -o tsv
+        $to_be_installed_version=Get-Content $(System.ArtifactsDirectory)/metadata/version
+        if ($pre_installed_version -eq $to_be_installed_version){
+          # See https://docs.microsoft.com/windows/win32/msi/reinstallmode about options of REINSTALLMODE
+          $reinstall_option="REINSTALL=ALL REINSTALLMODE=emus"
+          $InstallArgs += $reinstall_option
+        }
         Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow
-        Get-Content .\install_logs.txt
-
+        $install_time=Measure-Command {Start-Process "msiexec.exe" -ArgumentList $InstallArgs -Wait -NoNewWindow} | select -expand TotalSeconds
+        $installed_version=az version --query '\"azure-cli\"' -o tsv
+        if ($installed_version -ne $to_be_installed_version){
+          echo "The MSI failed to install."
+          Exit 1
+        }
+        echo 'Install time(seconds):' $install_time
         az --version
+        # Test bundled pip with extension installation
+        az extension add -n rdbms-connect
         az self-test
+
+        Get-Content .\install_logs.txt
 
 - job: BuildDockerImage
   displayName: Build Docker Image
@@ -241,7 +247,7 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Bash Script'
@@ -262,7 +268,7 @@ jobs:
   dependsOn: BuildDockerImage
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -297,19 +303,22 @@ jobs:
   dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.7
+      versionSpec: 3.10
 
 
-  - task: Bash@3
+  - script: |
+      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+        branch=$(System.PullRequest.TargetBranch)
+      else
+        branch=$(Build.SourceBranchName)
+      fi
+      scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/pypi/build.sh
 
 
   - task: PublishPipelineArtifact@0
@@ -324,7 +333,7 @@ jobs:
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -354,53 +363,71 @@ jobs:
        echo "== Testing pip install on Python 3.6 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.6 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.7 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.8 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"  
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
-       echo "== Testing pip install on Python 2.7 =="
+       # echo "== Testing pip install on Python 3.9 =="
+       # docker run \
+       #   --rm -v $PYPI_FILES:/mnt/pypi python:3.9 \
+       #   /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
+
+       echo "== Testing pip install on Python 3.10 =="
        docker run \
-         --rm -v $PYPI_FILES:/mnt/pypi python:2.7 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         --rm -v $PYPI_FILES:/mnt/pypi python:3.10 \
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
-- job: UnitTest
-  displayName: Unit Test for Core and Telemetry
+- job: TestCore
+  displayName: Unit Test for Core
   timeoutInMinutes: 10
-
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
-      Python27:
-        python.version: '2.7'
-        tox_env: 'py27'
       Python36:
         python.version: '3.6'
-        tox_env: 'py36'
       Python38:
         python.version: '3.8'
-        tox_env: 'py38'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
-    - task: UsePythonVersion@0
-      displayName: 'Use Python $(python.version)'
-      inputs:
-        versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip tox
-      displayName: 'Install pip and tox'
-    - bash: ./scripts/ci/unittest.sh
-      displayName: 'Run Unit Test'
-      env:
-        TOXENV: $(tox_env)
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-core'
+
+- job: TestTelemetry
+  displayName: Unit Test for Telemetry
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        module: 'azure-cli-telemetry'
 
 - job: IntegrationTestAgainstProfiles
   displayName: Integration Test against Profiles
@@ -409,13 +436,17 @@ jobs:
   timeoutInMinutes: 20
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -426,177 +457,101 @@ jobs:
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
 
-- job: RunAutomationFullPython2
-  displayName: Run Automation, Python 2
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
+- job: AutomationTest
+  displayName: Automation Test (Profile Latest)
+  timeoutInMinutes: 120
   pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 2.7'
-    inputs:
-      versionSpec: 2.7
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-
-- job: RunAutomationReducedPython3_6
-  displayName: Run Automation Reduced Python 3.6
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-
-- job: RunAutomationReduced20190301
-  displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
-
-- job: RunAutomation20180301
-  displayName: Run Automation, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
-
-- job: RunAutomationReducedPython3_8
-  displayName: Run Automation Reduced Python 3.8
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-
-- job: RunAutomationReduced20190301Python3_8
-  displayName: Run Automation Reduced Python 3.8, Profile 2019-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
-
-- job: TestExtensionsLoading
-  displayName: Test Extensions Loading
-  dependsOn: BuildPythonWheel
-  condition: succeeded()
-  timeoutInMinutes: 10
-
-  pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: 'latest'
+
+- job: AutomationTest20200901
+  displayName: Automation Test (Profile 2020-09-01)
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2020-09-01-hybrid'
+
+- job: AutomationTest20190301
+  displayName: Automation Test (Profile 2019-03-01)
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2019-03-01-hybrid'
+
+- job: AutomationTest20180301
+  displayName: Automation Test (Profile 2018-03-01)
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2018-03-01-hybrid'
+
+- job: TestExtensionsLoading
+  displayName: Test Extensions Loading
+  condition: succeeded()
+  timeoutInMinutes: 20
+
+  pool:
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Python38:
+        python.version: '3.8'
   steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python $(python.version)'
@@ -607,52 +562,19 @@ jobs:
     - bash: ./scripts/ci/test_extensions.sh
       displayName: 'Load extensions'
 
-- job: RunAutomation20180301Python3_8
-  displayName: Run Automation Python 3.8, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'      
-
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download PyPI Packages'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
 
   - bash: |
        #!/bin/bash
@@ -665,20 +587,19 @@ jobs:
        HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
 
        docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-       pypi_files=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+       src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
 
        echo "Generating formula in docker container ... "
        docker run -v $docker_files:/mnt/scripts \
-                  -v $pypi_files:/mnt/pypi \
+                  -v $src_files:/mnt/src \
                   -e CLI_VERSION=$CLI_VERSION \
                   -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                   --name azurecli \
-                  python:3.6 \
+                  python:3.10 \
                   /mnt/scripts/run.sh
 
        # clean up
        rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
 
        docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
        docker rm --force azurecli
@@ -696,7 +617,7 @@ jobs:
   dependsOn: BuildHomebrewFormula
   condition: succeeded()
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -727,39 +648,78 @@ jobs:
       echo == Run Self-Test ==
       az self-test
 
-      echo == Audit azure-cli.rb formula ==
-      brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
-
     displayName: 'Bash Script'
+
+- job: TestHomebrewPackage
+  displayName: Test Homebrew Package
+  timeoutInMinutes: 180
+  dependsOn: BuildHomebrewFormula
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  condition: false
+  pool:
+    vmImage: 'macOS-10.15'
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
+      artifactName: homebrew
+
+
+  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
+
+
+    displayName: 'Test Homebrew Package'
+
+
+- job: BuildYumPackageMariner
+  displayName: Build Yum Package Mariner
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package: Mariner'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline_mariner.sh
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: yum-mariner'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: yum-mariner
+
 
 - job: BuildYumPackage
   displayName: Build Yum Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
-
-
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: yum
 
+
 - job: TestYumPackage
   displayName: Test Yum Package
-
+  timeoutInMinutes: 120
   dependsOn: BuildYumPackage
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -784,227 +744,47 @@ jobs:
 
        echo "== Test yum package on CentOS =="
 
-       docker pull centos:centos7
-       docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum centos:centos7 /bin/bash -c "yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y && time az self-test && time az --version && sleep 5"
+       docker pull centos:centos8
+       docker run --rm -e YUM_NAME=$YUM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/yum:/mnt/yum -v $(pwd):/azure-cli centos:centos8 /bin/bash "/azure-cli/scripts/release/rpm/test_rpm_in_docker.sh"
 
-    displayName: 'Bash Script'
+    displayName: 'Test Yum Package'
 
-- job: BuildUbuntuXenial
-  displayName: Build Ubuntu Xenial Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Xenial Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: xenial
-      DISTRO_BASE_IMAGE: ubuntu:xenial
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-xenial
-
-- job: BuildUbuntuTrusty
-  displayName: Build Ubuntu Trusty Package
+- job: BuildDebPackages
+  displayName: Build Deb Packages
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Trusty Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: trusty
-      DISTRO_BASE_IMAGE: ubuntu:trusty
-
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-trusty
-
-- job: BuildUbuntuBionic
-  displayName: Build Ubuntu Bionic Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Bionic Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: bionic
-      DISTRO_BASE_IMAGE: ubuntu:bionic
-
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-bionic
-
-- job: BuildUbuntuDisco
-  displayName: Build Ubuntu Disco Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-
-
-    - task: Bash@3
-      displayName: 'Build Ubuntu Disco Package'
-      inputs:
-        targetType: 'filePath'
-        filePath: scripts/release/debian/pipeline.sh
-      env:
-        DISTRO: disco
-        DISTRO_BASE_IMAGE: ubuntu:disco
-
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: debian'
-      inputs:
-        TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: ubuntu-disco
-
-- job: BuildUbuntuEoan
-  displayName: Build Ubuntu Eoan Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-
-    - bash: scripts/release/debian/pipeline.sh
-      displayName: 'Build Ubuntu Eoan Package'
-      env:
-        DISTRO: eoan
-        DISTRO_BASE_IMAGE: ubuntu:eoan
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: debian'
-      inputs:
-        TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: ubuntu-eoan
-
-- job: BuildDebianJessie
-  displayName: Build Debian Jessie Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Debian Jessie Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: jessie
-      DISTRO_BASE_IMAGE: debian:jessie
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-jessie
-
-- job: BuildDebianStretch
-  displayName: Build Debian Stretch Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Debian Stretch Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: stretch
-      DISTRO_BASE_IMAGE: debian:stretch
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-stretch
-
-- job: BuildDebianBuster
-  displayName: Build Debian Buster Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
+  strategy:
+    matrix:
+      Xenial:
+        deb_system: ubuntu
+        distro: xenial
+      Trusty:
+        deb_system: ubuntu
+        distro: trusty
+      Bionic:
+        deb_system: ubuntu
+        distro: bionic
+      Focal:
+        deb_system: ubuntu
+        distro: focal
+      Hirsute:
+        deb_system: ubuntu
+        distro: hirsute
+      Jessie:
+        deb_system: debian
+        distro: jessie
+      Stretch:
+        deb_system: debian
+        distro: stretch
+      Buster:
+        deb_system: debian
+        distro: buster
+      Bullseye:
+        deb_system: debian
+        distro: bullseye
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -1013,35 +793,36 @@ jobs:
       artifactName: pypi
 
   - task: Bash@3
-    displayName: 'Build Debian Buster Package'
+    displayName: 'Build $(deb_system) $(distro) Package'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
-      DISTRO: buster
-      DISTRO_BASE_IMAGE: debian:buster
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-buster
+      ArtifactName: $(deb_system)-$(distro)
 
-- job: TestLinuxPackages
-  displayName: Test Linux Packages
+- job: TestDebPackages
+  displayName: Test Deb Packages
 
   dependsOn:
-   - BuildUbuntuXenial
-   - BuildUbuntuTrusty
-   - BuildUbuntuBionic
-   - BuildDebianJessie
-   - BuildDebianStretch
-   - BuildUbuntuCosmic
-   - BuildUbuntuDisco
-   - BuildUbuntuEoan
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+   - BuildDebPackages
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  strategy:
+    matrix:
+      Focal:
+        deb_system: ubuntu
+        distro: focal
+      Buster:
+        deb_system: debian
+        distro: buster
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -1049,199 +830,122 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
-
   - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Stretch Build'
+    displayName: 'Download $(deb_system):$(distro) Build'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-stretch
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Buster Build'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-buster
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Debian:Jessie Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: debian-jessie
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Bionic Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-bionic
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Cosmic Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-cosmic
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Disco Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-disco
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Xenial Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-xenial
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Trusty Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-trusty
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Eoan Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-eoan    
-
-
-  - bash: |
-       set -exv
-
-       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-
-       DISTROS=(jessie stretch xenial trusty)
-       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
-
-       # Distros that don't require libssl1.1
-       for i in ${!DISTROS[@]}; do
-           echo "== Test debian package on ${DISTROS[$i]} =="
-
-           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
-
-           docker pull ${BASE_IMAGES[$i]}
-
-           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
-       done
-
-       # Distros that do require libssl1.1
-       DISTROS=(bionic cosmic disco eoan buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:cosmic ubuntu:disco ubuntu:eoan debian:buster)
-
-       for i in ${!DISTROS[@]}; do
-           echo "== Test debian package on ${DISTROS[$i]} =="
-
-           DEB_FILE=$SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb
-
-           docker pull ${BASE_IMAGES[$i]}
-
-           docker run --rm -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts ${BASE_IMAGES[$i]} /bin/bash -c "apt-get update && apt-get install -y libssl1.1 apt-transport-https && dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTROS[$i]}_all.deb && time az self-test && time az --version && sleep 5"
-       done
-    displayName: 'Bash Script'
-
-- job: BuildUbuntuCosmic
-  displayName: Build Ubuntu Cosmic
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
+      artifactName: $(deb_system)-$(distro)
 
   - task: Bash@3
-    displayName: 'Bash Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
+    displayName: 'Test $(deb_system) $(distro) Package'
     env:
-      DISTRO: cosmic
-      DISTRO_BASE_IMAGE: ubuntu:cosmic
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
     inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-cosmic
+      targetType: 'inline'
+      script: |
+        set -exv
+        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        echo "== Test debian package on ${DISTRO} =="
+        docker pull ${DISTRO_BASE_IMAGE}
+        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
 - job: CheckStyle
   displayName: "Check CLI Style"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.7'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.7
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
-      pip list
+      set -ev
+      . env/bin/activate
       azdev style
 
 - job: CheckHeaders
   displayName: "Check License, History, and DocMap"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.6
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev verify license
       azdev verify history
       azdev verify document-map
 
-- job: CheckLoadPerformance
-  displayName: "Check Module Load Performance"
-
+- job: PerformanceCheck
+  displayName: "PerformanceCheck"
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
+      Python310:
+        python.version: '3.10'
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python $(python.version)'
     inputs:
-      versionSpec: 3.6
+      versionSpec: '$(python.version)'
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
+      set -ev
+      . env/bin/activate
       azdev perf load-times
+    displayName: "Load Performance"
+  # - bash: |
+  #     set -ev
+  #     . env/bin/activate
+
+  #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
+  #   displayName: "Execution Performance"
 
 - job: CheckLinter
   displayName: "Check CLI Linter"
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
+    displayName: 'Use Python 3.10'
     inputs:
-      versionSpec: 3.6
+      versionSpec: 3.10
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
-      azdev linter --ci-exclusions
+      set -ev
+      . env/bin/activate
+      python scripts/ci/service_name.py
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      else
+        azdev linter --ci-exclusions --min-severity medium
+      fi
 
 - job: VerifySphinxDocumentGenerator
   displayName: "Verify Sphinx Document Generator"
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-20.04'
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.6'
+      displayName: 'Use Python 3.10'
       inputs:
-        versionSpec: 3.6
+        versionSpec: 3.10
     - bash: pip install --upgrade pip wheel
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh

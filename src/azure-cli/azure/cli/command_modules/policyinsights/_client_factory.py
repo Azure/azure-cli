@@ -14,7 +14,7 @@ def cf_policy_insights(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.policyinsights import PolicyInsightsClient
 
-    return get_mgmt_service_client(cli_ctx, PolicyInsightsClient, subscription_bound=False)
+    return get_mgmt_service_client(cli_ctx, PolicyInsightsClient)
 
 
 def policy_events_operations(cli_ctx, _):
@@ -27,3 +27,7 @@ def policy_states_operations(cli_ctx, _):
 
 def policy_remediations_operations(cli_ctx, _):
     return cf_policy_insights(cli_ctx).remediations
+
+
+def policy_metadata_operations(cli_ctx, _):
+    return cf_policy_insights(cli_ctx).policy_metadata

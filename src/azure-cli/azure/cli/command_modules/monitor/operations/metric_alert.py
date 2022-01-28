@@ -2,32 +2,48 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-locals
 
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-
 from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+_metric_alert_dimension_prefix = '_where_'
 
-def create_metric_alert(client, resource_group_name, rule_name, scopes, description, condition, disabled=False,
+
+def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
-                        auto_mitigate=None):
+                        auto_mitigate=None, target_resource_type=None, target_resource_region=None):
     from azure.mgmt.monitor.models import (MetricAlertResource,
                                            MetricAlertSingleResourceMultipleMetricCriteria,
-                                           MetricAlertMultipleResourceMultipleMetricCriteria)
+                                           MetricAlertMultipleResourceMultipleMetricCriteria,
+                                           DynamicMetricCriteria)
+    from azure.cli.core import CLIError
     # generate names for the conditions
     for i, cond in enumerate(condition):
         cond.name = 'cond{}'.format(i)
     criteria = None
-    target_resource_type = None
-    target_resource_region = None
-    if len(scopes) == 1:
-        criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
-    else:
+    resource_type, scope_type = _parse_resource_and_scope_type(scopes)
+    if scope_type in ['resource_group', 'subscription']:
+        if target_resource_type is None or target_resource_region is None:
+            raise CLIError('--target-resource-type and --target-resource-region must be provided.')
         criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
-        target_resource_type = _parse_resource_type(scopes)
-        target_resource_region = 'global'
+    else:
+        if len(scopes) == 1:
+            is_dynamic_threshold_criterion = False
+            for v in condition:
+                if isinstance(v, DynamicMetricCriteria):
+                    is_dynamic_threshold_criterion = True
+            if not is_dynamic_threshold_criterion:
+                criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
+            else:
+                criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+        else:
+            criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
+            target_resource_type = resource_type
+            target_resource_region = target_resource_region if target_resource_region else 'global'
+
     kwargs = {
         'description': description,
         'severity': severity,
@@ -72,14 +88,9 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
 
     # process action additions
     if add_actions is not None:
-        for action in add_actions:
-            match = next(
-                (x for x in instance.actions if action.action_group_id.lower() == x.action_group_id.lower()), None
-            )
-            if match:
-                match.webhook_properties = action.webhook_properties
-            else:
-                instance.actions.append(action)
+        add_action_ids = {x.action_group_id.lower() for x in add_actions}
+        instance.actions = [x for x in instance.actions if x.action_group_id.lower() not in add_action_ids]
+        instance.actions.extend(add_actions)
 
     # process condition removals
     if remove_conditions is not None:
@@ -104,6 +115,42 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
     return instance
 
 
+def create_metric_alert_dimension(dimension_name, value_list, operator=None):
+    values = ' or '.join(value_list)
+    return '{} {} {} {}'.format(_metric_alert_dimension_prefix, dimension_name, operator, values)
+
+
+def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
+                                  dimension_list=None, threshold=None, alert_sensitivity=None,
+                                  number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
+                                  ignore_data_before=None, skip_metric_validation=None):
+    if metric_namespace:
+        metric_namespace += '.'
+    condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
+    if condition_type == 'static':
+        condition += '{} '.format(threshold)
+    elif condition_type == 'dynamic':
+        dynamics = 'dynamic {} {} of {} '.format(
+            alert_sensitivity, min_failing_periods_to_alert, number_of_evaluation_periods)
+        if ignore_data_before:
+            dynamics += 'since {} '.format(ignore_data_before)
+        condition += dynamics
+    else:
+        raise NotImplementedError()
+
+    if dimension_list:
+        dimensions = ' '.join([t for t in dimension_list if t.strip()])
+        if dimensions.startswith(_metric_alert_dimension_prefix):
+            dimensions = [t for t in dimensions.split(_metric_alert_dimension_prefix) if t]
+            dimensions = 'where' + 'and'.join(dimensions)
+        condition += dimensions
+
+    if skip_metric_validation:
+        condition += ' with skipmetricvalidation'
+
+    return condition.strip()
+
+
 def list_metric_alerts(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -119,7 +166,7 @@ def create_metric_rule(client, resource_group_name, rule_name, target, condition
         RuleEmailAction(send_to_service_owners=email_service_owners, custom_emails=custom_emails)
     ] + (webhooks or [])
     rule = AlertRuleResource(
-        location=location, alert_rule_resource_name=rule_name, is_enabled=not disabled,
+        location=location, name_properties_name=rule_name, is_enabled=not disabled,
         condition=condition, tags=tags, description=description, actions=actions)
     return client.create_or_update(resource_group_name, rule_name, rule)
 
@@ -212,18 +259,49 @@ def _parse_action_removals(actions):
     return emails, webhooks
 
 
-def _parse_resource_type(scopes):
-    from msrestazure.tools import parse_resource_id
-    from azure.cli.core import CLIError
-    namespace = None
-    resource_type = None
-    for item in scopes:
-        item_namespace = parse_resource_id(item)['namespace']
-        item_resource_type = parse_resource_id(item)['resource_type']
-        if namespace is None and resource_type is None:
-            namespace = item_namespace
-            resource_type = item_resource_type
+def _parse_resource_and_scope_type(scopes):
+    from azure.mgmt.core.tools import parse_resource_id
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if not scopes:
+        raise InvalidArgumentValueError('scopes cannot be null.')
+
+    namespace = ''
+    resource_type = ''
+    scope_type = None
+
+    def validate_scope(item_namespace, item_resource_type, item_scope_type):
+        if namespace != item_namespace or resource_type != item_resource_type or scope_type != item_scope_type:
+            raise InvalidArgumentValueError('Multiple scopes should be the same resource type.')
+
+    def store_scope(item_namespace, item_resource_type, item_scope_type):
+        nonlocal namespace
+        nonlocal resource_type
+        nonlocal scope_type
+        namespace = item_namespace
+        resource_type = item_resource_type
+        scope_type = item_scope_type
+
+    def parse_one_scope_with_action(scope, operation_on_scope):
+        result = parse_resource_id(scope)
+        if 'namespace' in result and 'resource_type' in result:
+            resource_types = [result['type']]
+            child_idx = 1
+            while 'child_type_{}'.format(child_idx) in result:
+                resource_types.append(result['child_type_{}'.format(child_idx)])
+                child_idx += 1
+            operation_on_scope(result['namespace'], '/'.join(resource_types), 'resource')
+        elif 'resource_group' in result:  # It's a resource group.
+            operation_on_scope('', '', 'resource_group')
+        elif 'subscription' in result:  # It's a subscription.
+            operation_on_scope('', '', 'subscription')
         else:
-            if namespace != item_namespace or resource_type != item_resource_type:
-                raise CLIError('Multiple scopes should be the same resource type.')
-    return namespace + '/' + resource_type
+            raise InvalidArgumentValueError('Scope must be a valid resource id.')
+
+    # Store the resource type and scope type from first scope
+    parse_one_scope_with_action(scopes[0], operation_on_scope=store_scope)
+    # Validate the following scopes
+    for item in scopes:
+        parse_one_scope_with_action(item, operation_on_scope=validate_scope)
+
+    return namespace + '/' + resource_type, scope_type

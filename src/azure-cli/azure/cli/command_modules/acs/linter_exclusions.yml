@@ -1,0 +1,26 @@
+---
+aks create:
+  parameters:
+      appgw_watch_namespace:
+          rule_exclusions:
+          - option_length_too_long
+      enable_sgxquotehelper:
+          rule_exclusions:
+          - option_length_too_long
+aks enable-addons:
+  parameters:
+      appgw_watch_namespace:
+          rule_exclusions:
+          - option_length_too_long
+      enable_sgxquotehelper:
+          rule_exclusions:
+          - option_length_too_long
+      disable_secret_rotation:
+          rule_exclusions:
+          - option_length_too_long
+aks update:
+  parameters:
+      disable_secret_rotation:
+          rule_exclusions:
+          - option_length_too_long
+...

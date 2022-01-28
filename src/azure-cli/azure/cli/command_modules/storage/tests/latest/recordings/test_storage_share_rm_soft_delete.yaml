@@ -1,0 +1,475 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account file-service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --delete-retention-days --enable-delete-retention
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/fileServices","properties":{"protocolSettings":{"smb":{}},"cors":{"corsRules":[]},"shareDeleteRetentionPolicy":{"enabled":true,"days":7}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '486'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"shareDeleteRetentionPolicy": {"enabled": true, "days":
+      7}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account file-service-properties update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '76'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --delete-retention-days --enable-delete-retention
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/fileServices","properties":{"shareDeleteRetentionPolicy":{"enabled":true,"days":7}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '384'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1187'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '370'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:13 GMT
+      etag:
+      - '"0x8D971CF3CA04662"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1185'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D971CF3CA04662\"","properties":{"accessTier":"TransactionOptimized","lastModifiedTime":"2021-09-07T07:15:13.0000000Z","shareQuota":5120,"enabledProtocols":"SMB","leaseStatus":"unlocked","leaseState":"available"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '607'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --storage-account -g -n -y
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003?api-version=2021-06-01&$include=none
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Sep 2021 07:15:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14993'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g --include-deleted
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2021-06-01&$expand=deleted
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003_01D7A3B81A132997","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D971CF3CA04662\"","properties":{"version":"01D7A3B81A132997","deleted":true,"deletedTime":"2021-09-07T07:15:17.0000000Z","remainingRetentionDays":7,"accessTier":"TransactionOptimized","lastModifiedTime":"2021-09-07T07:15:13.0000000Z","shareQuota":5120,"enabledProtocols":"SMB","leaseStatus":"unlocked","leaseState":"broken"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g --include-deleted --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2021-06-01&$expand=deleted
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003_01D7A3B81A132997","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D971CF3CA04662\"","properties":{"version":"01D7A3B81A132997","deleted":true,"deletedTime":"2021-09-07T07:15:17.0000000Z","remainingRetentionDays":7,"accessTier":"TransactionOptimized","lastModifiedTime":"2021-09-07T07:15:13.0000000Z","shareQuota":5120,"enabledProtocols":"SMB","leaseStatus":"unlocked","leaseState":"broken"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '737'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"deletedShareName": "share000003", "deletedShareVersion": "01D7A3B81A132997"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '91'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --storage-account -g -n --deleted-version
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003/restore?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Sep 2021 07:15:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share-rm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --storage-account -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares?api-version=2021-06-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_sf000001/providers/Microsoft.Storage/storageAccounts/clitest000002/fileServices/default/shares/share000003","name":"share000003","type":"Microsoft.Storage/storageAccounts/fileServices/shares","etag":"\"0x8D971CF546A1805\"","properties":{"accessTier":"TransactionOptimized","lastModifiedTime":"2021-09-07T07:15:53.0000000Z","shareQuota":5120,"enabledProtocols":"SMB","leaseStatus":"unlocked","leaseState":"available"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '607'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:15:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

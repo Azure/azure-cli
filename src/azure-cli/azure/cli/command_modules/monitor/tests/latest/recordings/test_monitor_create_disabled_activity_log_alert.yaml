@@ -1,114 +1,96 @@
 interactions:
 - request:
-    body: '{"location": "southcentralus", "tags": {"product": "azurecli", "cause":
-      "automation", "date": "2018-08-15T00:26:54Z"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['118']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.5.0 resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2018-08-15T00:26:54Z"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['392']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 15 Aug 2018 00:26:55 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [monitor activity-log alert create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.5.0 azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --disable -o
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002?api-version=2017-04-01
   response:
-    body: {string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''microsoft.insights/activityLogAlerts/clialert000002''
-        under resource group ''clitest.rg000001'' was not found."}}'}
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''microsoft.insights/activityLogAlerts/clialert000002''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['248']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 15 Aug 2018 00:26:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-failure-cause: [gateway]
-    status: {code: 404, message: Not Found}
+      cache-control:
+      - no-cache
+      content-length:
+      - '316'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Dec 2021 05:25:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
 - request:
-    body: 'b''{"location": "global", "properties": {"scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],
-      "enabled": false, "condition": {"allOf": [{"field": "category", "equals": "ServiceHealth"}]},
-      "actions": {"actionGroups": []}}}'''
+    body: '{"location": "global", "properties": {"scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],
+      "condition": {"allOf": [{"field": "category", "equals": "ServiceHealth"}]},
+      "actions": {"actionGroups": []}, "enabled": false}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [monitor activity-log alert create]
-      Connection: [keep-alive]
-      Content-Length: ['323']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.5.0 azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '323'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --disable -o
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002?api-version=2017-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002","type":"Microsoft.Insights/ActivityLogAlerts","name":"clialert000002","location":"Global","kind":null,"tags":{},"properties":{"scopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],"condition":{"allOf":[{"field":"category","equals":"ServiceHealth","containsAny":null}]},"actions":{"actionGroups":[]},"enabled":false,"description":null},"identity":null}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/activityLogAlerts/clialert000002","type":"Microsoft.Insights/ActivityLogAlerts","name":"clialert000002","location":"Global","kind":null,"tags":{},"properties":{"scopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001"],"condition":{"allOf":[{"field":"category","equals":"ServiceHealth","containsAny":null,"odata.type":null}],"odata.type":null},"actions":{"actionGroups":[]},"enabled":false,"description":null},"identity":null}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['702']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 15 Aug 2018 00:26:57 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.5.0 resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 15 Aug 2018 00:26:59 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdPNVJRUDZSVFRQUVhVV0tWR1VPN0pPRjQ3WFVQSU9CM0tWV3w4OUM3REQwRENFRTY1OTk3LVNPVVRIQ0VOVFJBTFVTIiwiam9iTG9jYXRpb24iOiJzb3V0aGNlbnRyYWx1cyJ9?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '738'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 10 Dec 2021 05:25:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
 version: 1

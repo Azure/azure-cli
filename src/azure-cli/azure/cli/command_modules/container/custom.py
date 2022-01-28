@@ -8,11 +8,12 @@
 import errno
 try:
     import msvcrt
+    from ._vt_helper import enable_vt_mode
 except ImportError:
     # Not supported for Linux machines.
     pass
+import os
 import platform
-import select
 import shlex
 import signal
 import sys
@@ -31,11 +32,13 @@ from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
-                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
-                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
+                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequest, ContainerExecRequestTerminalSize,
+                                                 GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupSubnetId,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network)
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network, cf_msi)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -61,7 +64,7 @@ def get_container(client, resource_group_name, name):
 
 def delete_container(client, resource_group_name, name, **kwargs):
     """Delete a container group. """
-    return client.delete(resource_group_name, name)
+    return client.begin_delete(resource_group_name, name)
 
 
 # pylint: disable=too-many-statements
@@ -95,7 +98,6 @@ def create_container(cmd,
                      vnet_address_prefix='10.0.0.0/16',
                      subnet=None,
                      subnet_address_prefix='10.0.0.0/24',
-                     network_profile=None,
                      gitrepo_url=None,
                      gitrepo_dir='.',
                      gitrepo_revision=None,
@@ -106,7 +108,9 @@ def create_container(cmd,
                      assign_identity=None,
                      identity_scope=None,
                      identity_role='Contributor',
-                     no_wait=False):
+                     no_wait=False,
+                     acr_identity=None,
+                     zone=None):
     """Create a container group. """
     if file:
         return _create_update_from_file(cmd.cli_ctx, resource_group_name, name, location, file, no_wait)
@@ -122,10 +126,13 @@ def create_container(cmd,
 
     container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
-    image_registry_credentials = _create_image_registry_credentials(registry_login_server=registry_login_server,
+    image_registry_credentials = _create_image_registry_credentials(cmd=cmd,
+                                                                    resource_group_name=resource_group_name,
+                                                                    registry_login_server=registry_login_server,
                                                                     registry_username=registry_username,
                                                                     registry_password=registry_password,
-                                                                    image=image)
+                                                                    image=image,
+                                                                    identity=acr_identity)
 
     command = shlex.split(command_line) if command_line else None
 
@@ -184,15 +191,19 @@ def create_container(cmd,
     if assign_identity is not None:
         identity = _build_identities_info(assign_identity)
 
-    # Set up VNET, subnet and network profile if needed
-    if subnet and not network_profile:
-        network_profile = _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
+    # Set up VNET and subnet if needed
+    subnet_id = None
+    cgroup_subnet = None
+    if subnet:
+        subnet_id = _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
+        cgroup_subnet = [ContainerGroupSubnetId(id=subnet_id)]
 
-    cg_network_profile = None
-    if network_profile:
-        cg_network_profile = ContainerGroupNetworkProfile(id=network_profile)
+    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, network_profile)
+    # Setup zones, validation done in control plane so check is not needed here
+    zones = None
+    if zone:
+        zones = [zone]
 
     container = Container(name=name,
                           image=image,
@@ -211,13 +222,14 @@ def create_container(cmd,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None,
-                            network_profile=cg_network_profile,
+                            subnet_ids=cgroup_subnet,
                             diagnostics=diagnostics,
-                            tags=tags)
+                            tags=tags,
+                            zones=zones)
 
     container_group_client = cf_container_groups(cmd.cli_ctx)
 
-    lro = sdk_no_wait(no_wait, container_group_client.create_or_update, resource_group_name,
+    lro = sdk_no_wait(no_wait, container_group_client.begin_create_or_update, resource_group_name,
                       name, cgroup)
 
     if assign_identity is not None and identity_scope:
@@ -245,17 +257,17 @@ def _build_identities_info(identities):
 
 
 def _get_resource(client, resource_group_name, *subresources):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         resource = client.get(resource_group_name, *subresources)
         return resource
-    except CloudError as ex:
-        if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
             return None
         raise
 
 
-def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
+def _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix):
     from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
@@ -280,8 +292,6 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         vnet_name = parsed_vnet_id['resource_name']
         resource_group_name = parsed_vnet_id['resource_group']
 
-    default_network_profile_name = "aci-network-profile-{}-{}".format(vnet_name, subnet_name)
-
     subnet = _get_resource(ncf.subnets, resource_group_name, vnet_name, subnet_name)
     # For an existing subnet, validate and add delegation if needed
     if subnet:
@@ -293,16 +303,11 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         if not subnet.delegations:
             logger.info('Adding ACI delegation to the existing subnet.')
             subnet.delegations = [aci_delegation]
-            subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+            subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
                 if delegation.service_name != aci_delegation_service_name:
                     raise CLIError("Can not use subnet with existing delegations other than {}".format(aci_delegation_service_name))
-
-        network_profile = _get_resource(ncf.network_profiles, resource_group_name, default_network_profile_name)
-        if network_profile:
-            logger.info('Using existing network profile "%s"', default_network_profile_name)
-            return network_profile.id
 
     # Create new subnet and Vnet if not exists
     else:
@@ -312,11 +317,12 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
             logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
-            ncf.virtual_networks.create_or_update(resource_group_name,
-                                                  vnet_name,
-                                                  VirtualNetwork(name=vnet_name,
-                                                                 location=location,
-                                                                 address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
+            ncf.virtual_networks.begin_create_or_update(resource_group_name,
+                                                        vnet_name,
+                                                        VirtualNetwork(name=vnet_name,
+                                                                       location=location,
+                                                                       polling=False,
+                                                                       address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,
             location=location,
@@ -324,38 +330,19 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
             delegations=[aci_delegation])
 
         logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
-        subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+        subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
-    NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
-                                                                                                    'ContainerNetworkInterfaceConfiguration',
-                                                                                                    'IPConfigurationProfile',
-                                                                                                    resource_type=ResourceType.MGMT_NETWORK)
-    # In all cases, create the network profile with aci NIC
-    network_profile = NetworkProfile(
-        name=default_network_profile_name,
-        location=location,
-        container_network_interface_configurations=[ContainerNetworkInterfaceConfiguration(
-            name="eth0",
-            ip_configurations=[IPConfigurationProfile(
-                name="ipconfigprofile",
-                subnet=subnet
-            )]
-        )]
-    )
-
-    logger.info('Creating network profile "%s" in resource group "%s"', default_network_profile_name, resource_group_name)
-    network_profile = ncf.network_profiles.create_or_update(resource_group_name, default_network_profile_name, network_profile).result()
-
-    return network_profile.id
+    return subnet.id
 
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     from msrestazure.tools import parse_resource_id
-    log_analytics_client = cf_log_analytics(cli_ctx)
+    log_analytics_workspace_client = cf_log_analytics_workspace(cli_ctx)
+    log_analytics_workspace_shared_keys_client = cf_log_analytics_workspace_shared_keys(cli_ctx)
 
-    for workspace in log_analytics_client.list():
+    for workspace in log_analytics_workspace_client.list():
         if log_analytics_workspace in (workspace.name, workspace.customer_id):
-            keys = log_analytics_client.get_shared_keys(
+            keys = log_analytics_workspace_shared_keys_client.get_shared_keys(
                 parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
             log_analytics = LogAnalytics(
@@ -369,6 +356,7 @@ def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     return None, {}
 
 
+# pylint: disable=unsupported-assignment-operation,protected-access
 def _create_update_from_file(cli_ctx, resource_group_name, name, location, file, no_wait):
     resource_client = cf_resource(cli_ctx)
     container_group_client = cf_container_groups(cli_ctx)
@@ -394,15 +382,14 @@ def _create_update_from_file(cli_ctx, resource_group_name, name, location, file,
 
     cg_defintion['name'] = name
 
-    location = location or cg_defintion.get('location', None)
-    if not location:
-        location = resource_client.resource_groups.get(resource_group_name).location
+    if cg_defintion.get('location'):
+        location = cg_defintion.get('location')
     cg_defintion['location'] = location
 
-    api_version = cg_defintion.get('apiVersion', None) or container_group_client.api_version
+    api_version = cg_defintion.get('apiVersion', None) or container_group_client._config.api_version
 
     return sdk_no_wait(no_wait,
-                       resource_client.resources.create_or_update,
+                       resource_client.resources.begin_create_or_update,
                        resource_group_name,
                        "Microsoft.ContainerInstance",
                        '',
@@ -420,17 +407,40 @@ def _create_resource_requirements(cpu, memory):
         return ResourceRequirements(requests=container_resource_requests)
 
 
-def _create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
-    """Create image registry credentials. """
+def _create_image_registry_credentials(cmd, resource_group_name, registry_login_server, registry_username, registry_password, image, identity):
+    from msrestazure.tools import is_valid_resource_id
     image_registry_credentials = None
+
+    if identity:
+        # Get full resource ID if only identity name is provided
+        if not is_valid_resource_id(identity):
+            msi_client = cf_msi(cmd.cli_ctx)
+            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
+                                                               resource_name=identity).id
+        if registry_login_server:
+            image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
+                                                                  username=registry_username,
+                                                                  password=registry_password,
+                                                                  identity=identity)]
+        elif ACR_SERVER_DELIMITER in image.split("/")[0]:
+            acr_server = image.split("/")[0] if image.split("/") else None
+            if acr_server:
+                image_registry_credentials = [ImageRegistryCredential(server=acr_server,
+                                                                      username=registry_username,
+                                                                      password=registry_password,
+                                                                      identity=identity)]
+        else:
+            raise RequiredArgumentMissingError('Failed to parse login server from image name; please explicitly specify --registry-server.')
+        return image_registry_credentials
+
     if registry_login_server:
         if not registry_username:
-            raise CLIError('Please specify --registry-username in order to use custom image registry.')
+            raise RequiredArgumentMissingError('Please specify --registry-username in order to use custom image registry.')
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-password in order to use custom image registry.')
+                raise RequiredArgumentMissingError('Please specify --registry-password in order to use custom image registry.')
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
@@ -439,13 +449,13 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
             try:
                 registry_username = prompt(msg='Image registry username: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+                raise RequiredArgumentMissingError('Please specify --registry-username in order to use Azure Container Registry.')
 
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
             except NoTTYException:
-                raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
+                raise RequiredArgumentMissingError('Please specify --registry-password in order to use Azure Container Registry.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
         if acr_server:
@@ -459,7 +469,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                                                                   username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse login server from image name; please explicitly specify --registry-server.')
+            raise RequiredArgumentMissingError('Failed to parse login server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 
@@ -524,12 +534,12 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports, protocol, dns_name_label, network_profile):
+def _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id):
     """Create IP address. """
     if (ip_address and ip_address.lower() == 'public') or dns_name_label:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          dns_name_label=dns_name_label, type=ContainerGroupIpAddressType.public)
-    if network_profile:
+    if subnet_id:
         return IpAddress(ports=[Port(protocol=protocol, port=p) for p in ports],
                          type=ContainerGroupIpAddressType.private)
 
@@ -557,6 +567,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(container_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
+# pylint: disable=protected-access
 def container_export(cmd, resource_group_name, name, file):
     resource_client = cf_resource(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
@@ -565,8 +576,8 @@ def container_export(cmd, resource_group_name, name, file):
                                              '',
                                              "containerGroups",
                                              name,
-                                             container_group_client.api_version,
-                                             False).__dict__
+                                             container_group_client._config.api_version).__dict__
+
     # Remove unwanted properites
     resource['properties'].pop('instanceView', None)
     resource.pop('sku', None)
@@ -593,13 +604,13 @@ def container_export(cmd, resource_group_name, name, file):
         resource['properties']['containers'][i]['properties'].pop('instanceView', None)
 
     # Add the api version
-    resource['apiVersion'] = container_group_client.api_version
+    resource['apiVersion'] = container_group_client._config.api_version
 
     with open(file, 'w+') as f:
         yaml.safe_dump(resource, f, default_flow_style=False)
 
 
-def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
+def container_exec(cmd, resource_group_name, name, exec_command, container_name=None):
     """Start exec for a container. """
 
     container_client = cf_container(cmd.cli_ctx)
@@ -611,84 +622,128 @@ def container_exec(cmd, resource_group_name, name, exec_command, container_name=
         if container_name is None:
             container_name = container_group.containers[0].name
 
-        terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
+        try:
+            terminalsize = os.get_terminal_size()
+        except OSError:
+            terminalsize = os.terminal_size((80, 24))
+        terminal_size = ContainerExecRequestTerminalSize(rows=terminalsize.lines, cols=terminalsize.columns)
+        exec_request = ContainerExecRequest(command=exec_command, terminal_size=terminal_size)
 
-        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_command, terminal_size)
+        execContainerResponse = container_client.execute_command(resource_group_name, name, container_name, exec_request)
 
         if platform.system() is WINDOWS_NAME:
-            _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_windows(execContainerResponse.web_socket_uri, execContainerResponse.password)
         else:
-            _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+            _start_exec_pipe_linux(execContainerResponse.web_socket_uri, execContainerResponse.password)
 
     else:
         raise CLIError('--container-name required when container group has more than one container.')
 
 
-def _start_exec_pipe_win(web_socket_uri, password):
+def _start_exec_pipe_windows(web_socket_uri, password):
+    import colorama
+    colorama.deinit()
+    enable_vt_mode()
+    buff = bytearray()
+    lock = threading.Lock()
 
-    def _on_ws_open(ws):
+    def _on_ws_open_windows(ws):
         ws.send(password)
-        t = threading.Thread(target=_capture_stdin, args=[ws])
-        t.daemon = True
-        t.start()
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_windows, buff, lock], daemon=True)
+        readKeyboard.start()
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_windows, on_message=_on_ws_msg)
+    # in windows, msvcrt.getch doesn't give us ctrl+C so we have to manually catch it with kb interrupt and send it over the socket
+    websocketRun = threading.Thread(target=ws.run_forever)
+    websocketRun.start()
+    while websocketRun.is_alive():
+        try:
+            time.sleep(0.01)
+        except KeyboardInterrupt:
+            try:
+                ws.send(b'\x03')  # CTRL-C character (ETX character)
+            finally:
+                pass
+    colorama.reinit()
 
-    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open, on_message=_on_ws_msg)
 
+def _start_exec_pipe_linux(web_socket_uri, password):
+    stdin_fd = sys.stdin.fileno()
+    old_tty = termios.tcgetattr(stdin_fd)
+    old_winch_handler = signal.getsignal(signal.SIGWINCH)
+    tty.setraw(stdin_fd)
+    tty.setcbreak(stdin_fd)
+    buff = bytearray()
+    lock = threading.Lock()
+
+    def _on_ws_open_linux(ws):
+        ws.send(password)
+        readKeyboard = threading.Thread(target=_capture_stdin, args=[_getch_linux, buff, lock], daemon=True)
+        readKeyboard.start()
+        flushKeyboard = threading.Thread(target=_flush_stdin, args=[ws, buff, lock], daemon=True)
+        flushKeyboard.start()
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
     ws.run_forever()
+    termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+    signal.signal(signal.SIGWINCH, old_winch_handler)
 
 
 def _on_ws_msg(ws, msg):
-    sys.stdout.write(msg)
+    if isinstance(msg, str):
+        msg = msg.encode()
+    sys.stdout.buffer.write(msg)
     sys.stdout.flush()
 
 
-def _capture_stdin(ws):
+def _capture_stdin(getch_func, buff, lock):
+    # this method will fill up the buffer from one thread (using the lock)
     while True:
-        if msvcrt.kbhit:
-            x = msvcrt.getch()
-            ws.send(x)
+        try:
+            x = getch_func()
+            lock.acquire()
+            buff.extend(x)
+            lock.release()
+        finally:
+            if lock.locked():
+                lock.release()
 
 
-def _start_exec_pipe(web_socket_uri, password):
-    ws = websocket.create_connection(web_socket_uri)
+def _flush_stdin(ws, buff, lock):
+    # this method will flush the buffer out to the websocket (using the lock)
+    while True:
+        time.sleep(0.01)
+        try:
+            if not buff:
+                continue
+            lock.acquire()
+            x = bytes(buff)
+            buff.clear()
+            lock.release()
+            ws.send(x, opcode=0x2)  # OPCODE_BINARY = 0x2
+        except (OSError, IOError, websocket.WebSocketConnectionClosedException) as e:
+            if isinstance(e, websocket.WebSocketConnectionClosedException):
+                pass
+            elif e.errno == 9:  # [Errno 9] Bad file descriptor
+                pass
+            elif e.args and e.args[0] == errno.EINTR:
+                pass
+            else:
+                raise
+        finally:
+            if lock.locked():
+                lock.release()
 
-    oldtty = termios.tcgetattr(sys.stdin)
-    old_handler = signal.getsignal(signal.SIGWINCH)
 
-    try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
-        ws.send(password)
-        while True:
-            try:
-                if not _cycle_exec_pipe(ws):
-                    break
-            except (select.error, IOError) as e:
-                if e.args and e.args[0] == errno.EINTR:
-                    pass
-                else:
-                    raise
-    except websocket.WebSocketException:
-        pass
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-        signal.signal(signal.SIGWINCH, old_handler)
+def _getch_windows():
+    while not msvcrt.kbhit():
+        time.sleep(0.01)
+    return msvcrt.getch()
 
 
-def _cycle_exec_pipe(ws):
-    r, _, _ = select.select([ws.sock, sys.stdin], [], [])
-    if ws.sock in r:
-        data = ws.recv()
-        if not data:
-            return False
-        sys.stdout.write(data)
-        sys.stdout.flush()
-    if sys.stdin in r:
-        x = sys.stdin.read(1)
-        if not x:
-            return True
-        ws.send(x)
-    return True
+def _getch_linux():
+    ch = sys.stdin.read(1)
+    return ch.encode()
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):

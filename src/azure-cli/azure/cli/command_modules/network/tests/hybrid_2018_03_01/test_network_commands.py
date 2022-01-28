@@ -8,12 +8,12 @@
 import os
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 
 from knack.util import CLIError
 
@@ -291,7 +291,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
 
-        cipher_suite = 'TLS_RSA_WITH_AES_128_CBC_SHA256'
+        cipher_suite = 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'
         self.kwargs['cipher'] = cipher_suite
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {cipher} --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
@@ -681,6 +681,7 @@ class NetworkZonedPublicIpScenarioTest(ScenarioTest):
 class NetworkRouteFilterScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_route_filter')
+    @AllowLargeResponse()
     def test_network_route_filter(self, resource_group):
         self.kwargs['filter'] = 'filter1'
         self.cmd('network route-filter create -g {rg} -n {filter} --tags foo=doo')
@@ -745,6 +746,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         self.cmd('network express-route auth list --resource-group {rg} --circuit-name {er}', checks=self.is_empty())
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route(self, resource_group):
 
@@ -802,6 +804,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
 
@@ -1651,9 +1654,12 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
             'subnet': 'subnet1'
         })
         self.cmd('network vnet list-endpoint-services -l westus', checks=[
-            self.check('length(@)', 9),
+            self.check('length(@)', 11),
             self.check('@[0].name', 'Microsoft.Storage')
         ])
+
+        result = self.cmd('network vnet list-endpoint-services -l westus').get_output_in_json()
+        self.assertGreaterEqual(len(result), 2)
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.1.0/24 --service-endpoints Microsoft.Storage',
                  checks=self.check('serviceEndpoints[0].service', 'Microsoft.Storage'))
@@ -1867,13 +1873,13 @@ class NetworkVpnClientPackageScenarioTest(LiveScenarioTest):
 
 # convert to ScenarioTest and re-record when #6009 is fixed
 class NetworkWatcherScenarioTest(LiveScenarioTest):
-    import mock
+    from unittest import mock
 
     def _mock_thread_count():
         return 1
 
     def _network_watcher_configure(self):
-        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
+        self.cmd('network watcher configure -g {rg} --locations westus Westus2 westcentraluS --enabled')
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')

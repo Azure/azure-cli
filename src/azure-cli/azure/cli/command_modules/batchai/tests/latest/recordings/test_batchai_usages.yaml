@@ -2,25 +2,38 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [batchai list-usages]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.15 (Linux-4.16.12-300.fc28.x86_64-x86_64-with-fedora-28-Twenty_Eight)
-          requests/2.18.4 msrest/0.4.29 msrest_azure/0.4.31 azure-mgmt-batchai/2.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.37]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - batchai list-usages
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-batchai/7.0.0b1 Python/3.8.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/northeurope/usages?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/usages?api-version=2018-05-01
   response:
-    body: {string: !!python/unicode '{"value":[{"unit":"Count","currentValue":5,"limit":20,"name":{"value":"Clusters","localizedValue":"Clusters"}},{"unit":"Count","currentValue":61,"limit":600,"name":{"value":"Total
+    body:
+      string: '{"value":[{"unit":"Count","currentValue":2,"limit":200,"name":{"value":"Total
+        Cluster vCPUs","localizedValue":"Total Cluster vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Total
         Cluster Dedicated Regional vCPUs","localizedValue":"Total Cluster Dedicated
-        Regional vCPUs"}},{"unit":"Count","currentValue":1,"limit":24,"name":{"value":"Standard
+        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         D Family Cluster Dedicated vCPUs","localizedValue":"Standard D Family Cluster
         Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         Dv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard Dv2 Family
-        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":60,"limit":600,"name":{"value":"Standard
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Dv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard Dv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        DSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard DSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        DSv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard DSv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        FSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard FSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         NC Family Cluster Dedicated vCPUs","localizedValue":"Standard NC Family Cluster
         Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
         NCv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCv2 Family
@@ -28,61 +41,158 @@ interactions:
         NCv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCv3 Family
         Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
         ND Family Cluster Dedicated vCPUs","localizedValue":"Standard ND Family Cluster
-        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NDv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard NDv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         NV Family Cluster Dedicated vCPUs","localizedValue":"Standard NV Family Cluster
-        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":600,"name":{"value":"Total
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        MS Family Cluster Dedicated vCPUs","localizedValue":"Standard MS Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NVv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NVv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard HBv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HC Family Cluster Dedicated vCPUs","localizedValue":"Standard HC Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NCasT4_v3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCasT4_v3
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NDas_A100_v4 Family Cluster Dedicated vCPUs","localizedValue":"Standard NDas_A100_v4
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NC Promo Family Cluster Dedicated vCPUs","localizedValue":"Standard NC Promo
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        EAv4 Family Cluster Dedicated vCPUs","localizedValue":"Standard EAv4 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        H Family Cluster Dedicated vCPUs","localizedValue":"Standard H Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBS Family Cluster Dedicated vCPUs","localizedValue":"Standard HBS Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Ev3 Family Cluster Dedicated vCPUs","localizedValue":"Standard Ev3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Ddsv4 Family Cluster Dedicated vCPUs","localizedValue":"Standard Ddsv4 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        LSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard LSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard HBv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Total
         Cluster LowPriority Regional vCPUs","localizedValue":"Total Cluster Low Priority
-        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         D Family Cluster LowPriority vCPUs","localizedValue":"Standard D Family Cluster
-        Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         Dv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard Dv2 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":600,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Dv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard Dv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        DSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard DSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        DSv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard DSv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        FSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard FSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NC Family Cluster LowPriority vCPUs","localizedValue":"Standard NC Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NCv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCv2 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NCv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCv3 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         ND Family Cluster LowPriority vCPUs","localizedValue":"Standard ND Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NDv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard NDv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NV Family Cluster LowPriority vCPUs","localizedValue":"Standard NV Family
-        Cluster Low Priority vCPUs"}}]}'}
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        MS Family Cluster LowPriority vCPUs","localizedValue":"Standard MS Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NVv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NVv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard HBv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HC Family Cluster LowPriority vCPUs","localizedValue":"Standard HC Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NCasT4_v3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCasT4_v3
+        Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NDas_A100_v4 Family Cluster LowPriority vCPUs","localizedValue":"Standard
+        NDas_A100_v4 Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NC Promo Family Cluster LowPriority vCPUs","localizedValue":"Standard NC Promo
+        Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        EAv4 Family Cluster LowPriority vCPUs","localizedValue":"Standard EAv4 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        H Family Cluster LowPriority vCPUs","localizedValue":"Standard H Family Cluster
+        LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBS Family Cluster LowPriority vCPUs","localizedValue":"Standard HBS Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Ev3 Family Cluster LowPriority vCPUs","localizedValue":"Standard Ev3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Ddsv4 Family Cluster LowPriority vCPUs","localizedValue":"Standard Ddsv4 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        LSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard LSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard HBv3 Family
+        Cluster LowPriority vCPUs"}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['2856']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Jun 2018 21:21:43 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [91d7d5eb-e5d9-4cfc-8201-0c26aa0df90d]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '9534'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jun 2021 05:31:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:22307ea5-0af8-473a-8389-17649f981c86
+      request-id:
+      - f5864b98-4133-481f-8f27-1d0e9a2293c8
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-request-time:
+      - '0.045'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [batchai list-usages]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.15 (Linux-4.16.12-300.fc28.x86_64-x86_64-with-fedora-28-Twenty_Eight)
-          requests/2.18.4 msrest/0.4.29 msrest_azure/0.4.31 azure-mgmt-batchai/2.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.37]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - batchai list-usages
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -o
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-batchai/7.0.0b1 Python/3.8.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/northeurope/usages?api-version=2018-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/usages?api-version=2018-05-01
   response:
-    body: {string: !!python/unicode '{"value":[{"unit":"Count","currentValue":5,"limit":20,"name":{"value":"Clusters","localizedValue":"Clusters"}},{"unit":"Count","currentValue":61,"limit":600,"name":{"value":"Total
+    body:
+      string: '{"value":[{"unit":"Count","currentValue":2,"limit":200,"name":{"value":"Total
+        Cluster vCPUs","localizedValue":"Total Cluster vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Total
         Cluster Dedicated Regional vCPUs","localizedValue":"Total Cluster Dedicated
-        Regional vCPUs"}},{"unit":"Count","currentValue":1,"limit":24,"name":{"value":"Standard
+        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         D Family Cluster Dedicated vCPUs","localizedValue":"Standard D Family Cluster
         Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         Dv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard Dv2 Family
-        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":60,"limit":600,"name":{"value":"Standard
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Dv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard Dv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        DSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard DSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        DSv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard DSv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        FSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard FSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         NC Family Cluster Dedicated vCPUs","localizedValue":"Standard NC Family Cluster
         Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
         NCv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCv2 Family
@@ -90,37 +200,121 @@ interactions:
         NCv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCv3 Family
         Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
         ND Family Cluster Dedicated vCPUs","localizedValue":"Standard ND Family Cluster
-        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NDv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard NDv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
         NV Family Cluster Dedicated vCPUs","localizedValue":"Standard NV Family Cluster
-        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":600,"name":{"value":"Total
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        MS Family Cluster Dedicated vCPUs","localizedValue":"Standard MS Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NVv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NVv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard HBv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HC Family Cluster Dedicated vCPUs","localizedValue":"Standard HC Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NCasT4_v3 Family Cluster Dedicated vCPUs","localizedValue":"Standard NCasT4_v3
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NDas_A100_v4 Family Cluster Dedicated vCPUs","localizedValue":"Standard NDas_A100_v4
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        NC Promo Family Cluster Dedicated vCPUs","localizedValue":"Standard NC Promo
+        Family Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        EAv4 Family Cluster Dedicated vCPUs","localizedValue":"Standard EAv4 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        H Family Cluster Dedicated vCPUs","localizedValue":"Standard H Family Cluster
+        Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBS Family Cluster Dedicated vCPUs","localizedValue":"Standard HBS Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Ev3 Family Cluster Dedicated vCPUs","localizedValue":"Standard Ev3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Ddsv4 Family Cluster Dedicated vCPUs","localizedValue":"Standard Ddsv4 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        LSv2 Family Cluster Dedicated vCPUs","localizedValue":"Standard LSv2 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        HBv3 Family Cluster Dedicated vCPUs","localizedValue":"Standard HBv3 Family
+        Cluster Dedicated vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Total
         Cluster LowPriority Regional vCPUs","localizedValue":"Total Cluster Low Priority
-        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Regional vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         D Family Cluster LowPriority vCPUs","localizedValue":"Standard D Family Cluster
-        Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         Dv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard Dv2 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":600,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Dv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard Dv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        DSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard DSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        DSv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard DSv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        FSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard FSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NC Family Cluster LowPriority vCPUs","localizedValue":"Standard NC Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NCv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCv2 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NCv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCv3 Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":0,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         ND Family Cluster LowPriority vCPUs","localizedValue":"Standard ND Family
-        Cluster Low Priority vCPUs"}},{"unit":"Count","currentValue":0,"limit":24,"name":{"value":"Standard
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NDv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard NDv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
         NV Family Cluster LowPriority vCPUs","localizedValue":"Standard NV Family
-        Cluster Low Priority vCPUs"}}]}'}
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        MS Family Cluster LowPriority vCPUs","localizedValue":"Standard MS Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NVv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NVv3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard HBv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HC Family Cluster LowPriority vCPUs","localizedValue":"Standard HC Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NCasT4_v3 Family Cluster LowPriority vCPUs","localizedValue":"Standard NCasT4_v3
+        Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NDas_A100_v4 Family Cluster LowPriority vCPUs","localizedValue":"Standard
+        NDas_A100_v4 Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        NC Promo Family Cluster LowPriority vCPUs","localizedValue":"Standard NC Promo
+        Family Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        EAv4 Family Cluster LowPriority vCPUs","localizedValue":"Standard EAv4 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        H Family Cluster LowPriority vCPUs","localizedValue":"Standard H Family Cluster
+        LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBS Family Cluster LowPriority vCPUs","localizedValue":"Standard HBS Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Ev3 Family Cluster LowPriority vCPUs","localizedValue":"Standard Ev3 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        Ddsv4 Family Cluster LowPriority vCPUs","localizedValue":"Standard Ddsv4 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        LSv2 Family Cluster LowPriority vCPUs","localizedValue":"Standard LSv2 Family
+        Cluster LowPriority vCPUs"}},{"unit":"Count","currentValue":0,"limit":-1,"name":{"value":"Standard
+        HBv3 Family Cluster LowPriority vCPUs","localizedValue":"Standard HBv3 Family
+        Cluster LowPriority vCPUs"}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['2856']
-      content-type: [application/json; charset=utf-8]
-      date: ['Thu, 07 Jun 2018 21:21:44 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [ba590521-445b-4bf4-92ef-42c7ae79e191]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '9534'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jun 2021 05:31:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:22307ea5-0af8-473a-8389-17649f981c86
+      request-id:
+      - aa961345-a745-491c-b278-aca07cc58a73
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-request-time:
+      - '0.027'
+    status:
+      code: 200
+      message: OK
 version: 1

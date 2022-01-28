@@ -14,7 +14,6 @@
 
 #pylint: disable=line-too-long
 
-from __future__ import print_function
 import os
 import sys
 import platform
@@ -42,10 +41,10 @@ AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
 """
 
-VIRTUALENV_VERSION = '16.7.7'
+VIRTUALENV_VERSION = '16.7.11'
 VIRTUALENV_ARCHIVE = 'virtualenv-'+VIRTUALENV_VERSION+'.tar.gz'
 VIRTUALENV_DOWNLOAD_URL = 'https://pypi.python.org/packages/source/v/virtualenv/'+VIRTUALENV_ARCHIVE
-VIRTUALENV_ARCHIVE_SHA256 = 'd257bb3773e48cac60e475a19b608996c73f4d333b3ba2e4e57d5ac6134e0136'
+VIRTUALENV_ARCHIVE_SHA256 = '0f73ef551d889bf4b3241f1819aaf5f5c7e27259c1537255b1f63207552919b1'
 
 DEFAULT_INSTALL_DIR = os.path.expanduser(os.path.join('~', 'lib', 'azure-cli'))
 DEFAULT_EXEC_DIR = os.path.expanduser(os.path.join('~', 'bin'))
@@ -63,7 +62,7 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -F _python_argcomplete "az"
+complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 """
 
 
@@ -149,10 +148,6 @@ def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, 'bin', 'pip')
     cmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, 'azure-cli', '--upgrade']
     exec_command(cmd)
-    # Temporary fix to make sure that we have empty __init__.py files for the azure site-packages folder.
-    # (including the pkg_resources/declare namespace significantly impacts startup perf for the CLI)
-    fixupcmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, '--upgrade', '--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg']
-    exec_command(fixupcmd)
 
 
 def create_executable(exec_dir, install_dir):
@@ -368,7 +363,7 @@ def verify_native_dependencies():
         python_dep = 'python3-dev' if is_python3 else 'python-dev'
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep]
-        elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
+        elif distname == 'ubuntu' and version in ['15.10', '16.04', '18.04']or distname == 'debian' and version.startswith('8'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep, 'build-essential']
     elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
@@ -380,7 +375,7 @@ def verify_native_dependencies():
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         python_dep = 'python3-devel' if is_python3 else 'python-devel'
-        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'libopenssl-devel']
 
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)

@@ -146,7 +146,7 @@ examples:
 
 helps['eventhubs eventhub list'] = """
 type: command
-short-summary: List the EventHub by Namepsace
+short-summary: List the EventHub by Namespace
 examples:
   - name: Get the Eventhubs by Namespace.
     text: az eventhubs eventhub list --resource-group myresourcegroup --namespace-name mynamespace
@@ -424,4 +424,174 @@ short-summary: Updates the EventHubs Namespace
 examples:
   - name: Update a new namespace.
     text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
+"""
+
+helps['eventhubs cluster'] = """
+type: group
+short-summary: Manage Azure EventHubs Clusters
+"""
+
+helps['eventhubs cluster create'] = """
+type: command
+short-summary: Create EventHubs Cluster
+examples:
+  - name: Create a new cluster.
+    text: az eventhubs cluster create --resource-group myresourcegroup --name mycluster --location mylocation --capacity 1 --tags tag=value
+"""
+
+helps['eventhubs cluster update'] = """
+type: command
+short-summary: Update tags of EventHubs Cluster
+examples:
+  - name: Update tags of a existing cluster.
+    text: az eventhubs cluster update --resource-group myresourcegroup --name mycluster --tags tag=value
+"""
+
+helps['eventhubs cluster available-region'] = """
+type: command
+short-summary: List the quantity of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
+examples:
+  - name: List of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
+    text: az eventhubs cluster available-region
+"""
+
+helps['eventhubs cluster show'] = """
+type: command
+short-summary: Get the resource description of the specified Event Hubs Cluster.
+examples:
+  - name: Get the resource description of the specified Event Hubs Cluster.
+    text: az eventhubs cluster show --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster delete'] = """
+type: command
+short-summary: Delete an existing Event Hubs Cluster.
+examples:
+  - name: Delete an existing Event Hubs Cluster.
+    text: az eventhubs cluster delete --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster list'] = """
+type: command
+short-summary: List the available Event Hubs Clusters within an ARM resource group.
+examples:
+  - name: List the available Event Hubs Clusters within an ARM resource group.
+    text: az eventhubs cluster list --resource-group myresourcegroup
+"""
+
+helps['eventhubs cluster namespace'] = """
+type: group
+short-summary: Manage Azure EventHubs Cluster for namespace
+"""
+
+helps['eventhubs cluster namespace list'] = """
+type: command
+short-summary: List of Namespaces within given Cluster.
+examples:
+  - name: List of Namespaces within given Cluster.
+    text: az eventhubs cluster namespace list --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the Cluster operation is completed.
+"""
+
+helps['eventhubs namespace private-endpoint-connection'] = """
+type: group
+short-summary: Manage eventhubs namespace private endpoint connection.
+"""
+
+helps['eventhubs namespace private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for eventhubs namesapce.
+examples:
+  - name: Approve a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Eventhub/namesapces/mynamepsace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name myconnection
+  - name: Approve a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection approve -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Delete a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for eventhubs namespace using account name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name myconnection
+  - name: Delete a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection delete -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Reject a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name myconnection
+  - name: Reject a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection reject -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for eventhubs namespace.
+examples:
+  - name: Show details of a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        az eventhubs namespace private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.EventHub/namespaces/mynamespace/privateEndpointConnections/mynamespace.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for eventhubs namespace by ID.
+    text: |
+        id = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].id")
+        az eventhubs namespace private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        az eventhubs namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name myconnection
+  - name: Show details of a private endpoint connection request for eventhubs namespace using namespace name and connection name.
+    text: |
+        name = (az eventhubs namespace show -n mynamespace --query "privateEndpointConnections[0].name")
+        az eventhubs namespace private-endpoint-connection show -g myRg --namespace-name mynamespace --name $name
+"""
+
+helps['eventhubs namespace private-link-resource'] = """
+type: group
+short-summary: Manage eventhubs namespace private link resources.
+"""
+
+helps['eventhubs namespace private-link-resource show'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a eventhubs namespace.
+examples:
+  - name: Get the private link resources that need to be created for a eventhubs namespace.
+    text: |
+        az eventhubs namespace private-link-resource show --namespace-name mynamespace -g MyResourceGroup
 """

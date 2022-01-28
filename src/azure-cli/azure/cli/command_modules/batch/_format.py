@@ -7,7 +7,7 @@ import json
 
 from collections import OrderedDict
 
-from six.moves.urllib.parse import unquote  # pylint: disable=import-error
+from urllib.parse import unquote
 
 HEAD_PROPERTIES = {  # Convert response headers to properties.
     'Last-Modified': 'lastModified',

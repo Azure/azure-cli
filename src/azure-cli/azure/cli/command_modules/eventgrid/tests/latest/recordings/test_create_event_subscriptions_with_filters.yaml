@@ -1,54 +1,57 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-06-03T22:59:33Z"}}'
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "StorageV2", "location": "centraluseuap",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - group create
+      - storage account create
       Connection:
       - keep-alive
       Content-Length:
-      - '110'
+      - '175'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - --location --name --tag
+      - -g -n --sku -l
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-03T22:59:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"centraluseuap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-07-16T02:02:04.4949306Z","key2":"2021-07-16T02:02:04.4949306Z"},"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-07-16T02:02:04.4324314Z","primaryEndpoints":{"dfs":"https://clieventgrid000002.dfs.core.windows.net/","web":"https://clieventgrid000002.z2.web.core.windows.net/","blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"centraluseuap","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '1500'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Mon, 03 Jun 2019 22:59:35 GMT
+      - Fri, 16 Jul 2021 02:02:25 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -57,40 +60,98 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - group show
+      - storage account update
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -o
+      - -g -n --set
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-06-03T22:59:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"centraluseuap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-07-16T02:02:04.4949306Z","key2":"2021-07-16T02:02:04.4949306Z"},"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-07-16T02:02:04.4324314Z","primaryEndpoints":{"dfs":"https://clieventgrid000002.dfs.core.windows.net/","web":"https://clieventgrid000002.z2.web.core.windows.net/","blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"centraluseuap","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '1500'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
       date:
-      - Mon, 03 Jun 2019 22:59:35 GMT
+      - Fri, 16 Jul 2021 02:02:26 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "tags": {}, "kind": "StorageV2", "properties":
+      {"encryption": {"services": {"blob": {"enabled": true, "keyType": "Account"},
+      "file": {"enabled": true, "keyType": "Account"}}, "keySource": "Microsoft.Storage"},
+      "accessTier": "Hot", "supportsHttpsTrafficOnly": true, "networkAcls": {"bypass":
+      "AzureServices", "virtualNetworkRules": [], "ipRules": [], "defaultAction":
+      "Allow"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '411'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --set
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2021-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002","name":"clieventgrid000002","type":"Microsoft.Storage/storageAccounts","location":"centraluseuap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-07-16T02:02:04.4949306Z","key2":"2021-07-16T02:02:04.4949306Z"},"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-07-16T02:02:04.5105576Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-07-16T02:02:04.4324314Z","primaryEndpoints":{"dfs":"https://clieventgrid000002.dfs.core.windows.net/","web":"https://clieventgrid000002.z2.web.core.windows.net/","blob":"https://clieventgrid000002.blob.core.windows.net/","queue":"https://clieventgrid000002.queue.core.windows.net/","table":"https://clieventgrid000002.table.core.windows.net/","file":"https://clieventgrid000002.file.core.windows.net/"},"primaryLocation":"centraluseuap","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1500'
+      content-type:
+      - application/json
+      date:
+      - Fri, 16 Jul 2021 02:02:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
       code: 200
       message: OK
@@ -112,31 +173,28 @@ interactions:
       Content-Length:
       - '509'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --source-resource-id --name --endpoint --subject-ends-with --included-event-types
         --subject-case-sensitive --labels
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2020-10-15-preview
   response:
     body:
-      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Creating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Creating","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/BB9799DC-D18E-49A9-9DB5-6F05D090A636?api-version=2019-06-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/7D16AD7D-53C9-43DC-97A0-B0F21F262EB9?api-version=2020-10-15-preview
       cache-control:
       - no-cache
       content-length:
-      - '895'
+      - '1033'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:42 GMT
+      - Fri, 16 Jul 2021 02:02:29 GMT
       expires:
       - '-1'
       pragma:
@@ -147,8 +205,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '899'
     status:
       code: 201
       message: Created
@@ -156,7 +214,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -167,22 +225,21 @@ interactions:
       - --source-resource-id --name --endpoint --subject-ends-with --included-event-types
         --subject-case-sensitive --labels
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/BB9799DC-D18E-49A9-9DB5-6F05D090A636?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/7D16AD7D-53C9-43DC-97A0-B0F21F262EB9?api-version=2020-10-15-preview
   response:
     body:
-      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationsStatus/BB9799DC-D18E-49A9-9DB5-6F05D090A636?api-version=2019-06-01","name":"bb9799dc-d18e-49a9-9db5-6f05d090a636","status":"Succeeded"}'
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/7D16AD7D-53C9-43DC-97A0-B0F21F262EB9?api-version=2020-10-15-preview","name":"7d16ad7d-53c9-43dc-97a0-b0f21f262eb9","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '262'
+      - '294'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:53 GMT
+      - Fri, 16 Jul 2021 02:02:39 GMT
       expires:
       - '-1'
       pragma:
@@ -204,7 +261,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -215,22 +272,21 @@ interactions:
       - --source-resource-id --name --endpoint --subject-ends-with --included-event-types
         --subject-case-sensitive --labels
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2020-10-15-preview
   response:
     body:
-      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid","maxEventsPerBatch":1,"preferredBatchSizeInKilobytes":64},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '919'
+      - '1154'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:54 GMT
+      - Fri, 16 Jul 2021 02:02:39 GMT
       expires:
       - '-1'
       pragma:
@@ -262,24 +318,21 @@ interactions:
       ParameterSetName:
       - --source-resource-id --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2020-10-15-preview
   response:
     body:
-      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid","maxEventsPerBatch":1,"preferredBatchSizeInKilobytes":64},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '919'
+      - '1154'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:55 GMT
+      - Fri, 16 Jul 2021 02:02:41 GMT
       expires:
       - '-1'
       pragma:
@@ -311,24 +364,21 @@ interactions:
       ParameterSetName:
       - --include-full-endpoint-url --source-resource-id --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2020-10-15-preview
   response:
     body:
-      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
+      string: '{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid","maxEventsPerBatch":1,"preferredBatchSizeInKilobytes":64},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '919'
+      - '1154'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:54 GMT
+      - Fri, 16 Jul 2021 02:02:41 GMT
       expires:
       - '-1'
       pragma:
@@ -362,12 +412,9 @@ interactions:
       ParameterSetName:
       - --include-full-endpoint-url --source-resource-id --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2/getFullUrl?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2/getFullUrl?api-version=2020-10-15-preview
   response:
     body:
       string: '{"endpointUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>"}'
@@ -379,7 +426,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:55 GMT
+      - Fri, 16 Jul 2021 02:02:42 GMT
       expires:
       - '-1'
       pragma:
@@ -413,122 +460,21 @@ interactions:
       ParameterSetName:
       - --source-resource-id
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/topicTypes/Microsoft.Resources.ResourceGroups/eventSubscriptions?api-version=2019-06-01&$top=100
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2020-10-15-preview&$top=100
   response:
     body:
-      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid","maxEventsPerBatch":1,"preferredBatchSizeInKilobytes":64},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '931'
+      - '1166'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventgrid event-subscription list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --location
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$top=100
-  response:
-    body:
-      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/canaryeh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-26.brazilus.logic.azure.com/workflows/c90432e8c58d4f348f5072e950bc4a27/triggers/When_a_resource_event_occurs/versions/08586993622831880989/run"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/canaryeh/providers/Microsoft.EventGrid/eventSubscriptions/LogicAppd9ab501a-2fe2-426c-a676-9e90365ddbdb","name":"LogicAppd9ab501a-2fe2-426c-a676-9e90365ddbdb","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/1fun9ou1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/mysub600","name":"mysub600","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/r3wknyr3"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/allsubevents3","name":"allsubevents3","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridResourceGroup","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-18.brazilus.logic.azure.com/workflows/c22dee70ada34ffca23b5fc89232166a/triggers/When_a_resource_event_occurs/versions/08586988636200583748/run"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/LogicApp46d74b10-aa69-484e-aec2-52bfac87e2d9","name":"LogicApp46d74b10-aa69-484e-aec2-52bfac87e2d9","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Default-EventHub-EASTUS2EUAP","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-01.brazilus.logic.azure.com/workflows/87f6a4a8c5f3473ab9fd50076da6e909/triggers/On_a_resource_event/versions/08586988571716815965/run"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Default-EventHub-EASTUS2EUAP/providers/Microsoft.EventGrid/eventSubscriptions/LogicApp4a6316a3-5bda-44c8-ae67-bfb83aa31d1e","name":"LogicApp4a6316a3-5bda-44c8-ae67-bfb83aa31d1e","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/10jslly1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg/providers/Microsoft.EventGrid/eventSubscriptions/kalses112","name":"kalses112","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/egprodtestingrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/egprodtestingrg/providers/Microsoft.EventGrid/eventSubscriptions/subValid","name":"subValid","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/null","name":"null","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceDeleteSuccess"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/MyEventSubscription","name":"MyEventSubscription","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesartopics","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/11x4isl1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesartopics/providers/Microsoft.EventGrid/eventSubscriptions/cesarArmRgTest","name":"cesarArmRgTest","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteFailure"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/BuiltOnArmSubscription","name":"BuiltOnArmSubscription","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/1jimsdh1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gridResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/rgsub1","name":"rgsub1","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesartopics","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cesartopics/providers/Microsoft.EventGrid/eventSubscriptions/cesarTest3","name":"cesarTest3","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/z5gv8oz5"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg/providers/Microsoft.EventGrid/eventSubscriptions/kalses77","name":"kalses77","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/snorop","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Snorop/providers/Microsoft.EventGrid/eventSubscriptions/SomeSubNameHere","name":"SomeSubNameHere","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/ue9kc5ue"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg/providers/Microsoft.EventGrid/eventSubscriptions/armswitchtest","name":"armswitchtest","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/ue9kc5ue"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg/providers/Microsoft.EventGrid/eventSubscriptions/armswitchtest2","name":"armswitchtest2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/ue9kc5ue"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalsrg/providers/Microsoft.EventGrid/eventSubscriptions/armswitchtest3","name":"armswitchtest3","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/examplerg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/15ksip71"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/examplerg/providers/Microsoft.EventGrid/eventSubscriptions/examplesubscription2","name":"examplesubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/examplerg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/15ksip71"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/examplerg/providers/Microsoft.EventGrid/eventSubscriptions/examplesubscription4","name":"examplesubscription4","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demorg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demoRg/providers/Microsoft.EventGrid/eventSubscriptions/testRg","name":"testRg","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"AwaitingManualAction","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridtestfunctionapp.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceDeleteSuccess"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/alleventtypescheck","name":"alleventtypescheck","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/eventgridrunnertestresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventHub/namespaces/EventHubTestWithEventGrid1/eventhubs/egarmrunnereventhublocaltestwestus2"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-c5f6c255-West-US-2","name":"eg-crud-runner-subscription-c5f6c255-West-US-2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/eventgridrunnertestresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventHub/namespaces/EventHubTestWithEventGrid1/eventhubs/egarmrunnereventhublocaltestwestus2"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-88e492c5-West-US-2","name":"eg-crud-runner-subscription-88e492c5-West-US-2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/eventgridrunnertestresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventHub/namespaces/EventHubTestWithEventGrid1/eventhubs/egarmrunnereventhublocaltestwestus2"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/eg-crud-runner-subscription-86f9994d-West-US-2","name":"eg-crud-runner-subscription-86f9994d-West-US-2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/eventgridrunnertestresourcegroup","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventHub/namespaces/testeventhublocalusw2/eventhubs/testeventhublocalusw2"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/EventGridRunnerTestResourceGroup/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-West-US-2","name":"eg-arm-runner-subscription-West-US-2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgwestus2","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGWestUS2/providers/Microsoft.EventHub/namespaces/egarmrunnereventhubnamespacewestus2/eventhubs/egarmrunnereventhubwestus2"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":["TestLabel1","TestLabel2"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGWestUS2/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-West-US-2","name":"eg-arm-runner-subscription-West-US-2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/demo-devopsautomation","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://s13events.azure-automation.net/webhooks"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/Demo-DevOpsAutomation/providers/Microsoft.Compute/virtualMachines","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Demo-DevOpsAutomation/providers/Microsoft.EventGrid/eventSubscriptions/AzureAutomation","name":"AzureAutomation","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://s13events.azure-automation.net/webhooks"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/contosovms/providers/Microsoft.Compute/virtualMachines","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/VMCreation","name":"VMCreation","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/165j5xt1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/contosovms/providers/Microsoft.Compute/virtualMachines","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel"]},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/VMEventAudit","name":"VMEventAudit","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://babanisafun.azurewebsites.net/admin/extensions/EventGridExtensionConfig"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/SQLchanges","name":"SQLchanges","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://babanisafun.azurewebsites.net/admin/extensions/EventGridExtensionConfig"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/AllProdChanges","name":"AllProdChanges","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-12.westus2.logic.azure.com/workflows/92fc8cf8a9394e48a0f22738070d9132/triggers/manual/paths/invoke"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/AllDogfoodChanges","name":"AllDogfoodChanges","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-12.westus2.logic.azure.com/workflows/92fc8cf8a9394e48a0f22738070d9132/triggers/manual/paths/invoke"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/contosovms/providers/Microsoft.EventGrid/eventSubscriptions/DeploymentFailures","name":"DeploymentFailures","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://requestb.in/1huu2ug1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa/providers/Microsoft.EventGrid/eventSubscriptions/testsub","name":"testsub","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FrancosResources","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://prod-14.westcentralus.logic.azure.com/workflows/d5ef6d3cf09147529f40e36172992ff1/triggers/When_a_resource_event_occurs/versions/08586809618926790378/run"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FrancosResources/providers/Microsoft.EventGrid/eventSubscriptions/LogicApp8597fc52-2559-4c2b-b9a5-6179d2eea8d0","name":"LogicApp8597fc52-2559-4c2b-b9a5-6179d2eea8d0","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdyoajzoke3lbxojr7omt6m6oasvyr7zsho5fidxigg36zbgvesajzqx4fzlyrltzi","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdyoajzoke3lbxojr7omt6m6oasvyr7zsho5fidxigg36zbgvesajzqx4fzlyrltzi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgggqagcer44su5icztostiufuauqsivdligimbgtoufsw5t24uauwgtqvks5eucndv","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgggqagcer44su5icztostiufuauqsivdligimbgtoufsw5t24uauwgtqvks5eucndv/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testPsRG/providers/Microsoft.EventGrid/eventSubscriptions/testPsRgES5","name":"testPsRgES5","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testPsRG/providers/Microsoft.EventGrid/eventSubscriptions/testPsRgES6","name":"testPsRgES6","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpsrg","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpowershellRG/providers/Microsoft.Relay/namespaces/testpowershellhybridconnection/hybridConnections/eventgridhybridconnection1"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testPsRG/providers/Microsoft.EventGrid/eventSubscriptions/testPsRgE0123","name":"testPsRgE0123","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testPsRG/providers/Microsoft.EventGrid/eventSubscriptions/testPsRgES111333","name":"testPsRgES111333","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testpsrg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testPsRG/providers/Microsoft.EventGrid/eventSubscriptions/testPsRgES11134444","name":"testPsRgES11134444","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnekak4bfydypjqukzgxjt4gl6oajnbxrkdwnuxzner4nbwa3bl62udrdrieg5timj","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg"},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnekak4bfydypjqukzgxjt4gl6oajnbxrkdwnuxzner4nbwa3bl62udrdrieg5timj/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgb2lttd5wuitcf4ja4j2tqhzvpy5wpdw6qidzrjje2nji4nhdhgnms7vpn7a6kolqq","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgb2lttd5wuitcf4ja4j2tqhzvpy5wpdw6qidzrjje2nji4nhdhgnms7vpn7a6kolqq/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alitest/providers/Microsoft.Relay/namespaces/ali-relay/hybridconnections/my~hybrid~connection"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa/providers/Microsoft.EventGrid/eventSubscriptions/someTestEventSub","name":"someTestEventSub","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","queueName":"armqueue"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es1","name":"es1","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","queueName":"armqueue"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es11","name":"es11","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alitest/providers/Microsoft.Relay/namespaces/ali-relay/hybridconnections/my~hybrid~connection"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa/providers/Microsoft.EventGrid/eventSubscriptions/someEventSubInRG","name":"someEventSubInRG","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://gridtestsite.azurewebsites.net/api/updates"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/babanisa/providers/Microsoft.EventGrid/eventSubscriptions/RGtestFoo","name":"RGtestFoo","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FrancosResources","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/alitest/providers/Microsoft.Relay/namespaces/ali-relay-test/hybridconnections/somehybridconnection"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/FrancosResources/providers/Microsoft.EventGrid/eventSubscriptions/something","name":"something","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rajagrid","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rajagrid/providers/Microsoft.Storage/storageAccounts/rajaqueuestorage","queueName":"clibugbash"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rajagrid/providers/Microsoft.EventGrid/eventSubscriptions/runnertest","name":"runnertest","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://gridtestsite.azurewebsites.net/api/updates"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/babanisa","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/babanisatogridtestsite","name":"babanisatogridtestsite","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgeastus","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://resourcelogger.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGEastUS/providers/Microsoft.EventGrid/eventSubscriptions/runner-logger-sub","name":"runner-logger-sub","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/serverlessdevops","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://resourcelogger.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ServerlessDevOps/providers/Microsoft.EventGrid/eventSubscriptions/undefined","name":"undefined","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgeastus","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://resourcelogger.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[""],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGEastUS/providers/Microsoft.EventGrid/eventSubscriptions/arm-runner-sub","name":"arm-runner-sub","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ServerlessDevOps","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://resourcelogger.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":[],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ServerlessDevOps/providers/Microsoft.EventGrid/eventSubscriptions/devopssubscription","name":"devopssubscription","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh/providers/Microsoft.EventGrid/eventSubscriptions/domainTopic1ES1","name":"domainTopic1ES1","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh/providers/Microsoft.EventGrid/eventSubscriptions/domaintest11topic44ES8888","name":"domaintest11topic44ES8888","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridrunnerfunction.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amh/providers/Microsoft.EventGrid/eventSubscriptions/domaintest11topic44ES9999","name":"domaintest11topic44ES9999","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg74y2zekmuezgdxxvu5o6xw7noral7kktz6kdzii7nfantnybh5b4542bptb3ynnif","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg74y2zekmuezgdxxvu5o6xw7noral7kktz6kdzii7nfantnybh5b4542bptb3ynnif/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvhw2gbrofn2qxabjqukojmpfvu2c6ppkwrshlbht6j4tlb7zwgci6o3m2vt4vhvvc","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvhw2gbrofn2qxabjqukojmpfvu2c6ppkwrshlbht6j4tlb7zwgci6o3m2vt4vhvvc/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgy6k3wf2huzlkvq6ji2yppns5t7bd4jcnyrhry3rl3berje3it76xf3mrsvceehtqi","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgy6k3wf2huzlkvq6ji2yppns5t7bd4jcnyrhry3rl3berje3it76xf3mrsvceehtqi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es1008","name":"es1008","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es1009","name":"es1009","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es1011","name":"es1011","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/kalstest/providers/Microsoft.EventGrid/eventSubscriptions/es1012","name":"es1012","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwtsmk2x74lq5ucz23le446fmndtllskbag7b4cl33bobnkwb452lax3k2dyv4zs5l","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwtsmk2x74lq5ucz23le446fmndtllskbag7b4cl33bobnkwb452lax3k2dyv4zs5l/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfftva5fki4yts7dqyuie2d25ojzese5hvuxefdhm37mmsh473opiullf2svyxzpcy","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfftva5fki4yts7dqyuie2d25ojzese5hvuxefdhm37mmsh473opiullf2svyxzpcy/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgk2nqhsv4yqjhh63oe7ysznuc7noe2u2s6xiwty2su66vmcbbnx6cwn6xccjhzexvp","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg"},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgk2nqhsv4yqjhh63oe7ysznuc7noe2u2s6xiwty2su66vmcbbnx6cwn6xccjhzexvp/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjhoug6n3blyjwbza3pjaqllge43n3vzn6tprw3hs7ig2puwjkwxm2m6z34tbcnfni","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjhoug6n3blyjwbza3pjaqllge43n3vzn6tprw3hs7ig2puwjkwxm2m6z34tbcnfni/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/api/HttpTriggerCSharp2"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":[],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/kishptestsub","name":"kishptestsub","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/admin/extensions/EventGridExtensionConfig"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"fsdfsdfsdfsdfs","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"],"isSubjectCaseSensitive":true},"labels":["functions-eventgridtriggercsharp2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/testsubport553","name":"testsubport553","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test1","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/admin/extensions/EventGridExtensionConfig"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"fsdfsdfsdfsdfsdfsdfsdffsdfsdf","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"],"isSubjectCaseSensitive":true},"labels":["functions-eventgridtriggercsharp2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test1/providers/Microsoft.EventGrid/eventSubscriptions/testsub553","name":"testsub553","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kishpdummyapp.azurewebsites.net/api/HttpTriggerCSharp2"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"rwerwerwerwerewrewr","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":[],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/test567","name":"test567","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgugwoshphzozagzimymgwgvjnxmvzqp5ocopvh4ub7q73mqn7mqwyjbyndb5nktvnf","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.ServiceBus/namespaces/devexpservicebus/queues/devexpdestination"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":10,"eventTimeToLiveInMinutes":1200},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgugwoshphzozagzimymgwgvjnxmvzqp5ocopvh4ub7q73mqn7mqwyjbyndb5nktvnf/providers/Microsoft.EventGrid/eventSubscriptions/CliTestEventsubscription3","name":"CliTestEventsubscription3","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrspxro5j5byy6snwchqdopfyeicquub4wrl634l7wztbfzcl6z444qgmetrcz22wz","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.ServiceBus/namespaces/devexpservicebus/queues/devexpdestination"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":10,"eventTimeToLiveInMinutes":1200},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrspxro5j5byy6snwchqdopfyeicquub4wrl634l7wztbfzcl6z444qgmetrcz22wz/providers/Microsoft.EventGrid/eventSubscriptions/CliTestEventsubscription3","name":"CliTestEventsubscription3","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguifwywhuf62tpj3ax6e3kqu4ebf5zhhhgjdkvhkgur2kzsui6bravtrgh3tlyyniu","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguifwywhuf62tpj3ax6e3kqu4ebf5zhhhgjdkvhkgur2kzsui6bravtrgh3tlyyniu/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps497","name":"EventSubscription-ps497","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps7238","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"NewSuffix","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["Marketing","Sales"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps7238/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps8462","name":"EventSubscription-ps8462","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps7238","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps7238/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps7656","name":"EventSubscription-ps7656","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps567","name":"EventSubscription-ps567","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps4534","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"NewSuffix","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["Marketing","Sales"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps4534/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps4983","name":"EventSubscription-ps4983","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps4534","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps4534/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps7679","name":"EventSubscription-ps7679","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps2395","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"NewSuffix","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["Marketing","Sales"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps2395/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps5611","name":"EventSubscription-ps5611","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps2395","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps2395/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps4207","name":"EventSubscription-ps4207","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps2089","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"NewSuffix","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["Marketing","Sales"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps2089/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps370","name":"EventSubscription-ps370","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgname-ps2089","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps2089/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps9349","name":"EventSubscription-ps9349","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps1495","name":"EventSubscription-ps1495","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbmkajelng45muwemcbenm4vwwex3zicdp4ih3gg3ngztiy7iy4ptgbamcerlf52k5","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbmkajelng45muwemcbenm4vwwex3zicdp4ih3gg3ngztiy7iy4ptgbamcerlf52k5/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghws7xajkhx3pjjk7tu3prfirukcwtyxvbkxhydc4bdtsl4fjuiufohsg5o6vok7mi","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghws7xajkhx3pjjk7tu3prfirukcwtyxvbkxhydc4bdtsl4fjuiufohsg5o6vok7mi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrgsowriy7z3xmcopkjvo2vgwfgop34f4qguqozphrnazibjpyxb5qr76im4brdsbo","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrgsowriy7z3xmcopkjvo2vgwfgop34f4qguqozphrnazibjpyxb5qr76im4brdsbo/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkhl4spsq65s3jryi63y2ebprwaavpa7mth3723q4wyc7dxjumpyiehr4y2q3mlpk7","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkhl4spsq65s3jryi63y2ebprwaavpa7mth3723q4wyc7dxjumpyiehr4y2q3mlpk7/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg7ns2ya23i7sb56d65h7whit6ftnnwahn34levwd37eijjrabesohhknemuhzamd6n","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg7ns2ya23i7sb56d65h7whit6ftnnwahn34levwd37eijjrabesohhknemuhzamd6n/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgji7mk3pmpcj4aq3x65fbeuiquxgr5htg56bljplug7o5lwbwpyk6sgcd2dxjq557b","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgji7mk3pmpcj4aq3x65fbeuiquxgr5htg56bljplug7o5lwbwpyk6sgcd2dxjq557b/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpdtpzyvohfkwaar2vxuhy6vaijkjjk46ft46ra2p2cmn7cjorzkvbnuwbvilgkke7","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpdtpzyvohfkwaar2vxuhy6vaijkjjk46ft46ra2p2cmn7cjorzkvbnuwbvilgkke7/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgajxohel3ydkzph2ksrkxcpnljjyvwnh2g3dc35vf7zpwqczmkivh5qd6kth5hr7xg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgajxohel3ydkzph2ksrkxcpnljjyvwnh2g3dc35vf7zpwqczmkivh5qd6kth5hr7xg/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps1334","name":"EventSubscription-ps1334","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps7921","name":"EventSubscription-ps7921","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps8093/providers/Microsoft.Relay/namespaces/hcnamespace-ps4408/hybridConnections/hcname-ps5598"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps5505","name":"EventSubscription-ps5505","type":"Microsoft.EventGrid/eventSubscriptions"}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$skiptoken=%7b%22token%22%3a%22%2bRID%3a9fgUAOy9bAKhgwIAAAAAAA%3d%3d%23RT%3a1%23TRC%3a100%23FPC%3aAgEKCgqMAKGDMgDAAAMAAQTA%2fyFA%2fv9SQN9%2fQPBDQN%2f%2f%2f%2ff%2f0bdA%2b%2f%2fv%2f9%2f87tqP%2bv%2fX%2f68SQPd3%2f%2fshQP%2fbGkD%2f%2b%2b%2f%2f97%2b35%2bPj%2by%2f7%2f6%2f%2f9fr3%2fxRA%2br9%2fvff9%2f%2bYUQP9%2f%2f%2f3%2f9v7%2fG0D%2fv9%2bvz%2f7%2f%2fv%2f73v%2f2L393r%2f%2f7%2b%2ff1IkD%2f7%2b%2f%2fEUC%2fXxFA%2b%2f8RQD8A%22%2c%22range%22%3a%7b%22min%22%3a%22%22%2c%22max%22%3a%22FF%22%7d%7d&$top=100"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '81435'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 03 Jun 2019 22:59:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventgrid event-subscription list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --location
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$skiptoken=%7b%22token%22%3a%22%2bRID%3a9fgUAOy9bAKhgwIAAAAAAA%3d%3d%23RT%3a1%23TRC%3a100%23FPC%3aAgEKCgqMAKGDMgDAAAMAAQTA%2fyFA%2fv9SQN9%2fQPBDQN%2f%2f%2f%2ff%2f0bdA%2b%2f%2fv%2f9%2f87tqP%2bv%2fX%2f68SQPd3%2f%2fshQP%2fbGkD%2f%2b%2b%2f%2f97%2b35%2bPj%2by%2f7%2f6%2f%2f9fr3%2fxRA%2br9%2fvff9%2f%2bYUQP9%2f%2f%2f3%2f9v7%2fG0D%2fv9%2bvz%2f7%2f%2fv%2f73v%2f2L393r%2f%2f7%2b%2ff1IkD%2f7%2b%2f%2fEUC%2fXxFA%2b%2f8RQD8A%22%2c%22range%22%3a%7b%22min%22%3a%22%22%2c%22max%22%3a%22FF%22%7d%7d&$top=100
-  response:
-    body:
-      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.ServiceBus/namespaces/devexpservicebus/queues/devexpdestination"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps9448","name":"EventSubscription-ps9448","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps4396/providers/Microsoft.Relay/namespaces/hcnamespace-ps1684/hybridConnections/hcname-ps6448"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps6963","name":"EventSubscription-ps6963","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps4396/providers/Microsoft.ServiceBus/namespaces/sbnamespace-ps4249/queues/sbname-ps6739"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps1658","name":"EventSubscription-ps1658","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps6297/providers/Microsoft.Relay/namespaces/hcnamespace-ps6914/hybridConnections/hcname-ps7946"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps4056","name":"EventSubscription-ps4056","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/RGName-ps6297/providers/Microsoft.ServiceBus/namespaces/sbnamespace-ps3065/queues/sbname-ps3617"},"endpointType":"ServiceBusQueue"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteSuccess"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions/EventSubscription-ps8616","name":"EventSubscription-ps8616","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgcentralindia","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGCentralIndia/providers/Microsoft.EventHub/namespaces/egarmrunnereventhubnamespacecentralindia/eventhubs/egarmrunnereventhubcentralindia"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGCentralIndia/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-Central-India","name":"eg-arm-runner-subscription-Central-India","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerwestcentralus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerWestCentralUS/providers/Microsoft.EventHub/namespaces/egarmrunnereventhubnamespacewestcentralus/eventhubs/egarmrunnereventhubwestcentralus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerWestCentralUS/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-West-Central-US","name":"eg-arm-runner-subscription-West-Central-US","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgwestus","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGWestUS/providers/Microsoft.EventHub/namespaces/egarmrunnereventhubnamespacewestus/eventhubs/egarmrunnereventhubwestus"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGWestUS/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-West-US","name":"eg-arm-runner-subscription-West-US","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azureeventgridarmrunnerrgeastus2euap","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGEastUS2EUAP/providers/Microsoft.EventHub/namespaces/egarmrunnereventhubnamespaceeastus2euap/eventhubs/egarmrunnereventhubeastus2euap"},"endpointType":"EventHub"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":["TestLabel1","TestLabel2"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1439}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AzureEventGridArmRunnerRGEastUS2EUAP/providers/Microsoft.EventGrid/eventSubscriptions/eg-arm-runner-subscription-EAST-US-2-EUAP","name":"eg-arm-runner-subscription-EAST-US-2-EUAP","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgocfav6hl5co3adprsy2wdivk26ywzaq7hzrtjchai4xqmmu4huxk6qjdhmem3xfmh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgocfav6hl5co3adprsy2wdivk26ywzaq7hzrtjchai4xqmmu4huxk6qjdhmem3xfmh/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyheg6vj43wwm66qndtdmkg4qhdivva7wl3xe2fenm2kab3zjtjiv2ji4h4zi4a7pv","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","queueName":"stogqueuedestination"},"endpointType":"StorageQueue"},"filter":{"subjectBeginsWith":"SomeRandomText1","subjectEndsWith":"SomeRandomText2","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyheg6vj43wwm66qndtdmkg4qhdivva7wl3xe2fenm2kab3zjtjiv2ji4h4zi4a7pv/providers/Microsoft.EventGrid/eventSubscriptions/CliTestEventsubscription1","name":"CliTestEventsubscription1","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyheg6vj43wwm66qndtdmkg4qhdivva7wl3xe2fenm2kab3zjtjiv2ji4h4zi4a7pv","provisioningState":"Creating","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"SomeRandomText1","subjectEndsWith":"SomeRandomText2","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgyheg6vj43wwm66qndtdmkg4qhdivva7wl3xe2fenm2kab3zjtjiv2ji4h4zi4a7pv/providers/Microsoft.EventGrid/eventSubscriptions/CliTestEventsubscription2","name":"CliTestEventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '14780'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 03 Jun 2019 22:59:58 GMT
+      - Fri, 16 Jul 2021 02:02:42 GMT
       expires:
       - '-1'
       pragma:
@@ -560,24 +506,21 @@ interactions:
       ParameterSetName:
       - --source-resource-id --odata-query
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/topicTypes/Microsoft.Resources.ResourceGroups/eventSubscriptions?api-version=2019-06-01&$filter=CONTAINS%28name%2C%27eventsubscription2%27%29&$top=100
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2020-10-15-preview&$filter=CONTAINS%28name%2C%27eventsubscription2%27%29&$top=100
   response:
     body:
-      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
+      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.storage/storageaccounts/clieventgrid000002","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid","maxEventsPerBatch":1,"preferredBatchSizeInKilobytes":64},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"eventDeliverySchema":"EventGridSchema","retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '931'
+      - '1166'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 03 Jun 2019 22:59:59 GMT
+      - Fri, 16 Jul 2021 02:02:44 GMT
       expires:
       - '-1'
       pragma:
@@ -599,56 +542,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventgrid event-subscription list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --location --odata-query
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/eventSubscriptions?api-version=2019-06-01&$filter=name%20eq%20%27eventsubscription2%27&$top=100
-  response:
-    body:
-      string: '{"value":[{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdyoajzoke3lbxojr7omt6m6oasvyr7zsho5fidxigg36zbgvesajzqx4fzlyrltzi","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgdyoajzoke3lbxojr7omt6m6oasvyr7zsho5fidxigg36zbgvesajzqx4fzlyrltzi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgggqagcer44su5icztostiufuauqsivdligimbgtoufsw5t24uauwgtqvks5eucndv","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgggqagcer44su5icztostiufuauqsivdligimbgtoufsw5t24uauwgtqvks5eucndv/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnekak4bfydypjqukzgxjt4gl6oajnbxrkdwnuxzner4nbwa3bl62udrdrieg5timj","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg"},"labels":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnekak4bfydypjqukzgxjt4gl6oajnbxrkdwnuxzner4nbwa3bl62udrdrieg5timj/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgb2lttd5wuitcf4ja4j2tqhzvpy5wpdw6qidzrjje2nji4nhdhgnms7vpn7a6kolqq","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://eventgridclilivetest.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgb2lttd5wuitcf4ja4j2tqhzvpy5wpdw6qidzrjje2nji4nhdhgnms7vpn7a6kolqq/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg74y2zekmuezgdxxvu5o6xw7noral7kktz6kdzii7nfantnybh5b4542bptb3ynnif","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg74y2zekmuezgdxxvu5o6xw7noral7kktz6kdzii7nfantnybh5b4542bptb3ynnif/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvhw2gbrofn2qxabjqukojmpfvu2c6ppkwrshlbht6j4tlb7zwgci6o3m2vt4vhvvc","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgvhw2gbrofn2qxabjqukojmpfvu2c6ppkwrshlbht6j4tlb7zwgci6o3m2vt4vhvvc/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgy6k3wf2huzlkvq6ji2yppns5t7bd4jcnyrhry3rl3berje3it76xf3mrsvceehtqi","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgy6k3wf2huzlkvq6ji2yppns5t7bd4jcnyrhry3rl3berje3it76xf3mrsvceehtqi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwtsmk2x74lq5ucz23le446fmndtllskbag7b4cl33bobnkwb452lax3k2dyv4zs5l","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwtsmk2x74lq5ucz23le446fmndtllskbag7b4cl33bobnkwb452lax3k2dyv4zs5l/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfftva5fki4yts7dqyuie2d25ojzese5hvuxefdhm37mmsh473opiullf2svyxzpcy","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgfftva5fki4yts7dqyuie2d25ojzese5hvuxefdhm37mmsh473opiullf2svyxzpcy/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgk2nqhsv4yqjhh63oe7ysznuc7noe2u2s6xiwty2su66vmcbbnx6cwn6xccjhzexvp","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://kalsfunc1.azurewebsites.net/api/HttpTriggerCSharp1"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg"},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgk2nqhsv4yqjhh63oe7ysznuc7noe2u2s6xiwty2su66vmcbbnx6cwn6xccjhzexvp/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjhoug6n3blyjwbza3pjaqllge43n3vzn6tprw3hs7ig2puwjkwxm2m6z34tbcnfni","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Relay/namespaces/kalsdemo/hybridConnections/kalstest"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":""},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsdemo","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjhoug6n3blyjwbza3pjaqllge43n3vzn6tprw3hs7ig2puwjkwxm2m6z34tbcnfni/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguifwywhuf62tpj3ax6e3kqu4ebf5zhhhgjdkvhkgur2kzsui6bravtrgh3tlyyniu","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rguifwywhuf62tpj3ax6e3kqu4ebf5zhhhgjdkvhkgur2kzsui6bravtrgh3tlyyniu/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbmkajelng45muwemcbenm4vwwex3zicdp4ih3gg3ngztiy7iy4ptgbamcerlf52k5","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbmkajelng45muwemcbenm4vwwex3zicdp4ih3gg3ngztiy7iy4ptgbamcerlf52k5/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghws7xajkhx3pjjk7tu3prfirukcwtyxvbkxhydc4bdtsl4fjuiufohsg5o6vok7mi","provisioningState":"Succeeded","destination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Relay/namespaces/DevExpRelayNamespace/hybridConnections/hydbridconnectiondestination"},"endpointType":"HybridConnection"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":20,"eventTimeToLiveInMinutes":1000},"deadLetterDestination":{"properties":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/DevExpRg/providers/Microsoft.Storage/storageAccounts/devexpstg","blobContainerName":"dlq"},"endpointType":"StorageBlob"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rghws7xajkhx3pjjk7tu3prfirukcwtyxvbkxhydc4bdtsl4fjuiufohsg5o6vok7mi/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrgsowriy7z3xmcopkjvo2vgwfgop34f4qguqozphrnazibjpyxb5qr76im4brdsbo","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrgsowriy7z3xmcopkjvo2vgwfgop34f4qguqozphrnazibjpyxb5qr76im4brdsbo/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkhl4spsq65s3jryi63y2ebprwaavpa7mth3723q4wyc7dxjumpyiehr4y2q3mlpk7","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkhl4spsq65s3jryi63y2ebprwaavpa7mth3723q4wyc7dxjumpyiehr4y2q3mlpk7/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg7ns2ya23i7sb56d65h7whit6ftnnwahn34levwd37eijjrabesohhknemuhzamd6n","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg7ns2ya23i7sb56d65h7whit6ftnnwahn34levwd37eijjrabesohhknemuhzamd6n/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgji7mk3pmpcj4aq3x65fbeuiquxgr5htg56bljplug7o5lwbwpyk6sgcd2dxjq557b","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgji7mk3pmpcj4aq3x65fbeuiquxgr5htg56bljplug7o5lwbwpyk6sgcd2dxjq557b/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpdtpzyvohfkwaar2vxuhy6vaijkjjk46ft46ra2p2cmn7cjorzkvbnuwbvilgkke7","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpdtpzyvohfkwaar2vxuhy6vaijkjjk46ft46ra2p2cmn7cjorzkvbnuwbvilgkke7/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgajxohel3ydkzph2ksrkxcpnljjyvwnh2g3dc35vf7zpwqczmkivh5qd6kth5hr7xg","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgajxohel3ydkzph2ksrkxcpnljjyvwnh2g3dc35vf7zpwqczmkivh5qd6kth5hr7xg/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"","subjectEndsWith":"mysubject_suffix","includedEventTypes":["blobCreated","blobUpdated"],"isSubjectCaseSensitive":true},"labels":["Finance","HR"],"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"},{"properties":{"topic":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgocfav6hl5co3adprsy2wdivk26ywzaq7hzrtjchai4xqmmu4huxk6qjdhmem3xfmh","provisioningState":"Succeeded","destination":{"properties":{"endpointUrl":null,"endpointBaseUrl":"https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid"},"endpointType":"WebHook"},"filter":{"subjectBeginsWith":"mysubject_prefix","subjectEndsWith":".jpg","includedEventTypes":["Microsoft.Resources.ResourceWriteSuccess","Microsoft.Resources.ResourceWriteFailure","Microsoft.Resources.ResourceWriteCancel","Microsoft.Resources.ResourceDeleteSuccess","Microsoft.Resources.ResourceDeleteFailure","Microsoft.Resources.ResourceDeleteCancel","Microsoft.Resources.ResourceActionSuccess","Microsoft.Resources.ResourceActionFailure","Microsoft.Resources.ResourceActionCancel"]},"labels":null,"retryPolicy":{"maxDeliveryAttempts":30,"eventTimeToLiveInMinutes":1440}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgocfav6hl5co3adprsy2wdivk26ywzaq7hzrtjchai4xqmmu4huxk6qjdhmem3xfmh/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2","name":"eventsubscription2","type":"Microsoft.EventGrid/eventSubscriptions"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23466'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 03 Jun 2019 22:59:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -660,118 +554,29 @@ interactions:
       ParameterSetName:
       - --source-resource-id --name
       User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002/providers/Microsoft.EventGrid/eventSubscriptions/eventsubscription2?api-version=2020-10-15-preview
   response:
     body:
       string: ''
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/1C1D32EF-B057-474D-95E8-2E7BD54FBC09?api-version=2020-10-15-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 03 Jun 2019 23:00:01 GMT
+      - Fri, 16 Jul 2021 02:02:45 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationResults/042EB7DC-A8CF-43B2-98E5-DB9F0315EF0F?api-version=2019-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationResults/1C1D32EF-B057-474D-95E8-2E7BD54FBC09?api-version=2020-10-15-preview
       pragma:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - eventgrid event-subscription delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --source-resource-id --name
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 azure-mgmt-eventgrid/2.2.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/operationResults/042EB7DC-A8CF-43B2-98E5-DB9F0315EF0F?api-version=2019-06-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 03 Jun 2019 23:00:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.65
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Mon, 03 Jun 2019 23:00:12 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdMVVkyTVVKWkpHTkZKSzRRRUFDWEdNNDNYQkRSUEJHQkxJVXw0MDFBMzhENUU3M0Q2REUwLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01
-      pragma:
-      - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -781,4 +586,96 @@ interactions:
     status:
       code: 202
       message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventgrid event-subscription delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource-id --name
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-eventgrid/9.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/1C1D32EF-B057-474D-95E8-2E7BD54FBC09?api-version=2020-10-15-preview
+  response:
+    body:
+      string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventGrid/locations/centraluseuap/operationsStatus/1C1D32EF-B057-474D-95E8-2E7BD54FBC09?api-version=2020-10-15-preview","name":"1c1d32ef-b057-474d-95e8-2e7bd54fbc09","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Jul 2021 02:02:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -y -g -n
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.3 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clieventgrid000002?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 16 Jul 2021 02:02:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
 version: 1

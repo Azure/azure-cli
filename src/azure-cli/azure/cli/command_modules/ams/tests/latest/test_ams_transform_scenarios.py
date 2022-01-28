@@ -50,7 +50,7 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'nonexits_transform_name': nonexits_transform_name
         })
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('az ams transform show -a {amsname} -n {nonexits_transform_name} -g {rg}')
 
         self.cmd('az ams transform update --description mydesc -a {amsname} -n {transformName} -g {rg}', checks=[
@@ -165,16 +165,26 @@ class AmsTransformTests(ScenarioTest):
         self.kwargs.update({
             'presetName': 'AudioAnalyzer',
             'presetName2': 'VideoAnalyzer',
+            'presetName3': 'FaceDetector',
             'audioLanguage': 'es-ES',
             'audioLanguage2': 'en-US',
-            'insightsToExtract': 'AudioInsightsOnly'
+            'insightsToExtract': 'AudioInsightsOnly',
+            'resolution': 'SourceResolution',
+            'audioAnalysisMode': 'Basic',
+            'videoAnalysisMode': 'Basic'
         })
 
-        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName} --audio-language {audioLanguage}', checks=[
-            self.check('outputs[2].preset.audioLanguage', '{audioLanguage}')
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName} --audio-language {audioLanguage} --audio-analysis-mode {audioAnalysisMode}', checks=[
+            self.check('outputs[2].preset.audioLanguage', '{audioLanguage}'),
+            self.check('outputs[2].preset.mode', '{audioAnalysisMode}')
         ])
 
-        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName2} --audio-language {audioLanguage2} --insights-to-extract {insightsToExtract}', checks=[
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName2} --audio-language {audioLanguage2} --insights-to-extract {insightsToExtract} --video-analysis-mode {videoAnalysisMode}', checks=[
             self.check('outputs[3].preset.audioLanguage', '{audioLanguage2}'),
-            self.check('outputs[3].preset.insightsToExtract', '{insightsToExtract}')
+            self.check('outputs[3].preset.insightsToExtract', '{insightsToExtract}'),
+            self.check('outputs[3].preset.mode', '{videoAnalysisMode}'),
+        ])
+
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution {resolution}', checks=[
+            self.check('outputs[4].preset.resolution', '{resolution}')
         ])

@@ -1,0 +1,1869 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001","name":"test_network_private_endpoint_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T08:17:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:17:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_network_private_endpoint_edge_zone000001%27%20and%20name%20eq%20%27ip%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:17:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"apiVersion": "2021-05-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "ip", "location": "eastus2euap", "tags": {}, "dependsOn": [], "properties":
+      {"publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}}, {"type":
+      "Microsoft.Network/loadBalancers", "name": "lb", "location": "eastus2euap",
+      "tags": {}, "apiVersion": "2021-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/ip"],
+      "properties": {"backendAddressPools": [{"name": "lbbepool"}], "frontendIPConfigurations":
+      [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/publicIPAddresses/ip"},
+      "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Standard"}}], "outputs":
+      {"loadBalancer": {"type": "object", "value": "[reference(''lb'')]"}}}, "parameters":
+      {}, "mode": "incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1165'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/lb_deploy_DKZYnFPr9FV6qp1z7KOrHcaPTISAoQq7","name":"lb_deploy_DKZYnFPr9FV6qp1z7KOrHcaPTISAoQq7","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12767825158319389153","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-11-03T08:17:57.4827961Z","duration":"PT2.5797936S","correlationId":"c8960fbc-6c5c-49ed-93b1-0f5e719a1c20","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2euap"]},{"resourceType":"loadBalancers","locations":["eastus2euap"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/publicIPAddresses/ip","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"ip"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/lb_deploy_DKZYnFPr9FV6qp1z7KOrHcaPTISAoQq7/operationStatuses/08585656794105746305?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1337'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:17:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656794105746305?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:18:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585656794105746305?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --public-ip-address --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Resources/deployments/lb_deploy_DKZYnFPr9FV6qp1z7KOrHcaPTISAoQq7","name":"lb_deploy_DKZYnFPr9FV6qp1z7KOrHcaPTISAoQq7","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12767825158319389153","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-11-03T08:18:34.0928251Z","duration":"PT39.1898226S","correlationId":"c8960fbc-6c5c-49ed-93b1-0f5e719a1c20","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2euap"]},{"resourceType":"loadBalancers","locations":["eastus2euap"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/publicIPAddresses/ip","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"ip"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"bf33502a-0bf7-4fb1-80b2-84acfe321647","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"87b44567-8bd5-4eae-a5a2-a83576274906\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/publicIPAddresses/ip"}}}],"backendAddressPools":[{"name":"lbbepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb/backendAddressPools/lbbepool","etag":"W/\"87b44567-8bd5-4eae-a5a2-a83576274906\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/publicIPAddresses/ip"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3181'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001","name":"test_network_private_endpoint_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T08:17:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "tags": {}, "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]},
+      "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties": {"addressPrefix":
+      "10.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '374'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
+        \ \"etag\": \"W/\\\"67029d86-e417-4b37-b66b-6cc7a9b4a13c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"resourceGuid\": \"8517a2f3-000f-4d62-bf7f-13c746384889\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"67029d86-e417-4b37-b66b-6cc7a9b4a13c\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/41b3cabd-6035-40f9-a147-32aa542678fc?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 39f10242-bb62-45a2-9c15-3aeeffc65ebb
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/41b3cabd-6035-40f9-a147-32aa542678fc?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e6d4f5a9-af9a-4db4-8fc7-b606ba64d2e5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
+        \ \"etag\": \"W/\\\"b62811d1-6696-4805-bd35-b35f4c2aaa81\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"8517a2f3-000f-4d62-bf7f-13c746384889\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"b62811d1-6696-4805-bd35-b35f4c2aaa81\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1496'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:15 GMT
+      etag:
+      - W/"b62811d1-6696-4805-bd35-b35f4c2aaa81"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2b98966d-a40e-4398-b80f-f36f389767bf
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-link-service-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \ \"etag\": \"W/\\\"b62811d1-6696-4805-bd35-b35f4c2aaa81\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '585'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:17 GMT
+      etag:
+      - W/"b62811d1-6696-4805-bd35-b35f4c2aaa81"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ffe575c4-7b12-4aa7-be3f-cc81b8cd6f99
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1",
+      "name": "subnet1", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Disabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '450'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-link-service-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \ \"etag\": \"W/\\\"07f53acd-ca1a-41ee-a902-6224d4ed7d11\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Disabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/10b7311f-63b3-4663-bd9b-6e0f00f674a3?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '585'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 586f2157-07b8-4c00-addf-13aa0e0cae04
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-link-service-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/10b7311f-63b3-4663-bd9b-6e0f00f674a3?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e74313f3-4838-4fee-b1cb-45d60955a390
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-link-service-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \ \"etag\": \"W/\\\"100bdcb6-14a4-4a7e-a2da-0a0e3ac463bc\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Disabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '586'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:24 GMT
+      etag:
+      - W/"100bdcb6-14a4-4a7e-a2da-0a0e3ac463bc"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c082c09f-7411-44bf-949d-9548035277b6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
+        \ \"etag\": \"W/\\\"100bdcb6-14a4-4a7e-a2da-0a0e3ac463bc\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"8517a2f3-000f-4d62-bf7f-13c746384889\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"100bdcb6-14a4-4a7e-a2da-0a0e3ac463bc\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Disabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1497'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:28 GMT
+      etag:
+      - W/"100bdcb6-14a4-4a7e-a2da-0a0e3ac463bc"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3211083f-b3a6-4839-a2c4-5187d215b39d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet",
+      "location": "eastus2euap", "tags": {}, "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]},
+      "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1",
+      "name": "subnet1", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Disabled"}}, {"name": "subnet2",
+      "properties": {"addressPrefix": "10.0.2.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      [], "enableDdosProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1104'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
+        \ \"etag\": \"W/\\\"0ac860e8-1b1e-4250-94b5-d06fbe052367\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"resourceGuid\": \"8517a2f3-000f-4d62-bf7f-13c746384889\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"0ac860e8-1b1e-4250-94b5-d06fbe052367\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Disabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\",\r\n
+        \       \"etag\": \"W/\\\"0ac860e8-1b1e-4250-94b5-d06fbe052367\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/08d1de32-6c35-49b4-b4a6-eddef45954d9?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2160'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9b97ba3b-a945-4f8c-83bd-a68aff877fdf
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/08d1de32-6c35-49b4-b4a6-eddef45954d9?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e04ac9c5-d25a-49f9-be51-a7ba0f80074b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --address-prefixes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
+        \ \"etag\": \"W/\\\"b9530174-2eb6-43f4-a5e5-9a1c269faac1\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"tags\": {},\r\n  \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n
+        \   \"name\": \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"8517a2f3-000f-4d62-bf7f-13c746384889\",\r\n
+        \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
+        \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
+        \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"b9530174-2eb6-43f4-a5e5-9a1c269faac1\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Disabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\",\r\n
+        \       \"etag\": \"W/\\\"b9530174-2eb6-43f4-a5e5-9a1c269faac1\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2163'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:33 GMT
+      etag:
+      - W/"b9530174-2eb6-43f4-a5e5-9a1c269faac1"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5edefef4-0c77-4e0b-b851-05569b6a0724
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\",\r\n
+        \ \"etag\": \"W/\\\"b9530174-2eb6-43f4-a5e5-9a1c269faac1\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '585'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:35 GMT
+      etag:
+      - W/"b9530174-2eb6-43f4-a5e5-9a1c269faac1"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 70e10b63-1b64-45e9-9341-7f5cc1efe4be
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2",
+      "name": "subnet2", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.2.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '450'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\",\r\n
+        \ \"etag\": \"W/\\\"fa63c3ac-4f01-4cf0-a011-7d25b2be0042\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/ad279692-a805-4af8-b6ae-49a767a6e635?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '585'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d2b976da-de59-47f9-a3f0-fd73a9655ddb
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/ad279692-a805-4af8-b6ae-49a767a6e635?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7ff0f4ff-0764-4c61-94dd-ccaad993e0ce
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\",\r\n
+        \ \"etag\": \"W/\\\"ddd15667-6629-43ef-8598-3aeb439414c1\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '586'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:43 GMT
+      etag:
+      - W/"ddd15667-6629-43ef-8598-3aeb439414c1"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3cc8ea51-7d92-45e8-8c55-f60a2cf0e003
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --lb-name --lb-frontend-ip-configs --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001","name":"test_network_private_endpoint_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T08:17:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"loadBalancerFrontendIpConfigurations":
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb/frontendIpConfigurations/LoadBalancerFrontEnd"}],
+      "ipConfigurations": [{"name": "pls_ipconfig_0", "properties": {"subnet": {"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "privateIPAddressVersion": "IPv4"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-service create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '840'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --lb-name --lb-frontend-ip-configs --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"pls\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls\",\r\n
+        \ \"etag\": \"W/\\\"38968cf7-20e7-43f1-ade6-9ffb28f2f919\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateLinkServices\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
+        \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"resourceGuid\": \"51714190-419f-4d1c-ae20-8cfc1064bf6e\",\r\n
+        \   \"fqdns\": [],\r\n    \"alias\": \"pls.705af1d4-c596-4059-af39-cb33ed66320a.eastus2euap.azure.privatelinkservice\",\r\n
+        \   \"enableProxyProtocol\": false,\r\n    \"loadBalancerFrontendIpConfigurations\":
+        [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb/frontendIPConfigurations/LoadBalancerFrontEnd\"\r\n
+        \     }\r\n    ],\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\":
+        \"pls_ipconfig_0\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls/ipConfigurations/pls_ipconfig_0\",\r\n
+        \       \"etag\": \"W/\\\"38968cf7-20e7-43f1-ade6-9ffb28f2f919\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/privateLinkServices/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"subnet\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"privateEndpointConnections\":
+        [],\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/networkInterfaces/pls.nic.9bf6de15-b418-4197-9f39-ba9d8663d469\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/c11ef9a5-7d89-4091-a864-65b2f90dca99?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2337'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:19:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6cc39eeb-d565-416d-b900-38ee6d0e42d0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --lb-name --lb-frontend-ip-configs --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/c11ef9a5-7d89-4091-a864-65b2f90dca99?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 09710a66-1317-486c-896e-e664e7d78f11
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --lb-name --lb-frontend-ip-configs --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"pls\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls\",\r\n
+        \ \"etag\": \"W/\\\"2009869d-9403-49e8-aa21-b6327136d171\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateLinkServices\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
+        \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"51714190-419f-4d1c-ae20-8cfc1064bf6e\",\r\n
+        \   \"fqdns\": [],\r\n    \"alias\": \"pls.705af1d4-c596-4059-af39-cb33ed66320a.eastus2euap.azure.privatelinkservice\",\r\n
+        \   \"enableProxyProtocol\": false,\r\n    \"loadBalancerFrontendIpConfigurations\":
+        [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/loadBalancers/lb/frontendIPConfigurations/LoadBalancerFrontEnd\"\r\n
+        \     }\r\n    ],\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\":
+        \"pls_ipconfig_0\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls/ipConfigurations/pls_ipconfig_0\",\r\n
+        \       \"etag\": \"W/\\\"2009869d-9403-49e8-aa21-b6327136d171\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/privateLinkServices/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"subnet\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"privateEndpointConnections\":
+        [],\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/networkInterfaces/pls.nic.9bf6de15-b418-4197-9f39-ba9d8663d469\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2338'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:06 GMT
+      etag:
+      - W/"2009869d-9403-49e8-aa21-b6327136d171"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3399e549-99ee-4c04-8a05-2faf95d4bb37
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_private_endpoint_edge_zone000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001","name":"test_network_private_endpoint_edge_zone000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T08:17:43Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "extendedLocation": {"name": "microsoftrrdclab1",
+      "type": "EdgeZone"}, "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2",
+      "properties": {"privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}, "privateLinkServiceConnections": [{"name": "cn", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '741'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"pe\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe\",\r\n
+        \ \"etag\": \"W/\\\"e0e13542-240e-4694-8888-01fd8604d47b\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
+        \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Updating\",\r\n    \"resourceGuid\": \"65d6767d-24fc-4dc0-9c0c-4356a89d5c6c\",\r\n
+        \   \"privateLinkServiceConnections\": [\r\n      {\r\n        \"name\": \"cn\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe/privateLinkServiceConnections/cn\",\r\n
+        \       \"etag\": \"W/\\\"e0e13542-240e-4694-8888-01fd8604d47b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls\",\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/networkInterfaces/pe.nic.c7f7eb09-10b8-44aa-af0c-8e9426a14cb5\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/6c80bef4-89d8-48e5-9e91-b0d04771cf68?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2243'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ef1d62f1-43cd-41d8-8366-1b61ae1c67e4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/6c80bef4-89d8-48e5-9e91-b0d04771cf68?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 99710255-eb6a-458b-be7f-1fae77c74c63
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/6c80bef4-89d8-48e5-9e91-b0d04771cf68?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cb1f9819-3d22-4439-a24d-cd310ce7c1f9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/6c80bef4-89d8-48e5-9e91-b0d04771cf68?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:20:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7460269b-6855-4900-90aa-4c9da4931abb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/6c80bef4-89d8-48e5-9e91-b0d04771cf68?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:21:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8303ef9f-365d-4e45-b5d9-9dbab4b2a177
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --private-connection-resource-id --connection-name
+        --edge-zone
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"pe\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe\",\r\n
+        \ \"etag\": \"W/\\\"2de088a3-c8d5-49e1-8123-97e050452c25\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"extendedLocation\": {\r\n    \"type\": \"EdgeZone\",\r\n    \"name\":
+        \"microsoftrrdclab1\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"65d6767d-24fc-4dc0-9c0c-4356a89d5c6c\",\r\n
+        \   \"privateLinkServiceConnections\": [\r\n      {\r\n        \"name\": \"cn\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateEndpoints/pe/privateLinkServiceConnections/cn\",\r\n
+        \       \"etag\": \"W/\\\"2de088a3-c8d5-49e1-8123-97e050452c25\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/privateLinkServices/pls\",\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto Approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"customNetworkInterfaceName\": \"\",\r\n    \"subnet\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet2\"\r\n
+        \   },\r\n    \"ipConfigurations\": [],\r\n    \"networkInterfaces\": [\r\n
+        \     {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_private_endpoint_edge_zone000001/providers/Microsoft.Network/networkInterfaces/pe.nic.c7f7eb09-10b8-44aa-af0c-8e9426a14cb5\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2244'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:21:39 GMT
+      etag:
+      - W/"2de088a3-c8d5-49e1-8123-97e050452c25"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ddff403e-1a2e-4b49-9801-b1dcb52dc721
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,589 @@
+interactions:
+- request:
+    body: '{"location": "southcentralus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '30'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --location
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/rgehcluster-cli-test?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test","name":"rgehcluster-cli-test","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '245'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:27:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "southcentralus", "tags": {"tag1": "value1"}, "sku": {"name":
+      "Dedicated", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2021-07-12T15:27:35.32Z","updatedAt":"2021-07-12T15:27:35.32Z","metricId":"PROD-SN3-537"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:27:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2021-07-12T15:27:35.32Z","updatedAt":"2021-07-12T15:27:35.32Z","metricId":"PROD-SN3-537"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:27:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {"{tag1": "value1}"}, "sku": {"name":
+      "Standard", "tier": "Standard"}, "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '291'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000002","createdAt":"2021-07-12T15:27:49.517Z","updatedAt":"2021-07-12T15:27:49.517Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '898'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:27:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000002","createdAt":"2021-07-12T15:27:49.517Z","updatedAt":"2021-07-12T15:27:49.517Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '898'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:28:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000002","createdAt":"2021-07-12T15:27:49.517Z","updatedAt":"2021-07-12T15:28:51.92Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '895'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:28:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:eventhubs-nscli000002","createdAt":"2021-07-12T15:27:49.517Z","updatedAt":"2021-07-12T15:28:51.92Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '895'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:28:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster namespace list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001/namespaces?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:28:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2021-07-12T15:27:35.32Z","updatedAt":"2021-07-12T15:27:35.32Z","metricId":"PROD-SN3-537"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:29:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {"tag2": "value2"}, "sku": {"name":
+      "Dedicated", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --tags
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2021-07-12T15:27:35.32Z","updatedAt":"2021-07-12T15:29:04.923Z","metricId":"PROD-SN3-537"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:29:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2021-07-12T15:27:35.32Z","updatedAt":"2021-07-12T15:29:04.923Z","metricId":"PROD-SN3-537"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '445'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 15:29:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

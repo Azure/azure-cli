@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
+from unittest import mock
 import unittest
 import difflib
-from six import StringIO
+from io import StringIO
 from collections import namedtuple
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -49,9 +49,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('sub-command the-second-name'.split())
         self.assertIs(args.func, command2)
 
-        AzCliCommandParser.error = VerifyError(self,)
-        parser.parse_args('sub-command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('sub-command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_required_parameter(self):
         def test_handler(args):  # pylint: disable=unused-argument
@@ -72,9 +72,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_nargs_parameter(self):
         def test_handler():
@@ -95,9 +95,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command -req yep'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command -req yep'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_case_insensitive_enum_choices(self):
         from enum import Enum
@@ -143,10 +143,10 @@ class TestParser(unittest.TestCase):
     def _mock_extension_modname(ext_name, ext_dir):
         return ext_name
 
-    def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview', 'path', 'get_metadata'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, path=None, get_metadata=lambda: {}),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, path=None, get_metadata=lambda: {})]
+    def _mock_get_extensions(**kwargs):
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
 
     def _mock_load_command_loader(loader, args, name, prefix):
         from enum import Enum
@@ -209,11 +209,19 @@ class TestParser(unittest.TestCase):
         choice_lists = []
         original_get_close_matches = difflib.get_close_matches
 
-        def mock_log_error(_, msg):
-            logger_msgs.append(msg)
+        def mock_log_error(logger_self, msg):
+            # Only intercept 'cli.azure.cli.core.azclierror' logger and ignore 'az_command_data_logger'
+            if logger_self.name.startswith('cli'):
+                logger_msgs.append(msg)
 
         def mock_get_close_matches(*args, **kwargs):
             choice_lists.append(original_get_close_matches(*args, **kwargs))
+
+        def mock_ext_cmd_tree_load(*args, **kwargs):
+            return {"test": {"new-ext": {"create": "new-ext-name", "reset": "another-ext-name"}}}
+
+        def mock_add_extension(*args, **kwargs):
+            pass
 
         # run multiple faulty commands and save error logs, as well as close matches
         with mock.patch('logging.Logger.error', mock_log_error), \
@@ -233,8 +241,7 @@ class TestParser(unittest.TestCase):
         # assert the right type of error msg is logged for command vs argument parsing
         self.assertEqual(len(logger_msgs), 5)
         for msg in logger_msgs[:3]:
-            self.assertIn("not in the", msg)
-            self.assertIn("command group", msg)
+            self.assertIn("misspelled or not recognized by the system", msg)
         for msg in logger_msgs[3:]:
             self.assertIn("not a valid value for '--opt'.", msg)
 
@@ -247,6 +254,19 @@ class TestParser(unittest.TestCase):
             self.assertEqual(len(choices), 2)
             for choice in ['enum_1', 'enum_2']:
                 self.assertIn(choice, choices)
+
+        # test dynamic extension install
+        with mock.patch('logging.Logger.error', mock_log_error), \
+                mock.patch('azure.cli.core.extension.operations.add_extension', mock_add_extension), \
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_command_tree', mock_ext_cmd_tree_load), \
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_use_dynamic_install_config', return_value='yes_without_prompt'), \
+                mock.patch('azure.cli.core.extension.dynamic_install._get_extension_run_after_dynamic_install_config', return_value=False):
+            with self.assertRaises(SystemExit):
+                parser.parse_args('test new-ext create --opt enum_2'.split())
+            self.assertIn("Extension new-ext-name installed. Please rerun your command.", logger_msgs[5])
+            with self.assertRaises(SystemExit):
+                parser.parse_args('test new-ext reset pos1 pos2'.split())  # test positional args
+            self.assertIn("Extension another-ext-name installed. Please rerun your command.", logger_msgs[6])
 
 
 class VerifyError(object):  # pylint: disable=too-few-public-methods

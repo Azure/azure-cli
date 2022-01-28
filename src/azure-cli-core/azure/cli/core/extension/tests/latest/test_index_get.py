@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import mock
+from unittest import mock
 import unittest
 from requests.exceptions import ConnectionError, HTTPError
 from azure.cli.core.util import CLIError
@@ -84,6 +84,27 @@ class TestExtensionIndexGet(unittest.TestCase):
             with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, {'v2extensions': []})):
                 self.assertEqual(get_index_extensions(), None)
                 logger_mock.assert_called_once_with(ERR_UNABLE_TO_GET_EXTENSIONS)
+
+    # pylint: disable=line-too-long
+    def test_get_index_cloud(self):
+
+        from azure.cli.core.mock import DummyCli
+        cli_ctx = DummyCli()
+
+        default_data = {'extensions': {}}
+        obj = object()
+        cloud_data = {'extensions': {'myext': obj}}
+        # cli_ctx not passed
+        with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, default_data)):
+            self.assertEqual(get_index_extensions(), {})
+        # cli_ctx passed but endpoint not set
+        delattr(cli_ctx.cloud.endpoints, 'azmirror_storage_account_resource_id')
+        with mock.patch('requests.get', side_effect=mock_index_get_generator(DEFAULT_INDEX_URL, default_data)):
+            self.assertEqual(get_index_extensions(cli_ctx=cli_ctx), {})
+        # cli_ctx passed and the endpoint is set
+        cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id = 'http://contoso.com'
+        with mock.patch('requests.get', side_effect=mock_index_get_generator('http://contoso.com/extensions/index.json', cloud_data)):
+            self.assertEqual(get_index_extensions(cli_ctx=cli_ctx).get('myext'), obj)
 
 
 if __name__ == '__main__':

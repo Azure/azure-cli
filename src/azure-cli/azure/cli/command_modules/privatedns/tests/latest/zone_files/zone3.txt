@@ -1,0 +1,65 @@
+; This zone file assumes the zone name is 'zone3.com'
+$ORIGIN zone3.com.
+
+; Note, first record must be SOA. Override default TTL
+@ 1d IN SOA ns1.zone3.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			)
+
+
+; Check each type
+test-a IN A 1.2.3.4
+test-aaaa IN AAAA 2001:cafe:130::100
+test-cname IN CNAME target.com.
+test-cname2 IN CNAME target.org
+test-mx IN MX 10 mail.com.
+_sip._tcp.test-srv IN SRV 1 2 3 target.com.
+test-txt IN TXT "string 1" ; Note, text is enclosed in quotes
+
+; Check that missing name means re-use previous name
+d1 IN A 12.1.2.3
+   IN A 12.2.3.4 ; Same record set 'd1.zone3.com.'
+   IN TXT "fishfishfish" ; New record set, same name but type == TXT
+
+$ORIGIN d1.zone3.com.
+@ IN A 12.3.4.5 ; Same record set d1 as above
+  IN A 12.4.5.6 ; Same record set again
+
+; Check for non-adjacent records in same record set
+$ORIGIN zone3.com.
+f1 IN A 11.1.2.3
+f2 IN A 11.2.3.4
+f1 IN A 11.2.3.3 ; Same record set as f1 above
+
+$ORIGIN f2.zone3.com.
+@ IN A 11.5.6.7 ; Same record set as f2 above
+
+; Multi-line records (see also SOA example above)
+$ORIGIN zone3.com.
+_sip._tcp IN SRV ( 10
+		   20
+		   30
+		   foo.com.) ; SRV with priority 10, weight 20, port 30, target foo.com.
+mail IN MX (100
+	    mail.test.com.) ; MX record
+
+; Missing class
+noclass A 1.2.3.4
+	A 2.3.4.5
+
+; noclass CNAME bar.com
+
+; Multi-string TXT records
+txt1 TXT "string 1 only"
+txt2 TXT "string1" "string2" ; Concatenate to "string1string2" (no separator)
+txt3 TXT ("this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+ 	  "this is a very long string with lots of text, in fact is has 74 characters"
+	  "this is a very long string with lots of text, in fact is has 74 characters"
+	 ) ; Concatentate, and divide into 255 character strings
+
+txt3 TXT "string;string;string" ; String with ';' inside

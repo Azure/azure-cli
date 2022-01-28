@@ -10,7 +10,7 @@ import requests
 
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
@@ -22,11 +22,13 @@ class BotTemplateDeployer:
     v4_webapp_template_name = 'webappv4.template.json'
 
     @staticmethod
-    def deploy_arm_template(cli_ctx, resource_group_name,  # pylint: disable=too-many-arguments
+    def deploy_arm_template(cmd, resource_group_name,  # pylint: disable=too-many-arguments
                             template_file=None, deployment_name=None,
                             parameters=None, mode=None):
-        DeploymentProperties, _ = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                          'DeploymentProperties', 'TemplateLink', mod='models')
+        DeploymentProperties = cmd.get_models(
+            'DeploymentProperties',
+            resource_type=ResourceType.MGMT_RESOURCE_RESOURCES,
+        )
 
         template = {}
         # TODO: get_file_json() can return None if specified, otherwise it can throw an error.
@@ -44,16 +46,18 @@ class BotTemplateDeployer:
 
         properties = DeploymentProperties(template=template, template_link=None,
                                           parameters=parameters, mode=mode)
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
 
-        resource_management_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-        return LongRunningOperation(cli_ctx, 'Deploying ARM Tempalte')(
-            resource_management_client.deployments.create_or_update(resource_group_name,
-                                                                    deployment_name,
-                                                                    properties, raw=False))
+        resource_mgmt_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+        deployment_poller = resource_mgmt_client.begin_create_or_update(resource_group_name, deployment_name,
+                                                                        deployment)
+
+        return LongRunningOperation(cmd.cli_ctx, 'Deploying ARM Tempalte')(deployment_poller)
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   location, sku_name, language, bot_template_type):
+                   location, sku_name, language, bot_template_type, cmek_key_vault_url=None):
         kind = 'sdk' if kind == 'webapp' else kind
         (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(language,
                                                                                     bot_template_type)
@@ -88,6 +92,10 @@ class BotTemplateDeployer:
         if description:
             paramsdict['description'] = description
 
+        if cmek_key_vault_url is not None:
+            paramsdict['cmekKeyVaultUrl'] = cmek_key_vault_url
+            paramsdict['isCmekEnabled'] = True
+
         params = {k: {'value': v} for k, v in paramsdict.items()}
 
         # Get and deploy ARM template
@@ -95,7 +103,7 @@ class BotTemplateDeployer:
 
         logger.debug('ARM template creation complete. Deploying ARM template. ')
         deploy_result = BotTemplateDeployer.deploy_arm_template(
-            cli_ctx=cmd.cli_ctx,
+            cmd=cmd,
             resource_group_name=resource_group_name,
             template_file=os.path.join(dir_path, template_name),
             parameters=[[json.dumps(params)]],

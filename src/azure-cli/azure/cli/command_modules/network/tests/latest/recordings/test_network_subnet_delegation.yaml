@@ -3,6 +3,55 @@ interactions:
     body: null
     headers:
       Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network routeserver create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -l -n --hosted-subnet --public-ip-address
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centraluseuap/operations/f898460e-c90f-4a31-a7f3-3243d396a961?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 03 Nov 2021 08:25:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6d4d714d-0c6c-47d8-b1af-363354f66985
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
@@ -13,12 +62,9 @@ interactions:
       ParameterSetName:
       - -l
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/availableDelegations?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/availableDelegations?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Microsoft.Web.serverFarms\",\r\n
@@ -87,16 +133,134 @@ interactions:
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.serversv2\",\r\n
         \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
         \"Microsoft.DBforPostgreSQL/serversv2\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.AzureCosmosDB.clusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.AzureCosmosDB.clusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AzureCosmosDB/clusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.MachineLearningServices.workspaces\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.MachineLearningServices.workspaces\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.MachineLearningServices/workspaces\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.DBforPostgreSQL.singleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.singleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforPostgreSQL/singleServers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DBforPostgreSQL.flexibleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.flexibleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.DBforMySQL.serversv2\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DBforMySQL.serversv2\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforMySQL/serversv2\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DBforMySQL.flexibleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DBforMySQL.flexibleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforMySQL/flexibleServers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.ApiManagement.service\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.ApiManagement.service\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.ApiManagement/service\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Synapse.workspaces\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Synapse.workspaces\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Synapse/workspaces\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.PowerPlatform.vnetaccesslinks\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.PowerPlatform.vnetaccesslinks\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.PowerPlatform/vnetaccesslinks\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Network.dnsResolvers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Network.dnsResolvers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Network/dnsResolvers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Kusto.clusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Kusto.clusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Kusto/clusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DelegatedNetwork.controller\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DelegatedNetwork.controller\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DelegatedNetwork/controller\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.ContainerService.managedClusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.ContainerService.managedClusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.ContainerService/managedClusters\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.PowerPlatform.enterprisePolicies\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.PowerPlatform.enterprisePolicies\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.PowerPlatform/enterprisePolicies\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.StoragePool.diskPools\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.StoragePool.diskPools\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.StoragePool/diskPools\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/read\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DocumentDB.cassandraClusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.DocumentDB.cassandraClusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DocumentDB/cassandraClusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Apollo.npu\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Apollo.npu\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Apollo/npu\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AVS.PrivateClouds\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.AVS.PrivateClouds\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AVS/PrivateClouds\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Orbital.orbitalGateways\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Orbital.orbitalGateways\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Orbital/orbitalGateways\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/publicIPAddresses/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n        \"Microsoft.Network/virtualNetworks/read\",\r\n
+        \       \"Microsoft.Network/publicIPAddresses/read\"\r\n      ]\r\n    },\r\n
+        \   {\r\n      \"name\": \"Microsoft.Singularity.accounts.jobs\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Singularity.accounts.jobs\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Singularity/accounts/jobs\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.Singularity.accounts.models\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Singularity.accounts.models\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Singularity/accounts/models\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AISupercomputer.accounts.jobs\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.AISupercomputer.accounts.jobs\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AISupercomputer/accounts/jobs\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AISupercomputer.accounts.models\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.AISupercomputer.accounts.models\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AISupercomputer/accounts/models\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/networkinterfaces/*\",\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.LabServices.labplans\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.LabServices.labplans\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.LabServices/labplans\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Fidalgo.networkSettings\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/Microsoft.Fidalgo.networkSettings\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Fidalgo/networkSettings\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"NGINX.NGINXPLUS.nginxDeployments\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/availableDelegations/NGINX.NGINXPLUS.nginxDeployments\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"NGINX.NGINXPLUS/nginxDeployments\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \     ]\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6578'
+      - '18442'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:06 GMT
+      - Wed, 03 Nov 2021 08:25:41 GMT
       expires:
       - '-1'
       pragma:
@@ -113,7 +277,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7952c6ca-aefd-4a49-b55f-4f4817f31a4e
+      - 9a4c686c-9bc8-40b8-a632-9863a80d3ca2
     status:
       code: 200
       message: OK
@@ -131,15 +295,12 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_subnet_delegation000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_subnet_delegation000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001","name":"cli_subnet_delegation000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-24T08:21:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001","name":"cli_subnet_delegation000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T08:25:34Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -148,7 +309,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:06 GMT
+      - Wed, 03 Nov 2021 08:25:43 GMT
       expires:
       - '-1'
       pragma:
@@ -176,12 +337,9 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/locations/westus/availableDelegations?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/locations/westus/availableDelegations?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"Microsoft.Web.serverFarms\",\r\n
@@ -250,16 +408,134 @@ interactions:
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.serversv2\",\r\n
         \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
         \"Microsoft.DBforPostgreSQL/serversv2\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.AzureCosmosDB.clusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.AzureCosmosDB.clusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AzureCosmosDB/clusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.MachineLearningServices.workspaces\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.MachineLearningServices.workspaces\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.MachineLearningServices/workspaces\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.DBforPostgreSQL.singleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.singleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforPostgreSQL/singleServers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DBforPostgreSQL.flexibleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DBforPostgreSQL.flexibleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.DBforMySQL.serversv2\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DBforMySQL.serversv2\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforMySQL/serversv2\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DBforMySQL.flexibleServers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DBforMySQL.flexibleServers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DBforMySQL/flexibleServers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.ApiManagement.service\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.ApiManagement.service\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.ApiManagement/service\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Synapse.workspaces\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Synapse.workspaces\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Synapse/workspaces\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.PowerPlatform.vnetaccesslinks\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.PowerPlatform.vnetaccesslinks\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.PowerPlatform/vnetaccesslinks\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Network.dnsResolvers\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Network.dnsResolvers\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Network/dnsResolvers\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Kusto.clusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Kusto.clusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Kusto/clusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/prepareNetworkPolicies/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/unprepareNetworkPolicies/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DelegatedNetwork.controller\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DelegatedNetwork.controller\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DelegatedNetwork/controller\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.ContainerService.managedClusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.ContainerService.managedClusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.ContainerService/managedClusters\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.PowerPlatform.enterprisePolicies\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.PowerPlatform.enterprisePolicies\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.PowerPlatform/enterprisePolicies\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.StoragePool.diskPools\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.StoragePool.diskPools\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.StoragePool/diskPools\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/read\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DocumentDB.cassandraClusters\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.DocumentDB.cassandraClusters\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.DocumentDB/cassandraClusters\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Apollo.npu\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Apollo.npu\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Apollo/npu\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AVS.PrivateClouds\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.AVS.PrivateClouds\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AVS/PrivateClouds\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Orbital.orbitalGateways\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Orbital.orbitalGateways\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Orbital/orbitalGateways\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/publicIPAddresses/join/action\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n        \"Microsoft.Network/virtualNetworks/read\",\r\n
+        \       \"Microsoft.Network/publicIPAddresses/read\"\r\n      ]\r\n    },\r\n
+        \   {\r\n      \"name\": \"Microsoft.Singularity.accounts.jobs\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Singularity.accounts.jobs\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Singularity/accounts/jobs\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.Singularity.accounts.models\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Singularity.accounts.models\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Singularity/accounts/models\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AISupercomputer.accounts.jobs\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.AISupercomputer.accounts.jobs\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AISupercomputer/accounts/jobs\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/networkinterfaces/*\",\r\n
+        \       \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n      ]\r\n
+        \   },\r\n    {\r\n      \"name\": \"Microsoft.AISupercomputer.accounts.models\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.AISupercomputer.accounts.models\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.AISupercomputer/accounts/models\",\r\n      \"actions\": [\r\n
+        \       \"Microsoft.Network/networkinterfaces/*\",\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.LabServices.labplans\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.LabServices.labplans\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.LabServices/labplans\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Fidalgo.networkSettings\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/Microsoft.Fidalgo.networkSettings\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"Microsoft.Fidalgo/networkSettings\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \     ]\r\n    },\r\n    {\r\n      \"name\": \"NGINX.NGINXPLUS.nginxDeployments\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroup/cli_subnet_delegation000001/providers/Microsoft.Network/availableDelegations/NGINX.NGINXPLUS.nginxDeployments\",\r\n
+        \     \"type\": \"Microsoft.Network/availableDelegations\",\r\n      \"serviceName\":
+        \"NGINX.NGINXPLUS/nginxDeployments\",\r\n      \"actions\": [\r\n        \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
         \     ]\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7838'
+      - '22042'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:07 GMT
+      - Wed, 03 Nov 2021 08:25:45 GMT
       expires:
       - '-1'
       pragma:
@@ -276,7 +552,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 06196d91-eb50-4c6c-afe6-9e28d9b36a01
+      - f6aff78e-1bd6-4246-b926-aa84ea7c50af
     status:
       code: 200
       message: OK
@@ -295,40 +571,37 @@ interactions:
       Content-Length:
       - '130'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"d0278bb6-9f3b-4fb4-b2dc-328956c6caa2\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"edabf51d-cab3-4b9e-84ef-096c6466c6f3\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"8e9581c3-2f8f-4426-b4fb-f63cf29b75fe\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"64d727b1-432f-4d0f-af0e-237e537fdad4\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/24937876-2357-47cd-b085-17e37fc0542f?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/d824533e-ffa8-4558-a77c-782dd9a8578d?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '773'
+      - '739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:11 GMT
+      - Wed, 03 Nov 2021 08:25:53 GMT
       expires:
       - '-1'
       pragma:
@@ -341,9 +614,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ecdf3353-f8a8-46d4-a5eb-db4406ae3d31
+      - d286cc1e-5ef1-4558-b2b4-69dee3141cfc
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -351,7 +624,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -361,10 +634,9 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/24937876-2357-47cd-b085-17e37fc0542f?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/d824533e-ffa8-4558-a77c-782dd9a8578d?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -376,7 +648,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:15 GMT
+      - Wed, 03 Nov 2021 08:25:56 GMT
       expires:
       - '-1'
       pragma:
@@ -393,7 +665,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7bffca10-ffa1-433c-883c-fbed200c96e4
+      - 6e96d759-b20a-4fcd-b6c9-31c3b04f6537
     status:
       code: 200
       message: OK
@@ -401,7 +673,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -411,32 +683,31 @@ interactions:
       ParameterSetName:
       - -g -n -l
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"3e6ac3b5-12f3-48e7-bd27-ff05cd5c96de\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e803e6b0-7e02-44e0-be78-179539537f21\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"8e9581c3-2f8f-4426-b4fb-f63cf29b75fe\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"64d727b1-432f-4d0f-af0e-237e537fdad4\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '774'
+      - '740'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:16 GMT
+      - Wed, 03 Nov 2021 08:25:57 GMT
       etag:
-      - W/"3e6ac3b5-12f3-48e7-bd27-ff05cd5c96de"
+      - W/"e803e6b0-7e02-44e0-be78-179539537f21"
       expires:
       - '-1'
       pragma:
@@ -453,7 +724,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c7fa37d9-46f1-42be-8d34-8a2386c4d463
+      - 1ee53f7f-c0a2-4468-bd19-05781f7d2973
     status:
       code: 200
       message: OK
@@ -471,34 +742,31 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"3e6ac3b5-12f3-48e7-bd27-ff05cd5c96de\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e803e6b0-7e02-44e0-be78-179539537f21\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"8e9581c3-2f8f-4426-b4fb-f63cf29b75fe\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"64d727b1-432f-4d0f-af0e-237e537fdad4\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '774'
+      - '740'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:16 GMT
+      - Wed, 03 Nov 2021 08:25:58 GMT
       etag:
-      - W/"3e6ac3b5-12f3-48e7-bd27-ff05cd5c96de"
+      - W/"e803e6b0-7e02-44e0-be78-179539537f21"
       expires:
       - '-1'
       pragma:
@@ -515,17 +783,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 71b54764-6547-4c41-a433-62b43e1323d5
+      - 4abd1281-b5e3-4dea-8575-a8b285bb4dca
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1",
       "location": "westcentralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"properties":
-      {"addressPrefix": "10.0.0.0/24", "delegations": [{"properties": {"serviceName":
-      "Microsoft.Web/serverFarms"}, "name": "0"}]}, "name": "subnet1"}], "virtualNetworkPeerings":
-      [], "enableDdosProtection": false, "enableVmProtection": false}}'''
+      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"name": "subnet1",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"name": "0",
+      "properties": {"serviceName": "Microsoft.Web/serverFarms"}}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      [], "enableDdosProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -536,35 +805,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '612'
+      - '676'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vnet-name -n --address-prefix --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"3344db55-88ef-46dc-b966-e022c562ee3a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"85afa6eb-a816-43e6-ab30-b829d6d7b862\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"8e9581c3-2f8f-4426-b4fb-f63cf29b75fe\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"64d727b1-432f-4d0f-af0e-237e537fdad4\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"3344db55-88ef-46dc-b966-e022c562ee3a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"85afa6eb-a816-43e6-ab30-b829d6d7b862\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [\r\n            {\r\n              \"name\": \"0\",\r\n              \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1/delegations/0\",\r\n
-        \             \"etag\": \"W/\\\"3344db55-88ef-46dc-b966-e022c562ee3a\\\"\",\r\n
+        \             \"etag\": \"W/\\\"85afa6eb-a816-43e6-ab30-b829d6d7b862\\\"\",\r\n
         \             \"properties\": {\r\n                \"provisioningState\":
         \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n
         \               \"actions\": [\r\n                  \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
@@ -573,18 +839,20 @@ interactions:
         \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/bb3b33e3-e587-458a-9f15-c4f28a5fe875?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/aaff9277-f2f0-4d01-8b78-a0448b9bea63?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '2189'
+      - '2155'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:17 GMT
+      - Wed, 03 Nov 2021 08:26:00 GMT
       expires:
       - '-1'
       pragma:
@@ -601,9 +869,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b5a02aad-7c87-4d8b-bf90-cfe1e6c6b3b5
+      - 7716b051-c582-47bf-bbc4-64cbaafa6ac1
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -611,7 +879,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -621,10 +889,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/bb3b33e3-e587-458a-9f15-c4f28a5fe875?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/aaff9277-f2f0-4d01-8b78-a0448b9bea63?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -636,7 +903,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:21 GMT
+      - Wed, 03 Nov 2021 08:26:03 GMT
       expires:
       - '-1'
       pragma:
@@ -653,7 +920,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9c0e8ace-cb8f-4894-b3f6-ff063f1ac16a
+      - 0076cf7f-6520-4dc9-96f4-e5ce3c226e90
     status:
       code: 200
       message: OK
@@ -661,7 +928,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -671,27 +938,26 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"c71830b5-5165-4c40-b87e-3ac41ccec347\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"15461656-a321-4f5a-94a0-84118215afbc\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"8e9581c3-2f8f-4426-b4fb-f63cf29b75fe\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"64d727b1-432f-4d0f-af0e-237e537fdad4\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"c71830b5-5165-4c40-b87e-3ac41ccec347\\\"\",\r\n
+        \       \"etag\": \"W/\\\"15461656-a321-4f5a-94a0-84118215afbc\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [\r\n            {\r\n              \"name\": \"0\",\r\n              \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1/delegations/0\",\r\n
-        \             \"etag\": \"W/\\\"c71830b5-5165-4c40-b87e-3ac41ccec347\\\"\",\r\n
+        \             \"etag\": \"W/\\\"15461656-a321-4f5a-94a0-84118215afbc\\\"\",\r\n
         \             \"properties\": {\r\n                \"provisioningState\":
         \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n
         \               \"actions\": [\r\n                  \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
@@ -700,18 +966,18 @@ interactions:
         \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
         \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2191'
+      - '2157'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:22 GMT
+      - Wed, 03 Nov 2021 08:26:03 GMT
       etag:
-      - W/"c71830b5-5165-4c40-b87e-3ac41ccec347"
+      - W/"15461656-a321-4f5a-94a0-84118215afbc"
       expires:
       - '-1'
       pragma:
@@ -728,7 +994,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 494d94c6-f44a-42c7-8c89-5e1e9031e75a
+      - e65fad6f-8e49-4402-b580-d2b529ffe8a8
     status:
       code: 200
       message: OK
@@ -746,20 +1012,17 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"c71830b5-5165-4c40-b87e-3ac41ccec347\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"15461656-a321-4f5a-94a0-84118215afbc\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1/delegations/0\",\r\n
-        \       \"etag\": \"W/\\\"c71830b5-5165-4c40-b87e-3ac41ccec347\\\"\",\r\n
+        \       \"etag\": \"W/\\\"15461656-a321-4f5a-94a0-84118215afbc\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
         [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
@@ -775,9 +1038,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:23 GMT
+      - Wed, 03 Nov 2021 08:26:06 GMT
       etag:
-      - W/"c71830b5-5165-4c40-b87e-3ac41ccec347"
+      - W/"15461656-a321-4f5a-94a0-84118215afbc"
       expires:
       - '-1'
       pragma:
@@ -794,15 +1057,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1b1e189c-2be8-453f-8c08-ed023e06d845
+      - 68826807-5f9d-4c8e-923d-19ae1b23fa6b
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
-      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"properties":
-      {"serviceName": "Microsoft.Sql/managedInstances"}, "name": "0"}], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "subnet1"}'''
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
+      "name": "subnet1", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.0.0/24", "delegations": [{"name": "0", "properties":
+      {"serviceName": "Microsoft.Sql/managedInstances"}}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -813,26 +1077,23 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '475'
+      - '528'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vnet-name -n --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"9426368a-dcfb-47ab-972f-dfb5a78f83bd\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"fa6a8030-0f47-403f-823f-c6f588398dce\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1/delegations/0\",\r\n
-        \       \"etag\": \"W/\\\"9426368a-dcfb-47ab-972f-dfb5a78f83bd\\\"\",\r\n
+        \       \"etag\": \"W/\\\"fa6a8030-0f47-403f-823f-c6f588398dce\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.Sql/managedInstances\",\r\n          \"actions\":
         [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
@@ -844,7 +1105,7 @@ interactions:
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/917f9e56-b148-49d9-8f70-a5241257123e?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/7124ffb6-1a7e-4ff9-ac53-5164ceed1119?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -852,7 +1113,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:24 GMT
+      - Wed, 03 Nov 2021 08:26:11 GMT
       expires:
       - '-1'
       pragma:
@@ -869,9 +1130,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 49afe205-a802-46cd-af25-1e7b4a8164ac
+      - dc5e115b-07e1-470d-8fda-e3fac7d35b11
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1170'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -879,7 +1140,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -889,10 +1150,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/917f9e56-b148-49d9-8f70-a5241257123e?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/7124ffb6-1a7e-4ff9-ac53-5164ceed1119?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -904,7 +1164,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:28 GMT
+      - Wed, 03 Nov 2021 08:26:14 GMT
       expires:
       - '-1'
       pragma:
@@ -921,7 +1181,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c5f9ef08-a5fe-408d-9460-33d312f23b41
+      - dd74d9ec-c6ba-4bcb-80e4-8784c7b22167
     status:
       code: 200
       message: OK
@@ -929,7 +1189,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -939,18 +1199,17 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --delegations
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"subnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \ \"etag\": \"W/\\\"d4e0801f-c532-403c-8343-0abf16c72d5f\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"6b8c3ca9-a802-4027-abe6-65ec6ac86be8\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"0\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_subnet_delegation000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1/delegations/0\",\r\n
-        \       \"etag\": \"W/\\\"d4e0801f-c532-403c-8343-0abf16c72d5f\\\"\",\r\n
+        \       \"etag\": \"W/\\\"6b8c3ca9-a802-4027-abe6-65ec6ac86be8\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.Sql/managedInstances\",\r\n          \"actions\":
         [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\",\r\n
@@ -968,9 +1227,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 08:22:28 GMT
+      - Wed, 03 Nov 2021 08:26:15 GMT
       etag:
-      - W/"d4e0801f-c532-403c-8343-0abf16c72d5f"
+      - W/"6b8c3ca9-a802-4027-abe6-65ec6ac86be8"
       expires:
       - '-1'
       pragma:
@@ -987,7 +1246,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 45a8dd8c-0890-4df6-bc7a-6614a59a5ca2
+      - f0d64606-773f-446f-a885-b5b23f84573a
     status:
       code: 200
       message: OK

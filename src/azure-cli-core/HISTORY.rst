@@ -3,6 +3,240 @@
 Release History
 ===============
 
+2.33.0
+++++++
+* Drop `--query-examples` global argument (#20962)
+
+2.32.0
+++++++
+* Use optimistic locking for service principal entry reads (#20408)
+
+2.31.0
+++++++
+* Use MSAL HTTP cache (#20234)
+
+2.30.0
+++++++
+* [BREAKING CHANGE] ADAL to MSAL migration (#19853)
+
+2.29.1
+++++++
+* No changes
+
+2.29.0
+++++++
+* Add a global config `core.disable_progress_bar` by `az config` to allow users to disable progress bar globally in the automation scenario. (#19464)
+* It is supported to use the parameter `--only-show-errors` to disable progress bar. (#19464)
+
+2.28.1
+++++++
+* No changes
+
+2.28.0
+++++++
+* Conditional Access: Show `--scope` for `az login` message when failed to refresh the access token (#17738)
+
+2.27.2
+++++++
+* No changes
+
+2.27.1
+++++++
+* No changes
+
+2.27.0
+++++++
+* Minor fixes
+
+2.26.1
+++++++
+* No changes
+
+2.26.0
+++++++
+* Minor fixes
+
+2.25.0
+++++++
+* Fix #18360 and #18262: Write to stderr issue (#18414)
+
+2.24.2
+++++++
+* No changes
+
+2.24.1
+++++++
+* No changes
+
+2.24.0
+++++++
+* Fix issue #16798: Azure CLI output is corrupted! (#18065)
+
+2.23.0
+++++++
+* Display allowed values in error message when enum validation fails (#17621)
+* Refactor AzCommandGroup (#17387)
+* Add a linter rule for `service_name.json` (#17428)
+
+2.22.1
+++++++
+* Minor fixes
+
+2.22.0
+++++++
+* Add spinner progress bar for long running operation (#17262)
+* Add service_name.json (#17159)
+* Provide recommendation for JSON parsing error (#17445)
+* Add workaround for cross-tenant authentication with Track 2 SDKs (#16797)
+
+2.21.0
+++++++
+* Unify ADAL and MSAL error handler (#17072)
+* Add support for specifying minimum required version of an extension to work with the current core version (#16751)
+
+2.20.0
+++++++
+* Minor fixes
+
+2.19.1
+++++++
+* No changes
+
+2.19.0
+++++++
+* New error output: Support multiple failure recommendations with colorization (#16257)
+
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
+2.17.1
+++++++
+* No changes
+
+2.17.0
+++++++
+* Minor fixes
+
+2.16.0
+++++++
+* Add 2020-09-01-hybrid API profile for AzureStack (#15096)
+
+2.15.1
+++++++
+* Minor fixes
+
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
+2.14.1
+++++++
+* Minor fixes
+
+2.14.0
+++++++
+* Minor fixes
+
+2.13.0
+++++++
+* Minor fixes
+
+2.12.1
+++++++
+* No changes
+
+2.12.0
+++++++
+* Add a new global parameter `--query-examples` (#14765)
+* Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
+* Error message improvement (#14855)
+
+2.11.1
+++++++
+* Minor fixes
+
+2.11.0
+++++++
+* Minor improvement
+
+2.10.1
+++++++
+* Minor fixes
+
+2.10.0
+++++++
+* Minor fixes
+
+2.9.1
+++++++
+* Minor fixes
+
+2.9.0
+++++++
+* Fix get_token() issue in msi login and `expiresIn` key error in cloud shell login credentials for track 2 SDK related commands (#14187)
+
+2.8.0
+++++++
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
+
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
+2.6.0
+++++++
+* Update local context on/off status to global user level (#13277)
+
+2.5.1
+++++++
+* Minor fixes
+
+2.5.0
+++++++
+* Fix logging file fd leaking (#13102)
+* Fix core tests failed under certain profiles (#13136)
+* Use pkginfo to query metadata for Python Package (#12782)
+
+2.4.0
+++++++
+* Upgrade msrestazure to 0.6.3 (#12839)
+* Output more error details of exceptions if possible (#12945)
+* Support track1 and track2 mgmt SDK side by side (#12952)
+* Fix generic remove property NoneType exception (#12950)
+* `az --version`: Show command instruction and detailed instruction link when updates available (#12981)
+* Fix bug in core test test_parser that will affect exception stack while existing if argument parse raise Exception
+* Make CLI respect file logging configuration option: enable_log_file and AZURE_LOGGING_ENABLE_LOG_FILE env variable
+* Fix the name of extension of dev type is None if it has incompatibility problem with core
+
+2.3.1
+++++++
+* No changes
+
+2.3.0
+++++++
+* az cloud show: add application insights endpoint for public cloud
+* Enable local context for global resource group
+* PREVIEW: Add experimental tag to extension packages, command groups, commands and arguments
+* PREVIEW: Allow disabling color by setting `AZURE_CORE_NO_COLOR` environment variable to `True` or `[core] no_color=True` config
+* PREVIEW: Add `--only-show-errors` global argument to mute all warning, info and debug output. It can also be enabled by setting `AZURE_CORE_ONLY_SHOW_ERRORS` environment variable to `True` or `[core] only_show_errors=True` config
+
+2.2.0
+++++++
+* az cloud show: add application insights endpoint for China/US cloud
+
+2.1.0
+++++++
+* Support `--output yamlc` for colorized YAML
+
+2.0.81
+++++++
+* `get_raw_token`: Add `tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
 2.0.80
 ++++++
 * No changes
@@ -199,8 +433,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

@@ -7,10 +7,7 @@
 
 import argparse
 import unittest
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from knack.util import CLIError
 
@@ -78,7 +75,7 @@ def _mock_resource_client(cli_ctx, client_type, **kwargs):
                 mock_sa.name = name
                 mock_sa.resource_group = rg
                 mock_sa.location = location
-                mock_sa.sku.tier.value = tier
+                mock_sa.sku.tier = tier
                 return mock_sa
             all_mocks = [
                 _get_mock_sa('sa1', 'rg1', 'eastus', 'Standard'),
@@ -378,7 +375,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 
-        self.assertEqual(ns.os_type, 'someOS')
+        self.assertEqual(ns.os_type.value, 'someOS')
         self.assertTrue(0 in ns.disk_info)
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)

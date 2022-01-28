@@ -332,6 +332,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
                            "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
+                           "To see if public network access is enabled, run 'az acr show --query publicNetworkAccess'."
                            "Please refer to https://aka.ms/acr/errors#connectivity_forbidden_error for more information."  # pylint: disable=line-too-long
                            .format(login_server, registry_name))
     except RequestException as e:
@@ -493,7 +494,8 @@ def request_data_from_registry(http_method,
                                file_payload=None,
                                params=None,
                                retry_times=3,
-                               retry_interval=5):
+                               retry_interval=5,
+                               timeout=300):
     if http_method not in ALLOWED_HTTP_METHOD:
         raise ValueError("Allowed http method: {}".format(ALLOWED_HTTP_METHOD))
 
@@ -520,6 +522,7 @@ def request_data_from_registry(http_method,
                         headers=headers,
                         params=params,
                         data=data_payload,
+                        timeout=timeout,
                         verify=(not should_disable_connection_verify())
                     )
             else:
@@ -529,6 +532,7 @@ def request_data_from_registry(http_method,
                     headers=headers,
                     params=params,
                     json=json_payload,
+                    timeout=timeout,
                     verify=(not should_disable_connection_verify())
                 )
 
@@ -598,7 +602,7 @@ class RegistryException(CLIError):
         self.status_code = status_code
 
 
-class RegistryResponse(object):  # pylint: disable=too-few-public-methods
+class RegistryResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, request, internal_response):
         self.request = request
         self.internal_response = internal_response

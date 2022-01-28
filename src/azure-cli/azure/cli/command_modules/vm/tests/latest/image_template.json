@@ -1,0 +1,83 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "apiVersion": "2020-02-14",
+    "location": "westus",
+    "dependsOn": [],
+    "tags": {
+        "imagebuilderTemplate": "ubuntu1804"
+    },
+    "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "/subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourceGroups/fy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1": {}
+        }
+    },
+    "properties": {
+
+        "buildTimeoutInMinutes" : 80,
+        
+        "vmProfile": {
+            "vmSize": "Standard_D1_v2",
+            "osDiskSizeGB": 30
+        },
+
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "18.04-LTS",
+                "version": "18.04.201903060"
+        },
+        "customize": [
+            {
+                "type": "Shell",
+                "name": "RunScriptFromSource",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript.sh"
+            },
+
+            {
+                "type": "Shell",
+                "name": "CheckSumCompareShellScript",
+                "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/customizeScript2.sh",
+                "sha256Checksum": "ade4c5214c3c675e92c66e2d067a870c5b81b9844b3de3cc72c49ff36425fc93"
+            },
+            
+            {
+                "type": "File",
+                "name": "downloadBuildArtifacts",
+                "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+                "destination":"/tmp/index.html"
+            },
+
+            {
+                "type": "Shell",
+                "name": "setupBuildPath",
+                "inline": [
+                    "sudo mkdir /buildArtifacts",
+                    "sudo cp /tmp/index.html /buildArtifacts/index.html"
+                ]
+            },
+
+            {
+                "type": "Shell",
+                "name": "InstallUpgrades",
+                "inline": [
+                    "sudo apt install unattended-upgrades"
+                ]
+            }
+
+        ],
+        "distribute": 
+            [
+                {   "type":"ManagedImage",
+                    "imageId": "/subscriptions/1c638cf4-608f-4ee6-b680-c329e824c3a8/resourceGroups/fy/providers/Microsoft.Compute/images/image",
+                    "location": "westus",
+                    "runOutputName": "runOutputName",
+                    "artifactTags": {
+                        "source": "azVmImageBuilder",
+                        "baseosimg": "ubuntu1804"
+                    }
+                }
+            ]
+        }
+    }

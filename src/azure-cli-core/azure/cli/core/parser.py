@@ -3,25 +3,36 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-
-import sys
 import difflib
 
 import argparse
 import argcomplete
 
-import azure.cli.core.telemetry as telemetry
-from azure.cli.core.azlogging import CommandLoggerContext
+from azure.cli.core import telemetry
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
+from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+from azure.cli.core.command_recommender import CommandRecommender
+from azure.cli.core.azclierror import UnrecognizedArgumentError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import CommandNotFoundError
+from azure.cli.core.azclierror import ValidationError
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
 
 logger = get_logger(__name__)
+
+EXTENSION_REFERENCE = ("If the command is from an extension, "
+                       "please make sure the corresponding extension is installed. "
+                       "To learn more about extensions, please visit "
+                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
+
+OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
 
 
 class IncorrectUsageError(CLIError):
@@ -54,6 +65,11 @@ class AzCliCommandParser(CLICommandParser):
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
+        self._raw_arguments = None
+        self._namespace = None
+        self._suggestion_msg = []
+        self.subparser_map = {}
+        self.specified_arguments = []
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
@@ -89,6 +105,7 @@ class AzCliCommandParser(CLICommandParser):
                                                   formatter_class=fc,
                                                   cli_help=self.cli_help,
                                                   _command_source=metadata.command_source)
+            self.subparser_map[command_name] = command_parser
             command_parser.cli_ctx = self.cli_ctx
             command_validator = metadata.validator
             argument_validators = []
@@ -119,6 +136,8 @@ class AzCliCommandParser(CLICommandParser):
                 param.completer = arg.completer
                 param.deprecate_info = arg.deprecate_info
                 param.preview_info = arg.preview_info
+                param.experimental_info = arg.experimental_info
+                param.default_value_source = arg.default_value_source
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -128,15 +147,34 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        telemetry.set_user_fault('validation error')
-        return super(AzCliCommandParser, self).error(message)
+        az_error = ValidationError(message)
+        az_error.print_error()
+        az_error.send_telemetry()
+        self.exit(2)
 
     def error(self, message):
-        telemetry.set_user_fault('parse error: {}'.format(message))
-        args = {'prog': self.prog, 'message': message}
-        with CommandLoggerContext(logger):
-            logger.error('%(prog)s: error: %(message)s', args)
-        self.print_usage(sys.stderr)
+        # Get a recommended command from the CommandRecommender
+        command_arguments = self._get_failure_recovery_arguments()
+        cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+        recommender = CommandRecommender(*command_arguments, message, cli_ctx)
+        recommender.set_help_examples(self.get_examples(self.prog))
+        recommendations = recommender.provide_recommendations()
+
+        az_error = ArgumentUsageError(message)
+        if 'unrecognized arguments' in message:
+            az_error = UnrecognizedArgumentError(message)
+        elif 'arguments are required' in message:
+            az_error = RequiredArgumentMissingError(message)
+        elif 'invalid' in message:
+            az_error = InvalidArgumentValueError(message)
+
+        if '--query' in message:
+            from azure.cli.core.util import QUERY_REFERENCE
+            az_error.set_recommendation(QUERY_REFERENCE)
+        elif recommendations:
+            az_error.set_aladdin_recommendation(recommendations)
+        az_error.print_error()
+        az_error.send_telemetry()
         self.exit(2)
 
     def format_help(self):
@@ -156,40 +194,147 @@ class AzCliCommandParser(CLICommandParser):
         telemetry.set_success(summary='show help')
         super(AzCliCommandParser, self).format_help()
 
+    def get_examples(self, command):
+        if not self.cli_help:
+            return []
+        is_group = self.is_group()
+        return self.cli_help.get_examples(command,
+                                          self._actions[-1] if is_group else self,
+                                          is_group)
+
     def enable_autocomplete(self):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
-                                 default_completer=lambda _: ())
+                                 default_completer=lambda *args, **kwargs: ())
+
+    def _get_failure_recovery_arguments(self, action=None):
+        # Strip the leading "az " and any extraneous whitespace.
+        command = self.prog[3:].strip()
+        parameters = []
+        parameter_set = set()
+        raw_arguments = None
+        extension = None
+
+        # Extract only parameter names to ensure GPDR compliance
+        def extract_safe_params(parameters):
+            return AzCliCommandInvoker._extract_parameter_names(parameters)  # pylint: disable=protected-access
+
+        # Check for extension name attribute
+        def has_extension_name(command_source):
+            is_extension_command_source = isinstance(command_source, ExtensionCommandSource)
+            has_extension_name = False
+
+            if is_extension_command_source:
+                has_extension_name = hasattr(command_source, 'extension_name')
+
+            return is_extension_command_source and has_extension_name
+
+        # If the arguments have been processed into a namespace...
+        if self._namespace:
+            # Select the parsed command.
+            if hasattr(self._namespace, 'command'):
+                command = self._namespace.command
+        # Parse parameter names from user input.
+        if self._raw_arguments:
+            raw_arguments = self._raw_arguments
+            parameters = extract_safe_params(self._raw_arguments)
+
+        for parameter in parameters:
+            parameter_set.add(parameter)
+
+        # If we can retrieve the extension from the current parser's command source...
+        if has_extension_name(self.command_source):
+            extension = self.command_source.extension_name
+        # Otherwise, the command may have not been in a command group. The command source will not be
+        # set in this case.
+        elif action and action.dest in ('_subcommand', '_command_package'):
+            # Get all parsers in the set of possible actions.
+            parsers = list(action.choices.values())
+            parser = parsers[0] if parsers else None
+            # If the first parser comes from an extension...
+            if parser and has_extension_name(parser.command_source):
+                # We're looking for a subcommand under an extension command group. Set the
+                # extension to reflect this.
+                extension = parser.command_source.extension_name
+            # Extend the command if the first raw argument is not a parameter.
+            if raw_arguments and raw_arguments[0] not in parameter_set:
+                command = '{cmd} {arg}'.format(cmd=command, arg=raw_arguments[0])
+        # Otherwise, only set the extension if every subparser comes from an extension. This occurs
+        # when an unrecognized argument is passed to a command from an extension.
+        elif isinstance(self.subparser_map, dict):
+            for _, subparser in self.subparser_map.items():
+                if isinstance(subparser.command_source, ExtensionCommandSource):
+                    extension = subparser.command_source.extension_name
+                else:
+                    extension = None
+                    break
+
+        return command, self._raw_arguments, extension
+
+    def _get_values(self, action, arg_strings):
+        value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
+        if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
+            self.specified_arguments.append(action.dest)
+        return value
+
+    def parse_known_args(self, args=None, namespace=None):
+        # retrieve the raw argument list in case parsing known arguments fails.
+        self._raw_arguments = args
+        # if parsing known arguments succeeds, get the command namespace and the argument list
+        self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
+        return self._namespace, self._raw_arguments
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
-        if action.choices is not None and value not in action.choices:
+        if action.choices is not None and value not in action.choices:  # pylint: disable=too-many-nested-blocks
+            # self.cli_ctx is None when self.prog is beyond 'az', such as 'az iot'.
+            # use cli_ctx from cli_help which is not lost.
+            cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
+
+            command_name_inferred = self.prog
+            use_dynamic_install = 'no'
             if not self.command_source:
+                from azure.cli.core.extension.dynamic_install import try_install_extension
+                candidates = []
+                args = self.prog.split() + self._raw_arguments
+                # Check if the command is from an extension. If yes, try to fix by installing the extension, then exit.
+                # The command will be rerun in another process.
+                use_dynamic_install = try_install_extension(self, args)
                 # parser has no `command_source`, value is part of command itself
-                extensions_link = 'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'
-                error_msg = ("{prog}: '{value}' is not in the '{prog}' command group. See '{prog} --help'. "
-                             "If the command is from an extension, "
-                             "please make sure the corresponding extension is installed. "
-                             "To learn more about extensions, please visit "
-                             "{extensions_link}").format(prog=self.prog, value=value, extensions_link=extensions_link)
+                error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                az_error = CommandNotFoundError(error_msg)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                if candidates:
+                    # use the most likely candidate to replace the misspelled command
+                    args_inferred = [item if item != value else candidates[0] for item in args]
+                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
                 parameter = action.option_strings[0] if action.option_strings else action.dest
-                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. See '{prog} --help'.".format(
-                    prog=self.prog, value=value, param=parameter)
-            telemetry.set_user_fault(error_msg)
-            with CommandLoggerContext(logger):
-                logger.error(error_msg)
-            candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
+                    prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
+                az_error = InvalidArgumentValueError(error_msg)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+
+            command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
-                print_args = {
-                    's': 's' if len(candidates) > 1 else '',
-                    'verb': 'are' if len(candidates) > 1 else 'is',
-                    'value': value
-                }
-                suggestion_msg = "\nThe most similar choice{s} to '{value}' {verb}:\n".format(**print_args)
-                suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
-                print(suggestion_msg, file=sys.stderr)
+                az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
+
+            # recommend a command for user
+            recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
+            recommender.set_help_examples(self.get_examples(command_name_inferred))
+            recommendations = recommender.provide_recommendations()
+            if recommendations:
+                az_error.set_aladdin_recommendation(recommendations)
+
+            # remind user to check extensions if we can not find a command to recommend
+            if isinstance(az_error, CommandNotFoundError) \
+                    and not az_error.recommendations and self.prog == 'az' \
+                    and use_dynamic_install == 'no':
+                az_error.set_recommendation(EXTENSION_REFERENCE)
+
+            az_error.print_error()
+            az_error.send_telemetry()
 
             self.exit(2)

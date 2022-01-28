@@ -108,3 +108,12 @@ def validate_sqlmanagement(namespace):
 
     if (sql_mgmt_mode == "NoAgent" and (namespace.sql_image_sku is None or namespace.sql_image_offer is None)):
         raise CLIError("usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME")
+
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_expand(namespace):
+    '''
+    Concatenates expand parameters
+    '''
+    if namespace.expand is not None:
+        namespace.expand = ",".join(namespace.expand)

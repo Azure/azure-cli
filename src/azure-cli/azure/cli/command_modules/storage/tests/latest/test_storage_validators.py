@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 from argparse import (Namespace, ArgumentError)
-from six import StringIO
+from io import StringIO
 
 from knack import CLI
 
@@ -19,7 +19,8 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client,
                                                            validate_encryption_source, validate_source_uri,
-                                                           validate_encryption_services, as_user_validator)
+                                                           validate_encryption_services, as_user_validator,
+                                                           get_not_none_validator)
 from azure.cli.testsdk import api_version_constraint
 
 
@@ -40,9 +41,10 @@ class MockLoader(object):
 
 
 class MockCmd(object):
-    def __init__(self, ctx):
+    def __init__(self, ctx, arguments={}):
         self.cli_ctx = ctx
         self.loader = MockLoader(self.cli_ctx)
+        self.arguments = arguments
 
     def get_models(self, *attr_args, **kwargs):
         return get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, *attr_args, **kwargs)
@@ -89,6 +91,7 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
             actual = get_datetime_type(False)(input)
 
     def test_ipv4_range_type(self):
+        from knack.util import CLIError
         input = "111.22.3.111"
         actual = ipv4_range_type(input)
         expected = input
@@ -100,11 +103,11 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
         self.assertEqual(actual, expected)
 
         input = "111.22"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CLIError):
             actual = ipv4_range_type(input)
 
         input = "111.22.33.44-"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CLIError):
             actual = ipv4_range_type(input)
 
     def test_resource_types_type(self):
@@ -162,6 +165,27 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
         validate_source_uri(MockCmd(self.cli), ns)
         self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
 
+    def test_get_not_none_validator(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        from knack.arguments import CLICommandArgument, CLIArgumentType
+
+        container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='The container name.')
+        arg_type = CLIArgumentType(help='whatever arg')
+        cmd = MockCmd(self.cli)
+        cmd.arguments = {'container_name': CLICommandArgument(dest='container_name', argtype=container_name_type),
+                         'arg': CLICommandArgument(dest='arg', argtype=arg_type)}
+
+        validate_container_name = get_not_none_validator('container_name')
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Argument --container-name/-c should be specified'):
+            validate_container_name(cmd, Namespace(container_name=''))
+
+        validate_arg = get_not_none_validator('arg')
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Argument --arg should be specified'):
+            validate_arg(cmd, Namespace(arg=None))
+
+        validate_arg(cmd, Namespace(arg=0))
+        validate_arg(cmd, Namespace(arg=False))
+
 
 @api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class TestEncryptionValidators(unittest.TestCase):
@@ -190,26 +214,14 @@ class TestEncryptionValidators(unittest.TestCase):
 
     def test_validate_encryption_source(self):
         with self.assertRaises(ValueError):
-            validate_encryption_source(MockCmd(self.cli),
-                                       Namespace(encryption_key_source='Microsoft.Keyvault', _cmd=MockCmd(self.cli)))
+            validate_encryption_source(
+                Namespace(encryption_key_source='Microsoft.Keyvault', encryption_key_name=None,
+                          encryption_key_version=None, encryption_key_vault=None, _cmd=MockCmd(self.cli)))
 
         with self.assertRaises(ValueError):
             validate_encryption_source(
-                MockCmd(self.cli),
                 Namespace(encryption_key_source='Microsoft.Storage', encryption_key_name='key_name',
                           encryption_key_version='key_version', encryption_key_vault='https://example.com/key_uri'))
-
-        ns = Namespace(encryption_key_source='Microsoft.Keyvault', encryption_key_name='key_name',
-                       encryption_key_version='key_version', encryption_key_vault='https://example.com/key_uri')
-        validate_encryption_source(MockCmd(self.cli), ns)
-        self.assertFalse(hasattr(ns, 'encryption_key_name'))
-        self.assertFalse(hasattr(ns, 'encryption_key_version'))
-        self.assertFalse(hasattr(ns, 'encryption_key_uri'))
-
-        properties = ns.encryption_key_vault_properties
-        self.assertEqual(properties.key_name, 'key_name')
-        self.assertEqual(properties.key_version, 'key_version')
-        self.assertEqual(properties.key_vault_uri, 'https://example.com/key_uri')
 
 
 class TestGetSourceClientValidator(unittest.TestCase):
@@ -311,6 +323,58 @@ class TestGetSourceClientValidator(unittest.TestCase):
         for key in kwargs:
             setattr(ns, key, kwargs[key])
         return ns
+
+
+class TestAzcopyValidator(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def test_validate_azcopy_credential(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        ns = Namespace(source='https://testaccount1.s3.amazonaws.com/test/dir',
+                       destination='https://testaccount2.blob.core.windows.net/test/blob',
+                       destination_container=None, destination_blob=None,
+                       destination_share=None, destination_file_path=None,
+                       source_container=None, source_blob=None,
+                       source_share=None, source_file_path=None,
+                       source_account_name=None, source_account_key=None,
+                       source_connection_string=None, source_sas=None,
+                       account_name=None, account_key=None,
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
+
+        ns = Namespace(source='./dir',
+                       destination=None,
+                       destination_container='destcon', destination_blob=None,
+                       destination_share=None, destination_file_path=None,
+                       source_container=None, source_blob=None,
+                       source_share=None, source_file_path=None,
+                       source_account_name=None, source_account_key=None,
+                       source_connection_string=None, source_sas=None,
+                       account_name='destacc', account_key=None,
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
+
+        ns = Namespace(source=None,
+                       destination=None,
+                       destination_container=None, destination_blob=None,
+                       destination_share='destshare', destination_file_path='dir/file',
+                       source_container=None, source_blob=None,
+                       source_share='srcshare', source_file_path='dir/file',
+                       source_account_name='srcacc', source_account_key='mockacckey',
+                       source_connection_string=None, source_sas=None,
+                       account_name='destacc', account_key='mockacckey',
+                       connection_string=None, sas_token=None,
+                       _cmd=MockCmd(self.cli))
+        validate_azcopy_credential(MockCmd(self.cli), ns)
+        self.assertIsNotNone(ns.source)
+        self.assertIsNotNone(ns.destination)
 
 
 if __name__ == '__main__':

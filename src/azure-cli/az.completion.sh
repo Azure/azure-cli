@@ -1,6 +1,6 @@
 case $SHELL in
 */zsh)
-   echo 'Enabling ZSH compatibility mode';
+   # Enable ZSH compatibility mode
    autoload bashcompinit && bashcompinit
    ;;
 */bash)

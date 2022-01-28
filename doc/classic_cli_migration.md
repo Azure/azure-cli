@@ -85,13 +85,14 @@ While most commands keep the same group and command names between the Azure clas
 Mutate operations now use the `update` verb instead of `set`.  While the classic CLI
 exposed some common operations as parameters, such as:
 
-```
+```azurecli
 $ azure vm set -g MyGroup -n MyName --nic-ids $MyNicID
 $ azure vm set -g MyGroup -n MyName --tags myTagName=MyTagValue
 ```
 
 The Azure CLI `update` commands work generically against the resource, for example:
-```
+
+```azurecli
 $ az vm update -g MyGroup -n MyName --add networkProfile.networkInterfaces primary=false id=$MyNicID
 $ az vm update -g MyGroup -n MyName --set tags.myTagName=MyTagValue
 ```
@@ -115,7 +116,7 @@ parameter flags: `az vm show -g MyRG -n MyName`.
 In addition, when an input value is missing, we will show an error indicating the
 missing parameters, instead of prompting the user automatically:
 
-```
+```azurecli
 $ az vm show
 az vm show: error: (--name --resource-group | --ids) are required
 ```
@@ -123,7 +124,7 @@ az vm show: error: (--name --resource-group | --ids) are required
 In addition to using resource groups and names (`-g`, `-n`), you can also refer to
 resources directly by ID value using `--ids`:
 
-```
+```bash
 $ MyVar=$(az vm list --query [0].id --out tsv)
 $ echo $MyVar
 /subscriptions/xxxx/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Data
@@ -135,7 +136,7 @@ VMGROUP1         VM-Data  63edd6a0-2796-49e6-acc1-ad3f8bd94f13  westus      Succ
 
 When working with files, you can use the `@` symbol to indicate the contents of a file or file descriptor.
 
-```
+```azurecli
 $ az role create --role-definition @MyOnCallRoleDef.json
 ```
 
@@ -159,7 +160,7 @@ Tips:
 * Avoid using `--out jsonc` output programmatically as not all tools will accept the ANSI values that provide color in the Shell
 * Currently, `--out table` does not work with some formatted outputs.
 
-```
+```azurecli
 $ az vm list --query [0].name --out json
 "VM-Data"
 $ az vm list --query [0].name --out tsv
@@ -175,7 +176,7 @@ VM-Data
 A common pattern in Azure classic CLI scripts is using command-line tools, such as
 AWK, grep, and jq, to extract values from output documents:
 
-```
+```azurecli
 $ azure vm list --json \
      | jq -r '.[].storageProfile.osDisk.vhd.uri' \
      | cut -d / -f3 \
@@ -189,7 +190,7 @@ $ MY_SUBSCRIPTION_ID=$(azure account show --json | jq -r '.[0].id')
 With the Azure CLI, you can now use the `--query '[expression]'` parameter and the [JMESPath](http://jmespath.org/)
 query language to extract values.
 
-```
+```azurecli
 $ az vm list --query "[].{name:name,os:storageProfile.osDisk.osType}" --out table
 Name           Os
 -------------  -------
@@ -227,7 +228,7 @@ $ az vm list --query "[].{name:name,os:storageProfile.osDisk.osType}" --out json
 
 You can also extract single values.  Using `--out tsv` will prevent any unintended quotes:
 
-```
+```azurecli
 az vm list --query "[0].id" --out tsv
 /subscriptions/xxxx/resourceGroups/VMGROUP1/providers/Microsoft.Compute/virtualMachines/VM-Web
 ```

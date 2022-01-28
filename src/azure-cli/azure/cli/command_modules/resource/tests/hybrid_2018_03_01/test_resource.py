@@ -8,7 +8,7 @@ import os
 import time
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
 from azure.cli.core.util import get_file_json
 
@@ -78,8 +78,10 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
         self.cmd('resource list --resource-type {rt}',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --name {vnet}',
-                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}', checks=[
+            self.check("length([?name=='{vnet}'])", vnet_count),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
         self.cmd('resource list --tag cli-test',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
         self.cmd('resource list --tag cli-test=test',
@@ -183,10 +185,10 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
-        self.cmd('tag delete -n {tag}')
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -204,7 +206,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
@@ -213,7 +215,7 @@ class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
 
-        self.kwargs.update({'prov': 'TrendMicro.DeepSecurity'})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
@@ -258,7 +260,7 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -274,11 +276,11 @@ class DeploymentTest(ScenarioTest):
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -315,12 +317,12 @@ class DeploymentLiveTest(LiveScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
@@ -336,7 +338,7 @@ class DeploymentNoWaitTest(ScenarioTest):
             'dn': 'azure-cli-deployment'
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --no-wait',
                  checks=self.is_empty())
 
         self.cmd('group deployment wait -g {rg} -n {dn} --created',
@@ -355,10 +357,10 @@ class DeploymentThruUriTest(LiveScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
-            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
-        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
         ]).get_output_in_json()['name']
@@ -393,6 +395,7 @@ class ResourceMoveScenarioTest(ScenarioTest):
 
 class PolicyScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -475,78 +478,6 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition list',
                  checks=self.check("length([?name=='{pn}'])", 0))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    @AllowLargeResponse
-    def test_resource_policyset(self, resource_group):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-
-        self.kwargs.update({
-            'pn': self.create_random_name('azure-cli-test-policy', 30),
-            'pdn': self.create_random_name('test_policy', 20),
-            'desc': 'desc_for_test_policy_123',
-            'psn': self.create_random_name('azure-cli-test-policyset', 30),
-            'psdn': self.create_random_name('test_policyset', 20),
-            'ps_desc': 'desc_for_test_policyset_123',
-            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
-            'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
-            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
-        })
-
-        # create a policy
-        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}').get_output_in_json()
-
-        # create a policy set
-        policyset = get_file_json(self.kwargs['psf'])
-        policyset[0]['policyDefinitionId'] = policy['id']
-        with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
-            json.dump(policyset, outfile)
-        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', checks=[
-            self.check('name', '{psn}'),
-            self.check('displayName', '{psdn}'),
-            self.check('description', '{ps_desc}')
-        ])
-
-        # update it
-        self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
-        self.cmd('policy set-definition update -n {psn} --description {ps_desc}',
-                 checks=self.check('description', '{ps_desc}'))
-
-        # list and show it
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 1))
-        self.cmd('policy set-definition show -n {psn}', checks=[
-            self.check('name', '{psn}'),
-            self.check('displayName', '{psdn}')
-        ])
-
-        # create a policy assignment on a resource group
-        self.kwargs.update({
-            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
-            'padn': self.create_random_name('test_assignment', 20)
-        })
-        self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
-            self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free'),
-        ])
-
-        # delete the assignment
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
-        self.cmd('policy assignment list --disable-scope-strict-match')
-
-        # delete the policy set
-        self.cmd('policy set-definition delete -n {psn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 0))
-
-        # delete the policy
-        self.cmd('policy definition delete -n {pn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list',
-                 checks=self.check("length([?name=='{pn}'])", 0))
-
 
 # TODO: Change back to ScenarioTest and re-record when issue #5110 is fixed.
 class CrossRGDeploymentScenarioTest(ScenarioTest):
@@ -596,7 +527,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

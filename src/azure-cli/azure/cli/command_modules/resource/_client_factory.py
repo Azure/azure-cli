@@ -34,6 +34,12 @@ def _resource_links_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_LINKS)
 
 
+def _resource_deploymentscripts_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS)
+
+
 def _authorization_management_client(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -50,6 +56,12 @@ def _resource_managementgroups_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.managementgroups import ManagementGroupsAPI
     return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
+
+
+def _resource_templatespecs_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
 
 
 def cf_resource_groups(cli_ctx, _):
@@ -80,6 +92,10 @@ def cf_features(cli_ctx, _):
     return _resource_feature_client_factory(cli_ctx).features
 
 
+def cf_feature_registrations(cli_ctx, _):
+    return _resource_feature_client_factory(cli_ctx).subscription_feature_registrations
+
+
 def cf_policy_definitions(cli_ctx, _):
     return _resource_policy_client_factory(cli_ctx).policy_definitions
 
@@ -88,12 +104,20 @@ def cf_policy_set_definitions(cli_ctx, _):
     return _resource_policy_client_factory(cli_ctx).policy_set_definitions
 
 
+def cf_policy_exemptions(cli_ctx, _):
+    return _resource_policy_client_factory(cli_ctx).policy_exemptions
+
+
 def cf_management_locks(cli_ctx, _):
     return _resource_lock_client_factory(cli_ctx).management_locks
 
 
 def cf_resource_links(cli_ctx, _):
     return _resource_links_client_factory(cli_ctx).resource_links
+
+
+def cf_resource_deploymentscripts(cli_ctx, _):
+    return _resource_deploymentscripts_client_factory(cli_ctx).deployment_scripts
 
 
 def cf_resource_managedapplications(cli_ctx, _):
@@ -110,3 +134,7 @@ def cf_management_groups(cli_ctx, _):
 
 def cf_management_group_subscriptions(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_group_subscriptions
+
+
+def cf_resource_templatespecs(cli_ctx, _):
+    return _resource_templatespecs_client_factory(cli_ctx).template_specs

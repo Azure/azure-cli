@@ -5,8 +5,9 @@
 
 import time
 import os
+import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
@@ -51,7 +52,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
-                    ' --size Standard_DS2_v2')
+                    ' --size Standard_DS2_v2 --nsg-rule NONE')
         execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
         return {self.parameter_name: name}
 
@@ -93,9 +94,9 @@ class DomainPreparer(AbstractPreparer, SingleValueReplacer):
         dns_name = self.id_generator()
         parameters = ('adminUsername=admin123 adminPassword=SecretPassword123 location=westus '
                       'domainName=domain.com dnsPrefix={}').format(dns_name)
-        template = 'az group deployment create --name {} -g {} --template-uri {} --parameters {}'
+        template = 'az deployment group create --name {} -g {} --template-uri {} --parameters {}'
         execute(DummyCli(), template.format('domaintemplate', group,
-                                            'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/active-directory-new-domain/azuredeploy.json',
+                                            'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/application-workloads/active-directory/active-directory-new-domain/azuredeploy.json',
                                             parameters))
         return {self.parameter_name: name}
 
@@ -130,7 +131,7 @@ class SqlVmScenarioTest(ScenarioTest):
                        .format(storage_account, resource_group)).get_output_in_json()
 
         # Assert customer cannot create a SQL vm with no agent and do not provide offer and sku
-        with self.assertRaisesRegexp(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
+        with self.assertRaisesRegex(CLIError, "usage error: --sql-mgmt-type NoAgent --image-sku NAME --image-offer NAME"):
             self.cmd('sql vm create -n {} -g {} -l {} --license-type {} --sql-mgmt-type {}'
                      .format(sqlvm, resource_group, loc, 'PAYG', 'NoAgent'))
 
@@ -173,6 +174,42 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('location', loc),
                      JMESPathCheck('sqlManagement', 'Full')
                  ]).get_output_in_json()
+
+        # test expand parameter: * - all settings exist
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, '*')
+                              ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_all
+        assert 'autoPatchingSettings' in expand_all
+        assert 'keyVaultCredentialSettings' in expand_all
+        assert 'serverConfigurationsManagementSettings' in expand_all
+
+        # test expand parameter: single value - only specified setting exists
+        expand_one = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AutoBackupSettings')
+                              ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_one
+        assert 'autoPatchingSettings' not in expand_one
+        assert 'keyVaultCredentialSettings' not in expand_one
+        assert 'serverConfigurationsManagementSettings' not in expand_one
+
+        # test expand parameter: comma-separated values - all specificed settings exist
+        expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
+                                .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
+                                ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_comma
+        assert 'autoPatchingSettings' in expand_comma
+        assert 'keyVaultCredentialSettings' not in expand_comma
+        assert 'serverConfigurationsManagementSettings' not in expand_comma
+
+        # test expand parameter: comma-separated values with * - all settings exist
+        expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                                    .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
+                                    ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_comma_all
+        assert 'autoPatchingSettings' in expand_comma_all
+        assert 'keyVaultCredentialSettings' in expand_comma_all
+        assert 'serverConfigurationsManagementSettings' in expand_comma_all
 
         # test license change
         self.cmd('sql vm update -n {} -g {} --license-type {}'
@@ -423,8 +460,8 @@ class SqlVmScenarioTest(ScenarioTest):
 
 class SqlVmGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account1')
-    @StorageAccountPreparer(parameter_name='storage_account2')
+    @StorageAccountPreparer(parameter_name='storage_account1', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='storage_account2', kind='StorageV2')
     def test_sqlvm_group_mgmt(self, resource_group, resource_group_location, storage_account1, storage_account2):
 
         name = 'sqlvmgroup'
@@ -434,15 +471,11 @@ class SqlVmGroupScenarioTest(ScenarioTest):
         operator_acc = 'myvmadmin'
         sql_service_acc = 'sqlservice'
 
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account1, resource_group))
-
         sa_1 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account1, resource_group)).get_output_in_json()
 
         key_1 = self.cmd('storage account keys list -n {} -g {}'
                          .format(storage_account1, resource_group)).get_output_in_json()
-
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account2, resource_group))
 
         sa_2 = self.cmd('storage account show -n {} -g {}'
                         .format(storage_account2, resource_group)).get_output_in_json()
@@ -518,7 +551,7 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @DomainPreparer()
     @SqlVirtualMachinePreparer(parameter_name='sqlvm1')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_sqlvm_add_and_remove(self, resource_group, resource_group_location, domainvm, sqlvm1, storage_account):
 
         add_account_script = '\"Set-AdUser -UserPrincipalName admin123@domain.com -Identity admin123 -PasswordNeverExpires $true\"'
@@ -531,13 +564,11 @@ class SqlVmAndGroupScenarioTest(ScenarioTest):
                              'domainFQDN=domain.com vmList={}').format(resource_group_location, sqlvm1)
 
         # join vms to the domain
-        self.cmd('group deployment create --name {} -g {} --template-uri {} --parameters {}'
+        self.cmd('deployment group create --name {} -g {} --template-uri {} --parameters {}'
                  .format('joinvms',
                          resource_group,
-                         'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-vm-domain-join-existing/azuredeploy.json',
+                         'https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/quickstarts/microsoft.compute/vm-domain-join-existing/azuredeploy.json',
                          parameters_string))
-
-        self.cmd('storage account update -n {} -g {} --set kind=StorageV2'.format(storage_account, resource_group))
 
         # Create the sqlvm group
         sa = self.cmd('storage account show -n {} -g {}'

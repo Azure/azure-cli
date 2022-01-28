@@ -26,10 +26,17 @@ def _common_client_factory(cli_ctx, **_):
 
 
 def _backup_client_factory(cli_ctx, **_):
-    from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
+    from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
+
+
+def _backup_passive_client_factory(cli_ctx, **_):
+    from azure.mgmt.recoveryservicesbackup.passivestamp import RecoveryServicesBackupPassiveClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupPassiveClient)
 
 
 # External Deps Client Factories
@@ -50,8 +57,20 @@ def vaults_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).vaults
 
 
+def registered_identities_cf(cli_ctx, *_):
+    return _common_client_factory(cli_ctx).registered_identities
+
+
 def backup_storage_configs_cf(cli_ctx, *_):
-    return _backup_client_factory(cli_ctx).backup_resource_storage_configs
+    return _backup_passive_client_factory(cli_ctx).backup_resource_storage_configs
+
+
+def backup_storage_configs_non_crr_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_resource_storage_configs_non_crr
+
+
+def backup_status_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_status
 
 
 # Protection Client Factories
@@ -92,6 +111,10 @@ def backup_protection_containers_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protection_containers
 
 
+def backup_protection_intent_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protection_intent
+
+
 def backup_protectable_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protectable_items
 
@@ -100,8 +123,16 @@ def backup_protected_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protected_items
 
 
+def backup_protected_items_crr_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).backup_protected_items_crr
+
+
 def backup_operation_statuses_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_operation_statuses
+
+
+def crr_operation_status_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).crr_operation_status
 
 
 def backups_cf(cli_ctx, *_):
@@ -110,6 +141,10 @@ def backups_cf(cli_ctx, *_):
 
 def backup_jobs_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_jobs
+
+
+def backup_crr_jobs_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).backup_crr_jobs
 
 
 def backup_workload_items_cf(cli_ctx, *_):
@@ -121,6 +156,10 @@ def job_details_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).job_details
 
 
+def backup_crr_job_details_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).backup_crr_job_details
+
+
 def job_cancellations_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).job_cancellations
 
@@ -130,8 +169,24 @@ def recovery_points_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).recovery_points
 
 
+def recovery_points_recommended_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).recovery_points_recommended_for_move
+
+
+def recovery_points_crr_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).recovery_points_crr
+
+
+def recovery_points_passive_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).recovery_points
+
+
 def restores_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).restores
+
+
+def cross_region_restore_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).cross_region_restore
 
 
 def item_level_recovery_connections_cf(cli_ctx, *_):
@@ -140,3 +195,12 @@ def item_level_recovery_connections_cf(cli_ctx, *_):
 
 def backup_resource_vault_config_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_resource_vault_configs
+
+
+def backup_resource_encryption_config_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_resource_encryption_configs
+
+
+# Azure Active Directory Client Factories
+def aad_properties_cf(cli_ctx, *_):
+    return _backup_passive_client_factory(cli_ctx).aad_properties

@@ -5,7 +5,7 @@ import os
 
 dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src')
 
-if os.environ.get('PYTHONPATH') == None:
+if os.environ.get('PYTHONPATH') is None:
     os.environ['PYTHONPATH'] = dir
 else:
     os.environ['PYTHONPATH'] = os.pathsep.join([
@@ -13,4 +13,7 @@ else:
         os.environ.get('PYTHONPATH'),
     ])
 
-os.execl(sys.executable, sys.executable , '-m', 'azure.cli', *sys.argv[1:])
+if os.environ.get('AZ_INSTALLER') is None:
+    os.environ['AZ_INSTALLER'] = 'PIP'
+
+os.execl(sys.executable, sys.executable, '-m', 'azure.cli', *sys.argv[1:])

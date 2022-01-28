@@ -16,7 +16,8 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
+    process_subscription_id, process_workspace_data_export_destination)
 
 from knack.arguments import CLIArgumentType
 
@@ -24,13 +25,14 @@ from knack.arguments import CLIArgumentType
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
     from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
-
+    from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
     autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
     autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
+    scope_name_type = CLIArgumentType(help='Name of the Azure Monitor Private Link Scope.')
 
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -108,20 +110,30 @@ def load_arguments(self, _):
         c.argument('end_time', arg_type=get_datetime_type(help='End time of the query. Defaults to the current time.'))
         c.argument('offset', type=get_period_type(as_timedelta=True))
         c.argument('interval', arg_group='Time', type=get_period_type())
+
+    with self.argument_context('monitor metrics list-namespaces', arg_group='Time') as c:
+        c.argument('start_time', arg_type=get_datetime_type(help='Start time of the query.'))
     # endregion
 
     # region MetricAlerts
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.argument('severity', type=int, help='Severity of the alert from 0 (low) to 4 (high).')
+        c.argument('severity', type=int, help='Severity of the alert from 0 (critical) to 4 (verbose).')
         c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
         c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
-        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to.')
+        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to. '
+                                             'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
+        c.argument('target_resource_type', options_list=['--target-resource-type', '--type'],
+                   help='The resource type of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
+        c.argument('target_resource_region', options_list=['--target-resource-region', '--region'],
+                   help='The region of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
 
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))
@@ -133,6 +145,48 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert update', arg_group='Condition') as c:
         c.argument('add_conditions', options_list='--add-condition', action=MetricAlertConditionAction, nargs='+')
         c.argument('remove_conditions', nargs='+')
+
+    with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
+        c.argument('dimension_name', options_list=['--name', '-n'],
+                   help='Name of the dimension.')
+        c.argument('operator', options_list=['--operator', '--op'],
+                   arg_type=get_enum_type(dim_op_conversion.values(), default=dim_op_conversion['includes']),
+                   help="Dimension operator.")
+        c.argument('value_list', options_list=['--value', '-v'], nargs='+',
+                   help='The values to apply on the operation.')
+
+    with self.argument_context('monitor metrics alert condition create', arg_group=None) as c:
+        c.argument('condition_type', options_list=['--type', '-t'], arg_type=get_enum_type(['static', 'dynamic']),
+                   help='Type of condition threshold.')
+        c.argument('metric_name', options_list=['--metric'],
+                   help='Name of metric.')
+        c.argument('metric_namespace', options_list=['--namespace'],
+                   help='Namespace of metric.')
+        c.argument('dimension_list', options_list=['--dimension'], nargs='+',
+                   help='Dimension created by \'az monitor metrics alert dimension create\'.')
+        c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()),
+                   help='Time aggregation.')
+        c.argument('operator', options_list=['--operator', '--op'], arg_type=get_enum_type(op_conversion.values()),
+                   help="Operator for static threshold can be 'Equals', 'NotEquals', 'GreaterThan', 'GreaterThanOrEqual', 'LessThan' or 'LessThanOrEqual'. "
+                   "Operator for dynamic threshold can be 'GreaterThan', 'LessThan', 'GreaterOrLessThan'.")
+        c.argument('threshold', type=float,
+                   help='Static threshold value.')
+        c.argument('alert_sensitivity', options_list=['--sensitivity'],
+                   arg_type=get_enum_type(sens_conversion.values(), default='Medium'),
+                   help="Alert sensitivity for dynamic threshold.")
+        c.argument('number_of_evaluation_periods', options_list=['--num-periods'], type=int,
+                   help='The number of evaluation periods for dynamic threshold. '
+                        'Range: 1-6.')
+        c.argument('min_failing_periods_to_alert', options_list=['--num-violations'], type=int,
+                   help='The number of violations to trigger an dynamic alert. '
+                        'Range: 1-6. It should be less than or equal to --num-periods.')
+        c.argument('ignore_data_before', options_list=['--since'],
+                   arg_type=get_datetime_type(
+                       help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+        c.argument('skip_metric_validation', options_list=['--skip-metric-validation'],
+                   arg_type=get_three_state_flag(),
+                   help='Cause the metric validation to be skipped. This allows to use a metric that has not been emitted yet.')
+
     # endregion
 
     # region Autoscale
@@ -231,12 +285,28 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
+        c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
+                   help='Indicate that the export to LA must be done to a resource specific table, '
+                        'a.k.a. dedicated or fixed schema table, '
+                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
+                        'This argument is effective only when the argument --workspace is also given.')
 
     with self.argument_context('monitor diagnostic-settings categories list') as c:
         c.resource_parameter('resource_uri', required=True)
 
     with self.argument_context('monitor diagnostic-settings categories show') as c:
         c.resource_parameter('resource_uri', required=True)
+
+    with self.argument_context('monitor diagnostic-settings subscription') as c:
+        import argparse
+        c.argument('subscription_id', validator=process_subscription_id, help=argparse.SUPPRESS, required=False)
+        c.argument('logs', type=get_json_object, help="JSON encoded list of logs settings. Use '@{file}' to load from a file.")
+        c.argument('name', help='The name of the diagnostic setting.', options_list=['--name', '-n'])
+        c.argument('event_hub_name', help='The name of the event hub. If none is specified, the default event hub will be selected.')
+        c.argument('event_hub_auth_rule', help='The resource Id for the event hub authorization rule.')
+        c.argument('workspace', help='The resource id of the log analytics workspace.')
+        c.argument('storage_account', help='The resource id of the storage account to which you would like to send the Activity Log.')
+        c.argument('service_bus_rule', help="The service bus rule ID of the service bus namespace in which you would like to have Event Hubs created for streaming the Activity Log. The rule ID is of the format '{service bus resource ID}/authorizationrules/{key name}'.")
     # endregion
 
     # region LogProfiles
@@ -263,11 +333,11 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='2.1.0')])
+        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -277,9 +347,8 @@ def load_arguments(self, _):
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
 
     with self.argument_context('monitor action-group create') as c:
-        from .validators import process_action_group_detail_for_creation
         from .actions import ActionGroupReceiverParameterAction
-        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
+        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
         c.extra('short_name')
         c.extra('tags')
         c.ignore('action_group')
@@ -290,8 +359,8 @@ def load_arguments(self, _):
         c.ignore('action_group')
 
     with self.argument_context('monitor action-group enable-receiver') as c:
-        c.argument('receiver_name', options_list=['--name', '-n'])
-        c.argument('action_group_name', options_list=['--action-group'])
+        c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts
@@ -336,10 +405,133 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
-        c.ignore('sku')
+        c.argument('sku', help="The supported value: PerGB2018, CapacityReservation.")
+        c.argument('capacity_reservation_level', options_list=['--capacity-reservation-level', '--level'], help='The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.')
+        c.argument('daily_quota_gb', options_list=['--quota'], help='The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
+        from azure.mgmt.loganalytics.models import PublicNetworkAccessType
+        c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+
+    with self.argument_context('monitor log-analytics workspace saved-search') as c:
+        c.argument('saved_search_id', options_list=['--name', '-n'], help="Name of the saved search and it's unique in a given workspace.")
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('category', help='The category of the saved search. This helps the user to find a saved search faster.')
+        c.argument('display_name', help='Display name of the saved search.')
+        c.argument('saved_query', options_list=['--saved-query', '-q'], help='The query expression for the saved search.')
+        c.argument('function_alias', options_list=['--func-alias', '--fa'],
+                   help='Function Aliases are short names given to Saved Searches so they can be easily referenced in query. They are required for Computer Groups.')
+        c.argument('function_parameters', options_list=['--func-param', '--fp'],
+                   help="The optional function parameters if query serves as a function. "
+                        "Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. "
+                        "For more examples and proper syntax please refer to "
+                        "https://docs.microsoft.com/azure/kusto/query/functions/user-defined-functions.")
+        c.argument('tags', tags_type)
+    # endregion
+
+    # region Log Analytics Workspace table
+    with self.argument_context('monitor log-analytics workspace table') as c:
+        c.argument('table_name', name_arg_type, help='Name of the table.')
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
+    # endregion
+
+    # region Log Analytics Workspace Data Export
+    with self.argument_context('monitor log-analytics workspace data-export') as c:
+        c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
+                   help='An array of tables to export.')
+        c.argument('destination', validator=process_workspace_data_export_destination,
+                   help='The destination resource ID. It should be a storage account, an event hub namespace or an event hub. '
+                        'If event hub namespace is provided, event hub would be created for each table automatically.')
+        c.ignore('data_export_type')
+        c.ignore('event_hub_name')
+        c.argument('enable', arg_type=get_three_state_flag(), help='Enable this data export rule.')
+    # endregion
+
+    # region Log Analytics Workspace Linked Service
+    with self.argument_context('monitor log-analytics workspace linked-service') as c:
+        c.argument('linked_service_name', name_arg_type, help='Name of the linkedServices resource. Supported values: cluster, automation.')
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('resource_id', help='The resource id of the resource that will be linked to the workspace. This '
+                                       'should be used for linking resources which require read access.')
+        c.argument('write_access_resource_id', help='The resource id of the resource that will be linked to the '
+                                                    'workspace. This should be used for linking resources which '
+                                                    'require write access.')
+    # endregion
+
+    # region Log Analytics Cluster
+    with self.argument_context('monitor log-analytics cluster') as c:
+        c.argument('cluster_name', name_arg_type, help='The name of the Log Analytics cluster.')
+        c.argument('sku_name', help="The name of the SKU. Currently only support 'CapacityReservation'")
+        c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
+                                        ' be in multiples of 100. If you want to increase the limit, please contact'
+                                        ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
+        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
+
+    with self.argument_context('monitor log-analytics cluster update') as c:
+        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
+        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
+        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
+    # endregion
+
+    # region Log Analytics Linked Storage Account
+    with self.argument_context('monitor log-analytics workspace linked-storage') as c:
+        from azure.mgmt.loganalytics.models import DataSourceType
+        c.argument('data_source_type', help='Data source type for the linked storage account.',
+                   options_list=['--type'], arg_type=get_enum_type(DataSourceType))
+        c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],
+                   help='List of Name or ID of Azure Storage Account.',
+                   validator=validate_storage_accounts_name_or_id)
+    # endregion
+
+    # region monitor clone
+    with self.argument_context('monitor clone') as c:
+        c.argument('source_resource', help="Resource ID of the source resource.")
+        c.argument('target_resource', help="Resource ID of the target resource.")
+        c.argument('always_clone', action='store_true',
+                   help="If this argument is applied, "
+                        "all monitor settings would be cloned instead of expanding its scope.")
+        c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
+                   nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
+
+    # region Private Link Resources
+    for item in ['create', 'update', 'show', 'delete', 'list']:
+        with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
+            c.argument('scope_name', scope_name_type, options_list=['--name', '-n'])
+    with self.argument_context('monitor private-link-scope create') as c:
+        c.ignore('location')
+
+    with self.argument_context('monitor private-link-scope scoped-resource') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
+        c.argument('linked_resource_id', options_list=['--linked-resource'], help='ARM resource ID of the linked resource. It should be one of log analytics workspace or application insights component.')
+
+    with self.argument_context('monitor private-link-scope private-link-resource') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('group_name', options_list=['--name', '-n'], help='Name of the private link resource.')
+
+    with self.argument_context('monitor private-link-scope private-endpoint-connection') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the private link scope.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('monitor private-link-scope private-endpoint-connection {}'.format(item)) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the private link scope.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the private link scope. You can get '
+                    'it using `az monitor private-link-scope show`.')
+            c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified private link scope.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
     # endregion

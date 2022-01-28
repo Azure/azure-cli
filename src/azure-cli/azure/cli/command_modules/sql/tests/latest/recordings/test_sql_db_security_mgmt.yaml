@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "westus", "properties": {"administratorLogin": "admin123",
-      "administratorLoginPassword": "SecretPassword123"}}'
+    body: '{"location": "westeurope", "properties": {"administratorLogin": "admin123",
+      "administratorLoginPassword": "SecretPassword123", "administrators": {}}}'
     headers:
       Accept:
       - application/json
@@ -12,24 +12,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '123'
+      - '149'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"operation":"UpsertLogicalServer","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"operation":"UpsertLogicalServer","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -37,11 +34,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:30:41 GMT
+      - Mon, 13 Dec 2021 04:33:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverOperationResults/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverOperationResults/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
       pragma:
       - no-cache
       server:
@@ -51,7 +48,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -59,7 +56,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -69,13 +66,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"InProgress","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -84,7 +80,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:30:42 GMT
+      - Mon, 13 Dec 2021 04:33:14 GMT
       expires:
       - '-1'
       pragma:
@@ -106,7 +102,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -116,13 +112,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"InProgress","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -131,7 +126,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:30:44 GMT
+      - Mon, 13 Dec 2021 04:33:15 GMT
       expires:
       - '-1'
       pragma:
@@ -153,7 +148,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -163,13 +158,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"InProgress","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -178,7 +172,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:30:45 GMT
+      - Mon, 13 Dec 2021 04:33:16 GMT
       expires:
       - '-1'
       pragma:
@@ -200,7 +194,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -210,13 +204,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"InProgress","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -225,7 +218,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:30:46 GMT
+      - Mon, 13 Dec 2021 04:33:17 GMT
       expires:
       - '-1'
       pragma:
@@ -247,7 +240,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -257,13 +250,12 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"InProgress","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -272,7 +264,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:31:06 GMT
+      - Mon, 13 Dec 2021 04:33:37 GMT
       expires:
       - '-1'
       pragma:
@@ -294,7 +286,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -304,13 +296,196 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/serverAzureAsyncOperation/a27aeb35-4b9e-47bb-8a29-0608a0f1fb39?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"a27aeb35-4b9e-47bb-8a29-0608a0f1fb39","status":"Succeeded","startTime":"2019-08-28T20:30:41.63Z"}'
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:33:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:34:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:34:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"InProgress","startTime":"2021-12-13T04:33:12.69Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:34:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/serverAzureAsyncOperation/5c5380f2-cd03-4d33-9743-4a60373719c2?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"5c5380f2-cd03-4d33-9743-4a60373719c2","status":"Succeeded","startTime":"2021-12-13T04:33:12.69Z"}'
     headers:
       cache-control:
       - no-cache
@@ -319,7 +494,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:31:26 GMT
+      - Mon, 13 Dec 2021 04:35:04 GMT
       expires:
       - '-1'
       pragma:
@@ -341,7 +516,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -351,22 +526,21 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000003.database.windows.net"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003","name":"clitestserver000003","type":"Microsoft.Sql/servers"}'
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000003.database.windows.net","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003","name":"clitestserver000003","type":"Microsoft.Sql/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '580'
+      - '688'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:31:27 GMT
+      - Mon, 13 Dec 2021 04:35:04 GMT
       expires:
       - '-1'
       pragma:
@@ -398,24 +572,21 @@ interactions:
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004","name":"clitest000004","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:29.7143053Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:29.7143053Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-28T20:31:29.6674238Z","primaryEndpoints":{"blob":"https://clitest000004.blob.core.windows.net/","queue":"https://clitest000004.queue.core.windows.net/","table":"https://clitest000004.table.core.windows.net/","file":"https://clitest000004.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004","name":"clitest000004","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-13T04:35:12.5484621Z","key2":"2021-12-13T04:35:12.5484621Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:12.5484621Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:12.5484621Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-13T04:35:12.4703217Z","primaryEndpoints":{"blob":"https://clitest000004.blob.core.windows.net/","queue":"https://clitest000004.queue.core.windows.net/","table":"https://clitest000004.table.core.windows.net/","file":"https://clitest000004.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1394'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:08 GMT
+      - Mon, 13 Dec 2021 04:35:59 GMT
       expires:
       - '-1'
       pragma:
@@ -449,24 +620,21 @@ interactions:
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000004/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:12.5484621Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:12.5484621Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:09 GMT
+      - Mon, 13 Dec 2021 04:36:00 GMT
       expires:
       - '-1'
       pragma:
@@ -481,8 +649,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
     status:
       code: 200
       message: OK
@@ -500,24 +668,21 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2015-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000003.database.windows.net"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003","name":"clitestserver000003","type":"Microsoft.Sql/servers"}'
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000003.database.windows.net","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003","name":"clitestserver000003","type":"Microsoft.Sql/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '580'
+      - '688'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:10 GMT
+      - Mon, 13 Dec 2021 04:36:00 GMT
       expires:
       - '-1'
       pragma:
@@ -536,7 +701,53 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000003.database.windows.net","privateEndpointConnections":[],"publicNetworkAccess":"Enabled","restrictOutboundNetworkAccess":"Disabled"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003","name":"clitestserver000003","type":"Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '688'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:36:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope"}'
     headers:
       Accept:
       - application/json
@@ -547,24 +758,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '26'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01?api-version=2017-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"operation":"CreateLogicalDatabase","startTime":"2019-08-28T20:32:10.85Z"}'
+      string: '{"operation":"CreateLogicalDatabase","startTime":"2021-12-13T04:36:06.77Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/databaseAzureAsyncOperation/bab92a86-b60f-4631-9c0b-8f3aa08cf08e?api-version=2017-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -572,11 +780,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:10 GMT
+      - Mon, 13 Dec 2021 04:36:06 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/databaseOperationResults/bab92a86-b60f-4631-9c0b-8f3aa08cf08e?api-version=2017-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseOperationResults/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
       pragma:
       - no-cache
       server:
@@ -594,7 +802,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -604,13 +812,12 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/databaseAzureAsyncOperation/bab92a86-b60f-4631-9c0b-8f3aa08cf08e?api-version=2017-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"bab92a86-b60f-4631-9c0b-8f3aa08cf08e","status":"InProgress","startTime":"2019-08-28T20:32:10.85Z"}'
+      string: '{"name":"977efc35-d1d2-469e-a402-1522b38ab81c","status":"InProgress","startTime":"2021-12-13T04:36:06.77Z"}'
     headers:
       cache-control:
       - no-cache
@@ -619,7 +826,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:26 GMT
+      - Mon, 13 Dec 2021 04:36:21 GMT
       expires:
       - '-1'
       pragma:
@@ -641,7 +848,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -651,13 +858,150 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westus/databaseAzureAsyncOperation/bab92a86-b60f-4631-9c0b-8f3aa08cf08e?api-version=2017-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"name":"bab92a86-b60f-4631-9c0b-8f3aa08cf08e","status":"Succeeded","startTime":"2019-08-28T20:32:10.85Z"}'
+      string: '{"name":"977efc35-d1d2-469e-a402-1522b38ab81c","status":"InProgress","startTime":"2021-12-13T04:36:06.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:36:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"977efc35-d1d2-469e-a402-1522b38ab81c","status":"InProgress","startTime":"2021-12-13T04:36:06.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:36:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"977efc35-d1d2-469e-a402-1522b38ab81c","status":"InProgress","startTime":"2021-12-13T04:36:06.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:37:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/westeurope/databaseAzureAsyncOperation/977efc35-d1d2-469e-a402-1522b38ab81c?api-version=2021-02-01-preview
+  response:
+    body:
+      string: '{"name":"977efc35-d1d2-469e-a402-1522b38ab81c","status":"Succeeded","startTime":"2021-12-13T04:36:06.77Z"}'
     headers:
       cache-control:
       - no-cache
@@ -666,7 +1010,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:41 GMT
+      - Mon, 13 Dec 2021 04:37:22 GMT
       expires:
       - '-1'
       pragma:
@@ -688,7 +1032,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -698,22 +1042,21 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01?api-version=2017-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01?api-version=2021-02-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2},"kind":"v12.0,user,vcore","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":34359738368,"status":"Online","databaseId":"d63d9a8b-0d11-431e-a3cd-c649e74d8bb4","creationDate":"2019-08-28T20:32:40.477Z","currentServiceObjectiveName":"GP_Gen5_2","requestedServiceObjectiveName":"GP_Gen5_2","defaultSecondaryLocation":"eastus","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"licenseType":"LicenseIncluded","maxLogSizeBytes":10307502080,"earliestRestoreDate":"2019-08-28T21:02:40.477Z","readScale":"Disabled","readReplicaCount":0,"currentSku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2}},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases"}'
+      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2},"kind":"v12.0,user,vcore","properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","maxSizeBytes":34359738368,"status":"Online","databaseId":"c0b9a737-e63e-4eb0-b716-e9b26949ca9d","creationDate":"2021-12-13T04:37:09.77Z","currentServiceObjectiveName":"GP_Gen5_2","requestedServiceObjectiveName":"GP_Gen5_2","defaultSecondaryLocation":"northeurope","catalogCollation":"SQL_Latin1_General_CP1_CI_AS","zoneRedundant":false,"licenseType":"LicenseIncluded","maxLogSizeBytes":68719476736,"readScale":"Disabled","currentSku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":2},"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","isLedgerOn":false,"isInfraEncryptionEnabled":false},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01","name":"cliautomationdb01","type":"Microsoft.Sql/servers/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1098'
+      - '1326'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:42 GMT
+      - Mon, 13 Dec 2021 04:37:23 GMT
       expires:
       - '-1'
       pragma:
@@ -745,24 +1088,21 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Disabled","storageAccountAccessKey":"","retentionDays":0,"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":0,"isAzureMonitorTargetEnabled":false,"state":"Disabled","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '597'
+      - '532'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:42 GMT
+      - Mon, 13 Dec 2021 04:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -792,26 +1132,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --state --storage-key --storage-endpoint --retention-days --actions
+      - -g -s -n --state --blob-storage-target-state --storage-key --storage-endpoint
+        --retention-days --actions
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Disabled","storageAccountAccessKey":"","retentionDays":0,"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":0,"isAzureMonitorTargetEnabled":false,"state":"Disabled","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '597'
+      - '532'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:42 GMT
+      - Mon, 13 Dec 2021 04:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -830,11 +1168,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"state": "Enabled", "storageEndpoint": "https://clitest000004.blob.core.windows.net/",
-      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "retentionDays":
-      30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP", "DATABASE_ROLE_MEMBER_CHANGE_GROUP"],
-      "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000", "isStorageSecondaryKeyInUse":
-      false, "isAzureMonitorTargetEnabled": false}}'''
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isAzureMonitorTargetEnabled": false,
+      "state": "Enabled", "storageEndpoint": "https://clitest000004.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
     headers:
       Accept:
       - application/json
@@ -845,30 +1183,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '490'
+      - '453'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -s -n --state --storage-key --storage-endpoint --retention-days --actions
+      - -g -s -n --state --blob-storage-target-state --storage-key --storage-endpoint
+        --retention-days --actions
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '694'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:43 GMT
+      - Mon, 13 Dec 2021 04:37:29 GMT
       expires:
       - '-1'
       pragma:
@@ -892,30 +1228,73 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:37:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - storage account show
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-28T20:31:49.4957790Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-13T04:35:39.5163936Z","key2":"2021-12-13T04:35:39.5163936Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-13T04:35:39.4382611Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1394'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:44 GMT
+      - Mon, 13 Dec 2021 04:37:31 GMT
       expires:
       - '-1'
       pragma:
@@ -945,26 +1324,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --storage-account
+      - -g -s -n --blob-storage-target-state --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '729'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:45 GMT
+      - Mon, 13 Dec 2021 04:37:32 GMT
       expires:
       - '-1'
       pragma:
@@ -994,14 +1370,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --storage-account
+      - -g -s -n --blob-storage-target-state --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
@@ -1013,7 +1386,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:45 GMT
+      - Mon, 13 Dec 2021 04:37:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1039,26 +1412,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --storage-account
+      - -g -s -n --blob-storage-target-state --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-28T20:31:49.4957790Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-13T04:35:39.5163936Z","key2":"2021-12-13T04:35:39.5163936Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-13T04:35:39.4382611Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1394'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:45 GMT
+      - Mon, 13 Dec 2021 04:37:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1090,26 +1460,23 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g -s -n --storage-account
+      - -g -s -n --blob-storage-target-state --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:46 GMT
+      - Mon, 13 Dec 2021 04:37:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1124,17 +1491,17 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
-      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "retentionDays":
-      30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP", "DATABASE_ROLE_MEMBER_CHANGE_GROUP"],
-      "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000", "isStorageSecondaryKeyInUse":
-      false, "isAzureMonitorTargetEnabled": false}}'''
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      false, "state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
     headers:
       Accept:
       - application/json
@@ -1147,28 +1514,25 @@ interactions:
       Content-Length:
       - '490'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -s -n --storage-account
+      - -g -s -n --blob-storage-target-state --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '729'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:47 GMT
+      - Mon, 13 Dec 2021 04:37:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1202,24 +1566,21 @@ interactions:
       ParameterSetName:
       - -g -s -n --state
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '729'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:47 GMT
+      - Mon, 13 Dec 2021 04:37:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1238,11 +1599,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"state": "Disabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
-      "storageAccountAccessKey": "", "retentionDays": 30, "auditActionsAndGroups":
-      ["DATABASE_LOGOUT_GROUP", "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "storageAccountSubscriptionId":
-      "00000000-0000-0000-0000-000000000000", "isStorageSecondaryKeyInUse": false,
-      "isAzureMonitorTargetEnabled": false}}'''
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      false, "state": "Disabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"}}'
     headers:
       Accept:
       - application/json
@@ -1253,30 +1613,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '403'
+      - '372'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -s -n --state
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Disabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Disabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '760'
+      - '730'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:48 GMT
+      - Mon, 13 Dec 2021 04:37:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1292,7 +1649,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1310,27 +1667,25 @@ interactions:
       ParameterSetName:
       - -g -s -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies","location":"West
-        US","kind":null,"properties":{"useServerDefault":"Disabled","state":"Disabled","disabledAlerts":"","emailAddresses":"","emailAccountAdmins":"Disabled","storageEndpoint":"","storageAccountAccessKey":"","retentionDays":0}}'
+      string: '{"properties":{"state":"Disabled","disabledAlerts":[""],"emailAddresses":[""],"emailAccountAdmins":false,"storageEndpoint":"","storageAccountAccessKey":"","retentionDays":0,"creationTime":"0001-01-01T00:00:00Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/Default","name":"Default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '622'
+      - '595'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:49 GMT
+      - Mon, 13 Dec 2021 04:37:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -1359,27 +1714,25 @@ interactions:
       - -g -s -n --state --storage-key --storage-endpoint --retention-days --email-addresses
         --disabled-alerts --email-account-admins
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies","location":"West
-        US","kind":null,"properties":{"useServerDefault":"Disabled","state":"Disabled","disabledAlerts":"","emailAddresses":"","emailAccountAdmins":"Disabled","storageEndpoint":"","storageAccountAccessKey":"","retentionDays":0}}'
+      string: '{"properties":{"state":"Disabled","disabledAlerts":[""],"emailAddresses":[""],"emailAccountAdmins":false,"storageEndpoint":"","storageAccountAccessKey":"","retentionDays":0,"creationTime":"0001-01-01T00:00:00Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/Default","name":"Default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '622'
+      - '595'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:50 GMT
+      - Mon, 13 Dec 2021 04:37:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -1394,11 +1747,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "West US", "properties": {"state": "Enabled", "disabledAlerts":
-      "Sql_Injection_Vulnerability;Access_Anomaly", "emailAddresses": "test1@example.com;test2@example.com",
-      "emailAccountAdmins": "Enabled", "storageEndpoint": "https://clitest000004.blob.core.windows.net/",
+    body: '{"properties": {"state": "Enabled", "disabledAlerts": ["Sql_Injection_Vulnerability",
+      "Access_Anomaly"], "emailAddresses": ["test1@example.com", "test2@example.com"],
+      "emailAccountAdmins": true, "storageEndpoint": "https://clitest000004.blob.core.windows.net/",
       "storageAccountAccessKey": "veryFakedStorageAccountKey==", "retentionDays":
-      30, "useServerDefault": "Disabled"}}'''
+      30}}'
     headers:
       Accept:
       - application/json
@@ -1409,36 +1762,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '463'
+      - '413'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -s -n --state --storage-key --storage-endpoint --retention-days --email-addresses
         --disabled-alerts --email-account-admins
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies","location":"West
-        US","kind":null,"properties":{"useServerDefault":"Disabled","state":"Enabled","disabledAlerts":"Sql_Injection_Vulnerability;Access_Anomaly","emailAddresses":"test1@example.com;test2@example.com","emailAccountAdmins":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"veryFakedStorageAccountKey==","retentionDays":30}}'
+      string: '{"properties":{"state":"Enabled","disabledAlerts":["Sql_Injection_Vulnerability","Access_Anomaly"],"emailAddresses":["test1@example.com","test2@example.com"],"emailAccountAdmins":true,"storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"creationTime":"0001-01-01T00:00:00Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/Default","name":"Default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '841'
+      - '730'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:51 GMT
-      preference-applied:
-      - return-content
+      - Mon, 13 Dec 2021 04:37:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -1450,7 +1799,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1470,24 +1819,21 @@ interactions:
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:52 GMT
+      - Mon, 13 Dec 2021 04:37:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1502,8 +1848,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
     status:
       code: 200
       message: OK
@@ -1521,27 +1867,25 @@ interactions:
       ParameterSetName:
       - -g -s -n --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies","location":"West
-        US","kind":null,"properties":{"useServerDefault":"Disabled","state":"Enabled","disabledAlerts":"Sql_Injection_Vulnerability;Access_Anomaly","emailAddresses":"test1@example.com;test2@example.com","emailAccountAdmins":"Enabled","storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30}}'
+      string: '{"properties":{"state":"Enabled","disabledAlerts":["Sql_Injection_Vulnerability","Access_Anomaly"],"emailAddresses":["test1@example.com","test2@example.com"],"emailAccountAdmins":true,"storageEndpoint":"https://clitest000004.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"creationTime":"2021-12-13T04:37:45.11Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/Default","name":"Default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '753'
+      - '733'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:53 GMT
+      - Mon, 13 Dec 2021 04:37:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -1569,12 +1913,9 @@ interactions:
       ParameterSetName:
       - -g -s -n --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-resource/3.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
@@ -1586,7 +1927,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:53 GMT
+      - Mon, 13 Dec 2021 04:37:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1614,24 +1955,21 @@ interactions:
       ParameterSetName:
       - -g -s -n --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-08-28T20:31:49.5426985Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-08-28T20:31:49.4957790Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"keyCreationTime":{"key1":"2021-12-13T04:35:39.5163936Z","key2":"2021-12-13T04:35:39.5163936Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-12-13T04:35:39.5320276Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2021-12-13T04:35:39.4382611Z","primaryEndpoints":{"blob":"https://clitest000005.blob.core.windows.net/","queue":"https://clitest000005.queue.core.windows.net/","table":"https://clitest000005.table.core.windows.net/","file":"https://clitest000005.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1168'
+      - '1394'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:54 GMT
+      - Mon, 13 Dec 2021 04:37:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1665,24 +2003,21 @@ interactions:
       ParameterSetName:
       - -g -s -n --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-storage/4.0.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '380'
       content-type:
       - application/json
       date:
-      - Wed, 28 Aug 2019 20:32:53 GMT
+      - Mon, 13 Dec 2021 04:37:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1697,17 +2032,17 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "West US", "properties": {"state": "Enabled", "disabledAlerts":
-      "Sql_Injection_Vulnerability;Access_Anomaly", "emailAddresses": "test1@example.com;test2@example.com",
-      "emailAccountAdmins": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+    body: '{"properties": {"state": "Enabled", "disabledAlerts": ["Sql_Injection_Vulnerability",
+      "Access_Anomaly"], "emailAddresses": ["test1@example.com", "test2@example.com"],
+      "emailAccountAdmins": true, "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
       "storageAccountAccessKey": "veryFakedStorageAccountKey==", "retentionDays":
-      30, "useServerDefault": "Disabled"}}'''
+      30}}'
     headers:
       Accept:
       - application/json
@@ -1718,35 +2053,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '463'
+      - '413'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -s -n --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2014-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies","location":"West
-        US","kind":null,"properties":{"useServerDefault":"Disabled","state":"Enabled","disabledAlerts":"Sql_Injection_Vulnerability;Access_Anomaly","emailAddresses":"test1@example.com;test2@example.com","emailAccountAdmins":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"veryFakedStorageAccountKey==","retentionDays":30}}'
+      string: '{"properties":{"state":"Enabled","disabledAlerts":["Sql_Injection_Vulnerability","Access_Anomaly"],"emailAddresses":["test1@example.com","test2@example.com"],"emailAccountAdmins":true,"storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"creationTime":"0001-01-01T00:00:00Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/securityAlertPolicies/Default","name":"Default","type":"Microsoft.Sql/servers/databases/securityAlertPolicies"}'
     headers:
       cache-control:
-      - no-store, no-cache
+      - no-cache
       content-length:
-      - '841'
+      - '730'
       content-type:
-      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
-      dataserviceversion:
-      - 3.0;
+      - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:55 GMT
-      preference-applied:
-      - return-content
+      - Mon, 13 Dec 2021 04:37:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -1770,30 +2101,194 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - sql db audit-policy update
+      - monitor log-analytics workspace create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --state
+      - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"properties":{"state":"Disabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","date":"2021-12-13T04:33:00Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '760'
+      - '432'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:56 GMT
+      - Mon, 13 Dec 2021 04:37:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "properties": {"sku": {"name": "PerGB2018"},
+      "retentionInDays": 30, "workspaceCapping": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '119'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-loganalytics/11.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/laws000006?api-version=2021-06-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"11bc2972-a56e-4bbf-bd74-31da4865e310\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Mon, 13 Dec 2021 04:38:03 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 14 Dec 2021 04:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 04:38:03 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 13 Dec 2021 04:38:03 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006\",\r\n
+        \ \"name\": \"laws000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1137'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:38:03 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-loganalytics/11.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/laws000006?api-version=2021-06-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"11bc2972-a56e-4bbf-bd74-31da4865e310\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
+        \"Mon, 13 Dec 2021 04:38:03 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Tue, 14 Dec 2021 04:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Mon, 13 Dec 2021 04:38:03 GMT\",\r\n
+        \   \"modifiedDate\": \"Mon, 13 Dec 2021 04:38:04 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006\",\r\n
+        \ \"name\": \"laws000006\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westeurope\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1138'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:38:34 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Disabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '730'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1812,11 +2307,54 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"state": "Disabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
-      "storageAccountAccessKey": "", "retentionDays": 30, "auditActionsAndGroups":
-      ["DATABASE_LOGOUT_GROUP", "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "storageAccountSubscriptionId":
-      "00000000-0000-0000-0000-000000000000", "isStorageSecondaryKeyInUse": false,
-      "isAzureMonitorTargetEnabled": false}}'''
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"logs": [{"category": "SQLSecurityAuditEvents", "enabled":
+      true, "retentionPolicy": {"enabled": false, "days": 0}}], "workspaceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006"}}'
     headers:
       Accept:
       - application/json
@@ -1827,30 +2365,1253 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '403'
+      - '366'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -s -n --state
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.1 azure-mgmt-sql/0.12.0
-        Azure-SDK-For-Python AZURECLI/2.0.72
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2017-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings/SQLSecurityAuditEvents_LogAnalytics?api-version=2017-05-01-preview
   response:
     body:
-      string: '{"properties":{"state":"Disabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountAccessKey":"","retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000","isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_LogAnalytics","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_LogAnalytics","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '760'
+      - '1031'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 28 Aug 2019 20:32:56 GMT
+      - Mon, 13 Dec 2021 04:38:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '149'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '404'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:38:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      true, "state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '489'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state --log-analytics-workspace-resource-id
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_LogAnalytics","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_LogAnalytics","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:38:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_LogAnalytics","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_LogAnalytics","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/laws000006","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1043'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings/SQLSecurityAuditEvents_LogAnalytics?api-version=2017-05-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 13 Dec 2021 04:39:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '404'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:39:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      false, "state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '490'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --state --log-analytics-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westeurope","tags":{"product":"azurecli","cause":"automation","date":"2021-12-13T04:33:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '432'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westeurope", "sku": {"name": "Standard", "tier": "Standard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '75'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01","name":"cliehnamespacedb01","type":"Microsoft.EventHub/Namespaces","location":"West
+        Europe","tags":{},"properties":{"disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cliehnamespacedb01","createdAt":"2021-12-13T04:39:18.54Z","updatedAt":"2021-12-13T04:39:18.54Z","serviceBusEndpoint":"https://cliehnamespacedb01.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01","name":"cliehnamespacedb01","type":"Microsoft.EventHub/Namespaces","location":"West
+        Europe","tags":{},"properties":{"disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Created","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cliehnamespacedb01","createdAt":"2021-12-13T04:39:18.54Z","updatedAt":"2021-12-13T04:39:18.54Z","serviceBusEndpoint":"https://cliehnamespacedb01.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '782'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:39:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01","name":"cliehnamespacedb01","type":"Microsoft.EventHub/Namespaces","location":"West
+        Europe","tags":{},"properties":{"disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cliehnamespacedb01","createdAt":"2021-12-13T04:39:18.54Z","updatedAt":"2021-12-13T04:40:07.143Z","serviceBusEndpoint":"https://cliehnamespacedb01.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01","name":"cliehnamespacedb01","type":"Microsoft.EventHub/Namespaces","location":"West
+        Europe","tags":{},"properties":{"disableLocalAuth":false,"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590:cliehnamespacedb01","createdAt":"2021-12-13T04:39:18.54Z","updatedAt":"2021-12-13T04:40:07.143Z","serviceBusEndpoint":"https://cliehnamespacedb01.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs eventhub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --namespace-name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/eventhubs/cliehdb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/eventhubs/cliehdb01","name":"cliehdb01","type":"Microsoft.EventHub/Namespaces/EventHubs","location":"West
+        Europe","properties":{"messageRetentionInDays":7,"partitionCount":4,"status":"Active","createdAt":"2021-12-13T04:40:27.553Z","updatedAt":"2021-12-13T04:40:28.02Z","partitionIds":["0","1","2","3"]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '512'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"rights": ["Send", "Manage", "Listen"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace authorization-rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '56'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --namespace-name --rights
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-eventhub/9.1.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01?api-version=2021-06-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01","name":"cliehauthruledb01","type":"Microsoft.EventHub/Namespaces/AuthorizationRules","location":"West
+        Europe","properties":{"rights":["Send","Manage","Listen"]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"eventHubAuthorizationRuleId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01",
+      "eventHubName": "cliehdb01", "logs": [{"category": "SQLSecurityAuditEvents",
+      "enabled": true, "retentionPolicy": {"enabled": false, "days": 0}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '435'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings/SQLSecurityAuditEvents_EventHub?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_EventHub","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_EventHub","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":null,"eventHubAuthorizationRuleId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01","eventHubName":"cliehdb01","metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1054'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '148'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '404'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:40:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11997'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      true, "state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '489'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state --event-hub-authorization-rule-id
+        --event-hub
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1867,6 +3628,428 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_EventHub","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_EventHub","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":null,"eventHubAuthorizationRuleId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01","eventHubName":"cliehdb01","metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1066'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":true,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '728'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings?api-version=2017-05-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.sql/servers/clitestserver000003/databases/cliautomationdb01/providers/microsoft.insights/diagnosticSettings/SQLSecurityAuditEvents_EventHub","type":"Microsoft.Insights/diagnosticSettings","name":"SQLSecurityAuditEvents_EventHub","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":null,"eventHubAuthorizationRuleId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.EventHub/namespaces/cliehnamespacedb01/authorizationRules/cliehauthruledb01","eventHubName":"cliehdb01","metrics":[],"logs":[{"category":"SQLSecurityAuditEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1066'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:40:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/providers/Microsoft.Insights/diagnosticSettings/SQLSecurityAuditEvents_EventHub?api-version=2017-05-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 13 Dec 2021 04:41:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27clitest000005%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005","name":"clitest000005","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"westus","tags":{}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '404'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:41:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/clitest000005/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-12-13T04:35:39.5163936Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Mon, 13 Dec 2021 04:41:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 30, "auditActionsAndGroups": ["DATABASE_LOGOUT_GROUP",
+      "DATABASE_ROLE_MEMBER_CHANGE_GROUP"], "isStorageSecondaryKeyInUse": false, "isAzureMonitorTargetEnabled":
+      false, "state": "Enabled", "storageEndpoint": "https://clitest000005.blob.core.windows.net/",
+      "storageAccountAccessKey": "veryFakedStorageAccountKey==", "storageAccountSubscriptionId":
+      "00000000-0000-0000-0000-000000000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '490'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s -n --state --event-hub-target-state
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:41:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql db audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -s -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-sql/3.0.1 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/default?api-version=2020-11-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":30,"auditActionsAndGroups":["DATABASE_LOGOUT_GROUP","DATABASE_ROLE_MEMBER_CHANGE_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://clitest000005.blob.core.windows.net/","storageAccountSubscriptionId":"00000000-0000-0000-0000-000000000000"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000003/databases/cliautomationdb01/auditingSettings/Default","name":"Default","type":"Microsoft.Sql/servers/databases/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '729'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 13 Dec 2021 04:41:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK

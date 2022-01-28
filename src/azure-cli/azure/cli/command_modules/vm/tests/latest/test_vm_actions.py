@@ -7,7 +7,7 @@ import os
 import shutil
 import tempfile
 import unittest
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
@@ -39,11 +39,12 @@ class TestActions(unittest.TestCase):
         self.assertTrue(expected_err in str(context.exception))
 
     @staticmethod
-    def _get_compute_model(model_type):
+    def _get_compute_model(model_type, api_version=None):
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         from importlib import import_module
 
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
+        if api_version is None:
+            api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
         api_version = "v" + api_version.replace("-", "_")
         result = getattr(import_module('azure.mgmt.compute.{}.models'.format(api_version)), model_type)
         return result
@@ -61,6 +62,7 @@ class TestActions(unittest.TestCase):
         os.remove(private_key_file)
 
         args = mock.MagicMock()
+        args.ssh_key_name = None
         args.ssh_key_value = [public_key_file]
         args.generate_ssh_keys = True
 
@@ -76,6 +78,7 @@ class TestActions(unittest.TestCase):
         # for convinience we will reuse the generated file in the previous step
         args2 = mock.MagicMock()
         args2.ssh_key_value = [generated_public_key_string]
+        args2.ssh_key_name = None
         args2.generate_ssh_keys = False
         validate_ssh_key(args2)
         # we didn't regenerate
@@ -86,6 +89,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
+        args3.ssh_key_name = None
         args3.ssh_key_value = [public_key_file2]
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
@@ -96,6 +100,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
+        args4.ssh_key_name = None
         args4.ssh_key_value = [public_key_file4]
         args4.generate_ssh_keys = True
         validate_ssh_key(args4)
@@ -104,13 +109,13 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(DummyCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot, _ = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
@@ -424,6 +429,7 @@ class TestActions(unittest.TestCase):
             'lun': 0,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -431,6 +437,7 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -458,7 +465,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[5], {
             'lun': 5,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         # last image data disk
@@ -489,6 +497,7 @@ class TestActions(unittest.TestCase):
             'lun': 1,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[0]
         })
 
@@ -508,6 +517,7 @@ class TestActions(unittest.TestCase):
             'lun': 4,
             'managedDisk': {'storageAccountType': 'premium_lrs'},
             'createOption': 'empty',
+            'deleteOption': None,
             'diskSizeGB': data_disk_sizes[1]
         })
 
@@ -527,7 +537,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(r[7], {
             'lun': 7,
             'managedDisk': {'id': attach_data_disks[1]},
-            'createOption': 'attach'
+            'createOption': 'attach',
+            'name': 'disk'
         })
 
         self.assertEqual(r[10], {
@@ -568,7 +579,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_DS4_v2'
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         size_mock.number_of_cores, size_mock.name = 8, 'Standard_DS4_v2'
         _validate_vm_vmss_accelerated_networking(mock.MagicMock(), np)
         self.assertTrue(np.accelerated_networking)
@@ -576,7 +587,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.size = 'Standard_D3_v2'  # known supported 4 core size
         np.accelerated_networking = None
-        np.os_publisher, np.os_offer, np.os_sku = 'coreos', 'coreos', 'alpha'
+        np.os_publisher, np.os_offer, np.os_sku = 'kinvolk', 'flatcar-container-linux-free', 'alpha'
         _validate_vm_vmss_accelerated_networking(None, np)
         self.assertTrue(np.accelerated_networking)
 
@@ -653,10 +664,15 @@ class TestActions(unittest.TestCase):
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
     def test_process_gallery_image_version_namespace(self):
-        np = mock.MagicMock()
-        TargetRegion = self._get_compute_model('TargetRegion')
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
+        np = mock.MagicMock(spec='target_regions')
+        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].profile['gallery_images']
+        TargetRegion = self._get_compute_model('TargetRegion', api_version)
+        EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
+        OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
+        DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = TargetRegion
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
 
         target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
         np.target_regions = target_regions_list

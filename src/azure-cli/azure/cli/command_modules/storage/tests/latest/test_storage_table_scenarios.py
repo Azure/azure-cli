@@ -14,6 +14,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_storage_table_main_scenario(self, resource_group, storage_account):
+        from datetime import datetime, timedelta
+
         account_info = self.get_account_info(resource_group, storage_account)
         table_name = self.create_random_name('table', 24)
 
@@ -24,9 +26,9 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         self.assertIn(table_name, self.storage_cmd('storage table list --query "[].name"',
                                                    account_info).get_output_in_json())
-
-        sas = self.storage_cmd('storage table generate-sas -n {} --permissions r',
-                               account_info, table_name).output
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        sas = self.storage_cmd('storage table generate-sas -n {} --permissions r --expiry {}',
+                               account_info, table_name, expiry).output
         self.assertIn('sig=', sas)
 
         self.verify_entity_operations(account_info, table_name)

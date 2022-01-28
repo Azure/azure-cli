@@ -1,0 +1,45 @@
+; This zone file assumes the zone name is 'zone5.com'
+
+; Before setting $ORIGIN, create a couple of records to check the default
+; $ORIGIN matches the zone name. Note, first record must be SOA.
+@ IN SOA ns1.zone5.com. hostmaster (
+			2003080800 ; se = serial number
+			12h ; ref = refresh
+			15m ; ret = update retry
+			3w ; ex = expiry
+			3h ; min = minimum
+			) ; Should give email 'hostmaster.zone5.com.'
+
+default IN A 0.1.2.3 ; Should give default.zone5.com. A 0.1.2.3
+tc IN CNAME test ; Should give tc.zone5.com. CNAME test.zone5.com.
+
+; Test that $ORIGIN is substituted into non-fully qualified names
+$ORIGIN zone5.com.
+@ IN A 1.2.3.4 ; fqdn = zone5.com.
+www IN A 2.3.4.5 ; fqdn = www.zone5.com.
+
+; Check both record names and RDATA (across record types as appropriate)
+test-cname IN CNAME r1 ; Should give test-cname.zone5.com. CNAME r1.zone5.com.
+test-mx IN MX 10 m1 ; Should give test-mx.zone5.com MX 10 m1.zone5.com.
+test-srv IN SRV 1 2 3 srv1 ; Should give test-srv.zone5.com SRV 1 2 3 srv1.zone5.com.
+
+; And repeat the above, this time with fully-qualified targets
+test-cname2 IN CNAME r1. ; Should give test-cname2.zone5.com. CNAME r1.
+test-mx2 IN MX 10 m1. ; Should give test-mx2.zone5.com MX 10 m1.
+test-ns2 IN NS ns1. ; Should give test-ns2.zone5.com NS ns1.
+test-srv2 IN SRV 1 2 3 srv1. ; Should give test-srv2.zone5.com SRV 1 2 3 srv1.
+
+; Check that changes to $ORIGIN are picked up
+$ORIGIN subzone.zone5.com.
+@ IN A 3.4.5.6 ; fqdn = subzone.zone5.com.
+www IN A 4.5.6.7 ; fqdn = www.subzone.zone5.com.
+test-cname IN CNAME r1 ; Should give test-cname.subzone.zone5.com.
+
+; CNAME r1.subzone.zone5.com.
+; Check $ORIGIN from outside zone is permitted (but not for record names)
+; Also check that $ORIGIN without '.' terminator has one added (and a warning)
+$ORIGIN foo.com
+record.zone5.com. IN CNAME bar ; Should give record.zone5.com. CNAME bar.foo.com.
+
+; A fully-qualified name that is within the zone should work OK
+test.zone5.com. IN A 7.8.9.0 ; Should work OK

@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+
+from knack.util import CLIError
 
 
 def process_autoscale_create_namespace(cmd, namespace):
@@ -17,7 +20,6 @@ def process_autoscale_create_namespace(cmd, namespace):
 
 
 def validate_autoscale_recurrence(namespace):
-    from knack.util import CLIError
     from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
 
     def _validate_weekly_recurrence(namespace):
@@ -102,7 +104,6 @@ def validate_autoscale_timegrain(namespace):
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id
-        from knack.util import CLIError
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -139,10 +140,71 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
     return _validator
 
 
+def validate_metrics_alert_dimension(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion
+    for keyword, value in dim_op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+
+
+def validate_metrics_alert_condition(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import op_conversion, \
+        agg_conversion, sens_conversion
+    for keyword, value in agg_conversion.items():
+        if namespace.aggregation == value:
+            namespace.aggregation = keyword
+            break
+    for keyword, value in op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+            break
+
+    if namespace.condition_type == 'static':
+        if namespace.threshold is None:
+            raise RequiredArgumentMissingError('Parameter --threshold is required for static threshold.')
+        if namespace.operator not in ('=', '!=', '>', '>=', '<', '<='):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for static threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+    elif namespace.condition_type == 'dynamic':
+        if namespace.operator not in ('>', '<', '><'):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for dynamic threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+        if namespace.alert_sensitivity is None:
+            raise RequiredArgumentMissingError('Parameter --sensitivity is required for dynamic threshold.')
+        for keyword, value in sens_conversion.items():
+            if namespace.alert_sensitivity == value:
+                namespace.alert_sensitivity = keyword
+                break
+
+        if namespace.number_of_evaluation_periods is None:
+            setattr(namespace, 'number_of_evaluation_periods', 4)
+
+        if namespace.number_of_evaluation_periods < 1 or namespace.number_of_evaluation_periods > 6:
+            raise InvalidArgumentValueError('Parameter --num-periods {} should in range 1-6.'.format(
+                namespace.number_of_evaluation_periods
+            ))
+
+        if namespace.min_failing_periods_to_alert is None:
+            setattr(namespace, 'min_failing_periods_to_alert', min(4, namespace.number_of_evaluation_periods))
+
+        if namespace.min_failing_periods_to_alert < 1 or namespace.min_failing_periods_to_alert > 6:
+            raise InvalidArgumentValueError('Parameter --num-violations {} should in range 1-6.'.format(
+                namespace.min_failing_periods_to_alert
+            ))
+
+        if namespace.min_failing_periods_to_alert > namespace.number_of_evaluation_periods:
+            raise InvalidArgumentValueError(
+                'Parameter --num-violations {} should be less than or equal to parameter --num-periods {}.'.format(
+                    namespace.min_failing_periods_to_alert, namespace.number_of_evaluation_periods))
+    else:
+        raise NotImplementedError()
+
+
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
-    from knack.util import CLIError
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
     if not namespace.resource_group_name:
@@ -214,7 +276,7 @@ def _validate_tag(string):
 def process_action_group_detail_for_creation(namespace):
     from azure.mgmt.monitor.models import ActionGroupResource, EmailReceiver, SmsReceiver, WebhookReceiver, \
         ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+        VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
 
     _validate_tags(namespace)
 
@@ -234,8 +296,11 @@ def process_action_group_detail_for_creation(namespace):
         'voice_receivers': [r for r in receivers if isinstance(r, VoiceReceiver)],
         'logic_app_receivers': [r for r in receivers if isinstance(r, LogicAppReceiver)],
         'azure_function_receivers': [r for r in receivers if isinstance(r, AzureFunctionReceiver)],
+        'event_hub_receivers': [r for r in receivers if isinstance(r, EventHubReceiver)],
         'tags': ns.get('tags') or None
     }
+    if hasattr(namespace, 'tags'):
+        del namespace.tags
 
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 
@@ -246,7 +311,6 @@ def validate_metric_dimension(namespace):
         return
 
     if namespace.filters:
-        from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     namespace.filters = ' and '.join("{} eq '*'".format(d) for d in namespace.dimension)
@@ -317,3 +381,62 @@ def get_action_group_id_validator(dest):
             action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
+
+
+def validate_private_endpoint_connection_id(namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.scope_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
+
+    del namespace.connection_id
+
+
+def validate_storage_accounts_name_or_id(cmd, namespace):
+    if namespace.storage_account_ids:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        for index, storage_account_id in enumerate(namespace.storage_account_ids):
+            if not is_valid_resource_id(storage_account_id):
+                namespace.storage_account_ids[index] = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Storage',
+                    type='storageAccounts',
+                    name=storage_account_id
+                )
+
+
+def process_subscription_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    namespace.subscription_id = get_subscription_id(cmd.cli_ctx)
+
+
+def process_workspace_data_export_destination(namespace):
+    if namespace.destination:
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
+        if not is_valid_resource_id(namespace.destination):
+            raise CLIError('usage error: --destination should be a storage account, '
+                           'an evenhug namespace or an event hub resource id.')
+        result = parse_resource_id(namespace.destination)
+        if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
+            namespace.data_export_type = 'StorageAccount'
+        elif result['namespace'].lower() == 'microsoft.eventhub' and result['type'].lower() == 'namespaces':
+            namespace.data_export_type = 'EventHub'
+            namespace.destination = resource_id(
+                subscription=result['subscription'],
+                resource_group=result['resource_group'],
+                namespace=result['namespace'],
+                type=result['type'],
+                name=result['name']
+            )
+            if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
+                namespace.event_hub_name = result['child_name_1']
+        else:
+            raise CLIError('usage error: --destination should be a storage account, '
+                           'an evenhug namespace or an event hub resource id.')

@@ -12,13 +12,27 @@ logger = get_logger(__name__)
 
 class AzureSkuName(Enum):
     # TODO: use AzureSkuName from Kusto python module in the new kusto python version
-    d13_v2 = "D13_v2"
-    d14_v2 = "D14_v2"
-    l8 = "L8"
-    l16 = "L16"
-    d11_v2 = "D11_v2"
-    d12_v2 = "D12_v2"
-    l4 = "L4"
+    standard_ds13_v21_tb_ps = "Standard_DS13_v2+1TB_PS"
+    standard_ds13_v22_tb_ps = "Standard_DS13_v2+2TB_PS"
+    standard_ds14_v23_tb_ps = "Standard_DS14_v2+3TB_PS"
+    standard_ds14_v24_tb_ps = "Standard_DS14_v2+4TB_PS"
+    standard_d13_v2 = "Standard_D13_v2"
+    standard_d14_v2 = "Standard_D14_v2"
+    standard_l8s = "Standard_L8s"
+    standard_l16s = "Standard_L16s"
+    standard_d11_v2 = "Standard_D11_v2"
+    standard_d12_v2 = "Standard_D12_v2"
+    standard_l4s = "Standard_L4s"
+    dev_no_sla_standard_d11_v2 = "Dev(No SLA)_Standard_D11_v2"
+    standard_e2a_v4 = "Standard_E2a_v4"
+    standard_e4a_v4 = "Standard_E4a_v4"
+    standard_e8a_v4 = "Standard_E8a_v4"
+    standard_e16a_v4 = "Standard_E16a_v4"
+    standard_e8as_v41_tb_ps = "Standard_E8as_v4+1TB_PS"
+    standard_e8as_v42_tb_ps = "Standard_E8as_v4+2TB_PS"
+    standard_e16as_v43_tb_ps = "Standard_E16as_v4+3TB_PS"
+    standard_e16as_v44_tb_ps = "Standard_E16as_v4+4TB_PS"
+    dev_no_sla_standard_e2a_v4 = "Dev(No SLA)_Standard_E2a_v4"
 
 
 def cluster_create(cmd,

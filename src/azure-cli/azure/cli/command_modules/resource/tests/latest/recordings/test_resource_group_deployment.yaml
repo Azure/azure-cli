@@ -1,0 +1,1356 @@
+interactions:
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\": {\r\n
+      \ },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1368'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/simple_deploy","name":"simple_deploy","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"58ed2559-dd76-449b-a32b-2d48629109bc","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '937'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {}, \"mode\": \"Incremental\", template:{\r\n
+      \   \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n    },\r\n
+      \   \"variables\": {\r\n        \"alertLocation\": \"japaneast\",\r\n        \"alertName\":
+      \"armtemplate-alert-japanese-utf8\",\r\n        \"alertDescription\": \"\u3053\u3053\u306B\u65E5\u672C\u8A9E\u3067\u8AAC\u660E\u3057\u307E\u3059\u3002\",\r\n
+      \       \"alertStatus\": \"true\",\r\n        \"alertSource\": {\r\n            \"Query\":
+      \"requests\",\r\n            \"SourceId\": \"/subscriptions/{subscriptionId}/resourceGroups/test-rg/providers/microsoft.insights/components/my-insight\",\r\n
+      \           \"Type\": \"ResultCount\"\r\n        },\r\n        \"alertSchedule\":
+      {\r\n            \"Frequency\": 15,\r\n            \"Time\": 60\r\n        },\r\n
+      \       \"alertActions\": {\r\n            \"SeverityLevel\": \"3\"\r\n        },\r\n
+      \       \"alertTrigger\": {\r\n            \"Operator\": \"GreaterThan\",\r\n
+      \           \"Threshold\": \"50\"\r\n        },\r\n        \"actionGrp\": {\r\n
+      \           \"ActionGroup\": \"/subscriptions/{subscriptionId}/resourcegroups/default-activitylogalerts/providers/microsoft.insights/actiongroups/send-email\",\r\n
+      \           \"Subject\": \"Customized Email Header\",\r\n            \"Webhook\":
+      \"{ \\\"alertname\\\":\\\"#alertrulename\\\", \\\"IncludeSearchResults\\\":true
+      }\"\r\n        }\r\n    },\r\n    \"resources\": [\r\n        {\r\n            \"name\":
+      \"[variables('alertName')]\",\r\n            \"type\": \"Microsoft.Insights/scheduledQueryRules\",\r\n
+      \           \"apiVersion\": \"2018-04-16\",\r\n            \"location\": \"[variables('alertLocation')]\",\r\n
+      \           \"properties\": {\r\n                \"description\": \"[variables('alertDescription')]\",\r\n
+      \               \"enabled\": \"[variables('alertStatus')]\",\r\n                \"source\":
+      {\r\n                    \"query\": \"[variables('alertSource').Query]\",\r\n
+      \                   \"dataSourceId\": \"[variables('alertSource').SourceId]\",\r\n
+      \                   \"queryType\": \"[variables('alertSource').Type]\"\r\n                },\r\n
+      \               \"schedule\": {\r\n                    \"frequencyInMinutes\":
+      \"[variables('alertSchedule').Frequency]\",\r\n                    \"timeWindowInMinutes\":
+      \"[variables('alertSchedule').Time]\"\r\n                },\r\n                \"action\":
+      {\r\n                    \"odata.type\": \"Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction\",\r\n
+      \                   \"severity\": \"[variables('alertActions').SeverityLevel]\",\r\n
+      \                   \"aznsAction\": {\r\n                        \"actionGroup\":
+      \"[array(variables('actionGrp').ActionGroup)]\",\r\n                        \"emailSubject\":
+      \"[variables('actionGrp').Subject]\",\r\n                        \"customWebhookPayload\":
+      \"[variables('actionGrp').Webhook]\"\r\n                    },\r\n                    \"trigger\":
+      {\r\n                        \"thresholdOperator\": \"[variables('alertTrigger').Operator]\",\r\n
+      \                       \"threshold\": \"[variables('alertTrigger').Threshold]\"\r\n
+      \                   }\r\n                }\r\n            }\r\n        }\r\n
+      \   ]\r\n}}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3034'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --template-file
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/Japanese-characters-template","name":"Japanese-characters-template","type":"Microsoft.Resources/deployments","properties":{"templateHash":"4894731703445510842","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"b12a668c-a879-4504-8744-814fc86b230e","providers":[{"namespace":"Microsoft.Insights","resourceTypes":[{"resourceType":"scheduledQueryRules","locations":["japaneast"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Insights/scheduledQueryRules/armtemplate-alert-japanese-utf8"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '866'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the \r\n        network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"\r\n                                string
+      username = \\\"UNKNOWN\\\";\\r\\n\r\n                    \"\r\n      }\r\n    }\r\n
+      \ },\r\n  \"variables\": {\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
+      \"Microsoft.Network/networkSecurityGroups\",\r\n      \"name\": \"[parameters('name')]\",\r\n
+      \     \"apiVersion\": \"2015-06-15\",\r\n      \"location\": \"[parameters('location')]\",\r\n
+      \     \"properties\": {\r\n        \"securityRules\": [\r\n        ]\r\n      },\r\n
+      \     \"dependsOn\": [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"Empty\":
+      {\r\n        \"type\": \"string\",\r\n        \"value\": \"\"\r\n    },\r\n
+      \   \"NewNSG\": {\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n      // comment\r\n      /** comment **/\r\n      \"type\": \"object\",
+      /** comment **/\r\n      \"value\": \"[reference(parameters('name'))]\" // comment\r\n
+      \     // comment\r\n      /** comment **/\r\n      /** comment1\r\n          comment2\r\n
+      \         comment3\r\n      **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1505'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/simple_deploy_multiline","name":"simple_deploy_multiline","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"093818e0-bcca-4dd6-97c0-e2579e7764ca","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '957'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    },\r\n    \"extra_param\": {\r\n
+      \     \"type\": \"string\",\r\n      \"metadata\": {\r\n        \"description\":
+      \"Useless redundant parameters.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\":
+      {\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1509'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --template-file --parameters --no-prompt
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidTemplate","message":"Deployment template validation
+        failed: ''The value for the template parameter ''extra_param'' at line ''18''
+        and column ''20'' is not provided. Please see https://aka.ms/resource-manager-parameter-files
+        for usage details.''.","additionalInfo":[{"type":"TemplateViolation","info":{"lineNumber":18,"linePosition":20,"path":"properties.template.parameters.extra_param"}}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\": {\r\n
+      \ },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1368'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"b27575f2-cb61-4333-b4fc-d157fc33c055","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '993'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\": {\r\n
+      \ },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1368'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-12-27T13:12:17.5129728Z","duration":"PT0.0008239S","correlationId":"2179f9d8-3e40-4d1b-ba6c-e73b84ecfb7d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002/operationStatuses/08585609961506092948?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '791'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585609961506092948?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-27T13:12:33.2215605Z","duration":"PT15.7094116S","correlationId":"2179f9d8-3e40-4d1b-ba6c-e73b84ecfb7d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4c3ec961-44c6-4192-94d0-9602a3cb0cb8","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5258'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the \r\n        network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"\r\n                                string
+      username = \\\"UNKNOWN\\\";\\r\\n\r\n                    \"\r\n      }\r\n    }\r\n
+      \ },\r\n  \"variables\": {\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
+      \"Microsoft.Network/networkSecurityGroups\",\r\n      \"name\": \"[parameters('name')]\",\r\n
+      \     \"apiVersion\": \"2015-06-15\",\r\n      \"location\": \"[parameters('location')]\",\r\n
+      \     \"properties\": {\r\n        \"securityRules\": [\r\n        ]\r\n      },\r\n
+      \     \"dependsOn\": [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"Empty\":
+      {\r\n        \"type\": \"string\",\r\n        \"value\": \"\"\r\n    },\r\n
+      \   \"NewNSG\": {\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n      // comment\r\n      /** comment **/\r\n      \"type\": \"object\",
+      /** comment **/\r\n      \"value\": \"[reference(parameters('name'))]\" // comment\r\n
+      \     // comment\r\n      /** comment **/\r\n      /** comment1\r\n          comment2\r\n
+      \         comment3\r\n      **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1505'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"c25e5f4f-083e-4570-856b-d0a37f0aa83c","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '993'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the \r\n        network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"\r\n                                string
+      username = \\\"UNKNOWN\\\";\\r\\n\r\n                    \"\r\n      }\r\n    }\r\n
+      \ },\r\n  \"variables\": {\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
+      \"Microsoft.Network/networkSecurityGroups\",\r\n      \"name\": \"[parameters('name')]\",\r\n
+      \     \"apiVersion\": \"2015-06-15\",\r\n      \"location\": \"[parameters('location')]\",\r\n
+      \     \"properties\": {\r\n        \"securityRules\": [\r\n        ]\r\n      },\r\n
+      \     \"dependsOn\": [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"Empty\":
+      {\r\n        \"type\": \"string\",\r\n        \"value\": \"\"\r\n    },\r\n
+      \   \"NewNSG\": {\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n      // comment\r\n      /** comment **/\r\n      \"type\": \"object\",
+      /** comment **/\r\n      \"value\": \"[reference(parameters('name'))]\" // comment\r\n
+      \     // comment\r\n      /** comment **/\r\n      /** comment1\r\n          comment2\r\n
+      \         comment3\r\n      **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1505'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-12-27T13:12:58.2905863Z","duration":"PT0.0009461S","correlationId":"36c35610-d3bf-4959-9518-09c2c8458d13","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002/operationStatuses/08585609961105020735?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '791'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:12:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585609961105020735?api-version=2021-04-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:04.2545314Z","duration":"PT5.9648912S","correlationId":"36c35610-d3bf-4959-9518-09c2c8458d13","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"empty":{"type":"String","value":""},"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4c3ec961-44c6-4192-94d0-9602a3cb0cb8","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    },\r\n    \"extra_param\": {\r\n
+      \     \"type\": \"string\",\r\n      \"metadata\": {\r\n        \"description\":
+      \"Useless redundant parameters.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\":
+      {\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1509'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --no-prompt
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidTemplate","message":"Deployment template validation
+        failed: ''The value for the template parameter ''extra_param'' at line ''18''
+        and column ''20'' is not provided. Please see https://aka.ms/resource-manager-parameter-files
+        for usage details.''.","additionalInfo":[{"type":"TemplateViolation","info":{"lineNumber":18,"linePosition":20,"path":"properties.template.parameters.extra_param"}}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/?api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:04.2545314Z","duration":"PT5.9648912S","correlationId":"36c35610-d3bf-4959-9518-09c2c8458d13","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"empty":{"type":"String","value":""},"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4c3ec961-44c6-4192-94d0-9602a3cb0cb8","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5306'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --filter
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/?$filter=provisioningState%20eq%20%27Succeeded%27&api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:04.2545314Z","duration":"PT5.9648912S","correlationId":"36c35610-d3bf-4959-9518-09c2c8458d13","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"empty":{"type":"String","value":""},"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4c3ec961-44c6-4192-94d0-9602a3cb0cb8","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5306'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002","name":"azure-cli-resource-group-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7631343456035834737","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:04.2545314Z","duration":"PT5.9648912S","correlationId":"36c35610-d3bf-4959-9518-09c2c8458d13","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"outputs":{"empty":{"type":"String","value":""},"newNSG":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"4c3ec961-44c6-4192-94d0-9602a3cb0cb8","securityRules":[],"defaultSecurityRules":[{"name":"AllowVnetInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Inbound"}},{"name":"AllowAzureLoadBalancerInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        inbound traffic from azure load balancer","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"AzureLoadBalancer","destinationAddressPrefix":"*","access":"Allow","priority":65001,"direction":"Inbound"}},{"name":"DenyAllInBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllInBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all inbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Inbound"}},{"name":"AllowVnetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowVnetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to all VMs in VNET","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"VirtualNetwork","destinationAddressPrefix":"VirtualNetwork","access":"Allow","priority":65000,"direction":"Outbound"}},{"name":"AllowInternetOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/AllowInternetOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Allow
+        outbound traffic from all VMs to Internet","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"Internet","access":"Allow","priority":65001,"direction":"Outbound"}},{"name":"DenyAllOutBound","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1/defaultSecurityRules/DenyAllOutBound","etag":"W/\"421c8a5c-f199-45f6-b632-50bca9609006\"","type":"Microsoft.Network/networkSecurityGroups/defaultSecurityRules","properties":{"provisioningState":"Succeeded","description":"Deny
+        all outbound traffic","protocol":"*","sourcePortRange":"*","destinationPortRange":"*","sourceAddressPrefix":"*","destinationAddressPrefix":"*","access":"Deny","priority":65500,"direction":"Outbound"}}]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group export
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/exportTemplate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"location":{"defaultValue":"[resourceGroup().location]","type":"String","metadata":{"description":"Location
+        for the \r\n        network security group."}},"name":{"type":"String","metadata":{"description":"\r\n                                string
+        username = \"UNKNOWN\";\r\n\r\n                    "}}},"variables":{},"resources":[{"type":"Microsoft.Network/networkSecurityGroups","apiVersion":"2015-06-15","name":"[parameters(''name'')]","location":"[parameters(''location'')]","dependsOn":[],"properties":{"securityRules":[]}}],"outputs":{"Empty":{"type":"String","value":""},"NewNSG":{"type":"Object","value":"[reference(parameters(''name''))]"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '793'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment operation group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/deployments/mock-deployment/operations?api-version=2021-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002/operations/DE039F59338EA4DB","operationId":"DE039F59338EA4DB","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:03.3682444Z","duration":"PT3.1942528S","trackingId":"c4ccfd27-f83c-49fa-8003-161ce7e48166","serviceRequestId":"1315c089-939c-48eb-a2b1-cdf4eb6f04d6","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"azure-cli-deploy-test-nsg1"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002/operations/08585609961105020735","operationId":"08585609961105020735","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:04.0543375Z","duration":"PT3.8803459S","trackingId":"27e6f36d-904b-4820-9ff3-265fcec0f16f","statusCode":"OK"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1369'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment operation group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --operation-id
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/deployments/mock-deployment/operations/DE039F59338EA4DB?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000002/operations/DE039F59338EA4DB","operationId":"DE039F59338EA4DB","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2021-12-27T13:13:03.3682444Z","duration":"PT3.1942528S","trackingId":"c4ccfd27-f83c-49fa-8003-161ce7e48166","serviceRequestId":"1315c089-939c-48eb-a2b1-cdf4eb6f04d6","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"azure-cli-deploy-test-nsg1"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '850'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\": {\r\n
+      \ },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1368'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --no-wait
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"0001-01-01T00:00:00Z","duration":"PT0S","correlationId":"07fa0fad-2443-449a-8f71-918077aef94b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Network/networkSecurityGroups/azure-cli-deploy-test-nsg1"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '993'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"location\": {\"value\": \"westus\"},
+      \"name\": {\"value\": \"azure-cli-deploy-test-nsg1\"}}, \"mode\": \"Incremental\",
+      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"location\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\",\r\n
+      \     \"metadata\": {\r\n        \"description\": \"Location for the network
+      security group.\"\r\n      }\r\n    },\r\n    \"name\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Name of the
+      network security group.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\": {\r\n
+      \ },\r\n  \"resources\": [\r\n    {\r\n      \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n
+      \     \"name\": \"[parameters('name')]\",\r\n      \"apiVersion\": \"2015-06-15\",\r\n
+      \     \"location\": \"[parameters('location')]\",\r\n      \"properties\": {\r\n
+      \       \"securityRules\": [\r\n        ]\r\n      },\r\n      \"dependsOn\":
+      [ ]\r\n    }\r\n  ],\r\n  \"outputs\": {\r\n    \"NewNSG\": {\r\n      /** comment1\r\n
+      \         comment2\r\n          comment3\r\n      **/\r\n      // comment\r\n
+      \     /** comment **/\r\n      \"type\": \"object\", /** comment **/\r\n      \"value\":
+      \"[reference(parameters('name'))]\" // comment\r\n      // comment\r\n      /**
+      comment **/\r\n      /** comment1\r\n          comment2\r\n          comment3\r\n
+      \     **/\r\n    }\r\n  } // comment\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1368'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --no-wait
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-12-27T13:13:42.665743Z","duration":"PT0.0001827S","correlationId":"e5379271-9b2c-411a-97fa-2576340e2926","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003/operationStatuses/08585609960648550796?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '790'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group cancel
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/cancel?api-version=2021-04-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Mon, 27 Dec 2021 13:13:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --custom
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Canceled","timestamp":"2021-12-27T13:13:45.2225555Z","duration":"PT2.5569952S","correlationId":"e5379271-9b2c-411a-97fa-2576340e2926","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '791'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-resource-group-deployment000003","name":"azure-cli-resource-group-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6836373655278635521","parameters":{"location":{"type":"String","value":"westus"},"name":{"type":"String","value":"azure-cli-deploy-test-nsg1"}},"mode":"Incremental","provisioningState":"Canceled","timestamp":"2021-12-27T13:13:47.4337812Z","duration":"PT4.7682209S","correlationId":"e5379271-9b2c-411a-97fa-2576340e2926","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]}]}],"dependencies":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '791'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Dec 2021 13:13:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

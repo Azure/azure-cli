@@ -1,0 +1,33 @@
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: Gen
+  displayName: Gen
+  pool:
+    vmImage: 'Ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        exit
+        cd ..
+        git clone -b dev https://github.com/Azure/azure-cli.git
+        git clone -b master https://github.com/Azure/azure-cli-extensions.git
+        pip install jinja2
+        python /home/vsts/work/1/s/scripts/live_test/gen.py
+        rm -rf azure-cli
+        rm -rf azure-cli-extensions
+        git clone -b CLITest https://qwordy:$(PASSWORD)@github.com/qwordy/azure-cli.git
+        git config --global user.email "fey@microsoft.com"
+        git config --global user.name "Feiyue Yu"
+        cp CLITest.yml azure-cli/CLITest.yml
+        cd azure-cli
+        git add .
+        git commit -m "Update CLITest.yml"
+        git push origin CLITest

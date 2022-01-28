@@ -53,6 +53,9 @@ Example: `"azext.maxCliCoreVersion": "2.0.15"`
 ### azext.isPreview
 Description: Indicate that the extension is in preview.
 
+### azext.isExperimental
+Description: Indicate that the extension is experimental and not covered by customer support.
+
 Type: `boolean`
 
 Example: `"azext.isPreview": true`

@@ -64,12 +64,13 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('language', options_list=['--lang'], arg_type=get_enum_type(SUPPORTED_LANGUAGES), help='The language to be used to create the bot.', arg_group='Web App Bot Specific')
         c.argument('deploy_echo', options_list=['--echo'], arg_type=get_three_state_flag(), help='Deploy an Echo Bot template to the newly created v4 Web App Bot.', arg_group='V4 Bot Templates')
+        c.argument('cmek_key_vault_url', options_list=['--cmk-key-vault-key-url', '--cmk'], help='The key vault key url to enable Customer Managed Keys encryption')
 
     with self.argument_context('bot publish') as c:
         c.argument('code_dir', options_list=['--code-dir'], help='The directory to upload bot code from.')
         c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
                                                                                    redirect='--proj-file-path',
-                                                                                   hide=True, expiration='2.1.0')],
+                                                                                   hide=True, expiration='3.0.0')],
                    help='Path to the start up project file name. (E.g. "./EchoBotWithCounter.csproj")')
         c.argument('version', options_list=['-v', '--version'],
                    help='The Microsoft Bot Builder SDK version of the bot.')
@@ -106,11 +107,13 @@ def load_arguments(self, _):
                    help='Azure Application Insights Application ID used to read bot analytics data. Provide an Id if '
                         'you want to view analytics about your bot in the Analytics blade.')
         c.argument('icon_url', help='Icon URL for bot avatar. Accepts PNG files with file size limit of 30KB.')
+        c.argument('cmek_key_vault_url', options_list=['--cmk-key-vault-key-url', '--cmk'], help='The key vault key url to enable Customer Managed Keys encryption')
+        c.argument('encryption_off', options_list=['--cmk-off'], help='Set encryption to Microsoft-Managed Keys', action='store_true')
 
     with self.argument_context('bot prepare-publish') as c:
         c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
                                                                                    redirect='--proj-file-path',
-                                                                                   hide=True, expiration='2.1.0')],
+                                                                                   hide=True, expiration='3.0.0')],
                    help='Path to the start up project file name. (E.g. "./EchoBotWithCounter.csproj") '
                         'Required only for C#.')
         c.argument('sln_name', help='Name of the start up solution file name. Required only for C#.')

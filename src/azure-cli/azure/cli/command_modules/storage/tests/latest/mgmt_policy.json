@@ -5,30 +5,47 @@
             "type": "Lifecycle",
             "definition": {
                 "filters": {
-                    "blobTypes": [
-                        "blockBlob"
-                    ],
-                    "prefixMatch": [
-                        "olcmtestcontainer"
-                    ]
+                  "blobTypes": [
+                    "blockBlob"
+                  ],
+                  "prefixMatch": [
+                    "olcmtestcontainer1"
+                  ]
                 },
                 "actions": {
-                    "baseBlob": {
-                        "tierToCool": {
-                            "daysAfterModificationGreaterThan": 1000
-                        },
-                        "tierToArchive": {
-                            "daysAfterModificationGreaterThan": 90
-                        },
-                        "delete": {
-                            "daysAfterModificationGreaterThan": 1000
-                        }
+                  "baseBlob": {
+                    "tierToCool": {
+                      "daysAfterLastAccessTimeGreaterThan": 30
                     },
-                    "snapshot": {
-                        "delete": {
-                            "daysAfterCreationGreaterThan": 5000
-                        }
+                    "tierToArchive": {
+                      "daysAfterModificationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterModificationGreaterThan": 1000
                     }
+                  },
+                  "snapshot": {
+                    "tierToCool": {
+                      "daysAfterCreationGreaterThan": 30
+                    },
+                    "tierToArchive": {
+                      "daysAfterCreationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterCreationGreaterThan": 1000
+                    }
+                  },
+                  "version": {
+                    "tierToCool": {
+                      "daysAfterCreationGreaterThan": 30
+                    },
+                    "tierToArchive": {
+                      "daysAfterCreationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterCreationGreaterThan": 1000
+                    }
+                  }
                 }
             }
         }

@@ -23,7 +23,12 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_fairplay_rentalandlease_completion_list,
                                                        get_token_completion_list,
                                                        get_mru_type_completion_list,
-                                                       get_encoding_types_list)
+                                                       get_encoding_types_list,
+                                                       get_allowed_resolutions_completion_list,
+                                                       get_allowed_transcription_languages,
+                                                       get_allowed_analysis_modes,
+                                                       get_stretch_mode_types_list,
+                                                       get_storage_authentication_allowed_values_list)
 
 from azure.cli.command_modules.ams._validators import (validate_storage_account_id,
                                                        datetime_format,
@@ -55,12 +60,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   validator=get_default_location_from_resource_group)
+                   validator=get_default_location_from_resource_group, required=False)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
+        c.argument('assign_identity', options_list=['--mi-system-assigned'], action='store_true', help='Set the system managed identity on the media services account.')
 
     with self.argument_context('ams account check-name') as c:
         c.argument('account_name', options_list=['--name', '-n'], id_part=None,
@@ -78,17 +84,27 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=validate_storage_account_id)
 
     with self.argument_context('ams account storage sync-storage-keys') as c:
-        c.argument('id', required=True)
+        c.argument('storage_account_id', required=True, help="The storage account Id.")
+
+    with self.argument_context('ams account storage set-authentication') as c:
+        c.argument('storage_auth', arg_type=get_enum_type(get_storage_authentication_allowed_values_list()), help='The type of authentication for the storage account associated with the media services account.')
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('sp_name', name_arg_type,
                    help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
+        c.argument('new_sp_name', help="The new app name or app URI to update the RBAC with.")
         c.argument('sp_password', password_arg_type,
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', help='The role of the service principal.', completer=get_role_definition_name_completion_list)
         c.argument('xml', action='store_true', help='Enables xml output format.')
         c.argument('years', help='Number of years for which the secret will be valid. Default: 1 year.', type=int, default=None)
+
+    with self.argument_context('ams account encryption') as c:
+        c.argument('account_name', account_name_arg_type)
+        c.argument('key_type', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.', required=True)
+        c.argument('key_identifier', help='The URL of the Key Vault key used to encrypt the account. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).')
+        c.argument('current_key_id', help='The current key used to encrypt the Media Services account, including the key version.')
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)
@@ -97,8 +113,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('preset', help='Preset that describes the operations that will be used to modify, transcode, or extract insights from the source file to generate the transform output. Allowed values: {}. In addition to the allowed values, you can also pass a path to a custom Standard Encoder preset JSON file. See https://docs.microsoft.com/rest/api/media/transforms/createorupdate#standardencoderpreset for further details on the settings to use to build a custom preset.'
                    .format(", ".join(get_presets_definition_name_completion_list())))
         c.argument('insights_to_extract', arg_group='Video Analyzer', arg_type=get_enum_type(InsightsType), help='The type of insights to be extracted. If not set then the type will be selected based on the content type. If the content is audio only then only audio insights will be extracted and if it is video only video insights will be extracted.')
+        c.argument('video_analysis_mode', arg_group='Video Analyzer', help='Determines the set of audio analysis operations to be performed. If unspecified, the Standard AudioAnalysisMode would be chosen. Allowed values: {}'.format(", ".join(get_allowed_analysis_modes())))
         c.argument('audio_language', arg_group='Audio/Video Analyzer', help='The language for the audio payload in the input using the BCP-47 format of \"language tag-region\" (e.g: en-US). If not specified, automatic language detection would be employed. This feature currently supports English, Chinese, French, German, Italian, Japanese, Spanish, Russian, and Portuguese. The automatic detection works best with audio recordings with clearly discernable speech. If automatic detection fails to find the language, transcription would fallback to English. Allowed values: {}.'
                    .format(", ".join(get_allowed_languages_for_preset_completion_list())))
+        c.argument('audio_analysis_mode', arg_group='Audio/Video Analyzer', help='Determines the set of audio analysis operations to be performed. If unspecified, the Standard AudioAnalysisMode would be chosen. Allowed values: {}.'.format(", ".join(get_allowed_analysis_modes())))
+        c.argument('resolution', arg_group='Face Detector', help='Specifies the maximum resolution at which your video is analyzed. The default behavior is "SourceResolution," which will keep the input video at its original resolution when analyzed. Using StandardDefinition will resize input videos to standard definition while preserving the appropriate aspect ratio. It will only resize if the video is of higher resolution. For example, a 1920x1080 input would be scaled to 640x360 before processing. Switching to "StandardDefinition" will reduce the time it takes to process high resolution video. It may also reduce the cost of using this component (see https://azure.microsoft.com/pricing/details/media-services/#analytics for details). However, faces that end up being too small in the resized video may not be detected. Allowed values: {}.'
+                   .format(", ".join(get_allowed_resolutions_completion_list())))
         c.argument('relative_priority', arg_type=get_enum_type(Priority), help='Sets the relative priority of the transform outputs within a transform. This sets the priority that the service uses for processing TransformOutputs. The default priority is Normal.')
         c.argument('on_error', arg_type=get_enum_type(OnErrorType), help="A Transform can define more than one output. This property defines what the service should do when one output fails - either continue to produce other outputs, or, stop the other outputs. The overall Job state will not reflect failures of outputs that are specified with 'ContinueJob'. The default is 'StopProcessingJob'.")
         c.argument('description', help='The description of the transform.')
@@ -132,7 +152,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
                    help='The permissions to set on the SAS URL.')
-        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M:S'Z') at which the SAS becomes invalid.")
+        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M:S'Z') at which the SAS becomes invalid. This must be less than 24 hours from the current time.")
 
     with self.argument_context('ams asset-filter') as c:
         c.argument('account_name', account_name_arg_type)
@@ -217,7 +237,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
         c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON Widevine license template. Use @{file} to load from a file.')
-        c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay Application Secret Key.')
+        c.argument('fp_playback_duration_seconds', arg_group='FairPlay Configuration', help='Playback duration')
+        c.argument('fp_storage_duration_seconds', arg_group='FairPlay Configuration', help='Storage duration')
+        c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay Application Secret Key, which is a 32 character hex string.')
         c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The filepath to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')
         c.argument('rental_and_lease_key_type', arg_group='FairPlay Configuration', help='The rental and lease key type. Available values: {}.'.format(", ".join(get_fairplay_rentalandlease_completion_list())))
@@ -332,6 +354,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('auto_start', action='store_true', help='The flag indicates if the resource should be automatically started on creation.')
         c.argument('encoding_type', arg_group='Encoding', help='The encoding type for live event. This value is specified at creation time and cannot be updated. Allowed values: {}.'.format(", ".join(get_encoding_types_list())))
         c.argument('preset_name', arg_group='Encoding', help='The encoding preset name. This value is specified at creation time and cannot be updated.')
+        c.argument('stretch_mode', arg_group='Encoding', help='Specifies how the input video will be resized to fit the desired output resolution(s). Default is None.  Allowed values: {}.'.format(", ".join(get_stretch_mode_types_list())))
+        c.argument('key_frame_interval', arg_group='Encoding', help='Use an ISO 8601 time value between 0.5 to 20 seconds to specify the output fragment length for the video and audiotracks of an encoding live event. For example, use PT2S to indicate 2 seconds. For the video track it also defines the key frame interval, or the length of a GoP (group of pictures). If this value is not set for anencoding live event, the fragment duration defaults to 2 seconds. The value cannot be set for pass-through live events.')
         c.argument('tags', arg_type=tags_type)
         c.argument('key_frame_interval_duration', key_frame_interval_duration_arg_type, arg_group='Input', validator=validate_key_frame_interval_duration,
                    help='ISO 8601 timespan duration of the key frame interval duration in seconds. The value should be an interger in the range of 1 (PT1S or 00:00:01) to 30 (PT30S or 00:00:30) seconds.')
@@ -342,10 +366,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('preview_locator', arg_group='Preview', help='The identifier of the preview locator in Guid format. Specifying this at creation time allows the caller to know the preview locator url before the event is created. If omitted, the service will generate a random identifier. This value cannot be updated once the live event is created.')
         c.argument('streaming_policy_name', arg_group='Preview', help='The name of streaming policy used for the live event preview. This can be specified at creation time but cannot be updated.')
         c.argument('alternative_media_id', arg_group='Preview', help='An Alternative Media Identifier associated with the StreamingLocator created for the preview. This value is specified at creation time and cannot be updated. The identifier can be used in the CustomLicenseAcquisitionUrlTemplate or the CustomKeyAcquisitionUrlTemplate of the StreamingPolicy specified in the StreamingPolicyName field.')
-        c.argument('vanity_url', arg_type=get_three_state_flag(), help='Specifies whether to use a vanity url with the Live Event. This value is specified at creation time and cannot be updated.')
         c.argument('client_access_policy', arg_group='Cross Site Access Policies', help='Filepath to the clientaccesspolicy.xml used by Microsoft Silverlight and Adobe Flash. Use @{file} to load from a file.')
         c.argument('cross_domain_policy', arg_group='Cross Site Access Policies', help='Filepath to the crossdomain.xml used by Microsoft Silverlight and Adobe Flash. Use @{file} to load from a file.')
         c.argument('stream_options', nargs='+', arg_type=get_enum_type(StreamOptionsFlag), help='The options to use for the LiveEvent. This value is specified at creation time and cannot be updated.')
+        c.argument('transcription_lang', help='Live transcription language for the live event. Allowed values: {} See https://go.microsoft.com/fwlink/?linkid=2133742 for more information about the live transcription feature.'.format(", ".join(get_allowed_transcription_languages())))
+        c.argument('use_static_hostname', help='Specifies whether a static hostname would be assigned to the live event preview and ingest endpoints. This value can only be updated if the live event is in Standby state. If hostname_prefix is not specified, the live event name will be used as the hostname prefix.')
+        c.argument('hostname_prefix', help='When useStaticHostname is set to true, hostname_prefix specifies the first part of the hostname assigned to the live event preview and ingest endpoints. The final hostname would be a combination of this prefix, the media service account name and a short code for the Azure Media Services data center.')
         c.argument('remove_outputs_on_stop', action='store_true', help='Remove live outputs on stop.')
 
     with self.argument_context('ams live-event list') as c:

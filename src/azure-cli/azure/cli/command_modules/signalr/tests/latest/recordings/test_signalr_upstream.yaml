@@ -1,0 +1,790 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "tags": {"key": "value"}, "sku": {"name": "Standard_S1",
+      "capacity": 1}, "properties": {"features": [{"flag": "ServiceMode", "value":
+      "Classic"}, {"flag": "EnableMessagingLogs", "value": "False"}], "cors": {"allowedOrigins":
+      ["http://example1.com", "http://example2.com"]}, "networkACLs": {"defaultAction":
+      "Deny"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '339'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Creating","externalIP":null,"hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0-preview","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2021-05-31T05:25:47.744845Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-05-31T05:25:47.744845Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1373'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:25:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationResults/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002","name":"1e5fbfc5-0567-4927-a03e-aa2027bc2c4c","status":"Running","startTime":"2021-05-31T05:25:51.9994118Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:26:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002","name":"1e5fbfc5-0567-4927-a03e-aa2027bc2c4c","status":"Running","startTime":"2021-05-31T05:25:51.9994118Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:26:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/1e5fbfc5-0567-4927-a03e-aa2027bc2c4c/SignalR/signalr000002","name":"1e5fbfc5-0567-4927-a03e-aa2027bc2c4c","status":"Succeeded","startTime":"2021-05-31T05:25:51.9994118Z","endTime":"2021-05-31T05:27:06.465494Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '378'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:27:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --unit-count -l --tags --service-mode --allowed-origins --default-action
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"40.71.15.8","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":null},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2021-05-31T05:25:47.744845Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-05-31T05:25:47.744845Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1374'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:27:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"upstream": {"templates": [{"hubPattern": "chat", "eventPattern":
+      "connected", "categoryPattern": "connections", "urlTemplate": "http://host1.com"},
+      {"categoryPattern": "messages", "urlTemplate": "http://host2.com"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '235'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --template --template
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 31 May 2021 05:27:29 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationResults/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --template --template
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002","name":"d3fd0139-bf6c-45e3-9332-cfd130b8c0fc","status":"Running","startTime":"2021-05-31T05:27:29.1750435Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:27:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --template --template
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002","name":"d3fd0139-bf6c-45e3-9332-cfd130b8c0fc","status":"Running","startTime":"2021-05-31T05:27:29.1750435Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:28:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --template --template
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/d3fd0139-bf6c-45e3-9332-cfd130b8c0fc/SignalR/signalr000002","name":"d3fd0139-bf6c-45e3-9332-cfd130b8c0fc","status":"Succeeded","startTime":"2021-05-31T05:27:29.1750435Z","endTime":"2021-05-31T05:28:46.3092345Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '379'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:28:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --template --template
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"40.71.15.8","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2021-05-31T05:25:47.744845Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-05-31T05:27:28.3109975Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1610'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:29:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"40.71.15.8","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[{"hubPattern":"chat","eventPattern":"connected","categoryPattern":"connections","urlTemplate":"http://host1.com","auth":null},{"hubPattern":"*","eventPattern":"*","categoryPattern":"messages","urlTemplate":"http://host2.com","auth":null}]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2021-05-31T05:25:47.744845Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-05-31T05:27:28.3109975Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1610'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:29:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"upstream": {"templates": []}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream clear
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002?api-version=2021-04-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 31 May 2021 05:29:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationResults/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002?api-version=2021-04-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream clear
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002","name":"488a9ab9-e6a4-4d7d-a92d-04f5c1076779","status":"Running","startTime":"2021-05-31T05:29:04.7314747Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:29:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream clear
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002","name":"488a9ab9-e6a4-4d7d-a92d-04f5c1076779","status":"Running","startTime":"2021-05-31T05:29:04.7314747Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '336'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:30:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream clear
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/locations/eastus/operationStatuses/488a9ab9-e6a4-4d7d-a92d-04f5c1076779/SignalR/signalr000002","name":"488a9ab9-e6a4-4d7d-a92d-04f5c1076779","status":"Succeeded","startTime":"2021-05-31T05:29:04.7314747Z","endTime":"2021-05-31T05:30:19.621697Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '378'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:30:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - signalr upstream clear
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.23.0 azsdk-python-mgmt-signalr/1.0.0b2 Python/3.9.2 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/signalR/signalr000002?api-version=2021-04-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_S1","tier":"Standard","size":"S1","capacity":1},"properties":{"provisioningState":"Succeeded","externalIP":"40.71.15.8","hostName":"signalr000002.service.signalr.net","publicPort":443,"serverPort":443,"version":"1.0","privateEndpointConnections":[],"sharedPrivateLinkResources":[],"tls":{"clientCertEnabled":false},"features":[{"flag":"ServiceMode","value":"Classic","properties":{}},{"flag":"EnableConnectivityLogs","value":"False","properties":{}},{"flag":"EnableMessagingLogs","value":"False","properties":{}},{"flag":"EnableLiveTrace","value":"False","properties":{}}],"cors":{"allowedOrigins":["http://example1.com","http://example2.com"]},"upstream":{"templates":[]},"networkACLs":{"defaultAction":"Deny","publicNetwork":{"allow":["ServerConnection","ClientConnection","RESTAPI","Trace"],"deny":null},"privateEndpoints":[]}},"kind":"SignalR","systemData":{"createdBy":"chenyl@microsoft.com","createdByType":"User","createdAt":"2021-05-31T05:25:47.744845Z","lastModifiedBy":"chenyl@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-05-31T05:29:03.8994562Z"},"location":"eastus","tags":{"key":"value"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.SignalRService/SignalR/signalr000002","name":"signalr000002","type":"Microsoft.SignalRService/SignalR"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1373'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 31 May 2021 05:30:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - 984a9db1-8dbb-44a5-825f-40facb4f334c
+    status:
+      code: 200
+      message: OK
+version: 1

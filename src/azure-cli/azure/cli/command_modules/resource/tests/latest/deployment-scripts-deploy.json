@@ -1,0 +1,44 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "scriptName": {
+           "type": "string",
+           "metadata": {
+                "description": "Deployment script name"
+            }
+        },
+        "utcValue": {
+            "type": "string",
+            "defaultValue": "[utcNow()]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('scriptName')]",
+            "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]": {}
+                }
+            },
+            "kind": "AzureCLI",
+            "properties": {
+                "forceUpdateTag": "[parameters('utcValue')]",
+                "containerSettings": {
+                    "containerGroupName": "mycustomaci"	
+                },
+                "AzCliVersion": "2.0.80",
+                "timeout": "PT30M",
+                "arguments": "'foo' 'bar'",
+                "scriptContent": "echo 'foo'",
+                "cleanupPreference": "OnExpiration",
+                "retentionInterval": "P1D"
+            }
+        }
+    ],
+    "outputs": {}
+}

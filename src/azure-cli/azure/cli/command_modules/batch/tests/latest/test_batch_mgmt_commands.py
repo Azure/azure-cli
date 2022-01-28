@@ -3,29 +3,36 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import mock
-import os
 import tempfile
 import time
 
-from knack.util import CLIError
-from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
-from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
-class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    @ResourceGroupPreparer(location='northeurope')
+class BatchMgmtScenarioTests(ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus')
     def test_batch_general_arm_cmd(self, resource_group):
+        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage1',
-            'loc': 'northeurope',
-            'acc': 'clibatchtest1',
+            'str_n': storage_name,
+            'loc': 'eastus',
+            'acc': account_name,
             'ip': resource_group + 'ip',
             'poolname': 'batch_account_cmd_pool'
         })
@@ -66,8 +73,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
             self.check('primary != null', True),
             self.check('secondary', keys.get_output_in_json()['secondary'])])
 
-        self.assertTrue(keys.get_output_in_json()['primary'] !=
-                        keys2.get_output_in_json()['primary'])
+        self.assertNotEqual(keys.get_output_in_json()['primary'], keys2.get_output_in_json()['primary'])
 
         self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
         self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'aad')
@@ -78,24 +84,49 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
         self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
 
+        self.cmd('batch account outbound-endpoints -g {rg} -n {acc}').assert_with_checks([
+            self.check('length(@)', 4),
+            self.check('[0].category', 'Azure Batch'),
+            self.check('[1].category', 'Azure Storage'),
+            self.check('[2].category', 'Microsoft Package Repository'),
+            self.check('[3].category', 'Azure Key Vault'),
+            self.check('length([0].endpoints)', 2),
+            self.check('ends_with([0].endpoints[0].domainName, `batch.azure.com`)', True) 
+        ])
+
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
         self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
-            [self.check('accountQuota', 3)])
+            [self.check('accountQuota', 1000)])
+
+        self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
+            self.check('length(@)', 20), # Ensure at least 20 entries
+            self.check('[?name==`Basic_A2`] | [0].familyName', 'basicAFamily'),
+            self.check('[?name==`Basic_A2`] | [0].capabilities[?name==`vCPUs`] | [0].value', 2)
+        ])
 
 
-class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
-    @ResourceGroupPreparer(location='ukwest')
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            StorageSASReplacer()
+        ])
+
+    @ResourceGroupPreparer(location='eastus')
     def test_batch_application_cmd(self, resource_group):
+        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+
         _, package_file_name = tempfile.mkstemp()
+
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage7',
-            'loc': 'ukwest',
-            'acc': 'clibatchtest7',
+            'str_n': storage_name,
+            'loc': 'eastus',
+            'acc': account_name,
             'app': 'testapp',
             'app_p': '1.0',
             'app_f': package_file_name
@@ -157,21 +188,25 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-ma
 class BatchMgmtLiveScenarioTests(LiveScenarioTest):
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_byos_account_cmd(self, resource_group):
+        storage_name = self.create_random_name(prefix='clibatchteststor', length=24)
+        account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
+        kv_name = self.create_random_name('clibatchtestkv', 24)
+
         SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                    'models.key_vault_management_client_enums#SecretPermissions')
+                                    'models._key_vault_management_client_enums#SecretPermissions')
         KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                 'models.key_vault_management_client_enums#KeyPermissions')
+                                 'models._key_vault_management_client_enums#KeyPermissions')
         ALL_SECRET_PERMISSIONS = ' '.join(
             [perm.value for perm in SecretPermissions])
         ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
         self.kwargs.update({
             'rg': resource_group,
-            'str_n': 'clibatchteststorage1',
-            'byos_n': 'clibatchtestuser1',
+            'str_n': storage_name,
+            'byos_n': account_name,
             'byos_l': 'southindia',
-            'kv': 'clibatchtestkeyvault1',
-            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
+            'kv': kv_name,
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
             'perm_k': ALL_KEY_PERMISSIONS,
             'perm_s': ALL_SECRET_PERMISSIONS
         })

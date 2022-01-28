@@ -1,9 +1,21 @@
+**Description**<!--Mandatory-->
+<!--Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process.-->
 
+**Testing Guide**
+<!--Example commands with explanations.-->
+
+**History Notes**
+<!--If your PR is not customer-facing, use {Component Name} in the PR title. Otherwise, use [Component Name] to allow our pipeline to add the title as a history note. If you need multiple history notes or would like to overwrite the note from the PR title, please fill in the following templates.-->
+
+[Component Name 1] BREAKING CHANGE: az command a: Make some customer-facing breaking change.
+[Component Name 2] az command b: Add some customer-facing feature.
 
 ---
 
 This checklist is used to make sure that common guidelines for a pull request are followed.
 
-- [ ] The PR has modified HISTORY.rst describing any customer-facing, functional changes. Note that this does not include changes only to help content. (see [Modifying change log](https://github.com/Azure/azure-cli/tree/master/doc/authoring_command_modules#modify-change-log)).
+- [ ] The PR title and description has followed the guideline in [Submitting Pull Requests](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests).
 
 - [ ] I adhere to the [Command Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md).
+
+- [ ] I adhere to the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md).

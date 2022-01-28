@@ -2,37 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+"""Table transformer for storage commands"""
 
+from azure.cli.core.commands.transform import build_table_output
 from azure.cli.core.profiles import get_sdk, ResourceType
 from knack.log import get_logger
 
 logger = get_logger(__name__)
-
-
-def build_table_output(result, projection):
-
-    if not isinstance(result, list):
-        result = [result]
-
-    final_list = []
-
-    from collections import OrderedDict
-    for item in result:
-        def _value_from_path(each_item, path):
-            obj = each_item
-            try:
-                for part in path.split('.'):
-                    obj = obj.get(part, None)
-            except AttributeError:
-                obj = None
-            return obj or ' '
-
-        item_dict = OrderedDict()
-        for element in projection:
-            item_dict[element[0]] = _value_from_path(item, element[1])
-        final_list.append(item_dict)
-
-    return final_list
 
 
 def transform_container_list(result):
@@ -153,11 +129,3 @@ def transform_file_directory_result(cli_ctx):
 
         return return_list
     return transformer
-
-
-def transform_immutability_policy(result):
-    # service returns policy with period value of "0" after it has been deleted
-    # this only shows the policy if the property value is greater than 0
-    if result.immutability_period_since_creation_in_days:
-        return result
-    return None

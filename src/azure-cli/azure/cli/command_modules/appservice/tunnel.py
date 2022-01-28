@@ -6,6 +6,7 @@
 # pylint: disable=import-error,unused-import
 import sys
 import ssl
+import json
 import socket
 import time
 import traceback
@@ -17,6 +18,7 @@ from threading import Thread
 import websocket
 from websocket import create_connection, WebSocket
 
+from .utils import get_pool_manager
 from knack.util import CLIError
 from knack.log import get_logger
 logger = get_logger(__name__)
@@ -35,8 +37,8 @@ class TunnelWebSocket(WebSocket):
 
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
-class TunnelServer(object):
-    def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password):
+class TunnelServer:
+    def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password, instance):
         self.local_addr = local_addr
         self.local_port = local_port
         if self.local_port != 0 and not self.is_port_open():
@@ -47,6 +49,7 @@ class TunnelServer(object):
             self.remote_addr = remote_addr
         self.remote_user_name = remote_user_name
         self.remote_password = remote_password
+        self.instance = instance
         self.client = None
         self.ws = None
         logger.info('Creating a socket on port: %s', self.local_port)
@@ -77,9 +80,7 @@ class TunnelServer(object):
             return is_port_open
 
     def is_webapp_up(self):
-        import certifi
         import urllib3
-        from azure.cli.core.util import should_disable_connection_verify
 
         try:
             import urllib3.contrib.pyopenssl
@@ -87,27 +88,45 @@ class TunnelServer(object):
         except ImportError:
             pass
 
-        http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        if should_disable_connection_verify():
-            http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
-        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus')
+        url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
+        http = get_pool_manager(url)
+        if self.instance is not None:
+            headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(
             'GET',
             url,
             headers=headers,
             preload_content=False
         )
+
+        logger.warning('Verifying if app is running....')
+
         if r.status != 200:
             raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
                 url, r.status, r.reason))
-        msg = r.read().decode('utf-8')
-        logger.info('Status response message: %s', msg)
-        if 'FAIL' in msg.upper():
-            logger.info('WARNING - Remote debugging may not be setup properly. Reponse content: %s', msg)
+        resp_msg = r.read().decode('utf-8')
+        json_data = json.loads(resp_msg)
+
+        if json_data.get('state', None) is None:
             return False
-        if 'SUCCESS' in msg.upper():
-            return True
+
+        if 'STARTED' in json_data["state"].upper():
+            if json_data["canReachPort"] is False:
+                raise CLIError(
+                    'SSH is not enabled for this app. '
+                    'To enable SSH follow this instructions: '
+                    'https://go.microsoft.com/fwlink/?linkid=2132395')
+            if json_data["canReachPort"] is True:
+                logger.warning("App is running. Trying to establish tunnel connection...")
+                return True
+        elif 'STOPPED' in json_data["state"].upper():
+            raise CLIError(
+                'SSH endpoint unreachable, your app must be '
+                'running before it can accept SSH connections.'
+                'Use `az webapp log tail` to review the app startup logs.')
+        elif 'STARTING' in json_data["state"].upper():
+            logger.warning('Waiting for app to start up... ')
         return False
 
     def _listen(self):
@@ -118,7 +137,9 @@ class TunnelServer(object):
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
-            basic_auth_header = 'Authorization: Basic {}'.format(basic_auth_string)
+            basic_auth_header = ['Authorization: Basic {}'.format(basic_auth_string)]
+            if self.instance is not None:
+                basic_auth_header.append('Cookie: ARRAffinity=' + self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
             is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
             if is_verbose:
@@ -130,7 +151,7 @@ class TunnelServer(object):
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
                                         class_=TunnelWebSocket,
-                                        header=[basic_auth_header],
+                                        header=basic_auth_header,
                                         sslopt={'cert_reqs': ssl.CERT_NONE},
                                         timeout=60 * 60,
                                         enable_multithread=True)

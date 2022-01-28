@@ -51,14 +51,16 @@ def load_command_table(self, _):
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
-        g.custom_command('show', 'get_account')
+        g.custom_show_command('show', 'get_account')
         g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('login', 'login_account')
         g.command('autostorage-keys sync', 'synchronize_auto_storage_keys')
         g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
-        g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
+        # g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
+        g.custom_command('keys renew', 'renew_accounts_keys', table_transformer=account_keys_renew_table_format)
+        g.command('outbound-endpoints', 'list_outbound_network_dependencies_endpoints')
 
     with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
@@ -71,11 +73,15 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_application_package')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
-        g.command('activate', 'activate')
+        # g.command('activate', 'activate')
+        g.custom_command('activate', 'activate_application_package')
         g.command('list', 'list')
 
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
         g.show_command('show', 'get_quotas')
+
+    with self.command_group('batch location', get_mgmt_type('location')) as g:
+        g.show_command('list-skus', 'list_supported_virtual_machine_skus')
 
     # Data Plane Commands
     with self.command_group('batch application summary', get_data_type('application')) as g:
@@ -98,7 +104,7 @@ def load_command_table(self, _):
     with self.command_group('batch pool', pool_type, client_factory=get_data_factory('pool')) as g:
         g.batch_command('usage-metrics list', 'list_usage_metrics')
         g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
-        g.batch_command('create', 'add', validator=validate_pool_settings)
+        g.batch_command('create', 'add', validator=validate_pool_settings, flatten=10)
         g.batch_command('list', 'list')
         g.batch_command('delete', 'delete')
         g.batch_command('show', 'get')

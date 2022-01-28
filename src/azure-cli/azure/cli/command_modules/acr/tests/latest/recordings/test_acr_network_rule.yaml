@@ -13,24 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T10:38:59Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-30T21:10:33Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '435'
+      - '317'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:06 GMT
+      - Thu, 30 Dec 2021 21:10:28 GMT
       expires:
       - '-1'
       pragma:
@@ -46,8 +43,9 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westcentralus", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties":
-      {"addressPrefix": "10.0.0.0/24"}, "name": "cliregsubnet"}]}}'
+      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name":
+      "cliregsubnet", "properties": {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -58,49 +56,46 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '217'
+      - '310'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cliregvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet\",\r\n
-        \ \"etag\": \"W/\\\"e83a07c2-9566-452a-a226-d490892af5e4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"bf7308c8-4b7c-4dad-bdd5-9b9911cc1bb5\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"517b6138-2185-467e-a265-1a9ca1e2c0d9\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"871a8348-d0bd-4d81-865d-acb1e60d6fd5\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cliregsubnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet\",\r\n
-        \       \"etag\": \"W/\\\"e83a07c2-9566-452a-a226-d490892af5e4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"bf7308c8-4b7c-4dad-bdd5-9b9911cc1bb5\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/bbc95362-aac7-4f99-9991-019cfde5747f?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/b98b85d0-263f-4851-acf9-09d48b1cc2f2?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '1469'
+      - '1317'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:10 GMT
+      - Thu, 30 Dec 2021 21:10:29 GMT
       expires:
       - '-1'
       pragma:
@@ -113,9 +108,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 755ffe22-d3c8-4e6c-96dc-28dcdfb9bb92
+      - 0fc37982-f4a0-4ab4-95b8-8d482a30a671
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -123,7 +118,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -133,10 +128,9 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/bbc95362-aac7-4f99-9991-019cfde5747f?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/b98b85d0-263f-4851-acf9-09d48b1cc2f2?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -148,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:14 GMT
+      - Thu, 30 Dec 2021 21:10:33 GMT
       expires:
       - '-1'
       pragma:
@@ -165,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ea7c8a42-5124-4e33-a4c0-fe2789c05a0a
+      - 0edf9036-e910-4a73-98a9-8c6ba7d5514b
     status:
       code: 200
       message: OK
@@ -173,7 +167,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -183,39 +177,38 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cliregvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet\",\r\n
-        \ \"etag\": \"W/\\\"1beb8c2f-0ac4-4481-a070-5505c4c0cb45\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"213a1dd3-7456-412d-9aef-7db1c6004414\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westcentralus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"517b6138-2185-467e-a265-1a9ca1e2c0d9\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"871a8348-d0bd-4d81-865d-acb1e60d6fd5\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cliregsubnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet\",\r\n
-        \       \"etag\": \"W/\\\"1beb8c2f-0ac4-4481-a070-5505c4c0cb45\\\"\",\r\n
+        \       \"etag\": \"W/\\\"213a1dd3-7456-412d-9aef-7db1c6004414\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1471'
+      - '1319'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:15 GMT
+      - Thu, 30 Dec 2021 21:10:33 GMT
       etag:
-      - W/"1beb8c2f-0ac4-4481-a070-5505c4c0cb45"
+      - W/"213a1dd3-7456-412d-9aef-7db1c6004414"
       expires:
       - '-1'
       pragma:
@@ -232,7 +225,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ec2681bb-52a1-4fd7-a7e5-f16695263ee6
+      - a4437c6e-88d9-46d5-92c0-27e1187b6bc1
     status:
       code: 200
       message: OK
@@ -250,16 +243,13 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cliregsubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet\",\r\n
-        \ \"etag\": \"W/\\\"1beb8c2f-0ac4-4481-a070-5505c4c0cb45\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"213a1dd3-7456-412d-9aef-7db1c6004414\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -268,13 +258,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '601'
+      - '542'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:15 GMT
+      - Thu, 30 Dec 2021 21:10:33 GMT
       etag:
-      - W/"1beb8c2f-0ac4-4481-a070-5505c4c0cb45"
+      - W/"213a1dd3-7456-412d-9aef-7db1c6004414"
       expires:
       - '-1'
       pragma:
@@ -291,16 +281,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c419eb30-ace0-45db-ad82-03e107820c1f
+      - 6cfca9b0-cf96-4827-a1d9-7f6d5d6e628f
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet",
+      "name": "cliregsubnet", "type": "Microsoft.Network/virtualNetworks/subnets",
       "properties": {"addressPrefix": "10.0.0.0/24", "serviceEndpoints": [{"service":
-      "Microsoft.ContainerRegistry"}], "delegations": [], "provisioningState": "Succeeded",
-      "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}, "name": "cliregsubnet", "etag": "W/\\"1beb8c2f-0ac4-4481-a070-5505c4c0cb45\\""}'''
+      "Microsoft.ContainerRegistry"}], "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -311,22 +301,19 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '566'
+      - '472'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cliregsubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet\",\r\n
-        \ \"etag\": \"W/\\\"f55938cd-b835-49bf-bb62-651bd1210e3d\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"e3657b45-a911-43e7-b590-4aa93e6a352c\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Updating\",\r\n
         \       \"service\": \"Microsoft.ContainerRegistry\",\r\n        \"locations\":
@@ -335,15 +322,15 @@ interactions:
         \"Enabled\"\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/a086abfc-23ab-48d1-8eb9-6733360f7afc?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/25a7fe21-1170-427d-84ab-df556bb8f43c?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '796'
+      - '737'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:17 GMT
+      - Thu, 30 Dec 2021 21:10:34 GMT
       expires:
       - '-1'
       pragma:
@@ -360,9 +347,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 661e7013-0e5e-4c12-87aa-f782ee3014f7
+      - 658e8fc4-7f8e-405f-8a26-80489f52475a
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -370,7 +357,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -380,10 +367,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/a086abfc-23ab-48d1-8eb9-6733360f7afc?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/25a7fe21-1170-427d-84ab-df556bb8f43c?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -395,7 +381,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:20 GMT
+      - Thu, 30 Dec 2021 21:10:37 GMT
       expires:
       - '-1'
       pragma:
@@ -412,7 +398,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c23257fe-5992-4b30-af1b-5822085940a2
+      - 67bb6258-f021-46da-8cae-ad8112f67f6a
     status:
       code: 200
       message: OK
@@ -420,7 +406,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -430,14 +416,13 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --service-endpoints
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"cliregsubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet\",\r\n
-        \ \"etag\": \"W/\\\"c214a1e9-610c-4f0d-af5c-6135a0eac47b\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"4b5f35db-4b4e-4009-a8d1-549c31017219\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"serviceEndpoints\": [\r\n      {\r\n        \"provisioningState\": \"Succeeded\",\r\n
         \       \"service\": \"Microsoft.ContainerRegistry\",\r\n        \"locations\":
@@ -448,13 +433,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '798'
+      - '739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:21 GMT
+      - Thu, 30 Dec 2021 21:10:37 GMT
       etag:
-      - W/"c214a1e9-610c-4f0d-af5c-6135a0eac47b"
+      - W/"4b5f35db-4b4e-4009-a8d1-549c31017219"
       expires:
       - '-1'
       pragma:
@@ -471,13 +456,14 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d4468704-d43e-4691-b128-0bc3991040db
+      - 523e1262-453e-4611-8765-eb5e0d0b9e93
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "westcentralus", "sku": {"name": "Premium"}, "properties":
-      {"adminUserEnabled": false, "networkRuleSet": {"defaultAction": "Deny"}}}'
+      {"adminUserEnabled": false, "networkRuleSet": {"defaultAction": "Deny"}, "anonymousPullEnabled":
+      false}}'
     headers:
       Accept:
       - application/json
@@ -488,30 +474,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '145'
+      - '176'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --sku --default-action
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:39.1474931+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-f6c3956c-69b4-11ec-8804-00155d249691?api-version=2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '833'
+      - '1285'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:29 GMT
+      - Thu, 30 Dec 2021 21:10:39 GMT
       expires:
       - '-1'
       pragma:
@@ -520,155 +508,47 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr network-rule add
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '833'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 21 Oct 2019 10:39:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"properties": {"networkRuleSet": {"defaultAction": "Deny", "virtualNetworkRules":
-      [{"action": "Allow", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],
-      "ipRules": []}}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr network-rule add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '350'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --vnet-name --subnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1077'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 21 Oct 2019 10:39:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1195'
     status:
-      code: 200
-      message: OK
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - acr network-rule add
+      - acr create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --ip-address
+      - -n -g -l --sku --default-action
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-f6c3956c-69b4-11ec-8804-00155d249691?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"status":"Succeeded"}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-f6c3956c-69b4-11ec-8804-00155d249691?api-version=2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1077'
+      - '22'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:37 GMT
+      - Thu, 30 Dec 2021 21:10:50 GMT
       expires:
       - '-1'
       pragma:
@@ -687,9 +567,107 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"networkRuleSet": {"defaultAction": "Deny", "virtualNetworkRules":
-      [{"action": "Allow", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],
-      "ipRules": [{"action": "Allow", "value": "16.17.18.0/24"}]}}}'''
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --sku --default-action
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:39.1474931+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:10:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr network-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:39.1474931+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1286'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:10:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"networkRuleSet": {"defaultAction": "Deny", "virtualNetworkRules":
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],
+      "ipRules": []}}}'
     headers:
       Accept:
       - application/json
@@ -700,30 +678,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '395'
+      - '272'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n --ip-address
+      - -g -n --vnet-name --subnet
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:51.93071+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1119'
+      - '1469'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:37 GMT
+      - Thu, 30 Dec 2021 21:10:51 GMT
       expires:
       - '-1'
       pragma:
@@ -740,6 +718,112 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr network-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --ip-address
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:51.93071+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1469'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:10:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"networkRuleSet": {"defaultAction": "Deny", "virtualNetworkRules":
+      [{"action": "Allow", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],
+      "ipRules": [{"value": "16.17.18.0/24"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr network-rule add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '317'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --ip-address
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:53.5093479+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1513'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:10:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
     status:
       code: 200
       message: OK
@@ -757,24 +841,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:53.5093479+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1119'
+      - '1513'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:40 GMT
+      - Thu, 30 Dec 2021 21:10:53 GMT
       expires:
       - '-1'
       pragma:
@@ -806,24 +890,24 @@ interactions:
       ParameterSetName:
       - -n -g --default-action
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:53.5093479+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Deny","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1119'
+      - '1513'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:41 GMT
+      - Thu, 30 Dec 2021 21:10:53 GMT
       expires:
       - '-1'
       pragma:
@@ -855,28 +939,28 @@ interactions:
       Content-Length:
       - '62'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --default-action
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:54.8707366+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1120'
+      - '1514'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:43 GMT
+      - Thu, 30 Dec 2021 21:10:54 GMT
       expires:
       - '-1'
       pragma:
@@ -892,7 +976,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1193'
     status:
       code: 200
       message: OK
@@ -910,24 +994,24 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --subnet
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:54.8707366+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[{"action":"Allow","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet/subnets/cliregsubnet"}],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1120'
+      - '1514'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:39:44 GMT
+      - Thu, 30 Dec 2021 21:10:54 GMT
       expires:
       - '-1'
       pragma:
@@ -960,28 +1044,28 @@ interactions:
       Content-Length:
       - '149'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:55.7204237+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '876'
+      - '1329'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:40:16 GMT
+      - Thu, 30 Dec 2021 21:11:05 GMT
       expires:
       - '-1'
       pragma:
@@ -997,7 +1081,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -1015,24 +1099,24 @@ interactions:
       ParameterSetName:
       - -g -n --ip-address
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:10:55.7204237+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"action":"Allow","value":"16.17.18.0/24"}]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '876'
+      - '1329'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:40:18 GMT
+      - Thu, 30 Dec 2021 21:11:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1065,28 +1149,28 @@ interactions:
       Content-Length:
       - '104'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --ip-address
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:11:07.0239991+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '1287'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:40:18 GMT
+      - Thu, 30 Dec 2021 21:11:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1102,7 +1186,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1191'
     status:
       code: 200
       message: OK
@@ -1120,24 +1204,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-21T10:39:27.1210949Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-21T10:39:28.7342069+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westcentralus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:10:39.1474931+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:11:07.0239991+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:10:39.1474931Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:10:39.9900078+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '834'
+      - '1287'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:40:20 GMT
+      - Thu, 30 Dec 2021 21:11:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1159,7 +1243,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1169,24 +1253,24 @@ interactions:
       Content-Length:
       - '0'
       ParameterSetName:
-      - -g -n
+      - -g -n -y
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
       string: ''
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 21 Oct 2019 10:40:25 GMT
+      - Thu, 30 Dec 2021 21:11:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1198,7 +1282,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 200
       message: OK
@@ -1218,12 +1302,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cliregvnet?api-version=2021-05-01
   response:
     body:
       string: ''
@@ -1231,17 +1312,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/10f886ae-9f43-48c2-8b97-50c024b38751?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/1028ffdd-8eda-4674-a1c3-1cfed1daf459?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Mon, 21 Oct 2019 10:40:28 GMT
+      - Thu, 30 Dec 2021 21:11:11 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/10f886ae-9f43-48c2-8b97-50c024b38751?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operationResults/1028ffdd-8eda-4674-a1c3-1cfed1daf459?api-version=2021-05-01
       pragma:
       - no-cache
       server:
@@ -1252,9 +1333,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 449ff981-0c95-4abd-aaaf-242f0c8f9fb4
+      - 5cb22040-2122-4048-927f-bd673fe190a8
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -1262,7 +1343,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1272,10 +1353,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/10f886ae-9f43-48c2-8b97-50c024b38751?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/1028ffdd-8eda-4674-a1c3-1cfed1daf459?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1287,7 +1367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 10:40:39 GMT
+      - Thu, 30 Dec 2021 21:11:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1304,7 +1384,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d2e336c7-f0f7-47a3-96ff-dd62730c29ef
+      - 11497511-d553-47ae-a41d-764f48ac77cc
     status:
       code: 200
       message: OK

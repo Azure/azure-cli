@@ -43,7 +43,7 @@ def _get_proxy_instance():
     raise NotImplementedError('Not implemented yet for {}'.format(os_platform))
 
 
-class Proxy(object):
+class Proxy:
     """
     Base proxy class
     """

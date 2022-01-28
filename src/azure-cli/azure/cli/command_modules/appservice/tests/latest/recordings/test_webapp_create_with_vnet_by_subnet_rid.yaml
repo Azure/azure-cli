@@ -1,0 +1,1457 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-11-10T05:01:14Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "japanwest", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet000005", "properties":
+      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '318'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006\",\r\n
+        \ \"etag\": \"W/\\\"f96638f9-42f1-41a6-91c6-03f0548033d2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"japanwest\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"59aaf2e9-7ae6-4fea-9e3a-23916f06561f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000005\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \       \"etag\": \"W/\\\"f96638f9-42f1-41a6-91c6-03f0548033d2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/japanwest/operations/f80763d4-8bc9-4f1d-9075-19554f05ed7e?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2f2b2005-0942-4328-8de8-8e2670042283
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/japanwest/operations/f80763d4-8bc9-4f1d-9075-19554f05ed7e?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 78057dfc-eccc-424f-b35a-9f42dcb49431
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --address-prefix --subnet-name --subnet-prefix
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006\",\r\n
+        \ \"etag\": \"W/\\\"72e8ebea-4a59-4197-bade-1dc5a50fc2f0\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"japanwest\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"59aaf2e9-7ae6-4fea-9e3a-23916f06561f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000005\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \       \"etag\": \"W/\\\"72e8ebea-4a59-4197-bade-1dc5a50fc2f0\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1315'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:27 GMT
+      etag:
+      - W/"72e8ebea-4a59-4197-bade-1dc5a50fc2f0"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d15afdf9-421f-461c-bcae-c3e6166213a7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-11-10T05:01:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "vnetplan000004", "type": "Microsoft.Web/serverfarms", "location":
+      "japanwest", "properties": {"skuName": "P1V2", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '148'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2020-09-01
+  response:
+    body:
+      string: '{"status":"Success","error":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:01:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-11-10T05:01:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "japanwest", "sku": {"name": "P1V2", "tier": "PREMIUMV2",
+      "capacity": 1}, "properties": {"perSiteScaling": false, "isXenon": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '145'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004","name":"vnetplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"japanwest","properties":{"serverFarmId":18403,"name":"vnetplan000004","sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_18403","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1488'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:01:39 GMT
+      etag:
+      - '"1D7D5F00A7CBD15"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004","name":"vnetplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
+        West","properties":{"serverFarmId":18403,"name":"vnetplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_18403","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1407'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:01:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004","name":"vnetplan000004","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
+        West","properties":{"serverFarmId":18403,"name":"vnetplan000004","workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_18403","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"P1v2","tier":"PremiumV2","size":"P1v2","family":"Pv2","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1407'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:01:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "vnetwebapp000003", "type": "Site"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '52'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2021-01-15
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '47'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:01:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vnet000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006\",\r\n
+        \ \"etag\": \"W/\\\"72e8ebea-4a59-4197-bade-1dc5a50fc2f0\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"japanwest\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"59aaf2e9-7ae6-4fea-9e3a-23916f06561f\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet000005\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \       \"etag\": \"W/\\\"72e8ebea-4a59-4197-bade-1dc5a50fc2f0\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1315'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:46 GMT
+      etag:
+      - W/"72e8ebea-4a59-4197-bade-1dc5a50fc2f0"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9431cb2d-291e-4434-9a8a-3e52279ece8c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
+  response:
+    body:
+      string: "{\"value\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\",\"name\":\"eastus\",\"displayName\":\"East
+        US\",\"regionalDisplayName\":\"(US) East US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"displayName\":\"East
+        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"displayName\":\"South
+        Central US\",\"regionalDisplayName\":\"(US) South Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\":[{\"name\":\"northcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\",\"name\":\"westus2\",\"displayName\":\"West
+        US 2\",\"regionalDisplayName\":\"(US) West US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-119.852\",\"latitude\":\"47.233\",\"physicalLocation\":\"Washington\",\"pairedRegion\":[{\"name\":\"westcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus3\",\"name\":\"westus3\",\"displayName\":\"West
+        US 3\",\"regionalDisplayName\":\"(US) West US 3\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-112.074036\",\"latitude\":\"33.448376\",\"physicalLocation\":\"Phoenix\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiaeast\",\"name\":\"australiaeast\",\"displayName\":\"Australia
+        East\",\"regionalDisplayName\":\"(Asia Pacific) Australia East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"151.2094\",\"latitude\":\"-33.86\",\"physicalLocation\":\"New
+        South Wales\",\"pairedRegion\":[{\"name\":\"australiasoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia\",\"name\":\"southeastasia\",\"displayName\":\"Southeast
+        Asia\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"103.833\",\"latitude\":\"1.283\",\"physicalLocation\":\"Singapore\",\"pairedRegion\":[{\"name\":\"eastasia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northeurope\",\"name\":\"northeurope\",\"displayName\":\"North
+        Europe\",\"regionalDisplayName\":\"(Europe) North Europe\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"-6.2597\",\"latitude\":\"53.3478\",\"physicalLocation\":\"Ireland\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\",\"name\":\"swedencentral\",\"displayName\":\"Sweden
+        Central\",\"regionalDisplayName\":\"(Europe) Sweden Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"17.14127\",\"latitude\":\"60.67488\",\"physicalLocation\":\"G\xE4vle\",\"pairedRegion\":[{\"name\":\"swedensouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\",\"name\":\"uksouth\",\"displayName\":\"UK
+        South\",\"regionalDisplayName\":\"(Europe) UK South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"-0.799\",\"latitude\":\"50.941\",\"physicalLocation\":\"London\",\"pairedRegion\":[{\"name\":\"ukwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\",\"name\":\"westeurope\",\"displayName\":\"West
+        Europe\",\"regionalDisplayName\":\"(Europe) West Europe\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"4.9\",\"latitude\":\"52.3667\",\"physicalLocation\":\"Netherlands\",\"pairedRegion\":[{\"name\":\"northeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northeurope\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\",\"name\":\"centralus\",\"displayName\":\"Central
+        US\",\"regionalDisplayName\":\"(US) Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"physicalLocation\":\"Iowa\",\"pairedRegion\":[{\"name\":\"eastus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\",\"name\":\"northcentralus\",\"displayName\":\"North
+        Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-87.6278\",\"latitude\":\"41.8819\",\"physicalLocation\":\"Illinois\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\",\"name\":\"westus\",\"displayName\":\"West
+        US\",\"regionalDisplayName\":\"(US) West US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-122.417\",\"latitude\":\"37.783\",\"physicalLocation\":\"California\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth\",\"name\":\"southafricanorth\",\"displayName\":\"South
+        Africa North\",\"regionalDisplayName\":\"(Africa) South Africa North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Africa\",\"longitude\":\"28.218370\",\"latitude\":\"-25.731340\",\"physicalLocation\":\"Johannesburg\",\"pairedRegion\":[{\"name\":\"southafricawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\",\"name\":\"centralindia\",\"displayName\":\"Central
+        India\",\"regionalDisplayName\":\"(Asia Pacific) Central India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"73.9197\",\"latitude\":\"18.5822\",\"physicalLocation\":\"Pune\",\"pairedRegion\":[{\"name\":\"southindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia\",\"name\":\"eastasia\",\"displayName\":\"East
+        Asia\",\"regionalDisplayName\":\"(Asia Pacific) East Asia\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"114.188\",\"latitude\":\"22.267\",\"physicalLocation\":\"Hong
+        Kong\",\"pairedRegion\":[{\"name\":\"southeastasia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japaneast\",\"name\":\"japaneast\",\"displayName\":\"Japan
+        East\",\"regionalDisplayName\":\"(Asia Pacific) Japan East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"139.77\",\"latitude\":\"35.68\",\"physicalLocation\":\"Tokyo,
+        Saitama\",\"pairedRegion\":[{\"name\":\"japanwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japanwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\",\"name\":\"jioindiawest\",\"displayName\":\"Jio
+        India West\",\"regionalDisplayName\":\"(Asia Pacific) Jio India West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreacentral\",\"name\":\"koreacentral\",\"displayName\":\"Korea
+        Central\",\"regionalDisplayName\":\"(Asia Pacific) Korea Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"126.9780\",\"latitude\":\"37.5665\",\"physicalLocation\":\"Seoul\",\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\",\"name\":\"canadacentral\",\"displayName\":\"Canada
+        Central\",\"regionalDisplayName\":\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Canada\",\"longitude\":\"-79.383\",\"latitude\":\"43.653\",\"physicalLocation\":\"Toronto\",\"pairedRegion\":[{\"name\":\"canadaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\",\"name\":\"francecentral\",\"displayName\":\"France
+        Central\",\"regionalDisplayName\":\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\":[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\",\"name\":\"germanywestcentral\",\"displayName\":\"Germany
+        West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"displayName\":\"Norway
+        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
+        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
+        North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
+        South\",\"regionalDisplayName\":\"(South America) Brazil South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao
+        Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralusstage\",\"name\":\"centralusstage\",\"displayName\":\"Central
+        US (Stage)\",\"regionalDisplayName\":\"(US) Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstage\",\"name\":\"eastusstage\",\"displayName\":\"East
+        US (Stage)\",\"regionalDisplayName\":\"(US) East US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2stage\",\"name\":\"eastus2stage\",\"displayName\":\"East
+        US 2 (Stage)\",\"regionalDisplayName\":\"(US) East US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralusstage\",\"name\":\"northcentralusstage\",\"displayName\":\"North
+        Central US (Stage)\",\"regionalDisplayName\":\"(US) North Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstage\",\"name\":\"southcentralusstage\",\"displayName\":\"South
+        Central US (Stage)\",\"regionalDisplayName\":\"(US) South Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westusstage\",\"name\":\"westusstage\",\"displayName\":\"West
+        US (Stage)\",\"regionalDisplayName\":\"(US) West US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2stage\",\"name\":\"westus2stage\",\"displayName\":\"West
+        US 2 (Stage)\",\"regionalDisplayName\":\"(US) West US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asia\",\"name\":\"asia\",\"displayName\":\"Asia\",\"regionalDisplayName\":\"Asia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asiapacific\",\"name\":\"asiapacific\",\"displayName\":\"Asia
+        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
+        Africa\",\"regionalDisplayName\":\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\",\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\":\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\",\"name\":\"uae\",\"displayName\":\"United
+        Arab Emirates\",\"regionalDisplayName\":\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uk\",\"name\":\"uk\",\"displayName\":\"United
+        Kingdom\",\"regionalDisplayName\":\"United Kingdom\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/unitedstates\",\"name\":\"unitedstates\",\"displayName\":\"United
+        States\",\"regionalDisplayName\":\"United States\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasiastage\",\"name\":\"eastasiastage\",\"displayName\":\"East
+        Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) East Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasiastage\",\"name\":\"southeastasiastage\",\"displayName\":\"Southeast
+        Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
+        US EUAP\",\"regionalDisplayName\":\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\",\"name\":\"eastus2euap\",\"displayName\":\"East
+        US 2 EUAP\",\"regionalDisplayName\":\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\",\"name\":\"westcentralus\",\"displayName\":\"West
+        Central US\",\"regionalDisplayName\":\"(US) West Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-110.234\",\"latitude\":\"40.890\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"westus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\",\"name\":\"southafricawest\",\"displayName\":\"South
+        Africa West\",\"regionalDisplayName\":\"(Africa) South Africa West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Africa\",\"longitude\":\"18.843266\",\"latitude\":\"-34.075691\",\"physicalLocation\":\"Cape
+        Town\",\"pairedRegion\":[{\"name\":\"southafricanorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\",\"name\":\"australiacentral\",\"displayName\":\"Australia
+        Central\",\"regionalDisplayName\":\"(Asia Pacific) Australia Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\",\"name\":\"australiacentral2\",\"displayName\":\"Australia
+        Central 2\",\"regionalDisplayName\":\"(Asia Pacific) Australia Central 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\",\"name\":\"australiasoutheast\",\"displayName\":\"Australia
+        Southeast\",\"regionalDisplayName\":\"(Asia Pacific) Australia Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"144.9631\",\"latitude\":\"-37.8136\",\"physicalLocation\":\"Victoria\",\"pairedRegion\":[{\"name\":\"australiaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japanwest\",\"name\":\"japanwest\",\"displayName\":\"Japan
+        West\",\"regionalDisplayName\":\"(Asia Pacific) Japan West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"135.5022\",\"latitude\":\"34.6939\",\"physicalLocation\":\"Osaka\",\"pairedRegion\":[{\"name\":\"japaneast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japaneast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\",\"name\":\"jioindiacentral\",\"displayName\":\"Jio
+        India Central\",\"regionalDisplayName\":\"(Asia Pacific) Jio India Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"79.08886\",\"latitude\":\"21.146633\",\"physicalLocation\":\"Nagpur\",\"pairedRegion\":[{\"name\":\"jioindiawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\",\"name\":\"koreasouth\",\"displayName\":\"Korea
+        South\",\"regionalDisplayName\":\"(Asia Pacific) Korea South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"129.0756\",\"latitude\":\"35.1796\",\"physicalLocation\":\"Busan\",\"pairedRegion\":[{\"name\":\"koreacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\",\"name\":\"southindia\",\"displayName\":\"South
+        India\",\"regionalDisplayName\":\"(Asia Pacific) South India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"80.1636\",\"latitude\":\"12.9822\",\"physicalLocation\":\"Chennai\",\"pairedRegion\":[{\"name\":\"centralindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westindia\",\"name\":\"westindia\",\"displayName\":\"West
+        India\",\"regionalDisplayName\":\"(Asia Pacific) West India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"72.868\",\"latitude\":\"19.088\",\"physicalLocation\":\"Mumbai\",\"pairedRegion\":[{\"name\":\"southindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\",\"name\":\"canadaeast\",\"displayName\":\"Canada
+        East\",\"regionalDisplayName\":\"(Canada) Canada East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Canada\",\"longitude\":\"-71.217\",\"latitude\":\"46.817\",\"physicalLocation\":\"Quebec\",\"pairedRegion\":[{\"name\":\"canadacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\",\"name\":\"francesouth\",\"displayName\":\"France
+        South\",\"regionalDisplayName\":\"(Europe) France South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.1972\",\"latitude\":\"43.8345\",\"physicalLocation\":\"Marseille\",\"pairedRegion\":[{\"name\":\"francecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\",\"name\":\"germanynorth\",\"displayName\":\"Germany
+        North\",\"regionalDisplayName\":\"(Europe) Germany North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.806422\",\"latitude\":\"53.073635\",\"physicalLocation\":\"Berlin\",\"pairedRegion\":[{\"name\":\"germanywestcentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\",\"name\":\"norwaywest\",\"displayName\":\"Norway
+        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\",\"name\":\"swedensouth\",\"displayName\":\"Sweden
+        South\",\"regionalDisplayName\":\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\":\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
+        West\",\"regionalDisplayName\":\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"6.143158\",\"latitude\":\"46.204391\",\"physicalLocation\":\"Geneva\",\"pairedRegion\":[{\"name\":\"switzerlandnorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\",\"name\":\"ukwest\",\"displayName\":\"UK
+        West\",\"regionalDisplayName\":\"(Europe) UK West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"-3.084\",\"latitude\":\"53.427\",\"physicalLocation\":\"Cardiff\",\"pairedRegion\":[{\"name\":\"uksouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\",\"name\":\"uaecentral\",\"displayName\":\"UAE
+        Central\",\"regionalDisplayName\":\"(Middle East) UAE Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"54.366669\",\"latitude\":\"24.466667\",\"physicalLocation\":\"Abu
+        Dhabi\",\"pairedRegion\":[{\"name\":\"uaenorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\",\"name\":\"brazilsoutheast\",\"displayName\":\"Brazil
+        Southeast\",\"regionalDisplayName\":\"(South America) Brazil Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\",\"name\":\"eastusslv\",\"displayName\":\"East
+        US SLV\",\"regionalDisplayName\":\"(South America) East US SLV\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Silverstone\",\"pairedRegion\":[{\"name\":\"eastusslv\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
+        Central\",\"regionalDisplayName\":\"(Europe) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}}]}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29925'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/locations?api-version=2019-11-01
+  response:
+    body:
+      string: "{\"value\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\",\"name\":\"eastus\",\"displayName\":\"East
+        US\",\"regionalDisplayName\":\"(US) East US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-79.8164\",\"latitude\":\"37.3719\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"westus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\",\"name\":\"eastus2\",\"displayName\":\"East
+        US 2\",\"regionalDisplayName\":\"(US) East US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"physicalLocation\":\"Virginia\",\"pairedRegion\":[{\"name\":\"centralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\",\"name\":\"southcentralus\",\"displayName\":\"South
+        Central US\",\"regionalDisplayName\":\"(US) South Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-98.5\",\"latitude\":\"29.4167\",\"physicalLocation\":\"Texas\",\"pairedRegion\":[{\"name\":\"northcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\",\"name\":\"westus2\",\"displayName\":\"West
+        US 2\",\"regionalDisplayName\":\"(US) West US 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-119.852\",\"latitude\":\"47.233\",\"physicalLocation\":\"Washington\",\"pairedRegion\":[{\"name\":\"westcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus3\",\"name\":\"westus3\",\"displayName\":\"West
+        US 3\",\"regionalDisplayName\":\"(US) West US 3\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-112.074036\",\"latitude\":\"33.448376\",\"physicalLocation\":\"Phoenix\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiaeast\",\"name\":\"australiaeast\",\"displayName\":\"Australia
+        East\",\"regionalDisplayName\":\"(Asia Pacific) Australia East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"151.2094\",\"latitude\":\"-33.86\",\"physicalLocation\":\"New
+        South Wales\",\"pairedRegion\":[{\"name\":\"australiasoutheast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia\",\"name\":\"southeastasia\",\"displayName\":\"Southeast
+        Asia\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"103.833\",\"latitude\":\"1.283\",\"physicalLocation\":\"Singapore\",\"pairedRegion\":[{\"name\":\"eastasia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northeurope\",\"name\":\"northeurope\",\"displayName\":\"North
+        Europe\",\"regionalDisplayName\":\"(Europe) North Europe\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"-6.2597\",\"latitude\":\"53.3478\",\"physicalLocation\":\"Ireland\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\",\"name\":\"swedencentral\",\"displayName\":\"Sweden
+        Central\",\"regionalDisplayName\":\"(Europe) Sweden Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"17.14127\",\"latitude\":\"60.67488\",\"physicalLocation\":\"G\xE4vle\",\"pairedRegion\":[{\"name\":\"swedensouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\",\"name\":\"uksouth\",\"displayName\":\"UK
+        South\",\"regionalDisplayName\":\"(Europe) UK South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"-0.799\",\"latitude\":\"50.941\",\"physicalLocation\":\"London\",\"pairedRegion\":[{\"name\":\"ukwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\",\"name\":\"westeurope\",\"displayName\":\"West
+        Europe\",\"regionalDisplayName\":\"(Europe) West Europe\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"4.9\",\"latitude\":\"52.3667\",\"physicalLocation\":\"Netherlands\",\"pairedRegion\":[{\"name\":\"northeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northeurope\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralus\",\"name\":\"centralus\",\"displayName\":\"Central
+        US\",\"regionalDisplayName\":\"(US) Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"physicalLocation\":\"Iowa\",\"pairedRegion\":[{\"name\":\"eastus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralus\",\"name\":\"northcentralus\",\"displayName\":\"North
+        Central US\",\"regionalDisplayName\":\"(US) North Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-87.6278\",\"latitude\":\"41.8819\",\"physicalLocation\":\"Illinois\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus\",\"name\":\"westus\",\"displayName\":\"West
+        US\",\"regionalDisplayName\":\"(US) West US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"US\",\"longitude\":\"-122.417\",\"latitude\":\"37.783\",\"physicalLocation\":\"California\",\"pairedRegion\":[{\"name\":\"eastus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth\",\"name\":\"southafricanorth\",\"displayName\":\"South
+        Africa North\",\"regionalDisplayName\":\"(Africa) South Africa North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Africa\",\"longitude\":\"28.218370\",\"latitude\":\"-25.731340\",\"physicalLocation\":\"Johannesburg\",\"pairedRegion\":[{\"name\":\"southafricawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\",\"name\":\"centralindia\",\"displayName\":\"Central
+        India\",\"regionalDisplayName\":\"(Asia Pacific) Central India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"73.9197\",\"latitude\":\"18.5822\",\"physicalLocation\":\"Pune\",\"pairedRegion\":[{\"name\":\"southindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasia\",\"name\":\"eastasia\",\"displayName\":\"East
+        Asia\",\"regionalDisplayName\":\"(Asia Pacific) East Asia\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"114.188\",\"latitude\":\"22.267\",\"physicalLocation\":\"Hong
+        Kong\",\"pairedRegion\":[{\"name\":\"southeastasia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japaneast\",\"name\":\"japaneast\",\"displayName\":\"Japan
+        East\",\"regionalDisplayName\":\"(Asia Pacific) Japan East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"139.77\",\"latitude\":\"35.68\",\"physicalLocation\":\"Tokyo,
+        Saitama\",\"pairedRegion\":[{\"name\":\"japanwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japanwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\",\"name\":\"jioindiawest\",\"displayName\":\"Jio
+        India West\",\"regionalDisplayName\":\"(Asia Pacific) Jio India West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"70.05773\",\"latitude\":\"22.470701\",\"physicalLocation\":\"Jamnagar\",\"pairedRegion\":[{\"name\":\"jioindiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreacentral\",\"name\":\"koreacentral\",\"displayName\":\"Korea
+        Central\",\"regionalDisplayName\":\"(Asia Pacific) Korea Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"126.9780\",\"latitude\":\"37.5665\",\"physicalLocation\":\"Seoul\",\"pairedRegion\":[{\"name\":\"koreasouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\",\"name\":\"canadacentral\",\"displayName\":\"Canada
+        Central\",\"regionalDisplayName\":\"(Canada) Canada Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Canada\",\"longitude\":\"-79.383\",\"latitude\":\"43.653\",\"physicalLocation\":\"Toronto\",\"pairedRegion\":[{\"name\":\"canadaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\",\"name\":\"francecentral\",\"displayName\":\"France
+        Central\",\"regionalDisplayName\":\"(Europe) France Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.3730\",\"latitude\":\"46.3772\",\"physicalLocation\":\"Paris\",\"pairedRegion\":[{\"name\":\"francesouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\",\"name\":\"germanywestcentral\",\"displayName\":\"Germany
+        West Central\",\"regionalDisplayName\":\"(Europe) Germany West Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.682127\",\"latitude\":\"50.110924\",\"physicalLocation\":\"Frankfurt\",\"pairedRegion\":[{\"name\":\"germanynorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\",\"name\":\"norwayeast\",\"displayName\":\"Norway
+        East\",\"regionalDisplayName\":\"(Europe) Norway East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"10.752245\",\"latitude\":\"59.913868\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwaywest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\",\"name\":\"switzerlandnorth\",\"displayName\":\"Switzerland
+        North\",\"regionalDisplayName\":\"(Europe) Switzerland North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.564572\",\"latitude\":\"47.451542\",\"physicalLocation\":\"Zurich\",\"pairedRegion\":[{\"name\":\"switzerlandwest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\",\"name\":\"uaenorth\",\"displayName\":\"UAE
+        North\",\"regionalDisplayName\":\"(Middle East) UAE North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"55.316666\",\"latitude\":\"25.266666\",\"physicalLocation\":\"Dubai\",\"pairedRegion\":[{\"name\":\"uaecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\",\"name\":\"brazilsouth\",\"displayName\":\"Brazil
+        South\",\"regionalDisplayName\":\"(South America) Brazil South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Recommended\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-46.633\",\"latitude\":\"-23.55\",\"physicalLocation\":\"Sao
+        Paulo State\",\"pairedRegion\":[{\"name\":\"southcentralus\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralus\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralusstage\",\"name\":\"centralusstage\",\"displayName\":\"Central
+        US (Stage)\",\"regionalDisplayName\":\"(US) Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusstage\",\"name\":\"eastusstage\",\"displayName\":\"East
+        US (Stage)\",\"regionalDisplayName\":\"(US) East US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2stage\",\"name\":\"eastus2stage\",\"displayName\":\"East
+        US 2 (Stage)\",\"regionalDisplayName\":\"(US) East US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/northcentralusstage\",\"name\":\"northcentralusstage\",\"displayName\":\"North
+        Central US (Stage)\",\"regionalDisplayName\":\"(US) North Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southcentralusstage\",\"name\":\"southcentralusstage\",\"displayName\":\"South
+        Central US (Stage)\",\"regionalDisplayName\":\"(US) South Central US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westusstage\",\"name\":\"westusstage\",\"displayName\":\"West
+        US (Stage)\",\"regionalDisplayName\":\"(US) West US (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2stage\",\"name\":\"westus2stage\",\"displayName\":\"West
+        US 2 (Stage)\",\"regionalDisplayName\":\"(US) West US 2 (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asia\",\"name\":\"asia\",\"displayName\":\"Asia\",\"regionalDisplayName\":\"Asia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/asiapacific\",\"name\":\"asiapacific\",\"displayName\":\"Asia
+        Pacific\",\"regionalDisplayName\":\"Asia Pacific\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australia\",\"name\":\"australia\",\"displayName\":\"Australia\",\"regionalDisplayName\":\"Australia\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazil\",\"name\":\"brazil\",\"displayName\":\"Brazil\",\"regionalDisplayName\":\"Brazil\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canada\",\"name\":\"canada\",\"displayName\":\"Canada\",\"regionalDisplayName\":\"Canada\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/europe\",\"name\":\"europe\",\"displayName\":\"Europe\",\"regionalDisplayName\":\"Europe\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/france\",\"name\":\"france\",\"displayName\":\"France\",\"regionalDisplayName\":\"France\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germany\",\"name\":\"germany\",\"displayName\":\"Germany\",\"regionalDisplayName\":\"Germany\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/global\",\"name\":\"global\",\"displayName\":\"Global\",\"regionalDisplayName\":\"Global\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/india\",\"name\":\"india\",\"displayName\":\"India\",\"regionalDisplayName\":\"India\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japan\",\"name\":\"japan\",\"displayName\":\"Japan\",\"regionalDisplayName\":\"Japan\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/korea\",\"name\":\"korea\",\"displayName\":\"Korea\",\"regionalDisplayName\":\"Korea\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norway\",\"name\":\"norway\",\"displayName\":\"Norway\",\"regionalDisplayName\":\"Norway\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafrica\",\"name\":\"southafrica\",\"displayName\":\"South
+        Africa\",\"regionalDisplayName\":\"South Africa\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerland\",\"name\":\"switzerland\",\"displayName\":\"Switzerland\",\"regionalDisplayName\":\"Switzerland\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uae\",\"name\":\"uae\",\"displayName\":\"United
+        Arab Emirates\",\"regionalDisplayName\":\"United Arab Emirates\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uk\",\"name\":\"uk\",\"displayName\":\"United
+        Kingdom\",\"regionalDisplayName\":\"United Kingdom\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/unitedstates\",\"name\":\"unitedstates\",\"displayName\":\"United
+        States\",\"regionalDisplayName\":\"United States\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastasiastage\",\"name\":\"eastasiastage\",\"displayName\":\"East
+        Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) East Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southeastasiastage\",\"name\":\"southeastasiastage\",\"displayName\":\"Southeast
+        Asia (Stage)\",\"regionalDisplayName\":\"(Asia Pacific) Southeast Asia (Stage)\",\"metadata\":{\"regionType\":\"Logical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\"}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\",\"name\":\"centraluseuap\",\"displayName\":\"Central
+        US EUAP\",\"regionalDisplayName\":\"(US) Central US EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-93.6208\",\"latitude\":\"41.5908\",\"pairedRegion\":[{\"name\":\"eastus2euap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastus2euap\",\"name\":\"eastus2euap\",\"displayName\":\"East
+        US 2 EUAP\",\"regionalDisplayName\":\"(US) East US 2 EUAP\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-78.3889\",\"latitude\":\"36.6681\",\"pairedRegion\":[{\"name\":\"centraluseuap\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centraluseuap\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westcentralus\",\"name\":\"westcentralus\",\"displayName\":\"West
+        Central US\",\"regionalDisplayName\":\"(US) West Central US\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"US\",\"longitude\":\"-110.234\",\"latitude\":\"40.890\",\"physicalLocation\":\"Wyoming\",\"pairedRegion\":[{\"name\":\"westus2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westus2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricawest\",\"name\":\"southafricawest\",\"displayName\":\"South
+        Africa West\",\"regionalDisplayName\":\"(Africa) South Africa West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Africa\",\"longitude\":\"18.843266\",\"latitude\":\"-34.075691\",\"physicalLocation\":\"Cape
+        Town\",\"pairedRegion\":[{\"name\":\"southafricanorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southafricanorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\",\"name\":\"australiacentral\",\"displayName\":\"Australia
+        Central\",\"regionalDisplayName\":\"(Asia Pacific) Australia Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\",\"name\":\"australiacentral2\",\"displayName\":\"Australia
+        Central 2\",\"regionalDisplayName\":\"(Asia Pacific) Australia Central 2\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"149.1244\",\"latitude\":\"-35.3075\",\"physicalLocation\":\"Canberra\",\"pairedRegion\":[{\"name\":\"australiacentral2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiacentral2\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiasoutheast\",\"name\":\"australiasoutheast\",\"displayName\":\"Australia
+        Southeast\",\"regionalDisplayName\":\"(Asia Pacific) Australia Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"144.9631\",\"latitude\":\"-37.8136\",\"physicalLocation\":\"Victoria\",\"pairedRegion\":[{\"name\":\"australiaeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/australiaeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japanwest\",\"name\":\"japanwest\",\"displayName\":\"Japan
+        West\",\"regionalDisplayName\":\"(Asia Pacific) Japan West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"135.5022\",\"latitude\":\"34.6939\",\"physicalLocation\":\"Osaka\",\"pairedRegion\":[{\"name\":\"japaneast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/japaneast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiacentral\",\"name\":\"jioindiacentral\",\"displayName\":\"Jio
+        India Central\",\"regionalDisplayName\":\"(Asia Pacific) Jio India Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"79.08886\",\"latitude\":\"21.146633\",\"physicalLocation\":\"Nagpur\",\"pairedRegion\":[{\"name\":\"jioindiawest\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/jioindiawest\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreasouth\",\"name\":\"koreasouth\",\"displayName\":\"Korea
+        South\",\"regionalDisplayName\":\"(Asia Pacific) Korea South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"129.0756\",\"latitude\":\"35.1796\",\"physicalLocation\":\"Busan\",\"pairedRegion\":[{\"name\":\"koreacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/koreacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\",\"name\":\"southindia\",\"displayName\":\"South
+        India\",\"regionalDisplayName\":\"(Asia Pacific) South India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"80.1636\",\"latitude\":\"12.9822\",\"physicalLocation\":\"Chennai\",\"pairedRegion\":[{\"name\":\"centralindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/centralindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westindia\",\"name\":\"westindia\",\"displayName\":\"West
+        India\",\"regionalDisplayName\":\"(Asia Pacific) West India\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Asia
+        Pacific\",\"longitude\":\"72.868\",\"latitude\":\"19.088\",\"physicalLocation\":\"Mumbai\",\"pairedRegion\":[{\"name\":\"southindia\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/southindia\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadaeast\",\"name\":\"canadaeast\",\"displayName\":\"Canada
+        East\",\"regionalDisplayName\":\"(Canada) Canada East\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Canada\",\"longitude\":\"-71.217\",\"latitude\":\"46.817\",\"physicalLocation\":\"Quebec\",\"pairedRegion\":[{\"name\":\"canadacentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/canadacentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francesouth\",\"name\":\"francesouth\",\"displayName\":\"France
+        South\",\"regionalDisplayName\":\"(Europe) France South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"2.1972\",\"latitude\":\"43.8345\",\"physicalLocation\":\"Marseille\",\"pairedRegion\":[{\"name\":\"francecentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/francecentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanynorth\",\"name\":\"germanynorth\",\"displayName\":\"Germany
+        North\",\"regionalDisplayName\":\"(Europe) Germany North\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"8.806422\",\"latitude\":\"53.073635\",\"physicalLocation\":\"Berlin\",\"pairedRegion\":[{\"name\":\"germanywestcentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/germanywestcentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwaywest\",\"name\":\"norwaywest\",\"displayName\":\"Norway
+        West\",\"regionalDisplayName\":\"(Europe) Norway West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"5.733107\",\"latitude\":\"58.969975\",\"physicalLocation\":\"Norway\",\"pairedRegion\":[{\"name\":\"norwayeast\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/norwayeast\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedensouth\",\"name\":\"swedensouth\",\"displayName\":\"Sweden
+        South\",\"regionalDisplayName\":\"(Europe) Sweden South\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"13.0007\",\"latitude\":\"55.6059\",\"physicalLocation\":\"Malmo\",\"pairedRegion\":[{\"name\":\"swedencentral\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/swedencentral\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandwest\",\"name\":\"switzerlandwest\",\"displayName\":\"Switzerland
+        West\",\"regionalDisplayName\":\"(Europe) Switzerland West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"6.143158\",\"latitude\":\"46.204391\",\"physicalLocation\":\"Geneva\",\"pairedRegion\":[{\"name\":\"switzerlandnorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/switzerlandnorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/ukwest\",\"name\":\"ukwest\",\"displayName\":\"UK
+        West\",\"regionalDisplayName\":\"(Europe) UK West\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"-3.084\",\"latitude\":\"53.427\",\"physicalLocation\":\"Cardiff\",\"pairedRegion\":[{\"name\":\"uksouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uksouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaecentral\",\"name\":\"uaecentral\",\"displayName\":\"UAE
+        Central\",\"regionalDisplayName\":\"(Middle East) UAE Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Middle
+        East\",\"longitude\":\"54.366669\",\"latitude\":\"24.466667\",\"physicalLocation\":\"Abu
+        Dhabi\",\"pairedRegion\":[{\"name\":\"uaenorth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/uaenorth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsoutheast\",\"name\":\"brazilsoutheast\",\"displayName\":\"Brazil
+        Southeast\",\"regionalDisplayName\":\"(South America) Brazil Southeast\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Rio\",\"pairedRegion\":[{\"name\":\"brazilsouth\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/brazilsouth\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\",\"name\":\"eastusslv\",\"displayName\":\"East
+        US SLV\",\"regionalDisplayName\":\"(South America) East US SLV\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"South
+        America\",\"longitude\":\"-43.2075\",\"latitude\":\"-22.90278\",\"physicalLocation\":\"Silverstone\",\"pairedRegion\":[{\"name\":\"eastusslv\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/eastusslv\"}]}},{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/qatarcentral\",\"name\":\"qatarcentral\",\"displayName\":\"Qatar
+        Central\",\"regionalDisplayName\":\"(Europe) Qatar Central\",\"metadata\":{\"regionType\":\"Physical\",\"regionCategory\":\"Other\",\"geographyGroup\":\"Europe\",\"longitude\":\"51.439327\",\"latitude\":\"25.551462\",\"physicalLocation\":\"Doha\",\"pairedRegion\":[{\"name\":\"westeurope\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/locations/westeurope\"}]}}]}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29925'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \ \"etag\": \"W/\\\"72e8ebea-4a59-4197-bade-1dc5a50fc2f0\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '542'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:53 GMT
+      etag:
+      - W/"72e8ebea-4a59-4197-bade-1dc5a50fc2f0"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9bf0582e-4ce0-46a7-ac55-5b33432feca9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005",
+      "name": "subnet000005", "type": "Microsoft.Network/virtualNetworks/subnets",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"name": "delegation",
+      "properties": {"serviceName": "Microsoft.Web/serverFarms"}}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '585'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \ \"etag\": \"W/\\\"fbb712c8-5cae-4dba-a33d-6612c0b6f6d3\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"fbb712c8-5cae-4dba-a33d-6612c0b6f6d3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/japanwest/operations/c9000177-c69f-4087-84dc-670bdb08ad9a?api-version=2021-05-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1171'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a266738a-7c1d-41b2-b6cf-2b8f76f1b8c0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/japanwest/operations/c9000177-c69f-4087-84dc-670bdb08ad9a?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9901d7b1-a92c-4726-a722-3814bef042ba
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.3.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"subnet000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005\",\r\n
+        \ \"etag\": \"W/\\\"374cef28-3a4f-43b8-aeef-35941853f36e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"serviceAssociationLinks\": [\r\n      {\r\n        \"name\": \"AppServiceLink\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005/serviceAssociationLinks/AppServiceLink\",\r\n
+        \       \"etag\": \"W/\\\"374cef28-3a4f-43b8-aeef-35941853f36e\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/virtualNetworks/subnets/serviceAssociationLinks\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"linkedResourceType\": \"Microsoft.Web/serverfarms\",\r\n          \"link\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004\",\r\n
+        \         \"enabledForArmDeployments\": false,\r\n          \"allowDelete\":
+        false,\r\n          \"locations\": []\r\n        }\r\n      }\r\n    ],\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"delegation\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005/delegations/delegation\",\r\n
+        \       \"etag\": \"W/\\\"374cef28-3a4f-43b8-aeef-35941853f36e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.Web/serverFarms\",\r\n          \"actions\":
+        [\r\n            \"Microsoft.Network/virtualNetworks/subnets/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2039'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 10 Nov 2021 05:01:56 GMT
+      etag:
+      - W/"374cef28-3a4f-43b8-aeef-35941853f36e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6fc2781d-cc5e-4a92-8ad6-24ddf6c98171
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "10.14.1"}],
+      "alwaysOn": true, "vnetRouteAllEnabled": true, "localMySqlEnabled": false, "http20Enabled":
+      true}, "scmSiteAlsoStopped": false, "httpsOnly": false, "virtualNetworkSubnetId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '866'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003","name":"vnetwebapp000003","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"vnetwebapp000003","state":"Running","hostNames":["vnetwebapp000003.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/vnetwebapp000003","repositorySiteName":"vnetwebapp000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["vnetwebapp000003.azurewebsites.net","vnetwebapp000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"vnetwebapp000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"vnetwebapp000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/vnetplan000004","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-11-10T05:01:58.6066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"sitePort":null},"deploymentId":"vnetwebapp000003","slotName":null,"trafficManagerHostNames":null,"sku":"PremiumV2","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"253001F2FCF5A7B1CD759EB861E9BB1596370BE27E47A991F72184277B3D12F2","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"vnetwebapp000003\\$vnetwebapp000003","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"vnetwebapp000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs,AppServiceFileAuditLogs,AppServiceAntivirusScanAuditLogs","storageAccountRequired":false,"virtualNetworkSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005","keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6204'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:02:18 GMT
+      etag:
+      - '"1D7D5F017824680"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '23'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan --subnet
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003/publishxml?api-version=2020-09-01
+  response:
+    body:
+      string: <publishData><publishProfile profileName="vnetwebapp000003 - Web Deploy"
+        publishMethod="MSDeploy" publishUrl="vnetwebapp000003.scm.azurewebsites.net:443"
+        msdeploySite="vnetwebapp000003" userName="$vnetwebapp000003" userPWD="kFGpCp2R44oGBeq4eBFaamPePgnfx7t2ygeE1Y6krksrYl2Mo1M19wLH6i2f"
+        destinationAppUrl="http://vnetwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="vnetwebapp000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="vnetwebapp000003\$vnetwebapp000003" userPWD="kFGpCp2R44oGBeq4eBFaamPePgnfx7t2ygeE1Y6krksrYl2Mo1M19wLH6i2f"
+        destinationAppUrl="http://vnetwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="vnetwebapp000003
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="vnetwebapp000003.scm.azurewebsites.net:443"
+        userName="$vnetwebapp000003" userPWD="kFGpCp2R44oGBeq4eBFaamPePgnfx7t2ygeE1Y6krksrYl2Mo1M19wLH6i2f"
+        destinationAppUrl="http://vnetwebapp000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1563'
+      content-type:
+      - application/xml
+      date:
+      - Wed, 10 Nov 2021 05:02:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003/virtualNetworkConnections?api-version=2020-09-01
+  response:
+    body:
+      string: '[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003/virtualNetworkConnections/59aaf2e9-7ae6-4fea-9e3a-23916f06561f_subnet000005","name":"59aaf2e9-7ae6-4fea-9e3a-23916f06561f_subnet000005","type":"Microsoft.Web/sites/virtualNetworkConnections","location":"Japan
+        West","properties":{"vnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Network/virtualNetworks/vnet000006/subnets/subnet000005","certThumbprint":null,"certBlob":null,"routes":null,"resyncRequired":false,"dnsServers":null,"isSwift":true}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '657'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:02:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003/networkConfig/virtualNetwork?api-version=2020-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 10 Nov 2021 05:02:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp vnet-integration list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.10 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/vnetwebapp000003/virtualNetworkConnections?api-version=2020-09-01
+  response:
+    body:
+      string: '[]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json
+      date:
+      - Wed, 10 Nov 2021 05:02:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

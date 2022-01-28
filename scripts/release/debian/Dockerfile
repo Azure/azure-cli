@@ -6,7 +6,7 @@ RUN apt-get update
 RUN apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev wget
 
 # Download Python source code
-ARG python_version="3.6.5"
+ARG python_version="3.6.10"
 ENV PYTHON_SRC_DIR=/usr/src/python
 RUN mkdir -p ${PYTHON_SRC_DIR} && \
     wget -qO- https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz \
@@ -28,9 +28,7 @@ COPY . .
 RUN mkdir -p ./bin/pypi && \
     BUILD_STAGINGDIRECTORY=/azure-cli/bin/pypi ./scripts/release/pypi/build.sh && \
     if [ -d ./privates ]; then find ./privates -name '*.whl' | xargs pip install; fi && \
-    find ./bin/pypi -name '*.whl' | xargs pip install && \
-    pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg && \
-    pip install --force-reinstall urllib3==1.24.2
+    find ./bin/pypi -name '*.whl' | xargs pip install &&
 
 ARG cli_version=0.0.0-dev
 ARG cli_version_revision=1

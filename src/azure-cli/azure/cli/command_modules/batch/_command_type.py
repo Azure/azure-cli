@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import re
-from six import string_types
 
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
@@ -186,7 +185,7 @@ def format_options_name(operation):
     return "{}_{}_options".format(op_class, op_function)
 
 
-class BatchArgumentTree(object):
+class BatchArgumentTree:
     """Dependency tree parser for arguments of complex objects"""
 
     def __init__(self, validator):
@@ -250,7 +249,7 @@ class BatchArgumentTree(object):
         required_args = []
         children = self._get_children(path)
         if not required:
-            if not any([getattr(namespace, n) for n in children]):
+            if not any(getattr(namespace, n) for n in children):
                 return []
         siblings = self._get_siblings(path)
         if not siblings:
@@ -377,7 +376,7 @@ class BatchArgumentTree(object):
             child_args = self._get_children(arg_group)
             if child_args:
                 ex_group_names.append(group_title(arg_group))
-                if any([getattr(namespace, arg) for arg in child_args]):
+                if any(getattr(namespace, arg) for arg in child_args):
                     ex_groups.append(ex_group_names[-1])
 
         message = None
@@ -427,11 +426,11 @@ class BatchArgumentTree(object):
         self.done = True
 
 
-class AzureBatchDataPlaneCommand(object):
+class AzureBatchDataPlaneCommand:
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
     def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
-        if not isinstance(operation, string_types):
+        if not isinstance(operation, str):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
         self._flatten = kwargs.pop('flatten', pformat.FLATTEN)  # Number of object levels to flatten
@@ -488,12 +487,11 @@ class AzureBatchDataPlaneCommand(object):
                             param_value = kwargs.pop(arg)
                             if param_value is None:
                                 continue
-                            else:
-                                self._build_parameters(
-                                    details['path'],
-                                    kwargs,
-                                    details['root'],
-                                    param_value)
+                            self._build_parameters(
+                                details['path'],
+                                kwargs,
+                                details['root'],
+                                param_value)
                         except KeyError:
                             continue
 
@@ -614,7 +612,7 @@ class AzureBatchDataPlaneCommand(object):
                 model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
             conditions.append(
                 model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
-            conditions.append(any([i for i in pformat.IGNORE_PARAMETERS if i in full_path]))
+            conditions.append(any(i for i in pformat.IGNORE_PARAMETERS if i in full_path))
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
                 yield attr, details

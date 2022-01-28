@@ -13,8 +13,11 @@ from azure.cli.core.profiles import ResourceType
 class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
-    def test_storage_queue_general_scenario(self, resource_group, storage_account):
-        account_key = self.get_account_key(resource_group, storage_account)
+    def test_storage_queue_general_scenario(self, resource_group, storage_account_info):
+        from datetime import datetime, timedelta
+
+        storage_account, account_key = storage_account_info
+        connection_string = self.get_connection_string(resource_group, storage_account)
 
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
         self.set_env('AZURE_STORAGE_KEY', account_key)
@@ -29,7 +32,12 @@ class StorageQueueScenarioTests(ScenarioTest):
         res = self.cmd('storage queue list').get_output_in_json()
         self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
 
-        sas = self.cmd('storage queue generate-sas -n {} --permissions r'.format(queue)).output
+        # test list with connection-string
+        res = self.cmd('storage queue list --connection-string {}'.format(connection_string)).get_output_in_json()
+        self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        sas = self.cmd('storage queue generate-sas -n {} --permissions r --expiry {}'.format(queue, expiry)).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
 
         self.cmd('storage queue metadata show -n {}'.format(queue), checks=[
@@ -47,7 +55,6 @@ class StorageQueueScenarioTests(ScenarioTest):
         self.cmd('storage queue policy list -q {}'.format(queue), checks=NoneCheck())
 
         start_time = '2016-01-01T00:00Z'
-        expiry = '2016-05-01T00:00Z'
         policy = self.create_random_name('policy', 16)
         self.cmd('storage queue policy create -q {} -n {} --permission raup --start {} --expiry {}'
                  .format(queue, policy, start_time, expiry))
@@ -58,7 +65,6 @@ class StorageQueueScenarioTests(ScenarioTest):
 
         returned_permissions = self.cmd('storage queue policy show -q {} -n {}'.format(queue, policy), checks=[
             JMESPathCheck('start', '2016-01-01T00:00:00+00:00'),
-            JMESPathCheck('expiry', '2016-05-01T00:00:00+00:00'),
             JMESPathCheckExists('permission')
         ]).get_output_in_json()['permission']
 
@@ -118,6 +124,10 @@ class StorageQueueScenarioTests(ScenarioTest):
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
                         .format(name, group)).output
+
+    def get_connection_string(self, group, name):
+        return self.cmd('storage account show-connection-string -n {} -g {} '
+                        '--query connectionString -otsv'.format(name, group)).output.strip()
 
 
 if __name__ == '__main__':

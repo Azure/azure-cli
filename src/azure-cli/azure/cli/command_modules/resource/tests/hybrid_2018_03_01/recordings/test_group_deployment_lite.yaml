@@ -1,140 +1,188 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"date": "2018-08-17T17:24:48Z",
-      "product": "azurecli", "cause": "automation"}}'
+    body: "{\"properties\": {\"parameters\": {}, \"mode\": \"Incremental\", template:{\r\n
+      \ \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"resources\": []\r\n}}}"
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001?api-version=2018-02-01
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '219'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --template-file
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001","name":"cli_test_deployment_lite000001","location":"westus","tags":{"date":"2018-08-17T17:24:48Z","product":"azurecli","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002","name":"azure-cli-deployment000002","properties":{"templateHash":"9698913895792634932","mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-16T09:03:07.8870212Z","duration":"PT0S","correlationId":"5403022c-9f71-44c0-b6fd-6dfd1ea79808","providers":[],"dependencies":[],"validatedResources":[]}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:24:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '542'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:03:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"mode": "Incremental", "parameters": {},
-      "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-      "contentVersion": "1.0.0.0", "resources": []}}}'
+    body: "{\"properties\": {\"parameters\": {}, \"mode\": \"Incremental\", template:{\r\n
+      \ \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"resources\": []\r\n}}}"
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group deployment create]
-      Connection: [keep-alive]
-      Content-Length: ['213']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '219'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --template-file
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002","name":"azure-cli-deployment000002","properties":{"templateHash":"2567930156074384302","mode":"Incremental","provisioningState":"Accepted","timestamp":"2018-08-17T17:24:50.1657643Z","duration":"PT0.0839346S","correlationId":"fc420d1e-0d0d-4050-afb8-cf8774fc1e00","providers":[],"dependencies":[]}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002","name":"azure-cli-deployment000002","properties":{"templateHash":"9698913895792634932","mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-04-16T09:03:09.3051864Z","duration":"PT0.7223739S","correlationId":"9e1266c8-dd26-4d6b-896f-0b3d3bccce34","providers":[],"dependencies":[]}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002/operationStatuses/08586670801953957593?api-version=2018-02-01']
-      cache-control: [no-cache]
-      content-length: ['525']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:24:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002/operationStatuses/08585830430968947774?api-version=2018-02-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '525'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:03:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group deployment create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --template-file
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586670801953957593?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585830430968947774?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"status":"Succeeded"}'}
+    body:
+      string: '{"status":"Succeeded"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['22']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:25:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:03:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group deployment create]
-      Connection: [keep-alive]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - group deployment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --template-file
+      User-Agent:
+      - AZURECLI/2.21.0 azsdk-python-azure-mgmt-resource/16.0.0 Python/3.8.0 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2018-02-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002","name":"azure-cli-deployment000002","properties":{"templateHash":"2567930156074384302","mode":"Incremental","provisioningState":"Succeeded","timestamp":"2018-08-17T17:24:53.7275394Z","duration":"PT3.6457097S","correlationId":"fc420d1e-0d0d-4050-afb8-cf8774fc1e00","providers":[],"dependencies":[],"outputResources":[]}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_lite000001/providers/Microsoft.Resources/deployments/azure-cli-deployment000002","name":"azure-cli-deployment000002","properties":{"templateHash":"9698913895792634932","mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-04-16T09:03:10.6869311Z","duration":"PT2.1041186S","correlationId":"9e1266c8-dd26-4d6b-896f-0b3d3bccce34","providers":[],"dependencies":[],"outputResources":[]}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['547']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 17 Aug 2018 17:25:20 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.14 (Windows-10-10.0.17134) requests/2.19.1 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment_lite000001?api-version=2018-02-01
-  response:
-    body: {string: !!python/unicode ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Fri, 17 Aug 2018 17:25:21 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGREVQTE9ZTUVOVDo1RkxJVEVWT0dFSFBDUEVHVDc2Mkg0V3w5QUIyM0Q1NTAxMjMyQUIxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '547'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 Apr 2021 09:03:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

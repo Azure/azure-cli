@@ -3,11 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.commands.constants import SURVEY_PROMPT
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -64,31 +62,36 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
+        self._print_az_find_message(help_file.command)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
-        choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
+        choice_str = '  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
             if p.choices else ''
-        default_str = u'  Default: {}.'.format(p.default) if p.default and p.default != argparse.SUPPRESS else ''
+        default_value_source = p.default_value_source if p.default_value_source else 'Default'
+        default_str = '  {}: {}.'.format(default_value_source, p.default) \
+            if p.default and p.default != argparse.SUPPRESS else ''
         value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
-        return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
+        return '{}{}{}'.format(choice_str, default_str, value_sources_str)
 
     @staticmethod
     def _print_examples(help_file):
-        from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
         for e in help_file.examples:
             indent = 1
-            _print_indent(u'{0}'.format(e.short_summary), indent)
+            _print_indent('{0}'.format(e.short_summary), indent)
             indent = 2
             if e.long_summary:
-                _print_indent(u'{0}'.format(e.long_summary), indent)
-            _print_indent(u'{0}'.format(e.command), indent)
+                _print_indent('{0}'.format(e.long_summary), indent)
+            _print_indent('{0}'.format(e.command), indent)
             print('')
+
+    @staticmethod
+    def _print_az_find_message(command):
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(help_file.command)
-        _print_indent(Style.BRIGHT + message + Style.RESET_ALL + '\n', indent)
+        message = 'To search AI knowledge base for examples, use: az find "az {}"'.format(command)
+        _print_indent(message + '\n', indent)
 
     @staticmethod
     def _process_value_sources(p):
@@ -102,11 +105,11 @@ class CLIPrintMixin(CLIHelp):
             elif "link" in item and "url" in item["link"]:
                 urls.append(item["link"]["url"])
 
-        command_str = u'  Values from: {}.'.format(", ".join(commands)) if commands else ''
-        string_str = u'  {}'.format(", ".join(strings)) if strings else ''
+        command_str = '  Values from: {}.'.format(", ".join(commands)) if commands else ''
+        string_str = '  {}'.format(", ".join(strings)) if strings else ''
         string_str = string_str + "." if string_str and not string_str.endswith(".") else string_str
-        urls_str = u'  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
-        return u'{}{}{}'.format(command_str, string_str, urls_str)
+        urls_str = '  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
+        return '{}{}{}'.format(command_str, string_str, urls_str)
 
     @staticmethod
     def _print_extensions_msg(help_file):
@@ -114,8 +117,15 @@ class CLIPrintMixin(CLIHelp):
             return
         if isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
-            if help_file.command_source.preview:
-                logger.warning(help_file.command_source.get_preview_warn_msg())
+
+            # Extension preview/experimental warning is disabled because it can be confusing when displayed together
+            # with command or command group preview/experimental warning. See #12556
+
+            # # If experimental is true, it overrides preview
+            # if help_file.command_source.experimental:
+            #     logger.warning(help_file.command_source.get_experimental_warn_msg())
+            # elif help_file.command_source.preview:
+            #     logger.warning(help_file.command_source.get_preview_warn_msg())
 
 
 class AzCliHelp(CLIPrintMixin, CLIHelp):
@@ -147,18 +157,62 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._register_help_loaders()
         self._name_to_content = {}
 
-    # override
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
-        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
-        print(SURVEY_PROMPT)
+
+        delimiters = ' '.join(nouns)
+        help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
+            else self.group_help_cls(self, delimiters, parser)
+        help_file.load(parser)
+        if not nouns:
+            help_file.command = ''
+        else:
+            AzCliHelp.update_examples(help_file)
+        self._print_detailed_help(cli_name, help_file)
+        from azure.cli.core.util import show_updates_available
+        show_updates_available(new_line_after=True)
+        show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
+        from azure.cli.core.commands.constants import (SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED)
+        from azure.cli.core.style import print_styled_text
+        if show_link:
+            print_styled_text(SURVEY_PROMPT_STYLED)
+            if not nouns:
+                print_styled_text(UX_SURVEY_PROMPT_STYLED)
+
+    def get_examples(self, command, parser, is_group):
+        """Get examples of a certain command from the help file.
+        Get the text of the example, strip the newline character and
+        return a list of commands which start with the given command name.
+        """
+        nouns = command.split(' ')[1:]
+        self.update_loaders_with_help_file_contents(nouns)
+
+        delimiters = ' '.join(nouns)
+        help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
+            else self.group_help_cls(self, delimiters, parser)
+        help_file.load(parser)
+
+        def strip_command(command):
+            command = command.replace('\\\n', '')
+            contents = [item for item in command.split(' ') if item]
+            return ' '.join(contents).strip()
+
+        examples = []
+        for example in help_file.examples:
+            if example.command and example.name:
+                examples.append({
+                    'command': strip_command(example.command),
+                    'description': example.name
+                })
+
+        return examples
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
         import inspect
 
         def is_loader_cls(cls):
-            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader'and issubclass(cls, help_loaders.BaseHelpLoader)  # pylint: disable=line-too-long
+            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader' and issubclass(cls, help_loaders.BaseHelpLoader)  # pylint: disable=line-too-long
 
         versioned_loaders = {}
         for cls_name, loader_cls in inspect.getmembers(help_loaders, is_loader_cls):
@@ -189,6 +243,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             for name in file_names:
                 file_contents[name] = self._name_to_content[name]
             self.versioned_loaders[ldr_cls_name].update_file_contents(file_contents)
+
+    # This method is meant to be a hook that can be overridden by an extension or module.
+    @staticmethod
+    def update_examples(help_file):
+        pass
 
 
 class CliHelpFile(KnackHelpFile):
@@ -269,6 +328,8 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
                     'name_source': [action.metavar or action.dest],
                     'deprecate_info': getattr(action, 'deprecate_info', None),
                     'preview_info': getattr(action, 'preview_info', None),
+                    'experimental_info': getattr(action, 'experimental_info', None),
+                    'default_value_source': getattr(action, 'default_value_source', None),
                     'description': action.help,
                     'choices': action.choices,
                     'required': False,

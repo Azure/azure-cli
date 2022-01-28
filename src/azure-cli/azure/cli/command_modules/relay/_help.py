@@ -104,7 +104,7 @@ examples:
 
 helps['relay hyco list'] = """
 type: command
-short-summary: List the Hybrid Connection by Relay Service Namepsace
+short-summary: List the Hybrid Connection by Relay Service Namespace
 examples:
   - name: Get the Hybrid Connections by Namespace.
     text: az relay hyco list --resource-group myresourcegroup --namespace-name mynamespace
@@ -339,7 +339,7 @@ examples:
 
 helps['relay wcfrelay list'] = """
 type: command
-short-summary: List the WCF Relay by Relay Service Namepsace
+short-summary: List the WCF Relay by Relay Service Namespace
 examples:
   - name: Get the WCF Relays by Relay Service Namespace.
     text: az relay wcfrelay list --resource-group myresourcegroup --namespace-name mynamespace

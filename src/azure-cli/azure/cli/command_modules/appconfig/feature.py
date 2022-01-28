@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-statements, too-many-locals, too-many-branches
 
 import json
 import time
@@ -12,35 +12,47 @@ import copy
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
-from ._utils import resolve_connection_string, user_confirmation
-from ._azconfig.azconfig_client import AzconfigClient
-from ._azconfig.constants import StatusCodes
-from ._azconfig.exceptions import HTTPException
-from ._azconfig.models import (KeyValue,
-                               ModifyKeyValueOptions,
-                               QueryKeyValueCollectionOptions,
-                               QueryKeyValueOptions)
+from azure.appconfiguration import (ConfigurationSetting,
+                                    ResourceReadOnlyError)
+from azure.core import MatchConditions
+from azure.cli.core.util import user_confirmation
+from azure.core.exceptions import (HttpResponseError,
+                                   ResourceNotFoundError,
+                                   ResourceModifiedError)
+
+from ._constants import (FeatureFlagConstants, SearchFilterOptions, StatusCodes)
+from ._models import (KeyValue,
+                      convert_configurationsetting_to_keyvalue,
+                      convert_keyvalue_to_configurationsetting)
+from ._utils import (get_appconfig_data_client,
+                     prep_label_filter_for_url_encoding)
 from ._featuremodels import (map_keyvalue_to_featureflag,
                              map_keyvalue_to_featureflagvalue,
                              FeatureFilter)
 
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 # Feature commands #
 
 
 def set_feature(cmd,
-                feature,
+                feature=None,
+                key=None,
                 name=None,
                 label=None,
                 description=None,
                 yes=False,
-                connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
+                connection_string=None,
+                auth_mode="key",
+                endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):] if feature is None else feature
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
@@ -48,62 +60,62 @@ def set_feature(cmd,
 
     default_value = {
         "id": feature,
-        "description": description,
+        "description": "" if description is None else description,
         "enabled": False,
         "conditions": default_conditions
     }
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
     retry_times = 3
     retry_interval = 1
 
-    label = label if label and label != ModifyKeyValueOptions.empty_label else None
-    query_options = QueryKeyValueOptions(label=label)
-
+    label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
     for i in range(0, retry_times):
+        retrieved_kv = None
+        set_kv = None
+        set_configsetting = None
+        new_kv = None
+
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
-        except HTTPException as exception:
-            raise CLIError(str(exception))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            logger.debug("Feature flag '%s' with label '%s' not found. A new feature flag will be created.", feature, label)
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
         try:
             # if kv exists and only content-type is wrong, we can force correct it by updating the kv
             if retrieved_kv is None:
-                set_kv = KeyValue(
-                    key,
-                    json.dumps(default_value, ensure_ascii=False),
-                    label,
-                    tags,
-                    FEATURE_FLAG_CONTENT_TYPE)
+                set_kv = KeyValue(key=key,
+                                  value=json.dumps(default_value, ensure_ascii=False),
+                                  label=label,
+                                  tags=tags,
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
             else:
-                if retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+                if retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     logger.warning(
                         "This feature contains invalid content-type. The feature flag will be overwritten.")
                 # we make sure that value retrieved is a valid json and only has the fields supported by backend.
                 # if it's invalid, we catch appropriate exception that contains
                 # detailed message
-                feature_flag_value = map_keyvalue_to_featureflagvalue(
-                    retrieved_kv)
+                feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
 
                 # User can only update description if the key already exists
-                feature_flag_value.description = description
-                set_kv = KeyValue(
-                    key=key,
-                    label=label,
-                    value=json.dumps(
-                        feature_flag_value,
-                        default=lambda o: o.__dict__,
-                        ensure_ascii=False),
-                    content_type=FEATURE_FLAG_CONTENT_TYPE,
-                    tags=retrieved_kv.tags if retrieved_kv.tags else tags)
-                set_kv.etag = retrieved_kv.etag
-                set_kv.last_modified = retrieved_kv.last_modified
+                if description is not None:
+                    feature_flag_value.description = description
+
+                set_kv = KeyValue(key=key,
+                                  label=label,
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
+                                  tags=retrieved_kv.tags if tags is None else tags,
+                                  etag=retrieved_kv.etag,
+                                  last_modified=retrieved_kv.last_modified)
 
             # Convert KeyValue object to required FeatureFlag format for
             # display
-            feature_flag = map_keyvalue_to_featureflag(
-                set_kv, show_conditions=True)
+            feature_flag = map_keyvalue_to_featureflag(set_kv, show_conditions=True)
             entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
@@ -113,115 +125,120 @@ def set_feature(cmd,
 
         confirmation_message = "Are you sure you want to set the feature flag: \n" + entry + "\n"
         user_confirmation(confirmation_message, yes)
+        set_configsetting = convert_keyvalue_to_configurationsetting(set_kv)
 
         try:
-            updated_key_value = azconfig_client.add_keyvalue(
-                set_kv,
-                ModifyKeyValueOptions()) if set_kv.etag is None else azconfig_client.update_keyvalue(
-                    set_kv,
-                    ModifyKeyValueOptions())
-            return map_keyvalue_to_featureflag(
-                keyvalue=updated_key_value, show_conditions=True)
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying setting %s times with exception: concurrent setting operations',
-                    i + 1)
+            if set_configsetting.etag is None:
+                new_kv = azconfig_client.add_configuration_setting(set_configsetting)
+            else:
+                new_kv = azconfig_client.set_configuration_setting(set_configsetting, match_condition=MatchConditions.IfNotModified)
+            return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv))
+
+        except ResourceReadOnlyError:
+            raise CLIError("Failed to update read only feature flag. Unlock the feature flag before updating it.")
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
         except Exception as exception:
             raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to set the feature flag '{}' due to a conflicting operation.".format(feature))
+    raise CLIError("Failed to set the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
 def delete_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    yes=False,
-                   connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                   connection_string=None,
+                   auth_mode="key",
+                   endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
-    delete_one_version_message = "Are you sure you want to delete the feature '{}'".format(
-        feature)
-    confirmation_message = delete_one_version_message
+    if key is not None:
+        key_filter = key
+    elif feature is not None:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
+                                               key_filter=key_filter,
+                                               label=SearchFilterOptions.EMPTY_LABEL if label is None else label)
+
+    confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
     user_confirmation(confirmation_message, yes)
 
-    try:
-        retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                                   feature=feature,
-                                                   label=QueryKeyValueCollectionOptions.empty_label if label is None else label)
-    except HTTPException as exception:
-        raise CLIError('Delete operation failed. ' + str(exception))
-
-    deleted_kv = []
-    not_deleted_kv = []
-    http_exception = None
+    deleted_kvs = []
+    exception_messages = []
     for entry in retrieved_keyvalues:
+        feature_name = entry.key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
         try:
-            deleted_kv.append(
-                azconfig_client.delete_keyvalue(
-                    entry, ModifyKeyValueOptions()))
-        except HTTPException as exception:
-            not_deleted_kv.append(entry)
-            http_exception = exception
-        except Exception as exception:
-            raise CLIError(str(exception))
+            deleted_kv = azconfig_client.delete_configuration_setting(key=entry.key,
+                                                                      label=entry.label,
+                                                                      etag=entry.etag,
+                                                                      match_condition=MatchConditions.IfNotModified)
+            deleted_kvs.append(convert_configurationsetting_to_keyvalue(deleted_kv))
+        except ResourceReadOnlyError:
+            exception = "Failed to delete read-only feature '{}' with label '{}'. Unlock the feature flag before deleting it.".format(feature_name, entry.label)
+            exception_messages.append(exception)
+        except ResourceModifiedError:
+            exception = "Failed to delete feature '{}' with label '{}' due to a conflicting operation.".format(feature_name, entry.label)
+            exception_messages.append(exception)
+        except HttpResponseError as ex:
+            exception_messages.append(str(ex))
+            raise CLIError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
-    if not_deleted_kv:
-        if deleted_kv:
-            # Log partial success - display feature flags that failed to be
-            # deleted
-            logger.error(
-                'Delete operation partially succeeded. Unable to delete the following keys: \n')
-            not_deleted_ff = []
-            for failed_kv in not_deleted_kv:
-                failed_ff = map_keyvalue_to_featureflag(
-                    failed_kv, show_conditions=False)
-                not_deleted_ff.append(failed_ff)
-                logger.error(
-                    json.dumps(
-                        failed_ff,
-                        default=lambda o: o.__dict__,
-                        indent=2,
-                        sort_keys=True,
-                        ensure_ascii=False))
+    # Log errors if partially succeeded
+    if exception_messages:
+        if deleted_kvs:
+            logger.error('Delete operation partially failed. The following error(s) occurred:\n%s\n',
+                         json.dumps(exception_messages, indent=2, ensure_ascii=False))
         else:
-            raise CLIError('Delete operation failed.' + str(http_exception))
+            raise CLIError('Delete operation failed. \n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
-    # Convert result list of KeyValue to ist of FeatureFlag
+    # Convert result list of KeyValue to list of FeatureFlag
     deleted_ff = []
-    for success_kv in deleted_kv:
-        success_ff = map_keyvalue_to_featureflag(
-            success_kv, show_conditions=False)
+    for success_kv in deleted_kvs:
+        success_ff = map_keyvalue_to_featureflag(success_kv, show_conditions=False)
         deleted_ff.append(success_ff)
 
     return deleted_ff
 
 
 def show_feature(cmd,
-                 feature,
+                 feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  fields=None,
-                 connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                 connection_string=None,
+                 auth_mode="key",
+                 endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        query_options = QueryKeyValueOptions(label=label)
-        retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+        config_setting = azconfig_client.get_configuration_setting(key=key, label=label)
+        if config_setting is None or config_setting.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            raise CLIError("The feature flag does not exist.")
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
-            raise CLIError(
-                "The feature flag '{}' does not exist.".format(feature))
-
-        feature_flag = map_keyvalue_to_featureflag(
-            keyvalue=retrieved_kv, show_conditions=True)
+        retrieved_kv = convert_configurationsetting_to_keyvalue(config_setting)
+        feature_flag = map_keyvalue_to_featureflag(keyvalue=retrieved_kv, show_conditions=True)
 
         # If user has specified fields, we still get all the fields and then
         # filter what we need from the response.
@@ -231,31 +248,41 @@ def show_feature(cmd,
                 # feature_flag is guaranteed to have all the fields because
                 # we validate this in map_keyvalue_to_featureflag()
                 # So this line will never throw AttributeError
-                partial_featureflag[field.name.lower()] = getattr(
-                    feature_flag, field.name.lower())
+                partial_featureflag[field.name.lower()] = getattr(feature_flag, field.name.lower())
             return partial_featureflag
         return feature_flag
-
-    except Exception as exception:
+    except ResourceNotFoundError:
+        raise CLIError("Feature '{}' with label '{}' does not exist.".format(feature, label))
+    except HttpResponseError as exception:
         raise CLIError(str(exception))
 
 
 def list_feature(cmd,
                  feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  fields=None,
                  connection_string=None,
                  top=None,
-                 all_=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                 all_=False,
+                 auth_mode="key",
+                 endpoint=None):
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
 
+    if key is not None:
+        key_filter = key
+    elif feature is not None:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
+    else:
+        key_filter = FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
-        feature = '*' if feature is None else feature
         retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
-                                                   feature=feature,
-                                                   label=label)
+                                                   key_filter=key_filter,
+                                                   label=label if label else SearchFilterOptions.ANY_LABEL)
         retrieved_featureflags = []
         for kv in retrieved_keyvalues:
             retrieved_featureflags.append(
@@ -291,115 +318,140 @@ def list_feature(cmd,
 
 
 def lock_feature(cmd,
-                 feature,
+                 feature=None,
+                 key=None,
                  name=None,
                  label=None,
                  connection_string=None,
-                 yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                 yes=False,
+                 auth_mode="key",
+                 endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(str(exception))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature '{}' with label '{}' does not exist.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
-            raise CLIError(
-                "The feature '{}' you are trying to lock does not exist.".format(feature))
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            raise CLIError("The feature '{}' you are trying to lock does not exist.".format(feature))
 
-        confirmation_message = "Are you sure you want to lock the feature '{}'".format(feature)
+        confirmation_message = "Are you sure you want to lock the feature '{}' with label '{}'".format(feature, label)
         user_confirmation(confirmation_message, yes)
 
         try:
-            updated_key_value = azconfig_client.lock_keyvalue(
-                retrieved_kv, ModifyKeyValueOptions())
-            return map_keyvalue_to_featureflag(
-                updated_key_value, show_conditions=False)
-
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying locking %s times with exception: concurrent setting operations',
-                    i + 1)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
+            return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
+                                               show_conditions=False)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
         except Exception as exception:
             raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to lock the feature '{}' due to a conflicting operation.".format(feature))
+    raise CLIError("Failed to lock the feature '{}' with label '{}' due to a conflicting operation.".format(feature, label))
 
 
 def unlock_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    connection_string=None,
-                   yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                   yes=False,
+                   auth_mode="key",
+                   endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(str(exception))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature '{}' with label '{}' does not exist.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
-            raise CLIError(
-                "The feature '{}' you are trying to unlock does not exist.".format(feature))
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            raise CLIError("The feature '{}' you are trying to unlock does not exist.".format(feature))
 
-        confirmation_message = "Are you sure you want to unlock the feature '{}'".format(feature)
+        confirmation_message = "Are you sure you want to unlock the feature '{}' with label '{}'".format(feature, label)
         user_confirmation(confirmation_message, yes)
 
         try:
-            updated_key_value = azconfig_client.unlock_keyvalue(
-                retrieved_kv, ModifyKeyValueOptions())
-            return map_keyvalue_to_featureflag(
-                updated_key_value, show_conditions=False)
-
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying unlocking %s times with exception: concurrent setting operations',
-                    i + 1)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
+            return map_keyvalue_to_featureflag(convert_configurationsetting_to_keyvalue(new_kv),
+                                               show_conditions=False)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
         except Exception as exception:
             raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to unlock the feature '{}' due to a conflicting operation.".format(feature))
+    raise CLIError("Failed to unlock the feature '{}' with label '{}' due to a conflicting operation.".format(feature, label))
 
 
 def enable_feature(cmd,
-                   feature,
+                   feature=None,
+                   key=None,
                    name=None,
                    label=None,
                    connection_string=None,
-                   yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                   yes=False,
+                   auth_mode="key",
+                   endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            query_options = QueryKeyValueOptions(label=label)
-            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
-                raise CLIError(
-                    "The feature flag {} does not exist.".format(feature))
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                raise CLIError("The feature flag {} does not exist.".format(feature))
 
             # we make sure that value retrieved is a valid json and only has the fields supported by backend.
             # if it's invalid, we catch appropriate exception that contains
@@ -407,8 +459,7 @@ def enable_feature(cmd,
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
 
             feature_flag_value.enabled = True
-            confirmation_message = "Are you sure you want to enable this feature '{}'?".format(
-                feature)
+            confirmation_message = "Are you sure you want to enable this feature '{}'?".format(feature)
             user_confirmation(confirmation_message, yes)
 
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
@@ -417,44 +468,52 @@ def enable_feature(cmd,
                                                                                      default=lambda o: o.__dict__,
                                                                                      ensure_ascii=False))
 
-            return map_keyvalue_to_featureflag(
-                keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
 
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying enabling %s times with exception: concurrent setting operations',
-                    i + 1)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying feature enable operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
-
         except Exception as exception:
             raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to enable the feature flag '{}' due to a conflicting operation.".format(feature))
+    raise CLIError("Failed to enable the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
 def disable_feature(cmd,
-                    feature,
+                    feature=None,
+                    key=None,
                     name=None,
                     label=None,
                     connection_string=None,
-                    yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                    yes=False,
+                    auth_mode="key",
+                    endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            query_options = QueryKeyValueOptions(label=label)
-            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
-                raise CLIError(
-                    "The feature flag {} does not exist.".format(feature))
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                raise CLIError("The feature flag {} does not exist.".format(feature))
 
             # we make sure that value retrieved is a valid json and only has the fields supported by backend.
             # if it's invalid, we catch appropriate exception that contains
@@ -462,8 +521,7 @@ def disable_feature(cmd,
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
 
             feature_flag_value.enabled = False
-            confirmation_message = "Are you sure you want to disable this feature '{}'?".format(
-                feature)
+            confirmation_message = "Are you sure you want to disable this feature '{}'?".format(feature)
             user_confirmation(confirmation_message, yes)
 
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
@@ -472,39 +530,44 @@ def disable_feature(cmd,
                                                                                      default=lambda o: o.__dict__,
                                                                                      ensure_ascii=False))
 
-            return map_keyvalue_to_featureflag(
-                keyvalue=updated_key_value, show_conditions=False)
+            return map_keyvalue_to_featureflag(keyvalue=updated_key_value, show_conditions=False)
 
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying disabling %s times with exception: concurrent setting operations',
-                    i + 1)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying feature disable operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
-
         except Exception as exception:
             raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to disable the feature flag '{}' due to a conflicting operation.".format(feature))
+    raise CLIError("Failed to disable the feature flag '{}' due to a conflicting operation.".format(feature))
 
 
-# Feature Flter commands #
+# Feature Filter commands #
 
 
 def add_filter(cmd,
-               feature,
                filter_name,
+               feature=None,
+               key=None,
                name=None,
                label=None,
                filter_parameters=None,
                yes=False,
                index=None,
-               connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+               connection_string=None,
+               auth_mode="key",
+               endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
@@ -518,10 +581,14 @@ def add_filter(cmd,
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            query_options = QueryKeyValueOptions(label=label)
-            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -554,15 +621,12 @@ def add_filter(cmd,
 
             return new_filter
 
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying adding filter %s times with exception: concurrent setting operations',
-                    i + 1)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying filter add operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
-
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
@@ -570,16 +634,27 @@ def add_filter(cmd,
 
 
 def delete_filter(cmd,
-                  feature,
+                  feature=None,
+                  key=None,
                   filter_name=None,
                   name=None,
                   label=None,
                   index=None,
                   yes=False,
                   connection_string=None,
-                  all_=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    azconfig_client = AzconfigClient(resolve_connection_string(cmd, name, connection_string))
+                  all_=False,
+                  auth_mode="key",
+                  endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
@@ -594,10 +669,14 @@ def delete_filter(cmd,
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(
-                key, QueryKeyValueOptions(label=label))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -660,15 +739,12 @@ def delete_filter(cmd,
 
             return display_filter
 
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying deleting filter %s times with exception: concurrent setting operations',
-                    i + 1)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying deleting feature filter operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
-
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
@@ -678,24 +754,38 @@ def delete_filter(cmd,
 
 
 def show_filter(cmd,
-                feature,
                 filter_name,
+                feature=None,
+                key=None,
                 index=None,
                 name=None,
                 label=None,
-                connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                connection_string=None,
+                auth_mode="key",
+                endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if index is None:
         index = float("-inf")
 
     try:
-        query_options = QueryKeyValueOptions(label=label)
-        retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+        retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+    except ResourceNotFoundError:
+        raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+    except HttpResponseError as exception:
+        raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+    try:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -730,21 +820,35 @@ def show_filter(cmd,
 
 
 def list_filter(cmd,
-                feature,
+                feature=None,
+                key=None,
                 name=None,
                 label=None,
                 connection_string=None,
                 top=None,
-                all_=False):
-    key = FEATURE_FLAG_PREFIX + feature
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                all_=False,
+                auth_mode="key",
+                endpoint=None):
+    if key is None and feature is None:
+        raise RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
+    if key and feature:
+        logger.warning("Since both `--key` and `--feature` are provided, `--feature` argument will be ignored.")
+
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature if key is None else key
+    # Get feature name from key for logging. If users have provided a different feature name, we ignore it anyway.
+    feature = key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     try:
-        query_options = QueryKeyValueOptions(label=label)
-        retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+        retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+    except ResourceNotFoundError:
+        raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+    except HttpResponseError as exception:
+        raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+    try:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -772,16 +876,20 @@ def __clear_filter(azconfig_client,
                    feature,
                    label=None,
                    yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            query_options = QueryKeyValueOptions(label=label)
-            retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Feature flag '{}' with label '{}' not found.".format(feature, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve feature flags from config store. " + str(exception))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        try:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -813,15 +921,12 @@ def __clear_filter(azconfig_client,
 
             return display_filters
 
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying deleting filters %s times with exception: concurrent setting operations',
-                    i + 1)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying feature enable operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
                 raise CLIError(str(exception))
-
         except Exception as exception:
             raise CLIError(str(exception))
     raise CLIError(
@@ -836,36 +941,38 @@ def __update_existing_key_value(azconfig_client,
 
         Args:
             azconfig_client - AppConfig client making calls to the service
-            retrieved_kv - Pre-existing KeyValue object
+            retrieved_kv - Pre-existing ConfigurationSetting object
             updated_value - Value string to be updated
 
         Return:
             KeyValue object
     '''
-    set_kv = KeyValue(key=retrieved_kv.key,
-                      value=updated_value,
-                      label=retrieved_kv.label,
-                      tags=retrieved_kv.tags,
-                      content_type=FEATURE_FLAG_CONTENT_TYPE)
-    set_kv.etag = retrieved_kv.etag
-    set_kv.last_modified = retrieved_kv.last_modified
+    set_kv = ConfigurationSetting(key=retrieved_kv.key,
+                                  value=updated_value,
+                                  label=retrieved_kv.label,
+                                  tags=retrieved_kv.tags,
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
+                                  read_only=retrieved_kv.read_only,
+                                  etag=retrieved_kv.etag,
+                                  last_modified=retrieved_kv.last_modified)
 
     try:
-        return azconfig_client.update_keyvalue(set_kv, ModifyKeyValueOptions())
-
-    except Exception as exception:
-        raise CLIError(str(exception))
+        new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+        return convert_configurationsetting_to_keyvalue(new_kv)
+    except ResourceReadOnlyError:
+        raise CLIError("Failed to update read only feature flag. Unlock the feature flag before updating it.")
+    # We don't catch HttpResponseError here because some calling functions want to retry on transient exceptions
 
 
 def __list_all_keyvalues(azconfig_client,
-                         feature,
+                         key_filter,
                          label=None):
     '''
         To get all keys by name or pattern
 
         Args:
             azconfig_client - AppConfig client making calls to the service
-            feature - Feature name or pattern
+            key_filter - Filter for the key of the feature flag
             label - Feature label or pattern
 
         Return:
@@ -877,74 +984,22 @@ def __list_all_keyvalues(azconfig_client,
     # (?:\\\\)*  Matches any number of occurrences of two backslashes
     # ,          Matches a comma
     unescaped_comma_regex = re.compile(r'(?<!\\)(?:\\\\)*,')
-    if unescaped_comma_regex.search(feature):
+    if unescaped_comma_regex.search(key_filter):
         raise CLIError("Comma separated feature names are not supported. Please provide escaped string if your feature name contains comma. \nSee \"az appconfig feature list -h\" for correct usage.")
 
-    # Filtering keys on these patterns needs to happen on client side after getting all keys that match user specified pattern
-    # If user provides *abc or *abc* or * -> get all keys that match this
-    # pattern, then filter based on whether they are feature flags or not
-    all_keys_pattern = "*"
-    if feature.startswith("*") and feature != all_keys_pattern:
-        key = feature
-    else:
-        key = FEATURE_FLAG_PREFIX + feature
+    label = prep_label_filter_for_url_encoding(label)
 
-    # If user has specified fields, we still get all the fields and then
-    # filter what we need from the response.
-    query_option = QueryKeyValueCollectionOptions(
-        key_filter=key,
-        label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
-        fields=None)
     try:
-        retrieved_kv = azconfig_client.get_keyvalues(query_option)
-        if key != feature:
-            valid_features = []
-            for kv in retrieved_kv:
-                if kv.content_type == FEATURE_FLAG_CONTENT_TYPE:
-                    valid_features.append(kv)
-            return valid_features
+        configsetting_iterable = azconfig_client.list_configuration_settings(key_filter=key_filter, label_filter=label)
+    except HttpResponseError as exception:
+        raise CLIError('Failed to read feature flag(s) that match the specified feature and label. ' + str(exception))
 
-        return __custom_key_filtering(retrieved_kv=retrieved_kv, user_key_filter=feature)
-
+    try:
+        retrieved_kv = [convert_configurationsetting_to_keyvalue(x) for x in configsetting_iterable]
+        valid_features = []
+        for kv in retrieved_kv:
+            if kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                valid_features.append(kv)
+        return valid_features
     except Exception as exception:
         raise CLIError(str(exception))
-
-
-def __custom_key_filtering(retrieved_kv, user_key_filter):
-    '''
-        To get all keys after Client side Filtering based on user specified pattern
-
-        Args:
-            retrieved_kv - List of KeyValue objects
-            user_key_filter - key pattern to be matched
-
-        Return:
-            List of KeyValue objects
-    '''
-
-    filtered_kv = []
-    try:
-        user_key_pattern_regex = re.compile(r"." + user_key_filter)
-        for kv in retrieved_kv:
-            internal_key = kv.key
-            internal_content_type = kv.content_type
-            # filter only feature flags
-            if internal_key.startswith(
-                    FEATURE_FLAG_PREFIX) and internal_content_type == FEATURE_FLAG_CONTENT_TYPE:
-                feature_name = internal_key[len(FEATURE_FLAG_PREFIX):]
-                # search for user pattern in actual feature name
-                if user_key_pattern_regex.search(feature_name):
-                    filtered_kv.append(kv)
-        return filtered_kv
-
-    except re.error as exception:
-        error_msg = "Regular expression error in parsing '{0}'. ".format(user_key_filter) +\
-            "Please provide escaped string if your feature name contains special characters. \nSee \"az appconfig feature list -h\" for correct usage.\n"
-        raise re.error(error_msg + "Error: " + str(exception))
-
-    except AttributeError as exception:
-        raise AttributeError(
-            "Could not find 'content_type' attribute in the retrieved key-value data.\n" +
-            str(exception))
-
-    return filtered_kv

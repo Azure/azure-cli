@@ -47,12 +47,40 @@ setup() {
 
     assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
     set -v
-    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg
     set +v
 
     assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}
     set -v
-    CLI_REPO=$(lsb_release -cs)
+    # Use env var DIST_CODE for the package dist name if provided
+    if [[ -z $DIST_CODE ]]; then
+        CLI_REPO=$(lsb_release -cs)
+        shopt -s nocasematch
+        ERROR_MSG="Unable to find a package for your system. Please check if an existing package in https://packages.microsoft.com/repos/azure-cli/dists/ can be used in your system and install with the dist name: 'curl -sL https://aka.ms/InstallAzureCLIDeb | sudo DIST_CODE=<dist_code_name> bash'"
+        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+            DIST=$(lsb_release -is)
+            if [[ $DIST =~ "Ubuntu" ]]; then
+                CLI_REPO="focal"
+            elif [[ $DIST =~ "Debian" ]]; then
+                CLI_REPO="bullseye"
+            elif [[ $DIST =~ "LinuxMint" ]]; then
+                CLI_REPO=$(cat /etc/os-release | grep -Po 'UBUNTU_CODENAME=\K.*') || true
+                if [[ -z $CLI_REPO ]]; then
+                    echo $ERROR_MSG
+                    exit 1
+                fi
+            else
+                echo $ERROR_MSG
+                exit 1
+            fi
+        fi
+    else
+        CLI_REPO=$DIST_CODE
+        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+            echo "Unable to find an azure-cli package with DIST_CODE=$CLI_REPO in https://packages.microsoft.com/repos/azure-cli/dists/."
+            exit 1
+        fi
+    fi
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
     apt-get update

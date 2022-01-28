@@ -23,8 +23,6 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\__init__.py" />
-    <Compile Include="azure-cli-command_modules-nspkg\setup.py" />
     <Compile Include="azure-cli-core\azure\cli\core\adal_authentication.py" />
     <Compile Include="azure-cli-core\azure\cli\core\api.py" />
     <Compile Include="azure-cli-core\azure\cli\core\azlogging.py" />
@@ -90,8 +88,6 @@
     <Compile Include="azure-cli-core\azure\cli\core\telemetry.py" />
     <Compile Include="azure-cli-core\azure\cli\core\__init__.py" />
     <Compile Include="azure-cli-core\setup.py" />
-    <Compile Include="azure-cli-nspkg\azure\cli\__init__.py" />
-    <Compile Include="azure-cli-nspkg\setup.py" />
     <Compile Include="azure-cli-telemetry\azure\cli\telemetry\components\records_collection.py" />
     <Compile Include="azure-cli-telemetry\azure\cli\telemetry\components\records_collection.py" />
     <Compile Include="azure-cli-telemetry\azure\cli\telemetry\components\telemetry_client.py" />
@@ -205,6 +201,7 @@
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\asset.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\asset_filter.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\content_key_policy.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\encryption.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\job.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\live_event.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\live_output.py" />
@@ -215,6 +212,7 @@
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\streaming_policy.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\transform.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\operations\__init__.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\ams\tests\latest\test_ams_account_encryption_scenarios.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\tests\latest\test_ams_account_filter_scenarios.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\tests\latest\test_ams_account_mru_scenarios.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\ams\tests\latest\test_ams_account_scenarios.py" />
@@ -282,7 +280,6 @@
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\tests\__init__.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\tunnel.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\utils.py" />
-    <Compile Include="azure-cli\azure\cli\command_modules\appservice\vsts_cd_provider.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\_appservice_utils.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\_client_factory.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\appservice\_completers.py" />
@@ -842,10 +839,19 @@
     <Compile Include="azure-cli\azure\cli\command_modules\servicebus\__init__.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\commands.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\custom.py" />
-    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\test_sf_commands.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\operations\applications.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\operations\managed_clusters.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\operations\managed_node_types.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\test_util.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\test_sf_application.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\test_sf_cluster.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\test_sf_managed_cluster.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_arm_deployment_utils.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_client_factory.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_help.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_params.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_sf_utils.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\_validators.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\servicefabric\__init__.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\signalr\commands.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\signalr\custom.py" />
@@ -930,6 +936,22 @@
     <Compile Include="azure-cli\azure\cli\command_modules\storage\_transformers.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\storage\_validators.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\storage\__init__.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\spark.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\__init__.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\util.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\_completers.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\_client_factory.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\_help.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\_params.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\_validators.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\__init__.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\commands.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\constant.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\accesscontrol.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\sparkpool.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\workspace.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\operations\sqlpool.py" />
+    <Compile Include="azure-cli\azure\cli\command_modules\synapse\tests\latest\test_synapse_scenario.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\vm\commands.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\vm\custom.py" />
     <Compile Include="azure-cli\azure\cli\command_modules\vm\disk_encryption.py" />
@@ -961,10 +983,6 @@
     <Compile Include="azure-cli\setup.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="azure-cli-command_modules-nspkg\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\" />
-    <Folder Include="azure-cli-command_modules-nspkg\azure\cli\command_modules\" />
     <Folder Include="azure-cli-core\" />
     <Folder Include="azure-cli-core\azure\" />
     <Folder Include="azure-cli-core\azure\cli\" />
@@ -978,9 +996,6 @@
     <Folder Include="azure-cli-core\azure\cli\core\profiles\" />
     <Folder Include="azure-cli-core\azure\cli\core\tests\" />
     <Folder Include="azure-cli-core\azure\cli\core\tests\data\" />
-    <Folder Include="azure-cli-nspkg\" />
-    <Folder Include="azure-cli-nspkg\azure\" />
-    <Folder Include="azure-cli-nspkg\azure\cli\" />
     <Folder Include="azure-cli-telemetry\" />
     <Folder Include="azure-cli-telemetry\azure\" />
     <Folder Include="azure-cli-telemetry\azure\" />
@@ -1167,9 +1182,13 @@
     <Folder Include="azure-cli\azure\cli\command_modules\servicebus\tests\" />
     <Folder Include="azure-cli\azure\cli\command_modules\servicebus\tests\latest\" />
     <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\operations\" />
     <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\template\" />
     <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\template\linux\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\template\service\" />
     <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\template\windows\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\tests\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\servicefabric\tests\latest\" />
     <Folder Include="azure-cli\azure\cli\command_modules\signalr\" />
     <Folder Include="azure-cli\azure\cli\command_modules\signalr\tests\" />
     <Folder Include="azure-cli\azure\cli\command_modules\signalr\tests\latest\" />
@@ -1184,16 +1203,17 @@
     <Folder Include="azure-cli\azure\cli\command_modules\storage\operations\" />
     <Folder Include="azure-cli\azure\cli\command_modules\storage\tests\" />
     <Folder Include="azure-cli\azure\cli\command_modules\storage\tests\latest\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\synapse\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\synapse\operations\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\synapse\tests\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\synapse\tests\latest\" />
+    <Folder Include="azure-cli\azure\cli\command_modules\synapse\tests\latest\recordings\" />
     <Folder Include="azure-cli\azure\cli\command_modules\vm\" />
     <Folder Include="azure-cli\azure\cli\command_modules\vm\tests\" />
     <Folder Include="azure-cli\azure\cli\command_modules\vm\tests\latest\" />
     <Folder Include="azure-cli\azure\cli\command_modules\vm\tests\latest\keyvault\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="azure-cli-command_modules-nspkg\HISTORY.rst" />
-    <Content Include="azure-cli-command_modules-nspkg\MANIFEST.in" />
-    <Content Include="azure-cli-command_modules-nspkg\README.rst" />
-    <Content Include="azure-cli-command_modules-nspkg\setup.cfg" />
     <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\fail.html" />
     <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\fail.html" />
     <Content Include="azure-cli-core\azure\cli\core\auth_landing_pages\ok.html" />
@@ -1207,8 +1227,6 @@
     <Content Include="azure-cli-core\azure\cli\core\tests\sp_cert.pem" />
     <Content Include="azure-cli-core\HISTORY.rst" />
     <Content Include="azure-cli-core\setup.cfg" />
-    <Content Include="azure-cli-nspkg\HISTORY.rst" />
-    <Content Include="azure-cli-nspkg\setup.cfg" />
     <Content Include="azure-cli-telemetry\azure\cli\telemetry\tests\resources\cache" />
     <Content Include="azure-cli-telemetry\azure\cli\telemetry\tests\resources\cache.1" />
     <Content Include="azure-cli-telemetry\azure\cli\telemetry\tests\resources\cache.10" />
@@ -1421,10 +1439,14 @@
     <Content Include="azure-cli\azure\cli\command_modules\role\tests\latest\cert.pem" />
     <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\linux\parameter.json" />
     <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\linux\template.json" />
+    <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\service\parameter.json" />
+    <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\service\template.json" />
     <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\windows\parameter.json" />
     <Content Include="azure-cli\azure\cli\command_modules\servicefabric\template\windows\template.json" />
     <Content Include="azure-cli\azure\cli\command_modules\servicefabric\tests\policy.json" />
     <Content Include="azure-cli\azure\cli\command_modules\storage\tests\latest\mgmt_policy.json" />
+    <Content Include="azure-cli\azure\cli\command_modules\synapse\tests\latest\recordings\test_spark_job.yaml" />
+    <Content Include="azure-cli\azure\cli\command_modules\synapse\tests\latest\recordings\test_spark_session_and_statements.yaml" />
     <Content Include="azure-cli\azure\cli\command_modules\vm\linter_exclusions.yml" />
     <Content Include="azure-cli\azure\cli\command_modules\vm\tests\latest\aliases.json" />
     <Content Include="azure-cli\azure\cli\command_modules\vm\tests\latest\keyvault\policy.json" />

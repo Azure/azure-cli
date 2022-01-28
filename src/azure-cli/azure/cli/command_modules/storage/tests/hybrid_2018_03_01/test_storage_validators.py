@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import mock
+from unittest import mock
 from argparse import Namespace
-from six import StringIO
+from io import StringIO
 
 from knack import CLI
 
@@ -87,6 +87,7 @@ class TestStorageValidators(unittest.TestCase):
             actual = get_datetime_type(False)(input)
 
     def test_ipv4_range_type(self):
+        from knack.util import CLIError
         input = "111.22.3.111"
         actual = ipv4_range_type(input)
         expected = input
@@ -98,11 +99,11 @@ class TestStorageValidators(unittest.TestCase):
         self.assertEqual(actual, expected)
 
         input = "111.22"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CLIError):
             actual = ipv4_range_type(input)
 
         input = "111.22.33.44-"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(CLIError):
             actual = ipv4_range_type(input)
 
     def test_resource_types_type(self):

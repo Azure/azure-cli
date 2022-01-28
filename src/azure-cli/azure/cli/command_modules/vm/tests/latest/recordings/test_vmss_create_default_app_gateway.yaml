@@ -12,26 +12,26 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
-        --admin-username --generate-ssh-keys
+        --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T16:17:28Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2020-08-24T12:43:28Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '472'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:17:38 GMT
+      - Mon, 24 Aug 2020 12:43:32 GMT
       expires:
       - '-1'
       pragma:
@@ -110,37 +110,36 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:17:42 GMT
+      - Mon, 24 Aug 2020 12:43:32 GMT
       etag:
-      - W/"5d5b1214d514a7d1af3a6606ac1a74d9cadc7bb5"
+      - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Mon, 21 Oct 2019 16:22:42 GMT
+      - Mon, 24 Aug 2020 12:48:32 GMT
       source-age:
-      - '253'
+      - '18'
       strict-transport-security:
       - max-age=31536000
       vary:
       - Authorization,Accept-Encoding, Accept-Encoding
       via:
+      - 1.1 varnish (Varnish/6.0)
       - 1.1 varnish
       x-cache:
-      - HIT
+      - MISS, HIT
       x-cache-hits:
-      - '1'
+      - 0, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - c5c1a55e7bb1681f94065f4e17812acec0c9a99a
+      - 39eb2920d7b48a029e8591d4bf522312f59a4d27
       x-frame-options:
       - deny
-      x-geo-block-list:
-      - ''
       x-github-request-id:
-      - EE12:7E37:7C176F:85504C:5DADD927
+      - F48E:5957:13606:2023B:5F43B1FE
       x-served-by:
-      - cache-sin18033-SIN
+      - cache-sin18022-SIN
       x-timer:
-      - S1571674662.234364,VS0,VE0
+      - S1598273013.889338,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -159,10 +158,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
-        --admin-username --generate-ssh-keys
+        --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: GET
@@ -178,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:17:44 GMT
+      - Mon, 24 Aug 2020 12:43:32 GMT
       expires:
       - '-1'
       pragma:
@@ -193,56 +192,29 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
       [{"name": "vmss1VNET", "type": "Microsoft.Network/virtualNetworks", "location":
-      "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
+      "eastus2", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {}, "properties":
       {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"name":
-      "vmss1Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"apiVersion":
-      "2018-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "vmss1LBPublicIP",
-      "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
-      "Static"}, "sku": {"name": "Standard"}}, {"type": "Microsoft.Network/loadBalancers",
-      "name": "vmss1LB", "location": "westus", "tags": {}, "apiVersion": "2018-01-01",
-      "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET", "Microsoft.Network/publicIpAddresses/vmss1LBPublicIP"],
-      "properties": {"backendAddressPools": [{"name": "vmss1LBBEPool"}], "inboundNatPools":
-      [{"name": "vmss1LBNatPool", "properties": {"frontendIPConfiguration": {"id":
-      "[concat(resourceId(\''Microsoft.Network/loadBalancers\'', \''vmss1LB\''), \''/frontendIPConfigurations/\'',
-      \''loadBalancerFrontEnd\'')]"}, "protocol": "tcp", "frontendPortRangeStart":
-      "50000", "frontendPortRangeEnd": "50119", "backendPort": 22}}], "frontendIPConfigurations":
-      [{"name": "loadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP"}}}],
-      "loadBalancingRules": [{"name": "LBRule", "properties": {"frontendIPConfiguration":
-      {"id": "[concat(resourceId(\''Microsoft.Network/loadBalancers\'', \''vmss1LB\''),
-      \''/frontendIPConfigurations/\'', \''loadBalancerFrontEnd\'')]"}, "backendAddressPool":
-      {"id": "[concat(resourceId(\''Microsoft.Network/loadBalancers\'', \''vmss1LB\''),
-      \''/backendAddressPools/\'', \''vmss1LBBEPool\'')]"}, "protocol": "tcp", "frontendPort":
-      80, "backendPort": 80, "enableFloatingIP": false, "idleTimeoutInMinutes": 5}}]},
-      "sku": {"name": "Standard"}}, {"type": "Microsoft.Network/networkSecurityGroups",
-      "name": "vmss1NSG", "apiVersion": "2015-06-15", "location": "westus", "tags":
-      {}, "dependsOn": [], "properties": {"securityRules": [{"name": "default-allow-ssh",
-      "properties": {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange":
-      "22", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "access":
-      "Allow", "priority": 1000, "direction": "Inbound"}}]}}, {"type": "Microsoft.Compute/virtualMachineScaleSets",
-      "name": "vmss1", "location": "westus", "tags": {}, "apiVersion": "2019-03-01",
-      "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET", "Microsoft.Network/loadBalancers/vmss1LB",
-      "Microsoft.Network/networkSecurityGroups/vmss1NSG"], "sku": {"name": "Standard_DS1_v2",
-      "capacity": 101}, "properties": {"overprovision": false, "upgradePolicy": {"mode":
-      "manual"}, "virtualMachineProfile": {"storageProfile": {"osDisk": {"createOption":
-      "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
-      "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
-      "18.04-LTS", "version": "latest"}}, "osProfile": {"computerNamePrefix": "vmss1fca8",
-      "adminUsername": "ubuntuadmin", "linuxConfiguration": {"disablePasswordAuthentication":
-      true, "ssh": {"publicKeys": [{"path": "/home/ubuntuadmin/.ssh/authorized_keys",
-      "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC86Jgk+Wp0JneEvsoZMG3PIL/zMJIbuY+r3xakXOZ8thq9gOQVgxSLdwUELhPy1iekWGsoGrvQIMEb22upTPG/9VaulCAVXfZnIetNUlId5DNAxOiyvOMEIqhPuxIOce0KKeGnCMkfPGzXrT3hqg8mSU8xW4cDNKJGikpPLMTX+O8V0QptnO5n7E4vH3zPOWuH9Xf0D2uTc6Z8JUFIljy1LfmvJkAitEsPWBott4k4JtxueODbNB+RaQT/p4FUGcxKMObAgQw0jJWKoZTylQOi0xtOOBKAS19+bXwo8AMOoUOB+8CHDX+3okZI3thHN7C1oL7qm6pfHdgvNrt1sPFl"}]}}},
-      "networkProfile": {"networkInterfaceConfigurations": [{"name": "vmss1fca8Nic",
-      "properties": {"primary": "true", "ipConfigurations": [{"name": "vmss1fca8IPConfig",
-      "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},
-      "loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/vmss1LB/backendAddressPools/vmss1LBBEPool"}],
-      "loadBalancerInboundNatPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/loadBalancers/vmss1LB/inboundNatPools/vmss1LBNatPool"}]}}],
-      "networkSecurityGroup": {"id": "[resourceId(\''Microsoft.Network/networkSecurityGroups\'',
-      \''vmss1NSG\'')]"}}}]}}, "singlePlacementGroup": false}}], "outputs": {"VMSS":
-      {"type": "object", "value": "[reference(resourceId(\''Microsoft.Compute/virtualMachineScaleSets\'',
-      \''vmss1\''),providers(\''Microsoft.Compute\'', \''virtualMachineScaleSets\'').apiVersions[0])]"}}},
-      "parameters": {}, "mode": "Incremental"}}'''
+      "vmss1Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type":
+      "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss1", "location": "eastus2",
+      "tags": {}, "apiVersion": "2020-06-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET"],
+      "sku": {"name": "Standard_DS1_v2", "capacity": 101}, "properties": {"overprovision":
+      false, "upgradePolicy": {"mode": "manual"}, "virtualMachineProfile": {"storageProfile":
+      {"osDisk": {"createOption": "FromImage", "caching": "ReadWrite", "managedDisk":
+      {"storageAccountType": null}}, "imageReference": {"publisher": "Canonical",
+      "offer": "UbuntuServer", "sku": "18.04-LTS", "version": "latest"}}, "networkProfile":
+      {"networkInterfaceConfigurations": [{"name": "vmss12a28Nic", "properties": {"primary":
+      "true", "ipConfigurations": [{"name": "vmss12a28IPConfig", "properties": {"subnet":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"}}}]}}]},
+      "osProfile": {"computerNamePrefix": "vmss12a28", "adminUsername": "ubuntuadmin",
+      "linuxConfiguration": {"disablePasswordAuthentication": true, "ssh": {"publicKeys":
+      [{"path": "/home/ubuntuadmin/.ssh/authorized_keys", "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmzXeK++L20uMK/Ug5wpjnWWyMlHoecEOxyHueHc1gPDj8qgLChiHt1OWJ1sDjiqBJ+hEEwZLjN8lCmUvWzzrl20d7M/BVp1ejulE/zr999kWuY3m5+FpAkbbxeO9LWoafwOir9dPzIOjDGdPWKbgHr3SerOHAuvVdXJDhWHtW5lB/MEnrxi48Pz/8k1lD1YccUAI6zDgKVJPBEk9fWMW8H0hKYsRXmlxdtg2npBQK7kbmcB2NJPEhTVgxVPqSaBVAt2lOCC/QQvAXcoD0lJGujp1IVYqSUarS5RnrYEDZ9Q6EKduWrP0GFkFkF8YzpFe+BRFaV8bLJrvZN43vgzRj
+      fey@DESKTOP-ARGPJS4\n"}]}}}}, "singlePlacementGroup": false}}], "outputs": {"VMSS":
+      {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
+      ''vmss1''),providers(''Microsoft.Compute'', ''virtualMachineScaleSets'').apiVersions[0])]"}}},
+      "parameters": {}, "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -253,51 +225,46 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '5284'
+      - '2442'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --validate --image --disable-overprovision --instance-count --single-placement-group
-        --admin-username --generate-ssh-keys
+        --admin-username --generate-ssh-keys --lb
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2021-04-01
   response:
     body:
-      string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
-        deployment ''vmss_deploy_sEEQtunu0wXOpKNx3SxSuxX1yNGXPmp2'' is not valid according
-        to the validation procedure. The tracking id is ''6cb70fa9-0c4f-4ed7-b89f-fc72a713246e''.
-        See inner errors for details.","details":[{"code":"QuotaExceeded","message":"The
-        operation couldn''t be completed as it results in exceeding quota limit of
-        Core. Maximum allowed: 100, Current in use: 17, Additional requested: 101.
-        Read more about quota limits at https://aka.ms/AzurePerVMQuotaLimits. Submit
-        a request for Quota increase using the link https://aka.ms/ProdportalCRP/?#create/Microsoft.Support/Parameters/%7B%22subId%22:%220b1f6471-1bf0-4dda-aec3-cb9272f09590%22,%22pesId%22:%2206bfd9d3-516b-d5c6-5802-169c800dec89%22,%22supportTopicId%22:%22e12e3d1d-7fa0-af33-c6d0-3c50df9658a3%22%7D."}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/vmss_deploy_ksvlksg2CqUUBPLrrF5CHMI2hY8ZjAhJ","name":"vmss_deploy_ksvlksg2CqUUBPLrrF5CHMI2hY8ZjAhJ","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9205058721319154317","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-24T12:43:35.5326784Z","duration":"PT0S","correlationId":"066135d1-1cb2-45fb-924c-88d6de06c275","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '841'
+      - '1860'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 16:17:49 GMT
+      - Mon, 24 Aug 2020 12:43:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1198'
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
 version: 1

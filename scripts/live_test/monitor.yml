@@ -1,0 +1,20 @@
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: Monitor
+  displayName: Monitor
+  pool:
+    vmImage: 'Ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        pip install mysql-connector-python
+        pip install requests
+        python /home/vsts/work/1/s/scripts/live_test/monitor.py "$(DB_PWD)" "$(GITHUB_TOKEN)"

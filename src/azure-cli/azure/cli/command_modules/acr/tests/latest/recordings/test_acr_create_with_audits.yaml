@@ -13,24 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-24T16:44:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-30T21:06:29Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 16:44:31 GMT
+      - Thu, 30 Dec 2021 21:06:24 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +43,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"sku": {"name": "PerGB2018"}, "retentionInDays":
-      30}}'
+      30, "workspaceCapping": {}}}'
     headers:
       Accept:
       - application/json
@@ -57,40 +54,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '91'
+      - '115'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-loganalytics/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/11.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/wprkspace000003?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/wprkspace000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"902bbf0d-fa55-476c-bf3c-be9f1ceefcfb\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \"e0302d7b-a92f-4179-ad94-1a6a38722f08\",\r\n    \"provisioningState\": \"Creating\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 24 Oct 2019 16:44:40 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Thu, 30 Dec 2021 21:06:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 24 Oct 2019 19:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/wprkspace000003\",\r\n
+        \"Fri, 31 Dec 2021 08:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 30 Dec 2021 21:06:27 GMT\",\r\n
+        \   \"modifiedDate\": \"Thu, 30 Dec 2021 21:06:27 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/wprkspace000003\",\r\n
         \ \"name\": \"wprkspace000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"westus\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '928'
+      - '1064'
       content-type:
       - application/json
       date:
-      - Thu, 24 Oct 2019 16:44:40 GMT
+      - Thu, 30 Dec 2021 21:06:27 GMT
       pragma:
       - no-cache
       server:
@@ -101,7 +98,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -112,7 +109,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -122,32 +119,34 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-loganalytics/0.2.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.31.0 azsdk-python-mgmt-loganalytics/11.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/wprkspace000003?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.OperationalInsights/workspaces/wprkspace000003?api-version=2021-06-01
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
-        \"902bbf0d-fa55-476c-bf3c-be9f1ceefcfb\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \"e0302d7b-a92f-4179-ad94-1a6a38722f08\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
         \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"lastSkuUpdate\":
-        \"Thu, 24 Oct 2019 16:44:40 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \"Thu, 30 Dec 2021 21:06:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
         \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
         \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
         \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
-        \"Thu, 24 Oct 2019 19:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
-        \   }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/wprkspace000003\",\r\n
+        \"Fri, 31 Dec 2021 08:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 30 Dec 2021 21:06:27 GMT\",\r\n
+        \   \"modifiedDate\": \"Thu, 30 Dec 2021 21:06:31 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/wprkspace000003\",\r\n
         \ \"name\": \"wprkspace000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
         \ \"location\": \"westus\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '929'
+      - '1065'
       content-type:
       - application/json
       date:
-      - Thu, 24 Oct 2019 16:45:11 GMT
+      - Thu, 30 Dec 2021 21:06:58 GMT
       pragma:
       - no-cache
       server:
@@ -181,24 +180,21 @@ interactions:
       ParameterSetName:
       - -n -g --sku --workspace
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-24T16:44:24Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-30T21:06:29Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '310'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 16:45:12 GMT
+      - Thu, 30 Dec 2021 21:06:59 GMT
       expires:
       - '-1'
       pragma:
@@ -214,7 +210,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "sku": {"name": "Basic"}, "properties": {"adminUserEnabled":
-      false}}'
+      false, "anonymousPullEnabled": false}}'
     headers:
       Accept:
       - application/json
@@ -225,30 +221,81 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '91'
+      - '122'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --sku --workspace
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-containerregistry/3.0.0rc6 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2019-10-24T16:45:16.3436036Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2019-10-24T16:45:17.5594083+00:00","status":"disabled"}}}}'
+      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:07:00.1864563+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:07:00.1864563+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:07:00.1864563Z","provisioningState":"Creating","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:07:00.8932053+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
     headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-7460a380-69b4-11ec-94fa-00155d249691?api-version=2021-08-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '742'
+      - '1194'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 16:45:17 GMT
+      - Thu, 30 Dec 2021 21:07:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --workspace
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-7460a380-69b4-11ec-94fa-00155d249691?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/operationStatuses/registries-7460a380-69b4-11ec-94fa-00155d249691?api-version=2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:07:10 GMT
       expires:
       - '-1'
       pragma:
@@ -263,17 +310,64 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"metrics": [{"category": "AllMetrics", "enabled": true,
-      "retentionPolicy": {"enabled": false, "days": 0}}], "logs": [{"category": "ContainerRegistryRepositoryEvents",
-      "enabled": true, "retentionPolicy": {"enabled": false, "days": 0}}, {"category":
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --workspace
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Basic","tier":"Basic"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T21:07:00.1864563+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T21:07:00.1864563+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2021-12-30T21:07:00.1864563Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T21:07:00.8932053+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1195'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 21:07:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"metrics": [{"category": "AllMetrics", "enabled": true,
+      "retentionPolicy": {"enabled": true, "days": 0}}], "logs": [{"category": "ContainerRegistryRepositoryEvents",
+      "enabled": true, "retentionPolicy": {"enabled": true, "days": 0}}, {"category":
       "ContainerRegistryLoginEvents", "enabled": true, "retentionPolicy": {"enabled":
-      false, "days": 0}}], "workspaceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003"}}'''
+      true, "days": 0}}], "workspaceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003"}}'
     headers:
       Accept:
       - application/json
@@ -284,30 +378,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '598'
+      - '531'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g --sku --workspace
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings?api-version=2017-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/providers/Microsoft.Insights/diagnosticSettings/clireg000002-diagnostic-settings?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.containerregistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings","type":null,"name":"clireg000002-diagnostic-settings","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[{"timeGrain":"PT1M","category":"AllMetrics","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logs":[{"category":"ContainerRegistryRepositoryEvents","enabled":true,"retentionPolicy":{"enabled":false,"days":0}},{"category":"ContainerRegistryLoginEvents","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.containerregistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings","type":"Microsoft.Insights/diagnosticSettings","name":"clireg000002-diagnostic-settings","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[{"timeGrain":"PT1M","category":"AllMetrics","enabled":true,"retentionPolicy":{"enabled":true,"days":0}}],"logs":[{"category":"ContainerRegistryRepositoryEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":true,"days":0}},{"category":"ContainerRegistryLoginEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":true,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1151'
+      - '1078'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 16:45:24 GMT
+      - Thu, 30 Dec 2021 21:07:14 GMT
       expires:
       - '-1'
       pragma:
@@ -338,29 +429,24 @@ interactions:
       - monitor diagnostic-settings show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --resource -n
       User-Agent:
-      - python/3.6.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-monitor/0.5.2 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings?api-version=2017-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/providers/Microsoft.Insights/diagnosticSettings/clireg000002-diagnostic-settings?api-version=2017-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.containerregistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings","type":null,"name":"clireg000002-diagnostic-settings","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[{"category":"AllMetrics","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logs":[{"category":"ContainerRegistryRepositoryEvents","enabled":true,"retentionPolicy":{"enabled":false,"days":0}},{"category":"ContainerRegistryLoginEvents","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.containerregistry/registries/clireg000002/providers/microsoft.insights/diagnosticSettings/clireg000002-diagnostic-settings","type":"Microsoft.Insights/diagnosticSettings","name":"clireg000002-diagnostic-settings","location":null,"kind":null,"tags":null,"properties":{"storageAccountId":null,"serviceBusRuleId":null,"workspaceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.OperationalInsights/workspaces/wprkspace000003","eventHubAuthorizationRuleId":null,"eventHubName":null,"metrics":[{"category":"AllMetrics","enabled":true,"retentionPolicy":{"enabled":true,"days":0}}],"logs":[{"category":"ContainerRegistryRepositoryEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":true,"days":0}},{"category":"ContainerRegistryLoginEvents","categoryGroup":null,"enabled":true,"retentionPolicy":{"enabled":true,"days":0}}],"logAnalyticsDestinationType":null},"identity":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1132'
+      - '1059'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 16:45:26 GMT
+      - Thu, 30 Dec 2021 21:07:15 GMT
       expires:
       - '-1'
       pragma:

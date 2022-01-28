@@ -5,13 +5,22 @@
 
 import os
 import datetime
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
+from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
+
 
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
+
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            BatchAccountKeyReplacer(),
+            StorageSASReplacer()
+        ])
 
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
@@ -49,9 +58,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('state', 'deleting')])
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='japanwest')
-    def test_batch_pool_cmd(self, resource_group, batch_account_name):
-        #
+    @BatchAccountPreparer()
+    def test_batch_pool_cmd(
+            self,
+            resource_group,
+            batch_account_name):
         endpoint = self.get_account_endpoint(
             batch_account_name,
             resource_group).replace("https://", "")
@@ -78,37 +89,38 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--node-agent-sku-id "batch.node.windows amd64"',
                                 expect_failure=True)
 
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04"'
+                                ' --disk-encryption-targets "TemporaryDisk"')
+
+        time.sleep(120)
+
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
             self.check('startTask.commandLine', "cmd /c echo test"),
             self.check('startTask.userIdentity.autoUser.elevationLevel', "admin")])
 
-        target = result.get_output_in_json()['currentDedicatedNodes']
-        self.batch_cmd('batch pool resize --pool-id {p_id} --target-dedicated-nodes 5 '
-                       '--target-low-priority-nodes 3')
+        target = result.get_output_in_json()['currentLowPriorityNodes']
+        self.batch_cmd('batch pool resize --pool-id {p_id} --target-dedicated-nodes 0 --target-low-priority-nodes 3')
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'resizing'),
-            self.check('targetDedicatedNodes', 5),
             self.check('targetLowPriorityNodes', 3),
             self.check('id', 'xplatCreatedPool')])
 
         self.batch_cmd('batch pool node-counts list').assert_with_checks([
-            self.check('length(@)', 1),
-            self.check('[0].poolId', 'xplatCreatedPool'),
-            self.check('[0].dedicated.total', 0),
-            self.check('[0].lowPriority.total', 0)])
+            self.check('length(@)', 2),
+            self.check('[1].poolId', 'xplatCreatedPool'),
+            self.check('[1].lowPriority.total', 0)])
 
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
         if self.is_live or self.in_recording:
-            import time
             time.sleep(120)
 
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
-            self.check('currentDedicatedNodes', target),
-            self.check('targetDedicatedNodes', 5),
+            self.check('currentLowPriorityNodes', target),
             self.check('targetLowPriorityNodes', 3)])
 
         self.batch_cmd('batch pool reset --pool-id {p_id} --json-file "{u_file}"').assert_with_checks([
@@ -128,8 +140,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='eastus')
-    def test_batch_job_list_cmd(self, resource_group, batch_account_name):
+    @BatchAccountPreparer()
+    def test_batch_job_list_cmd(
+            self,
+            resource_group,
+            batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
             'j_id': 'xplatJob',
@@ -186,11 +201,13 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
         if self.is_live or self.in_recording:
-            import time
             time.sleep(10)
-        task_counts = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
-        self.assertEqual(task_counts["completed"], 0)
-        self.assertEqual(task_counts["active"], 1)
+        task_result = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
+
+        self.assertEqual(task_result["taskCounts"]["completed"], 0)
+        self.assertEqual(task_result["taskCounts"]["active"], 1)
+        self.assertEqual(task_result["taskSlotCounts"]["completed"], 0)
+        self.assertEqual(task_result["taskSlotCounts"]["active"], 1)
 
         self.batch_cmd('batch task delete --job-id {j_id} --task-id aaa --yes')
 
@@ -212,7 +229,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool create --id {p_id} --vm-size small --os-family 4')
 
         # test create job with missing parameters
-        self.kwargs['start'] = datetime.datetime.now().isoformat()
+        self.kwargs['start'] = datetime.datetime.utcnow().isoformat()
         with self.assertRaises(SystemExit):
             self.batch_cmd('batch job create --id {j_id} --metadata test=value '
                            '--job-manager-task-environment-settings a=b '
@@ -270,8 +287,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # TODO: test task commands
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='koreacentral')
-    def test_batch_pools_and_nodes(self, resource_group, batch_account_name):  # pylint:disable=too-many-statements
+    @BatchAccountPreparer()
+    def test_batch_pools_and_nodes(
+            self,
+            resource_group,
+            batch_account_name):  # pylint:disable=too-many-statements
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
             'pool_p': "azure-cli-test-paas",
@@ -313,10 +333,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool from JSON file
         self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
-        self.batch_cmd('batch pool create --json-file {json}')
+        self.batch_cmd('batch pool create --json-file "{json}"')
         self.batch_cmd('batch pool show --pool-id azure-cli-test-json').assert_with_checks([
             self.check('userAccounts[0].name', 'cliTestUser'),
-            self.check('startTask.userIdentity.userName', 'cliTestUser')])
+            self.check('startTask.userIdentity.userName', 'cliTestUser'),
+            self.check('taskSlotsPerNode', 3)
+        ])
 
         # test create pool from non-existant JSON file
         with self.assertRaises(SystemExit):
@@ -325,12 +347,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool from invalid JSON file
         with self.assertRaises(CLIError):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create-invalid.json').replace('\\', '\\\\')
-            self.batch_cmd('batch pool create --json-file {json}')
+            self.batch_cmd('batch pool create --json-file "{json}"')
 
         # test create pool from JSON file with additional parameters
         with self.assertRaises(SystemExit):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create.json').replace('\\', '\\\\')
-            self.batch_cmd('batch pool create --json-file {json} --vm-size small')
+            self.batch_cmd('batch pool create --json-file "{json}" --vm-size small')
 
         # test list pools
         pool_list = self.batch_cmd('batch pool list')
@@ -344,24 +366,23 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.assertEqual(len(pool_list), 1)
 
         # test resize pool
-        self.batch_cmd('batch pool resize --pool-id {pool_p} --target-dedicated-nodes 5')
+        self.batch_cmd('batch pool resize --pool-id {pool_p} --target-dedicated-nodes 0 --target-low-priority-nodes 5')
         self.batch_cmd('batch pool show --pool-id {pool_p} '
-                       '--select "allocationState, targetDedicatedNodes"').assert_with_checks([
-                           self.check('allocationState', 'resizing'),
-                           self.check('targetDedicatedNodes', 5)])
+                       '--select "allocationState, targetLowPriorityNodes"').assert_with_checks([
+                           self.check('targetLowPriorityNodes', 5)])
 
         # test cancel pool resize
         self.batch_cmd('batch pool resize --pool-id {pool_p} --abort')
 
         # test enable autoscale
         self.batch_cmd('batch pool autoscale enable --pool-id {pool_i} '
-                       '--auto-scale-formula "$TargetDedicatedNodes=3"')
+                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
         self.batch_cmd('batch pool show --pool-id {pool_i} --select "enableAutoScale"').assert_with_checks([
             self.check('enableAutoScale', True)])
 
         # test evaluate autoscale
         self.batch_cmd('batch pool autoscale evaluate --pool-id {pool_i} '
-                       '--auto-scale-formula "$TargetDedicatedNodes=3"')
+                       '--auto-scale-formula "$TargetLowPriorityNodes=3"')
 
         # test disable autoscale
         self.batch_cmd('batch pool autoscale disable --pool-id {pool_i}')
@@ -384,8 +405,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test delete iaas pool
         self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
-        self.batch_cmd('batch pool show --pool-id {pool_i} --select "state"').assert_with_checks([
-            self.check('state', 'deleting')])
 
         # test app package reference
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '

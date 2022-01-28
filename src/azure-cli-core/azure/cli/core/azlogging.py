@@ -29,7 +29,8 @@ import datetime
 
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
-from knack.log import CLILogging, get_logger
+from knack.events import EVENT_CLI_POST_EXECUTE
+from knack.log import CLILogging, get_logger, LOG_FILE_ENCODING
 from knack.util import ensure_dir
 
 
@@ -38,7 +39,7 @@ _CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
 
 
 class AzCliLogging(CLILogging):
-    _COMMAND_METADATA_LOGGER = 'az_command_data_logger'
+    COMMAND_METADATA_LOGGER = 'az_command_data_logger'
 
     def __init__(self, name, cli_ctx=None):
         super(AzCliLogging, self).__init__(name, cli_ctx)
@@ -46,6 +47,16 @@ class AzCliLogging(CLILogging):
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
+        self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
+
+    def configure(self, args):
+        super(AzCliLogging, self).configure(args)
+        from knack.log import CliLogLevel
+        if self.log_level == CliLogLevel.DEBUG:
+            # As azure.core.pipeline.policies.http_logging_policy is a redacted version of
+            # azure.core.pipeline.policies._universal, disable azure.core.pipeline.policies.http_logging_policy
+            # when debug log is shown.
+            logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
 
     def get_command_log_dir(self):
         return self.command_log_dir
@@ -75,12 +86,14 @@ class AzCliLogging(CLILogging):
             self = cli_ctx.logging
             args = kwargs['args']
 
-            cmd_logger = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)
+            metadata_logger = logging.getLogger(AzCliLogging.COMMAND_METADATA_LOGGER)
 
-            self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
-            get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
+            # Overwrite the default of knack.log.CLILogging._is_file_log_enabled() to True
+            self.file_log_enabled = cli_ctx.config.getboolean('logging', 'enable_log_file', fallback=True)
 
-            _delete_old_logs(self.command_log_dir)
+            if self.file_log_enabled:
+                self._init_command_logfile_handlers(metadata_logger, args)  # pylint: disable=protected-access
+                _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
 
@@ -97,12 +110,15 @@ class AzCliLogging(CLILogging):
         log_name = "{}.{}.{}.{}.{}".format(date_str, time_str, command_str, os.getpid(), "log")
 
         log_file_path = os.path.join(self.command_log_dir, log_name)
+        get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", log_file_path)
 
-        logfile_handler = logging.FileHandler(log_file_path)
+        logfile_handler = logging.FileHandler(log_file_path, encoding=LOG_FILE_ENCODING)
 
         lfmt = logging.Formatter(_CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
         logfile_handler.setFormatter(lfmt)
         logfile_handler.setLevel(logging.DEBUG)
+        # command_metadata_logger should always accept all levels regardless of the root logger level.
+        command_metadata_logger.setLevel(logging.DEBUG)
         command_metadata_logger.addHandler(logfile_handler)
 
         self.command_logger_handler = logfile_handler
@@ -158,8 +174,7 @@ class AzCliLogging(CLILogging):
                 continue
 
             # else if positional or optional argument / value
-            else:
-                cleaned_args.append(placeholder)
+            cleaned_args.append(placeholder)
 
         return cleaned_args
 
@@ -168,27 +183,40 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-    def end_cmd_metadata_logging(self, exit_code):
+    @staticmethod
+    def deinit_cmd_metadata_logging(cli_ctx):
+        cli_ctx.logging.end_cmd_metadata_logging(cli_ctx.result.exit_code if cli_ctx.result else 128)
+
+    def end_cmd_metadata_logging(self, exit_code):  # leave it non '-' prefix to not to break user
         if self.command_metadata_logger:
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
             # We have finished metadata logging, remove handler and set command_metadata_handler to None.
             # crucial to remove handler as in python logger objects are shared which can affect testing of this logger
             # we do not want duplicate handlers to be added in subsequent calls of _init_command_logfile_handlers
+            self.command_logger_handler.close()
             self.command_metadata_logger.removeHandler(self.command_logger_handler)
             self.command_metadata_logger = None
 
 
-class CommandLoggerContext(object):
+class CommandLoggerContext:
+    """A context manager during which error logs are also written to az_command_data_logger for
+    `az feedback` usage.
+    """
     def __init__(self, module_logger):
-        self.logger = module_logger
-        self.hdlr = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)  # pylint: disable=protected-access
+        metadata_logger = logging.getLogger(AzCliLogging.COMMAND_METADATA_LOGGER)
+        original_error = module_logger.error
+
+        # Duplicate error logging to metadata logger
+        def error_duplicated(*args, **kwargs):
+            original_error(*args, **kwargs)
+            metadata_logger.error(*args, **kwargs)
+        from unittest import mock
+        self.mock_cm = mock.patch.object(module_logger, 'error', error_duplicated)
 
     def __enter__(self):
-        if self.hdlr:
-            self.logger.addHandler(self.hdlr)  # add command metadata handler
+        self.mock_cm.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.hdlr:
-            self.logger.removeHandler(self.hdlr)
+        self.mock_cm.__exit__(exc_type, exc_val, exc_tb)

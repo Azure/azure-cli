@@ -17,7 +17,7 @@ class ResourceDeleteTests(ScenarioTest):
         password = self.create_random_name('Password#1', 30)
 
         self.cmd('vm create -n {} -g {} --image UbuntuLTS --tag {} '
-                 '--admin-username {} --admin-password {} --authentication-type {}'
+                 '--admin-username {} --admin-password {} --authentication-type {} --nsg-rule None'
                  .format(vm_name, resource_group, tag_name, username, password, 'password'))
 
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()

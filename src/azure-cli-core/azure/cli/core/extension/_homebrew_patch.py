@@ -18,7 +18,7 @@ def is_homebrew():
 
 
 # A workaround for https://github.com/Azure/azure-cli/issues/4428
-class HomebrewPipPatch(object):  # pylint: disable=too-few-public-methods
+class HomebrewPipPatch:  # pylint: disable=too-few-public-methods
 
     CFG_FILE = os.path.expanduser(os.path.join('~', '.pydistutils.cfg'))
 

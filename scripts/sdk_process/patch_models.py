@@ -35,6 +35,13 @@ header = copyright_header + b"""from msrest.serialization import Model
 from msrest.exceptions import HttpOperationError
 """
 
+track2_header = copyright_header + b"""import datetime
+import msrest
+import msrest.serialization
+from typing import Dict, List, Optional, Union
+from msrest.exceptions import HttpOperationError
+"""
+
 paging_header = copyright_header + b"""from msrest.paging import Paged
 """
 
@@ -59,11 +66,12 @@ def parse_input(input_parameter):
     return package_name, module_name
 
 
-def solve_mro(models):
+def solve_mro(models, track2=False):
     for models_module in models:
         models_path = models_module.__path__[0]
         _LOGGER.info("Working on %s", models_path)
-        if Path(models_path, "models_py3.py").exists():
+
+        if not track2 and Path(models_path, "models_py3.py").exists():
             _LOGGER.info("Skipping since already patched")
             return
 
@@ -71,14 +79,14 @@ def solve_mro(models):
         with tempfile.TemporaryDirectory() as temp_folder:
             final_models_path = Path(temp_folder, "models")
             final_models_path.mkdir()
-            solve_one_model(models_module, final_models_path)
+            solve_one_model(models_module, final_models_path, track2=track2)
 
             # Switch the files
             shutil.rmtree(models_path)
             shutil.move(final_models_path, models_path)
 
 
-def solve_one_model(models_module, output_folder):
+def solve_one_model(models_module, output_folder, track2=False):
     """Will build the compacted models in the output_folder"""
 
     models_classes = [
@@ -88,11 +96,6 @@ def solve_one_model(models_module, output_folder):
     ]
     # Only sort based on the first element in the tuple
     models_classes.sort(key=lambda x: x[0])
-
-    py2_models_classes = [
-        (len_mro, path.replace("_py3.py", ".py"), None)
-        for len_mro, path, _ in models_classes
-    ]
 
     paged_models_classes = [
         (inspect.getfile(model_class), model_class) for model_name, model_class in vars(models_module).items()
@@ -110,8 +113,7 @@ def solve_one_model(models_module, output_folder):
     else:
         enum_file_module_name = None
 
-    write_model_file(Path(output_folder, "models_py3.py"), models_classes)
-    write_model_file(Path(output_folder, "models.py"), py2_models_classes)
+    write_model_file(Path(output_folder, "models_py3.py"), models_classes, track2=track2)
     write_paging_file(Path(output_folder, "paged_models.py"), paged_models_classes)
     write_init(
         Path(output_folder, "__init__.py"),
@@ -122,9 +124,12 @@ def solve_one_model(models_module, output_folder):
     )
 
 
-def write_model_file(output_file_path, classes_to_write):
+def write_model_file(output_file_path, classes_to_write, track2=False):
     with open(output_file_path, "bw") as write_fd:
-        write_fd.write(header)
+        if track2:
+            write_fd.write(track2_header)
+        else:
+            write_fd.write(header)
 
         for model in classes_to_write:
             _, model_file_path, _ = model
@@ -191,7 +196,7 @@ def find_models_to_change(module_name):
         return [
             importlib.import_module('.' + label + '.models', main_module.__name__)
             for (_, label, ispkg) in pkgutil.iter_modules(main_module.__path__)
-            if ispkg
+            if ispkg and label != 'aio'
         ]
 
 
@@ -220,7 +225,26 @@ def find_autorest_generated_folder(module_prefix="azure.mgmt"):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
+    track2_packages = [
+        'azure.mgmt.keyvault',
+        'azure.mgmt.storage',
+        'azure.mgmt.compute',
+        'azure.mgmt.network',
+        'azure.mgmt.monitor',
+        'azure.mgmt.rdbms'
+        'azure.mgmt.loganalytics',
+        'azure.mgmt.web',
+        'azure.mgmt.cosmosdb',
+        'azure.mgmt.privatedns',
+        'azure.mgmt.dms',
+        'azure.mgmt.sqlvirtualmachine'
+    ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):
         models = find_models_to_change(autorest_package)
-        solve_mro(models)
+        track2 = False
+        for track2_pkg in track2_packages:
+            if autorest_package.startswith(track2_pkg):
+                track2 = True
+                break
+        solve_mro(models, track2=track2)

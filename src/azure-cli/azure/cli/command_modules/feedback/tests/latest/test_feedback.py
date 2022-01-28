@@ -8,6 +8,8 @@ import logging
 import os
 import time
 import unittest
+from unittest import mock
+from knack.events import EVENT_CLI_POST_EXECUTE
 
 from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension.operations import get_extensions, add_extension, remove_extension, WheelExtension
@@ -136,7 +138,7 @@ class TestCommandLogFile(ScenarioTest):
         # check failed cli command:
         data_dict = command_log_files[0].command_data_dict
         self.assertTrue(data_dict["success"] is False)
-        self.assertEqual("There was an error during execution.", data_dict["errors"][0].strip())
+        self.assertEqual("The extension alias is not installed.", data_dict["errors"][0].strip())
         self.assertEqual(data_dict["command_args"], "extension remove -n {}")
 
         # check successful cli command
@@ -190,16 +192,18 @@ class TestCommandLogFile(ScenarioTest):
         cli_ctx = get_dummy_cli()
         cli_ctx.logging.command_log_dir = self.temp_command_log_dir
 
-        result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+        # azure.cli.core.util.handle_exception is mocked by azure.cli.testsdk.patches.patch_main_exception_handler
+        # Patch it again so that errors are properly written to command log file.
+        from azure.cli.core.util import handle_exception
+        original_handle_exception = handle_exception
 
-        # manually handle error logging as azure.cli.core.util's handle_exception function is mocked out in testsdk / patches
-        # this logged error tests that we can properly parse errors from command log file.
-        with CommandLoggerContext(logger):
-            if result.exit_code != 0:
-                logger.error("There was an error during execution.")
+        def _handle_exception_with_log(ex, *args, **kwargs):
+            with CommandLoggerContext(logger):
+                logger.error(ex)
+            original_handle_exception(*args, **kwargs)
 
-        cli_ctx.logging.end_cmd_metadata_logging(result.exit_code)
-
+        with mock.patch('azure.cli.core.util.handle_exception', _handle_exception_with_log):
+            result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
         return result
 
 

@@ -8,6 +8,7 @@ import os
 import shutil
 from uuid import UUID
 
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.command_modules.botservice.bot_json_formatter import BotJsonFormatter
 from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
@@ -21,6 +22,7 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
+    ErrorException,
     Sku)
 
 from knack.util import CLIError
@@ -75,9 +77,31 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
+def __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name):
+    # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
+    logger.debug('Failed name availability check for provided bot name "%s".\n'
+                 'Checking if bot exists in Resource Group "%s".', resource_name, resource_group_name)
+    try:
+        # If the bot exists, return the bot's information to the user
+        existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
+        logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
+        return existing_bot
+    except ErrorException as e:
+        if e.error.error.code == 'ResourceNotFound':
+            code = e.error.error.code
+            message = e.error.error.message
+
+            logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
+                         '"%s"', resource_name, resource_group_name, code, message)
+            raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
+
+        # For other error codes, raise them to the user
+        raise e
+
+
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
-           description=None, display_name=None, endpoint=None, tags=None, location='Central US',
-           sku_name='F0', deploy_echo=None):
+           description=None, display_name=None, endpoint=None, tags=None, location='global',
+           sku_name='F0', deploy_echo=None, cmek_key_vault_url=None):
     # Kind parameter validation
     kind = kind.lower()
     registration_kind = 'registration'
@@ -91,9 +115,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     # Check the resource name availability for the bot.
     name_response = NameAvailability.check_name_availability(client, resource_name, kind)
     if not name_response.valid:
-        # If the name is unavailable, gracefully exit and log the reason for the user.
-        raise CLIError('Unable to create a bot with a name of "{0}".\nReason: {1}'
-                       .format(resource_name, name_response.message))
+        return __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name)
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -125,8 +147,12 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         if not endpoint:
             endpoint = ''
 
+        is_cmek_enabled = False
+        if cmek_key_vault_url is not None:
+            is_cmek_enabled = True
+
         parameters = Bot(
-            location='global',
+            location=location,
             sku=Sku(name=sku_name),
             kind=kind,
             tags=tags,
@@ -134,7 +160,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
                 display_name=display_name,
                 description=description,
                 endpoint=endpoint,
-                msa_app_id=msa_app_id
+                msa_app_id=msa_app_id,
+                is_cmek_enabled=is_cmek_enabled,
+                cmek_key_vault_url=cmek_key_vault_url
             )
         )
         logger.info('Bot parameters client side validation successful.')
@@ -162,7 +190,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     creation_results = BotTemplateDeployer.create_app(
         cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        location, sku_name, language, bot_template_type)
+        location, sku_name, language, bot_template_type, cmek_key_vault_url)
 
     return creation_results
 
@@ -655,7 +683,8 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
 def update(client, resource_group_name, resource_name, endpoint=None, description=None,
            display_name=None, tags=None, sku_name=None, app_insights_key=None,
-           app_insights_api_key=None, app_insights_app_id=None, icon_url=None):
+           app_insights_api_key=None, app_insights_app_id=None, icon_url=None,
+           encryption_off=None, cmek_key_vault_url=None):
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -674,6 +703,18 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
 
     if app_insights_api_key:
         bot_props.developer_app_insights_api_key = app_insights_api_key
+
+    if cmek_key_vault_url is not None and encryption_off is not None:
+        error_msg = "Both --encryption-off and a --cmk-key-vault-key-url (encryption ON) were passed. " \
+                    "Please use only one: --cmk-key-vault-key-url or --encryption_off"
+        raise MutuallyExclusiveArgumentError(error_msg)
+
+    if cmek_key_vault_url is not None:
+        bot_props.cmek_key_vault_url = cmek_key_vault_url
+        bot_props.is_cmek_enabled = True
+
+    if encryption_off is not None:
+        bot_props.is_cmek_enabled = False
 
     return client.bots.update(resource_group_name,
                               resource_name,

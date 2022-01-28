@@ -1,0 +1,53 @@
+# Azure DevOps task for automation test using azdev and pytest
+
+parameters:
+- name: pythonVersion
+  type: string
+  default: 3.8
+- name: profile
+  type: string
+  default: latest
+- name: fullTest
+  displayName: Run full test?
+  type: boolean
+  default: false
+- name: module
+  displayName: Run test for specific module
+  type: string
+  default: ''
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: ${{ parameters.pythonVersion }}
+      displayName: "Use Python ${{ parameters.pythonVersion }}"
+  - template: ./azdev_setup.yml
+  - bash: |
+      set -ev
+
+      source env/bin/activate
+
+      echo pythonVersion: ${{ parameters.pythonVersion }}
+      echo profile: ${{ parameters.profile }}
+      echo fullTest: ${{ parameters.fullTest }}
+      echo module: ${{ parameters.module }}
+      echo Build.Reason: $(Build.Reason)
+
+      # Test specific module
+      module="${{ parameters.module }}"
+      if [[ -n $module ]]; then
+        echo "Running test for module '$module'"
+        azdev test --no-exitfirst --verbose --series $module
+        exit 0
+      fi
+
+      if [[ "$(Build.Reason)" == "PullRequest" && "${{ parameters.fullTest }}" == 'False' ]]; then
+        echo "Running incremental test"
+        azdev test --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }} --verbose --series
+      else
+        echo "Running full test"
+        azdev test --no-exitfirst --profile ${{ parameters.profile }} --verbose --series
+      fi
+    displayName: "azdev test"
+    env:
+      ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)

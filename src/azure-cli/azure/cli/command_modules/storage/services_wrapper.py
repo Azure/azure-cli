@@ -8,7 +8,7 @@ from azure.cli.core.profiles import get_sdk, ResourceType
 from ._client_factory import generic_data_service_factory
 
 
-class ServiceProperties(object):
+class ServiceProperties:
     def __init__(self, cli_ctx, name, service, account_name=None, account_key=None, connection_string=None,
                  sas_token=None):
         self.cli_ctx = cli_ctx
@@ -37,6 +37,9 @@ class ServiceProperties(object):
         if version:
             logging.version = str(version)
         return self.set_service_properties()(logging=logging, timeout=timeout)
+
+    def disable_logging(self, timeout=None):
+        return self.set_logging(read=False, write=False, delete=False, retention=0, timeout=timeout)
 
     def get_cors(self, timeout=None):
         return self.get_service_properties()(timeout=timeout).__dict__['cors']

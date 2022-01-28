@@ -1,0 +1,467 @@
+interactions:
+- request:
+    body: '{"location": "global", "properties": {"groupShortName": "ag1", "enabled":
+      true, "emailReceivers": [], "smsReceivers": [], "webhookReceivers": [], "itsmReceivers":
+      [], "azureAppPushReceivers": [], "automationRunbookReceivers": [], "voiceReceivers":
+      [], "logicAppReceivers": [], "azureFunctionReceivers": [], "armRoleReceivers":
+      [], "eventhubReceivers": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '356'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/actionGroups/ag1?api-version=2021-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1","type":"Microsoft.Insights/ActionGroups","name":"ag1","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"ag1","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventhubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[]},"identity":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '576'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:57:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '23'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000002"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "transactions", "timeAggregation": "Total", "dimensions": [{"name": "ResponseType",
+      "operator": "Include", "values": ["Success"]}, {"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      5.0}, {"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "timeAggregation": "Average", "dimensions": [{"name": "ApiName",
+      "operator": "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor metrics alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1220'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --scopes --region --action --description --condition --condition
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \ \"name\": \"alert1\",\r\n  \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \ \"location\": \"global\",\r\n  \"properties\": {\r\n    \"description\":
+        \"Test\",\r\n    \"severity\": 2,\r\n    \"enabled\": true,\r\n    \"scopes\":
+        [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
+        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
+        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
+        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"transactions\",\r\n
+        \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ResponseType\",\r\n
+        \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
+        \               \"Success\"\r\n              ]\r\n            },\r\n            {\r\n
+        \             \"name\": \"ApiName\",\r\n              \"operator\": \"Include\",\r\n
+        \             \"values\": [\r\n                \"GetBlob\"\r\n              ]\r\n
+        \           }\r\n          ],\r\n          \"operator\": \"GreaterThan\",\r\n
+        \         \"timeAggregation\": \"Total\",\r\n          \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n        },\r\n        {\r\n          \"threshold\":
+        250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
+        \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
+        \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
+        \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
+        \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n
+        \     {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '2125'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:58:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor clone
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --source-resource --target-resource
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
+        \"Test\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Insights/metricAlerts/alert2\",\r\n
+        \     \"name\": \"alert2\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
+        \"Test2\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Maximum\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Insights/metricAlerts/cloned-ip2-a5e2f0e6-563c-4fac-bad7-d1a5c565c1cc\",\r\n
+        \     \"name\": \"cloned-ip2-a5e2f0e6-563c-4fac-bad7-d1a5c565c1cc\",\r\n      \"type\":
+        \"Microsoft.Insights/metricAlerts\",\r\n      \"location\": \"global\",\r\n
+        \     \"properties\": {\r\n        \"description\": \"Test\",\r\n        \"severity\":
+        2,\r\n        \"enabled\": true,\r\n        \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/Microsoft.Network/publicIPAddresses/ip2\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonep7jfymyt53eitlooelizenhsra44u7nursbzpvcnzxvja3ur/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonem3ffkkshpkizwrqkcef5ijfxgagvqcb3c6dbxnrq632d672l/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
+        \"Test\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonem3ffkkshpkizwrqkcef5ijfxgagvqcb3c6dbxnrq632d672l/providers/Microsoft.Storage/storageAccounts/clitestpbxgmzflhaxutdl4h\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricName\": \"transactions\",\r\n              \"dimensions\":
+        [\r\n                {\r\n                  \"name\": \"ResponseType\",\r\n
+        \                 \"operator\": \"Include\",\r\n                  \"values\":
+        [\r\n                    \"Success\"\r\n                  ]\r\n                },\r\n
+        \               {\r\n                  \"name\": \"ApiName\",\r\n                  \"operator\":
+        \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob\"\r\n
+        \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            },\r\n            {\r\n              \"threshold\":
+        250.0,\r\n              \"name\": \"cond1\",\r\n              \"metricName\":
+        \"SuccessE2ELatency\",\r\n              \"dimensions\": [\r\n                {\r\n
+        \                 \"name\": \"ApiName\",\r\n                  \"operator\":
+        \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob\"\r\n
+        \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Average\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonem3ffkkshpkizwrqkcef5ijfxgagvqcb3c6dbxnrq632d672l/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
+        \"Test\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricName\": \"transactions\",\r\n              \"dimensions\":
+        [\r\n                {\r\n                  \"name\": \"ResponseType\",\r\n
+        \                 \"operator\": \"Include\",\r\n                  \"values\":
+        [\r\n                    \"Success\"\r\n                  ]\r\n                },\r\n
+        \               {\r\n                  \"name\": \"ApiName\",\r\n                  \"operator\":
+        \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob\"\r\n
+        \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            },\r\n            {\r\n              \"threshold\":
+        250.0,\r\n              \"name\": \"cond1\",\r\n              \"metricName\":
+        \"SuccessE2ELatency\",\r\n              \"dimensions\": [\r\n                {\r\n
+        \                 \"name\": \"ApiName\",\r\n                  \"operator\":
+        \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob\"\r\n
+        \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Average\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '9622'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:58:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000003"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "transactions", "timeAggregation": "Total", "dimensions": [{"name": "ResponseType",
+      "operator": "Include", "values": ["Success"]}, {"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      5.0}, {"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "timeAggregation": "Average", "dimensions": [{"name": "ApiName",
+      "operator": "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor clone
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1382'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --source-resource --target-resource
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
+  response:
+    body:
+      string: '{"code":"BadRequest","message":"Scopes property is invalid. Only single
+        resource is allowed for criteria type SingleResourceMultipleMetricCriteria.
+        If you want to create an alert on multiple resources, use MultipleResourceMultipleMetricCriteria
+        odata.type. Activity ID: 191b11da-2127-4a34-9e49-4826cff9bd03."}'
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '309'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:58:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 400
+      message: BadRequest
+- request:
+    body: '{"location": "global", "properties": {"description": "Test", "severity":
+      2, "enabled": true, "scopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000003"],
+      "evaluationFrequency": "PT1M", "windowSize": "PT5M", "targetResourceRegion":
+      "westus", "criteria": {"odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{"criterionType": "StaticThresholdCriterion", "name": "cond0", "metricName":
+      "transactions", "timeAggregation": "Total", "dimensions": [{"name": "ResponseType",
+      "operator": "Include", "values": ["Success"]}, {"name": "ApiName", "operator":
+      "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      5.0}, {"criterionType": "StaticThresholdCriterion", "name": "cond1", "metricName":
+      "SuccessE2ELatency", "timeAggregation": "Average", "dimensions": [{"name": "ApiName",
+      "operator": "Include", "values": ["GetBlob"]}], "operator": "GreaterThan", "threshold":
+      250.0}]}, "actions": [{"actionGroupId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor clone
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1220'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --source-resource --target-resource
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-monitor/3.0.0 Python/3.8.10 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/cloned-clitest000003-88888888-0000-0000-0000-000000000001?api-version=2018-03-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/cloned-clitest000003-88888888-0000-0000-0000-000000000001\",\r\n
+        \ \"name\": \"cloned-clitest000003-88888888-0000-0000-0000-000000000001\",\r\n
+        \ \"type\": \"Microsoft.Insights/metricAlerts\",\r\n  \"location\": \"global\",\r\n
+        \ \"properties\": {\r\n    \"description\": \"Test\",\r\n    \"severity\":
+        2,\r\n    \"enabled\": true,\r\n    \"scopes\": [\r\n      \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Storage/storageAccounts/clitest000003\"\r\n
+        \   ],\r\n    \"evaluationFrequency\": \"PT1M\",\r\n    \"windowSize\": \"PT5M\",\r\n
+        \   \"criteria\": {\r\n      \"allOf\": [\r\n        {\r\n          \"threshold\":
+        5.0,\r\n          \"name\": \"cond0\",\r\n          \"metricName\": \"transactions\",\r\n
+        \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ResponseType\",\r\n
+        \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
+        \               \"Success\"\r\n              ]\r\n            },\r\n            {\r\n
+        \             \"name\": \"ApiName\",\r\n              \"operator\": \"Include\",\r\n
+        \             \"values\": [\r\n                \"GetBlob\"\r\n              ]\r\n
+        \           }\r\n          ],\r\n          \"operator\": \"GreaterThan\",\r\n
+        \         \"timeAggregation\": \"Total\",\r\n          \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n        },\r\n        {\r\n          \"threshold\":
+        250.0,\r\n          \"name\": \"cond1\",\r\n          \"metricName\": \"SuccessE2ELatency\",\r\n
+        \         \"dimensions\": [\r\n            {\r\n              \"name\": \"ApiName\",\r\n
+        \             \"operator\": \"Include\",\r\n              \"values\": [\r\n
+        \               \"GetBlob\"\r\n              ]\r\n            }\r\n          ],\r\n
+        \         \"operator\": \"GreaterThan\",\r\n          \"timeAggregation\":
+        \"Average\",\r\n          \"criterionType\": \"StaticThresholdCriterion\"\r\n
+        \       }\r\n      ],\r\n      \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
+        \   },\r\n    \"targetResourceRegion\": \"westus\",\r\n    \"actions\": [\r\n
+        \     {\r\n        \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-09-01-preview, 2018-03-01
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '2227'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:58:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

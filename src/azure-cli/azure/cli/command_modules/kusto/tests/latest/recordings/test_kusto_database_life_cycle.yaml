@@ -1,1255 +1,3024 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-02-06T16:02:17Z"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-06T16:02:17Z"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:02:20 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - AZURECLI/2.26.0 azsdk-python-azure-mgmt-resource/18.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-06T16:02:17Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-07-12T08:07:11Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:02:21 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:07:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "D13_v2", "tier": "Standard"}}'
+    body: '{"location": "westus", "sku": {"name": "Standard_D13_v2", "tier": "Standard"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      Content-Length: ['69']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"West
-        US","sku":{"name":"D13_v2","tier":"Standard"},"properties":{"state":"Creating","queryUri":null,"uri":null,"dataIngestionUri":null,"trustedExternalTenants":null,"virtualNetworkConfiguration":null,"availabilityZones":null,"provisioningState":"Creating"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"westus","sku":{"name":"Standard_D13_v2","tier":"Standard"},"properties":{"state":"Creating","provisioningState":"Creating"}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-          US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21']
-      cache-control: [no-cache]
-      content-length: ['554']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:02:25 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+      cache-control:
+      - no-cache
+      content-length:
+      - '421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:07:22 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:07:22.4837827Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:02:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:07:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:07:22.4837827Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:03:29 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:08:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:07:22.4837827Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:04:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:09:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:07:22.4837827Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:04:31 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:09:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:07:22.4837827Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:05:02 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:10:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:05:34 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:10:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:06:06 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:11:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:06:36 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:11:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:07:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:12:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:07:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:12:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:08:10 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:13:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:08:41 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:13:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:09:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:14:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:09:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['298']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:14:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Running","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:02:25.198464Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['460']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:10:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:15:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '295'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/0dc114ca-cfea-4b4c-996d-e7d10aee4760?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/0dc114ca-cfea-4b4c-996d-e7d10aee4760","name":"0dc114ca-cfea-4b4c-996d-e7d10aee4760","status":"Succeeded","startTime":"2019-02-06T16:02:25.198464Z","endTime":"2019-02-06T16:10:20.6990687Z","percentComplete":1.0,"properties":{"OperationKind":"ClusterCreate","RootActivityId":"faa75b03-cc47-4f64-8400-66b67f5f5cc4","provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['465']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:10:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['297']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:16:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '293'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster create]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g --sku]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:16:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:17:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:17:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:18:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '292'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:18:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Running","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:10:26.7385986Z","percentComplete":0.5,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:19:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationResults/428dd7e3-de62-4f14-918f-3a1d8961ea34?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/westus/operationresults/428dd7e3-de62-4f14-918f-3a1d8961ea34","name":"428dd7e3-de62-4f14-918f-3a1d8961ea34","status":"Succeeded","startTime":"2021-07-12T08:07:22.4837827Z","endTime":"2021-07-12T08:19:43.0510159Z","percentComplete":1.0,"properties":{"operationKind":"ClusterCreateExternal","provisioningState":"Succeeded","operationState":"Completed"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '446'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:19:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 726983c1-2630-4f00-86b0-11c78d0753fc
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"West
-        US","sku":{"name":"D13_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","queryUri":"https://test000002.westus.kusto.windows.net","uri":"https://test000002.westus.kusto.windows.net","dataIngestionUri":"https://ingest-test000002.westus.kusto.windows.net","trustedExternalTenants":[],"virtualNetworkConfiguration":null,"availabilityZones":[],"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"2021-07-12T08:19:42.9885440Z\"","location":"West
+        US","sku":{"name":"Standard_D13_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","uri":"https://test000002.westus.kusto.windows.net","dataIngestionUri":"https://ingest-test000002.westus.kusto.windows.net","trustedExternalTenants":[{"value":"*"}],"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['733']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:10:49 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:19:48 GMT
+      etag:
+      - '"2021-07-12T08:19:42.9885440Z"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"\"","location":"West
-        US","sku":{"name":"D13_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","queryUri":"https://test000002.westus.kusto.windows.net","uri":"https://test000002.westus.kusto.windows.net","dataIngestionUri":"https://ingest-test000002.westus.kusto.windows.net","trustedExternalTenants":[],"virtualNetworkConfiguration":null,"availabilityZones":[],"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002","name":"test000002","type":"Microsoft.Kusto/Clusters","etag":"\"2021-07-12T08:19:42.9885440Z\"","location":"West
+        US","sku":{"name":"Standard_D13_v2","tier":"Standard","capacity":2},"tags":{},"properties":{"state":"Running","uri":"https://test000002.westus.kusto.windows.net","dataIngestionUri":"https://ingest-test000002.westus.kusto.windows.net","trustedExternalTenants":[{"value":"*"}],"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['733']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:10:52 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:19:52 GMT
+      etag:
+      - '"2021-07-12T08:19:42.9885440Z"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"location": "West US", "properties": {"softDeletePeriod": "P10D", "hotCachePeriod":
       "P5D"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database create]
-      Connection: [keep-alive]
-      Content-Length: ['92']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
-        US","properties":{"softDeletePeriod":"P10D","hotCachePeriod":"P5D","provisioningState":"Creating"}}'}
+    body:
+      string: '{"error":{"code":"GatewayTimeout","message":"GatewayTimeout"}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-          US/operationResults/4ffff037-8440-4776-825d-4188f0900705?api-version=2019-01-21']
-      cache-control: [no-cache]
-      content-length: ['463']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:10:54 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '62'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:20:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 504
+      message: Gateway Timeout
 - request:
-    body: null
+    body: '{"location": "West US", "properties": {"softDeletePeriod": "P10D", "hotCachePeriod":
+      "P5D"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database create]
-      Connection: [keep-alive]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/4ffff037-8440-4776-825d-4188f0900705?api-version=2019-01-21
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/4ffff037-8440-4776-825d-4188f0900705","name":"4ffff037-8440-4776-825d-4188f0900705","status":"Succeeded","startTime":"2019-02-06T16:10:54.6796751Z","endTime":"2019-02-06T16:10:56.939494Z","percentComplete":1.0,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"4ef9b5dc-6a1e-4bd5-baa4-8b1814ecdf43","provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"error":{"code":"GatewayTimeout","message":"GatewayTimeout"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['466']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:11:25 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['298']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '62'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:20:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 504
+      message: Gateway Timeout
+- request:
+    body: '{"location": "West US", "properties": {"softDeletePeriod": "P10D", "hotCachePeriod":
+      "P5D"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
+  response:
+    body:
+      string: '{"error":{"code":"GatewayTimeout","message":"GatewayTimeout"}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '62'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:20:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 504
+      message: Gateway Timeout
+- request:
+    body: '{"location": "West US", "properties": {"softDeletePeriod": "P10D", "hotCachePeriod":
+      "P5D"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
+  response:
+    body:
+      string: '{"error":{"code":"GatewayTimeout","message":"GatewayTimeout"}}'
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - close
+      content-length:
+      - '62'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:21:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 504
+      message: Gateway Timeout
+- request:
+    body: '{"location": "West US", "properties": {"softDeletePeriod": "P10D", "hotCachePeriod":
+      "P5D"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '92'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
+        US","properties":{"softDeletePeriod":"P10D","hotCachePeriod":"P5D","provisioningState":"Creating"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationResults/d07315d0-be3c-4ae6-a47f-e1b165ca2f7c?api-version=2019-01-21
+      cache-control:
+      - no-cache
+      content-length:
+      - '463'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:21:22 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database create]
-      Connection: [keep-alive]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/d07315d0-be3c-4ae6-a47f-e1b165ca2f7c?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/d07315d0-be3c-4ae6-a47f-e1b165ca2f7c","name":"d07315d0-be3c-4ae6-a47f-e1b165ca2f7c","status":"Succeeded","startTime":"2021-07-12T08:21:23.3538764Z","endTime":"2021-07-12T08:21:26.7983472Z","percentComplete":1.0,"properties":{"operationKind":"DatabaseCreate","provisioningState":"Succeeded","operationState":"Completed"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '440'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:21:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 674acd81-215e-48cf-93a2-a95f5e31f326
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
-        US","tags":{},"properties":{"softDeletePeriodInDays":10,"softDeletePeriod":"P10D","hotCachePeriodInDays":5,"hotCachePeriod":"P5D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
+        US","properties":{"softDeletePeriod":"P10D","hotCachePeriod":"P5D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['553']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:11:27 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:21:58 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
-        US","tags":{},"properties":{"softDeletePeriodInDays":10,"softDeletePeriod":"P10D","hotCachePeriodInDays":5,"hotCachePeriod":"P5D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
+        US","properties":{"softDeletePeriod":"P10D","hotCachePeriod":"P5D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['553']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:11:29 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:22:00 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"location": "West US", "properties": {"softDeletePeriod": "P20D", "hotCachePeriod":
       "P10D", "statistics": {"size": 0.0}}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database update]
-      Connection: [keep-alive]
-      Content-Length: ['122']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '122'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
-        US","properties":{"softDeletePeriod":"P20D","hotCachePeriod":"P10D","statistics":{"size":0.0},"provisioningState":"Accepted"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
+        US","properties":{"softDeletePeriod":"P20D","hotCachePeriod":"P10D","statistics":{"size":0.0},"provisioningState":"Accepted"}}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-          US/operationResults/fb87b69c-ee3e-4e4b-8118-0ab46500670b?api-version=2019-01-21']
-      cache-control: [no-cache]
-      content-length: ['490']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:11:31 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationResults/5c1b7c27-b2de-4f31-9ffd-227d09cbff6f?api-version=2019-01-21
+      cache-control:
+      - no-cache
+      content-length:
+      - '490'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:22:03 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '198'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database update]
-      Connection: [keep-alive]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/fb87b69c-ee3e-4e4b-8118-0ab46500670b?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/5c1b7c27-b2de-4f31-9ffd-227d09cbff6f?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/fb87b69c-ee3e-4e4b-8118-0ab46500670b","name":"fb87b69c-ee3e-4e4b-8118-0ab46500670b","status":"Succeeded","startTime":"2019-02-06T16:11:31.2884181Z","endTime":"2019-02-06T16:11:33.3754734Z","percentComplete":1.0,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"fbfdc9c7-87aa-48c2-b5e2-d64d2b92c972","provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/5c1b7c27-b2de-4f31-9ffd-227d09cbff6f","name":"5c1b7c27-b2de-4f31-9ffd-227d09cbff6f","status":"Succeeded","startTime":"2021-07-12T08:22:03.5957479Z","endTime":"2021-07-12T08:22:05.4551445Z","percentComplete":1.0,"properties":{"operationKind":"DatabaseCreate","provisioningState":"Succeeded","operationState":"Completed"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['467']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:12:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['297']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '440'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:22:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 366f7d3e-203b-416b-986b-d619551468a3
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database update]
-      Connection: [keep-alive]
-      ParameterSetName: [--cluster-name -g -n --soft-delete-period --hot-cache-period]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n --soft-delete-period --hot-cache-period
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
-        US","tags":{},"properties":{"softDeletePeriodInDays":20,"softDeletePeriod":"P20D","hotCachePeriodInDays":10,"hotCachePeriod":"P10D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/Clusters/test000002/Databases/testdb000003","name":"test000002/testdb000003","type":"Microsoft.Kusto/Clusters/Databases","etag":"\"\"","location":"West
+        US","properties":{"softDeletePeriod":"P20D","hotCachePeriod":"P10D","statistics":{"size":0.0},"provisioningState":"Succeeded"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['555']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:12:02 GMT']
-      etag: ['""']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:22:37 GMT
+      etag:
+      - '""'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--cluster-name -g -n -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --cluster-name -g -n -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002/databases/testdb000003?api-version=2019-01-21
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-          US/operationResults/dbc0d545-529c-4d6e-b12d-8188ab2489e0?api-version=2019-01-21']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Feb 2019 16:12:06 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/dbc0d545-529c-4d6e-b12d-8188ab2489e0?api-version=2019-01-21&operationResultResponseType=Location']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14998']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationResults/4ea89027-a19a-4fb5-83d4-60dbbf422827?api-version=2019-01-21
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 12 Jul 2021 08:22:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/4ea89027-a19a-4fb5-83d4-60dbbf422827?api-version=2019-01-21&operationResultResponseType=Location
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto database delete]
-      Connection: [keep-alive]
-      ParameterSetName: [--cluster-name -g -n -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto database delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --cluster-name -g -n -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/dbc0d545-529c-4d6e-b12d-8188ab2489e0?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/4ea89027-a19a-4fb5-83d4-60dbbf422827?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/dbc0d545-529c-4d6e-b12d-8188ab2489e0","name":"dbc0d545-529c-4d6e-b12d-8188ab2489e0","status":"Succeeded","startTime":"2019-02-06T16:12:06.7223155Z","endTime":"2019-02-06T16:12:09.9098368Z","percentComplete":1.0,"properties":{"OperationKind":"DatabaseDelete","RootActivityId":"e4e9bc1d-0b19-4d36-ab8a-b3d8b0acf583","provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/4ea89027-a19a-4fb5-83d4-60dbbf422827","name":"4ea89027-a19a-4fb5-83d4-60dbbf422827","status":"Succeeded","startTime":"2021-07-12T08:22:40.4692879Z","endTime":"2021-07-12T08:22:43.0630098Z","percentComplete":1.0,"properties":{"operationKind":"DatabaseDelete","provisioningState":"Succeeded","operationState":"Completed"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['467']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:12:37 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['298']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '440'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:23:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 9808e883-9cf3-414e-a555-37e6d2c299f3
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Kusto/clusters/test000002?api-version=2019-01-21
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-          US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Feb 2019 16:12:40 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21&operationResultResponseType=Location']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 12 Jul 2021 08:23:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21&operationResultResponseType=Location
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:13:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:23:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:13:43 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['298']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:24:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:14:16 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:24:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:14:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['296']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:25:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:15:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:25:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:15:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['298']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:26:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:16:22 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:27:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Running","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:12:41.2447858Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Running"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['462']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:16:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:27:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [kusto cluster delete]
-      Connection: [keep-alive]
-      ParameterSetName: [-n -g -y]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          kustomanagementclient/2019-01-21 Azure-SDK-For-Python AZURECLI/2.0.52]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d?api-version=2019-01-21
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
-        US/operationresults/e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","name":"e9d57a44-9df7-42ab-bfa4-ad25d8d0862d","status":"Succeeded","startTime":"2019-02-06T16:12:41.2447858Z","endTime":"2019-02-06T16:17:21.9986621Z","percentComplete":1.0,"properties":{"OperationKind":"ClusterDelete","RootActivityId":"397b1901-28e6-4d99-8f7a-6d20748f556d","provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['466']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Feb 2019 16:17:25 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      set-cookie: [ARRAffinity=feff4bb9075f81d2c76660b0f1646298084904ca249f0dc7ee8954d4b09d1a4f;Path=/;HttpOnly;Domain=rp-kustorpwus-website.azurewebsites.net]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['299']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:28:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.6.6 (Windows-10-10.0.17763-SP0) msrest/0.6.2 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.52]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
   response:
-    body: {string: ''}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Feb 2019 16:17:30 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDS0FCRUtPTUw0QjJSNENMQU9LN0hZM0pLVU9PSlhDUllHSXwwREVCMTI4ODU2MjhCODQyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:28:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:29:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:29:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '298'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:30:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:30:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '296'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:31:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Running","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:23:18.1041946Z","percentComplete":0.5,"properties":{"operationKind":"ClusterDelete","provisioningState":"Running","operationState":"InProgress"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:31:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '297'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - kusto cluster delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -y
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.18362-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-kusto/0.3.0 Azure-SDK-For-Python AZURECLI/2.26.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West%20US/operationResults/605e4630-d54f-46bc-b1ea-692f309b9ede?api-version=2019-01-21
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Kusto/locations/West
+        US/operationresults/605e4630-d54f-46bc-b1ea-692f309b9ede","name":"605e4630-d54f-46bc-b1ea-692f309b9ede","status":"Succeeded","startTime":"2021-07-12T08:23:18.0259696Z","endTime":"2021-07-12T08:32:08.8192435Z","percentComplete":1.0,"properties":{"operationKind":"ClusterDelete","provisioningState":"Succeeded","operationState":"Completed"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '439'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 12 Jul 2021 08:32:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-root-activity-id:
+      - 00f7d0bb-4a43-4549-982c-012c92fd3c15
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '299'
+    status:
+      code: 200
+      message: OK
 version: 1

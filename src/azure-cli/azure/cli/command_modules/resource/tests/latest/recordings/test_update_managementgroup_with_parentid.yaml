@@ -2,531 +2,1054 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:29:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:29:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"name": "testcligroup", "properties": {"details": {"parent": {}}}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Length: ['67']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '67'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['172']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:00 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [b5233390-9749-4776-8fcb-aed580e0c2d2]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '172'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:22 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - b8029ed0-acde-4a7e-9c47-0febd9deaf10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Succeeded","properties":{"tenantId":"dbe499da-a935-4b9f-b4e2-5377e76aaeef","displayName":"testcligroup","details":{"version":9,"updatedTime":"2018-06-13T01:30:03.9146004Z","updatedBy":"c243d53f-e5c5-41c2-8a67-6ed2030f73fe","parent":{"id":"/providers/Microsoft.Management/managementGroups/dbe499da-a935-4b9f-b4e2-5377e76aaeef","name":"dbe499da-a935-4b9f-b4e2-5377e76aaeef","displayName":"Tenant
-        Root Group"}}}}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['569']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:10 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [bef23bcd-1ad4-4db2-a7b2-bd8090df0319]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - e66f535d-b31d-4756-b304-bf4e555581e4
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2019-07-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2019-07-01
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:22 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 66b9a47c-212a-4b9c-8b89-9e004465a530
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroup?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Succeeded","properties":{"tenantId":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","displayName":"testcligroup","details":{"version":8,"updatedTime":"2020-12-18T21:24:31.0475959Z","updatedBy":"5310aa29-9a44-4cbc-adb3-6347a539537e","parent":{"id":"/providers/Microsoft.Management/managementGroups/01a4073e-87c8-47cd-aafc-1439b4b5ea2c","name":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","displayName":"Tenant
+        Root Group"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '569'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - c6e85aef-0129-479e-bfee-99eb740c2534
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:24:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"name": "testcligroupchild", "properties": {"details": {"parent": {}}}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      Content-Length: ['72']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '72'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroupchild?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"NotStarted"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"NotStarted"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['182']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:23 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [b1ceee3a-68a0-4367-95a2-59ac38906c9d]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:06 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - bdff91fd-1a4f-4a19-b197-be28bd293cb6
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group create]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Succeeded","properties":{"tenantId":"dbe499da-a935-4b9f-b4e2-5377e76aaeef","displayName":"testcligroupchild","details":{"version":5,"updatedTime":"2018-06-13T01:30:27.8108218Z","updatedBy":"c243d53f-e5c5-41c2-8a67-6ed2030f73fe","parent":{"id":"/providers/Microsoft.Management/managementGroups/dbe499da-a935-4b9f-b4e2-5377e76aaeef","name":"dbe499da-a935-4b9f-b4e2-5377e76aaeef","displayName":"Tenant
-        Root Group"}}}}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['584']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:33 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [f6f36090-698c-4135-b9b1-88de6cbf403e]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '179'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:16 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 3fbc39a5-2cfc-4df1-86bf-eb43e23f9114
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '179'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:27 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 5be45599-229b-40da-ae0c-7ac91a68d95b
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Succeeded","properties":{"tenantId":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","displayName":"testcligroupchild","details":{"version":9,"updatedTime":"2020-12-18T21:25:12.8749728Z","updatedBy":"5310aa29-9a44-4cbc-adb3-6347a539537e","parent":{"id":"/providers/Microsoft.Management/managementGroups/01a4073e-87c8-47cd-aafc-1439b4b5ea2c","name":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","displayName":"Tenant
+        Root Group"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '584'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 889bcc91-d83e-4581-a416-559228aaa02c
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"parentId": "/providers/Microsoft.Management/managementGroups/testcligroup"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group update]
-      Connection: [keep-alive]
-      Content-Length: ['77']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      CommandName:
+      - account management-group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '77'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --name --parent
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: PATCH
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroupchild?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","properties":{"tenantId":"dbe499da-a935-4b9f-b4e2-5377e76aaeef","displayName":"testcligroupchild","details":{"version":6,"updatedTime":"2018-06-13T01:30:35.315116Z","updatedBy":"c243d53f-e5c5-41c2-8a67-6ed2030f73fe","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","name":"testcligroup","displayName":"testcligroup"}}}}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","properties":{"tenantId":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","displayName":"testcligroupchild","details":{"version":10,"updatedTime":"2020-12-18T21:25:39.7712261Z","updatedBy":"5310aa29-9a44-4cbc-adb3-6347a539537e","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","name":"testcligroup","displayName":"testcligroup"}}}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['509']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:36 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [a8c7e6db-d612-4216-bb87-26bed1db1b45]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '511'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 44a461f3-4778-4ade-ac9e-e9e1c5f4c653
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:37 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroupchild?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"NotStarted"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"NotStarted"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['182']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:30:49 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroupchild?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [3104bd4c-d05b-4e13-b2cb-1a852798496d]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '182'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:25:57 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroupchild?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - 762b4297-8049-4775-b58b-66f5b71de9ce
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroupchild?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Succeeded"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild","status":"Succeeded"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['181']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:31:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [4a8b6035-8989-4835-b79d-ac5e6ada415e]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '181'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:26:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 2482f122-cb72-48ea-b222-bbe21d692122
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:31:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:26:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 resourcemanagementclient/2.0.0rc2 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2021-04-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2018-03-01-preview","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2018-03-01-preview"]},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2018-03-01-preview"]}],"registrationState":"Registered"}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"managementGroups","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"getEntities","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"managementGroups/settings","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview"],"capabilities":"None"},{"resourceType":"operationResults/asyncOperation","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta","2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"],"capabilities":"None"},{"resourceType":"tenantBackfillStatus","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"},{"resourceType":"startTenantBackfill","locations":[],"apiVersions":["2020-10-01","2020-05-01","2020-02-01","2019-11-01","2018-03-01-preview","2018-03-01-beta"],"capabilities":"None"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1342']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:31:11 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2381'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:26:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Cache-Control: [no-cache]
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligroup?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"NotStarted"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['172']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:31:12 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroup?api-version=2018-03-01-preview']
-      pragma: [no-cache]
-      request-id: [f9fae7c8-1010-49a0-9bff-40c4aa25276d]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-tenant-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '172'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:26:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroup?api-version=2018-03-01-preview
+      pragma:
+      - no-cache
+      request-id:
+      - d80ef048-d56c-44e8-85e0-aa95c74931a3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [account management-group delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.31 azure-mgmt-managementgroups/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.34]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-managementgroups/0.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/delete/managementGroups/testcligroup?api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Succeeded"}'}
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroup","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroup","status":"Succeeded"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['171']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Jun 2018 01:31:23 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [9c4dc9d3-f386-4800-8809-9e65b031075b]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-aspnet-version: [4.0.30319]
-      x-ba-restapi: [1.0.3.731]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '171'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 21:26:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - e5875db5-d88a-4b61-af2a-e09fabe668bb
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.1589
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

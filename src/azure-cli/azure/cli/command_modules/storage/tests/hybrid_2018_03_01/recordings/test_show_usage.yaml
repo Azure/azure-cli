@@ -2,32 +2,46 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account show-usage]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.4.29
-          msrest_azure/0.4.29 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.37]
-      accept-language: [en-US]
+      Accept:
+      - application/json, text/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show-usage
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/usages?api-version=2016-01-01
   response:
-    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"unit\": \"Count\",\r\n\
-        \      \"currentValue\": 3,\r\n      \"limit\": 200,\r\n      \"name\": {\r\
-        \n        \"value\": \"StorageAccounts\",\r\n        \"localizedValue\": \"\
-        Storage Accounts\"\r\n      }\r\n    }\r\n  ]\r\n}"}
+    body:
+      string: '{"value":[{"unit":"Count","currentValue":0,"limit":250,"name":{"value":"StorageAccounts","localizedValue":"Storage
+        Accounts"}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['217']
-      content-type: [application/json]
-      date: ['Thu, 14 Jun 2018 18:14:47 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '128'
+      content-type:
+      - application/json
+      date:
+      - Mon, 09 Nov 2020 07:03:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

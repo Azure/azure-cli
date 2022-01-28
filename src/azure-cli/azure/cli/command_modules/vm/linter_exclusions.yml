@@ -9,6 +9,44 @@ vmss create:
         public_ip_address_allocation:
             rule_exclusions:
             - missing_parameter_help
+        enable_cross_zone_upgrade:
+            rule_exclusions:
+            - option_length_too_long
+        max_batch_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        max_unhealthy_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        max_unhealthy_upgraded_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        pause_time_between_batches:
+            rule_exclusions:
+            - option_length_too_long
+        prioritize_unhealthy_instances:
+            rule_exclusions:
+            - option_length_too_long
+vmss update:
+    parameters:
+        enable_cross_zone_upgrade:
+            rule_exclusions:
+            - option_length_too_long
+        max_batch_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        max_unhealthy_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        max_unhealthy_upgraded_instance_percent:
+            rule_exclusions:
+            - option_length_too_long
+        pause_time_between_batches:
+            rule_exclusions:
+            - option_length_too_long
+        prioritize_unhealthy_instances:
+            rule_exclusions:
+            - option_length_too_long
 vmss encryption enable:
     parameters:
         key_encryption_algorithm:
@@ -29,6 +67,23 @@ vm encryption enable:
         key_encryption_algorithm:
             rule_exclusions:
             - missing_parameter_help
+vm install-patches:
+    parameters:
+        classifications_to_include_win:
+            rule_exclusions:
+            - option_length_too_long
+        classifications_to_include_linux:
+            rule_exclusions:
+            - option_length_too_long
+        exclude_kbs_requiring_reboot:
+            rule_exclusions:
+            - option_length_too_long
+        package_name_masks_to_exclude:
+            rule_exclusions:
+            - option_length_too_long
+        package_name_masks_to_include:
+            rule_exclusions:
+            - option_length_too_long
 image create:
     parameters:
         os_type:

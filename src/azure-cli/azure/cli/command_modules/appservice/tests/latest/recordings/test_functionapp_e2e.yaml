@@ -13,24 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-12-27T14:46:02Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","date":"2021-11-19T21:37:19Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '317'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:46:10 GMT
+      - Fri, 19 Nov 2021 21:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -45,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "func-e2e-plan000005", "type": "Microsoft.Web/serverfarms", "location":
-      "westus", "properties": {"skuName": "B1", "capacity": 1}}'
+    body: '{"location": "francecentral", "sku": {"name": "B1", "tier": "BASIC", "capacity":
+      1}, "properties": {"perSiteScaling": false, "isXenon": false}}'
     headers:
       Accept:
       - application/json
@@ -59,28 +56,841 @@ interactions:
       Content-Length:
       - '143'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2020-09-01
   response:
     body:
-      string: '{"status":"Success","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"francecentral","properties":{"serverFarmId":10324,"name":"func-e2e-plan000005","sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_10324","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '33'
+      - '1505'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:46:10 GMT
+      - Fri, 19 Nov 2021 21:37:39 GMT
+      etag:
+      - '"1D7DD8DABADB195"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms?api-version=2020-09-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
+        Central","properties":{"serverFarmId":10324,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_10324","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1471'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:37:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "StorageV2", "location": "francecentral",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '175'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:37:46 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:38:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:38:07 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/4eaea18c-6f6f-424a-bc8a-3234ccfd0371?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage","name":"functionappplanstorage","type":"Microsoft.Storage/storageAccounts","location":"francecentral","tags":{},"properties":{"keyCreationTime":{"key1":"2021-11-19T21:37:45.3475980Z","key2":"2021-11-19T21:37:45.3475980Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:37:45.3475980Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:37:45.3475980Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-11-19T21:37:45.2851254Z","primaryEndpoints":{"dfs":"https://functionappplanstorage.dfs.core.windows.net/","web":"https://functionappplanstorage.z28.web.core.windows.net/","blob":"https://functionappplanstorage.blob.core.windows.net/","queue":"https://functionappplanstorage.queue.core.windows.net/","table":"https://functionappplanstorage.table.core.windows.net/","file":"https://functionappplanstorage.file.core.windows.net/"},"primaryLocation":"francecentral","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1484'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:38:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "StorageV2", "location": "francecentral",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '175'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:38:17 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:38:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:38:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g -l --sku
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/francecentral/asyncoperations/522dcafd-b0fb-4e46-9de0-6c2424a5cbcb?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2","name":"functionappplanstorage2","type":"Microsoft.Storage/storageAccounts","location":"francecentral","tags":{},"properties":{"keyCreationTime":{"key1":"2021-11-19T21:38:15.8636049Z","key2":"2021-11-19T21:38:15.8636049Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:38:15.8636049Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:38:15.8636049Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-11-19T21:38:15.8011387Z","primaryEndpoints":{"dfs":"https://functionappplanstorage2.dfs.core.windows.net/","web":"https://functionappplanstorage2.z28.web.core.windows.net/","blob":"https://functionappplanstorage2.blob.core.windows.net/","queue":"https://functionappplanstorage2.queue.core.windows.net/","table":"https://functionappplanstorage2.table.core.windows.net/","file":"https://functionappplanstorage2.file.core.windows.net/"},"primaryLocation":"francecentral","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1492'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:38:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
+        Central","properties":{"serverFarmId":10324,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_10324","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1433'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:38:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage","name":"functionappplanstorage","type":"Microsoft.Storage/storageAccounts","location":"francecentral","tags":{},"properties":{"keyCreationTime":{"key1":"2021-11-19T21:37:45.3475980Z","key2":"2021-11-19T21:37:45.3475980Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:37:45.3475980Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:37:45.3475980Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-11-19T21:37:45.2851254Z","primaryEndpoints":{"dfs":"https://functionappplanstorage.dfs.core.windows.net/","web":"https://functionappplanstorage.z28.web.core.windows.net/","blob":"https://functionappplanstorage.blob.core.windows.net/","queue":"https://functionappplanstorage.queue.core.windows.net/","table":"https://functionappplanstorage.table.core.windows.net/","file":"https://functionappplanstorage.file.core.windows.net/"},"primaryLocation":"francecentral","statusOfPrimary":"available"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1484'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:38:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-11-19T21:37:45.3475980Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-11-19T21:37:45.3475980Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:38:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"kind": "functionapp", "location": "France Central", "properties": {"serverFarmId":
+      "func-e2e-plan000005", "reserved": false, "isXenon": false, "hyperV": false,
+      "siteConfig": {"netFrameworkVersion": "v4.6", "appSettings": [{"name": "FUNCTIONS_WORKER_RUNTIME",
+      "value": "dotnet"}, {"name": "FUNCTIONS_EXTENSION_VERSION", "value": "~3"},
+      {"name": "AzureWebJobsStorage", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey=="}],
+      "use32BitWorkerProcess": true, "alwaysOn": true, "localMySqlEnabled": false,
+      "http20Enabled": true}, "scmSiteAlsoStopped": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '716'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003","name":"func-e2e000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"France
+        Central","properties":{"name":"func-e2e000003","state":"Running","hostNames":["func-e2e000003.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/func-e2e000003","repositorySiteName":"func-e2e000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["func-e2e000003.azurewebsites.net","func-e2e000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"func-e2e000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"func-e2e000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-11-19T21:38:48.9366667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"sitePort":null},"deploymentId":"func-e2e000003","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp","inboundIpAddress":"20.43.43.36","possibleInboundIpAddresses":"20.43.43.36","ftpUsername":"func-e2e000003\\$func-e2e000003","ftpsHostName":"ftps://waws-prod-par-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.10.172,20.74.11.5,20.74.11.16,20.74.13.91,20.74.65.15,20.74.66.179,20.43.43.36","possibleOutboundIpAddresses":"20.74.10.172,20.74.11.5,20.74.11.16,20.74.13.91,20.74.65.15,20.74.66.179,20.74.66.246,20.74.67.7,20.74.68.18,20.74.68.56,20.74.68.182,20.74.68.185,20.74.68.188,20.74.68.228,20.74.68.239,20.74.13.59,20.74.14.186,20.74.68.241,20.74.68.247,20.74.68.249,20.74.68.251,20.74.69.13,20.74.69.14,20.74.68.238,20.74.69.28,20.74.68.189,20.74.69.35,20.74.69.92,20.74.69.106,20.74.69.147,20.43.43.36","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"func-e2e000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6015'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:39:06 GMT
+      etag:
+      - '"1D7DD8DD6C1BAAB"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "France Central", "kind": "web", "properties": {"Application_Type":
+      "web"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-applicationinsights/1.0.0 Python/3.8.6
+        (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/components/func-e2e000003?api-version=2015-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/func-e2e000003","name":"func-e2e000003","type":"microsoft.insights/components","location":"francecentral","tags":{},"kind":"web","etag":"\"f800e141-0000-0e00-0000-619819820000\"","properties":{"Ver":"v2","ApplicationId":"func-e2e000003","AppId":"9644276f-d3da-40e9-97a6-03442a1deaca","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"613e305e-e608-4814-b2d8-e70e3c379641","ConnectionString":"InstrumentationKey=613e305e-e608-4814-b2d8-e70e3c379641;IngestionEndpoint=https://francecentral-0.in.applicationinsights.azure.com/","Name":"func-e2e000003","CreationDate":"2021-11-19T21:39:14.4005593+00:00","TenantId":"2edc29f4-b81f-494b-a624-cc619903b837","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
+    headers:
+      access-control-expose-headers:
+      - Request-Context
+      cache-control:
+      - no-cache
+      content-length:
+      - '1019'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 19 Nov 2021 21:39:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:920e14b1-13f3-461a-a4bb-b4fe6f1a4525
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings/list?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
+        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey=="}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '489'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:39:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"FUNCTIONS_WORKER_RUNTIME": "dotnet", "FUNCTIONS_EXTENSION_VERSION":
+      "~3", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==",
+      "APPINSIGHTS_INSTRUMENTATIONKEY": "613e305e-e608-4814-b2d8-e70e3c379641"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '389'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -p -s
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
+        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"613e305e-e608-4814-b2d8-e70e3c379641"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '561'
+      content-type:
+      - application/json
+      date:
+      - Fri, 19 Nov 2021 21:39:23 GMT
+      etag:
+      - '"1D7DD8DEB01A600"'
       expires:
       - '-1'
       pragma:
@@ -112,394 +922,29 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-12-27T14:46:02Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Dec 2019 14:46:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "properties": {"perSiteScaling": false, "isXenon":
-      false}, "sku": {"name": "B1", "tier": "BASIC", "capacity": 1}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '136'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2018-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":25325,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-073_25325","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1524'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:46:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms?api-version=2018-02-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":25325,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-073_25325","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}],"nextLink":null,"id":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1562'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:46:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '74'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --name -g -l --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage?api-version=2019-06-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Fri, 27 Dec 2019 14:46:32 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/eafdadae-3f62-45c8-9069-3b927d0869eb?monitor=true&api-version=2019-06-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1180'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name -g -l --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/eafdadae-3f62-45c8-9069-3b927d0869eb?monitor=true&api-version=2019-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage","name":"functionappplanstorage","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:32.8253730Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:32.8253730Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:46:32.7785433Z","primaryEndpoints":{"blob":"https://functionappplanstorage.blob.core.windows.net/","queue":"https://functionappplanstorage.queue.core.windows.net/","table":"https://functionappplanstorage.table.core.windows.net/","file":"https://functionappplanstorage.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1188'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:46:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '74'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --name -g -l --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2?api-version=2019-06-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Fri, 27 Dec 2019 14:46:56 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ab2bffde-a4c2-4f35-b125-7101154e55c0?monitor=true&api-version=2019-06-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name -g -l --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ab2bffde-a4c2-4f35-b125-7101154e55c0?monitor=true&api-version=2019-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2","name":"functionappplanstorage2","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:56.2318318Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:56.2318318Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:46:56.1536413Z","primaryEndpoints":{"blob":"https://functionappplanstorage2.blob.core.windows.net/","queue":"https://functionappplanstorage2.queue.core.windows.net/","table":"https://functionappplanstorage2.table.core.windows.net/","file":"https://functionappplanstorage2.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1194'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
       - functionapp create
       Connection:
       - keep-alive
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":25325,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-073_25325","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"France
+        Central","properties":{"serverFarmId":10324,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":1,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-021_10324","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1524'
+      - '1433'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:47:15 GMT
+      - Fri, 19 Nov 2021 21:39:24 GMT
       expires:
       - '-1'
       pragma:
@@ -535,24 +980,21 @@ interactions:
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2?api-version=2021-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage","name":"functionappplanstorage","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:32.8253730Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:32.8253730Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:46:32.7785433Z","primaryEndpoints":{"blob":"https://functionappplanstorage.blob.core.windows.net/","queue":"https://functionappplanstorage.queue.core.windows.net/","table":"https://functionappplanstorage.table.core.windows.net/","file":"https://functionappplanstorage.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2","name":"functionappplanstorage2","type":"Microsoft.Storage/storageAccounts","location":"francecentral","tags":{},"properties":{"keyCreationTime":{"key1":"2021-11-19T21:38:15.8636049Z","key2":"2021-11-19T21:38:15.8636049Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:38:15.8636049Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-11-19T21:38:15.8636049Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-11-19T21:38:15.8011387Z","primaryEndpoints":{"dfs":"https://functionappplanstorage2.dfs.core.windows.net/","web":"https://functionappplanstorage2.z28.web.core.windows.net/","blob":"https://functionappplanstorage2.blob.core.windows.net/","queue":"https://functionappplanstorage2.queue.core.windows.net/","table":"https://functionappplanstorage2.table.core.windows.net/","file":"https://functionappplanstorage2.file.core.windows.net/"},"primaryLocation":"francecentral","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1188'
+      - '1492'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:47:16 GMT
+      - Fri, 19 Nov 2021 21:39:25 GMT
       expires:
       - '-1'
       pragma:
@@ -586,24 +1028,21 @@ interactions:
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-storage/19.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/functionappplanstorage/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2/listKeys?api-version=2021-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2021-11-19T21:38:15.8636049Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-11-19T21:38:15.8636049Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '288'
+      - '260'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:47:16 GMT
+      - Fri, 19 Nov 2021 21:39:25 GMT
       expires:
       - '-1'
       pragma:
@@ -616,432 +1055,22 @@ interactions:
       - chunked
       vary:
       - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"kind": "functionapp", "location": "West US", "properties": {"serverFarmId":
-      "func-e2e-plan000005", "reserved": false, "isXenon": false, "hyperV": false,
-      "siteConfig": {"netFrameworkVersion": "v4.6", "appSettings": [{"name": "FUNCTIONS_EXTENSION_VERSION",
-      "value": "~2"}, {"name": "AzureWebJobsStorage", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey=="},
-      {"name": "AzureWebJobsDashboard", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey=="},
-      {"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~10"}], "alwaysOn": true,
-      "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '924'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003","name":"func-e2e000003","type":"Microsoft.Web/sites","kind":"functionapp","location":"West
-        US","properties":{"name":"func-e2e000003","state":"Running","hostNames":["func-e2e000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-073.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/func-e2e000003","repositorySiteName":"func-e2e000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["func-e2e000003.azurewebsites.net","func-e2e000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"func-e2e000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"func-e2e000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-27T14:47:22.7466667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"func-e2e000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"AB799B4C490667BB75660E308123AB86E3D9FA4CA55CD99080EA7A52BAF97DE0","kind":"functionapp","inboundIpAddress":"40.112.216.189","possibleInboundIpAddresses":"40.112.216.189","outboundIpAddresses":"40.112.216.201,40.112.220.31,40.112.222.87,40.112.221.176","possibleOutboundIpAddresses":"40.112.216.201,40.112.220.31,40.112.222.87,40.112.221.176","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-073","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"func-e2e000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '3562'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:40 GMT
-      etag:
-      - '"1D5BCC48C81E7F5"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '499'
-      x-powered-by:
-      - ASP.NET
+      - '11998'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "West US", "kind": "web", "properties": {"Application_Type":
-      "web"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '81'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-applicationinsights/0.1.1 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/func-e2e000003?api-version=2015-05-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/components/func-e2e000003","name":"func-e2e000003","type":"microsoft.insights/components","location":"westus","tags":{},"kind":"web","etag":"\"b4007eb9-0000-0700-0000-5e0619920000\"","properties":{"Ver":"v2","ApplicationId":"func-e2e000003","AppId":"be29cc31-d0ee-4c8c-8824-ab0081d96ae0","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"0560a784-28d3-45bd-b704-acaaeab2f779","ConnectionString":"InstrumentationKey=0560a784-28d3-45bd-b704-acaaeab2f779","Name":"func-e2e000003","CreationDate":"2019-12-27T14:47:46.7719572+00:00","TenantId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","provisioningState":"Succeeded","SamplingPercentage":null}}'
-    headers:
-      access-control-expose-headers:
-      - Request-Context
-      cache-control:
-      - no-cache
-      content-length:
-      - '892'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Dec 2019 14:47:48 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-context:
-      - appId=cid-v1:920e14b1-13f3-461a-a4bb-b4fe6f1a4525
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings/list?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"FUNCTIONS_EXTENSION_VERSION":"~2","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"~10"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '836'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11992'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"kind": "<class ''str''>", "properties": {"FUNCTIONS_EXTENSION_VERSION":
-      "~2", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==",
-      "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==",
-      "WEBSITE_NODE_DEFAULT_VERSION": "~10", "APPINSIGHTS_INSTRUMENTATIONKEY": "0560a784-28d3-45bd-b704-acaaeab2f779"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '641'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"FUNCTIONS_EXTENSION_VERSION":"~2","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"~10","APPINSIGHTS_INSTRUMENTATIONKEY":"0560a784-28d3-45bd-b704-acaaeab2f779"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '908'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:50 GMT
-      etag:
-      - '"1D5BCC49CB9D295"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1182'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005?api-version=2018-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","name":"func-e2e-plan000005","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":25325,"name":"func-e2e-plan000005","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":1,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-073_25325","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1524'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2?api-version=2019-06-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2","name":"functionappplanstorage2","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:56.2318318Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:46:56.2318318Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:46:56.1536413Z","primaryEndpoints":{"blob":"https://functionappplanstorage2.blob.core.windows.net/","queue":"https://functionappplanstorage2.queue.core.windows.net/","table":"https://functionappplanstorage2.table.core.windows.net/","file":"https://functionappplanstorage2.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1194'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - functionapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n -p -s
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Storage/storageAccounts/functionappplanstorage2/listKeys?api-version=2019-06-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Fri, 27 Dec 2019 14:47:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"kind": "functionapp", "location": "West US", "properties": {"serverFarmId":
+    body: '{"kind": "functionapp", "location": "France Central", "properties": {"serverFarmId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005",
       "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
-      "v4.6", "appSettings": [{"name": "FUNCTIONS_EXTENSION_VERSION", "value": "~2"},
-      {"name": "AzureWebJobsStorage", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey=="},
-      {"name": "AzureWebJobsDashboard", "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey=="},
-      {"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "~10"}], "alwaysOn": true,
-      "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped": false}}'''
+      "v4.6", "appSettings": [{"name": "FUNCTIONS_WORKER_RUNTIME", "value": "dotnet"},
+      {"name": "FUNCTIONS_EXTENSION_VERSION", "value": "~3"}, {"name": "AzureWebJobsStorage",
+      "value": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey=="}],
+      "use32BitWorkerProcess": true, "alwaysOn": true, "localMySqlEnabled": false,
+      "http20Enabled": true}, "scmSiteAlsoStopped": false}}'
     headers:
       Accept:
       - application/json
@@ -1052,33 +1081,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1105'
+      - '896'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004","name":"func-e2e000004","type":"Microsoft.Web/sites","kind":"functionapp","location":"West
-        US","properties":{"name":"func-e2e000004","state":"Running","hostNames":["func-e2e000004.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-073.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/func-e2e000004","repositorySiteName":"func-e2e000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["func-e2e000004.azurewebsites.net","func-e2e000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"func-e2e000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"func-e2e000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-27T14:48:00.41","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"func-e2e000004","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"BCF4D1F3FCE0F5784C42D79720CA823A08CAB3F1BB732D3242127915D99CE8E4","kind":"functionapp","inboundIpAddress":"40.112.216.189","possibleInboundIpAddresses":"40.112.216.189","outboundIpAddresses":"40.112.216.201,40.112.220.31,40.112.222.87,40.112.221.176","possibleOutboundIpAddresses":"40.112.216.201,40.112.220.31,40.112.222.87,40.112.221.176","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-073","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"func-e2e000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004","name":"func-e2e000004","type":"Microsoft.Web/sites","kind":"functionapp","location":"France
+        Central","properties":{"name":"func-e2e000004","state":"Running","hostNames":["func-e2e000004.azurewebsites.net"],"webSpace":"clitest.rg000001-FranceCentralwebspace","selfLink":"https://waws-prod-par-021.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-FranceCentralwebspace/sites/func-e2e000004","repositorySiteName":"func-e2e000004","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["func-e2e000004.azurewebsites.net","func-e2e000004.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"func-e2e000004.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"func-e2e000004.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/func-e2e-plan000005","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-11-19T21:39:34.55","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"sitePort":null},"deploymentId":"func-e2e000004","slotName":null,"trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":false,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"functionapp","inboundIpAddress":"20.43.43.36","possibleInboundIpAddresses":"20.43.43.36","ftpUsername":"func-e2e000004\\$func-e2e000004","ftpsHostName":"ftps://waws-prod-par-021.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"20.74.10.172,20.74.11.5,20.74.11.16,20.74.13.91,20.74.65.15,20.74.66.179,20.43.43.36","possibleOutboundIpAddresses":"20.74.10.172,20.74.11.5,20.74.11.16,20.74.13.91,20.74.65.15,20.74.66.179,20.74.66.246,20.74.67.7,20.74.68.18,20.74.68.56,20.74.68.182,20.74.68.185,20.74.68.188,20.74.68.228,20.74.68.239,20.74.13.59,20.74.14.186,20.74.68.241,20.74.68.247,20.74.68.249,20.74.68.251,20.74.69.13,20.74.69.14,20.74.68.238,20.74.69.28,20.74.68.189,20.74.69.35,20.74.69.92,20.74.69.106,20.74.69.147,20.43.43.36","containerSize":1536,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-par-021","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000002","defaultHostName":"func-e2e000004.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"FunctionAppLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3557'
+      - '6010'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:48:17 GMT
+      - Fri, 19 Nov 2021 21:39:51 GMT
       etag:
-      - '"1D5BCC4A2CDB5E0"'
+      - '"1D7DD8DF21F0A0B"'
       expires:
       - '-1'
       pragma:
@@ -1103,7 +1131,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "West US", "kind": "web", "properties": {"Application_Type":
+    body: '{"location": "France Central", "kind": "web", "properties": {"Application_Type":
       "web"}}'
     headers:
       Accept:
@@ -1115,32 +1143,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '81'
+      - '88'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-applicationinsights/0.1.1 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-applicationinsights/1.0.0 Python/3.8.6
+        (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/microsoft.insights/components/func-e2e000004?api-version=2015-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Insights/components/func-e2e000004?api-version=2015-05-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/microsoft.insights/components/func-e2e000004","name":"func-e2e000004","type":"microsoft.insights/components","location":"westus","tags":{},"kind":"web","etag":"\"b40090bc-0000-0700-0000-5e0619b80000\"","properties":{"Ver":"v2","ApplicationId":"func-e2e000004","AppId":"8a69445b-2c14-456c-9803-b4a405dc5ad3","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"f71bd035-02ae-4804-82bd-27e8d99ccb78","ConnectionString":"InstrumentationKey=f71bd035-02ae-4804-82bd-27e8d99ccb78","Name":"func-e2e000004","CreationDate":"2019-12-27T14:48:24.3526348+00:00","TenantId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","provisioningState":"Succeeded","SamplingPercentage":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/microsoft.insights/components/func-e2e000004","name":"func-e2e000004","type":"microsoft.insights/components","location":"francecentral","tags":{},"kind":"web","etag":"\"f8004e46-0000-0e00-0000-619819b40000\"","properties":{"Ver":"v2","ApplicationId":"func-e2e000004","AppId":"afc95293-ad0a-4100-9a3b-dc29a3655573","Application_Type":"web","Flow_Type":null,"Request_Source":null,"InstrumentationKey":"f27e0cd9-edd2-47c2-b9cb-d0bb7413e5e4","ConnectionString":"InstrumentationKey=f27e0cd9-edd2-47c2-b9cb-d0bb7413e5e4;IngestionEndpoint=https://francecentral-0.in.applicationinsights.azure.com/","Name":"func-e2e000004","CreationDate":"2021-11-19T21:40:02.5020474+00:00","TenantId":"2edc29f4-b81f-494b-a624-cc619903b837","provisioningState":"Succeeded","SamplingPercentage":null,"RetentionInDays":90,"IngestionMode":"ApplicationInsights","publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled"}}'
     headers:
       access-control-expose-headers:
       - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '892'
+      - '1019'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:48:26 GMT
+      - Fri, 19 Nov 2021 21:40:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1158,7 +1184,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1179'
+      - '1197'
       x-powered-by:
       - ASP.NET
     status:
@@ -1180,25 +1206,22 @@ interactions:
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings/list?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings/list?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"FUNCTIONS_EXTENSION_VERSION":"~2","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"~10"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
+        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey=="}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '838'
+      - '490'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:48:27 GMT
+      - Fri, 19 Nov 2021 21:40:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1216,17 +1239,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"kind": "<class ''str''>", "properties": {"FUNCTIONS_EXTENSION_VERSION":
-      "~2", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==",
-      "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==",
-      "WEBSITE_NODE_DEFAULT_VERSION": "~10", "APPINSIGHTS_INSTRUMENTATIONKEY": "f71bd035-02ae-4804-82bd-27e8d99ccb78"}}'
+    body: '{"properties": {"FUNCTIONS_WORKER_RUNTIME": "dotnet", "FUNCTIONS_EXTENSION_VERSION":
+      "~3", "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==",
+      "APPINSIGHTS_INSTRUMENTATIONKEY": "f27e0cd9-edd2-47c2-b9cb-d0bb7413e5e4"}}'
     headers:
       Accept:
       - application/json
@@ -1237,33 +1259,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '643'
+      - '390'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -p -s
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
-        US","properties":{"FUNCTIONS_EXTENSION_VERSION":"~2","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==","AzureWebJobsDashboard":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==","WEBSITE_NODE_DEFAULT_VERSION":"~10","APPINSIGHTS_INSTRUMENTATIONKEY":"f71bd035-02ae-4804-82bd-27e8d99ccb78"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Web/sites/func-e2e000004/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"France
+        Central","properties":{"FUNCTIONS_WORKER_RUNTIME":"dotnet","FUNCTIONS_EXTENSION_VERSION":"~3","AzureWebJobsStorage":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=functionappplanstorage2;AccountKey=veryFakedStorageAccountKey==","APPINSIGHTS_INSTRUMENTATIONKEY":"f27e0cd9-edd2-47c2-b9cb-d0bb7413e5e4"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '910'
+      - '562'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:48:28 GMT
+      - Fri, 19 Nov 2021 21:40:11 GMT
       etag:
-      - '"1D5BCC4B3432BB5"'
+      - '"1D7DD8E0756A8D5"'
       expires:
       - '-1'
       pragma:
@@ -1281,7 +1300,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1177'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1303,12 +1322,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/func-e2e000003?api-version=2020-09-01
   response:
     body:
       string: ''
@@ -1318,9 +1334,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Dec 2019 14:48:34 GMT
+      - Fri, 19 Nov 2021 21:40:27 GMT
       etag:
-      - '"1D5BCC49CB9D295"'
+      - '"1D7DD8DEB01A600"'
       expires:
       - '-1'
       pragma:
@@ -1334,7 +1350,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14993'
+      - '14999'
       x-powered-by:
       - ASP.NET
     status:

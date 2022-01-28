@@ -16,8 +16,9 @@ class CdnProfileScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         profile_name = 'profile123'
         checks = [JMESPathCheck('name', profile_name),
-                  JMESPathCheck('sku.name', SkuName.standard_akamai.value)]
+                  JMESPathCheck('sku.name', SkuName.STANDARD_AKAMAI)]
         self.profile_create_cmd(resource_group, profile_name, checks=checks)
+        self.profile_show_cmd(resource_group, profile_name, checks=checks)
 
         list_checks = [JMESPathCheck('length(@)', 1)]
         self.profile_list_cmd(resource_group, checks=list_checks)
@@ -47,38 +48,3 @@ class CdnProfileMicrosoftScenarioTest(CdnScenarioMixin, ScenarioTest):
             'rg': resource_group,
         })
         self.cmd('cdn profile create -g {rg} -n {profile} --sku {sku}')
-
-
-class CdnCustomDomainScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_cdn_domain')
-    def test_cdn_custom_domain(self, resource_group):
-        from azure.mgmt.cdn.models import ErrorResponseException
-        from knack.util import CLIError
-
-        self.kwargs.update({
-            'profile': 'cdnprofile1',
-            'endpoint': self.create_random_name(prefix='endpoint', length=24),
-            'origin': 'www.test.com',
-            'hostname': 'www.example.com',
-            'name': 'customdomain1',
-            'rg': resource_group,
-        })
-
-        self.cmd('cdn profile create -g {rg} -n {profile}')
-        self.cmd('cdn endpoint create -g {rg} --origin {origin} --profile-name {profile} -n {endpoint}')
-        self.cmd('cdn custom-domain list -g {rg} --endpoint-name {endpoint} --profile-name {profile}')
-
-        # These will all fail because we don't really have the ability to create the custom endpoint in test.
-        # but they should still fail if there was a CLI-level regression.
-        with self.assertRaises(ErrorResponseException):
-            self.cmd(
-                'cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
-        with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
-            self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(CLIError):
-            self.cmd(
-                'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(CLIError):
-            self.cmd(
-                'cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')

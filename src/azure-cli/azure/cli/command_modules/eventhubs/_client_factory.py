@@ -6,8 +6,8 @@
 
 def cf_eventhub(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.eventhub import EventHubManagementClient
-    return get_mgmt_service_client(cli_ctx, EventHubManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_EVENTHUB)
 
 
 def namespaces_mgmt_client_factory(cli_ctx, _):
@@ -24,3 +24,15 @@ def consumer_groups_mgmt_client_factory(cli_ctx, _):
 
 def disaster_recovery_mgmt_client_factory(cli_ctx, _):
     return cf_eventhub(cli_ctx).disaster_recovery_configs
+
+
+def cluster_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).clusters
+
+
+def private_endpoint_connections_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).private_endpoint_connections
+
+
+def private_link_mgmt_client_factory(cli_ctx, _):
+    return cf_eventhub(cli_ctx).private_link_resources

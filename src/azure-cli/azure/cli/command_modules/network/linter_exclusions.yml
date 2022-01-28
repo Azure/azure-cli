@@ -27,8 +27,528 @@ network nsg rule update:
             - missing_parameter_help
 network vnet peering list:
     rule_exclusions:
-        - no_ids_for_list_commands
+    - no_ids_for_list_commands
 network vnet subnet list:
     rule_exclusions:
-        - no_ids_for_list_commands
+    - no_ids_for_list_commands
+network vnet subnet create:
+    parameters:
+        disable_private_endpoint_network_policies:
+            rule_exclusions:
+            - option_length_too_long
+        disable_private_link_service_network_policies:
+            rule_exclusions:
+            - option_length_too_long
+network watcher connection-monitor create:
+    parameters:
+        endpoint_dest_coverage_level:
+            rule_exclusions:
+            - option_length_too_long
+        endpoint_source_coverage_level:
+            rule_exclusions:
+            - option_length_too_long
+network application-gateway address-pool:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway auth-cert:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway frontend-ip:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway frontend-port:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway http-listener:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway http-settings:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway identity:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway probe:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway redirect-config:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway rewrite-rule condition:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway rewrite-rule set:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway rewrite-rule:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway root-cert:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway rule:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway show-backend-health:
+    parameters:
+        host_name_from_http_settings:
+            rule_exclusions:
+            - option_length_too_long
+network application-gateway ssl-cert:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway ssl-policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway url-path-map:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway url-path-map rule:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network application-gateway waf-config:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network express-route port identity:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network express-route port link:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network vnet-gateway aad:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network vnet-gateway ipsec-policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network vpn-connection ipsec-policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network watcher troubleshooting:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+disk-encryption-set:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+monitor log-analytics workspace:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+vm availability-set:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+vm user:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+vmss extension:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+network express-route create:
+    parameters:
+        peering_location:
+            rule_exclusions:
+            - no_required_location_param
+network list-service-aliases:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher flow-log create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher flow-log update:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor delete:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor start:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor stop:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor list:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor show:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher connection-monitor query:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher packet-capture delete:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher packet-capture list:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher packet-capture show:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher packet-capture show-status:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+network watcher packet-capture stop:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+acr agentpool:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+acr pack:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+acr task:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+acr:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+aks nodepool:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+appservice ase:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+appservice plan:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+iot central app:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+iot dps access-policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+iot dps linked-hub:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+iot hub policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+iot hub:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+keyvault key:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+mariadb server replica:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+mysql flexible-server replica:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+mysql server replica:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+openshift monitor:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+postgres server replica:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql db replica:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql db:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql dw:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql elastic-pool:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql mi:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql midb short-term-retention-policy:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql midb:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql virtual-cluster:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+staticwebapp hostname:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+storage account:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+storage blob:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+staticwebapp:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
+sql db classification recommendation disable:
+    rule_exclusions:
+    - faulty_help_example_rule
+sql db classification recommendation enable:
+    rule_exclusions:
+    - faulty_help_example_rule
+acr build:
+    parameters:
+        source_location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles account create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles pool create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles snapshot create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles snapshot policy create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles snapshot policy update:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles volume backup create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles volume create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+postgres server georestore:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+sql instance-pool create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+staticwebapp create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+iot dps linked-hub create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+mariadb server georestore:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+mysql server georestore:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles account backup-policy create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+netappfiles account backup-policy update:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+cognitiveservices account create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+dms create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+dms project create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+acr pack build:
+    parameters:
+        source_location:
+            rule_exclusions:
+            - no_required_location_param
+acr replication create:
+    parameters:
+        location:
+            rule_exclusions:
+            - no_required_location_param
+acr run:
+    parameters:
+        source_location:
+            rule_exclusions:
+            - no_required_location_param
+aro create:
+    parameters:
+        cluster_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+        vnet_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection create:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection delete:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection exists:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection list:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection show:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb collection update:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb database create:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb database delete:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb database exists:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb database list:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+cosmosdb database show:
+    parameters:
+        db_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+functionapp config access-restriction add:
+    parameters:
+        vnet_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+iot hub routing-endpoint create:
+    parameters:
+        endpoint_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db copy:
+    parameters:
+        dest_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db ltr-backup restore:
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db replica create:
+    parameters:
+        partner_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql db replica delete-link:
+    parameters:
+        partner_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql failover-group create:
+    parameters:
+        partner_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql instance-failover-group create:
+    parameters:
+        partner_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql midb ltr-backup restore:
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql midb restore:
+    parameters:
+        target_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+sql server dns-alias set:
+    parameters:
+        original_resource_group_name:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+webapp config access-restriction add:
+    parameters:
+        vnet_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
+webapp config snapshot restore:
+    parameters:
+        source_resource_group:
+            rule_exclusions:
+            - parameter_should_not_end_in_resource_group
 ...

@@ -6,21 +6,29 @@ class AzureCli < Formula
   url "{{ upstream_url }}"
   version "{{ cli_version }}"
   sha256 "{{ upstream_sha }}"
+  license "MIT"
   head "https://github.com/Azure/azure-cli.git"
+
+  livecheck do
+    url "https://github.com/Azure/azure-cli/releases/latest"
+    regex(%r{href=.*?/tag/azure-cli[._-]v?(\d+(?:\.\d+)+)["' >]}i)
+  end
 
 {{ bottle_hash }}
 
   depends_on "openssl@1.1"
-  depends_on "python@3.8"
+  depends_on "python@3.10"
+
+  uses_from_macos "libffi"
+
+  on_linux do
+    depends_on "pkg-config" => :build
+  end
 
 {{ resources }}
 
   def install
-    # Work around Xcode 11 clang bug
-    # https://code.videolan.org/videolan/libbluray/issues/20
-    ENV.append_to_cflags "-fno-stack-check" if DevelopmentTools.clang_build_version >= 1010
-
-    venv = virtualenv_create(libexec, "python3")
+    venv = virtualenv_create(libexec, "python3", system_site_packages: false)
     venv.pip_install resources
 
     # Get the CLI components we'll install
@@ -28,8 +36,6 @@ class AzureCli < Formula
       buildpath/"src/azure-cli",
       buildpath/"src/azure-cli-telemetry",
       buildpath/"src/azure-cli-core",
-      buildpath/"src/azure-cli-nspkg",
-      buildpath/"src/azure-cli-command_modules-nspkg",
     ]
 
     # Install CLI
@@ -41,7 +47,7 @@ class AzureCli < Formula
 
     (bin/"az").write <<~EOS
       #!/usr/bin/env bash
-      #{libexec}/bin/python -m azure.cli \"$@\"
+      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli \"$@\"
     EOS
 
     bash_completion.install "az.completion" => "az"

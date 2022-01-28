@@ -6,6 +6,7 @@
 from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 
 from knack.util import CLIError
 
@@ -93,7 +94,7 @@ def list_policy_events(
             subscription_id,
             query_options)
 
-    return events.value
+    return events
 
 
 def list_policy_states(
@@ -194,7 +195,7 @@ def list_policy_states(
             subscription_id,
             query_options)
 
-    return states.value
+    return states
 
 
 def summarize_policy_states(
@@ -272,6 +273,21 @@ def summarize_policy_states(
             query_options)
 
     return summary.value[0]
+
+
+def trigger_policy_scan(
+        cmd,
+        client,
+        resource_group_name=None,
+        no_wait=False):
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    if resource_group_name:
+        return sdk_no_wait(no_wait, client.begin_trigger_resource_group_evaluation,
+                           subscription_id, resource_group_name)
+
+    return sdk_no_wait(no_wait, client.begin_trigger_subscription_evaluation,
+                       subscription_id)
 
 
 def get_policy_remediation(
@@ -404,7 +420,8 @@ def create_policy_remediation(
         resource=None,
         namespace=None,
         resource_type_parent=None,
-        resource_type=None):
+        resource_type=None,
+        resource_discovery_mode=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     scope = _build_remediation_scope(
@@ -442,10 +459,34 @@ def create_policy_remediation(
         from azure.mgmt.policyinsights.models import RemediationFilters
         remediation.filters = RemediationFilters(locations=locations_list)
 
+    if resource_discovery_mode:
+        remediation.resource_discovery_mode = resource_discovery_mode
+
     return client.create_or_update_at_resource(
         resource_id=_remove_leading_and_trailing_slash(scope),
         remediation_name=remediation_name,
         parameters=remediation)
+
+
+def show_policy_metadata(cmd, client, resource_name):   # pylint: disable=unused-argument
+    return client.get_resource(resource_name=resource_name)
+
+
+def list_policy_metadata(cmd, client, top_value=None):   # pylint: disable=unused-argument
+    if top_value is not None:
+        from azure.mgmt.policyinsights.models import QueryOptions
+        page_iter = client.list(QueryOptions(top=top_value)).by_page()
+        results = []
+
+        while len(results) < top_value:
+            try:
+                results += list(next(page_iter))
+            except StopIteration:
+                break
+
+        return results[:top_value]
+
+    return list(client.list())
 
 
 def _execute_remediation_operation(

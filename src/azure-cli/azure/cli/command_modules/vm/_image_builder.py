@@ -5,10 +5,13 @@
 
 # TODO refactor out _image_builder commands.
 # i.e something like image_builder/_client_factory image_builder/commands.py image_builder/_params.py
-
+import os
 import re
+import json
+import traceback
 from enum import Enum
 
+import requests
 
 try:
     from urllib.parse import urlparse
@@ -24,6 +27,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_
 from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
@@ -47,6 +51,7 @@ class ScriptType(Enum):
     SHELL = "shell"
     POWERSHELL = "powershell"
     WINDOWS_RESTART = "windows-restart"
+    WINDOWS_UPDATE = "windows-update"
     FILE = "file"
 
 
@@ -142,9 +147,9 @@ def _validate_location(location, location_names, location_display_names):
 
     if ' ' in location:
         # if display name is provided, attempt to convert to short form name
-        location = next((l for l in location_display_names if l.lower() == location.lower()), location)
+        location = next((name for name in location_display_names if name.lower() == location.lower()), location)
 
-    if location.lower() not in [l.lower() for l in location_names]:
+    if location.lower() not in [location_name.lower() for location_name in location_names]:
         raise CLIError("Location {} is not a valid subscription location. "
                        "Use one from `az account list-locations`.".format(location))
 
@@ -152,6 +157,9 @@ def _validate_location(location, location_names, location_display_names):
 
 
 def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    if namespace.image_template is not None:
+        return
+
     from azure.cli.core.commands.parameters import get_subscription_locations
 
     source = None
@@ -172,8 +180,8 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     # Validate and parse destination and locations
     destinations = []
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_destinations:
         for dest in namespace.managed_image_destinations:
@@ -184,7 +192,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     if namespace.shared_image_destinations:
         for dest in namespace.shared_image_destinations:
             rid, locations = _parse_image_destination(cmd, namespace.resource_group_name, dest, is_shared_image=True)
-            locations = [_validate_location(l, location_names, location_display_names) for l in locations]
+            locations = [_validate_location(location, location_names, location_display_names) for location in locations]
             destinations.append((_DestType.SHARED_IMAGE_GALLERY, rid, locations))
 
     # Validate and parse source image
@@ -346,8 +354,8 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         raise CLIError("Usage error: If --is-vhd is used, a run output name must be provided via --output-name.")
 
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_location:
         namespace.managed_image_location = _validate_location(namespace.managed_image_location,
@@ -370,15 +378,53 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(  # pylint: disable=too-many-locals
+def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements, unused-argument
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
-        source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False):  # pylint: disable=unused-argument, too-many-locals
+        source=None, scripts=None, checksum=None, managed_image_destinations=None,
+        shared_image_destinations=None, no_wait=False, image_template=None, identity=None,
+        vm_size=None, os_disk_size=None, vnet=None, subnet=None, proxy_vm_size=None, build_vm_identities=None):
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
-                                                ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
+                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
-                                                ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
+                                                ImageTemplateManagedImageDistributor,
+                                                ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
+                                                ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties,  # pylint: disable=line-too-long
+                                                ImageTemplateVmProfile, VirtualNetworkConfig)
+
+    if image_template is not None:
+        logger.warning('You are using --image-template. All other parameters will be ignored.')
+        if os.path.exists(image_template):
+            # Local file
+            with open(image_template) as f:
+                content = f.read()
+        else:
+            # It should be an URL
+            msg = '\nusage error: --image-template is not a correct local path or URL'
+            try:
+                r = requests.get(image_template)
+            except Exception:
+                raise CLIError(traceback.format_exc() + msg)
+            if r.status_code != 200:
+                raise CLIError(traceback.format_exc() + msg)
+            content = r.content
+
+        try:
+            obj = json.loads(content)
+        except json.JSONDecodeError:
+            raise CLIError(traceback.format_exc() +
+                           '\nusage error: Content of --image-template is not a valid JSON string')
+        content = {}
+        if 'properties' in obj:
+            content = obj['properties']
+        if 'location' in obj:
+            content['location'] = obj['location']
+        if 'tags' in obj:
+            content['tags'] = obj['tags']
+        if 'identity' in obj:
+            content['identity'] = obj['identity']
+        return client.virtual_machine_image_templates.begin_create_or_update(
+            parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
     template_source, template_scripts, template_destinations = None, [], []
 
@@ -386,7 +432,8 @@ def create_image_template(  # pylint: disable=too-many-locals
     if source_dict['type'] == _SourceType.PLATFORM_IMAGE:
         template_source = ImageTemplatePlatformImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.ISO_URI:
-        template_source = ImageTemplateIsoSource(**source_dict)
+        # It was supported before but is removed in the current service version.
+        raise CLIError('usage error: Source type ISO URI is not supported.')
     elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
         template_source = ImageTemplateManagedImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.SIG_VERSION:
@@ -418,10 +465,39 @@ def create_image_template(  # pylint: disable=too-many-locals
         else:
             logger.info("No applicable destination found for destination %s", str(tuple([dest_type, rid, loc_info])))
 
-    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
-                                   location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}))
+    # Identity
+    identity_body = None
+    if identity is not None:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        user_assigned_identities = {}
+        for ide in identity:
+            if not is_valid_resource_id(ide):
+                ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
+            user_assigned_identities[ide] = ComponentsVrq145SchemasImagetemplateidentityPropertiesUserassignedidentitiesAdditionalproperties()  # pylint: disable=line-too-long
+        identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
+    # VM profile
+    vnet_config = None
+    if vnet or subnet:
+        if not is_valid_resource_id(subnet):
+            subscription_id = get_subscription_id(cmd.cli_ctx)
+            subnet = resource_id(subscription=subscription_id, resource_group=resource_group_name,
+                                 namespace='Microsoft.Network', type='virtualNetworks', name=vnet,
+                                 child_type_1='subnets', child_name_1=subnet)
+        vnet_config = VirtualNetworkConfig(subnet_id=subnet)
+    if proxy_vm_size is not None:
+        if subnet is not None:
+            vnet_config = VirtualNetworkConfig(subnet_id=subnet, proxy_vm_size=proxy_vm_size)
+        else:
+            raise RequiredArgumentMissingError('Usage error: --proxy-vm-size is only configurable when --subnet is specified.')
+    vm_profile = ImageTemplateVmProfile(vm_size=vm_size, os_disk_size_gb=os_disk_size, user_assigned_identities=build_vm_identities, vnet_config=vnet_config)  # pylint: disable=line-too-long
+
+    image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
+                                   location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
+                                   identity=identity_body, vm_profile=vm_profile)
+
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -478,7 +554,7 @@ def add_template_output(cmd, client, resource_group_name, image_template_name, g
 
     existing_image_template.distribute.append(distributor)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -502,7 +578,7 @@ def remove_template_output(cmd, client, resource_group_name, image_template_name
 
     existing_image_template.distribute = new_distribute
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -517,18 +593,19 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 
     existing_image_template.distribute = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
                             script_url=None, inline_script=None, valid_exit_codes=None,
                             restart_command=None, restart_check_command=None, restart_timeout=None,
-                            file_source=None, dest_path=None):
+                            file_source=None, dest_path=None, search_criteria=None, filters=None, update_limit=None):
     _require_defer(cmd)
 
     from azure.mgmt.imagebuilder.models import (ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
-                                                ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer)
+                                                ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer,
+                                                ImageTemplateWindowsUpdateCustomizer)
 
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
@@ -556,13 +633,16 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
     elif customizer_type.lower() == ScriptType.FILE.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplateFileCustomizer(name=customizer_name, source_uri=file_source,
                                                      destination=dest_path)
+    elif customizer_type.lower() == ScriptType.WINDOWS_UPDATE.value.lower():
+        new_customizer = ImageTemplateWindowsUpdateCustomizer(name=customizer_name, search_criteria=search_criteria,
+                                                              filters=filters, update_limit=update_limit)
 
     if not new_customizer:
         raise CLIError("Cannot determine customizer from type {}.".format(customizer_type))
 
     existing_image_template.customize.append(new_customizer)
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -586,7 +666,7 @@ def remove_template_customizer(cmd, client, resource_group_name, image_template_
 
     existing_image_template.customize = new_customize
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
@@ -602,7 +682,7 @@ def clear_template_customizer(cmd, client, resource_group_name, image_template_n
 
     existing_image_template.customize = []
 
-    return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=existing_image_template,
+    return cached_put(cmd, client.virtual_machine_image_templates.begin_create_or_update, parameters=existing_image_template,  # pylint: disable=line-too-long
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 # endregion

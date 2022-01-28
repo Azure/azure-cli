@@ -10,18 +10,33 @@ import requests
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.ams._completers import get_mru_type_completion_list
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.azclierror import BadRequestError
 
 _rut_dict = {0: 'S1',
              1: 'S2',
              2: 'S3'}
 
 
-def get_mru(cmd, resource_group_name, account_name):
+def get_mru(client, cmd, resource_group_name, account_name):
+    account_info = client.get(resource_group_name,
+                              account_name) if resource_group_name else client.get_by_subscription(account_name)
+    if account_info.encryption:
+        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created'
+                              ' with the 2020-05-01 version of the API or later. Accounts created this way no'
+                              ' longer need to set media reserved units as the system will automatically'
+                              ' scale up and down based on load.')
     mru = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name).get_mru()
     return _map_mru(mru)
 
 
-def set_mru(cmd, resource_group_name, account_name, count=None, type=None):
+def set_mru(client, cmd, resource_group_name, account_name, count=None, type=None):
+    account_info = client.get(resource_group_name,
+                              account_name) if resource_group_name else client.get_by_subscription(account_name)
+    if account_info.encryption:
+        raise BadRequestError('The media reserved unit operation failed as the Media Services account was created'
+                              ' with the 2020-05-01 version of the API or later. Accounts created this way no'
+                              ' longer need to set media reserved units as the system will automatically'
+                              ' scale up and down based on load.')
     client = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name)
     mru = client.get_mru()
 
@@ -68,7 +83,7 @@ class MediaV2Client():
                                        namespace=get_media_namespace(), type=get_media_type(),
                                        name=account_name) + '?api-version={}'.format(self._old_rp_api_version)
 
-        media_service_res = requests.get(cli_ctx.cloud.endpoints.resource_manager[:-1] + media_old_rp_url,
+        media_service_res = requests.get(cli_ctx.cloud.endpoints.resource_manager.rstrip('/') + media_old_rp_url,
                                          headers={'Authorization': 'Bearer {}'.format(access_token)})
         if not media_service_res.ok:
             err_info = 'Request to 2015-10-01 Media API failed.'

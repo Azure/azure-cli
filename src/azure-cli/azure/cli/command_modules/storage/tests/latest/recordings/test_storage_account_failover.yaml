@@ -1,0 +1,654 @@
+interactions:
+- request:
+    body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "StorageV2", "location": "eastus2euap",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"},
+      "supportsHttpsTrafficOnly": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '209'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g -l --kind --sku --https-only
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Sep 2021 07:08:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/277ae0a4-4ce4-484b-9892-5999b2a6dc1d?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --kind --sku --https-only
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/277ae0a4-4ce4-484b-9892-5999b2a6dc1d?monitor=true&api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2025'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:08:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:08:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:10:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Unavailable","lastSyncTime":"2021-09-07T07:08:32Z","canFailover":false},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2130'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:10:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Live","lastSyncTime":"2021-09-07T07:08:15Z","canFailover":true},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2122'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:10:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"geoReplicationStats":{"status":"Live","lastSyncTime":"2021-09-07T07:08:15Z","canFailover":true},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2122'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:10:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account failover
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --no-wait -y
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002/failover?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Sep 2021 07:25:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/c20fe40e-bb41-4768-aa15-cc7d25b7c441?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --expand
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002?api-version=2021-06-01&$expand=geoReplicationStats
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clistorage000001/providers/Microsoft.Storage/storageAccounts/storagegrzs000002","name":"storagegrzs000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-07T07:08:32.5792242Z","key2":"2021-09-07T07:08:32.5792242Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"failoverInProgress":true,"geoReplicationStats":{"status":"Live","lastSyncTime":"2021-09-07T07:22:20Z","canFailover":true},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-07T07:08:32.5792242Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-07T07:08:32.5010659Z","primaryEndpoints":{"dfs":"https://storagegrzs000002.dfs.core.windows.net/","web":"https://storagegrzs000002.z3.web.core.windows.net/","blob":"https://storagegrzs000002.blob.core.windows.net/","queue":"https://storagegrzs000002.queue.core.windows.net/","table":"https://storagegrzs000002.table.core.windows.net/","file":"https://storagegrzs000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storagegrzs000002-secondary.dfs.core.windows.net/","web":"https://storagegrzs000002-secondary.z3.web.core.windows.net/","blob":"https://storagegrzs000002-secondary.blob.core.windows.net/","queue":"https://storagegrzs000002-secondary.queue.core.windows.net/","table":"https://storagegrzs000002-secondary.table.core.windows.net/"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2148'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:25:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

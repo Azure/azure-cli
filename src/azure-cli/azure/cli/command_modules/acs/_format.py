@@ -24,7 +24,8 @@ def _aks_agentpool_table_format(result):
         osDiskSizeGB: osDiskSizeGB,
         count: count,
         maxPods: maxPods,
-        provisioningState: provisioningState
+        provisioningState: provisioningState,
+        mode: mode
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
@@ -38,6 +39,21 @@ def aks_agentpool_list_table_format(results):
 def aks_list_table_format(results):
     """"Format a list of managed clusters as summary results for display with "-o table"."""
     return [_aks_table_format(r) for r in results]
+
+
+def aks_run_command_result_format(cmdResult):
+    result = OrderedDict()
+    if cmdResult['provisioningState'] == "Succeeded":
+        result['exit code'] = cmdResult['exitCode']
+        result['logs'] = cmdResult['logs']
+        return result
+    if cmdResult['provisioningState'] == "Failed":
+        result['provisioning state'] = cmdResult['provisioningState']
+        result['reason'] = cmdResult['reason']
+        return result
+    result['provisioning state'] = cmdResult['provisioningState']
+    result['started At'] = cmdResult['startedAt']
+    return result
 
 
 def osa_list_table_format(results):
@@ -57,7 +73,7 @@ def _aks_table_format(result):
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
         provisioningState: provisioningState,
-        fqdn: fqdn
+        fqdn: fqdn || privateFqdn
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
@@ -86,14 +102,12 @@ def aks_upgrades_table_format(result):
             if upgrade.get('isPreview', False):
                 preview[upgrade['kubernetesVersion']] = True
     find_preview_versions(result.get('controlPlaneProfile', {}))
-    find_preview_versions(result.get('agentPoolProfiles', [{}])[0])
 
     # This expression assumes there is one node pool, and that the master and nodes upgrade in lockstep.
     parsed = compile_jmes("""{
         name: name,
         resourceGroup: resourceGroup,
         masterVersion: controlPlaneProfile.kubernetesVersion || `unknown`,
-        nodePoolVersion: agentPoolProfiles[0].kubernetesVersion || `unknown` | set_preview(@),
         upgrades: controlPlaneProfile.upgrades[].kubernetesVersion || [`None available`] | sort_versions(@) | set_preview_array(@) | join(`, `, @)
     }""")
     # use ordered dicts so headers are predictable
@@ -117,8 +131,33 @@ def aks_versions_table_format(result):
     }""")
 
     # use ordered dicts so headers are predictable
-    results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
+    results = parsed.search(result, Options(
+        dict_cls=OrderedDict, custom_functions=_custom_functions(preview)))
     return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
+
+
+def aks_list_snapshot_table_format(results):
+    """"Format a list of snapshots as summary results for display with "-o table"."""
+    return [_aks_snapshot_table_format(r) for r in results]
+
+
+def aks_show_snapshot_table_format(result):
+    """Format a snapshot as summary results for display with "-o table"."""
+    return [_aks_snapshot_table_format(result)]
+
+
+def _aks_snapshot_table_format(result):
+    parsed = compile_jmes("""{
+        name: name,
+        location: location,
+        resourceGroup: resourceGroup,
+        nodeImageVersion: nodeImageVersion,
+        kubernetesVersion: kubernetesVersion,
+        osType: osType,
+        enableFIPS: enableFIPS
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
 
 
 def version_to_tuple(version):
@@ -136,7 +175,8 @@ def _custom_functions(preview_versions):
             """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
             try:
                 return sorted(versions, key=version_to_tuple)
-            except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
+            # if it wasn't sortable, return the input so the pipeline continues
+            except (TypeError, ValueError):
                 return versions
 
         @functions.signature({'types': ['array']})

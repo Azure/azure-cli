@@ -1,275 +1,462 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"kind": "FormRecognizer", "sku": {"name": "S0"}, "location": "centraluseuap",
+      "properties": {}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['50']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2021-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"06006ee4-0000-3300-0000-61a332d40000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:42:12.4593263Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:42:12.4593263Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"00e5d57f6bd947759ceae4bfc1a641af","dateCreated":"2021-11-28T07:42:12.6806704Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Creating"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['328']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/c41bea99-3303-49f0-994e-68596acf8bf4?api-version=2017-04-18
+      cache-control:
+      - no-cache
+      content-length:
+      - '2405'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:12 GMT
+      etag:
+      - '"06006ee4-0000-3300-0000-61a332d40000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '277'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
 - request:
-    body: '{"sku": {"name": "S0"}, "kind": "Face", "location": "westeurope", "properties":
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/c41bea99-3303-49f0-994e-68596acf8bf4?api-version=2017-04-18
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/centraluseuap/operationResults/c41bea99-3303-49f0-994e-68596acf8bf4","name":"c41bea99-3303-49f0-994e-68596acf8bf4","status":"Succeeded","startTime":"2021-11-28T07:42:12Z","endTime":"2021-11-28T07:42:13Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '311'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '6'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"060071e4-0000-3300-0000-61a332d50000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:42:12.4593263Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:42:12.4593263Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"00e5d57f6bd947759ceae4bfc1a641af","dateCreated":"2021-11-28T07:42:12.6806704Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:42 GMT
+      etag:
+      - '"060071e4-0000-3300-0000-61a332d50000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '11'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2021-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"060071e4-0000-3300-0000-61a332d50000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:42:12.4593263Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:42:12.4593263Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","internalId":"00e5d57f6bd947759ceae4bfc1a641af","dateCreated":"2021-11-28T07:42:12.6806704Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2406'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:43 GMT
+      etag:
+      - '"060071e4-0000-3300-0000-61a332d50000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '11'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "S0"}, "tags": {"tagname000003": "tagvalue000004"}, "properties":
       {}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['83']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2017-04-18
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"02000c89-0000-0000-0000-5a2747b60000\"","location":"westeurope","sku":{"name":"S0"},"kind":"Face","properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/face/v1.0","internalId":"364dfbcf164544df8ac488153ec7d98a","dateCreated":"2017-12-06T01:28:22.6557384Z","provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['597']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:22 GMT']
-      etag: ['"02000c89-0000-0000-0000-5a2747b60000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2017-04-18
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"02000c89-0000-0000-0000-5a2747b60000\"","location":"westeurope","sku":{"name":"S0"},"kind":"Face","properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/face/v1.0","internalId":"364dfbcf164544df8ac488153ec7d98a","dateCreated":"2017-12-06T01:28:22.6557384Z","provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['597']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:23 GMT']
-      etag: ['"02000c89-0000-0000-0000-5a2747b60000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: 'b''b\''{"sku": {"name": "S0"}, "tags": {"tagname000003": "tagvalue000004"}}\'''''
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['71']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '89'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku --tags
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2021-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"02001089-0000-0000-0000-5a2747b90000\"","location":"westeurope","sku":{"name":"S0"},"kind":"Face","tags":{"tagname000003":"tagvalue000004"},"properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/face/v1.0","provisioningState":"Succeeded","internalId":"364dfbcf164544df8ac488153ec7d98a","dateCreated":"2017-12-06T01:28:22.6557384Z"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"06002ae5-0000-3300-0000-61a332f50000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:42:12.4593263Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:42:45.0387552Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","tags":{"tagname000003":"tagvalue000004"},"properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"00e5d57f6bd947759ceae4bfc1a641af","dateCreated":"2021-11-28T07:42:12.6806704Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"}}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['642']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:25 GMT']
-      etag: ['"02001089-0000-0000-0000-5a2747b90000"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2451'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:44 GMT
+      etag:
+      - '"06002ae5-0000-3300-0000-61a332f50000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '36'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/listKeys?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/listKeys?api-version=2021-10-01
   response:
-    body: {string: '{"key1":"aecaba74aac041679ce7b092ad0b42ef","key2":"c4266e5818d34421866849fa7d973943"}'}
+    body:
+      string: '{"key1":"3d75bdcffb9e4aa68dc2e9f248c07f56","key2":"4dc2f13ce28544ffb5f432cc145359aa"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['85']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '85'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '21'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"keyName": "Key1"}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['19']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account keys regenerate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '19'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --key-name
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/regenerateKey?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/regenerateKey?api-version=2021-10-01
   response:
-    body: {string: '{"key1":"4d8b275fc41f483eb888fdbb743be257","key2":"c4266e5818d34421866849fa7d973943"}'}
+    body:
+      string: '{"key1":"68b6b4cf375541c1b86791c74b042cec","key2":"4dc2f13ce28544ffb5f432cc145359aa"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['85']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:28 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '85'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '109'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts?api-version=2021-10-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"02001589-0000-0000-0000-5a2747bc0000\"","location":"westeurope","sku":{"name":"S0"},"kind":"Face","tags":{"tagname000003":"tagvalue000004"},"properties":{"endpoint":"https://westeurope.api.cognitive.microsoft.com/face/v1.0","provisioningState":"Succeeded","internalId":"364dfbcf164544df8ac488153ec7d98a","dateCreated":"2017-12-06T01:28:22.6557384Z"}}]}'}
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"060030e5-0000-3300-0000-61a332f60000\"","systemData":{"createdBy":"yuanyang@microsoft.com","createdByType":"User","createdAt":"2021-11-28T07:42:12.4593263Z","lastModifiedBy":"yuanyang@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-11-28T07:42:45.0387552Z"},"location":"centraluseuap","sku":{"name":"S0"},"kind":"FormRecognizer","tags":{"tagname000003":"tagvalue000004"},"properties":{"endpoint":"https://centraluseuap.api.cognitive.microsoft.com/","provisioningState":"Succeeded","internalId":"00e5d57f6bd947759ceae4bfc1a641af","dateCreated":"2021-11-28T07:42:12.6806704Z","callRateLimit":{"rules":[{"key":"formrecognizer.custom.train","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/train","method":"*"}]},{"key":"formrecognizer.custom.copymodels","renewalPeriod":60,"count":1,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/copy","method":"*"}]},{"key":"formrecognizer.custom.models.get","renewalPeriod":60,"count":10,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"GET"}]},{"key":"formrecognizer.analyzeform","renewalPeriod":1,"count":15,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"}]},{"key":"formrecognizer.analyzeform.result","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":false,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"CustomerManagedStorage"},{"name":"CustomerManagedKey"},{"name":"Container","value":"FormRecognizer.*"}],"endpoints":{"FormRecognizer":"https://centraluseuap.api.cognitive.microsoft.com/"}}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['654']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 06 Dec 2017 01:28:30 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2463'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sun, 28 Nov 2021 07:42:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '15'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 cognitiveservicesmanagementclient/1.0.0
-          Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-mgmt-cognitiveservices/13.0.0 Python/3.7.9 (Windows-10-10.0.22000-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2017-04-18
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2021-10-01
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Dec 2017 01:28:32 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 06 Dec 2017 01:28:34 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc3Vk5XVjdHWERGQ1o2WTVHNU82U1VJV0NaSENPQkwzUzJZV3xFQTNFRDQ2MDhEMkJFQjM1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sun, 28 Nov 2021 07:42:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - istio-envoy
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '84'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import platform
 
 from azure.cli.core.commands.arm import resource_exists
@@ -16,7 +15,7 @@ logger = get_logger(__name__)
 
 def get_folded_parameter_help_string(
         display_name, allow_none=False, allow_new=False, default_none=False,
-        other_required_option=None):
+        other_required_option=None, allow_cross_sub=True):
     """ Assembles a parameterized help string for folded parameters. """
     quotes = '""' if platform.system() == 'Windows' else "''"
 
@@ -43,16 +42,18 @@ def get_folded_parameter_help_string(
     # add parent name option string (if applicable)
     if other_required_option:
         help_text = '{} If name specified, also specify {}.'.format(help_text, other_required_option)
-        help_text = '{} If you want to use an existing {display_name} in other resource group or subscription, ' \
+        extra_sub_text = " or subscription" if allow_cross_sub else ""
+        help_text = '{} If you want to use an existing {display_name} in other resource group{append_sub}, ' \
                     'please provide the ID instead of the name of the {display_name}'.format(help_text,
-                                                                                             display_name=display_name)
+                                                                                             display_name=display_name,
+                                                                                             append_sub=extra_sub_text)
     return help_text
 
 
 def _validate_name_or_id(
         cli_ctx, resource_group_name, property_value, property_type, parent_value, parent_type):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     has_parent = parent_type is not None
     if is_valid_resource_id(property_value):
         resource_id_parts = parse_resource_id(property_value)
@@ -94,7 +95,7 @@ def get_folded_parameter_validator(
 
     # construct the validator
     def validator(cmd, namespace):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         type_field_name = '{}_type'.format(property_name)
         property_val = getattr(namespace, property_name, None)
         parent_val = getattr(namespace, parent_name, None) if parent_name else None

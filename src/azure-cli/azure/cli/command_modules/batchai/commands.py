@@ -22,7 +22,7 @@ from azure.cli.command_modules.batchai._format import (
     job_show_table_format,
     file_list_table_format,
     file_server_list_table_format,
-    file_server_show_table_format,
+    # file_server_show_table_format,
     remote_login_table_format,
     node_setup_files_list_table_format,
     usage_table_format,
@@ -64,11 +64,11 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_workspace')
         g.show_command('show', 'get', table_transformer=workspace_show_table_format)
         g.custom_command('list', 'list_workspaces', table_transformer=workspace_list_table_format)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('batchai cluster', batchai_cluster_sdk, client_factory=cluster_client_factory) as g:
         g.custom_command('create', 'create_cluster', client_factory=batchai_client_factory)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get', table_transformer=cluster_show_table_format)
         g.custom_command('list', 'list_clusters', table_transformer=cluster_list_table_format)
         g.custom_command('resize', 'resize_cluster')
@@ -82,15 +82,15 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_node_setup_files', table_transformer=node_setup_files_list_table_format)
 
     with self.command_group('batchai experiment', batchai_experiment_sdk, client_factory=experiment_client_factory) as g:
-        g.command('create', 'create')
+        g.command('create', 'begin_create')
         g.show_command('show', 'get', table_transformer=experiment_show_table_format)
         g.command('list', 'list_by_workspace', table_transformer=experiment_list_table_format)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('batchai job', batchai_job_sdk, client_factory=job_client_factory) as g:
         g.custom_command('create', 'create_job', client_factory=batchai_client_factory)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
-        g.command('terminate', 'terminate', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.command('terminate', 'begin_terminate', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get', table_transformer=job_show_table_format)
         g.command('list', 'list_by_experiment', table_transformer=job_list_table_format)
         g.custom_command('wait', 'wait_for_job_completion', client_factory=batchai_client_factory)
@@ -105,8 +105,8 @@ def load_command_table(self, _):
 
     with self.command_group('batchai file-server', batchai_server_sdk, client_factory=file_server_client_factory) as g:
         g.custom_command('create', 'create_file_server', no_wait_param='raw', client_factory=batchai_client_factory)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
-        g.show_command('show', 'get', table_transformer=file_server_show_table_format)
+        # g.command('delete', 'delete', supports_no_wait=True, confirmation=True)    # In Track2 Delete command missing
+        # g.show_command('show', 'get', table_transformer=file_server_show_table_format) # ditte Get command missing
         g.command('list', 'list_by_workspace', table_transformer=file_server_list_table_format)
 
     with self.command_group('batchai', batchai_usage_sdk, client_factory=usage_client_factory, deprecate_info=self.deprecate(hide=True)) as g:

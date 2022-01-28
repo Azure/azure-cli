@@ -11,7 +11,7 @@ import io
 import os
 import shutil
 from knack.util import CLIError
-import mock
+from unittest import mock
 
 from azure.cli.core.keys import generate_ssh_keys
 

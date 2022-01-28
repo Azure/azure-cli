@@ -9,14 +9,16 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.ams._utils import (create_ip_range, show_resource_not_found_message)
 from azure.mgmt.media.models import (CrossSiteAccessPolicies, IPAccessControl, LiveEvent,
                                      LiveEventEncoding, LiveEventInput, LiveEventInputAccessControl,
-                                     LiveEventInputProtocol, LiveEventPreview, LiveEventPreviewAccessControl)
+                                     LiveEventInputProtocol, LiveEventPreview, LiveEventPreviewAccessControl,
+                                     LiveEventActionInput)
 
 
 def create(cmd, client, resource_group_name, account_name, live_event_name, streaming_protocol, ips,  # pylint: disable=too-many-locals
-           auto_start=False, encoding_type=None, preset_name=None, tags=None, description=None,
-           key_frame_interval_duration=None, access_token=None, no_wait=False, preview_ips=None,
-           preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
-           vanity_url=False, client_access_policy=None, cross_domain_policy=None, stream_options=None):
+           auto_start=False, encoding_type=None, preset_name=None, stretch_mode=None, key_frame_interval=None,
+           tags=None, description=None, key_frame_interval_duration=None, access_token=None, no_wait=False,
+           preview_ips=None, preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
+           client_access_policy=None, cross_domain_policy=None, stream_options=None,
+           transcription_lang=None, use_static_hostname=False, hostname_prefix=None):
 
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
@@ -27,6 +29,10 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
         allowed_ips.append(create_ip_range(live_event_name, ip))
 
     live_event_input_access_control = LiveEventInputAccessControl(ip=IPAccessControl(allow=allowed_ips))
+
+    transcriptions = []
+    if transcription_lang:
+        transcriptions = [{'language': transcription_lang}]
 
     live_event_input = LiveEventInput(streaming_protocol=LiveEventInputProtocol(streaming_protocol),
                                       access_token=access_token,
@@ -43,11 +49,13 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
     live_event = LiveEvent(input=live_event_input, location=location, preview=live_event_preview,
-                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name),
-                           tags=tags, vanity_url=vanity_url, stream_options=stream_options,
-                           cross_site_access_policies=policies, description=description)
+                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name,
+                                                      stretch_mode=stretch_mode, key_frame_interval=key_frame_interval),
+                           tags=tags, stream_options=stream_options, cross_site_access_policies=policies,
+                           description=description, transcriptions=transcriptions,
+                           use_static_hostname=use_static_hostname, hostname_prefix=hostname_prefix, system_data=None)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
+    return sdk_no_wait(no_wait, client.begin_create, resource_group_name=resource_group_name, account_name=account_name,
                        live_event_name=live_event_name, parameters=live_event, auto_start=auto_start)
 
 
@@ -85,9 +93,18 @@ def create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
 def start(cmd, client, resource_group_name, account_name, live_event_name, no_wait=False):
     if no_wait:
-        return sdk_no_wait(no_wait, client.start, resource_group_name, account_name, live_event_name)
+        return sdk_no_wait(no_wait, client.begin_start, resource_group_name, account_name, live_event_name)
 
-    LongRunningOperation(cmd.cli_ctx)(client.start(resource_group_name, account_name, live_event_name))
+    LongRunningOperation(cmd.cli_ctx)(client.begin_start(resource_group_name, account_name, live_event_name))
+
+    return client.get(resource_group_name, account_name, live_event_name)
+
+
+def standby(cmd, client, resource_group_name, account_name, live_event_name, no_wait=False):
+    if no_wait:
+        return sdk_no_wait(no_wait, client.begin_allocate, resource_group_name, account_name, live_event_name)
+
+    LongRunningOperation(cmd.cli_ctx)(client.begin_allocate(resource_group_name, account_name, live_event_name))
 
     return client.get(resource_group_name, account_name, live_event_name)
 
@@ -96,11 +113,12 @@ def stop(cmd, client, resource_group_name, account_name, live_event_name,
          remove_outputs_on_stop=False, no_wait=False):
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.stop, resource_group_name, account_name, live_event_name,
+        return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, account_name, live_event_name,
                            remove_outputs_on_stop)
 
-    LongRunningOperation(cmd.cli_ctx)(client.stop(resource_group_name, account_name, live_event_name,
-                                                  remove_outputs_on_stop))
+    parameters = LiveEventActionInput(remove_outputs_on_stop=remove_outputs_on_stop)
+    LongRunningOperation(cmd.cli_ctx)(client.begin_stop(resource_group_name, account_name, live_event_name,
+                                                        parameters))
 
     return client.get(resource_group_name, account_name, live_event_name)
 
@@ -109,9 +127,9 @@ def reset(cmd, client, resource_group_name, account_name, live_event_name,
           no_wait=False):
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.reset, resource_group_name, account_name, live_event_name)
+        return sdk_no_wait(no_wait, client.begin_reset, resource_group_name, account_name, live_event_name)
 
-    LongRunningOperation(cmd.cli_ctx)(client.reset(resource_group_name, account_name, live_event_name))
+    LongRunningOperation(cmd.cli_ctx)(client.begin_reset(resource_group_name, account_name, live_event_name))
 
     return client.get(resource_group_name, account_name, live_event_name)
 
@@ -124,7 +142,7 @@ def update_live_event_setter(client, resource_group_name, account_name, live_eve
                            parameters.preview.access_control.ip.allow))
     parameters.input.access_control.ip.allow = ips
     parameters.preview.access_control.ip.allow = preview_ips
-    return client.update(resource_group_name, account_name, live_event_name, parameters)
+    return client.begin_update(resource_group_name, account_name, live_event_name, parameters)
 
 
 def update_live_event(instance, tags=None, description=None, key_frame_interval_duration=None,

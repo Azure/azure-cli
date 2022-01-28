@@ -39,3 +39,21 @@ class TestCoreTelemetry(unittest.TestCase):
 
         args = ['vm', 'show', '-g', 'rg', '--name', 'vm1', '-d', '--debug']
         self.assertEqual(['-g', '--name', '-d', '--debug'], AzCliCommandInvoker._extract_parameter_names(args))
+
+    def test_cloud_forbid_telemetry(self):
+        from unittest import mock
+        from azure.cli.core import telemetry
+        from azure.cli.core.mock import DummyCli
+        from knack.completion import ARGCOMPLETE_ENV_NAME
+
+        az_cli = DummyCli()
+        telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
+        # mock user turns off telemetry
+        with mock.patch('knack.config.CLIConfig.getboolean', return_value=False):
+            self.assertFalse(telemetry.is_telemetry_enabled())
+        # mock user turns on telemetry
+        with mock.patch('knack.config.CLIConfig.getboolean', return_value=True):
+            self.assertTrue(telemetry.is_telemetry_enabled())
+            # mock to add current cloud name in CLOUDS_FORBIDDING_TELEMETRY
+            with mock.patch('azure.cli.core.cloud.CLOUDS_FORBIDDING_TELEMETRY', [az_cli.cloud.name]):
+                self.assertFalse(telemetry.is_telemetry_enabled())

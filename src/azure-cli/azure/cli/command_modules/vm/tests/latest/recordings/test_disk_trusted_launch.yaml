@@ -1,0 +1,304 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image-reference --hyper-v-generation --security-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_disk_trusted_launch_000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_trusted_launch_000001","name":"cli_test_disk_trusted_launch_000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-15T12:05:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '436'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:06:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image-reference --hyper-v-generation --security-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/southcentralus/publishers/Canonical/artifacttypes/vmimage/offers/UbuntuServer/skus/18_04-lts-gen2/versions/18.04.202004290?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V2\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"Unmanaged\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"features\":
+        [\r\n      {\r\n        \"name\": \"SecurityType\",\r\n        \"value\":
+        \"TrustedLaunchSupported\"\r\n      }\r\n    ],\r\n    \"osDiskImage\": {\r\n
+        \     \"operatingSystem\": \"Linux\",\r\n      \"sizeInGb\": 31,\r\n      \"sizeInBytes\":
+        32213303808\r\n    },\r\n    \"dataDiskImages\": []\r\n  },\r\n  \"location\":
+        \"southcentralus\",\r\n  \"name\": \"18.04.202004290\",\r\n  \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/southcentralus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18_04-lts-gen2/Versions/18.04.202004290\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '830'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:06:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12999,Microsoft.Compute/GetVMImageFromLocation30Min;73999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {}, "sku": {"name": "Premium_LRS"},
+      "properties": {"hyperVGeneration": "V2", "creationData": {"createOption": "FromImage",
+      "imageReference": {"id": "/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/southcentralus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18_04-lts-gen2/Versions/18.04.202004290"}},
+      "securityProfile": {"securityType": "TrustedLaunch"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '459'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --image-reference --hyper-v-generation --security-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_trusted_launch_000001/providers/Microsoft.Compute/disks/d1?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"southcentralus\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\"\r\n  },\r\n
+        \ \"properties\": {\r\n    \"osType\": \"Linux\",\r\n    \"hyperVGeneration\":
+        \"V2\",\r\n    \"supportedCapabilities\": {\r\n      \"architecture\": \"x64\"\r\n
+        \   },\r\n    \"creationData\": {\r\n      \"createOption\": \"FromImage\",\r\n
+        \     \"imageReference\": {\r\n        \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/southcentralus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18_04-lts-gen2/Versions/18.04.202004290\"\r\n
+        \     }\r\n    },\r\n    \"securityProfile\": {\r\n      \"securityType\":
+        \"TrustedLaunch\"\r\n    },\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"isArmResource\": true\r\n  },\r\n  \"associatedXStoreEntities\": [\r\n
+        \   {\r\n      \"id\": \"875d05ad-0f4e-4170-83f1-906a2f72cd66\",\r\n      \"type\":
+        \"VmgsBlob\",\r\n      \"name\": \"875d05ad-0f4e-4170-83f1-906a2f72cd66_vmgs\",\r\n
+        \     \"accessibleExternally\": false,\r\n      \"alignWithDisk\": true,\r\n
+        \     \"deleteOnDetach\": false,\r\n      \"pseudoSubscriptionId\": \"00000000-0000-0000-0000-000000000000\",\r\n
+        \     \"sourceSubscriptionId\": \"00000000-0000-0000-0000-000000000000\"\r\n
+        \   }\r\n  ]\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/southcentralus/DiskOperations/be5d4036-261c-44c0-8621-34d951d632bb?p=cc2a4867-fc8c-49a3-83e3-4fae1746e33f&api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1167'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:06:13 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/southcentralus/DiskOperations/be5d4036-261c-44c0-8621-34d951d632bb?p=cc2a4867-fc8c-49a3-83e3-4fae1746e33f&monitor=true&api-version=2021-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7999
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image-reference --hyper-v-generation --security-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/southcentralus/DiskOperations/be5d4036-261c-44c0-8621-34d951d632bb?p=cc2a4867-fc8c-49a3-83e3-4fae1746e33f&api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-11-15T12:06:13.1253096+00:00\",\r\n  \"endTime\":
+        \"2021-11-15T12:06:14.2659051+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"d1\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_trusted_launch_000001/providers/Microsoft.Compute/disks/d1\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"southcentralus\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
+        \   \"hyperVGeneration\": \"V2\",\r\n    \"supportedCapabilities\": {\r\n
+        \     \"architecture\": \"x64\"\r\n    },\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"FromImage\",\r\n      \"imageReference\": {\r\n        \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/southcentralus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18_04-lts-gen2/Versions/18.04.202004290\"\r\n
+        \     }\r\n    },\r\n    \"diskSizeGB\": 30,\r\n    \"diskIOPSReadWrite\":
+        120,\r\n    \"diskMBpsReadWrite\": 25,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"networkAccessPolicy\":
+        \"AllowAll\",\r\n    \"securityProfile\": {\r\n      \"securityType\": \"TrustedLaunch\"\r\n
+        \   },\r\n    \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\":
+        \"2021-11-15T12:06:13.1878475+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 32213303296,\r\n
+        \   \"uniqueId\": \"cbbe2973-d10b-41b9-bbe3-15386c872da8\",\r\n    \"tier\":
+        \"P4\"\r\n  }\r\n}\r\n  },\r\n  \"name\": \"be5d4036-261c-44c0-8621-34d951d632bb\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1626'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:06:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;49999,Microsoft.Compute/GetOperation30Min;399999
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - disk create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image-reference --hyper-v-generation --security-type
+      User-Agent:
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.9.5 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_trusted_launch_000001/providers/Microsoft.Compute/disks/d1?api-version=2021-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"d1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_disk_trusted_launch_000001/providers/Microsoft.Compute/disks/d1\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"southcentralus\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Premium_LRS\",\r\n    \"tier\":
+        \"Premium\"\r\n  },\r\n  \"properties\": {\r\n    \"osType\": \"Linux\",\r\n
+        \   \"hyperVGeneration\": \"V2\",\r\n    \"supportedCapabilities\": {\r\n
+        \     \"architecture\": \"x64\"\r\n    },\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"FromImage\",\r\n      \"imageReference\": {\r\n        \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/southcentralus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18_04-lts-gen2/Versions/18.04.202004290\"\r\n
+        \     }\r\n    },\r\n    \"diskSizeGB\": 30,\r\n    \"diskIOPSReadWrite\":
+        120,\r\n    \"diskMBpsReadWrite\": 25,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"networkAccessPolicy\":
+        \"AllowAll\",\r\n    \"securityProfile\": {\r\n      \"securityType\": \"TrustedLaunch\"\r\n
+        \   },\r\n    \"publicNetworkAccess\": \"Enabled\",\r\n    \"timeCreated\":
+        \"2021-11-15T12:06:13.1878475+00:00\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\": 32213303296,\r\n
+        \   \"uniqueId\": \"cbbe2973-d10b-41b9-bbe3-15386c872da8\",\r\n    \"tier\":
+        \"P4\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1401'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 15 Nov 2021 12:06:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;14999,Microsoft.Compute/LowCostGet30Min;119999
+    status:
+      code: 200
+      message: OK
+version: 1

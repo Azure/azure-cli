@@ -32,7 +32,7 @@ def load_arguments_sb(self, _):
         c.argument('default_action', help='Default action for network rule set.')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
-        c.argument('capacity', type=int, choices=[1, 2, 4, 8], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
+        c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
 
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
@@ -50,9 +50,11 @@ def load_arguments_sb(self, _):
 
     for scope in ['servicebus namespace authorization-rule create', 'servicebus namespace authorization-rule update', 'servicebus queue authorization-rule create', 'servicebus queue authorization-rule update', 'servicebus topic authorization-rule create', 'servicebus topic authorization-rule update']:
         with self.argument_context(scope) as c:
+            c.argument('name', arg_type=name_type, help='Name of Authorization Rule')
             c.argument('rights', arg_type=rights_arg_type)
 
     with self.argument_context('servicebus namespace authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Namespace Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -97,6 +99,7 @@ def load_arguments_sb(self, _):
         c.argument('queue_name', id_part=None, options_list=['--queue-name'], help='Name of Queue')
 
     with self.argument_context('servicebus queue authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Queue Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -142,6 +145,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='name of Topic')
 
     with self.argument_context('servicebus topic authorization-rule keys renew') as c:
+        c.argument('name', arg_type=name_type, help='Name of Topic Authorization Rule')
         c.argument('key_type', arg_type=key_arg_type)
         c.argument('key', arg_type=keyvalue_arg_type)
 
@@ -174,7 +178,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
     # Region Subscription Rules
-    # Rules Create
+    # Region Rules Create
 
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')
@@ -208,13 +212,17 @@ def load_arguments_sb(self, _):
 
     # Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias exists') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
         c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo-Disaster Recovery Configuration Alias to check availability')
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
     with self.argument_context('servicebus georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Geo-Disaster Recovery Configuration Alias')
 
     with self.argument_context('servicebus georecovery-alias set') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
+        c.argument('alias', options_list=['--alias', '-a'], help='Name of the Geo-Disaster Recovery Configuration Alias')
         c.argument('partner_namespace', required=True, options_list=['--partner-namespace'], validator=validate_partner_namespace, help='Name (if within the same resource group) or ARM Id of Primary/Secondary Service Bus  namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
@@ -237,12 +245,15 @@ def load_arguments_sb(self, _):
     # Standard to Premium Migration: Region
 
     with self.argument_context('servicebus migration start') as c:
+        c.ignore('config_name')
         c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace used as source of the migration')
+        # c.argument('config_name', options_list=['--config-name'], id_part=None, help='Name of configuration. Should always be "$default"')
         c.argument('target_namespace', options_list=['--target-namespace'], validator=validate_target_namespace, help='Name (if within the same resource group) or ARM Id of empty Premium Service Bus namespace name that will be target of the migration')
         c.argument('post_migration_name', options_list=['--post-migration-name'], help='Post migration name is the name that can be used to connect to standard namespace after migration is complete.')
 
     for scope in ['show', 'complete', 'abort']:
         with self.argument_context('servicebus migration {}'.format(scope)) as c:
+            c.ignore('config_name')
             c.argument('namespace_name', arg_type=name_type, help='Name of Standard Namespace')
 
 # Region Namespace NetworkRuleSet

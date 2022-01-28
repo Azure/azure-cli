@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "centralus", "properties": {"publicIPAllocationMethod": "Dynamic",
-      "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes": 4}, "zones": ["2"]}'
+    body: '{"location": "centralus", "zones": ["2"], "properties": {"publicIPAllocationMethod":
+      "Dynamic", "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes": 4}}'
     headers:
       Accept:
       - application/json
@@ -14,29 +14,28 @@ interactions:
       Content-Length:
       - '157'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n -l -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\",\r\n
-        \ \"etag\": \"W/\\\"9de994a4-0526-4705-8971-c154b6afc386\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"1b51d598-6685-422a-8a7e-3da8e4d6de32\\\"\",\r\n  \"location\":
         \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"704169ba-084e-4d2c-b366-817e1283c1cc\",\r\n
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\": \"ebd91084-1dfe-48bc-a163-5099d49b467d\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Dynamic\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
         {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/06175f4d-826f-4c3e-85c5-924b1c3fb33d?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/e7886ebe-00e4-4813-80a0-71f302470f9d?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
@@ -44,7 +43,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:44:57 GMT
+      - Wed, 03 Nov 2021 05:17:00 GMT
       expires:
       - '-1'
       pragma:
@@ -57,9 +56,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1946832c-fa45-4728-a599-51362a2a4317
+      - 3b3c26e1-fd44-45e0-8b2e-8069c4fb9bab
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1189'
     status:
       code: 201
       message: Created
@@ -67,7 +66,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -77,10 +76,9 @@ interactions:
       ParameterSetName:
       - -g -n -l -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/06175f4d-826f-4c3e-85c5-924b1c3fb33d?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/centralus/operations/e7886ebe-00e4-4813-80a0-71f302470f9d?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -92,7 +90,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:44:59 GMT
+      - Wed, 03 Nov 2021 05:17:02 GMT
       expires:
       - '-1'
       pragma:
@@ -109,7 +107,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 73bd2dec-398d-4f86-92ec-4db84bc90ded
+      - 8254a05a-aa85-4a39-a0b7-459a835791a4
     status:
       code: 200
       message: OK
@@ -117,7 +115,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -127,16 +125,15 @@ interactions:
       ParameterSetName:
       - -g -n -l -z
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\",\r\n
-        \ \"etag\": \"W/\\\"b03d9ce8-0171-4bff-8c06-ec50a1be76bd\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"2be4b002-f4ec-40a2-b857-3df51266ce19\\\"\",\r\n  \"location\":
         \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"704169ba-084e-4d2c-b366-817e1283c1cc\",\r\n
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ebd91084-1dfe-48bc-a163-5099d49b467d\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Dynamic\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
@@ -149,9 +146,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:45:00 GMT
+      - Wed, 03 Nov 2021 05:17:02 GMT
       etag:
-      - W/"b03d9ce8-0171-4bff-8c06-ec50a1be76bd"
+      - W/"2be4b002-f4ec-40a2-b857-3df51266ce19"
       expires:
       - '-1'
       pragma:
@@ -168,7 +165,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f1dc2243-e766-4b14-b8d3-43b22e6a6c7e
+      - 0fc3d964-f05a-4eef-b93f-62da67b7b40b
     status:
       code: 200
       message: OK
@@ -186,18 +183,15 @@ interactions:
       ParameterSetName:
       - -g -n -o
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"pubip\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_zoned_public_ip000001/providers/Microsoft.Network/publicIPAddresses/pubip\",\r\n
-        \ \"etag\": \"W/\\\"b03d9ce8-0171-4bff-8c06-ec50a1be76bd\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"2be4b002-f4ec-40a2-b857-3df51266ce19\\\"\",\r\n  \"location\":
         \"centralus\",\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"704169ba-084e-4d2c-b366-817e1283c1cc\",\r\n
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ebd91084-1dfe-48bc-a163-5099d49b467d\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Dynamic\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
@@ -210,9 +204,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 12:45:02 GMT
+      - Wed, 03 Nov 2021 05:17:03 GMT
       etag:
-      - W/"b03d9ce8-0171-4bff-8c06-ec50a1be76bd"
+      - W/"2be4b002-f4ec-40a2-b857-3df51266ce19"
       expires:
       - '-1'
       pragma:
@@ -229,7 +223,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 137dc962-df30-4019-a197-79096982fd92
+      - 9bca43e2-f02f-4d13-a027-e4ea6984350c
     status:
       code: 200
       message: OK

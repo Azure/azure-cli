@@ -7,6 +7,7 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPrepare
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 from knack.util import CLIError
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -21,7 +22,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
-        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs),
+        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only '
+                 .format(**kwargs),
                  checks=[
                      JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
                      JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
@@ -63,7 +65,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     def test_create_storage_account_with_assigned_identity(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
-        cmd = 'az storage account create -n {} -g {} --sku Standard_LRS --assign-identity'.format(name, resource_group)
+        cmd = 'az storage account create -n {} -g {} --sku Standard_LRS --assign-identity --https-only '.format(name, resource_group)
         result = self.cmd(cmd).get_output_in_json()
 
         self.assertIn('identity', result)
@@ -74,7 +76,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     def test_update_storage_account_with_assigned_identity(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {} --sku Standard_LRS'.format(name, resource_group)
+        create_cmd = 'az storage account create -n {} -g {} --sku Standard_LRS --https-only '.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('identity', None)])
 
         update_cmd = 'az storage account update -n {} -g {} --assign-identity'.format(name, resource_group)
@@ -84,11 +86,12 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertTrue(result['identity']['principalId'])
         self.assertTrue(result['identity']['tenantId'])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
 
-        self.cmd('az storage account create -n {} -g {} --sku {} -l {}'.format(
+        self.cmd('az storage account create -n {} -g {} --sku {} -l {} --https-only '.format(
             name, resource_group, 'Standard_LRS', location))
 
         self.cmd('storage account check-name --name {}'.format(name), checks=[
@@ -143,7 +146,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'loc': location
         })
 
-        self.cmd('storage account create -n {name} -g {rg} -l {loc} --kind StorageV2',
+        self.cmd('storage account create -n {name} -g {rg} -l {loc} --kind StorageV2 --https-only ',
                  checks=[JMESPathCheck('kind', 'StorageV2')])
 
         self.cmd('storage account check-name --name {name}', checks=[
@@ -155,8 +158,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     def test_storage_create_default_sku(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
-        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        create_cmd = 'az storage account create -n {} -g {} --https-only '.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('sku.name', 'Standard_RAGRS')])
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_storage_create_default_kind(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --https-only'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('kind', 'Storage')])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
@@ -195,6 +205,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('file.hour.enabled', True),
             JMESPathCheck('file.minute.enabled', True))
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='account_1')
     @StorageAccountPreparer(parameter_name='account_2')
@@ -226,6 +237,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         assert renewed_keys[0] == original_keys[0]
         assert renewed_keys[1] != original_keys[1]
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_create_account_sas(self, storage_account):

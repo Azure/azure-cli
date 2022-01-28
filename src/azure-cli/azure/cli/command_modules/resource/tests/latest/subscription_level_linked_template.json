@@ -1,0 +1,59 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    /*
+    comment
+    */
+    "parameters": {
+      "rgName": {
+        "type": "string"
+      },
+      "rgLocation": {
+        "type": "string"
+      },
+      "keyVaultName": {
+        "type": "string"
+      }
+    },
+    "variables": {},
+    "resources": [
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-10-01",
+        "name": "deploymentRg",
+        "location": "[parameters('rgLocation')]",
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "relativePath":"createResourceGroup.json",
+            "contentVersion":"1.0.0.0"
+          },
+          "parameters": {
+              "rgName":{"value": "[parameters('rgName')]"},
+              "rgLocation":{"value": "[parameters('rgLocation')]"}
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-10-01",
+        "name": "keyVaultAndSecret",
+        "resourceGroup": "[parameters('rgName')]",
+        "dependsOn": [
+          "deploymentRg"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "relativePath":"createKeyVaultWithSecret.json",
+            "contentVersion":"1.0.0.0"
+          },
+          "parameters": {
+              "keyVaultName":{"value": "[parameters('keyVaultName')]"}
+          }
+        }
+      }
+    ],
+    "outputs": {}
+  }
+  

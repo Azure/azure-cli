@@ -5,7 +5,7 @@
 
 import sys
 import logging
-import mock
+from unittest import mock
 import unittest
 from collections import namedtuple
 
@@ -29,6 +29,8 @@ def _prepare_test_commands_loader(loader_cls, cli_ctx, command):
 
 
 class TestCommandRegistration(unittest.TestCase):
+
+    test_hook = []
 
     @classmethod
     def setUpClass(cls):
@@ -146,79 +148,300 @@ class TestCommandRegistration(unittest.TestCase):
         return mock_obj
 
     def _mock_iter_modules(_):
-        return [(None, __name__, None)]
+        return [(None, "hello", None),
+                (None, "extra", None)]
 
-    def _mock_extension_modname(ext_name, ext_dir):
-        return ext_name
+    def _mock_get_extension_modname(ext_name, ext_dir):
+        if ext_name.endswith('.ExtCommandsLoader'):
+            return "azext_hello1"
+        if ext_name.endswith('.Ext2CommandsLoader'):
+            return "azext_hello2"
+        if ext_name.endswith('.ExtAlwaysLoadedCommandsLoader'):
+            return "azext_always_loaded"
 
     def _mock_get_extensions():
-        MockExtension = namedtuple('Extension', ['name', 'preview', 'path', 'get_metadata'])
-        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, path=None, get_metadata=lambda: {}),
-                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, path=None, get_metadata=lambda: {})]
+        MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
+                MockExtension(name=__name__ + '.ExtAlwaysLoadedCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
 
     def _mock_load_command_loader(loader, args, name, prefix):
 
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('world', 'sample_vm_get')
+                    g.command('mod-only', 'sample_vm_get')
+                    g.command('overridden', 'sample_vm_get')
+                self.__module__ = "azure.cli.command_modules.hello"
                 return self.command_table
 
-        # A command from an extension
+        class Test2CommandsLoader(AzCommandsLoader):
+            # An extra group that is not loaded if a module is found from the index
+            def load_command_table(self, args):
+                with self.command_group('extra', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
+                    # A command that shouldn't be overridden, just like what `final` decorator indicated
+                    # https://docs.python.org/3/library/typing.html#typing.final
+                    g.command('final', 'sample_vm_get')
+                self.__module__ = "azure.cli.command_modules.extra"
+                return self.command_table
+
+        # Extend existing group by adding a new command
         class ExtCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(ExtCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('noodle', 'sample_vm_get')
+                    g.command('ext-only', 'sample_vm_get')
+                self.__module__ = "azext_hello1"
                 return self.command_table
 
-        # A command from an extension that overrides the original command
+        # Override existing command
         class Ext2CommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(Ext2CommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('world', 'sample_vm_get')
+                    g.command('overridden', 'sample_vm_get')
+                self.__module__ = "azext_hello2"
+                return self.command_table
+
+        # Contain no command, but hook into CLI core
+        class ExtAlwaysLoadedCommandsLoader(AzCommandsLoader):
+
+            def load_command_table(self, args):
+                # Hook something fake into the test_hook
+                TestCommandRegistration.test_hook = "FAKE_HANDLER"
+                self.__module__ = "azext_always_loaded"
                 return self.command_table
 
         if prefix == 'azure.cli.command_modules.':
-            command_loaders = {'TestCommandsLoader': TestCommandsLoader}
+            command_loaders = {'hello': TestCommandsLoader, 'extra': Test2CommandsLoader}
         else:
-            command_loaders = {'ExtCommandsLoader': ExtCommandsLoader, 'Ext2CommandsLoader': Ext2CommandsLoader}
+            command_loaders = {'azext_hello1': ExtCommandsLoader,
+                               'azext_hello2': Ext2CommandsLoader,
+                               'azext_always_loaded': ExtAlwaysLoadedCommandsLoader}
 
         module_command_table = {}
-        for _, loader_cls in command_loaders.items():
+        for mod_name, loader_cls in command_loaders.items():
+            # If name is provided, only load the named module
+            if name and name != mod_name:
+                continue
             command_loader = loader_cls(cli_ctx=loader.cli_ctx)
             command_table = command_loader.load_command_table(args)
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table, {}
+        return module_command_table, command_loader.command_group_table
+
+    expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
+                              'extra': ['azure.cli.command_modules.extra']}
+    expected_command_table = ['hello mod-only', 'hello overridden', 'extra final', 'hello ext-only']
 
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
-    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_register_command_from_extension(self):
 
-        from azure.cli.core.commands import _load_command_loader
         cli = DummyCli()
-        main_loader = MainCommandsLoader(cli)
-        cli.loader = main_loader
+        loader = cli.commands_loader
 
-        cmd_tbl = cli.loader.load_command_table(None)
-        ext1 = cmd_tbl['hello noodle']
-        ext2 = cmd_tbl['hello world']
+        cmd_tbl = loader.load_command_table(None)
+        hello_mod_only_cmd = cmd_tbl['hello mod-only']
+        hello_ext_only_cmd = cmd_tbl['hello ext-only']
+        hello_overridden_cmd = cmd_tbl['hello overridden']
 
-        self.assertTrue(isinstance(ext1.command_source, ExtensionCommandSource))
-        self.assertFalse(ext1.command_source.overrides_command)
+        self.assertEqual(hello_mod_only_cmd.command_source, 'hello')
+        self.assertEqual(hello_mod_only_cmd.loader.__module__, 'azure.cli.command_modules.hello')
 
-        self.assertTrue(isinstance(ext2.command_source, ExtensionCommandSource))
-        self.assertTrue(ext2.command_source.overrides_command)
+        self.assertTrue(isinstance(hello_ext_only_cmd.command_source, ExtensionCommandSource))
+        self.assertFalse(hello_ext_only_cmd.command_source.overrides_command)
+
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        self.assertTrue(hello_overridden_cmd.command_source.overrides_command)
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+        command_index = CommandIndex(cli)
+
+        def _set_index(dict_):
+            INDEX[CommandIndex._COMMAND_INDEX] = dict_
+
+        def _check_index():
+            self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
+            self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], cli.cloud.profile)
+            self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
+
+        # Clear the command index
+        _set_index({})
+        self.assertFalse(INDEX[CommandIndex._COMMAND_INDEX])
+        loader.load_command_table(None)
+        # Test command index is built for None args
+        _check_index()
+
+        # Test command index is built when `args` is provided
+        _set_index({})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
+
+        # Test rebuild command index if no module found
+        _set_index({"network": ["azure.cli.command_modules.network"]})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
+
+        with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+            def update_and_check_index():
+                loader.load_command_table(["hello", "mod-only"])
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
+                self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
+
+            # Test rebuild command index if version is not present
+            del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
+            del INDEX[CommandIndex._COMMAND_INDEX]
+            update_and_check_index()
+
+            # Test rebuild command index if version is not valid
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+            _set_index({})
+            update_and_check_index()
+
+            # Test rebuild command index if version is outdated
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = "2.6.0"
+            _set_index({})
+            update_and_check_index()
+
+            # Test rebuild command index if profile is outdated
+            INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = "2017-03-09-profile"
+            _set_index({})
+            update_and_check_index()
+
+        # Test rebuild command index if modules are found but outdated
+        # This only happens in dev environment. For users, the version check logic prevents it
+        _set_index({"hello": ["azure.cli.command_modules.extra"]})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
+
+        # Test irrelevant commands are not loaded
+        _set_index(self.expected_command_index)
+        cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+        self.assertEqual(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
+
+        # Full scenario test 1: Installing an extension 'azext_hello1' that extends 'hello' group
+        outdated_command_index = {'hello': ['azure.cli.command_modules.hello'],
+                                  'extra': ['azure.cli.command_modules.extra']}
+        _set_index(outdated_command_index)
+
+        # Command for an outdated group
+        cmd_tbl = loader.load_command_table(["hello", "-h"])
+        # Index is not updated, and only built-in commands are loaded
+        _set_index(outdated_command_index)
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden'])
+
+        # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
+        command_index.invalidate()
+
+        cmd_tbl = loader.load_command_table(["hello", "-h"])
+        # Index is updated, and new commands are loaded
+        _check_index()
+        self.assertListEqual(list(cmd_tbl), self.expected_command_table)
+
+        # Full scenario test 2: Installing extension 'azext_hello2' that overrides existing command 'hello overridden'
+        outdated_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello1'],
+                                  'extra': ['azure.cli.command_modules.extra']}
+        _set_index(outdated_command_index)
+        # Command for an overridden command
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
+        # Index is not updated
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], outdated_command_index)
+        # With the old command index, 'hello overridden' is loaded from the build-in module
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertEqual(hello_overridden_cmd.command_source, 'hello')
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+
+        # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
+        command_index.invalidate()
+
+        # Command index is updated, and 'hello overridden' is loaded from the new extension
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        _check_index()
+        self.assertListEqual(list(cmd_tbl), self.expected_command_table)
+
+        # Call again with the new command index. Irrelevant commands are not loaded
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        _check_index()
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+
+        del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
+        del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE]
+        del INDEX[CommandIndex._COMMAND_INDEX]
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_always_loaded_extensions(self):
+        from azure.cli.core import CommandIndex
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+        index = CommandIndex()
+        index.invalidate()
+
+        # Test azext_always_loaded is loaded when command index is rebuilt
+        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+            loader.load_command_table(["hello", "mod-only"])
+            self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
+
+        TestCommandRegistration.test_hook = []
+
+        # Test azext_always_loaded is loaded when command index is used
+        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+            loader.load_command_table(["hello", "mod-only"])
+            self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_positional_argument(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+        index = CommandIndex()
+        index.invalidate()
+
+        # Test command index is built for command with positional argument
+        cmd_tbl = loader.load_command_table(["extra", "extra", "positional_argument"])
+        self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'])
+
+        # Test command index is used by command with positional argument
+        cmd_tbl = loader.load_command_table(["hello", "mod-only", "positional_argument"])
+        self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+
+        # Test command index is used by command with positional argument
+        cmd_tbl = loader.load_command_table(["extra", "final", "positional_argument2"])
+        self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
+        self.assertEqual(list(cmd_tbl), ['extra final'])
 
     def test_argument_with_overrides(self):
 

@@ -1,0 +1,294 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2019-06-01
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Sep 2020 05:54:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.11.1
+      x-ms-date:
+      - Tue, 29 Sep 2020 05:54:25 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      etag:
+      - '"0x8D8643C1FC6C8B9"'
+      last-modified:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.11.1
+      x-ms-blob-content-length:
+      - '16384'
+      x-ms-blob-type:
+      - PageBlob
+      x-ms-date:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004/src
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      etag:
+      - '"0x8D8643C2022A35F"'
+      last-modified:
+      - Tue, 29 Sep 2020 05:54:27 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.11.1
+      x-ms-date:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/cont000004/src?comp=snapshot
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Sep 2020 05:54:26 GMT
+      etag:
+      - '"0x8D8643C2022A35F"'
+      last-modified:
+      - Tue, 29 Sep 2020 05:54:27 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'false'
+      x-ms-snapshot:
+      - '2020-09-29T05:54:27.6824333Z'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000003/listKeys?api-version=2019-06-01
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Tue, 29 Sep 2020 05:54:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.11.1
+      x-ms-date:
+      - Tue, 29 Sep 2020 05:54:27 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000003.blob.core.windows.net/cont000005?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Sep 2020 05:54:28 GMT
+      etag:
+      - '"0x8D8643C211A34DC"'
+      last-modified:
+      - Tue, 29 Sep 2020 05:54:28 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.5; Windows 10) AZURECLI/2.11.1
+      x-ms-copy-source:
+      - https://clitestu6w2b5gowwtpgmtq6.blob.core.windows.net/contvnybrdow7n3wpfkyk3ps/src?se=2020-09-30T05%3A54%3A28Z&sp=r&spr=https&sv=2018-11-09&sr=b&sig=JAdF%2BrVrL/YWgt0piNVFsfqw0Ajo9Datl4hxsPTAw1U%3D&snapshot=2020-09-29T05:54:27.6824333Z
+      x-ms-date:
+      - Tue, 29 Sep 2020 05:54:28 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000003.blob.core.windows.net/cont000005/backup?comp=incrementalcopy
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 29 Sep 2020 05:54:29 GMT
+      etag:
+      - '"0x8D8643C21566DEF"'
+      last-modified:
+      - Tue, 29 Sep 2020 05:54:29 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-copy-id:
+      - a6c0aa1e-98bd-4a2b-ab7a-784fd0b09fb1
+      x-ms-copy-status:
+      - pending
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 202
+      message: Accepted
+version: 1

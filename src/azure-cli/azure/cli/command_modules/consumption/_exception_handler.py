@@ -9,8 +9,6 @@ from knack.util import CLIError
 def consumption_exception_handler(ex):
     from azure.mgmt.consumption.models import ErrorResponseException
     if isinstance(ex, ErrorResponseException):
-        message = ex.error.error.message
+        message = ex.message
         raise CLIError(message)
-    import sys
-    from six import reraise
-    reraise(*sys.exc_info())
+    raise ex

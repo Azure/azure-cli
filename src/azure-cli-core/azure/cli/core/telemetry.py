@@ -14,17 +14,21 @@ import traceback
 import uuid
 from collections import defaultdict
 from functools import wraps
-
-import azure.cli.core.decorators as decorators
+from knack.util import CLIError
+from azure.cli.core import decorators
 
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
+# Put a config section or key (section.name) in the allowed set to allow recording the config
+# values in the section or for the key with 'az config set'
+ALLOWED_CONFIG_SECTIONS_OR_KEYS = {'auto-upgrade', 'extension', 'core', 'logging.enable_log_file',
+                                   'output.show_survey_link'}
 
 
-class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
+class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def __init__(self, correlation_id=None, application=None):
         self.start_time = None
         self.end_time = None
@@ -41,18 +45,33 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.module_correlation = None
         self.extension_name = None
         self.extension_version = None
+        self.event_id = str(uuid.uuid4())
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
+        # The AzCLIError sub-class name
+        self.error_type = 'None'
+        # The class name of the raw exception
+        self.exception_name = 'None'
+        self.init_time_elapsed = None
+        self.invoke_time_elapsed = None
+        self.debug_info = []
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
         # stops generate_payload() from adding new azurecli/command event
         # used for interactive to send new custom event upon exit
         self.suppress_new_event = False
+        self.poll_start_time = None
+        self.poll_end_time = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        # Move the exception info into userTask record, in order to make one Telemetry record for one command
+        self.exception_name = exception.__class__.__name__
+
+        # Backward compatible, so there are duplicated info recorded
+        # The logic below should be removed along with self.exceptions after confirmation
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
@@ -61,7 +80,6 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
             AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
 
@@ -88,7 +106,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                 props.update(base)
                 props.update(cli)
                 props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
-                              'Reserved.EventId': str(uuid.uuid4())})
+                              'Reserved.EventId': self.event_id})
                 self.events[DEFAULT_INSTRUMENTATION_KEY].append({
                     'name': name,
                     'properties': props
@@ -100,9 +118,9 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     def _get_base_properties(self):
         return {
             'Reserved.ChannelUsed': 'AI',
-            'Reserved.EventId': str(uuid.uuid4()),
+            'Reserved.EventId': self.event_id,
             'Reserved.SequenceNumber': 1,
-            'Reserved.SessionId': str(uuid.uuid4()),
+            'Reserved.SessionId': _get_session_id(),
             'Reserved.TimeSinceSessionStart': 0,
 
             'Reserved.DataModel.Source': 'DataModelAPI',
@@ -120,6 +138,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -164,6 +183,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
                               lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
         set_custom_properties(result, 'StartTime', str(self.start_time))
         set_custom_properties(result, 'EndTime', str(self.end_time))
+        set_custom_properties(result, 'InitTimeElapsed', str(self.init_time_elapsed))
+        set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
@@ -173,6 +194,13 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
+        set_custom_properties(result, 'error_type', self.error_type)
+        set_custom_properties(result, 'exception_name', self.exception_name)
+        set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
+        set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
+        set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
 
         return result
 
@@ -201,10 +229,14 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def has_exceptions():
+    return len(_session.exceptions) > 0
+
+
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
-        if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
+        if not is_telemetry_enabled():
             return None
         return func(*args, **kwargs)
 
@@ -219,6 +251,26 @@ def start(mode=None):
     if mode:
         _session.mode = mode
     _session.start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def set_init_time_elapsed(init_time_elapsed):
+    _session.init_time_elapsed = init_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def set_invoke_time_elapsed(invoke_time_elapsed):
+    _session.invoke_time_elapsed = invoke_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def poll_start():
+    _session.poll_start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def poll_end():
+    _session.poll_end_time = datetime.datetime.utcnow()
 
 
 @_user_agrees_to_telemetry
@@ -260,10 +312,17 @@ def set_custom_properties(prop, name, value):
 
 @decorators.suppress_all_exceptions()
 def set_exception(exception, fault_type, summary=None):
-    if not summary:
-        _session.result_summary = summary
+    if not _session.result_summary:
+        _session.result_summary = _remove_cmd_chars(summary)
 
     _session.add_exception(exception, fault_type=fault_type, description=summary)
+
+
+@decorators.suppress_all_exceptions()
+def set_error_type(error_type):
+    if _session.result != 'None':
+        return
+    _session.error_type = error_type
 
 
 @decorators.suppress_all_exceptions()
@@ -294,6 +353,27 @@ def set_user_fault(summary=None):
     _session.result = 'UserFault'
     if summary:
         _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions()
+def set_debug_info(key, info):
+    if key == 'ConfigSet':
+        info = _process_config_set_debug_info(info)
+
+    debug_info = '{}: {}'.format(key, info)
+    _session.debug_info.append(debug_info)
+
+
+@decorators.suppress_all_exceptions()
+def _process_config_set_debug_info(info):
+    processed_info = []
+    # info is a list of tuples
+    for key, section, value in info:
+        if section in ALLOWED_CONFIG_SECTIONS_OR_KEYS or key in ALLOWED_CONFIG_SECTIONS_OR_KEYS:
+            processed_info.append('{}={}'.format(key, value))
+        else:
+            processed_info.append('{}={}'.format(key, '***' if value else value))
+    return ' '.join(processed_info)
 
 
 @decorators.suppress_all_exceptions()
@@ -358,6 +438,14 @@ def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATI
     })
 
 
+@decorators.suppress_all_exceptions()
+def is_telemetry_enabled():
+    from azure.cli.core.cloud import cloud_forbid_telemetry
+    if cloud_forbid_telemetry(_session.application):
+        return False
+    return _get_config().getboolean('core', 'collect_telemetry', fallback=True)
+
+
 # definitions
 
 @decorators.call_once
@@ -377,6 +465,37 @@ def _get_core_version():
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_installation_id():
     return _get_profile().get_installation_id()
+
+
+@decorators.suppress_all_exceptions(fallback_return="")
+def _get_session_id():
+    # As a workaround to get the terminal info as SessionId, this function may not be accurate.
+
+    def get_hash_result(content):
+        import hashlib
+
+        hasher = hashlib.sha256()
+        hasher.update(content.encode('utf-8'))
+        return hasher.hexdigest()
+
+    # Usually, more than one layer of sub-process will be started when excuting a CLI command. While, the create time
+    # of these sub-processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
+    # When the difference of create time between current process and its parent process is larger than the threshold,
+    # the parent process will be viewed as the terminal process.
+    try:
+        # psutil is not available on cygwin
+        import psutil
+    except ImportError:
+        return ""
+    time_threshold = 1
+    process = psutil.Process()
+    while process and process.ppid() and process.pid != process.ppid():
+        parent_process = process.parent()
+        if parent_process and process.create_time() - parent_process.create_time() > time_threshold:
+            content = '{}{}{}'.format(_get_installation_id(), parent_process.create_time(), parent_process.pid)
+            return get_hash_result(content)
+        process = parent_process
+    return ""
 
 
 @decorators.call_once
@@ -409,7 +528,10 @@ def _get_hash_machine_id():
 @decorators.suppress_all_exceptions(fallback_return='')
 @decorators.hash256_result
 def _get_user_azure_id():
-    return _get_profile().get_current_account_user()
+    try:
+        return _get_profile().get_current_account_user()
+    except CLIError:
+        return ''
 
 
 def _get_env_string():
@@ -419,10 +541,14 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_subscription_id()
+    try:
+        return _get_profile().get_subscription_id()
+    except CLIError:
+        return None
 
 
 def _get_shell_type():
+    # This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
     if 'BASH_VERSION' in os.environ:
@@ -431,6 +557,9 @@ def _get_shell_type():
         return 'ksh'
     if 'WINDIR' in os.environ:
         return 'cmd'
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        return 'cloud-shell'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 

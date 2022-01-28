@@ -5,11 +5,16 @@
             "name": "Azure CLI Debug (Integrated Console)",
             "type": "python",
             "request": "launch",
-            "pythonPath": "${config:python.pythonPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "ts",
+                "export",
+                "-s",
+                 "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/Gokul-TestRG4/providers/Microsoft.Resources/templateSpecs/testTS/versions/1",
+                "--output-folder",
+                 "C:\\Users\\daetienn\\Desktop\\ExportBugOutput2"
             ],
             "console": "integratedTerminal",
             "debugOptions": [
@@ -24,7 +29,7 @@
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
-            "pythonPath": "${config:python.pythonPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
@@ -40,7 +45,7 @@
             "name": "Azdev Scripts",
             "type": "python",
             "request": "launch",
-            "pythonPath": "${config:python.pythonPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/tools/automation/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [

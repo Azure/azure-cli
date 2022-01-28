@@ -10,7 +10,7 @@ from azure.graphrbac.models import ConsentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.cli.core.profiles import ResourceType
+# from azure.cli.core.profiles import ResourceType
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
@@ -49,6 +49,8 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('app_roles', type=validate_file_or_dict,
                    help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
+        c.argument('optional_claims', type=validate_file_or_dict,
+                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 
@@ -56,15 +58,21 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        c.argument('api_permissions', nargs='+', help='space seperated list of <resource-access-id>=<type>')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2817
+        c.argument('api', help='Specify `RequiredResourceAccess.resourceAppId` - The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2833
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>=<type>`.')
         c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
         c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
-        c.argument('api', help='the target API to access')
         c.argument('consent_type', arg_type=get_enum_type(ConsentType), default=ConsentType.all_principals.value,
                    help="Indicates if consent was provided by the administrator (on behalf of the organization) or by an individual.")
         c.argument('principal_id', help='If --consent-type is "Principal", this argument specifies the object of the user that granted consent and applies only for that user.')
         c.argument('show_resource_name', options_list=['--show-resource-name', '-r'],
                    arg_type=get_three_state_flag(), help="show resource's display name")
+
+    with self.argument_context('ad app permission delete') as c:
+        # `=<type>` is not needed.
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>`.')
 
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
@@ -79,8 +87,9 @@ def load_arguments(self, _):
         c.argument('scopes', nargs='+')
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('skip_assignment', arg_type=get_three_state_flag(),
-                   help='Skip creating the default assignment, which allows the service principal to access resources under the current subscription')
-        c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
+                   deprecate_info=c.deprecate(target='--skip-assignment', hide=True), help='No-op.')
+        c.argument('show_auth_for_sdk', options_list='--sdk-auth', deprecate_info=c.deprecate(target='--sdk-auth'),
+                   help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
     with self.argument_context('ad sp owner list') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id or the service principal')
@@ -120,7 +129,7 @@ def load_arguments(self, _):
         c.argument('identifier_uri', help='graph application identifier, must be in uri format')
         c.argument('spn', help='service principal name')
         c.argument('upn', help='user principal name, e.g. john.doe@contoso.com')
-        c.argument('query_filter', options_list=['--filter'], help='OData filter')
+        c.argument('query_filter', options_list=['--filter'], help='OData filter, e.g. --filter "displayname eq \'test\' and servicePrincipalType eq \'Application\'"')
 
     with self.argument_context('ad user') as c:
         c.argument('mail_nickname', help='mail alias. Defaults to user principal name')
@@ -142,6 +151,7 @@ def load_arguments(self, _):
         c.argument('mail_nickname', help='Mail nickname')
         c.argument('force', arg_type=get_three_state_flag(),
                    help='always create a new group instead of updating the one with same display and mail nickname')
+        c.argument('description', help='Group description')
 
     with self.argument_context('ad group show') as c:
         c.extra('cmd')
@@ -175,12 +185,15 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
-        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass graph permission issues. "
+        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
                    "This parameter only works with object ids for users, groups, service principals, and "
                    "managed identities. For managed identities use the principal id. For service principals, "
                    "use the object id and not the app id.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
+        c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
+        c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
+        c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
 
     time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:
@@ -188,10 +201,27 @@ def load_arguments(self, _):
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
 
     with self.argument_context('role assignment create') as c:
-        PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
-        if PrincipalType:
-            c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
-                       help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+        # PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
+
+        # A temporary fix for https://github.com/Azure/azure-cli/issues/11594
+        # As only 'User', 'Group' or 'ServicePrincipal' are allowed values, the REST spec contains invalid values
+        # (like MSI) which are used only internally by the service. So hide them.
+        # https://github.com/Azure/azure-rest-api-specs/blob/962013a1cf9bf5b87e3aad75a14c7dd620acda62/specification/authorization/resource-manager/Microsoft.Authorization/preview/2020-04-01-preview/authorization-RoleAssignmentsCalls.json#L508-L522
+        from enum import Enum
+
+        class PrincipalType(str, Enum):
+            user = "User"
+            group = "Group"
+            service_principal = "ServicePrincipal"
+            foreign_group = "ForeignGroup"
+
+        c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
+                   help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+
+    with self.argument_context('role assignment update') as c:
+        c.argument('role_assignment',
+                   help='Description of an existing role assignment as JSON, or a path to a file containing a '
+                        'JSON description.')
 
     with self.argument_context('role assignment delete') as c:
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')

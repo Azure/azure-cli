@@ -1,460 +1,638 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"date": "2018-08-22T04:49:21Z", "cause":
-      "automation", "product": "azurecli"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_kv_cert_contacts000001?api-version=2018-02-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001","name":"cli_test_kv_cert_contacts000001","location":"westus","tags":{"date":"2018-08-22T04:49:21Z","cause":"automation","product":"azurecli"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:23 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-graphrbac/0.40.0 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"8427ce23-08f2-4510-b6e2-99644db7f94e","deletionTimestamp":null,"accountEnabled":true,"ageGroup":null,"assignedLicenses":[{"disabledPlans":[],"skuId":"488ba24a-39a9-4473-8ee5-19291e71b002"},{"disabledPlans":[],"skuId":"b05e124f-c7cc-45a0-a6aa-8cf78c946968"},{"disabledPlans":["0b03f40b-c404-40c3-8651-2aceb74365fa","b650d915-9886-424b-a08d-633cede56f57","e95bec33-7c88-4a70-8e19-b10bd9d0c014","5dbe027f-2339-4123-9542-606e4d348a72","fe71d6c3-a2ea-4499-9778-da042bf08063","fafd7243-e5c1-4a3a-9e40-495efcb1d3c3"],"skuId":"ea126fc5-a19e-42e2-a731-da9d437bffcf"},{"disabledPlans":[],"skuId":"c7df2760-2c81-4ef7-b578-5b5392b571df"},{"disabledPlans":[],"skuId":"c52ea49f-fe5d-4e95-93ba-1de91d380f89"},{"disabledPlans":["e95bec33-7c88-4a70-8e19-b10bd9d0c014","5dbe027f-2339-4123-9542-606e4d348a72"],"skuId":"f82a60b8-1ee3-4cfb-a4fe-1c6a53c2656c"},{"disabledPlans":[],"skuId":"c5928f49-12ba-48f7-ada3-0d743a3601d5"}],"assignedPlans":[{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"fe71d6c3-a2ea-4499-9778-da042bf08063"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"2bdbaf8f-738f-4ac7-9234-3c3ee2ce7d0f"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Deleted","service":"SharePoint","servicePlanId":"2125cfd7-2110-4567-83c4-c1cd5275163d"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"da792a53-cbc0-4184-a10d-e544dd34b3c1"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Deleted","service":"SharePoint","servicePlanId":"c4048e79-4474-4c74-ba9b-c31ff225e511"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"e95bec33-7c88-4a70-8e19-b10bd9d0c014"},{"assignedTimestamp":"2018-04-24T10:16:29Z","capabilityStatus":"Enabled","service":"SharePoint","servicePlanId":"5dbe027f-2339-4123-9542-606e4d348a72"},{"assignedTimestamp":"2018-03-22T22:45:07Z","capabilityStatus":"Deleted","service":"MicrosoftStream","servicePlanId":"acffdce6-c30f-4dc2-81c0-372e33c515ec"},{"assignedTimestamp":"2018-03-22T22:45:07Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"fafd7243-e5c1-4a3a-9e40-495efcb1d3c3"},{"assignedTimestamp":"2018-03-17T16:28:31Z","capabilityStatus":"Enabled","service":"WindowsDefenderATP","servicePlanId":"871d91ec-ec1a-452b-a83f-bd76c7d770ef"},{"assignedTimestamp":"2018-03-17T16:28:31Z","capabilityStatus":"Enabled","service":"AzureAdvancedThreatAnalytics","servicePlanId":"14ab5db5-e6c4-4b20-b4bc-13e36fd2227f"},{"assignedTimestamp":"2018-03-17T16:28:31Z","capabilityStatus":"Enabled","service":"Windows","servicePlanId":"e7c91390-7625-45be-94e0-e16907e03118"},{"assignedTimestamp":"2018-02-24T07:49:49Z","capabilityStatus":"Deleted","service":"CRM","servicePlanId":"bf36ca64-95c6-4918-9275-eb9f4ce2c04f"},{"assignedTimestamp":"2018-02-24T07:49:49Z","capabilityStatus":"Deleted","service":"PowerAppsService","servicePlanId":"874fc546-6efe-4d22-90b8-5c4e7aa59f4b"},{"assignedTimestamp":"2018-02-24T07:49:49Z","capabilityStatus":"Deleted","service":"ProcessSimple","servicePlanId":"7e6d7d78-73de-46ba-83b1-6d25117334ba"},{"assignedTimestamp":"2018-01-09T08:27:59Z","capabilityStatus":"Enabled","service":"ProjectWorkManagement","servicePlanId":"b737dad2-2f6c-4c65-90e3-ca563267e8b9"},{"assignedTimestamp":"2018-01-01T04:03:10Z","capabilityStatus":"Enabled","service":"AADPremiumService","servicePlanId":"41781fb2-bc02-4b7c-bd55-b576c07bb09d"},{"assignedTimestamp":"2018-01-01T04:03:10Z","capabilityStatus":"Enabled","service":"MultiFactorService","servicePlanId":"8a256a2b-b617-496d-b51b-e76466e88db0"},{"assignedTimestamp":"2017-12-31T14:35:06Z","capabilityStatus":"Deleted","service":"Adallom","servicePlanId":"932ad362-64a8-4783-9106-97849a1a30b9"},{"assignedTimestamp":"2017-12-15T03:29:54Z","capabilityStatus":"Enabled","service":"To-Do","servicePlanId":"3fb82609-8c27-4f7b-bd51-30634711ee67"},{"assignedTimestamp":"2017-12-15T03:29:54Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"5689bec4-755d-4753-8b61-40975025187c"},{"assignedTimestamp":"2017-12-15T03:29:54Z","capabilityStatus":"Enabled","service":"Adallom","servicePlanId":"2e2ddb96-6af9-4b1d-a3f0-d6ecfd22edb2"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Enabled","service":"Adallom","servicePlanId":"8c098270-9dd4-4350-9b30-ba4703f3b36b"},{"assignedTimestamp":"2017-10-07T04:53:18Z","capabilityStatus":"Enabled","service":"Netbreeze","servicePlanId":"03acaee3-9492-4f40-aed4-bcb6b32981b6"},{"assignedTimestamp":"2017-10-07T04:53:18Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"bea4c11e-220a-4e6d-8eb8-8ea15d019f90"},{"assignedTimestamp":"2017-10-07T04:53:18Z","capabilityStatus":"Enabled","service":"RMSOnline","servicePlanId":"6c57d4b6-3b23-47a5-9bc9-69f17b4947b3"},{"assignedTimestamp":"2017-10-07T04:53:18Z","capabilityStatus":"Enabled","service":"CRM","servicePlanId":"d56f3deb-50d8-465a-bedb-f079817ccac1"},{"assignedTimestamp":"2017-08-13T03:25:31Z","capabilityStatus":"Enabled","service":"OfficeForms","servicePlanId":"e212cbc7-0961-4c40-9825-01117710dcb1"},{"assignedTimestamp":"2017-08-13T03:25:31Z","capabilityStatus":"Enabled","service":"OfficeForms","servicePlanId":"159f4cd6-e380-449f-a816-af1a9ef76344"},{"assignedTimestamp":"2017-06-10T13:26:37Z","capabilityStatus":"Enabled","service":"AADPremiumService","servicePlanId":"eec0eb4f-6444-4f95-aba0-50c24d67f998"},{"assignedTimestamp":"2017-06-10T13:26:37Z","capabilityStatus":"Enabled","service":"SCO","servicePlanId":"c1ec4a95-1f05-45b3-a911-aa3fa01094f5"},{"assignedTimestamp":"2017-06-09T20:16:17Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"3e26ee1f-8a5f-4d52-aee2-b81ce45c8f40"},{"assignedTimestamp":"2017-06-09T20:16:16Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"4828c8ec-dc2e-4779-b502-87ac9ce28ab7"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"MicrosoftStream","servicePlanId":"6c6042f5-6f01-4d67-b8c1-eb99d36eed3e"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Deleted","service":"MicrosoftCommunicationsOnline","servicePlanId":"27216c54-caf8-4d0d-97e2-517afb5c08f6"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"Sway","servicePlanId":"a23b959c-7ce8-4e57-9140-b90eb88a9e97"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Deleted","service":"ProcessSimple","servicePlanId":"76846ad7-7776-4c40-a281-a386362dd1b9"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"TeamspaceAPI","servicePlanId":"57ff2da0-773e-42df-b2af-ffb7a2317929"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Deleted","service":"PowerAppsService","servicePlanId":"c68f8d98-5534-41c8-bf36-22fa496fa792"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"Deskless","servicePlanId":"8c7d2df8-86f0-4902-b2ed-a0458298f3b3"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"43de0ff5-c92c-492b-9116-175376d08c38"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"YammerEnterprise","servicePlanId":"7547a3fe-08ee-4ccb-b430-5077c5041653"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"efb87545-963c-4e0d-99df-69c6916d9eb0"},{"assignedTimestamp":"2017-06-09T20:16:15Z","capabilityStatus":"Enabled","service":"MicrosoftCommunicationsOnline","servicePlanId":"0feaeb32-d00e-4d66-bd5a-43b5b83db82c"},{"assignedTimestamp":"2017-05-13T05:50:47Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"8e0c0a52-6a6c-4d40-8370-dd62790dcd70"},{"assignedTimestamp":"2016-11-29T21:29:03Z","capabilityStatus":"Enabled","service":"ProcessSimple","servicePlanId":"07699545-9485-468e-95b6-2fca3738be01"},{"assignedTimestamp":"2016-11-29T21:29:03Z","capabilityStatus":"Enabled","service":"PowerAppsService","servicePlanId":"9c0dab89-a30c-4117-86e7-97bda240acd2"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Enabled","service":"PowerBI","servicePlanId":"70d33638-9c74-4d01-bfd3-562de28bd4ba"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"34c0d7a0-a70f-4668-9238-47f9fc208882"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"9f431833-0334-42de-a7dc-70aa40db46db"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Enabled","service":"exchange","servicePlanId":"4de31727-a228-4ec3-a5bf-8e45b5ca48cc"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Deleted","service":"AzureAnalysis","servicePlanId":"2049e525-b859-401b-b2a0-e0a31c4b1fe4"},{"assignedTimestamp":"2016-10-26T00:20:44Z","capabilityStatus":"Deleted","service":"PowerBI","servicePlanId":"fc0a60aa-feee-4746-a0e3-aecfe81a38dd"},{"assignedTimestamp":"2016-09-25T10:20:33Z","capabilityStatus":"Enabled","service":"MicrosoftOffice","servicePlanId":"663a804f-1c30-4ff0-9915-9db84f0d1cea"}],"city":"Bellevue","companyName":"MICROSOFT","consentProvidedForMinor":null,"country":null,"createdDateTime":null,"creationType":null,"department":"Azure
-        Stack Dev","dirSyncEnabled":true,"displayName":"Vishnu Priya Ananthu Sundaram","employeeId":null,"facsimileTelephoneNumber":null,"givenName":"Vishnu
-        Priya","immutableId":"515291","isCompromised":null,"jobTitle":"SOFTWARE ENGINEER
-        II","lastDirSyncTime":"2018-08-08T19:21:03Z","legalAgeGroupClassification":null,"mail":"viananth@microsoft.com","mailNickname":"viananth","mobile":null,"onPremisesDistinguishedName":"CN=Vishnu
-        Priya Ananthu Sundaram,OU=UserAccounts,DC=redmond,DC=corp,DC=microsoft,DC=com","onPremisesSecurityIdentifier":"S-1-5-21-2127521184-1604012920-1887927527-22389579","otherMails":[],"passwordPolicies":"DisablePasswordExpiration","passwordProfile":null,"physicalDeliveryOfficeName":"BRAVERN-1/10041","postalCode":null,"preferredLanguage":null,"provisionedPlans":[{"capabilityStatus":"Deleted","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Deleted","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"SharePoint"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"Adallom"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"Netbreeze"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Deleted","provisioningStatus":"Success","service":"MicrosoftCommunicationsOnline"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"CRM"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"},{"capabilityStatus":"Enabled","provisioningStatus":"Success","service":"exchange"}],"provisioningErrors":[],"proxyAddresses":["X500:/o=microsoft/ou=Exchange
-        Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=14e445c79d204cdd889e45f4202760b1-Vishnu
-        Priya A","X500:/o=microsoft/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=4a39007eb9ad473994b9eb17967e6c63-Vishnu
-        Priya A","X500:/o=microsoft/ou=Exchange Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=Vishnu
-        Priya Ananthu Sundaram639","x500:/o=ExchangeLabs/ou=Exchange Administrative
-        Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=9c00713fccbe4ef7bedd70472ebd2b44-Vishnu
-        Priy","smtp:viananth@microsoft.onmicrosoft.com","smtp:viananth@service.microsoft.com","X500:/o=Nokia/ou=Exchange
-        Administrative Group (FYDIBOHF23SPDLT)/cn=Recipients/cn=Vishnu Priya Ananthu
-        Sundaram7b2","SMTP:viananth@microsoft.com"],"refreshTokensValidFromDateTime":"2018-07-24T16:07:00Z","showInAddressList":null,"signInNames":[],"sipProxyAddress":"viananth@microsoft.com","state":null,"streetAddress":null,"surname":"Ananthu
-        Sundaram","telephoneNumber":"+1 (425) 4210184","thumbnailPhoto@odata.mediaEditLink":"directoryObjects/8427ce23-08f2-4510-b6e2-99644db7f94e/Microsoft.DirectoryServices.User/thumbnailPhoto","usageLocation":"US","userIdentities":[],"userPrincipalName":"viananth@microsoft.com","userState":null,"userStateChangedOn":null,"userType":"Member","extension_18e31482d3fb4a8ea958aa96b662f508_ZipCode":"98004","extension_18e31482d3fb4a8ea958aa96b662f508_CityName":"BELLEVUE","extension_18e31482d3fb4a8ea958aa96b662f508_BuildingName":"BRAVERN-1","extension_18e31482d3fb4a8ea958aa96b662f508_BuildingID":"100589","extension_18e31482d3fb4a8ea958aa96b662f508_AddressLine1":"11155
-        NE 8th","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToPersonnelNbr":"423208","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToFullName":"Cheemalavagupalli,
-        Krishna Nithin","extension_18e31482d3fb4a8ea958aa96b662f508_ReportsToEmailName":"KNITHINC","extension_18e31482d3fb4a8ea958aa96b662f508_SupervisorInd":"N","extension_18e31482d3fb4a8ea958aa96b662f508_StateProvinceCode":"WA","extension_18e31482d3fb4a8ea958aa96b662f508_ProfitCenterCode":"P95667","extension_18e31482d3fb4a8ea958aa96b662f508_PositionNumber":"90504022","extension_18e31482d3fb4a8ea958aa96b662f508_CountryShortCode":"US","extension_18e31482d3fb4a8ea958aa96b662f508_CostCenterCode":"95667","extension_18e31482d3fb4a8ea958aa96b662f508_LocationAreaCode":"US","extension_18e31482d3fb4a8ea958aa96b662f508_CompanyCode":"1010","extension_18e31482d3fb4a8ea958aa96b662f508_PersonnelNumber":"515291"}'}
+    body:
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","deletionTimestamp":null,"accountEnabled":true,"ageGroup":null,"assignedLicenses":[],"assignedPlans":[],"city":null,"companyName":null,"consentProvidedForMinor":null,"country":null,"createdDateTime":"2019-10-21T06:37:42Z","creationType":"Invitation","department":null,"dirSyncEnabled":null,"displayName":"Bin
+        Ma","employeeId":null,"facsimileTelephoneNumber":null,"givenName":null,"immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"legalAgeGroupClassification":null,"mail":"bim@microsoft.com","mailNickname":"bim_microsoft.com#EXT#","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["bim@microsoft.com"],"passwordPolicies":null,"passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":null,"provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":["SMTP:bim@microsoft.com"],"refreshTokensValidFromDateTime":"2019-10-21T06:37:41Z","showInAddressList":false,"signInNames":[],"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":null,"telephoneNumber":null,"thumbnailPhoto@odata.mediaEditLink":"directoryObjects/9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa/Microsoft.DirectoryServices.User/thumbnailPhoto","usageLocation":null,"userIdentities":[],"userPrincipalName":"bim_microsoft.com#EXT#@AzureSDKTeam.onmicrosoft.com","userState":"Accepted","userStateChangedOn":"2019-10-21T06:39:35Z","userType":"Guest"}'
     headers:
-      access-control-allow-origin: ['*']
-      cache-control: [no-cache]
-      content-length: ['14674']
-      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
-      dataserviceversion: [3.0;]
-      date: ['Wed, 22 Aug 2018 04:49:23 GMT']
-      duration: ['563319']
-      expires: ['-1']
-      ocp-aad-diagnostics-server-name: [EvOfLP9PQAD26fpwk0dE/RFcscWviL1fU6DjjzXB7dc=]
-      ocp-aad-session-key: [F-oTgskGDGkwCSMZQpFeqAIueiPMZf227fygnkMpauyMP1A_baXYoY6wZWc-tgB58wju067ppPE5dhjFn2fn5Ilm3FUdI4TUhi4N1Pq9X7K1RvKbAq76NFv66Ah-BhY_.S8JjEKdnUmuh2zq2lqs7RPAjBMqvkenqwllocOMvlDo]
-      pragma: [no-cache]
-      request-id: [4de58f9c-4c9f-4430-ac69-1c164cdfcb50]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-dirapi-data-contract-version: ['1.6']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - no-cache
+      content-length:
+      - '1668'
+      content-type:
+      - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
+      dataserviceversion:
+      - 3.0;
+      date:
+      - Tue, 27 Oct 2020 05:47:32 GMT
+      duration:
+      - '3837056'
+      expires:
+      - '-1'
+      ocp-aad-diagnostics-server-name:
+      - d35FAIySsO2nvWUbh7j440UCAim+53yqH+WtaALfEpE=
+      ocp-aad-session-key:
+      - cHnWUx9QcON7GQRHMd9reqD3N6k3JSxOJWu3I8dmvLomCOwmhAKtkBZna00fy0dUyW1zr6XopXj8TZ2UJx20vBz7wWj6cAghkwh41C72GGtii2i0XjDmIn9Kw4s458bJ.SWFOemyZHSIi6YoPBGTMsp1AD1Bh4LFcI1pKeZl8qmg
+      pragma:
+      - no-cache
+      request-id:
+      - a2984d7b-35f2-4755-bb64-b5b166630676
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-ms-dirapi-data-contract-version:
+      - '1.6'
+      x-ms-resource-unit:
+      - '1'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: '{"properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "accessPolicies":
-      [{"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "8427ce23-08f2-4510-b6e2-99644db7f94e",
-      "permissions": {"certificates": ["get", "list", "delete", "create", "import",
-      "update", "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
+    body: '{"location": "westus", "properties": {"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "sku": {"family": "A", "name": "premium"}, "accessPolicies": [{"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "objectId": "9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa", "permissions": {"keys":
+      ["get", "create", "delete", "list", "update", "import", "backup", "restore",
+      "recover"], "secrets": ["get", "list", "set", "delete", "backup", "restore",
+      "recover"], "certificates": ["get", "list", "delete", "create", "import", "update",
+      "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
       "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
-      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"], "secrets": ["get",
-      "list", "set", "delete", "backup", "restore", "recover"], "keys": ["get", "create",
-      "delete", "list", "update", "import", "backup", "restore", "recover"]}}], "sku":
-      {"name": "premium", "family": "A"}}, "location": "westus"}'
+      "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}]}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [keyvault create]
-      Connection: [keep-alive]
-      Content-Length: ['745']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-mgmt-keyvault/1.1.0 Azure-SDK-For-Python AZURECLI/2.0.45]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '745'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --sku
+      User-Agent:
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2016-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"8427ce23-08f2-4510-b6e2-99644db7f94e","permissions":{"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"],"secrets":["get","list","set","delete","backup","restore","recover"],"keys":["get","create","delete","list","update","import","backup","restore","recover"]}}],"enabledForDeployment":false,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'}
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1105']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-service-version: [1.0.0.224]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1105'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 1.1.112.0
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: ''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: [0]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: ''}
+    body:
+      string: '{"error":{"code":"Unauthorized","message":"Request is missing a Bearer
+        or PoP token."}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 22 Aug 2018 04:49:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      www-authenticate: ['Bearer authorization="https://login.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47",
-          resource="https://vault.azure.net"']
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 401, message: Unauthorized}
+      cache-control:
+      - no-cache
+      content-length:
+      - '87'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        resource="https://vault.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 401
+      message: Unauthorized
 - request:
     body: ''
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: [0]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - 0
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"error":{"code":"ContactsNotFound","message":"Contacts not found"}}'}
+    body:
+      string: '{"error":{"code":"ContactsNotFound","message":"Contacts not found"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['68']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:27 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 404, message: Not Found}
+      cache-control:
+      - no-cache
+      content-length:
+      - '68'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 404
+      message: Not Found
 - request:
-    body: '{"contacts": [{"name": "John Doe", "phone": "123-456-7890", "email": "admin@contoso.com"}]}'
+    body: '{"contacts": [{"email": "admin@contoso.com", "name": "John Doe", "phone":
+      "123-456-7890"}]}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['91']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '91'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['163']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:28 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '163'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['163']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:28 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '163'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: '{"contacts": [{"name": "John Doe", "phone": "123-456-7890", "email": "admin@contoso.com"},
-      {"email": "other@contoso.com"}]}'
+    body: '{"contacts": [{"email": "admin@contoso.com", "name": "John Doe", "phone":
+      "123-456-7890"}, {"email": "other@contoso.com"}]}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['123']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['193']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:29 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '193'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['193']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:29 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '193'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['193']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:30 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '193'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
-        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"admin@contoso.com","name":"John
+        Doe","phone":"123-456-7890"},{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['193']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:30 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '193'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"contacts": [{"email": "other@contoso.com"}]}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['46']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '46'
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['122']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:30 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 azure-keyvault/2016-10-01 Azure-SDK-For-Python]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-keyvault/2016-10-01 Azure-SDK-For-Python
+      accept-language:
+      - en-US
     method: GET
-    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
+    uri: https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts?api-version=2016-10-01
   response:
-    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'}
+    body:
+      string: '{"id":"https://cli-test-kv-ct-co-000002.vault.azure.net/certificates/contacts","contacts":[{"email":"other@contoso.com"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['122']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 22 Aug 2018 04:49:31 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000;includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-keyvault-network-info: [addr=131.107.174.118;act_addr_fam=InterNetwork;]
-      x-ms-keyvault-region: [westus]
-      x-ms-keyvault-service-version: [1.0.0.855]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.2 (Windows-10-10.0.17134-SP0) requests/2.18.4 msrest/0.5.4
-          msrest_azure/0.4.34 resourcemanagementclient/2.0.0 Azure-SDK-For-Python
-          AZURECLI/2.0.45]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_kv_cert_contacts000001?api-version=2018-02-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 22 Aug 2018 04:49:32 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGS1Y6NUZDRVJUOjVGQ09OVEFDVFNBM0FGUTVJQ1c3WFU2VnwzQkNGQTMxQjAwNEQ5NjFELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-02-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Oct 2020 05:47:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=167.220.255.120;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - westus
+      x-ms-keyvault-service-version:
+      - 1.2.41.0
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 version: 1

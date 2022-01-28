@@ -1,0 +1,129 @@
+interactions:
+- request:
+    body: '{"location": "eastasia", "identity": {"type": "None"}, "properties": {"storageAccounts":
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
+      "type": "Primary"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '333'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --storage-account -l
+      User-Agent:
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2021-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"East
+        Asia\",\"properties\":{\r\n    \"mediaServiceId\":\"c7316cc4-9603-477e-8f27-02c2f36d5102\",\"storageAccounts\":[\r\n
+        \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    },\"keyDelivery\":{\r\n      \"accessControl\":{\r\n
+        \       \"defaultAction\":\"Allow\",\"ipAllowList\":[\r\n          \r\n        ]\r\n
+        \     }\r\n    }\r\n  },\"systemData\":{\r\n    \"createdBy\":\"phcooper@microsoft.com\",\"createdByType\":\"User\",\"createdAt\":\"2021-07-30T19:00:22.8481082Z\",\"lastModifiedBy\":\"phcooper@microsoft.com\",\"lastModifiedByType\":\"User\",\"lastModifiedAt\":\"2021-07-30T19:00:22.8481082Z\"\r\n
+        \ },\"identity\":{\r\n    \"type\":\"None\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1158'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Fri, 30 Jul 2021 19:00:26 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"description": "ExampleDescription", "options": [{"name":
+      "pon000005", "configuration": {"@odata.type": "#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration",
+      "ask": "EjRWeJCrze8SNFZ4kKvN7w==", "fairPlayPfxPassword": "password", "fairPlayPfx":
+      "MIIKiQIBAzCCCk8GCSqGSIb3DQEHAaCCCkAEggo8MIIKODCCBO8GCSqGSIb3DQEHBqCCBOAwggTcAgEAMIIE1QYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQIpWxHMQn3nwMCAggAgIIEqOPQ4cNTz/41hY7gS1uVf46gL7kB9BNecRpprnR2uOMoWlB8I8K3GiXAzNJyX8ry9P+HHBQoGrP1klaRsUFjiVGoGLOXWaZP2N201J1ARVfo3nm6dVm3H4gkIrsuKL9O7vKr1GSZsyFpcb7j738O4cw4W5o70pozFFLw8/2ecD2Zdq+9StN8Bf/mnPSC97Qtp0K70gT6STh9UuFEObjg+3TDjiCveqsHTLTxjdUdMMFgunl5siJ0UOnIUh9P2v9fbQwXGh5s1uE18dq4P625m8msh3nQ8RRXoC9PnL1/m2TDpWwanox5P3EaA1aQMORleS6a3BoSjyegBW6ZrA581Fa62I+WXseZ/o/CCWqw5u2fMWMsfTyUzuyEAG3hyaJan+Lq8LOfDf7ZKw2dC1IWRaQF8DNRlrf658ELeIwzydXTLsI3Rv2zhNPmQa4yTpy/FpQZtHomlSvQTZy0s7hA9JwsxQInRAtv+3Auwp5m7hofrXJyOWCrGThcN17rYDVh+vCJFxGUeWOBZ4bF7Blv95PKSNuaXYdb5XsYY+DZ7WnU0Tkdk0r1W0ZThjrUOnGG0rCClSGOKruyvmymhTQXnL8hzXjvvdbjm/nmUnZOOrr5k4gunD817MmqGmvVxxdAcdtipx6vUeJMgj40b/MU9z75ygHFZEYAtvMwh/Qtl3Qv01HyOHGDH7sT53KggcU+0IcAMCFkZOx6ZY62WjEtZeoGeaA7xbSTbLL32X9vPBC8s6l2KAJCRy7FLXT8VSpX/C+YM2w97YpCSJ0qtRqcj/U3OuazdupN/62CvnesYRk7d7W764nyTiHiPI6SrkdqBV65XiJfOalE1A0OFJlaUD+a0VBFRZa+9WffFXuUmrd0LIXSLlEJWNJtQGKk/5iNjjA5bcxZ69DTuvX3EihbzUQOLz5dAMG/FuKvjAcxJd2u0ioGFKCJeRIS9NtSXzVytaVv7f6FVEjLArER0lskvI6FnpZmOtUXaoBAlvlsHaN0sY+787dcdLs4HRm3HxLoxbLl1ygZtSEi2AL+o9PA/cGh3KdpoJz/QSoF7c40ABSZ+QbJ+PefS7ncTy0dHjch8gQbXARKn20ROdspbEGW7CGyxl6ipOTwkhi/HhBeFhKk4ofwu/Tmh6Q75QoxJDHp7BMCI4Z5+hvZZ6DmeybxonyNvpwdxR1DIScA0X4mkZSyJECRpOGIZZxKUhd3Uxv7UREgOs/xiCgdUoRUpoOunqROpgSb/WmjOtFVYyVh03emEnfZoaEyCNB1Dk5NzstdtWZhbvmZQBZv7xkcFw65SoEAsPgPfR7LIqN5sJcUY1KSUgvZXalb2qkEST8NB5IImxPr/GBxygo6FE/f21wfPpwNDUIvYBtBQmDlJpLVz8n6CExl5EEIi612is1vusvCEXf3m83SLJmJn77b2lqyaZjhs0UW00B8kVEfpSOndW/P1/D7HvrSCWsnPsqJF66BUHxdI9V89Coo7suMiOlL0PMUI3D3I5l5UKO3JkOFxJQwBy/GPTkcYKF6MlQdnhH62p3AnIynBbQw3nebBP5wT3WGCbDIRFMBtm9ramYg4KTP7qjQwPoKbRcwggVBBgkqhkiG9w0BBwGgggUyBIIFLjCCBSowggUmBgsqhkiG9w0BDAoBAqCCBO4wggTqMBwGCiqGSIb3DQEMAQMwDgQIcHIlDzfEz0wCAggABIIEyMsmW+kFfagAyQQ2z9kBF/LyvpePCVMWq4eDT09zQ6M978RBuDXMOIUz6ylfzx+JgLuwEfYTifac35NyexKxJjCWj8H0U+xwG6NoSL9bfgmv3O2EkUx/G7OLaShr8/S7Aq7rtbLVDxXMv8qO11g6td0JDSx1CN5Ibtyo2YZqpadlOSlL+qHa1BzxFfpX+Ef9pE2Gs25D4icMqskaA0M78Qst7usPqMM4YVIA94HZvBxvu07LbZJF9gFB0x6nIQDZEJSmCObFdyiTuVhDTbea2JKgERauuodkniSGU+U6++iQ70mV7cQcBy5tP5m/CiXmFmp+UnOHKN5TK7t1e6nGq+KPLkqBaH33XUX+xdy2PsTv12+4oetKLEBVumQDTvLFOUth/CzRfWseAk/CSX7H1XC9KlW9XfULNKFQ5G7Bguk9RrS/Sf94OOO8fZRLICMN/Q8MnIz+x5QIT2wXfspFs0x0DWPSpFUUXAlVpt4XLhOmsvcfRm3GMRetvGzSb3IgdtSyGekzs+nmDYAGQJKrYCKTpsRRlKt3e/My8nsKfVh4Pa9vPQgHU/KaxDeSKIsTRe0Hy2t9WMF8US+LbjMjCRqazWUkVwQzbYq4FXjs7QYeiHx9Mo7jVacnjqyFMaWTx8czQo7QYSfbL5+YxJJR/iuHBrLIdR1L5MHa8S3VE3I5U5wrAEoCcqtc8HRmOwX2vhEDMRzz/jmrmyQ4l4EliCTG6fQV8aOfljj3zgvPahaTf9lfx1AjhD+x2ZjgjamLtYdNAUIYgMo3wo+qjh6QUA8gxcGoUv6d3Q8INBAJgiNLGSscs/omdU4EZ+l+3QUgQzfBmKltxuW472+tEbRkucR7Myci/UacdLhs38xGcnpaKh68J/SQ3q9jqKi8coGSQFOTNoHVcVVk/XmvpP+Hd6YMOfwmWdiSzhCEM70zWd7jXNK/PDfpXgncQf7GRTgxxGE9CejERaoScy+hypGWhtNARwZCpJk/joEWRd5gQDOqZS7uTgXRxgUkhgngiYAkGqTwW/x2iItXeU/A03vazLK8wch2/cz04Gh8RPQIWDK0n3APNY/OuoqzxYfIEaORwZh8PpGJsxGWI5sqTMKVuI3EndQj32SbWMry2vCixuDz6mYUkzyCmCUtkxWvGaS1iotIl7fHGL/kvOJSPI3te/Kc3SAGRHYaYSkYvi3D15/6Z/yw12vJWy3Q6XwlYvgYiTJuBUtOXanvvckXwzBAEA9gqiYovF5Ebs3CLbeFkBaD8dj9g2PpWr39qVRwUCqMRz7RF/g1+r638NfoVnLG7/QKppsfaC5b404jIUHfKqH6m55T6ivwhV102c0wwulmsdT9O2/BlhB1eUpJD5t5J3x475zeP4ReC5EH/2/wy3nc+cx+CdsPtyufpNj3nCTq0REB455OthLRLWRMj7iUwQnsodQvzqEvfOKsZPfV0DXbdvH9QDrte2jIyMCV2SKcw2idwaETghfMl34ifAXWkqsD0gFNLhtdwsFwaHMHGaI87AewmzxHptqcQiiLQkPnlRDHy7k8SPxasD4K05tC8nEQHzDnREPdkEncYqztF39l0nEtaxxphDWmFWGfcZZgfM8rEz+mIBOMGjmZL098i8so7ZxRmeNlizElMCMGCSqGSIb3DQEJFTEWBBRu6e5XeVt2l1MEKSdEQ+zgY8oXzTAxMCEwCQYFKw4DAhoFAAQUESCBobdy+D6h9P96kWPsxzgJ78wECHPJpxxkog9ZAgIIAA==",
+      "rentalAndLeaseKeyType": "DualExpiry", "rentalDuration": 60, "offlineRentalConfiguration":
+      {"playbackDurationSeconds": 60, "storageDurationSeconds": 60}}, "restriction":
+      {"@odata.type": "#Microsoft.Media.ContentKeyPolicyOpenRestriction"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ams content-key-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4115'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -a -n -g --open-restriction --description --ask --fair-play-pfx --fair-play-pfx-password
+        --rental-and-lease-key-type --fp-playback-duration-seconds --fp-storage-duration-seconds
+        --rental-duration --policy-option-name
+      User-Agent:
+      - AZURECLI/2.24.2 (MSI) azsdk-python-mgmt-media/7.0.0 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/contentKeyPolicies/pn000004?api-version=2020-05-01
+  response:
+    body:
+      string: "{\r\n  \"name\":\"pn000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/contentKeyPolicies/pn000004\",\"type\":\"Microsoft.Media/mediaservices/contentKeyPolicies\",\"properties\":{\r\n
+        \   \"policyId\":\"078dc397-55fd-4f2b-b3e5-8c554ddc3064\",\"created\":\"2021-07-30T19:00:27.823Z\",\"lastModified\":\"2021-07-30T19:00:27.823Z\",\"description\":\"ExampleDescription\",\"options\":[\r\n
+        \     {\r\n        \"policyOptionId\":\"1dfc6d7f-67d9-4512-8461-fe15d2ca9d84\",\"name\":\"pon000005\",\"configuration\":{\r\n
+        \         \"@odata.type\":\"#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration\",\"ask\":null,\"fairPlayPfxPassword\":null,\"fairPlayPfx\":null,\"rentalAndLeaseKeyType\":\"DualExpiry\",\"rentalDuration\":0,\"offlineRentalConfiguration\":{\r\n
+        \           \"playbackDurationSeconds\":60,\"storageDurationSeconds\":60\r\n
+        \         }\r\n        },\"restriction\":{\r\n          \"@odata.type\":\"#Microsoft.Media.ContentKeyPolicyOpenRestriction\"\r\n
+        \       }\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1076'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Fri, 30 Jul 2021 19:00:27 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+version: 1

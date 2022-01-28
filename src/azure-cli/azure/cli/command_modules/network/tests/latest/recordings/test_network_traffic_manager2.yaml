@@ -1,0 +1,160 @@
+interactions:
+- request:
+    body: '{"tags": {"foo": "doo"}, "location": "global", "properties": {"profileStatus":
+      "Enabled", "trafficRoutingMethod": "Multivalue", "dnsConfig": {"relativeName":
+      "mytrafficmanager001100a2", "ttl": 30}, "monitorConfig": {"protocol": "HTTP",
+      "port": 80, "path": "/"}, "maxReturn": 3}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '278'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --routing-method --unique-dns-name --max-return --tags
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager2000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile2","name":"mytmprofile2","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{"foo":"doo"},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"MultiValue","dnsConfig":{"relativeName":"mytrafficmanager001100a2","fqdn":"mytrafficmanager001100a2.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":3}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '725'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jan 2022 09:11:34 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '10799'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --routing-method --max-return --tags
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager2000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile2","name":"mytmprofile2","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{"foo":"doo"},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"MultiValue","dnsConfig":{"relativeName":"mytrafficmanager001100a2","fqdn":"mytrafficmanager001100a2.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":3}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '725'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jan 2022 09:11:35 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '10794'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficManagerProfiles/mytmprofile2",
+      "name": "mytmprofile2", "type": "Microsoft.Network/trafficManagerProfiles",
+      "tags": {"foo": "boo"}, "location": "global", "properties": {"profileStatus":
+      "Enabled", "trafficRoutingMethod": "Multivalue", "dnsConfig": {"relativeName":
+      "mytrafficmanager001100a2", "ttl": 30}, "monitorConfig": {"profileMonitorStatus":
+      "Inactive", "protocol": "HTTP", "port": 80, "path": "/", "intervalInSeconds":
+      30, "timeoutInSeconds": 10, "toleratedNumberOfFailures": 3}, "endpoints": [],
+      "trafficViewEnrollmentStatus": "Disabled", "maxReturn": 4}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network traffic-manager profile update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '703'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --routing-method --max-return --tags
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-trafficmanager/1.0.0 Python/3.10.2 (Windows-10-10.0.19044-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager2000001/providers/Microsoft.Network/trafficmanagerprofiles/mytmprofile2?api-version=2018-08-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager2000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/mytmprofile2","name":"mytmprofile2","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{"foo":"boo"},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"MultiValue","dnsConfig":{"relativeName":"mytrafficmanager001100a2","fqdn":"mytrafficmanager001100a2.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled","maxReturn":4}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '725'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 25 Jan 2022 09:11:40 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '10799'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

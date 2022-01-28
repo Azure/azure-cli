@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import os
 import json
 import os
@@ -11,6 +10,7 @@ import platform
 import tempfile
 import time
 import fileinput
+import unittest
 
 from azure.cli.testsdk import (
     ScenarioTest,
@@ -18,6 +18,7 @@ from azure.cli.testsdk import (
     StorageAccountPreparer)
 
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 name_prefix = 'cliadm'
 resource_location = 'centralus'
@@ -26,6 +27,7 @@ curr_dir = os.path.dirname(os.path.realpath(__file__))
 
 create_rollout_template = os.path.join(curr_dir, "createrollout.json").replace('\\', '\\\\')
 failure_create_rollout_template = os.path.join(curr_dir, "createrollout_failurerollout.json").replace('\\', '\\\\')
+healthcheck_file_path = os.path.join(curr_dir, "healthcheck_step.json").replace('\\', '\\\\')
 
 parameters_file_name = "storage.parameters.json"
 invalid_parameters_file_name = "storage_invalid.parameters.json"
@@ -44,8 +46,10 @@ templateCopyArtifactSourceRelativePath = os.path.join(curr_dir, artifact_root, t
 
 class DeploymentManagerTests(ScenarioTest):
 
+    @unittest.skip('Deployment failed')
     @ResourceGroupPreparer(name_prefix=name_prefix, random_name_length=12, location=resource_location)
     @StorageAccountPreparer(name_prefix=name_prefix, location=resource_location)
+    @AllowLargeResponse()
     def test_deploymentmanager_scenario(self, resource_group, storage_account):
 
         subscription_id = self.get_subscription_id()
@@ -72,6 +76,8 @@ class DeploymentManagerTests(ScenarioTest):
             updated_artifact_source_name,
             storage_account)
 
+        self.list_artifact_sources(resource_group, artifact_source_name)
+
         self.delete_artifact_source(resource_group, artifact_source_name)
         self.delete_artifact_source(resource_group, updated_artifact_source_name)
 
@@ -85,6 +91,7 @@ class DeploymentManagerTests(ScenarioTest):
             storage_account_name):
 
         topology_name = resource_group_name + "ServiceTopology"
+        topology2_name = resource_group_name + "ServiceTopology2"
 
         self.kwargs = {
             'rg': resource_group_name,
@@ -94,7 +101,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology create -g {rg} -n {st_name} -l \"{location}\" --artifact-source {as_id}', checks=[
-            self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', artifact_source_id)])
 
@@ -123,12 +130,44 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology update -g {rg} -n {st_name} --artifact-source {as_id}', checks=[
-            self.check('type', 'Microsoft.DeploymentManager/servicetopologies'),
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies'),
             self.check('name', topology_name),
             self.check('artifactSourceId', updated_artifact_source_id)])
 
+        self.kwargs = {
+            'rg': resource_group_name,
+            'location': location,
+            'st_name': topology2_name,
+            'as_id': artifact_source_id,
+        }
+
+        self.cmd('deploymentmanager service-topology create -g {rg} -n {st_name} -l \"{location}\" --artifact-source {as_id}', checks=[
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies'),
+            self.check('name', topology2_name),
+            self.check('artifactSourceId', artifact_source_id)])
+
+        self.list_service_topologies(resource_group_name, topology_name)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'location': location,
+            'st_name': topology_name,
+            'as_id': artifact_source_id,
+        }
+
         self.cmd('deploymentmanager service-topology delete -g {rg} -n {st_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'location': location,
+            'st_name': topology2_name,
+            'as_id': artifact_source_id,
+        }
+
+        self.cmd('deploymentmanager service-topology delete -g {rg} -n {st_name}')
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
 
     def services_validations(
@@ -141,11 +180,14 @@ class DeploymentManagerTests(ScenarioTest):
             subscription_id):
 
         service_name = resource_group_name + "Service"
+        service2_name = resource_group_name + "Service2"
+
         self.kwargs = {
             'rg': resource_group_name,
             'location': location,
             'st_name': service_topology_name,
             's_name': service_name,
+            's2_name': service2_name,
             't_l': location,
             't_sub_id': subscription_id
         }
@@ -170,6 +212,7 @@ class DeploymentManagerTests(ScenarioTest):
             'location': location,
             'st_name': service_topology_name,
             's_name': service_name,
+            's2_name': service2_name,
             't_l': location,
             't_sub_id': updated_target_subscription_id
         }
@@ -179,9 +222,27 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('name', service_name),
             self.check('targetSubscriptionId', updated_target_subscription_id)])
 
+        self.cmd('deploymentmanager service create -g {rg} --service-topology-name {st_name} -n {s2_name} -l \"{location}\" --target-location \"{t_l}\" --target-subscription-id {t_sub_id}', checks=[
+            self.check('type', 'Microsoft.DeploymentManager/serviceTopologies/services'),
+            self.check('name', service2_name),
+            self.check('targetLocation', location)])
+
+        self.list_services(resource_group_name, service_topology_name, service_name)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'st_name': service_topology_name,
+            's_name': service_name,
+            's2_name': service2_name,
+        }
+
         self.cmd('deploymentmanager service delete -g {rg} --service-topology-name {st_name} -n {s_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s_name}')
+
+        self.cmd('deploymentmanager service delete -g {rg} --service-topology-name {st_name} -n {s2_name}')
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s2_name}')
 
     def service_units_validations(
             self,
@@ -263,8 +324,17 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('name', service_unit_name),
             self.check('deploymentMode', deployment_mode)])
 
+        self.list_service_units(resource_group_name, service_topology_name, service_name, service_unit_name)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'st_name': service_topology_name,
+            's_name': service_name,
+            'su_name': service_unit_name,
+        }
+
         self.cmd('deploymentmanager service-unit delete -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
         self.kwargs = {
@@ -275,7 +345,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-unit delete -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
     def steps_validations(
@@ -329,9 +399,104 @@ class DeploymentManagerTests(ScenarioTest):
             self.check('name', step_name),
             self.check('properties.attributes.duration', updated_duration)])
 
+        self.healthcheck_step_validations(resource_group_name, location)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step_name': step_name
+        }
+
         self.cmd('deploymentmanager step delete -g {rg} -n {step_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
+
+    def healthcheck_step_validations(
+            self,
+            resource_group_name,
+            location):
+
+        step_name = resource_group_name + "RestHealthCheckStep"
+        updated_healthy_state_duration = "PT30M"
+
+        self.replace_string("__HEALTH_CHECK_STEP_NAME__", step_name, healthcheck_file_path, True)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step_name': step_name,
+            'rest_health_check_file': healthcheck_file_path,
+            'healthy_state_duration': updated_healthy_state_duration
+        }
+
+        json_obj = None
+        with open(healthcheck_file_path) as f:
+            json_obj = json.load(f)
+
+        self.cmd('deploymentmanager step create -g {rg} --step "{rest_health_check_file}"', checks=[
+            self.check('type', 'Microsoft.DeploymentManager/steps'),
+            self.check('name', step_name),
+            self.check('properties.stepType', 'HealthCheck'),
+            self.check('properties.attributes.waitDuration', json_obj['properties']['attributes']['waitDuration']),
+            self.check('properties.attributes.maxElasticDuration', json_obj['properties']['attributes']['maxElasticDuration']),
+            self.check('properties.attributes.healthyStateDuration', json_obj['properties']['attributes']['healthyStateDuration'])])
+
+        step_id = self.cmd('deploymentmanager step show -g {rg} -n {step_name}').get_output_in_json()['id']
+        self.assertFalse(step_id is None)
+
+        # Revert health check file change for playback mode.
+        self.replace_string(step_name, "__HEALTH_CHECK_STEP_NAME__", healthcheck_file_path, True)
+
+        json_obj['properties']['attributes']['healthyStateDuration'] = updated_healthy_state_duration
+
+        serialized_json = json.dumps(json_obj)
+        self.assertFalse(serialized_json is None)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step_name': step_name,
+            'step': serialized_json
+        }
+
+        self.cmd('deploymentmanager step update -g {rg} -n {step_name} --step \'{step}\'', checks=[
+            self.check('type', 'Microsoft.DeploymentManager/steps'),
+            self.check('name', step_name),
+            self.check('properties.attributes.healthyStateDuration', updated_healthy_state_duration)])
+
+        step2_name = resource_group_name + "RestHealthCheckStep2"
+        json_obj['name'] = step2_name
+
+        serialized_json = json.dumps(json_obj)
+        self.assertFalse(serialized_json is None)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step': serialized_json
+        }
+
+        self.cmd('deploymentmanager step create -g {rg} --step \'{step}\'', checks=[
+            self.check('type', 'Microsoft.DeploymentManager/steps'),
+            self.check('name', step2_name),
+            self.check('properties.stepType', 'HealthCheck'),
+            self.check('properties.attributes.healthyStateDuration', updated_healthy_state_duration)])
+
+        self.list_steps(resource_group_name, step_name)
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step_name': step_name
+        }
+
+        self.cmd('deploymentmanager step delete -g {rg} -n {step_name}')
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
+
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step2_name': step2_name
+        }
+
+        self.cmd('deploymentmanager step delete -g {rg} -n {step2_name}')
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('deploymentmanager step show -g {rg} -n {step2_name}')
 
     def rollouts_validations(
             self,
@@ -373,7 +538,7 @@ class DeploymentManagerTests(ScenarioTest):
             'failed_rollout_name': failed_rollout_name
         }
 
-        self.cmd('group deployment create -g {rg} --template-file {t_path}', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{t_path}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('deploymentmanager rollout show -g {rg} -n {rollout_name}', checks=[
@@ -396,7 +561,7 @@ class DeploymentManagerTests(ScenarioTest):
 
         self.assertEqual('Canceled', rollout['status'])
 
-        self.cmd('group deployment create -g {rg} --template-file {invalid_t_path}', checks=[
+        self.cmd('group deployment create -g {rg} --template-file "{invalid_t_path}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')])
 
         self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}', checks=[
@@ -436,9 +601,9 @@ class DeploymentManagerTests(ScenarioTest):
         self.cmd('deploymentmanager rollout delete -g {rg} -n {failed_rollout_name}')
         self.cmd('deploymentmanager rollout delete -g {rg} -n {rollout_name}')
 
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager rollout show -g {rg} -n {rollout_name}')
 
     def set_managed_identity(self, subscription_id, resource_group_name):
@@ -557,6 +722,83 @@ class DeploymentManagerTests(ScenarioTest):
         self.upload_blob(storage_account_info, container_name, templateCopyArtifactSourceRelativePath, template_copy_file_name)
         self.upload_blob(storage_account_info, container_name, invalidParametersArtifactSourceRelativePath, invalid_parameters_file_name)
 
+    def list_steps(self, resource_group_name, step_name):
+        self.kwargs = {
+            'rg': resource_group_name,
+            'step_name': step_name
+        }
+
+        steps = self.cmd('deploymentmanager step list -g {rg}', checks=[
+            self.check("length(@)", 3)
+        ]).get_output_in_json()
+
+        selected_step = [x for x in steps if(x['name'].lower() == step_name.lower())]
+        self.assertIsNotNone(selected_step, "list steps did not return {step_name}.")
+
+    def list_service_units(self, resource_group_name, service_topology_name, service_name, service_unit_name):
+        self.kwargs = {
+            'rg': resource_group_name,
+            'st_name': service_topology_name,
+            's_name': service_name,
+            'su_name': service_unit_name
+        }
+
+        service_units = self.cmd('deploymentmanager service-unit list -g {rg} --service-topology-name {st_name} --service-name {s_name}', checks=[
+            self.check("length(@)", 2)
+        ]).get_output_in_json()
+
+        selected_service_unit = [x for x in service_units if(x['name'].lower() == service_unit_name.lower())]
+        self.assertIsNotNone(selected_service_unit, "list service units did not return {su_name}.")
+
+    def list_services(self, resource_group_name, service_topology_name, service_name):
+        self.kwargs = {
+            'rg': resource_group_name,
+            'st_name': service_topology_name
+        }
+
+        services = self.cmd('deploymentmanager service list -g {rg} --service-topology-name {st_name}', checks=[
+            self.check("length(@)", 2)
+        ]).get_output_in_json()
+
+        self.kwargs = {
+            's_name': service_name
+        }
+
+        selected_service = [x for x in services if(x['name'].lower() == service_name.lower())]
+        self.assertIsNotNone(selected_service, "list services did not return {s_name}.")
+
+    def list_service_topologies(self, resource_group_name, service_topology_name):
+        self.kwargs = {
+            'rg': resource_group_name
+        }
+
+        service_topologies = self.cmd('deploymentmanager service-topology list -g {rg}', checks=[
+            self.check("length(@)", 2)
+        ]).get_output_in_json()
+
+        self.kwargs = {
+            'st_name': service_topology_name
+        }
+
+        selected_service_topology = [x for x in service_topologies if(x['name'].lower() == service_topology_name.lower())]
+        self.assertIsNotNone(selected_service_topology, "list service topologies did not return {st_name}.")
+
+    def list_artifact_sources(self, resource_group_name, artifact_source_name):
+        self.kwargs = {
+            'rg': resource_group_name
+        }
+
+        artifact_sources = self.cmd('deploymentmanager artifact-source list -g {rg}', checks=[
+            self.check("length(@)", 2)
+        ]).get_output_in_json()
+
+        self.kwargs = {
+            'as_name': artifact_source_name
+        }
+
+        selected_artifact_source = [x for x in artifact_sources if(x['name'].lower() == artifact_source_name.lower())]
+        self.assertIsNotNone(selected_artifact_source, "list artifact sources did not return {as_name}.")
+
     def delete_artifact_source(self, resource_group_name, artifact_source_name):
         self.kwargs = {
             'rg': resource_group_name,
@@ -564,7 +806,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
         self.cmd('deploymentmanager artifact-source delete -n {name} -g {rg} --yes')
 
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('deploymentmanager artifact-source show -n {name} -g {rg}')
 
     def upload_blob(self, storage_account_info, storage_container_name, file_path, file_name):
@@ -591,12 +833,13 @@ class DeploymentManagerTests(ScenarioTest):
         cmd = '{} --account-name {} --account-key {}'.format(cmd, *account_info)
         return self.cmd(cmd)
 
-    def replace_string(self, replacement_symbol, replacement_value, filePath):
+    def replace_string(self, replacement_symbol, replacement_value, filePath, overridePlayback=False):
         is_playback = os.path.exists(self.recording_file)
-        if not is_playback:
-            with fileinput.FileInput(filePath, inplace=True) as file:
-                for line in file:
-                    print(line.replace(replacement_symbol, replacement_value), end='')
+        if (not is_playback or overridePlayback):
+            file = fileinput.FileInput(filePath, inplace=True)
+            for line in file:
+                print(line.replace(replacement_symbol, replacement_value), end='')
+            file.close()
 
     def replace_rollout_placeholders(
         self,

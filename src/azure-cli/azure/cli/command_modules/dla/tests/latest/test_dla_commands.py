@@ -4,12 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from __future__ import print_function
-
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
@@ -336,9 +331,9 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
             'loc': 'eastus2',
             # compute policy variables
             'user_policy': 'pycliuserpolicy',
-            'user_oid': '8ce05900-7a9e-4895-b3f0-0fbcee507803',
+            'user_oid': '181c08fa-7ac8-48a6-a869-342ab74566a4',  # azureclitest
             'group_policy': 'pycligrouppolicy',
-            'group_oid': '0583cfd7-60f5-43f0-9597-68b85591fc69'
+            'group_oid': 'f0bec09f-45a4-4c58-ac5b-cf0516d7bc68'  # AzureSDKTeam
         })
 
         # create ADLS accounts

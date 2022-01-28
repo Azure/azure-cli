@@ -4,11 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import MagicMock
+from unittest.mock import MagicMock
 
 from knack.util import CLIError
 from azure.cli.command_modules.resource.custom import (_ResourceUtils, _validate_resource_inputs,
@@ -78,6 +74,19 @@ class TestApiCheck(unittest.TestCase):
                                    resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2005-01-01-preview")
 
+    def test_resolve_api_provider_latest_include_preview(self):
+        # Verifies provider is used as backup if api-version not specified.
+        from azure.cli.core.mock import DummyCli
+        cli = DummyCli()
+        rcf = self._get_mock_client()
+        res_utils = _ResourceUtils(cli, resource_type='Mock/test_latest', resource_name='vnet1',
+                                   resource_group_name='rg', rcf=rcf)
+        self.assertEqual(res_utils.api_version, "2015-01-01")
+
+        res_utils = _ResourceUtils(cli, resource_type='Mock/test_latest', resource_name='vnet1',
+                                   resource_group_name='rg', rcf=rcf, latest_include_preview=True)
+        self.assertEqual(res_utils.api_version, "2016-01-01-preview")
+
     def _get_mock_client(self):
         client = MagicMock()
         provider = MagicMock()
@@ -85,7 +94,8 @@ class TestApiCheck(unittest.TestCase):
             self._get_mock_resource_type('skip', ['2000-01-01-preview', '2000-01-01']),
             self._get_mock_resource_type('test', ['2016-01-01-preview', '2016-01-01']),
             self._get_mock_resource_type('foo', ['1999-01-01-preview', '1999-01-01']),
-            self._get_mock_resource_type('preview', ['2005-01-01-preview', '2004-01-01-preview'])
+            self._get_mock_resource_type('preview', ['2005-01-01-preview', '2004-01-01-preview']),
+            self._get_mock_resource_type('test_latest', ['2016-01-01-preview', '2015-01-01'])
         ]
         client.providers.get.return_value = provider
         return client

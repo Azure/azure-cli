@@ -12,14 +12,14 @@ import requests
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.storage.blob import BlockBlobService
+from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
 from ._constants import TASK_VALID_VSTS_URLS
 
 logger = get_logger(__name__)
 
 
-def upload_source_code(client,
+def upload_source_code(cmd, client,
                        registry_name,
                        resource_group_name,
                        source_location,
@@ -54,9 +54,12 @@ def upload_source_code(client,
         raise CLIError("Failed to get a SAS URL to upload context.")
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(upload_url)
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     BlockBlobService(account_name=account_name,
                      sas_token=sas_token,
-                     endpoint_suffix=endpoint_suffix).create_blob_from_path(
+                     endpoint_suffix=endpoint_suffix,
+                     # Increase socket timeout from default of 20s for clients with slow network connection.
+                     socket_timeout=300).create_blob_from_path(
                          container_name=container_name,
                          blob_name=blob_name,
                          file_path=tar_file_path)
@@ -68,7 +71,8 @@ def upload_source_code(client,
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
     logger.warning("Packing source code into tar to upload...")
 
-    ignore_list, ignore_list_size = _load_dockerignore_file(source_location)
+    original_docker_file_name = os.path.basename(docker_file_path.replace("\\", os.sep))
+    ignore_list, ignore_list_size = _load_dockerignore_file(source_location, original_docker_file_name)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
 
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
@@ -115,7 +119,7 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
                 tar.addfile(docker_file_tarinfo, f)
 
 
-class IgnoreRule(object):  # pylint: disable=too-few-public-methods
+class IgnoreRule:  # pylint: disable=too-few-public-methods
     def __init__(self, rule):
 
         self.rule = rule
@@ -124,6 +128,10 @@ class IgnoreRule(object):  # pylint: disable=too-few-public-methods
         if rule.startswith('!'):
             self.ignore = False
             rule = rule[1:]  # remove !
+            # load path without leading slash in linux and windows
+            # environments (interferes with dockerignore file)
+            if rule.startswith('/'):
+                rule = rule[1:]  # remove beginning '/'
 
         self.pattern = "^"
         tokens = rule.split('/')
@@ -143,9 +151,17 @@ class IgnoreRule(object):  # pylint: disable=too-few-public-methods
         self.pattern += "$"
 
 
-def _load_dockerignore_file(source_location):
+def _load_dockerignore_file(source_location, original_docker_file_name):
     # reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
     docker_ignore_file = os.path.join(source_location, ".dockerignore")
+    docker_ignore_file_override = None
+    if original_docker_file_name != "Dockerfile":
+        docker_ignore_file_override = os.path.join(
+            source_location, "{}.dockerignore".format(original_docker_file_name))
+        if os.path.exists(docker_ignore_file_override):
+            logger.warning("Overriding .dockerignore with %s", docker_ignore_file_override)
+            docker_ignore_file = docker_ignore_file_override
+
     if not os.path.exists(docker_ignore_file):
         return None, 0
 
@@ -155,6 +171,8 @@ def _load_dockerignore_file(source_location):
         encoding = "utf-8-sig"
 
     ignore_list = []
+    if docker_ignore_file == docker_ignore_file_override:
+        ignore_list.append(IgnoreRule(".dockerignore"))
 
     for line in open(docker_ignore_file, 'r', encoding=encoding).readlines():
         rule = line.rstrip()
@@ -217,4 +235,8 @@ def check_remote_source_code(source_location):
             if requests.head(source_location).status_code < 400:
                 return source_location
             raise CLIError("'{}' doesn't exist.".format(source_location))
+
+    # oci
+    if lower_source_location.startswith("oci://"):
+        return source_location
     raise CLIError("'{}' doesn't exist.".format(source_location))

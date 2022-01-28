@@ -13,24 +13,21 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-12-30T20:26:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-12-20T21:16:00Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '313'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:26:15 GMT
+      - Mon, 20 Dec 2021 21:16:02 GMT
       expires:
       - '-1'
       pragma:
@@ -45,8 +42,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "hcplan000003", "type": "Microsoft.Web/serverfarms", "location":
-      "westus", "properties": {"skuName": "S1", "capacity": 1}}'
+    body: '{"location": "japanwest", "sku": {"name": "S1", "tier": "STANDARD", "capacity":
+      1}, "properties": {"perSiteScaling": false, "isXenon": false}}'
     headers:
       Accept:
       - application/json
@@ -57,373 +54,201 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '143'
+      - '142'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
-  response:
-    body:
-      string: '{"status":"Success","error":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '33'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:26:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-12-30T20:26:11Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 30 Dec 2019 20:26:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus", "properties": {"perSiteScaling": false, "isXenon":
-      false}, "sku": {"name": "S1", "tier": "STANDARD", "capacity": 1}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '139'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --sku
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","name":"hcplan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":35402,"name":"hcplan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0a60a016-d28c-428c-b5a6-7435ec6f40e3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_35402","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","name":"hcplan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"japanwest","properties":{"serverFarmId":24482,"name":"hcplan000003","sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1},"workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_24482","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1528'
+      - '1478'
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:26:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --plan
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003?api-version=2018-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","name":"hcplan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":35402,"name":"hcplan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0a60a016-d28c-428c-b5a6-7435ec6f40e3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_35402","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1528'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:26:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"name": "hcwebapp000002", "type": "Microsoft.Web/sites", "location":
-      "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003"}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '329'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --plan
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/validate?api-version=2018-02-01
-  response:
-    body:
-      string: '{"status":"Success","error":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '33'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:26:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --plan
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003?api-version=2018-02-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","name":"hcplan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":35402,"name":"hcplan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0a60a016-d28c-428c-b5a6-7435ec6f40e3","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-bay-051_35402","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1528'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:26:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003",
-      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
-      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "10.14"}],
-      "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
-      false, "httpsOnly": false}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '558'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --plan
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-30T20:26:25.437","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"hcwebapp000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"28A59EA35AAF0BFA8BB4BF89217863EB90C8973A76E9C07EDBB20354E6919900","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '3523'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:26:42 GMT
+      - Mon, 20 Dec 2021 21:16:16 GMT
       etag:
-      - '"1D5BF4F68F86AD0"'
+      - '"1D7F5E6D155D9EB"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","name":"hcplan000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"Japan
+        West","properties":{"serverFarmId":24482,"name":"hcplan000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-JapanWestwebspace","subscription":"2edc29f4-b81f-494b-a624-cc619903b837","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"Japan
+        West","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-os1-027_24482","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1404'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:16:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "hcwebapp000002", "type": "Site"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '42'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web/checknameavailability?api-version=2021-01-15
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"","message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '47'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:16:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "10.14.1"}],
+      "alwaysOn": true, "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
+      false, "httpsOnly": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '492'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --plan
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-20T21:16:35.54","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"hcwebapp000002","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"hcwebapp000002\\$hcwebapp000002","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6012'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:16:54 GMT
+      etag:
+      - '"1D7F5E6DEDA0935"'
       expires:
       - '-1'
       pragma:
@@ -448,7 +273,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{}'
+    body: '{"format": "WebDeploy"}'
     headers:
       Accept:
       - application/xml
@@ -459,33 +284,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2'
+      - '23'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --plan
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2020-09-01
   response:
     body:
       string: <publishData><publishProfile profileName="hcwebapp000002 - Web Deploy"
         publishMethod="MSDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
-        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
+        userName="$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -493,11 +315,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1730'
+      - '1537'
       content-type:
       - application/xml
       date:
-      - Mon, 30 Dec 2019 20:26:42 GMT
+      - Mon, 20 Dec 2021 21:16:58 GMT
       expires:
       - '-1'
       pragma:
@@ -511,7 +333,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
@@ -531,24 +353,21 @@ interactions:
       ParameterSetName:
       - -g --name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-12-30T20:26:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"japanwest","tags":{"product":"azurecli","cause":"automation","date":"2021-12-20T21:16:00Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '428'
+      - '313'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:26:42 GMT
+      - Mon, 20 Dec 2021 21:16:58 GMT
       expires:
       - '-1'
       pragma:
@@ -563,7 +382,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "japanwest"}'
     headers:
       Accept:
       - application/json
@@ -574,31 +393,31 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '25'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g --name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004?api-version=2017-04-01
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"West
-        US","tags":{},"properties":{"provisioningState":"Created","metricId":"0a60a016-d28c-428c-b5a6-7435ec6f40e3:hcnamespace000004","createdAt":"2019-12-30T20:26:44.457Z","updatedAt":"2019-12-30T20:26:44.457Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"Japan
+        West","tags":{},"properties":{"provisioningState":"Created","metricId":"2edc29f4-b81f-494b-a624-cc619903b837:hcnamespace000004","createdAt":"2021-12-20T21:17:05.563Z","updatedAt":"2021-12-20T21:17:05.563Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '662'
+      - '578'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:26:44 GMT
+      - Mon, 20 Dec 2021 21:17:06 GMT
       expires:
       - '-1'
       pragma:
@@ -617,7 +436,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -637,25 +456,25 @@ interactions:
       ParameterSetName:
       - -g --name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004?api-version=2017-04-01
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"West
-        US","tags":{},"properties":{"provisioningState":"Created","metricId":"0a60a016-d28c-428c-b5a6-7435ec6f40e3:hcnamespace000004","createdAt":"2019-12-30T20:26:44.457Z","updatedAt":"2019-12-30T20:26:44.457Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Activating"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"Japan
+        West","tags":{},"properties":{"provisioningState":"Created","metricId":"2edc29f4-b81f-494b-a624-cc619903b837:hcnamespace000004","createdAt":"2021-12-20T21:17:05.563Z","updatedAt":"2021-12-20T21:17:05.563Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '662'
+      - '578'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:14 GMT
+      - Mon, 20 Dec 2021 21:17:37 GMT
       expires:
       - '-1'
       pragma:
@@ -692,25 +511,25 @@ interactions:
       ParameterSetName:
       - -g --name
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004?api-version=2017-04-01
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"West
-        US","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"0a60a016-d28c-428c-b5a6-7435ec6f40e3:hcnamespace000004","createdAt":"2019-12-30T20:26:44.457Z","updatedAt":"2019-12-30T20:27:26.667Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Active"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"Japan
+        West","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"2edc29f4-b81f-494b-a624-cc619903b837:hcnamespace000004","createdAt":"2021-12-20T21:17:05.563Z","updatedAt":"2021-12-20T21:17:49.817Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '660'
+      - '576'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:44 GMT
+      - Mon, 20 Dec 2021 21:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -749,25 +568,25 @@ interactions:
       ParameterSetName:
       - -g --namespace-name --name --user-metadata
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","name":"hcname000005","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US","properties":{"createdAt":"2019-12-30T20:27:48.0033426Z","updatedAt":"2019-12-30T20:27:48.0033426Z","listenerCount":0,"requiresClientAuthorization":true,"userMetadata":"[{\"key\":\"endpoint\",\"value\":\"vmsq1:80\"}]"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","name":"hcname000005","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"Japan
+        West","properties":{"createdAt":"2021-12-20T21:18:11.5317772Z","updatedAt":"2021-12-20T21:18:11.5317772Z","listenerCount":0,"requiresClientAuthorization":true,"userMetadata":"[{\"key\":\"endpoint\",\"value\":\"vmsq1:80\"}]"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '584'
+      - '497'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:47 GMT
+      - Mon, 20 Dec 2021 21:18:11 GMT
       expires:
       - '-1'
       pragma:
@@ -786,133 +605,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp hybrid-connection add
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --namespace --hybrid-connection
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2018-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-30T20:26:26.173","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"hcwebapp000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"28A59EA35AAF0BFA8BB4BF89217863EB90C8973A76E9C07EDBB20354E6919900","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '3521'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:27:49 GMT
-      etag:
-      - '"1D5BF4F68F86AD0"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{}'
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp hybrid-connection add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '2'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --namespace --hybrid-connection
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2018-11-01
-  response:
-    body:
-      string: <publishData><publishProfile profileName="hcwebapp000002 - Web Deploy"
-        publishMethod="MSDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
-        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile></publishData>
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1730'
-      content-type:
-      - application/xml
-      date:
-      - Mon, 30 Dec 2019 20:27:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
-      x-powered-by:
-      - ASP.NET
+      - '1198'
     status:
       code: 200
       message: OK
@@ -932,26 +625,25 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/namespaces?api-version=2017-04-01
   response:
     body:
-      string: '{"value":[{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/allisonm-prague/providers/Microsoft.Relay/namespaces/allisonm-test-migration-091619-d1b1","name":"allisonm-test-migration-091619-d1b1","type":"Microsoft.Relay/Namespaces","location":"West
-        Europe","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"0a60a016-d28c-428c-b5a6-7435ec6f40e3:allisonm-test-migration-091619-d1b1","createdAt":"2019-09-16T13:53:45.15Z","updatedAt":"2019-09-16T13:54:30.377Z","serviceBusEndpoint":"https://allisonm-test-migration-091619-d1b1.servicebus.windows.net:443/","status":"Active"}},{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"West
-        US","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"0a60a016-d28c-428c-b5a6-7435ec6f40e3:hcnamespace000004","createdAt":"2019-12-30T20:26:44.457Z","updatedAt":"2019-12-30T20:27:26.667Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Active"}}]}'
+      string: '{"value":[{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"Japan
+        West","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"2edc29f4-b81f-494b-a624-cc619903b837:hcnamespace000004","createdAt":"2021-12-20T21:17:05.563Z","updatedAt":"2021-12-20T21:17:49.817Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Active"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1320'
+      - '588'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:49 GMT
+      - Mon, 20 Dec 2021 21:18:11 GMT
       expires:
       - '-1'
       pragma:
@@ -969,6 +661,8 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-inline-count:
+      - ''
     status:
       code: 200
       message: OK
@@ -988,25 +682,25 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","name":"hcname000005","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"West
-        US","properties":{"createdAt":"2019-12-30T20:27:48.0033426Z","updatedAt":"2019-12-30T20:27:48.0033426Z","listenerCount":0,"requiresClientAuthorization":true,"userMetadata":"[{\"key\":\"endpoint\",\"value\":\"vmsq1:80\"}]"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","name":"hcname000005","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"Japan
+        West","properties":{"createdAt":"2021-12-20T21:18:11.5317772Z","updatedAt":"2021-12-20T21:18:11.5317772Z","listenerCount":0,"requiresClientAuthorization":true,"userMetadata":"[{\"key\":\"endpoint\",\"value\":\"vmsq1:80\"}]"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '584'
+      - '497'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:48 GMT
+      - Mon, 20 Dec 2021 21:18:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1043,8 +737,8 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: GET
@@ -1060,7 +754,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:48 GMT
+      - Mon, 20 Dec 2021 21:18:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1099,25 +793,589 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender?api-version=2017-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender","name":"defaultSender","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"West
-        US","properties":{"rights":["Send"]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender","name":"defaultSender","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"Japan
+        West","properties":{"rights":["Send"]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '439'
+      - '364'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 30 Dec 2019 20:27:48 GMT
+      - Mon, 20 Dec 2021 21:18:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection
+      User-Agent:
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender/listKeys?api-version=2017-04-01
+  response:
+    body:
+      string: '{"primaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=;EntityPath=hcname000005","secondaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=Qm/Ba2Hb/q2bQk1k75YzMVg5kpDZ/a7xeQRrd9L2vXc=;EntityPath=hcname000005","primaryKey":"3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=","secondaryKey":"Qm/Ba2Hb/q2bQk1k75YzMVg5kpDZ/a7xeQRrd9L2vXc=","keyName":"defaultSender"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 21:18:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"serviceBusNamespace": "hcnamespace000004", "relayName":
+      "hcname000005", "relayArmUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005",
+      "hostname": "vmsq1", "port": 80, "sendKeyName": "defaultSender", "sendKeyValue":
+      "3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=", "serviceBusSuffix": ".servicebus.windows.net"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '453'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"Japan
+        West","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '703'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:18:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionRelays?api-version=2020-09-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"Japan
+        West","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}],"nextLink":null,"id":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '741'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:18:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp deployment slot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-20T21:18:21.3533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"hcwebapp000002","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"hcwebapp000002\\$hcwebapp000002","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5815'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:18:23 GMT
+      etag:
+      - '"1D7F5E71D98F695"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp deployment slot create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/config/web?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/config/web","name":"hcwebapp000002","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$hcwebapp000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","scmMinTlsVersion":"1.0","ftpsState":"AllAllowed","preWarmedInstanceCount":0,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3728'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:18:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Japan West", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003",
+      "reserved": false, "isXenon": false, "hyperV": false, "siteConfig": {"netFrameworkVersion":
+      "v4.6", "localMySqlEnabled": false, "http20Enabled": true}, "scmSiteAlsoStopped":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp deployment slot create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '375'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage","name":"hcwebapp000002/hcwebapp000002-stage","type":"Microsoft.Web/sites/slots","kind":"app","location":"Japan
+        West","properties":{"name":"hcwebapp000002(hcwebapp000002-stage)","state":"Running","hostNames":["hcwebapp000002-hcwebapp000002-stage.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-20T21:18:36.7133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":false,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"hcwebapp000002__af29","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"hcwebapp000002__hcwebapp000002-stage\\$hcwebapp000002__hcwebapp000002-stage","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":null,"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6269'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:18:55 GMT
+      etag:
+      - '"1D7F5E71D98F695"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/namespaces?api-version=2017-04-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Standard","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004","name":"hcnamespace000004","type":"Microsoft.Relay/Namespaces","location":"Japan
+        West","tags":{},"properties":{"provisioningState":"Succeeded","metricId":"2edc29f4-b81f-494b-a624-cc619903b837:hcnamespace000004","createdAt":"2021-12-20T21:17:05.563Z","updatedAt":"2021-12-20T21:17:49.817Z","serviceBusEndpoint":"https://hcnamespace000004.servicebus.windows.net:443/","status":"Active"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '588'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 21:18:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-inline-count:
+      - ''
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005?api-version=2017-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","name":"hcname000005","type":"Microsoft.Relay/Namespaces/HybridConnections","location":"Japan
+        West","properties":{"createdAt":"2021-12-20T21:18:11.5317772Z","updatedAt":"2021-12-20T21:18:16.5689817Z","listenerCount":0,"requiresClientAuthorization":true,"userMetadata":"[{\"key\":\"endpoint\",\"value\":\"vmsq1:80\"}]"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '497'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 21:18:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules?api-version=2017-04-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender","name":"defaultSender","type":"Microsoft.Relay/Namespaces/HybridConnections/AuthorizationRules","location":"Japan
+        West","properties":{"rights":["Send"]}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '376'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 21:18:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit) msrest/0.6.21 msrest_azure/0.6.4
+        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.31.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender/listKeys?api-version=2017-04-01
+  response:
+    body:
+      string: '{"primaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=;EntityPath=hcname000005","secondaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=Qm/Ba2Hb/q2bQk1k75YzMVg5kpDZ/a7xeQRrd9L2vXc=;EntityPath=hcname000005","primaryKey":"3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=","secondaryKey":"Qm/Ba2Hb/q2bQk1k75YzMVg5kpDZ/a7xeQRrd9L2vXc=","keyName":"defaultSender"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '557'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 20 Dec 2021 21:19:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1141,68 +1399,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp hybrid-connection add
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --namespace --hybrid-connection
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-relay/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005/authorizationRules/defaultSender/listKeys?api-version=2017-04-01
-  response:
-    body:
-      string: '{"primaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=gjg3TCrxe52OpFzTyCZ7bxm99nCYc8P86nt3fLYqdvY=;EntityPath=hcname000005","secondaryConnectionString":"Endpoint=sb://hcnamespace000004.servicebus.windows.net/;SharedAccessKeyName=defaultSender;SharedAccessKey=zL9MjD3KnTjd5+AxxOgqvC49Kxf79F83rC69afOyJnI=;EntityPath=hcname000005","primaryKey":"gjg3TCrxe52OpFzTyCZ7bxm99nCYc8P86nt3fLYqdvY=","secondaryKey":"zL9MjD3KnTjd5+AxxOgqvC49Kxf79F83rC69afOyJnI=","keyName":"defaultSender"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '595'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 30 Dec 2019 20:27:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Service-Bus-Resource-Provider/SN1
-      - Microsoft-HTTPAPI/2.0
-      server-sb:
-      - Service-Bus-Resource-Provider/SN1
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"properties": {"serviceBusNamespace": "hcnamespace000004", "relayName":
+    body: '{"properties": {"serviceBusNamespace": "hcnamespace000004", "relayName":
       "hcname000005", "relayArmUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005",
       "hostname": "vmsq1", "port": 80, "sendKeyName": "defaultSender", "sendKeyValue":
-      "gjg3TCrxe52OpFzTyCZ7bxm99nCYc8P86nt3fLYqdvY=", "serviceBusSuffix": ".servicebus.windows.net"}}'''
+      "3RunpdFwYyP8xaWwIdBS+8eAmNh/MKce1Q0/2EQ33lE=", "serviceBusSuffix": ".servicebus.windows.net"}}'
     headers:
       Accept:
       - application/json
@@ -1213,31 +1413,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '550'
+      - '453'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n --namespace --hybrid-connection
+      - -g -n --namespace --hybrid-connection --slot
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"West
-        US","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"Japan
+        West","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '897'
+      - '730'
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:27:51 GMT
+      - Mon, 20 Dec 2021 21:19:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1255,7 +1452,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1273,153 +1470,24 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --slot
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionRelays?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-30T20:27:51.773","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"hcwebapp000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"28A59EA35AAF0BFA8BB4BF89217863EB90C8973A76E9C07EDBB20354E6919900","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null}}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"Japan
+        West","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}],"nextLink":null,"id":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3521'
+      - '768'
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:27:51 GMT
-      etag:
-      - '"1D5BF4F9BFDF0D0"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{}'
-    headers:
-      Accept:
-      - application/xml
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp hybrid-connection list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '2'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2018-11-01
-  response:
-    body:
-      string: <publishData><publishProfile profileName="hcwebapp000002 - Web Deploy"
-        publishMethod="MSDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
-        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile></publishData>
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1730'
-      content-type:
-      - application/xml
-      date:
-      - Mon, 30 Dec 2019 20:27:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - webapp hybrid-connection list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionRelays?api-version=2018-11-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005","name":"hcname000005","type":"Microsoft.Web/sites/hybridConnectionNamespaces/relays","location":"West
-        US","properties":{"serviceBusNamespace":"hcnamespace000004","relayName":"hcname000005","relayArmUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Relay/namespaces/hcnamespace000004/hybridConnections/hcname000005","hostname":"vmsq1","port":80,"sendKeyName":"defaultSender","sendKeyValue":"","serviceBusSuffix":".servicebus.windows.net"}}],"nextLink":null,"id":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '935'
-      content-type:
-      - application/json
-      date:
-      - Mon, 30 Dec 2019 20:27:52 GMT
+      - Mon, 20 Dec 2021 21:19:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1455,27 +1523,24 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-30T20:27:51.773","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"hcwebapp000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"28A59EA35AAF0BFA8BB4BF89217863EB90C8973A76E9C07EDBB20354E6919900","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"Japan
+        West","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-20T21:18:21.3533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"hcwebapp000002","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"hcwebapp000002\\$hcwebapp000002","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3521'
+      - '5815'
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:27:53 GMT
+      - Mon, 20 Dec 2021 21:19:05 GMT
       etag:
-      - '"1D5BF4F9BFDF0D0"'
+      - '"1D7F5E71D98F695"'
       expires:
       - '-1'
       pragma:
@@ -1498,7 +1563,60 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/config/web?api-version=2021-01-15
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/config/web","name":"hcwebapp000002","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$hcwebapp000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":true,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":true,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","scmMinTlsVersion":"1.0","ftpsState":"AllAllowed","preWarmedInstanceCount":0,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3728'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:19:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
     headers:
       Accept:
       - application/xml
@@ -1509,33 +1627,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2'
+      - '23'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2020-09-01
   response:
     body:
       string: <publishData><publishProfile profileName="hcwebapp000002 - Web Deploy"
         publishMethod="MSDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
-        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
+        userName="$hcwebapp000002" userPWD="qmlnNyCYERlGorTH9JCJcPBbnyCXkkcdxfymPZaJ5dpppvtd6tBXQgha62gx"
         destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>
@@ -1543,11 +1658,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1730'
+      - '1537'
       content-type:
       - application/xml
       date:
-      - Mon, 30 Dec 2019 20:27:53 GMT
+      - Mon, 20 Dec 2021 21:19:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1561,7 +1676,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11998'
       x-powered-by:
       - ASP.NET
     status:
@@ -1583,12 +1698,9 @@ interactions:
       ParameterSetName:
       - -g -n --namespace --hybrid-connection
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2020-09-01
   response:
     body:
       string: ''
@@ -1598,7 +1710,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 30 Dec 2019 20:27:54 GMT
+      - Mon, 20 Dec 2021 21:19:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1632,27 +1744,21 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionRelays?api-version=2020-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002","name":"hcwebapp000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"hcwebapp000002","state":"Running","hostNames":["hcwebapp000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-051.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002.azurewebsites.net","hcwebapp000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2019-12-30T20:27:54.417","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"hcwebapp000002","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"28A59EA35AAF0BFA8BB4BF89217863EB90C8973A76E9C07EDBB20354E6919900","kind":"app","inboundIpAddress":"40.78.18.232","possibleInboundIpAddresses":"40.78.18.232","outboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","possibleOutboundIpAddresses":"40.78.17.157,40.78.21.191,40.78.22.38,40.78.21.180","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-051","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null}}'
+      string: '{"value":[],"nextLink":null,"id":null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3521'
+      - '38'
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:27:54 GMT
-      etag:
-      - '"1D5BF4F9D916210"'
+      - Mon, 20 Dec 2021 21:19:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1675,56 +1781,162 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage?api-version=2020-09-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage","name":"hcwebapp000002/hcwebapp000002-stage","type":"Microsoft.Web/sites/slots","kind":"app","location":"Japan
+        West","properties":{"name":"hcwebapp000002(hcwebapp000002-stage)","state":"Running","hostNames":["hcwebapp000002-hcwebapp000002-stage.azurewebsites.net"],"webSpace":"clitest.rg000001-JapanWestwebspace","selfLink":"https://waws-prod-os1-027.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-JapanWestwebspace/sites/hcwebapp000002","repositorySiteName":"hcwebapp000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""},{"name":"WindowsFxVersion","value":null}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/hcplan000003","reserved":false,"isXenon":false,"hyperV":false,"lastModifiedTimeUtc":"2021-12-20T21:19:03.06","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":{"numberOfWorkers":1,"defaultDocuments":null,"netFrameworkVersion":null,"phpVersion":null,"pythonVersion":null,"nodeVersion":null,"powerShellVersion":null,"linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":null,"remoteDebuggingEnabled":null,"remoteDebuggingVersion":null,"httpLoggingEnabled":null,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":null,"detailedErrorLoggingEnabled":null,"publishingUsername":null,"publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":null,"use32BitWorkerProcess":null,"webSocketsEnabled":null,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":null,"managedPipelineMode":null,"virtualApplications":null,"winAuthAdminState":null,"winAuthTenantState":null,"customAppPoolIdentityAdminState":null,"customAppPoolIdentityTenantState":null,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":null,"routingRules":null,"experiments":null,"limits":null,"autoHealEnabled":null,"autoHealRules":null,"tracingOptions":null,"vnetName":null,"vnetRouteAllEnabled":null,"vnetPrivatePortsCount":null,"publicNetworkAccess":null,"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":null,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":null,"scmIpSecurityRestrictions":null,"scmIpSecurityRestrictionsUseMain":null,"http20Enabled":true,"minTlsVersion":null,"scmMinTlsVersion":null,"ftpsState":null,"preWarmedInstanceCount":null,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":null,"functionsRuntimeScaleMonitoringEnabled":null,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":null,"http20ProxyFlag":null,"sitePort":null,"antivirusScanEnabled":null},"deploymentId":"hcwebapp000002__af29","slotName":null,"trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"clientCertMode":"Required","clientCertExclusionPaths":null,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"customDomainVerificationId":"333646C25EDA7C903C86F0F0D0193C412978B2E48FA0B4F1461D339FBBAE3EB7","kind":"app","inboundIpAddress":"40.74.100.137","possibleInboundIpAddresses":"40.74.100.137","ftpUsername":"hcwebapp000002__hcwebapp000002-stage\\$hcwebapp000002__hcwebapp000002-stage","ftpsHostName":"ftps://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot","outboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.100.137","possibleOutboundIpAddresses":"40.74.90.160,40.74.94.222,40.74.113.39,40.74.95.132,40.74.113.204,40.74.75.201,40.74.112.41,40.74.113.1,40.74.65.7,40.74.76.184,40.74.79.7,40.74.67.13,40.74.81.157,40.74.86.212,40.74.86.30,40.74.81.231,40.74.80.113,40.74.80.110,40.74.100.137","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-os1-027","cloningInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"hcwebapp000002-hcwebapp000002-stage.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false,"redundancyMode":"None","inProgressOperationId":null,"geoDistributions":null,"privateEndpointConnections":[],"buildVersion":null,"targetBuildVersion":null,"migrationState":null,"eligibleLogCategories":"AppServiceAppLogs,AppServiceAuditLogs,AppServiceConsoleLogs,AppServiceHTTPLogs,AppServiceIPSecAuditLogs,AppServicePlatformLogs,ScanLogs","storageAccountRequired":false,"virtualNetworkSubnetId":null,"keyVaultReferenceIdentity":"SystemAssigned"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6063'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:19:12 GMT
+      etag:
+      - '"1D7F5E73674E540"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/config/web?api-version=2021-01-15
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/config/web","name":"hcwebapp000002","type":"Microsoft.Web/sites/config","location":"Japan
+        West","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","powerShellVersion":"","linuxFxVersion":"","windowsFxVersion":null,"requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"azureMonitorLogCategories":null,"acrUseManagedIdentityCreds":false,"acrUserManagedIdentityID":null,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$hcwebapp000002__hcwebapp000002-stage","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","vnetRouteAllEnabled":false,"vnetPrivatePortsCount":0,"publicNetworkAccess":null,"siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"clientSecretSettingName":null,"clientSecretCertificateThumbprint":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"aadClaimsAuthorization":null,"googleClientId":null,"googleClientSecret":null,"googleClientSecretSettingName":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookAppSecretSettingName":null,"facebookOAuthScopes":null,"gitHubClientId":null,"gitHubClientSecret":null,"gitHubClientSecretSettingName":null,"gitHubOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"twitterConsumerSecretSettingName":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountClientSecretSettingName":null,"microsoftAccountOAuthScopes":null,"configVersion":null},"cors":null,"push":null,"apiDefinition":null,"apiManagementConfig":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"xManagedServiceIdentityId":null,"keyVaultReferenceIdentity":null,"ipSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictions":[{"ipAddress":"Any","action":"Allow","priority":1,"name":"Allow
+        all","description":"Allow all access"}],"scmIpSecurityRestrictionsUseMain":false,"http20Enabled":true,"minTlsVersion":"1.2","scmMinTlsVersion":"1.0","ftpsState":"AllAllowed","preWarmedInstanceCount":0,"functionAppScaleLimit":0,"healthCheckPath":null,"fileChangeAuditEnabled":false,"functionsRuntimeScaleMonitoringEnabled":false,"websiteTimeZone":null,"minimumElasticInstanceCount":0,"azureStorageAccounts":{},"http20ProxyFlag":0,"sitePort":null,"antivirusScanEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3779'
+      content-type:
+      - application/json
+      date:
+      - Mon, 20 Dec 2021 21:19:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"format": "WebDeploy"}'
     headers:
       Accept:
       - application/xml
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - webapp hybrid-connection list
+      - webapp hybrid-connection remove
       Connection:
       - keep-alive
       Content-Length:
-      - '2'
+      - '23'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
-      - -g -n
+      - -g -n --namespace --hybrid-connection --slot
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/publishxml?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/publishxml?api-version=2020-09-01
   response:
     body:
-      string: <publishData><publishProfile profileName="hcwebapp000002 - Web Deploy"
-        publishMethod="MSDeploy" publishUrl="hcwebapp000002.scm.azurewebsites.net:443"
-        msdeploySite="hcwebapp000002" userName="$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="hcwebapp000002
-        - ReadOnly - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-051dr.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="hcwebapp000002\$hcwebapp000002" userPWD="Cs7HrshmZokxzb0nxAfhpdlCq3nX30T6Gt9DJh9whKlcpcYpaaFXXFg9rTWm"
-        destinationAppUrl="http://hcwebapp000002.azurewebsites.net" SQLServerDBConnectionString=""
-        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile></publishData>
+      string: <publishData><publishProfile profileName="hcwebapp000002-hcwebapp000002-stage
+        - Web Deploy" publishMethod="MSDeploy" publishUrl="hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net:443"
+        msdeploySite="hcwebapp000002__hcwebapp000002-stage" userName="$hcwebapp000002__hcwebapp000002-stage"
+        userPWD="bl2dcmufmM7EcK4yXxNhuntBFbmQQ4FFbJrMsALq8l1lCgEqebPn4Sg4osXg" destinationAppUrl="http://hcwebapp000002-hcwebapp000002-stage.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="hcwebapp000002-hcwebapp000002-stage
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-os1-027.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="hcwebapp000002__hcwebapp000002-stage\$hcwebapp000002__hcwebapp000002-stage"
+        userPWD="bl2dcmufmM7EcK4yXxNhuntBFbmQQ4FFbJrMsALq8l1lCgEqebPn4Sg4osXg" destinationAppUrl="http://hcwebapp000002-hcwebapp000002-stage.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile><publishProfile profileName="hcwebapp000002-hcwebapp000002-stage
+        - Zip Deploy" publishMethod="ZipDeploy" publishUrl="hcwebapp000002-hcwebapp000002-stage.scm.azurewebsites.net:443"
+        userName="$hcwebapp000002__hcwebapp000002-stage" userPWD="bl2dcmufmM7EcK4yXxNhuntBFbmQQ4FFbJrMsALq8l1lCgEqebPn4Sg4osXg"
+        destinationAppUrl="http://hcwebapp000002-hcwebapp000002-stage.azurewebsites.net"
+        SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
+        controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
+        /></publishProfile></publishData>
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1730'
+      - '1815'
       content-type:
       - application/xml
       date:
-      - Mon, 30 Dec 2019 20:27:54 GMT
+      - Mon, 20 Dec 2021 21:19:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1737,8 +1949,56 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - webapp hybrid-connection remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --namespace --hybrid-connection --slot
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionNamespaces/hcnamespace000004/relays/hcname000005?api-version=2020-09-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Mon, 20 Dec 2021 21:19:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
       x-powered-by:
       - ASP.NET
     status:
@@ -1756,14 +2016,11 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --slot
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-web/0.42.0 Azure-SDK-For-Python AZURECLI/2.0.78
-      accept-language:
-      - en-US
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-web/4.0.0 Python/3.8.6 (macOS-10.15.7-x86_64-i386-64bit)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/hybridConnectionRelays?api-version=2018-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/hcwebapp000002/slots/hcwebapp000002-stage/hybridConnectionRelays?api-version=2020-09-01
   response:
     body:
       string: '{"value":[],"nextLink":null,"id":null}'
@@ -1775,7 +2032,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 30 Dec 2019 20:27:55 GMT
+      - Mon, 20 Dec 2021 21:19:17 GMT
       expires:
       - '-1'
       pragma:

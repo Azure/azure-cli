@@ -9,15 +9,22 @@
 import json
 import unittest
 import jmespath
+from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError)
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, StorageAccountPreparer)
 from knack.cli import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
+LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
+LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
+
 
 class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_show(self, resource_group, location):
         self.kwargs.update({
@@ -40,7 +47,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_set_simple(self, resource_group, location):
         self.kwargs.update({
@@ -56,7 +63,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', True)
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_set_complex(self, resource_group, location):
         self.kwargs.update({
@@ -76,7 +83,8 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(random_name_length=17, parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    # random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({
@@ -96,7 +104,35 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
+        self.kwargs.update({
+            'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
+            'loc': location
+        })
+
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+            JMESPathCheck('state', 'Running')
+        ])
+
+        self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name ipv4 --action Allow --ip-address 130.220.0.0 --priority 200', checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'ipv4'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[0].ipAddress', '130.220.0.0/32'),
+            JMESPathCheck('[1].name', 'Deny all'),
+            JMESPathCheck('[1].action', 'Deny')
+        ])
+
+        self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name ipv6 --action Allow --ip-address 2004::1000 --priority 200', checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[1].name', 'ipv6'),
+            JMESPathCheck('[1].action', 'Allow'),
+            JMESPathCheck('[1].ipAddress', '2004::1000/128')
+        ])
+
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add_service_endpoint(self, resource_group, location):
         self.kwargs.update({
@@ -114,10 +150,6 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('subnets[0].serviceEndpoints', None)
         ])
 
-        # Subnet name cannot be provided without vNet name - only when subnet refers to full subnet resource id
-        with self.assertRaisesRegexp(CLIError, "Usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
-            self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --subnet endpoint-subnet --priority 150')
-
         self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --vnet-name {vnet_name} --subnet endpoint-subnet --priority 150', checks=[
             JMESPathCheck('length(@)', 2),
             JMESPathCheck('[0].name', 'vnet-integration'),
@@ -126,7 +158,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_remove(self, resource_group, location):
         self.kwargs.update({
@@ -152,7 +184,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_add_scm(self, resource_group, location):
         self.kwargs.update({
@@ -172,7 +204,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_remove_scm(self, resource_group, location):
         self.kwargs.update({
@@ -198,7 +230,8 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @unittest.skip("Function app slot shouldn't use webapp")
+    @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     @StorageAccountPreparer()
     def test_functionapp_access_restriction_slot(self, resource_group, location):
         self.kwargs.update({

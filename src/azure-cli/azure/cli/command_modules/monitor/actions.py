@@ -4,20 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-import antlr4
 
 from azure.cli.command_modules.monitor.util import (
-    get_aggregation_map, get_operator_map, get_autoscale_operator_map,
-    get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
+    get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
-from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 def timezone_name_type(value):
     from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
     zone = next((x['name'] for x in AUTOSCALE_TIMEZONES if x['name'].lower() == value.lower()), None)
     if not zone:
-        raise CLIError(
+        raise InvalidArgumentValueError(
             "Invalid time zone: '{}'. Run 'az monitor autoscale profile list-timezones' for values.".format(value))
     return zone
 
@@ -33,13 +31,13 @@ def timezone_offset_type(value):
     hour = int(hour)
 
     if hour > 14 or hour < -12:
-        raise CLIError('Offset out of range: -12 to +14')
+        raise InvalidArgumentValueError('Offset out of range: -12 to +14')
 
-    if hour >= 0 and hour < 10:
+    if 0 <= hour < 10:
         value = '+0{}'.format(hour)
     elif hour >= 10:
         value = '+{}'.format(hour)
-    elif hour < 0 and hour > -10:
+    elif -10 < hour < 0:
         value = '-0{}'.format(-1 * hour)
     else:
         value = str(hour)
@@ -63,7 +61,7 @@ def get_period_type(as_timedelta=False):
         match = re.match(regex, value.lower())
         match_len = match.span(0)
         if match_len != tuple([0, len(value)]):
-            raise ValueError
+            raise ValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
         # simply return value if a valid ISO8601 string is supplied
         if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
             return value
@@ -92,12 +90,20 @@ def get_period_type(as_timedelta=False):
 class MetricAlertConditionAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.cli.command_modules.monitor.grammar import (
-            MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
 
-        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
+        from azure.cli.command_modules.monitor.grammar.metric_alert import (
+            MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
+        from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
+
+        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
+                '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
+                '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
-                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n' \
+                '                         [with skipmetricvalidation]'
 
         string_val = ' '.join(values)
 
@@ -111,11 +117,20 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
-            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator']:
-                if not getattr(metric_condition, item, None):
-                    raise CLIError(usage)
+            if isinstance(metric_condition, MetricCriteria):
+                # static metric criteria
+                for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
+                    if not getattr(metric_condition, item, None):
+                        raise InvalidArgumentValueError(usage)
+            elif isinstance(metric_condition, DynamicMetricCriteria):
+                # dynamic metric criteria
+                for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity', 'failing_periods']:
+                    if not getattr(metric_condition, item, None):
+                        raise InvalidArgumentValueError(usage)
+            else:
+                raise NotImplementedError()
         except (AttributeError, TypeError, KeyError):
-            raise CLIError(usage)
+            raise InvalidArgumentValueError(usage)
         super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
 
 
@@ -123,10 +138,19 @@ class MetricAlertConditionAction(argparse._AppendAction):
 class MetricAlertAddAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
+        action_group_id = values[0]
+        try:
+            webhook_property_candidates = dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+        except ValueError:
+            err_msg = "value of {} is invalid. Please refer to --help to get insight of correct format".format(
+                option_string
+            )
+            raise InvalidArgumentValueError(err_msg)
+
         from azure.mgmt.monitor.models import MetricAlertAction
         action = MetricAlertAction(
-            action_group_id=values[0],
-            webhook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+            action_group_id=action_group_id,
+            web_hook_properties=webhook_property_candidates
         )
         action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
                            'DataContracts.Resources.ScheduledQueryRules.Action'
@@ -145,7 +169,8 @@ class ConditionAction(argparse.Action):
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) < 5:
-            raise CLIError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
+            raise InvalidArgumentValueError(
+                '--condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
         operator = get_operator_map()[values[-4]]
         threshold = int(values[-3])
@@ -175,9 +200,9 @@ class AlertAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
             return RuleWebhookAction(service_uri=uri, properties=properties)
-        raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+        raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AlertRemoveAction(argparse._AppendAction):
@@ -190,7 +215,7 @@ class AlertRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('{} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
@@ -211,9 +236,9 @@ class AutoscaleAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
             return WebhookNotification(service_uri=uri, properties=properties)
-        raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+        raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AutoscaleRemoveAction(argparse._AppendAction):
@@ -226,38 +251,43 @@ class AutoscaleRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('{} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
 class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-access
     def __call__(self, parser, namespace, values, option_string=None):
-        from azure.mgmt.monitor.models import MetricTrigger
-        if len(values) == 1:
-            # workaround because CMD.exe eats > character... Allows condition to be
-            # specified as a quoted expression
-            values = values[0].split(' ')
-        name_offset = 0
+        # antlr4 is not available everywhere, restrict the import scope so that commands
+        # that do not need it don't fail when it is absent
+        import antlr4
+
+        from azure.cli.command_modules.monitor.grammar.autoscale import (
+            AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
+
+        # pylint: disable=line-too-long
+        usage = '--condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
+                '            [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
+                '            [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
+
+        string_val = ' '.join(values)
+
+        lexer = AutoscaleConditionLexer(antlr4.InputStream(string_val))
+        stream = antlr4.CommonTokenStream(lexer)
+        parser = AutoscaleConditionParser(stream)
+        tree = parser.expression()
+
         try:
-            metric_name = ' '.join(values[name_offset:-4])
-            operator = get_autoscale_operator_map()[values[-4]]
-            threshold = int(values[-3])
-            aggregation = get_autoscale_aggregation_map()[values[-2].lower()]
-            window = get_period_type()(values[-1])
-        except (IndexError, KeyError):
-            raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '
-                           'THRESHOLD {avg,min,max,total,count} PERIOD')
-        condition = MetricTrigger(
-            metric_name=metric_name,
-            metric_resource_uri=None,  # will be filled in later
-            time_grain=None,  # will be filled in later
-            statistic=None,  # will be filled in later
-            time_window=window,
-            time_aggregation=aggregation,
-            operator=operator,
-            threshold=threshold
-        )
-        namespace.condition = condition
+            validator = AutoscaleConditionValidator()
+            walker = antlr4.ParseTreeWalker()
+            walker.walk(validator, tree)
+            autoscale_condition = validator.result()
+            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator', 'time_window']:
+                if not getattr(autoscale_condition, item, None):
+                    raise InvalidArgumentValueError(usage)
+        except (AttributeError, TypeError, KeyError):
+            raise InvalidArgumentValueError(usage)
+
+        namespace.condition = autoscale_condition
 
 
 class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
@@ -268,7 +298,7 @@ class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) != 2:
-            raise CLIError('usage error: --scale {in,out,to} VALUE[%]')
+            raise InvalidArgumentValueError('--scale {in,out,to} VALUE[%]')
         dir_val = values[0]
         amt_val = values[1]
         scale_type = None
@@ -300,13 +330,13 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
                                                                 self.deserialize_object(type_name, type_properties),
                                                                 option_string)
         except KeyError:
-            raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+            raise InvalidArgumentValueError('the type "{}" is not recognizable.'.format(type_name))
         except TypeError:
-            raise ValueError(
-                'usage error: Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
+            raise InvalidArgumentValueError(
+                'Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
         except ValueError as ex:
-            raise ValueError(
-                'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
+            raise InvalidArgumentValueError(
+                'Failed to parse "{}" as object of type "{}". {}'.format(
                     ' '.join(values), type_name, str(ex)))
 
     def deserialize_object(self, type_name, type_properties):
@@ -317,7 +347,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
             ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
         syntax = {
             'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
             'sms': 'NAME COUNTRY_CODE PHONE_NUMBER',
@@ -330,7 +360,8 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
             'voice': 'NAME COUNTRY_CODE PHONE_NUMBER',
             'logicapp': 'NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]',
             'azurefunction': 'NAME FUNCTION_APP_RESOURCE_ID '
-                             'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]'
+                             'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]',
+            'eventhub': 'NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema] '
         }
 
         receiver = None
@@ -385,9 +416,13 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                                                  function_name=type_properties[2],
                                                  http_trigger_url=type_properties[3],
                                                  use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'eventhub':
+                receiver = EventHubReceiver(name=type_properties[0], subscription_id=type_properties[1],
+                                            event_hub_name_space=type_properties[2], event_hub_name=type_properties[3],
+                                            use_common_alert_schema=useCommonAlertSchema)
             else:
-                raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+                raise InvalidArgumentValueError('The type "{}" is not recognizable.'.format(type_name))
 
         except IndexError:
-            raise CLIError('usage error: --action {}'.format(syntax[type_name]))
+            raise InvalidArgumentValueError('--action {}'.format(syntax[type_name]))
         return receiver

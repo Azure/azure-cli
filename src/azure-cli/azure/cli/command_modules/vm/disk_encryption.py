@@ -44,7 +44,7 @@ def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
     else:
         exts = vm.resources or []
         r = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                      e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+                                      e.type_properties_type.lower() == ade_ext_info['name'].lower())), None)
     return r
 
 
@@ -150,13 +150,13 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     ext = VirtualMachineExtension(
         location=vm.location,  # pylint: disable=no-member
         publisher=extension['publisher'],
-        virtual_machine_extension_type=extension['name'],
+        type_properties_type=extension['name'],
         protected_settings=None if use_new_ade else ade_legacy_private_config,
         type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
         settings=public_config,
         auto_upgrade_minor_version=True)
 
-    poller = compute_client.virtual_machine_extensions.create_or_update(
+    poller = compute_client.virtual_machine_extensions.begin_create_or_update(
         resource_group_name, vm_name, extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
@@ -253,9 +253,9 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         settings=public_config,
         auto_upgrade_minor_version=True)
 
-    poller = compute_client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                        vm_name,
-                                                                        extension['name'], ext)
+    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
+                                                                              vm_name,
+                                                                              extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name, vm_name,
@@ -317,7 +317,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
                                                                      extension['name'],
                                                                      'instanceView')
     logger.debug(extension_result)
-    if extension_result.instance_view.statuses:
+    if extension_result.instance_view and extension_result.instance_view.statuses:
         encryption_status['progressMessage'] = extension_result.instance_view.statuses[0].message
 
     substatus_message = None
@@ -432,7 +432,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type=extension['name'],
+                                          type_properties_type=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
@@ -446,7 +446,10 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                     if old_ext.type != ext.type or old_ext.name != ext.name)
     vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=exts)
 
-    poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
+
+    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)
 
@@ -469,7 +472,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type=extension['name'],
+                                          type_properties_type=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
@@ -481,14 +484,18 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
         extensions = vmss.virtual_machine_profile.extension_profile.extensions
 
     ade_extension = [x for x in extensions if
-                     x.type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
+                     x.type_properties_type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
     if not ade_extension:
         from knack.util import CLIError
         raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
 
     index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
     vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
-    poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
+
+    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)
 
@@ -546,7 +553,7 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 
     # ensure vault has 'EnabledForDiskEncryption' permission
-    if not key_vault.properties.enabled_for_disk_encryption:
+    if not key_vault.properties or not key_vault.properties.enabled_for_disk_encryption:
         _report_client_side_validation_error("Keyvault '{}' is not enabled for disk encryption.".format(
             disk_vault_resource_info['resource_name']))
 

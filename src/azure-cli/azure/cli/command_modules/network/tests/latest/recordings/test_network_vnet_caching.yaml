@@ -13,15 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --address-prefix --defer
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-resource/19.0.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_vnet_cache_test000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_vnet_cache_test000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001","name":"cli_vnet_cache_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-24T07:28:07Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001","name":"cli_vnet_cache_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-11-03T05:31:27Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:11 GMT
+      - Wed, 03 Nov 2021 05:31:32 GMT
       expires:
       - '-1'
       pragma:
@@ -58,25 +55,23 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/virtualNetworks/vnet1''
-        under resource group ''cli_vnet_cache_test000001'' was not found."}}'
+        under resource group ''cli_vnet_cache_test000001'' was not found. For more
+        details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '218'
+      - '286'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:13 GMT
+      - Wed, 03 Nov 2021 05:31:38 GMT
       expires:
       - '-1'
       pragma:
@@ -92,10 +87,13 @@ interactions:
       message: Not Found
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
-      "10.0.0.0/24"}, "name": "subnet1"}, {"properties": {"addressPrefix": "10.0.1.0/24"},
-      "name": "subnet2"}, {"properties": {"addressPrefix": "10.0.2.0/24"}, "name":
-      "subnet3"}]}}'
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties":
+      {"addressPrefix": "10.0.0.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      "privateLinkServiceNetworkPolicies": "Enabled"}}, {"name": "subnet2", "properties":
+      {"addressPrefix": "10.0.1.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      "privateLinkServiceNetworkPolicies": "Enabled"}}, {"name": "subnet3", "properties":
+      {"addressPrefix": "10.0.2.0/24", "privateEndpointNetworkPolicies": "Enabled",
+      "privateLinkServiceNetworkPolicies": "Enabled"}}]}}'
     headers:
       Accept:
       - application/json
@@ -106,59 +104,58 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '343'
+      - '622'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vnet-name -n --address-prefix
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"2d28cdde-bb02-4cbc-ae3c-0b98f1edcb16\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"4e2e325b-966b-46d7-9b2d-f97d81ba1439\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"2d28cdde-bb02-4cbc-ae3c-0b98f1edcb16\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4e2e325b-966b-46d7-9b2d-f97d81ba1439\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"2d28cdde-bb02-4cbc-ae3c-0b98f1edcb16\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4e2e325b-966b-46d7-9b2d-f97d81ba1439\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"2d28cdde-bb02-4cbc-ae3c-0b98f1edcb16\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4e2e325b-966b-46d7-9b2d-f97d81ba1439\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fcf8d98d-14ec-43f1-80fd-3da21325ef26?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/16f79ded-0554-4a4a-8345-e429d4fe4ad3?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '2769'
+      - '2735'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:17 GMT
+      - Wed, 03 Nov 2021 05:31:45 GMT
       expires:
       - '-1'
       pragma:
@@ -171,9 +168,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 25bc4d2a-1abd-46e9-b359-0ab6f69ec218
+      - b9c414ff-0b18-4ec8-b4ae-8cb5dd7dd327
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1174'
+      - '1194'
     status:
       code: 201
       message: Created
@@ -181,7 +178,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -191,10 +188,9 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fcf8d98d-14ec-43f1-80fd-3da21325ef26?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/16f79ded-0554-4a4a-8345-e429d4fe4ad3?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -206,7 +202,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:21 GMT
+      - Wed, 03 Nov 2021 05:31:49 GMT
       expires:
       - '-1'
       pragma:
@@ -223,7 +219,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b82df699-e89c-445e-a293-6e310aa23bb1
+      - 39d43b34-7f50-4903-bf59-f143f8c7cd7d
     status:
       code: 200
       message: OK
@@ -231,7 +227,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -241,51 +237,50 @@ interactions:
       ParameterSetName:
       - -g --vnet-name -n --address-prefix
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2773'
+      - '2739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:22 GMT
+      - Wed, 03 Nov 2021 05:31:49 GMT
       etag:
-      - W/"8acfe2fa-5911-4db2-8fd1-0702d41123b8"
+      - W/"b25a012e-7ee7-4117-86f3-13cee997d657"
       expires:
       - '-1'
       pragma:
@@ -302,7 +297,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9b7f6fc4-52e4-4384-83b5-3c34b783b3af
+      - 2c0fdeaf-8093-4678-bce4-4ac6053ac393
     status:
       code: 200
       message: OK
@@ -320,53 +315,50 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2773'
+      - '2739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:23 GMT
+      - Wed, 03 Nov 2021 05:31:52 GMT
       etag:
-      - W/"8acfe2fa-5911-4db2-8fd1-0702d41123b8"
+      - W/"b25a012e-7ee7-4117-86f3-13cee997d657"
       expires:
       - '-1'
       pragma:
@@ -383,7 +375,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c0b2a914-474c-40b4-8fb9-2dd015d893d4
+      - df233447-8a78-4c13-91d8-d267bd44d1fd
     status:
       code: 200
       message: OK
@@ -401,53 +393,50 @@ interactions:
       ParameterSetName:
       - -g -n --set --defer
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"8acfe2fa-5911-4db2-8fd1-0702d41123b8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b25a012e-7ee7-4117-86f3-13cee997d657\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2773'
+      - '2739'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:26 GMT
+      - Wed, 03 Nov 2021 05:31:54 GMT
       etag:
-      - W/"8acfe2fa-5911-4db2-8fd1-0702d41123b8"
+      - W/"b25a012e-7ee7-4117-86f3-13cee997d657"
       expires:
       - '-1'
       pragma:
@@ -464,25 +453,25 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cf60fe5b-b8e9-4056-9811-23a5738b9061
+      - b9511dfe-7d3e-4556-96bb-e8f453499e93
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1",
       "location": "westus", "tags": {"a": "1", "b": "2"}, "properties": {"addressSpace":
       {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets":
       [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1",
-      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "subnet1"},
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2",
-      "properties": {"addressPrefix": "10.0.1.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "subnet2"},
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3",
-      "properties": {"addressPrefix": "10.0.2.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "subnet3"}],
-      "virtualNetworkPeerings": [], "enableDdosProtection": false, "enableVmProtection":
-      false}}'''
+      "name": "subnet1", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2",
+      "name": "subnet2", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.1.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}, {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3",
+      "name": "subnet3", "type": "Microsoft.Network/virtualNetworks/subnets", "properties":
+      {"addressPrefix": "10.0.2.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}], "virtualNetworkPeerings":
+      [], "enableDdosProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -493,59 +482,58 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1659'
+      - '1789'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --set
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"a\": \"1\",\r\n    \"b\": \"2\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n
         \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
         \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
         \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
+      azure-asyncnotification:
+      - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/94e898dc-8676-4e12-a14b-c220a928d66c?api-version=2019-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2085bb69-fbdd-4deb-a898-7d6bb635b538?api-version=2021-05-01
       cache-control:
       - no-cache
       content-length:
-      - '2806'
+      - '2772'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:28 GMT
+      - Wed, 03 Nov 2021 05:32:04 GMT
       expires:
       - '-1'
       pragma:
@@ -562,9 +550,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e5c71025-c0f3-4e72-89bd-e99cb10004cc
+      - 61031c0a-ef0f-4c93-b48d-0457288dbbaf
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1173'
+      - '1182'
     status:
       code: 200
       message: OK
@@ -572,7 +560,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -582,10 +570,9 @@ interactions:
       ParameterSetName:
       - -g -n --set
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/94e898dc-8676-4e12-a14b-c220a928d66c?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2085bb69-fbdd-4deb-a898-7d6bb635b538?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -597,7 +584,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:59 GMT
+      - Wed, 03 Nov 2021 05:32:35 GMT
       expires:
       - '-1'
       pragma:
@@ -614,7 +601,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d495048b-37c7-4ce0-9686-ed878e6b3f50
+      - 327e5587-c6f8-45e0-881e-777e5cd4b8a9
     status:
       code: 200
       message: OK
@@ -622,7 +609,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -632,51 +619,50 @@ interactions:
       ParameterSetName:
       - -g -n --set
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"a\": \"1\",\r\n    \"b\": \"2\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n
         \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
         \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
         \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2806'
+      - '2772'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:28:59 GMT
+      - Wed, 03 Nov 2021 05:32:35 GMT
       etag:
-      - W/"473c3add-d957-4e3f-9a63-e479608c1cb4"
+      - W/"8a28baca-4358-4601-87c9-b7b109c27961"
       expires:
       - '-1'
       pragma:
@@ -693,7 +679,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e06617d9-8f81-41e4-81f0-c0c59dfda9a4
+      - 49367067-7e1d-4cdc-8900-1a5554482d70
     status:
       code: 200
       message: OK
@@ -711,53 +697,50 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-network/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
-      accept-language:
-      - en-US
+      - AZURECLI/2.30.0 azsdk-python-azure-mgmt-network/19.2.0 Python/3.8.3 (Windows-10-10.0.18362-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2019-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2021-05-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
-        \ \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {\r\n    \"a\": \"1\",\r\n    \"b\": \"2\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"dfc35690-3dd6-4c76-b274-874b35914d42\",\r\n
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"e2806947-a5f7-4965-8008-4d9ded25e8ff\",\r\n
         \   \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n
         \     ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n
         \   },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet2\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet2\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.1.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"subnet3\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vnet_cache_test000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet3\",\r\n
-        \       \"etag\": \"W/\\\"473c3add-d957-4e3f-9a63-e479608c1cb4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8a28baca-4358-4601-87c9-b7b109c27961\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+        false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2806'
+      - '2772'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 24 Oct 2019 07:29:00 GMT
+      - Wed, 03 Nov 2021 05:32:37 GMT
       etag:
-      - W/"473c3add-d957-4e3f-9a63-e479608c1cb4"
+      - W/"8a28baca-4358-4601-87c9-b7b109c27961"
       expires:
       - '-1'
       pragma:
@@ -774,7 +757,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2dae0935-84b3-44d2-8964-35b1a7749a52
+      - 240acee7-6cf1-4707-8595-a72fbab1a3a7
     status:
       code: 200
       message: OK

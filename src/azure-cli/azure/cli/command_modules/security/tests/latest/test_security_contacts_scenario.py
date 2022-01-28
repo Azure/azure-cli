@@ -4,14 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterSecurityContactsTests(ScenarioTest):
 
     def test_security_contacts(self):
 
-        self.cmd('az security contact create -n default1 --email john@contoso.com')
+        security_contacts = self.cmd('az security contact list').get_output_in_json()
+        previous_contacts_count = len(security_contacts)
+        assert previous_contacts_count >= 0
+
+        self.cmd('az security contact create -n default1 --email john@contoso.com --alert-notifications off --alerts-admins off')
 
         security_contacts = self.cmd('az security contact list').get_output_in_json()
         assert len(security_contacts) >= 0
@@ -20,7 +24,7 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
 
         assert contact["email"] == "john@contoso.com"
 
-        self.cmd('az security contact create -n default1 --email lisa@contoso.com')
+        self.cmd('az security contact create -n default1 --email lisa@contoso.com --alert-notifications off --alerts-admins off')
 
         contact = self.cmd('az security contact show -n default1').get_output_in_json()
 
@@ -29,4 +33,4 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
         self.cmd('az security contact delete -n default1')
 
         security_contacts = self.cmd('az security contact list').get_output_in_json()
-        assert len(security_contacts) == 0
+        assert len(security_contacts) == previous_contacts_count

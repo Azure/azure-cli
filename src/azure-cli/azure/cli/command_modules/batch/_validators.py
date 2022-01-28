@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+import azure.batch.models
 from azure.cli.core.util import get_file_json
+from urllib.parse import urlsplit
 
 
 # TYPES VALIDATORS
@@ -21,6 +21,24 @@ def datetime_format(value):
         message = "Argument {} is not a valid ISO-8601 datetime format"
         raise ValueError(message.format(value))
     return datetime_obj
+
+
+def disk_encryption_target_format(value):
+    """Space seperated target disks to be encrypted. Values can either be OsDisk or TemporaryDisk"""
+    if value == 'OsDisk':
+        return azure.batch.models.DiskEncryptionTarget.os_disk
+    if value == 'TemporaryDisk':
+        return azure.batch.models.DiskEncryptionTarget.temporary_disk
+    message = 'Argument {} is not a valid disk_encryption_target'
+    raise ValueError(message.format(value))
+
+
+def disk_encryption_configuration_format(value):
+    targets = value.split(' ')
+    parsed_targets = []
+    for target in targets:
+        parsed_targets.append(disk_encryption_target_format(target))
+    return targets
 
 
 def duration_format(value):
@@ -251,6 +269,9 @@ def validate_pool_settings(namespace, parser):
 
                 namespace.virtual_machine_image_id = namespace.image
             del namespace.image
+            if namespace.disk_encryption_targets:
+                namespace.targets = namespace.disk_encryption_targets
+                del namespace.disk_encryption_targets
         groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
         parser.parse_mutually_exclusive(namespace, True, groups)
 

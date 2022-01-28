@@ -1,0 +1,906 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -c -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_host_management_000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001","name":"cli_test_vm_host_management_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-16T06:06:22Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '346'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:06:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"platformFaultDomainCount": 3}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -c -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host-group\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/my-host-group\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"platformFaultDomainCount\": 3,\r\n    \"supportAutomaticPlacement\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:06:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;119,Microsoft.Compute/PutDeleteDedicatedHost30Min;599
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"my-host-group\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/my-host-group\",\r\n
+        \     \"type\": \"Microsoft.Compute/hostGroups\",\r\n      \"location\": \"westus\",\r\n
+        \     \"properties\": {\r\n        \"platformFaultDomainCount\": 3,\r\n        \"supportAutomaticPlacement\":
+        false\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '473'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:06:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;249
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_host_management_000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001","name":"cli_test_vm_host_management_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-16T06:06:22Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '346'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:06:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "DSv3-Type1"}, "properties": {"platformFaultDomain":
+      2}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '95'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --host-group -d -g --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n  \"location\": \"westus\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": true,\r\n
+        \   \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n    \"provisioningState\":
+        \"Creating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/ace1228a-0850-4445-9f84-18d70f06a849?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:06:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;118,Microsoft.Compute/PutDeleteDedicatedHost30Min;598
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/ace1228a-0850-4445-9f84-18d70f06a849?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-12-16T06:06:35.2276146+00:00\",\r\n  \"endTime\":
+        \"2021-12-16T06:06:36.3682128+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"ace1228a-0850-4445-9f84-18d70f06a849\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14972,Microsoft.Compute/GetOperation30Min;29967
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -d -g --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n  \"location\": \"westus\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": true,\r\n
+        \   \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n    \"virtualMachines\":
+        [],\r\n    \"provisioningTime\": \"2021-12-16T06:06:36.2275847+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '598'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;247,Microsoft.Compute/GetDedicatedHost30Min;998
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --host-group -g
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"my-host\",\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \     \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n      \"location\":
+        \"westus\",\r\n      \"sku\": {\r\n        \"name\": \"DSv3-Type1\"\r\n      },\r\n
+        \     \"properties\": {\r\n        \"platformFaultDomain\": 2,\r\n        \"autoReplaceOnFailure\":
+        true,\r\n        \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n
+        \       \"virtualMachines\": [],\r\n        \"provisioningTime\": \"2021-12-16T06:06:36.2275847+00:00\",\r\n
+        \       \"provisioningState\": \"Succeeded\"\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '732'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;246,Microsoft.Compute/GetDedicatedHost30Min;997
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host-group\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/my-host-group\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"platformFaultDomainCount\": 3,\r\n    \"hosts\":
+        [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/MY-HOST-GROUP/hosts/MY-HOST\"\r\n
+        \     }\r\n    ],\r\n    \"supportAutomaticPlacement\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '677'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost30Min;996
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {"foo": "bar"}, "properties": {"platformFaultDomainCount":
+      3, "supportAutomaticPlacement": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '129'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host-group\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_HOST_MANAGEMENT_ZFBRYWQSJB7RTNCH5YFV2USO3EZS6R2OFRTJA7T7QKRVU26/providers/Microsoft.Compute/hostGroups/my-host-group\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"properties\": {\r\n    \"platformFaultDomainCount\":
+        3,\r\n    \"supportAutomaticPlacement\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '445'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;117,Microsoft.Compute/PutDeleteDedicatedHost30Min;597
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n  \"location\": \"westus\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"DSv3-Type1\"\r\n  },\r\n  \"properties\":
+        {\r\n    \"platformFaultDomain\": 2,\r\n    \"autoReplaceOnFailure\": true,\r\n
+        \   \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n    \"virtualMachines\":
+        [],\r\n    \"provisioningTime\": \"2021-12-16T06:06:36.2275847+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '598'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;245,Microsoft.Compute/GetDedicatedHost30Min;995
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {"foo": "bar"}, "sku": {"name": "DSv3-Type1"},
+      "properties": {"platformFaultDomain": 2, "autoReplaceOnFailure": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '149'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --host-group -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"sku\": {\r\n    \"name\":
+        \"DSv3-Type1\"\r\n  },\r\n  \"properties\": {\r\n    \"platformFaultDomain\":
+        2,\r\n    \"autoReplaceOnFailure\": true,\r\n    \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n
+        \   \"provisioningTime\": \"2021-12-16T06:06:36.2275847+00:00\",\r\n    \"provisioningState\":
+        \"Updating\"\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/3a2010af-2198-4692-b95d-ae9dc4830622?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;116,Microsoft.Compute/PutDeleteDedicatedHost30Min;596
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/3a2010af-2198-4692-b95d-ae9dc4830622?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-12-16T06:07:15.5245204+00:00\",\r\n  \"endTime\":
+        \"2021-12-16T06:07:15.5245204+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"3a2010af-2198-4692-b95d-ae9dc4830622\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14969,Microsoft.Compute/GetOperation30Min;29958
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -g --set
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my-host\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host\",\r\n
+        \ \"type\": \"Microsoft.Compute/hostGroups/hosts\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"sku\": {\r\n    \"name\":
+        \"DSv3-Type1\"\r\n  },\r\n  \"properties\": {\r\n    \"platformFaultDomain\":
+        2,\r\n    \"autoReplaceOnFailure\": true,\r\n    \"hostId\": \"32a3421e-6646-4c3f-a843-33c2fb8df7c2\",\r\n
+        \   \"virtualMachines\": [],\r\n    \"provisioningTime\": \"2021-12-16T06:06:36.2275847+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:07:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetDedicatedHost3Min;243,Microsoft.Compute/GetDedicatedHost30Min;993
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --host-group -g --yes
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group/hosts/my-host?api-version=2021-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/7ccc9766-e3f1-4422-8151-7d73ab873b11?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 16 Dec 2021 06:07:49 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/7ccc9766-e3f1-4422-8151-7d73ab873b11?p=571046f6-b640-41c1-86f7-f9f044b5adf9&monitor=true&api-version=2021-07-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;115,Microsoft.Compute/PutDeleteDedicatedHost30Min;595
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --host-group -g --yes
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/7ccc9766-e3f1-4422-8151-7d73ab873b11?p=571046f6-b640-41c1-86f7-f9f044b5adf9&api-version=2021-07-01
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2021-12-16T06:07:50.6651758+00:00\",\r\n  \"endTime\":
+        \"2021-12-16T06:07:50.7901948+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"7ccc9766-e3f1-4422-8151-7d73ab873b11\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 16 Dec 2021 06:08:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperation3Min;14966,Microsoft.Compute/GetOperation30Min;29952
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm host group delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --yes
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-compute/23.1.0 Python/3.10.0 (Windows-10-10.0.19043-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_host_management_000001/providers/Microsoft.Compute/hostGroups/my-host-group?api-version=2021-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 16 Dec 2021 06:08:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeleteDedicatedHost3Min;114,Microsoft.Compute/PutDeleteDedicatedHost30Min;594
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+version: 1

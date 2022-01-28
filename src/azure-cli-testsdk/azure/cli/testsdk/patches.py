@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import mock_in_unit_test
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
+from .scenario_tests import mock_in_unit_test
+from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 from .exceptions import CliExecutionError
 
@@ -40,16 +40,20 @@ def patch_main_exception_handler(unit_test):
 def patch_load_cached_subscriptions(unit_test):
     def _handle_load_cached_subscription(*args, **kwargs):  # pylint: disable=unused-argument
 
-        return [{
-            "id": MOCKED_SUBSCRIPTION_ID,
-            "user": {
-                "name": MOCKED_USER_NAME,
-                "type": "user"
-            },
-            "state": "Enabled",
-            "name": "Example",
-            "tenantId": MOCKED_TENANT_ID,
-            "isDefault": True}]
+        return [
+            {
+                "id": MOCKED_SUBSCRIPTION_ID,
+                "state": "Enabled",
+                "name": "Example",
+                "tenantId": MOCKED_TENANT_ID,
+                "isDefault": True,
+                "environmentName": "AzureCloud",
+                "user": {
+                    "name": MOCKED_USER_NAME,
+                    "type": "user"
+                }
+            }
+        ]
 
     mock_in_unit_test(unit_test,
                       'azure.cli.core._profile.Profile.load_cached_subscriptions',
@@ -57,21 +61,23 @@ def patch_load_cached_subscriptions(unit_test):
 
 
 def patch_retrieve_token_for_user(unit_test):
-    def _retrieve_token_for_user(*args, **kwargs):  # pylint: disable=unused-argument
-        import datetime
-        fake_token = 'top-secret-token-for-you'
-        return 'Bearer', fake_token, {
-            "tokenType": "Bearer",
-            "expiresIn": 3600,
-            "expiresOn": (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S.%f"),
-            "resource": args[3],
-            "accessToken": fake_token,
-            "refreshToken": fake_token
-        }
 
-    mock_in_unit_test(unit_test,
-                      'azure.cli.core._profile.CredsCache.retrieve_token_for_user',
-                      _retrieve_token_for_user)
+    def get_user_credential_mock(*args, **kwargs):
+        class UserCredentialMock:
+
+            def __init__(self, *args, **kwargs):
+                super().__init__()
+
+            def get_token(*args, **kwargs):  # pylint: disable=unused-argument
+                from azure.core.credentials import AccessToken
+                import time
+                fake_raw_token = 'top-secret-token-for-you'
+                now = int(time.time())
+                return AccessToken(fake_raw_token, now + 3600)
+
+        return UserCredentialMock()
+
+    mock_in_unit_test(unit_test, 'azure.cli.core.auth.identity.Identity.get_user_credential', get_user_credential_mock)
 
 
 def patch_long_run_operation_delay(unit_test):
@@ -87,3 +93,13 @@ def patch_long_run_operation_delay(unit_test):
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',
                       _shortcut_long_run_operation)
+
+
+def patch_get_current_system_username(unit_test):
+    def _get_current_system_username(*args, **kwargs):  # pylint: disable=unused-argument
+        from .utilities import create_random_name
+        return create_random_name(prefix='example_')
+
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core.local_context._get_current_system_username',
+                      _get_current_system_username)

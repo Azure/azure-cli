@@ -15,6 +15,12 @@ short-summary: Manage and update CLI extensions.
 helps['extension add'] = """
 type: command
 short-summary: Add an extension.
+long-summary: To learn about installing extensions automatically, visit https://aka.ms/AzExtDynamicInstall.
+parameters:
+  - name: --system
+    type: string
+    short-summary: Use a system directory for the extension.
+    long-summary: Default path is azure-cli-extensions folder under the CLI running python environment lib path, configurable by environment variable AZURE_EXTENSION_SYS_DIR. On Windows, you may need to open your shell as Administrator to run with the right permission.
 examples:
   - name: Add extension by name
     text: az extension add --name anextension
@@ -24,6 +30,12 @@ examples:
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl
   - name: Add extension from local disk and use pip proxy for dependencies
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl --pip-proxy https://user:pass@proxy.server:8080
+  - name: Add extension to system directory
+    text: az extension add --name anextension --system
+  - name: Add a specific version of extension
+    text: az extension add --name anextension --version 1.0.0
+  - name: Upgrade the extension if already installed
+    text: az extension add --upgrade --name anextension
 """
 
 helps['extension list'] = """
@@ -67,4 +79,12 @@ examples:
     text: az extension update --name anextension
   - name: Update an extension by name and use pip proxy for dependencies
     text: az extension update --name anextension --pip-proxy https://user:pass@proxy.server:8080
+"""
+
+helps['extension list-versions'] = """
+type: command
+short-summary: List available versions for an extension.
+examples:
+  - name: List available versions for an extension
+    text: az extension list-versions --name anextension
 """

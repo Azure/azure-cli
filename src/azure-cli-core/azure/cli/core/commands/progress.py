@@ -5,12 +5,13 @@
 from __future__ import division
 import sys
 
-import humanfriendly
+from humanfriendly.terminal.spinners import Spinner
 
 BAR_LEN = 70
+EMPTY_LINE = ' ' * BAR_LEN
 
 
-class ProgressViewBase(object):
+class ProgressViewBase:
     """ a view base for progress reporting """
     def __init__(self, out):
         self.out = out
@@ -28,7 +29,7 @@ class ProgressViewBase(object):
         pass  # pylint: disable=unnecessary-pass
 
 
-class ProgressReporter(object):
+class ProgressReporter:
     """ generic progress reporter """
     def __init__(self, message='', value=None, total_value=None):
         self.message = message
@@ -45,7 +46,7 @@ class ProgressReporter(object):
         total_val = kwargs.get('total_val', self.total_val)
         value = kwargs.get('value', self.value)
         if value and total_val:
-            assert value >= 0 and value <= total_val and total_val >= 0
+            assert 0 <= value <= total_val
             self.closed = value == total_val
         self.total_val = total_val
         self.value = value
@@ -57,7 +58,7 @@ class ProgressReporter(object):
         return {'message': self.message, 'percent': percent}
 
 
-class ProgressHook(object):
+class ProgressHook:
     """ sends the progress to the view """
     def __init__(self):
         self.reporter = ProgressReporter()
@@ -103,10 +104,10 @@ class ProgressHook(object):
 
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
-    def __init__(self, out=None):
+    def __init__(self, out=None, spinner=None):
         super(IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr)
-        self.spinner = None
+        self.spinner = spinner
 
     def write(self, args):
         """
@@ -114,7 +115,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         :param args: dictionary containing key 'message'
         """
         if self.spinner is None:
-            self.spinner = humanfriendly.Spinner(
+            self.spinner = Spinner(  # pylint: disable=no-member
                 label='In Progress', stream=self.out, hide_cursor=False)
         msg = args.get('message', 'In Progress')
         try:
@@ -123,10 +124,8 @@ class IndeterminateStandardOut(ProgressViewBase):
             pass
 
     def clear(self):
-        try:
-            self.spinner.clear()
-        except AttributeError:
-            pass
+        self.spinner.clear()
+        self.out.flush()
 
     def flush(self):
         self.out.flush()
@@ -166,8 +165,33 @@ class DeterminateStandardOut(ProgressViewBase):
         self.out.flush()
 
 
-def get_progress_view(determinant=False, outstream=sys.stderr):
+def get_progress_view(determinant=False, outstream=sys.stderr, spinner=None):
     """ gets your view """
     if determinant:
         return DeterminateStandardOut(out=outstream)
-    return IndeterminateStandardOut(out=outstream)
+    return IndeterminateStandardOut(out=outstream, spinner=spinner)
+
+
+class IndeterminateProgressBar:
+    """ Define progress bar update view """
+    def __init__(self, cli_ctx, message="Running"):
+        self.cli_ctx = cli_ctx
+        self.message = message
+        self.hook = self.cli_ctx.get_progress_controller(
+            det=False,
+            spinner=Spinner(  # pylint: disable=no-member
+                label='Running',
+                stream=sys.stderr,
+                hide_cursor=False))
+
+    def begin(self):
+        self.hook.begin()
+
+    def stop(self):
+        self.hook.stop()
+
+    def update_progress(self):
+        self.hook.add(message=self.message)
+
+    def end(self):
+        self.hook.end()

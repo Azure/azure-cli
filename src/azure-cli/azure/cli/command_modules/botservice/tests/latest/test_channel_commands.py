@@ -93,7 +93,7 @@ class ChannelTests(ScenarioTest):
         self.cmd('az bot directline show -g {rg} -n {botname}', checks=[
             self.check('properties.properties.sites[0].siteName', 'Default Site'),
             self.check('properties.properties.sites[0].isEnabled', True),
-            self.check('properties.properties.sites[0].key', '')
+            self.check('properties.properties.sites[0].key', None)
         ])
 
         self.cmd('az bot directline show -g {rg} -n {botname} --with-secrets', checks=[

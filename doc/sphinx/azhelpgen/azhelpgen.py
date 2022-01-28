@@ -5,11 +5,15 @@
 
 import argparse
 import json
-from mock import patch
+from unittest.mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
-from sphinx.util.compat import Directive
+try:
+    # Deprecated in 1.6 and removed in 1.7
+    from sphinx.util.compat import Directive
+except ImportError:
+    from docutils.parsers.rst import Directive  # pylint: disable=import-error
 from sphinx.util.nodes import nested_parse_with_titles
 
 
@@ -47,7 +51,7 @@ class AzHelpGenDirective(Directive):
             if help_file.deprecate_info:
                 yield '{}:deprecated: {}'.format(INDENT, help_file.deprecate_info._get_message(help_file.deprecate_info))
             if not is_command:
-                top_group_name = help_file.command.split()[0] if help_file.command else 'az' 
+                top_group_name = help_file.command.split()[0] if help_file.command else 'az'
                 yield '{}:docsource: {}'.format(INDENT, doc_source_map[top_group_name] if top_group_name in doc_source_map else '')
             else:
                 top_command_name = help_file.command.split()[0] if help_file.command else ''
@@ -57,7 +61,7 @@ class AzHelpGenDirective(Directive):
 
             if is_command and help_file.parameters:
                group_registry = ArgumentGroupRegistry(
-                  [p.group_name for p in help_file.parameters if p.group_name]) 
+                  [p.group_name for p in help_file.parameters if p.group_name])
 
                for arg in sorted(help_file.parameters,
                                 key=lambda p: group_registry.get_group_priority(p.group_name)

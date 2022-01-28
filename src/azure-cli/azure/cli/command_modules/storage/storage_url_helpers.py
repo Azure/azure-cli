@@ -10,7 +10,7 @@ container and/or blob URL.
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
-class StorageResourceIdentifier(object):
+class StorageResourceIdentifier:
     def __init__(self, cloud, moniker):
         self.is_valid = False
         self.account_name = None
@@ -22,7 +22,7 @@ class StorageResourceIdentifier(object):
         self.snapshot = None
         self.sas_token = None
 
-        from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+        from urllib.parse import urlparse
         url = urlparse(moniker)
 
         self._is_url = (url.scheme == 'http' or url.scheme == 'https')

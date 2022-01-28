@@ -1,0 +1,96 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security allowed_connections list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations?api-version=2015-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/westcentralus","name":"westcentralus","type":"Microsoft.Security/locations","properties":{"homeRegionName":"westcentralus"}}]}'
+    headers:
+      api-supported-versions:
+      - '1.0'
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 04 Aug 2021 08:49:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security allowed_connections list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.25.0 azsdk-python-mgmt-security/1.0.0 Python/3.9.5 (Windows-10-10.0.19042-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/allowedConnections?api-version=2020-01-01
+  response:
+    body:
+      string: '{"value":[{"type":"Microsoft.Security/locations/allowedConnections","properties":{"calculatedDateTime":"2021-08-04T08:29:39.0216101Z","connectableResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2012","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2017","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2019","tcpPorts":"*","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2017","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2019","tcpPorts":"*","udpPorts":"*"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2017","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2012","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2019","tcpPorts":"*","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2012","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2019","tcpPorts":"*","udpPorts":"*"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2019","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2012","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2017","tcpPorts":"*","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2012","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Compute/virtualMachines/vatest-sql2017","tcpPorts":"*","udpPorts":"*"}]}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-ComponentTests-eastus/providers/Microsoft.Security/locations/westcentralus/allowedConnections/Internal","name":"Internal","location":"westcentralus"},{"type":"Microsoft.Security/locations/allowedConnections","properties":{"calculatedDateTime":"2021-08-04T08:29:39.0216101Z","connectableResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-eus","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-neu","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-sea","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-scus","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-eus2","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-aue","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-wus2","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-uks","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-euap","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-lteuap","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-test","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/iaas-syn-TLS","inboundConnectedResources":[],"outboundConnectedResources":[]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-arc-euap","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/va-onprem-euap","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-template-vm","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/va-onprem-euap","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-template-vm","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/va-onprem-euap","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-arc-euap","tcpPorts":"*","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-template-vm","tcpPorts":"*","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-arc-euap","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-template-vm","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"}]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-template-vm","inboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-arc-euap","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/va-onprem-euap","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"}],"outboundConnectedResources":[{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VULNERABILITYASSESSMENT-RUNNERS/providers/Microsoft.Compute/virtualMachines/va-arc-euap","tcpPorts":"[0-3388,3390-65535]","udpPorts":"*"},{"connectedResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Compute/virtualMachines/va-onprem-euap","tcpPorts":"*","udpPorts":"*"}]}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/VulnerabilityAssessment-Runners/providers/Microsoft.Security/locations/westcentralus/allowedConnections/Internal","name":"Internal","location":"westcentralus"},{"type":"Microsoft.Security/locations/allowedConnections","properties":{"calculatedDateTime":"2021-08-04T08:29:39.0216101Z","connectableResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amtayyem-sqlama2/providers/Microsoft.Compute/virtualMachines/sqlama2","inboundConnectedResources":[],"outboundConnectedResources":[]}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/amtayyem-sqlama2/providers/Microsoft.Security/locations/westcentralus/allowedConnections/Internal","name":"Internal","location":"westcentralus"},{"type":"Microsoft.Security/locations/allowedConnections","properties":{"calculatedDateTime":"2021-08-04T08:29:39.0216101Z","connectableResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/SQLVMA1TESTS_GROUP/providers/Microsoft.Compute/virtualMachines/sqlvma1tests","inboundConnectedResources":[],"outboundConnectedResources":[]}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/SQLVMA1TESTS_GROUP/providers/Microsoft.Security/locations/westcentralus/allowedConnections/Internal","name":"Internal","location":"westcentralus"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '11539'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 04 Aug 2021 08:49:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - ''
+      - ''
+      - ''
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,247 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sa_plr000001?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001","name":"cli_test_sa_plr000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-12-30T23:48:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '320'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 23:48:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
+      false, "anonymousPullEnabled": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '124'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"westus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T23:48:24.3970477+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T23:48:24.3970477+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2021-12-30T23:48:24.3970477Z","provisioningState":"Creating","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T23:48:25.2636824+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-00a00bc2-69cb-11ec-b47c-00155d249691?api-version=2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1287'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 23:48:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-00a00bc2-69cb-11ec-b47c-00155d249691?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/operationStatuses/registries-00a00bc2-69cb-11ec-b47c-00155d249691?api-version=2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 23:48:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --sku
+      User-Agent:
+      - AZURECLI/2.31.0 azsdk-python-azure-mgmt-containerregistry/8.2.0 Python/3.8.2
+        (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2021-08-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"westus","tags":{},"systemData":{"createdBy":"savaradh@microsoft.com","createdByType":"User","createdAt":"2021-12-30T23:48:24.3970477+00:00","lastModifiedBy":"savaradh@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2021-12-30T23:48:24.3970477+00:00"},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2021-12-30T23:48:24.3970477Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2021-12-30T23:48:25.2636824+00:00","status":"disabled"},"exportPolicy":{"status":"enabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled","anonymousPullEnabled":false}}'
+    headers:
+      api-supported-versions:
+      - 2021-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1288'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 23:48:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.8.2 (Linux-5.10.60.1-microsoft-standard-WSL2-x86_64-with-glibc2.29)
+        AZURECLI/2.31.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateLinkResources?api-version=2019-12-01-preview
+  response:
+    body:
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/privateLinkResources","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateLinkResources/registry","name":"registry","properties":{"groupId":"registry","requiredMembers":["registry_data_westus","registry"],"requiredZoneNames":["privatelink.azurecr.io"]}}]}'
+    headers:
+      api-supported-versions:
+      - 2019-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 30 Dec 2021 23:48:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

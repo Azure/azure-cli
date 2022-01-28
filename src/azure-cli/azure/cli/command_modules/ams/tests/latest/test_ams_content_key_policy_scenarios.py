@@ -8,6 +8,7 @@ import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure.cli.core.util import CLIError
+from azure.core.exceptions import (HttpResponseError)
 from azure.cli.command_modules.ams._test_utils import _get_test_data_file
 
 
@@ -82,8 +83,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg}  --open-restriction --play-ready-template "{playReadyPath}" --description {description} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
             self.check('options[0].configuration.responseCustomData', '{responseCustomData}'),
             self.check('options[0].configuration.licenses[0].allowTestDevices', '{allowTestDevices}'),
             self.check('options[0].configuration.licenses[0].beginDate', '{beginDate}'),
@@ -93,7 +94,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].configuration.licenses[0].gracePeriod', '{gracePeriod}'),
             self.check('options[0].configuration.licenses[0].licenseType', '{licenseType}'),
             self.check('options[0].configuration.licenses[0].contentType', '{contentType}'),
-            self.check('options[0].configuration.licenses[0].contentKeyLocation.odatatype', '{keyLocationODataType}'),
+            self.check('options[0].configuration.licenses[0].contentKeyLocation.odataType', '{keyLocationODataType}'),
             self.check('options[0].configuration.licenses[0].contentKeyLocation.keyId', '{keyId}'),
             self.check('options[0].configuration.licenses[0].playRight.firstPlayExpiration', '{firstPlayExpiration}'),
             self.check('options[0].configuration.licenses[0].playRight.scmsRestriction', '{scmsRestriction}'),
@@ -145,22 +146,22 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --clear-key-configuration --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --token-key-type {tokenType} --token-type {restrictionTokenType} --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
             self.check('options[0].restriction.issuer', '{issuer}'),
             self.check('options[0].restriction.audience', '{audience}'),
             self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
             self.check('length(options[0].restriction.requiredClaims)', 3),
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
         ])
 
         self.cmd('az ams content-key-policy update -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --set options[0].restriction.issuer={issuer}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
             self.check('options[0].restriction.issuer', '{issuer}'),
             self.check('options[0].restriction.audience', '{audience}'),
             self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
             self.check('length(options[0].restriction.requiredClaims)', 3),
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
         ])
@@ -180,7 +181,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
-            'ask': 'testtesttesttest',
+            'ask': '1234567890ABCDEF1234567890ABCDEF',
             'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
             'fairPlayPfxPassword': 'password',
             'rentalAndLeaseKeyType': 'Undefined',
@@ -192,10 +193,47 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --open-restriction --description {description} --ask {ask} --fair-play-pfx "{fairPlayPfx}" --fair-play-pfx-password {fairPlayPfxPassword} --rental-and-lease-key-type {rentalAndLeaseKeyType} --rental-duration {rentalDuration} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
             self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
             self.check('options[0].configuration.rentalDuration', '{rentalDuration}')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_fairplay_offline(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'eastasia',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
+            'ask': '1234567890ABCDEF1234567890ABCDEF',
+            'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
+            'fairPlayPfxPassword': 'password',
+            'rentalAndLeaseKeyType': 'DualExpiry',
+            'fairPlayPlaybackDurationSeconds': 60,
+            'fairPlayStorageDurationSeconds': 60,
+            'rentalDuration': 60,
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --open-restriction --description {description} --ask {ask} --fair-play-pfx "{fairPlayPfx}" --fair-play-pfx-password {fairPlayPfxPassword} --rental-and-lease-key-type {rentalAndLeaseKeyType} --fp-playback-duration-seconds {fairPlayPlaybackDurationSeconds} --fp-storage-duration-seconds {fairPlayStorageDurationSeconds} --rental-duration {rentalDuration} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
+            self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
+            self.check('options[0].configuration.rentalDuration', 0),
+            self.check('options[0].configuration.offlineRentalConfiguration.playbackDurationSeconds', '{fairPlayPlaybackDurationSeconds}'),
+            self.check('options[0].configuration.offlineRentalConfiguration.storageDurationSeconds', '{fairPlayStorageDurationSeconds}')
         ])
 
     @ResourceGroupPreparer()
@@ -228,11 +266,11 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --issuer {issuer} --audience {audience} --token-key "{tokenKey}" --token-key-type {tokenType} --token-type {restrictionTokenType} --widevine-template "{jsonFile}" --token-claims {tokenClaims} --open-id-connect-discovery-document {openIDConnectDiscoveryDocument} --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
             self.check('options[0].restriction.issuer', '{issuer}'),
             self.check('options[0].restriction.audience', '{audience}'),
             self.check('options[0].restriction.restrictionTokenType', '{restrictionTokenType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}'),
             self.check('length(options[0].restriction.requiredClaims)', 3),
             self.check('options[0].restriction.openIdConnectDiscoveryDocument', '{openIDConnectDiscoveryDocument}')
         ])
@@ -259,14 +297,14 @@ class AmsContentKeyPolicyTests(ScenarioTest):
 
         self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --description {description} --widevine-template "{jsonFile}" --open-restriction --policy-option-name {policyOptionName}', checks=[
             self.check('name', '{contentKeyPolicyName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}')
+            self.check('options[0].configuration.odataType', '{configurationODataType}')
         ])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_content_key_policy_create_basic(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
-        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_name = self.create_random_name(prefix='mm', length=12)
         policy_option_name = self.create_random_name(prefix='pon', length=12)
 
         self.kwargs.update({
@@ -288,8 +326,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('description', '{description}'),
             self.check('resourceGroup', '{rg}'),
             self.check('options[0].name', '{policyOptionName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}')
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}')
         ])
 
     @ResourceGroupPreparer()
@@ -320,8 +358,8 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('description', '{description}'),
             self.check('resourceGroup', '{rg}'),
             self.check('options[0].name', '{policyOptionName}'),
-            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
-            self.check('options[0].restriction.odatatype', '{restrictionODataType}')
+            self.check('options[0].configuration.odataType', '{configurationODataType}'),
+            self.check('options[0].restriction.odataType', '{restrictionODataType}')
         ])
 
     @ResourceGroupPreparer()

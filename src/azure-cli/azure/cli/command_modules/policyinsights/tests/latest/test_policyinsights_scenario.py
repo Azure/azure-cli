@@ -3,32 +3,36 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
+import time
 
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
+from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 
 class PolicyInsightsTests(ScenarioTest):
 
+    # Current recording was recorded against "Azure Governance Policy UX Test" (e78961ba-36fe-4739-9212-e3031b4c8db7)
     @record_only()
+    @AllowLargeResponse()
     def test_policy_insights(self):
         top_clause = '--top 2'
         filter_clause = '--filter "isCompliant eq false"'
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2019-03-01T00:00:00"'
-        to_clause = '--to "2019-04-17T00:00:00"'
+        from_clause = '--from "2021-07-01T00:00:00Z"'
+        to_clause = '--to "2021-07-03T01:30:00Z"'
         scopes = [
             '-m "azgovtest5"',
             '',
             '-g "defaultresourcegroup-eus"',
-            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/govintpolicyrp/providers/microsoft.network/trafficmanagerprofiles/gov-int-policy-rp"',
-            '--resource "cluster-test" --namespace "microsoft.keyvault" --resource-type "vaults" -g "akhe-sf-test"',
-            '--resource "Subnet-0" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/VNet-test-1" -g "akhe-sf-test-cluster-1"',
-            '-s "762007ec-c5ba-41ae-a52d-db0834bea096"',
-            '-d "796de0a7-4bc4-40e4-98b2-1ee2bf359207"',
-            '-a "3c3059c96b0940f0995f9464"',
-            '-a "1c95b94c9c394a8eb4f1d8a6" -g "jilimpolicytest" '
+            '--resource "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cheggpolicy/providers/microsoft.keyvault/vaults/cheggtmpkv"',
+            '--resource "cheggkv" --namespace "microsoft.keyvault" --resource-type "vaults" -g "cheggpolicy"',
+            '--resource "subnet2" --namespace "microsoft.network" --resource-type "subnets" --parent "virtualnetworks/cheggvnet" -g "cheggpolicy"',
+            '-s "1f3afdf9-d0c9-4c3d-847f-89da613e70a8"',
+            '-d "34c877ad-507e-4c82-993e-3452a6e0ad3c"',
+            '-a "4d31128e32d04a0098fd536e"',
+            '-a "f32eeddfc32345b585f9a70b" -g "cheggpolicy" '
         ]
 
         for scope in scopes:
@@ -76,6 +80,33 @@ class PolicyInsightsTests(ScenarioTest):
             self.check('length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_triggerscan')
+    def test_policy_insights_triggerscan(self):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'bip': '96670d01-0a4d-4649-9c89-2d3abc0a5025'
+        })
+
+        # create a subscription policy assignment that we can get an updated compliance state for
+        self.cmd(
+            'policy assignment create --policy {bip} -n {pan} --resource-group {rg} -p \'{{ "tagName": {{ "value": "notThere" }} }}\'')
+
+        # trigger a subscription scan and do not wait for it to complete
+        self.cmd('policy state trigger-scan --no-wait', checks=[
+            self.is_empty()
+        ])
+
+        # trigger a resource group scan and wait for it to complete
+        self.cmd('policy state trigger-scan -g {rg}', checks=[
+            self.is_empty()
+        ])
+
+        # ensure the compliance state of the resource group was updated
+        self.cmd('policy state list -g {rg} -a {pan} --filter \"isCompliant eq false\"', checks=[
+            self.check("length([])", 1)
+        ])
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')
     def test_policy_insights_remediation(self, resource_group_location, storage_account):
@@ -100,7 +131,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
@@ -110,7 +142,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation list -g {rg}', checks=[
@@ -136,7 +169,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters.locations[*] | length([])', 1),
                 self.check('filters.locations[0]', '{location}'),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation show -n {rn}', checks=[
@@ -147,7 +181,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters.locations[*] | length([])', 1),
                 self.check('filters.locations[0]', '{location}'),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation list', checks=[
@@ -172,7 +207,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation show -n {rn} -g {rg} --namespace "Microsoft.Storage" --resource-type storageAccounts --resource {sa}', checks=[
@@ -182,7 +218,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation list -g {rg} --namespace "Microsoft.Storage" --resource-type storageAccounts --resource {sa}', checks=[
@@ -201,6 +238,7 @@ class PolicyInsightsTests(ScenarioTest):
         finally:
             self.cmd('policy assignment delete -n {pan}')
 
+    @AllowLargeResponse()
     def test_policy_insights_remediation_policy_set(self):
         self.kwargs.update({
             'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
@@ -226,7 +264,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', '{drid}'),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation show -n {rn}', checks=[
@@ -236,7 +275,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('policyAssignmentId', '{pid}'),
                 self.check('policyDefinitionReferenceId', '{drid}'),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation list', checks=[
@@ -283,7 +323,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('resourceGroup', None),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation show -n {rn} -m {mg}', checks=[
@@ -293,7 +334,8 @@ class PolicyInsightsTests(ScenarioTest):
                 self.check('resourceGroup', None),
                 self.check('policyDefinitionReferenceId', None),
                 self.check('filters', None),
-                self.check('deploymentStatus.totalDeployments', 0)
+                self.check('deploymentStatus.totalDeployments', 0),
+                self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
             ])
 
             self.cmd('policy remediation list -m {mg}', checks=[
@@ -327,7 +369,7 @@ class PolicyInsightsTests(ScenarioTest):
     @AllowLargeResponse()
     def test_policy_insights_remediation_complete(self):
         self.kwargs.update({
-            'pan': '2a47116300b347c599c4c4d3',
+            'pan': '98904c39668a4f70804aef09',
             'rg': 'az-cli-policy-insights-test',
             'rn': self.create_random_name('azurecli-test-remediation', 40)
         })
@@ -343,15 +385,21 @@ class PolicyInsightsTests(ScenarioTest):
             self.check('policyAssignmentId', '{pid}'),
             self.check('policyDefinitionReferenceId', None),
             self.check('filters', None),
-            self.check('deploymentStatus.totalDeployments', 2)
+            self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
         ])
 
-        self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
-            self.check('name', '{rn}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('policyAssignmentId', '{pid}'),
-            self.check('deploymentStatus.totalDeployments', 2)
-        ])
+        for i in range(5):
+            try:
+                self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
+                    self.check('name', '{rn}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('policyAssignmentId', '{pid}'),
+                    self.check('deploymentStatus.totalDeployments', 2),
+                    self.check('resourceDiscoveryMode', 'ExistingNonCompliant')
+                ])
+                break
+            except JMESPathCheckAssertionError:
+                time.sleep(5)
 
         self.cmd('policy remediation list -g {rg}', checks=[
             self.check("length([?name == '{rn}'])", 1)
@@ -370,3 +418,78 @@ class PolicyInsightsTests(ScenarioTest):
         self.cmd('policy remediation cancel -n {rn} -g {rg}', checks=[
             self.check('provisioningState', 'Cancelling')
         ])
+
+    # Test a remediation that re-evaluates compliance results before remediating
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_remediation')
+    @StorageAccountPreparer(name_prefix='cliremediation')
+    def test_policy_insights_remediation_reevaluate(self, resource_group_location, storage_account):
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'rn': self.create_random_name('azurecli-test-remediation', 40),
+            'bip': '5ffd78d9-436d-4b41-a421-5baa819e3008',
+            'location': resource_group_location,
+            'sa': storage_account
+        })
+
+        # create a resource group policy assignment that we can trigger remediations on
+        assignment = self.cmd(
+            'policy assignment create --policy {bip} -g {rg} -n {pan} --location {location} --assign-identity -p \'{{"tagName": {{ "value": "cliTagKey" }}, "tagValue": {{ "value": "cliTagValue" }} }}\'').get_output_in_json()
+        self.kwargs['pid'] = assignment['id'].lower()
+
+        # create a remediation at resource group scope that will re-evaluate compliance
+        self.cmd('policy remediation create -n {rn} -g {rg} -a {pan} --resource-discovery-mode ReEvaluateCompliance', checks=[
+            self.check('name', '{rn}'),
+            self.check('provisioningState', 'Accepted'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('policyAssignmentId', '{pid}'),
+            self.check('policyDefinitionReferenceId', None),
+            self.check('filters', None),
+            self.check('deploymentStatus.totalDeployments', 0),
+            self.check('resourceDiscoveryMode', 'ReEvaluateCompliance')
+        ])
+
+        self.cmd('policy remediation show -n {rn} -g {rg}', checks=[
+            self.check('name', '{rn}'),
+            self.check_pattern('provisioningState', '(?:Evaluating|Accepted)'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('policyAssignmentId', '{pid}'),
+            self.check('deploymentStatus.totalDeployments', 0),
+            self.check('resourceDiscoveryMode', 'ReEvaluateCompliance')
+        ])
+
+        self.cmd('policy remediation list -g {rg}', checks=[
+            self.check("length([?name == '{rn}'])", 1)
+        ])
+
+        self.cmd('policy remediation deployment list -n {rn} -g {rg}', checks=[
+            self.check('length([])', 0)
+        ])
+
+        # cancel the remediation
+        self.cmd('policy remediation cancel -n {rn} -g {rg}', checks=[
+            self.check('provisioningState', 'Cancelling')
+        ])
+
+    @AllowLargeResponse()
+    def test_policy_insights_metadata(self):
+        # Get all metadata resources
+        all_metadata_resources = self.cmd('policy metadata list').get_output_in_json()
+        assert len(all_metadata_resources) > 1
+
+        # Test the --top argument
+        assert len(self.cmd('policy metadata list --top 0').get_output_in_json()) == 0
+
+        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) + 1)).get_output_in_json()
+        assert len(top_metadata_resources) == len(all_metadata_resources)
+
+        top_metadata_resources = self.cmd('policy metadata list --top {}'.format(len(all_metadata_resources) - 1)).get_output_in_json()
+        assert len(top_metadata_resources) == len(all_metadata_resources) - 1
+
+        # Test getting an individual resouce
+        resource_metadata_name = top_metadata_resources[0]['name']
+        metadata_resource = self.cmd('policy metadata show --name {}'.format(resource_metadata_name)).get_output_in_json()
+        assert metadata_resource['name'] == resource_metadata_name
+
+        metadata_resource = self.cmd('policy metadata show -n {}'.format(resource_metadata_name)).get_output_in_json()
+        assert metadata_resource['name'] == resource_metadata_name

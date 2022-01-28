@@ -3,18 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
 import json
 import os
 
-from knack.config import get_config_parser
+import configparser
 from knack.log import get_logger
-from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
+from knack.prompting import prompt, prompt_y_n, prompt_choice_list, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core.util import ConfiguredDefaultSetter
 
-from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METHOD_LIST,
+from azure.cli.command_modules.configure._consts import (OUTPUT_LIST,
                                                          MSG_INTRO,
                                                          MSG_CLOSING,
                                                          MSG_GLOBAL_SETTINGS_LOCATION,
@@ -22,10 +21,10 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_HEADING_ENV_VARS,
                                                          MSG_PROMPT_MANAGE_GLOBAL,
                                                          MSG_PROMPT_GLOBAL_OUTPUT,
-                                                         MSG_PROMPT_LOGIN,
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING,
                                                          MSG_PROMPT_CACHE_TTL,
+                                                         WARNING_CLOUD_FORBID_TELEMETRY,
                                                          DEFAULT_CACHE_TTL)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
@@ -48,59 +47,11 @@ def _print_cur_configuration(file_config):
         print('\n'.join(['{} = {}'.format(ev, os.environ[ev]) for ev in env_vars]))
 
 
-def _config_env_public_azure(cli_ctx, _):
-    from adal.adal_error import AdalError
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.profiles import ResourceType
-    # Determine if user logged in
-
-    try:
-        list(get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources.list())
-    except CLIError:
-        # Not logged in
-        login_successful = False
-        while not login_successful:
-            method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
-            answers['login_index'] = method_index
-            answers['login_options'] = str(LOGIN_METHOD_LIST)
-            profile = Profile(cli_ctx=cli_ctx)
-            interactive = False
-            username = None
-            password = None
-            service_principal = None
-            tenant = None
-            if method_index == 0:  # device auth
-                interactive = True
-            elif method_index == 1:  # username and password
-                username = prompt('Username: ')
-                password = prompt_pass(msg='Password: ')
-            elif method_index == 2:  # service principal with secret
-                service_principal = True
-                username = prompt('Service principal: ')
-                tenant = prompt('Tenant: ')
-                password = prompt_pass(msg='Client secret: ')
-            elif method_index == 3:  # skip
-                return
-            try:
-                profile.find_subscriptions_on_login(
-                    interactive,
-                    username,
-                    password,
-                    service_principal,
-                    tenant)
-                login_successful = True
-                logger.warning('Login successful!')
-            except AdalError as err:
-                logger.error('Login error!')
-                logger.error(err)
-
-
-def _handle_global_configuration(config):
+def _handle_global_configuration(config, cloud_forbid_telemetry):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
-    file_config = get_config_parser()
+    file_config = configparser.ConfigParser()
     config_exists = file_config.read([config.config_path])
     should_modify_global_config = False
     if config_exists:
@@ -118,7 +69,10 @@ def _handle_global_configuration(config):
             answers['output_type_prompt'] = output_index
             answers['output_type_options'] = str(OUTPUT_LIST)
             enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
-            allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
+            if cloud_forbid_telemetry:
+                allow_telemetry = False
+            else:
+                allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
             answers['telemetry_prompt'] = allow_telemetry
             cache_ttl = None
             while not cache_ttl:
@@ -140,6 +94,7 @@ def _handle_global_configuration(config):
 
 # pylint: disable=inconsistent-return-statements
 def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
+    from azure.cli.core.cloud import cloud_forbid_telemetry, get_active_cloud_name
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
         with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
@@ -157,8 +112,11 @@ def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
     # if nothing supplied, we go interactively
     try:
         print(MSG_INTRO)
-        _handle_global_configuration(cmd.cli_ctx.config)
+        cloud_forbid_telemetry = cloud_forbid_telemetry(cmd.cli_ctx)
+        _handle_global_configuration(cmd.cli_ctx.config, cloud_forbid_telemetry)
         print(MSG_CLOSING)
+        if cloud_forbid_telemetry:
+            logger.warning(WARNING_CLOUD_FORBID_TELEMETRY, get_active_cloud_name(cmd.cli_ctx))
         # TODO: log_telemetry('configure', **answers)
     except NoTTYException:
         raise CLIError('This command is interactive and no tty available.')
@@ -239,3 +197,39 @@ def purge_cache_contents():
         shutil.rmtree(directory)
     except (OSError, IOError) as ex:
         logger.debug(ex)
+
+
+def turn_local_context_on(cmd):
+    if not cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_on()
+        logger.warning('Local context is turned on, you can run `az local-context off` to turn it off.')
+    else:
+        logger.warning('Local context is on already.')
+
+
+def turn_local_context_off(cmd):
+    if cmd.cli_ctx.local_context.is_on:
+        cmd.cli_ctx.local_context.turn_off()
+        logger.warning('Local context is turned off, you can run `az local-context on` to turn it on.')
+    else:
+        logger.warning('Local context is off already.')
+
+
+def show_local_context(cmd, name=None):
+    return cmd.cli_ctx.local_context.get_value(name)
+
+
+def delete_local_context(cmd, name=None, all=False, yes=False, purge=False, recursive=False):  # pylint: disable=redefined-builtin
+    if name:
+        return cmd.cli_ctx.local_context.delete(name)
+
+    if all:
+        from azure.cli.core.util import user_confirmation
+        if purge:
+            user_confirmation('You are going to delete local context persistence file. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.delete_file(recursive)
+        else:
+            user_confirmation('You are going to clear all local context value. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.clear(recursive)

@@ -51,13 +51,13 @@ def load_command_table(self, _):
         g.custom_command('prepare-deploy', 'prepare_webapp_deploy')
 
     with self.command_group('bot', botServices_commandType) as g:
-        g.custom_command('show', 'get_bot')
+        g.custom_show_command('show', 'get_bot')
         g.command('delete', 'delete')
 
     # Begin "bot authsetting" command registration
     with self.command_group('bot authsetting', botConnections_commandType) as g:
         g.command('list', 'list_by_bot_service')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
 
     with self.command_group('bot authsetting', botOperations_commandType) as g:
@@ -74,11 +74,11 @@ def load_command_table(self, _):
                 g.command('update', '{}_update'.format(channel))
 
         with self.command_group('bot {}'.format(channel), channelOperations_commandType, is_preview=True) as g:
-            g.command('show', '{}_get'.format(channel))
+            g.show_command('show', '{}_get'.format(channel))
             g.command('delete', '{}_delete'.format(channel))
 
     with self.command_group('bot webchat', channelOperations_commandType) as g:
-        g.command('show', 'webchat_get')
+        g.show_command('show', 'webchat_get')
 
     with self.command_group('bot'):
         pass

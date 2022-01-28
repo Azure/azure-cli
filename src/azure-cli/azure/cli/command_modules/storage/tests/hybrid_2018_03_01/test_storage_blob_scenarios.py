@@ -301,8 +301,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
 
-        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {}', account_info,
-                                               c).output)
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry {}',
+                                               account_info, c, expiry).output)
 
         # verify delete operation
         self.storage_cmd('storage container delete --name {} --fail-not-exist', account_info, c) \

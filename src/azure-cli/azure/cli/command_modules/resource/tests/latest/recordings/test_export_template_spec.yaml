@@ -1,0 +1,663 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004''
+        under resource group ''cli_test_template_specs000001'' was not found. For
+        more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '341'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Sep 2020 14:12:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-09-16T14:12:11.844659Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:12:11.844659Z\"\r\n
+        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-export-template-spec000004\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '717'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Sep 2020 14:12:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"location": "westus", "properties": {"artifacts": [{"path": "artifacts\\createResourceGroup.json",
+      "kind": "template", "template": {"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"rgName": {"type": "string"}, "rgLocation":
+      {"type": "string"}}, "variables": {}, "resources": [{"type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2019-10-01", "name": "[parameters(''rgName'')]", "location":
+      "[parameters(''rgLocation'')]", "properties": {}}], "outputs": {}}}, {"path":
+      "artifacts\\createKeyVault.json", "kind": "template", "template": {"$schema":
+      "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"keyVaultName": {"type": "string"},
+      "location": {"type": "string", "defaultValue": "[resourceGroup().location]"},
+      "skuName": {"type": "string", "defaultValue": "standard"}, "tenantId": {"type":
+      "string", "defaultValue": "[subscription().tenantId]"}, "aadObjectId": {"type":
+      "string", "defaultValue": "177f56a0-9e41-4008-a321-d3676aae9c69"}}, "variables":
+      {}, "resources": [{"type": "Microsoft.KeyVault/vaults", "name": "[parameters(''keyVaultName'')]",
+      "apiVersion": "2018-02-14", "location": "[parameters(''location'')]", "properties":
+      {"tenantId": "[parameters(''tenantId'')]", "accessPolicies": [{"tenantId": "[parameters(''tenantId'')]",
+      "objectId": "[parameters(''aadObjectId'')]", "permissions": {"keys": ["encrypt",
+      "decrypt", "wrapKey", "unwrapKey", "sign", "verify", "get", "list", "create",
+      "update", "import", "delete", "backup", "restore", "recover", "purge"], "secrets":
+      ["get", "list", "set", "delete", "backup", "restore", "recover", "purge"], "certificates":
+      ["get", "list", "delete", "create", "import", "update", "managecontacts", "getissuers",
+      "listissuers", "setissuers", "deleteissuers", "manageissuers", "recover", "purge"]}}],
+      "sku": {"name": "[parameters(''skuName'')]", "family": "A"}, "networkAcls":
+      {"defaultAction": "Allow", "bypass": "AzureServices"}}}], "outputs": {}}}, {"path":
+      "artifacts\\createKeyVaultWithSecret.json", "kind": "template", "template":
+      {"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"keyVaultName": {"type": "string"},
+      "location": {"type": "string", "defaultValue": "[resourceGroup().location]"},
+      "skuName": {"type": "string", "defaultValue": "standard"}, "tenantId": {"type":
+      "string", "defaultValue": "[subscription().tenantId]"}, "aadObjectId": {"type":
+      "string", "defaultValue": "177f56a0-9e41-4008-a321-d3676aae9c69"}}, "variables":
+      {}, "resources": [{"type": "Microsoft.Resources/deployments", "apiVersion":
+      "2019-10-01", "name": "keyVault", "properties": {"mode": "Incremental", "templateLink":
+      {"relativePath": "createKeyVault.json", "contentVersion": "1.0.0.0"}, "parameters":
+      {"keyVaultName": {"value": "[parameters(''keyVaultName'')]"}, "location": {"value":
+      "[parameters(''location'')]"}, "skuName": {"value": "[parameters(''skuName'')]"},
+      "tenantId": {"value": "[parameters(''tenantId'')]"}, "aadObjectId": {"value":
+      "[parameters(''aadObjectId'')]"}}}}, {"type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2018-02-14", "name": "[concat(parameters(''keyVaultName''), ''/mySecret'')]",
+      "location": "[parameters(''location'')]", "dependsOn": ["keyVault"], "properties":
+      {"value": "mySecretValue"}}], "outputs": {}}}], "template": {"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"rgName": {"type": "string"}, "rgLocation":
+      {"type": "string"}, "keyVaultName": {"type": "string"}}, "variables": {}, "resources":
+      [{"type": "Microsoft.Resources/deployments", "apiVersion": "2019-10-01", "name":
+      "deploymentRg", "location": "[parameters(''rgLocation'')]", "properties": {"mode":
+      "Incremental", "templateLink": {"relativePath": "artifacts/createResourceGroup.json",
+      "contentVersion": "1.0.0.0"}, "parameters": {"rgName": {"value": "[parameters(''rgName'')]"},
+      "rgLocation": {"value": "[parameters(''rgLocation'')]"}}}}, {"type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01", "name": "keyVaultAndSecret", "resourceGroup": "[parameters(''rgName'')]",
+      "dependsOn": ["deploymentRg"], "properties": {"mode": "Incremental", "templateLink":
+      {"relativePath": "artifacts/createKeyVaultWithSecret.json", "contentVersion":
+      "1.0.0.0"}, "parameters": {"keyVaultName": {"value": "[parameters(''keyVaultName'')]"}}}}],
+      "outputs": {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4537'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-09-16T14:12:13.0447005Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:12:13.0447005Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
+        \           \"rgLocation\": {\r\n              \"type\": \"string\"\r\n            }\r\n
+        \         },\r\n          \"variables\": {},\r\n          \"resources\": [\r\n
+        \           {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"[parameters('rgName')]\",\r\n
+        \             \"location\": \"[parameters('rgLocation')]\",\r\n              \"properties\":
+        {}\r\n            }\r\n          ],\r\n          \"outputs\": {}\r\n        },\r\n
+        \       \"path\": \"artifacts\\\\createResourceGroup.json\",\r\n        \"kind\":
+        \"template\"\r\n      },\r\n      {\r\n        \"template\": {\r\n          \"$schema\":
+        \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.KeyVault/vaults\",\r\n
+        \             \"name\": \"[parameters('keyVaultName')]\",\r\n              \"apiVersion\":
+        \"2018-02-14\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"properties\": {\r\n                \"tenantId\": \"[parameters('tenantId')]\",\r\n
+        \               \"accessPolicies\": [\r\n                  {\r\n                    \"tenantId\":
+        \"[parameters('tenantId')]\",\r\n                    \"objectId\": \"[parameters('aadObjectId')]\",\r\n
+        \                   \"permissions\": {\r\n                      \"keys\":
+        [\r\n                        \"encrypt\",\r\n                        \"decrypt\",\r\n
+        \                       \"wrapKey\",\r\n                        \"unwrapKey\",\r\n
+        \                       \"sign\",\r\n                        \"verify\",\r\n
+        \                       \"get\",\r\n                        \"list\",\r\n
+        \                       \"create\",\r\n                        \"update\",\r\n
+        \                       \"import\",\r\n                        \"delete\",\r\n
+        \                       \"backup\",\r\n                        \"restore\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ],\r\n                      \"secrets\": [\r\n                        \"get\",\r\n
+        \                       \"list\",\r\n                        \"set\",\r\n
+        \                       \"delete\",\r\n                        \"backup\",\r\n
+        \                       \"restore\",\r\n                        \"recover\",\r\n
+        \                       \"purge\"\r\n                      ],\r\n                      \"certificates\":
+        [\r\n                        \"get\",\r\n                        \"list\",\r\n
+        \                       \"delete\",\r\n                        \"create\",\r\n
+        \                       \"import\",\r\n                        \"update\",\r\n
+        \                       \"managecontacts\",\r\n                        \"getissuers\",\r\n
+        \                       \"listissuers\",\r\n                        \"setissuers\",\r\n
+        \                       \"deleteissuers\",\r\n                        \"manageissuers\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ]\r\n                    }\r\n                  }\r\n
+        \               ],\r\n                \"sku\": {\r\n                  \"name\":
+        \"[parameters('skuName')]\",\r\n                  \"family\": \"A\"\r\n                },\r\n
+        \               \"networkAcls\": {\r\n                  \"defaultAction\":
+        \"Allow\",\r\n                  \"bypass\": \"AzureServices\"\r\n                }\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVault.json\",\r\n
+        \       \"kind\": \"template\"\r\n      },\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"keyVault\",\r\n
+        \             \"properties\": {\r\n                \"mode\": \"Incremental\",\r\n
+        \               \"templateLink\": {\r\n                  \"relativePath\":
+        \"createKeyVault.json\",\r\n                  \"contentVersion\": \"1.0.0.0\"\r\n
+        \               },\r\n                \"parameters\": {\r\n                  \"keyVaultName\":
+        {\r\n                    \"value\": \"[parameters('keyVaultName')]\"\r\n                  },\r\n
+        \                 \"location\": {\r\n                    \"value\": \"[parameters('location')]\"\r\n
+        \                 },\r\n                  \"skuName\": {\r\n                    \"value\":
+        \"[parameters('skuName')]\"\r\n                  },\r\n                  \"tenantId\":
+        {\r\n                    \"value\": \"[parameters('tenantId')]\"\r\n                  },\r\n
+        \                 \"aadObjectId\": {\r\n                    \"value\": \"[parameters('aadObjectId')]\"\r\n
+        \                 }\r\n                }\r\n              }\r\n            },\r\n
+        \           {\r\n              \"type\": \"Microsoft.KeyVault/vaults/secrets\",\r\n
+        \             \"apiVersion\": \"2018-02-14\",\r\n              \"name\": \"[concat(parameters('keyVaultName'),
+        '/mySecret')]\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"dependsOn\": [\r\n                \"keyVault\"\r\n              ],\r\n
+        \             \"properties\": {\r\n                \"value\": \"mySecretValue\"\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVaultWithSecret.json\",\r\n
+        \       \"kind\": \"template\"\r\n      }\r\n    ],\r\n    \"template\": {\r\n
+        \     \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"rgName\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"rgLocation\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"keyVaultName\":
+        {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"variables\":
+        {},\r\n      \"resources\": [\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
+        \         \"location\": \"[parameters('rgLocation')]\",\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createResourceGroup.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"rgName\": {\r\n                \"value\": \"[parameters('rgName')]\"\r\n
+        \             },\r\n              \"rgLocation\": {\r\n                \"value\":
+        \"[parameters('rgLocation')]\"\r\n              }\r\n            }\r\n          }\r\n
+        \       },\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
+        \         \"resourceGroup\": \"[parameters('rgName')]\",\r\n          \"dependsOn\":
+        [\r\n            \"deploymentRg\"\r\n          ],\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createKeyVaultWithSecret.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"keyVaultName\": {\r\n                \"value\": \"[parameters('keyVaultName')]\"\r\n
+        \             }\r\n            }\r\n          }\r\n        }\r\n      ],\r\n
+        \     \"outputs\": {}\r\n    }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '9362'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Sep 2020 14:12:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts export
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --version --output-folder
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-09-16T14:12:13.0447005Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:12:13.0447005Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
+        \           \"rgLocation\": {\r\n              \"type\": \"string\"\r\n            }\r\n
+        \         },\r\n          \"variables\": {},\r\n          \"resources\": [\r\n
+        \           {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"[parameters('rgName')]\",\r\n
+        \             \"location\": \"[parameters('rgLocation')]\",\r\n              \"properties\":
+        {}\r\n            }\r\n          ],\r\n          \"outputs\": {}\r\n        },\r\n
+        \       \"path\": \"artifacts\\\\createResourceGroup.json\",\r\n        \"kind\":
+        \"template\"\r\n      },\r\n      {\r\n        \"template\": {\r\n          \"$schema\":
+        \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.KeyVault/vaults\",\r\n
+        \             \"name\": \"[parameters('keyVaultName')]\",\r\n              \"apiVersion\":
+        \"2018-02-14\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"properties\": {\r\n                \"tenantId\": \"[parameters('tenantId')]\",\r\n
+        \               \"accessPolicies\": [\r\n                  {\r\n                    \"tenantId\":
+        \"[parameters('tenantId')]\",\r\n                    \"objectId\": \"[parameters('aadObjectId')]\",\r\n
+        \                   \"permissions\": {\r\n                      \"keys\":
+        [\r\n                        \"encrypt\",\r\n                        \"decrypt\",\r\n
+        \                       \"wrapKey\",\r\n                        \"unwrapKey\",\r\n
+        \                       \"sign\",\r\n                        \"verify\",\r\n
+        \                       \"get\",\r\n                        \"list\",\r\n
+        \                       \"create\",\r\n                        \"update\",\r\n
+        \                       \"import\",\r\n                        \"delete\",\r\n
+        \                       \"backup\",\r\n                        \"restore\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ],\r\n                      \"secrets\": [\r\n                        \"get\",\r\n
+        \                       \"list\",\r\n                        \"set\",\r\n
+        \                       \"delete\",\r\n                        \"backup\",\r\n
+        \                       \"restore\",\r\n                        \"recover\",\r\n
+        \                       \"purge\"\r\n                      ],\r\n                      \"certificates\":
+        [\r\n                        \"get\",\r\n                        \"list\",\r\n
+        \                       \"delete\",\r\n                        \"create\",\r\n
+        \                       \"import\",\r\n                        \"update\",\r\n
+        \                       \"managecontacts\",\r\n                        \"getissuers\",\r\n
+        \                       \"listissuers\",\r\n                        \"setissuers\",\r\n
+        \                       \"deleteissuers\",\r\n                        \"manageissuers\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ]\r\n                    }\r\n                  }\r\n
+        \               ],\r\n                \"sku\": {\r\n                  \"name\":
+        \"[parameters('skuName')]\",\r\n                  \"family\": \"A\"\r\n                },\r\n
+        \               \"networkAcls\": {\r\n                  \"defaultAction\":
+        \"Allow\",\r\n                  \"bypass\": \"AzureServices\"\r\n                }\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVault.json\",\r\n
+        \       \"kind\": \"template\"\r\n      },\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"keyVault\",\r\n
+        \             \"properties\": {\r\n                \"mode\": \"Incremental\",\r\n
+        \               \"templateLink\": {\r\n                  \"relativePath\":
+        \"createKeyVault.json\",\r\n                  \"contentVersion\": \"1.0.0.0\"\r\n
+        \               },\r\n                \"parameters\": {\r\n                  \"keyVaultName\":
+        {\r\n                    \"value\": \"[parameters('keyVaultName')]\"\r\n                  },\r\n
+        \                 \"location\": {\r\n                    \"value\": \"[parameters('location')]\"\r\n
+        \                 },\r\n                  \"skuName\": {\r\n                    \"value\":
+        \"[parameters('skuName')]\"\r\n                  },\r\n                  \"tenantId\":
+        {\r\n                    \"value\": \"[parameters('tenantId')]\"\r\n                  },\r\n
+        \                 \"aadObjectId\": {\r\n                    \"value\": \"[parameters('aadObjectId')]\"\r\n
+        \                 }\r\n                }\r\n              }\r\n            },\r\n
+        \           {\r\n              \"type\": \"Microsoft.KeyVault/vaults/secrets\",\r\n
+        \             \"apiVersion\": \"2018-02-14\",\r\n              \"name\": \"[concat(parameters('keyVaultName'),
+        '/mySecret')]\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"dependsOn\": [\r\n                \"keyVault\"\r\n              ],\r\n
+        \             \"properties\": {\r\n                \"value\": \"mySecretValue\"\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVaultWithSecret.json\",\r\n
+        \       \"kind\": \"template\"\r\n      }\r\n    ],\r\n    \"template\": {\r\n
+        \     \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"rgName\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"rgLocation\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"keyVaultName\":
+        {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"variables\":
+        {},\r\n      \"resources\": [\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
+        \         \"location\": \"[parameters('rgLocation')]\",\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createResourceGroup.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"rgName\": {\r\n                \"value\": \"[parameters('rgName')]\"\r\n
+        \             },\r\n              \"rgLocation\": {\r\n                \"value\":
+        \"[parameters('rgLocation')]\"\r\n              }\r\n            }\r\n          }\r\n
+        \       },\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
+        \         \"resourceGroup\": \"[parameters('rgName')]\",\r\n          \"dependsOn\":
+        [\r\n            \"deploymentRg\"\r\n          ],\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createKeyVaultWithSecret.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"keyVaultName\": {\r\n                \"value\": \"[parameters('keyVaultName')]\"\r\n
+        \             }\r\n            }\r\n          }\r\n        }\r\n      ],\r\n
+        \     \"outputs\": {}\r\n    }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '9362'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Sep 2020 14:12:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts export
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --template-spec --output-folder
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
+        \"2020-09-16T14:12:13.0447005Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:12:13.0447005Z\"\r\n
+        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
+        \           \"rgLocation\": {\r\n              \"type\": \"string\"\r\n            }\r\n
+        \         },\r\n          \"variables\": {},\r\n          \"resources\": [\r\n
+        \           {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"[parameters('rgName')]\",\r\n
+        \             \"location\": \"[parameters('rgLocation')]\",\r\n              \"properties\":
+        {}\r\n            }\r\n          ],\r\n          \"outputs\": {}\r\n        },\r\n
+        \       \"path\": \"artifacts\\\\createResourceGroup.json\",\r\n        \"kind\":
+        \"template\"\r\n      },\r\n      {\r\n        \"template\": {\r\n          \"$schema\":
+        \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.KeyVault/vaults\",\r\n
+        \             \"name\": \"[parameters('keyVaultName')]\",\r\n              \"apiVersion\":
+        \"2018-02-14\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"properties\": {\r\n                \"tenantId\": \"[parameters('tenantId')]\",\r\n
+        \               \"accessPolicies\": [\r\n                  {\r\n                    \"tenantId\":
+        \"[parameters('tenantId')]\",\r\n                    \"objectId\": \"[parameters('aadObjectId')]\",\r\n
+        \                   \"permissions\": {\r\n                      \"keys\":
+        [\r\n                        \"encrypt\",\r\n                        \"decrypt\",\r\n
+        \                       \"wrapKey\",\r\n                        \"unwrapKey\",\r\n
+        \                       \"sign\",\r\n                        \"verify\",\r\n
+        \                       \"get\",\r\n                        \"list\",\r\n
+        \                       \"create\",\r\n                        \"update\",\r\n
+        \                       \"import\",\r\n                        \"delete\",\r\n
+        \                       \"backup\",\r\n                        \"restore\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ],\r\n                      \"secrets\": [\r\n                        \"get\",\r\n
+        \                       \"list\",\r\n                        \"set\",\r\n
+        \                       \"delete\",\r\n                        \"backup\",\r\n
+        \                       \"restore\",\r\n                        \"recover\",\r\n
+        \                       \"purge\"\r\n                      ],\r\n                      \"certificates\":
+        [\r\n                        \"get\",\r\n                        \"list\",\r\n
+        \                       \"delete\",\r\n                        \"create\",\r\n
+        \                       \"import\",\r\n                        \"update\",\r\n
+        \                       \"managecontacts\",\r\n                        \"getissuers\",\r\n
+        \                       \"listissuers\",\r\n                        \"setissuers\",\r\n
+        \                       \"deleteissuers\",\r\n                        \"manageissuers\",\r\n
+        \                       \"recover\",\r\n                        \"purge\"\r\n
+        \                     ]\r\n                    }\r\n                  }\r\n
+        \               ],\r\n                \"sku\": {\r\n                  \"name\":
+        \"[parameters('skuName')]\",\r\n                  \"family\": \"A\"\r\n                },\r\n
+        \               \"networkAcls\": {\r\n                  \"defaultAction\":
+        \"Allow\",\r\n                  \"bypass\": \"AzureServices\"\r\n                }\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVault.json\",\r\n
+        \       \"kind\": \"template\"\r\n      },\r\n      {\r\n        \"template\":
+        {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+        \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
+        \           \"keyVaultName\": {\r\n              \"type\": \"string\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"type\": \"string\",\r\n
+        \             \"defaultValue\": \"[resourceGroup().location]\"\r\n            },\r\n
+        \           \"skuName\": {\r\n              \"type\": \"string\",\r\n              \"defaultValue\":
+        \"standard\"\r\n            },\r\n            \"tenantId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"[subscription().tenantId]\"\r\n
+        \           },\r\n            \"aadObjectId\": {\r\n              \"type\":
+        \"string\",\r\n              \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+        \           }\r\n          },\r\n          \"variables\": {},\r\n          \"resources\":
+        [\r\n            {\r\n              \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \             \"apiVersion\": \"2019-10-01\",\r\n              \"name\": \"keyVault\",\r\n
+        \             \"properties\": {\r\n                \"mode\": \"Incremental\",\r\n
+        \               \"templateLink\": {\r\n                  \"relativePath\":
+        \"createKeyVault.json\",\r\n                  \"contentVersion\": \"1.0.0.0\"\r\n
+        \               },\r\n                \"parameters\": {\r\n                  \"keyVaultName\":
+        {\r\n                    \"value\": \"[parameters('keyVaultName')]\"\r\n                  },\r\n
+        \                 \"location\": {\r\n                    \"value\": \"[parameters('location')]\"\r\n
+        \                 },\r\n                  \"skuName\": {\r\n                    \"value\":
+        \"[parameters('skuName')]\"\r\n                  },\r\n                  \"tenantId\":
+        {\r\n                    \"value\": \"[parameters('tenantId')]\"\r\n                  },\r\n
+        \                 \"aadObjectId\": {\r\n                    \"value\": \"[parameters('aadObjectId')]\"\r\n
+        \                 }\r\n                }\r\n              }\r\n            },\r\n
+        \           {\r\n              \"type\": \"Microsoft.KeyVault/vaults/secrets\",\r\n
+        \             \"apiVersion\": \"2018-02-14\",\r\n              \"name\": \"[concat(parameters('keyVaultName'),
+        '/mySecret')]\",\r\n              \"location\": \"[parameters('location')]\",\r\n
+        \             \"dependsOn\": [\r\n                \"keyVault\"\r\n              ],\r\n
+        \             \"properties\": {\r\n                \"value\": \"mySecretValue\"\r\n
+        \             }\r\n            }\r\n          ],\r\n          \"outputs\":
+        {}\r\n        },\r\n        \"path\": \"artifacts\\\\createKeyVaultWithSecret.json\",\r\n
+        \       \"kind\": \"template\"\r\n      }\r\n    ],\r\n    \"template\": {\r\n
+        \     \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"rgName\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"rgLocation\":
+        {\r\n          \"type\": \"string\"\r\n        },\r\n        \"keyVaultName\":
+        {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"variables\":
+        {},\r\n      \"resources\": [\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
+        \         \"location\": \"[parameters('rgLocation')]\",\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createResourceGroup.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"rgName\": {\r\n                \"value\": \"[parameters('rgName')]\"\r\n
+        \             },\r\n              \"rgLocation\": {\r\n                \"value\":
+        \"[parameters('rgLocation')]\"\r\n              }\r\n            }\r\n          }\r\n
+        \       },\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
+        \         \"resourceGroup\": \"[parameters('rgName')]\",\r\n          \"dependsOn\":
+        [\r\n            \"deploymentRg\"\r\n          ],\r\n          \"properties\":
+        {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
+        {\r\n              \"relativePath\": \"artifacts/createKeyVaultWithSecret.json\",\r\n
+        \             \"contentVersion\": \"1.0.0.0\"\r\n            },\r\n            \"parameters\":
+        {\r\n              \"keyVaultName\": {\r\n                \"value\": \"[parameters('keyVaultName')]\"\r\n
+        \             }\r\n            }\r\n          }\r\n        }\r\n      ],\r\n
+        \     \"outputs\": {}\r\n    }\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-export-template-spec000004/versions/1.0\",\r\n
+        \ \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n  \"name\":
+        \"1.0\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '9362'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Sep 2020 14:12:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

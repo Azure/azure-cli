@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "denyLocation": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    }
+  },
+  "variables": {
+      "policyDefinitionName": "policy-for-what-if-test"
+  },
+  "resources": [
+    {
+      "name": "[variables('policyDefinitionName')]",
+      "type": "Microsoft.Authorization/policyDefinitions",
+      "apiVersion": "2018-05-01",
+      "properties": {
+        "policyType": "Custom",
+        "policyRule": {
+          "if": {
+            "field": "location",
+            "equals": "[parameters('denyLocation')]"
+          },
+          "then": {
+            "effect": "deny"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "policyDefinitionId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Authorization/policyDefinitions', variables('policyDefinitionName'))]"
+    }
+  }
+}

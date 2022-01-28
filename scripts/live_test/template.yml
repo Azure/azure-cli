@@ -1,0 +1,103 @@
+# Some content of this file is generated.
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+schedules:
+- cron: "0 18 * * 5"
+  displayName: Weekly Friday test
+  branches:
+    include:
+    - CLITest
+  always: true
+
+jobs:
+- job: LiveTestPython38
+  displayName: Live Test Python 3.8
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 20
+    matrix:
+    {% for module in modules %}
+      {{module}}:
+        Target: {{module}}
+    {% endfor %}
+  pool:
+    vmImage: 'Ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || "$(USER_TARGET)" == "" ]]; then
+          echo "Match!"
+        else
+          echo "Not match!"
+          exit
+        fi
+        cd ..
+        pwd
+        ls
+        # ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+        git clone -b $(USER_BRANCH) $(USER_REPO)
+        #git clone https://github.com/Azure/azure-cli-extensions.git
+        python -m venv env
+        source env/bin/activate
+        pip install azdev
+        pip install pytest-json-report
+        pip install pytest-html
+        azdev setup -c azure-cli
+        # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
+        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        azdev test $(Target) $(USER_LIVE) --no-exitfirst -a "-n 8 --json-report --json-report-summary --json-report-file=$(Target).report.json --html=$(Target).report.html"
+        pwd
+        ls
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: '/home/vsts/.azdev/env_config/home/vsts/work/1/env/test_results.xml'
+        testRunTitle: 'Azure CLI live test results of $(Target)'
+        # mergeTestResults: true
+        # testResultsFormat: 'JUnit'
+    - task: PublishBuildArtifacts@1
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.json'
+        ArtifactName: '$(Target).report.json'
+        publishLocation: 'Container'
+    - task: PublishBuildArtifacts@1
+      condition: succeededOrFailed()
+      inputs:
+        PathtoPublish: '/home/vsts/work/1/$(Target).report.html'
+        ArtifactName: '$(Target).report.html'
+        publishLocation: 'Container'
+
+- job: SendEmail
+  displayName: Send email
+  dependsOn: LiveTestPython38
+  condition: succeededOrFailed()
+  pool:
+    vmImage: 'Ubuntu-20.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    - bash: |
+        echo $(System.ArtifactsDirectory)
+        ls $(System.ArtifactsDirectory)
+        pwd
+        commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
+        pip install sendgrid
+        # Send notification
+        python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)"

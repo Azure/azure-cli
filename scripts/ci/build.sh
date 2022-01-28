@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: hybrid-2019-03-01. Python module name can't begin with a digit.
     target_profile=hybrid_${target_profile//-/_}
 fi
-echo Pick up profile: $target_profile 
+echo Pick up profile: $target_profile
 
 ##############################################
 # Define colored output func
@@ -39,7 +39,7 @@ function title {
 # Update version strings
 title 'Determine version'
 . $script_dir/version.sh $1
-echo -n $version > ./artifacts/version
+# echo -n $version > ./artifacts/version
 
 ##############################################
 # build product packages
@@ -86,16 +86,13 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0.dev$version"
+VERSION = "1.0.0.$version"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -137,33 +134,40 @@ done
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/*.yaml',
-                       'data/*.zip',
-                       'data/*.whl',
-                       '*.zip',
+    package_data={'': ['*.bat',
+                       '*.byok',
+                       '*.cer',
+                       '*.js',
+                       '*.json',
+                       '*.kql',
+                       '*.md',
                        '*.pem',
                        '*.pfx',
+                       '*.sql',
                        '*.txt',
-                       '*.json',
-                       '*.byok',
-                       '*.js',
-                       '*.md',
-                       '*.bat',
                        '*.txt',
-                       '*.cer',
-                       '*.yml',
                        '*.xml',
+                       '*.yml',
+                       '*.zip',
+                       '**/*.bat',
+                       '**/*.byok',
                        '**/*.cer',
+                       '**/*.ipynb',
+                       '**/*.jar',
+                       '**/*.js',
+                       '**/*.json',
+                       '**/*.kql',
+                       '**/*.md',
                        '**/*.pem',
                        '**/*.pfx',
+                       '**/*.sql',
                        '**/*.txt',
-                       '**/*.json',
-                       '**/*.byok',
-                       '**/*.js',
-                       '**/*.md',
-                       '**/*.bat',
                        '**/*.txt',
-                       '**/*.xml']},
+                       '**/*.xml',
+                       'data/*.whl',
+                       'data/*.yaml',
+                       'data/*.zip',
+                       'recordings/*.yaml']},
     install_requires=DEPENDENCIES
 )
 EOL

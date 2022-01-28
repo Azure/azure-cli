@@ -20,7 +20,9 @@ If in doubt, ask!
 
 [7. Network Rule Commands](#network-rule-commands)
 
-[8. Coding Practices](#coding-practices)
+[8. Error Handling](#error-handling)
+
+[9. Coding Practices](#coding-practices)
 
 ## General Patterns
 
@@ -418,10 +420,13 @@ Virtual Network Rule Arguments
     --vnet-name                  : Name of a virtual network.
 ```
 
+## Error Handling
+
+Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md) to select a proper error type and write an actionable error message.
+
 ## Coding Practices
 
-- All code must support Python 2 & 3.
-The CLI supports 2.7, 3.5, 3.6, 3.7 and 3.8
+- All code must support Python 3.6, 3.7 and 3.8
 - PRs to Azure/azure-cli and Azure/azure-cli-extensions must pass CI
 - Code must pass style checks with pylint and pep8
 - (*) All commands should have tests

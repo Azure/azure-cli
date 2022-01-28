@@ -245,7 +245,7 @@ def find_models_to_change(module_name):
         return [
             importlib.import_module('.'+label+'.models', main_module.__name__)
             for (_, label, ispkg) in pkgutil.iter_modules(main_module.__path__)
-            if ispkg
+            if ispkg and label != 'aio'
         ]
 
 

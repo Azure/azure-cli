@@ -7,7 +7,7 @@ import os
 import tempfile
 import unittest
 import uuid
-import mock
+from unittest import mock
 
 from azure.cli.core.mock import DummyCli
 
@@ -134,7 +134,6 @@ class TestRoleMocked(unittest.TestCase):
         result = create_service_principal_for_rbac(cmd, name, 12, skip_assignment=True)
 
         # assert
-        self.assertEqual(result['name'], 'http://' + name)
         self.assertEqual(result['displayName'], name)
         self.assertEqual(result['appId'], test_app_id)
 
@@ -175,7 +174,6 @@ class TestRoleMocked(unittest.TestCase):
         result = create_service_principal_for_rbac(cmd, name, cert=cert, years=2, skip_assignment=True)
 
         # assert
-        self.assertEqual(result['name'], 'http://' + name)
         self.assertEqual(result['appId'], test_app_id)
         self.assertTrue(logger_mock.warning.called)  # we should warn 'years' will be dropped
         self.assertTrue(faked_graph_client.applications.create.called)
@@ -406,6 +404,29 @@ class TestRoleMocked(unittest.TestCase):
         for call, group in zip(graph_client.objects.get_objects_by_object_ids.call_args_list, object_groups):
             args, _ = call
             self.assertEqual(args[0].object_ids, group)
+
+    @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory')
+    @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory')
+    @mock.patch('azure.cli.command_modules.role.custom._create_service_principal')
+    @mock.patch('azure.cli.command_modules.role.custom.create_application')
+    def test_create_for_rbac_retry(self, create_application_mock, create_service_principal_mock,
+                                   graph_client_factory_mock, auth_client_factory_mock):
+        graph_client_factory_mock.return_value.config.tenant_id = '00000001-0000-0000-0000-000000000000'
+        create_application_mock.return_value.app_id = '00000000-0000-0000-0000-000000000000'
+        create_service_principal_mock.side_effect = [
+            # Mock replication exceptions
+            Exception("The appId '00000000-0000-0000-0000-000000000000' of the service principal "
+                      "does not reference a valid application object."),
+            Exception("When using this permission, the backing application of the service principal being "
+                      "created must in the local tenant"),
+            # Success
+            mock.MagicMock()
+        ]
+        # action
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with mock.patch("time.sleep", lambda _: None):
+            create_service_principal_for_rbac(cmd, skip_assignment=True)
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods

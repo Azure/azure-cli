@@ -9,13 +9,14 @@ import json
 import shutil
 import uuid
 import unittest
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
+
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+
+from unittest import mock
 import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, live_only
+from azure.cli.testsdk.decorators import serial_test
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
 
@@ -128,6 +129,40 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_be_idempotent_and_return_existing_bot_info(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+            'description': 'description1',
+            'endpoint': 'https://www.google.com/api/messages',
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id} -p '
+            '{password} --tags key1=value1',
+            checks=[
+                self.check('name', '{botname}'),
+                self.check('properties.description', '{description}'),
+                self.check('resourceGroup', '{rg}'),
+                self.check('location', 'global'),
+                self.check('tags.key1', 'value1')
+            ])
+
+    @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
+    @live_only()
     def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -172,6 +207,8 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
+    @live_only()
     def test_botservice_create_v4_js_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -221,6 +258,7 @@ class BotTests(ScenarioTest):
             'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @live_only()  # if the path to download already exist the tests fail as by design which makes this not idempotent
     def test_botservice_download_should_create_appsettings_for_v4_csharp_webapp_echo_bots_no_bot_file(self,
                                                                                                       resource_group):
         self.kwargs.update({
@@ -262,6 +300,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
+    @live_only()
     def test_botservice_download_should_create_env_file_for_v4_node_webapp_echo_bots_no_bot_file(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -300,6 +339,8 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
+    @live_only()
     def test_botservice_keep_node_modules_should_not_empty_node_modules_or_install_dependencies(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -336,40 +377,6 @@ class BotTests(ScenarioTest):
         ])
         # Clean up the folder
         shutil.rmtree(dir_path)
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        self.kwargs.update({
-            'botname': bot_name,
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
-                 '-e https://testurl.com/api/messages',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('type', 'Microsoft.BotService/botServices')
-                 })
-
-    @ResourceGroupPreparer(random_name_length=20)
-    def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
-        bot_name = self.create_random_name(prefix='cli.', length=15)
-        valid_bot_name = bot_name.replace(".", "")
-        self.kwargs.update({
-            'valid_bot_name': valid_bot_name,
-            'botname': bot_name,
-            'app_id': str(uuid.uuid4()),
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
-                 checks={
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('id', '{valid_bot_name}'),
-                     self.check('type', 'abs')
-                 })
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_create_registration_bot_without_endpoint(self, resource_group):
@@ -472,6 +479,7 @@ class BotTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
     def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -707,6 +715,7 @@ class BotTests(ScenarioTest):
             raise AssertionError('should have thrown an error for empty string passwords.')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(key='rg2', random_name_length=20)
     def test_botservice_should_throw_if_name_is_unavailable(self, resource_group):
         bot_name = self.create_random_name(prefix='cli', length=10)
         self.kwargs.update({
@@ -728,10 +737,10 @@ class BotTests(ScenarioTest):
 
         try:
             self.cmd(
-                'az bot create -k registration -g {rg} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
+                'az bot create -k registration -g {rg2} -n {botname} -d {description} -e {endpoint} --appid {app_id}')
             raise AssertionError()
         except CLIError as cli_error:
-            assert cli_error.__str__().startswith('Unable to create a bot with a name of "{0}".'.format(bot_name))
+            assert cli_error.__str__().startswith('Unable to create bot.\nReason: ')
         except AssertionError:
             raise AssertionError('should have thrown an error for unavailable name.')
 
@@ -768,6 +777,210 @@ class BotTests(ScenarioTest):
             if expected_text:
                 self.assertTrue(expected_text in text, "Bot response does not match expectation: " + text +
                                 expected_text)
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_update_bot_should_raise_mutuallyexclusiveargumenterror(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=10),
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} --appid {app_id}',
+            checks=[
+                self.check('name', '{botname}'),
+            ])
+
+        try:
+            self.cmd('az bot update -g {rg} -n {botname} --cmk-off --cmk-key-vault-key-url test.url')
+            raise AssertionError('should have thrown an error.')
+        except MutuallyExclusiveArgumentError:
+            pass
+        except AssertionError:
+            raise AssertionError('should have thrown an error for registration-type bot.')
+
+
+class BotLiveOnlyTests(LiveScenarioTest):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        self.kwargs.update({
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id} -p {password} '
+                 '-e https://testurl.com/api/messages',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('type', 'Microsoft.BotService/botServices')
+                 })
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_should_remove_invalid_char_from_name_when_webapp(self, resource_group):
+        bot_name = self.create_random_name(prefix='cli.', length=15)
+        valid_bot_name = bot_name.replace(".", "")
+        self.kwargs.update({
+            'valid_bot_name': valid_bot_name,
+            'botname': bot_name,
+            'app_id': str(uuid.uuid4()),
+            'password': str(uuid.uuid4())
+        })
+
+        self.cmd('az bot create -k webapp -g {rg} -n {botname} --appid {app_id} -p {password} --lang Javascript',
+                 checks={
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('id', '{valid_bot_name}'),
+                     self.check('type', 'abs')
+                 })
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_enable_encryption_then_disable(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'keyvaultname': self.create_random_name(prefix='keyVault', length=15),
+            'keyName': self.create_random_name(prefix='keyName', length=15),
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
+        self.cmd(
+            'az keyvault update --name {keyvaultname} -g {rg} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd(
+            'az keyvault set-policy --name {keyvaultname} --key-permissions get wrapKey unwrapKey --object-id a5c54cac-9ebb-45c5-81e5-29dabf2eb5ee')
+
+        resultAzKey = self.cmd(
+            'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software',
+            checks={
+                self.check('key', object)
+            })
+        resultAzKey = resultAzKey.get_output_in_json()
+        cmk_url = resultAzKey['key']['kid']
+
+        resultsCreate = self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} --appid {app_id} --cmk-key-vault-key-url ' + cmk_url,
+            checks={
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            })
+        resultsCreate = resultsCreate.get_output_in_json()
+        assert resultsCreate['properties']['cmekKeyVaultUrl'] == cmk_url
+        assert resultsCreate['properties']['isCmekEnabled'] is True
+
+        results = self.cmd('az bot update -g {rg} -n {botname} '
+                           '--cmk-off',
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        assert not results['properties']['cmekKeyVaultUrl']
+        assert results['properties']['isCmekEnabled'] is False
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_update_enable_cmk(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'keyvaultname': self.create_random_name(prefix='keyVault', length=15),
+            'keyName': self.create_random_name(prefix='keyName', length=15),
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        resultsCreate = self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id}',
+                                 checks={
+                                     self.check('resourceGroup', '{rg}'),
+                                     self.check('id', '{botname}'),
+                                     self.check('type', 'abs')
+                                 })
+        resultsCreate = resultsCreate.get_output_in_json()
+        assert resultsCreate['properties']['cmekKeyVaultUrl'] is None
+        assert resultsCreate['properties']['isCmekEnabled'] is False
+
+        self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
+        self.cmd(
+            'az keyvault update --name {keyvaultname} -g {rg} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd(
+            'az keyvault set-policy --name {keyvaultname} --key-permissions get wrapKey unwrapKey --object-id a5c54cac-9ebb-45c5-81e5-29dabf2eb5ee')
+
+        resultAzKey = self.cmd(
+            'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software')
+        resultAzKey = resultAzKey.get_output_in_json()
+        cmk_url = resultAzKey['key']['kid']
+
+        results = self.cmd('az bot update -g {rg} -n {botname} '
+                           '--cmk-key-vault-key-url ' + cmk_url,
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        assert results['properties']['cmekKeyVaultUrl'] == cmk_url
+        assert results['properties']['isCmekEnabled'] is True
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_webapp_enable_encryption_then_disable(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'keyvaultname': self.create_random_name(prefix='keyVault', length=15),
+            'keyName': self.create_random_name(prefix='keyName', length=15),
+            'pass': self.create_random_name(prefix='password.', length=15),
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
+        self.cmd(
+            'az keyvault update --name {keyvaultname} -g {rg} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd(
+            'az keyvault set-policy --name {keyvaultname} --key-permissions get wrapKey unwrapKey --object-id a5c54cac-9ebb-45c5-81e5-29dabf2eb5ee')
+
+        resultAzKey = self.cmd(
+            'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software',
+            checks={
+                self.check('key', object)
+            })
+        resultAzKey = resultAzKey.get_output_in_json()
+        cmk_url = resultAzKey['key']['kid']
+
+        self.cmd(
+            'az bot create -k webapp -g {rg} -n {botname} --appid {app_id} --echo --lang Csharp --password {pass} --cmk-key-vault-key-url ' + cmk_url,
+            checks={
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            })
+
+        resultShow = self.cmd(
+            'az bot show -g {rg} -n {botname}',
+            checks={
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}')
+            })
+
+        resultsShow = resultShow.get_output_in_json()
+        assert resultsShow['properties']['cmekKeyVaultUrl'] == cmk_url
+        assert resultsShow['properties']['isCmekEnabled'] is True
+
+        results = self.cmd('az bot update -g {rg} -n {botname} '
+                           '--cmk-off',
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        assert not results['properties']['cmekKeyVaultUrl']
+        assert results['properties']['isCmekEnabled'] is False
 
 
 class BotLocalErrorsTests(unittest.TestCase):

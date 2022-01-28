@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterPricingsTests(ScenarioTest):
@@ -15,14 +15,14 @@ class SecurityCenterPricingsTests(ScenarioTest):
 
         assert len(pricings) >= 0
 
-        self.cmd('az security pricing create -n default --tier free')
+        self.cmd('az security pricing create -n VirtualMachines --tier free')
 
-        pricing = self.cmd('az security pricing show -n default').get_output_in_json()
+        pricing = self.cmd('az security pricing show -n VirtualMachines').get_output_in_json()
 
         assert pricing["pricingTier"] == "Free"
 
-        self.cmd('az security pricing create -n default --tier standard')
+        self.cmd('az security pricing create -n VirtualMachines --tier standard')
 
-        pricing = self.cmd('az security pricing show -n default').get_output_in_json()
+        pricing = self.cmd('az security pricing show -n VirtualMachines').get_output_in_json()
 
         assert pricing["pricingTier"] == "Standard"

@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -316,8 +317,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
 
-        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {}', account_info,
-                                               c).output)
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry {}',
+                                               account_info, c, expiry).output)
 
         # verify delete operation
         self.storage_cmd('storage container delete --name {} --fail-not-exist', account_info, c) \
@@ -344,6 +347,22 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(Exception):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE, max_api='2018-11-09')
+    def test_storage_blob_suppress_400(self, resource_group, storage_account):
+        # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
+        # test 404
+        with self.assertRaises(SystemExit) as ex:
+            self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
+        self.assertEqual(ex.exception.code, 3)
+
+        # test 403
+        from azure.common import AzureException
+        with self.assertRaisesRegex(AzureException, "Authentication failure"):
+            self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
 if __name__ == '__main__':

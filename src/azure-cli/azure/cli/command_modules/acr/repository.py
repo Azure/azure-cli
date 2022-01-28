@@ -10,8 +10,8 @@ except ImportError:
 
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.util import user_confirmation
 
-from ._utils import user_confirmation
 from ._docker_utils import (
     request_data_from_registry,
     get_access_credentials,

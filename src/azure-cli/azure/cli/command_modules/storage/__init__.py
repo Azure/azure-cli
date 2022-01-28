@@ -8,12 +8,12 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import AzCommandGroup, AzArgumentContext
 
 import azure.cli.command_modules.storage._help  # pylint: disable=unused-import
+from knack.util import CLIError
 
 
 class StorageCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super(StorageCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.DATA_STORAGE,
@@ -22,14 +22,35 @@ class StorageCommandsLoader(AzCommandsLoader):
                                                     argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
-        super(StorageCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.storage.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(StorageCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.storage._params import load_arguments
+        load_arguments(self, command)
+
+
+class AzureStackStorageCommandsLoader(AzCommandsLoader):
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.commands import CliCommandType
+
+        storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
+        super(AzureStackStorageCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                              resource_type=ResourceType.DATA_STORAGE,
+                                                              custom_command_type=storage_custom,
+                                                              command_group_cls=AzureStackStorageCommandGroup,
+                                                              argument_context_cls=StorageArgumentContext)
+
+    def load_command_table(self, args):
+        super(AzureStackStorageCommandsLoader, self).load_command_table(args)
+        from azure.cli.command_modules.storage.commands_azure_stack import load_command_table
+        load_command_table(self, args)
+        return self.command_table
+
+    def load_arguments(self, command):
+        super(AzureStackStorageCommandsLoader, self).load_arguments(command)
+        from azure.cli.command_modules.storage._params_azure_stack import load_arguments
         load_arguments(self, command)
 
 
@@ -62,7 +83,9 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('content_disposition', default=None, arg_group=arg_group,
                    help='Conveys additional information about how to process the response payload, and can also be '
                         'used to attach additional metadata.')
-        self.extra('content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
+        self.extra('content_cache_control', options_list=['--content-cache-control', '--content-cache'],
+                   default=None, help='The cache control string.',
+                   arg_group=arg_group)
         self.extra('content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
         if update:
             self.extra('clear_content_settings', help='If this flag is set, then if any one or more of the '
@@ -86,25 +109,27 @@ class StorageArgumentContext(AzArgumentContext):
         self.ignore('file_name')
         self.ignore('directory_name')
 
-    def register_source_uri_arguments(self, validator, blob_only=False):
+    def register_source_uri_arguments(self, validator, blob_only=False, arg_group='Copy Source'):
         self.argument('copy_source', options_list=('--source-uri', '-u'), validator=validator, required=False,
-                      arg_group='Copy Source')
-        self.extra('source_sas', default=None, arg_group='Copy Source',
+                      arg_group=arg_group)
+        self.argument('source_url', options_list=('--source-uri', '-u'), validator=validator, required=False,
+                      arg_group=arg_group)
+        self.extra('source_sas', default=None, arg_group=arg_group,
                    help='The shared access signature for the source storage account.')
-        self.extra('source_container', default=None, arg_group='Copy Source',
+        self.extra('source_container', default=None, arg_group=arg_group,
                    help='The container name for the source storage account.')
-        self.extra('source_blob', default=None, arg_group='Copy Source',
+        self.extra('source_blob', default=None, arg_group=arg_group,
                    help='The blob name for the source storage account.')
-        self.extra('source_snapshot', default=None, arg_group='Copy Source',
+        self.extra('source_snapshot', default=None, arg_group=arg_group,
                    help='The blob snapshot for the source storage account.')
-        self.extra('source_account_name', default=None, arg_group='Copy Source',
+        self.extra('source_account_name', default=None, arg_group=arg_group,
                    help='The storage account name of the source blob.')
-        self.extra('source_account_key', default=None, arg_group='Copy Source',
+        self.extra('source_account_key', default=None, arg_group=arg_group,
                    help='The storage account key of the source blob.')
         if not blob_only:
-            self.extra('source_path', default=None, arg_group='Copy Source',
+            self.extra('source_path', default=None, arg_group=arg_group,
                        help='The file path for the source storage account.')
-            self.extra('source_share', default=None, arg_group='Copy Source',
+            self.extra('source_share', default=None, arg_group=arg_group,
                        help='The share name for the source storage account.')
 
     def register_common_storage_account_options(self):
@@ -133,6 +158,44 @@ class StorageArgumentContext(AzArgumentContext):
                           resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01', nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
+    def register_precondition_options(self, prefix=''):
+        from ._validators import (get_datetime_type)
+        self.extra('{}if_modified_since'.format(prefix), arg_group='Precondition',
+                   help="Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
+                   type=get_datetime_type(False))
+        self.extra('{}if_unmodified_since'.format(prefix), arg_group='Precondition',
+                   help="Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').",
+                   type=get_datetime_type(False))
+        self.extra('{}if_match'.format(prefix), arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the "
+                   "operation only if the resource's ETag matches the value specified.")
+        self.extra('{}if_none_match'.format(prefix), arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                   "the operation only if the resource's ETag does not match the value specified. Specify the wildcard "
+                   "character (*) to perform the operation only if the resource does not exist, and fail the operation "
+                   "if it does exist.")
+        self.extra('{}if_tags_match_condition'.format(prefix), arg_group='Precondition',
+                   options_list=['--{}tags-condition'.format(prefix.replace('_', '-'))],
+                   help='Specify a SQL where clause on blob tags to operate only on blobs with a matching value.')
+
+    def register_blob_arguments(self):
+        from ._validators import get_not_none_validator
+        self.extra('blob_name', required=True, validator=get_not_none_validator('blob_name'))
+        self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    def register_container_arguments(self):
+        from ._validators import get_not_none_validator
+        self.extra('container_name', required=True, validator=get_not_none_validator('container_name'))
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    def register_fs_directory_arguments(self):
+        self.extra('file_system_name', required=True, options_list=['-f', '--file-system'],
+                   help='File system name (i.e. container name).')
+        self.extra('directory_path', required=True, options_list=['-p', '--path'],
+                   help='The path to a file or directory in the specified file system.')
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
 
 class StorageCommandGroup(AzCommandGroup):
     def storage_command(self, name, method_name=None, command_type=None, oauth=False, generic_update=None, **kwargs):
@@ -148,9 +211,11 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_command(*args, oauth=True, **kwargs)
 
     def storage_custom_command(self, name, method_name, oauth=False, **kwargs):
@@ -158,19 +223,17 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_custom_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    def get_handler_suppress_some_400(self):
+    @classmethod
+    def get_handler_suppress_some_400(cls):
         def handler(ex):
-            from azure.cli.core.profiles import get_sdk
-
-            t_error = get_sdk(self.command_loader.cli_ctx,
-                              ResourceType.DATA_STORAGE,
-                              'common._error#AzureHttpError')
-            if isinstance(ex, t_error) and ex.status_code == 403:
+            if hasattr(ex, 'status_code') and ex.status_code == 403 and hasattr(ex, 'error_code'):
                 # TODO: Revisit the logic here once the service team updates their response
                 if ex.error_code == 'AuthorizationPermissionMismatch':
                     message = """
@@ -195,8 +258,22 @@ If you want to change the default action to apply when no rule matches, please u
 Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
                     """
                     ex.args = (message,)
-            if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
+            if hasattr(ex, 'status_code') and ex.status_code == 409\
+                    and hasattr(ex, 'error_code') and ex.error_code == 'NoPendingCopyOperation':
                 pass
+
+        return handler
+
+    @classmethod
+    def account_key_exception_handler(cls):
+        def handler(ex):
+            from azure.common import AzureException
+            from azure.core.exceptions import ClientAuthenticationError
+
+            if isinstance(ex, AzureException) and 'incorrect padding' in ex.args[0].lower():
+                raise CLIError('incorrect usage: the given account key may be not valid.')
+            if isinstance(ex, ClientAuthenticationError) and 'incorrect padding' in ex.args[0].lower():
+                raise CLIError('incorrect usage: the given account key may be not valid.')
 
         return handler
 
@@ -248,6 +325,42 @@ Authentication failure. This may be caused by either invalid account key, connec
                          'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
 
+class AzureStackStorageCommandGroup(StorageCommandGroup):
+
+    @classmethod
+    def get_handler_suppress_some_400(cls):
+        def handler(ex):
+            if hasattr(ex, 'status_code') and ex.status_code == 403:
+                # TODO: Revisit the logic here once the service team updates their response
+                if 'AuthorizationPermissionMismatch' in ex.args[0]:
+                    message = """
+You do not have the required permissions needed to perform this operation.
+Depending on your operation, you may need to be assigned one of the following roles:
+    "Storage Blob Data Contributor"
+    "Storage Blob Data Reader"
+    "Storage Queue Data Contributor"
+    "Storage Queue Data Reader"
+
+If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
+                    """
+                    ex.args = (message,)
+                elif 'AuthorizationFailure' in ex.args[0]:
+                    message = """
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
+                    """
+                    ex.args = (message,)
+                elif 'AuthenticationFailed' in ex.args[0]:
+                    message = """
+Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
+                    """
+                    ex.args = (message,)
+            if hasattr(ex, 'status_code') and ex.status_code == 409 and 'NoPendingCopyOperation' in ex.args[0]:
+                pass
+
+        return handler
+
+
 def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
@@ -259,4 +372,8 @@ def _merge_new_exception_handler(kwargs, handler):
     kwargs['exception_handler'] = new_handler
 
 
-COMMAND_LOADER_CLS = StorageCommandsLoader
+def get_command_loader(cli_ctx):
+    if cli_ctx.cloud.profile.lower() != 'latest':
+        return AzureStackStorageCommandsLoader
+
+    return StorageCommandsLoader

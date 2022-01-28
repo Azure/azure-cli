@@ -36,20 +36,35 @@ def show_cloud(cmd, cloud_name=None):
 
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
-
+    from azure.cli.core.cloud import CloudEndpointNotSetException
     if cloud_config:
         # Using JSON format so convert the keys to snake case
-        for key in cloud_config:
-            cloud_config[to_snake_case(key)] = cloud_config.pop(key)
-        cloud_args = cloud_config
+        cloud_args = {to_snake_case(k): v for k, v in cloud_config.items()}
     c = Cloud(cloud_name)
     c.profile = cloud_args.get('profile', None)
+    try:
+        endpoints = cloud_args['endpoints']
+        for arg in endpoints:
+            setattr(c.endpoints, to_snake_case(arg), endpoints[arg])
+    except KeyError:
+        pass
+    try:
+        suffixes = cloud_args['suffixes']
+        for arg in suffixes:
+            setattr(c.suffixes, to_snake_case(arg), suffixes[arg])
+    except KeyError:
+        pass
+
     for arg in cloud_args:
         if arg.startswith('endpoint_') and cloud_args[arg] is not None:
             setattr(c.endpoints, arg.replace('endpoint_', ''), cloud_args[arg])
         elif arg.startswith('suffix_') and cloud_args[arg] is not None:
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
-    arm_endpoint = cloud_args.get('endpoint_resource_manager', None)
+
+    try:
+        arm_endpoint = c.endpoints.resource_manager
+    except CloudEndpointNotSetException:
+        arm_endpoint = None
     try:
         _populate_from_metadata_endpoint(c, arm_endpoint)
     except MetadataEndpointError as err:

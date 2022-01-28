@@ -82,14 +82,21 @@ def validate_subnet(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    subnet = namespace.virtual_network_subnet_id
+    # Different custom function arg names, instance pool has subnet_id
+    is_instance_pool = False
+    if hasattr(namespace, "subnet_id"):
+        is_instance_pool = True
+        subnet = namespace.subnet_id
+    else:
+        subnet = namespace.virtual_network_subnet_id
+
     subnet_is_id = is_valid_resource_id(subnet)
     vnet = namespace.vnet_name
 
     if (subnet_is_id and not vnet) or (not subnet and not vnet):
         pass
     elif subnet and not subnet_is_id and vnet:
-        namespace.virtual_network_subnet_id = resource_id(
+        virtual_network_subnet_id = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
             namespace='Microsoft.Network',
@@ -97,9 +104,27 @@ def validate_subnet(cmd, namespace):
             name=vnet,
             child_type_1='subnets',
             child_name_1=subnet)
+        if is_instance_pool:
+            namespace.subnet_id = virtual_network_subnet_id
+        else:
+            namespace.virtual_network_subnet_id = virtual_network_subnet_id
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
+
+
+###############################################
+#                   sql db                    #
+###############################################
+
+def validate_backup_storage_redundancy(namespace):
+    # Validate if entered backup storage redundancy value is within allowed values
+    if (not namespace.requested_backup_storage_redundancy or
+            (namespace.requested_backup_storage_redundancy and
+             namespace.requested_backup_storage_redundancy in ['Local', 'Zone', 'Geo'])):
+        pass
+    else:
+        raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')
 
 
 ###############################################
@@ -113,3 +138,15 @@ def validate_managed_instance_storage_size(namespace):
         pass
     else:
         raise CLIError('incorrect usage: --storage must be specified in increments of 32 GB')
+
+
+def validate_backup_storage_redundancy_mi(namespace):
+    # Differentiating from validate_backup_storage_redundancy while Databases and
+    # ManagedInstances API use different properties for setting backup storage redundancy
+    # ie. "requested_backup_storage_redundancy" (Databases) vs. "storage_account_type" (ManagedInstances)
+    # Validate if entered backup storage redundancy value is within allowed values
+    if (not namespace.storage_account_type or
+            (namespace.storage_account_type and namespace.storage_account_type in ['LRS', 'ZRS', 'GRS'])):
+        pass
+    else:
+        raise CLIError('incorrect usage: --backup-storage-redundancy must be either Local, Zone or Geo')

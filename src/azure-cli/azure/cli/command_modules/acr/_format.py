@@ -50,6 +50,14 @@ def task_output_format(result):
     return _output_format(result, _task_format_group)
 
 
+def task_identity_format(result):
+    return _output_format(result, _task_identity_format_group)
+
+
+def taskrun_output_format(result):
+    return _output_format(result, _taskrun_format_group)
+
+
 def build_output_format(result):
     return _output_format(result, _build_format_group)
 
@@ -68,6 +76,66 @@ def token_output_format(result):
 
 def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
+
+
+def endpoints_output_format(result):
+    info = []
+    for e in result['dataEndpoints']:
+        info.append(OrderedDict([
+            ('loginServer', _get_value(result, 'loginServer')),
+            ('region', _get_value(e, 'region')),
+            ('endpoint', _get_value(e, 'endpoint'))
+        ]))
+    return info
+
+
+def agentpool_output_format(result):
+    return _output_format(result, _agentpool_format_group)
+
+
+def connected_registry_output_format(result):
+    return _output_format(result, _connected_registry_format_group)
+
+
+def connected_registry_list_output_format(result):
+    family_tree = {}
+    for reg in result:
+        parent_id = _get_value(reg, 'parent', 'id')
+        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
+        family_tree[_get_value(reg, 'id')] = {
+            "name": _get_value(reg, 'name'),
+            "id": _get_value(reg, 'id'),
+            "connectionState": _get_value(reg, 'connectionState'),
+            "parent_name": parent_name,
+            "parent_id": parent_id,
+            "loginServer_host": _get_value(reg, 'loginServer', 'host'),
+            "parent_syncProperties_lastSyncTime": _get_value(reg, 'parent', 'syncProperties', 'lastSyncTime'),
+            "mode": _get_value(reg, 'mode'),
+            "childs": []
+        }
+
+    roots = []
+    for reg in result:
+        parent_id = _get_value(reg, 'parent', 'id')
+        if parent_id.isspace() or parent_id not in family_tree:
+            roots.append(_get_value(reg, 'id'))
+        else:
+            family_tree[parent_id]["childs"].append(_get_value(reg, 'id'))
+
+    result_list_format = []
+    for connected_registry_id in roots:
+        result_list_format.extend(_recursive_format_list_acr_childs(family_tree, connected_registry_id))
+
+    return _output_format(result_list_format, _connected_registry_list_format_group)
+
+
+def _recursive_format_list_acr_childs(family_tree, connected_registry_id):
+    connected_registry = family_tree[connected_registry_id]
+    childs = connected_registry['childs']
+    result = [connected_registry]
+    for child_id in childs:
+        result.extend(_recursive_format_list_acr_childs(family_tree, child_id))
+    return result
 
 
 def helm_list_output_format(result):
@@ -184,6 +252,68 @@ def _task_format_group(item):
     ])
 
 
+def _task_identity_format_group(item):
+    identities = _get_array_value(item, 'userAssignedIdentities')
+    identities_by_line = str('\n'.join(identities)) if identities else ' '
+
+    return OrderedDict([
+        ('PRINCIPAL ID', _get_value(item, 'principalId')),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type')),
+        ('USER ASSIGNED IDENTITIES', identities_by_line)
+    ])
+
+
+def _taskrun_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('RUN ID', _get_value(item, 'runResult', 'runId')),
+        ('TASK', _get_value(item, 'runResult', 'task')),
+        ('PLATFORM', _get_value(item, 'runResult', 'platform', 'os')),
+        ('STATUS', _get_value(item, 'runResult', 'status')),
+        ('STARTED', _format_datetime(_get_value(item, 'runResult', 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'),
+                                   _get_value(item, 'runResult', 'finishTime')))
+    ])
+
+
+def _agentpool_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('COUNT', _get_value(item, 'count')),
+        ('TIER', _get_value(item, 'tier')),
+        ('STATE', _get_value(item, 'provisioningState')),
+        ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId')),
+        ('OS', _get_value(item, 'os'))
+    ])
+
+
+def _connected_registry_format_group(item):
+    parent_id = _get_value(item, 'parent', 'id')
+    parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('MODE', _get_value(item, 'mode')),
+        ('CONNECTION STATE', _get_value(item, 'connectionState')),
+        ('PARENT', parent_name),
+        ('LOGIN SERVER', _get_value(item, 'loginServer', 'host')),
+        ('LAST SYNC (UTC)', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
+        ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
+        ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow'))
+    ])
+
+
+def _connected_registry_list_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('MODE', _get_value(item, 'mode')),
+        ('CONNECTION STATE', _get_value(item, 'connectionState')),
+        ('PARENT', _get_value(item, 'parent_name')),
+        ('LOGIN SERVER', _get_value(item, 'loginServer_host')),
+        ('LAST SYNC (UTC)', _get_value(item, 'parent_syncProperties_lastSyncTime'))
+    ])
+
+
 def _build_format_group(item):
     return OrderedDict([
         ('BUILD ID', _get_value(item, 'buildId')),
@@ -193,7 +323,8 @@ def _build_format_group(item):
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
                                        _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
-        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+        ('DURATION', _get_duration(_get_value(item, 'startTime'),
+                                   _get_value(item, 'finishTime')))
     ])
 
 
@@ -301,7 +432,7 @@ def _get_value(item, *args):
     try:
         for arg in args:
             item = item[arg]
-        return str(item) if item else ' '
+        return str(item) if item or item == 0 else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

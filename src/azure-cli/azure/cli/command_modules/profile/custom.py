@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
+import os
 
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
@@ -52,34 +52,41 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    if not show_auth_for_sdk:
-        return profile.get_subscription(subscription)
 
-    # sdk-auth file should be in json format all the time, hence the print
-    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+    if show_auth_for_sdk:
+        from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING
+        logger.warning(CREDENTIAL_WARNING)
+        # sdk-auth file should be in json format all the time, hence the print
+        print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+        return
+
+    return profile.get_subscription(subscription)
 
 
-def get_access_token(cmd, subscription=None, resource=None, resource_type=None):
-    '''
-    get AAD token to access to a specified resource
-    :param resource: Azure resource endpoints. Default to Azure Resource Manager
-    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
+    """
+    get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
-    '''
-    if resource is None and resource_type is not None:
+    """
+    if resource is None and resource_type:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
-    else:
-        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
-    return {
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
+                                                        tenant=tenant)
+
+    result = {
         'tokenType': creds[0],
         'accessToken': creds[1],
-        'expiresOn': creds[2].get('expiresOn', 'N/A'),
-        'subscription': subscription,
+        # 'expires_on': creds[2].get('expires_on', None),
+        'expiresOn': creds[2]['expiresOn'],
         'tenant': tenant
     }
+    if subscription:
+        result['subscription'] = subscription
+
+    return result
 
 
 def set_active_subscription(cmd, subscription):
@@ -92,18 +99,18 @@ def set_active_subscription(cmd, subscription):
 
 def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
+    _remove_adal_token_cache()
+
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
     """Log in to access Azure subscriptions"""
-    from adal.adal_error import AdalError
-    import requests
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
@@ -117,17 +124,17 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
 
     if identity:
         if in_cloud_console():
-            return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(username, allow_no_subscriptions)
+            return profile.login_in_cloud_shell()
+        return profile.login_with_managed_identity(username, allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not password:
+        if not (password or client_assertion):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -135,37 +142,20 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     else:
         interactive = True
 
-    try:
-        subscriptions = profile.find_subscriptions_on_login(
-            interactive,
-            username,
-            password,
-            service_principal,
-            tenant,
-            use_device_code=use_device_code,
-            allow_no_subscriptions=allow_no_subscriptions,
-            use_cert_sn_issuer=use_cert_sn_issuer)
-    except AdalError as err:
-        # try polish unfriendly server errors
-        if username:
-            msg = str(err)
-            suggestion = "For cross-check, try 'az login' to authenticate through browser."
-            if ('ID3242:' in msg) or ('Server returned an unknown AccountType' in msg):
-                raise CLIError("The user name might be invalid. " + suggestion)
-            if 'Server returned error in RSTR - ErrorCode' in msg:
-                raise CLIError("Logging in through command line is not supported. " + suggestion)
-            if 'wstrust' in msg:
-                raise CLIError("Authentication failed due to error of '" + msg + "' "
-                               "This typically happens when attempting a Microsoft account, which requires "
-                               "interactive login. Please invoke 'az login' to cross check. "
-                               # pylint: disable=line-too-long
-                               "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
-        raise CLIError(err)
-    except requests.exceptions.SSLError as err:
-        from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
-    except requests.exceptions.ConnectionError as err:
-        raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+    if service_principal:
+        from azure.cli.core.auth.identity import ServicePrincipalAuth
+        password = ServicePrincipalAuth.build_credential(password, client_assertion, use_cert_sn_issuer)
+
+    subscriptions = profile.login(
+        interactive,
+        username,
+        password,
+        service_principal,
+        tenant,
+        scopes=scopes,
+        use_device_code=use_device_code,
+        allow_no_subscriptions=allow_no_subscriptions,
+        use_cert_sn_issuer=use_cert_sn_issuer)
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
@@ -174,6 +164,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
 def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
+    _remove_adal_token_cache()
+
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
 
@@ -203,6 +195,7 @@ def check_cli(cmd):
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_commands'] = ex
         logger.error('Error occurred loading commands!\n')
+        raise ex
 
     print('Retrieving all help...')
     try:
@@ -211,8 +204,21 @@ def check_cli(cmd):
     except Exception as ex:  # pylint: disable=broad-except
         exceptions['load_help'] = ex
         logger.error('Error occurred loading help!\n')
+        raise ex
 
     if not exceptions:
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
+
+
+def _remove_adal_token_cache():
+    """Remove ADAL token cache file ~/.azure/accessTokens.json, as it is no longer needed by MSAL-based Azure CLI.
+    """
+    from azure.cli.core._environment import get_config_dir
+    adal_token_cache = os.path.join(get_config_dir(), 'accessTokens.json')
+    try:
+        os.remove(adal_token_cache)
+        return True  # Deleted
+    except FileNotFoundError:
+        return False  # Not exist

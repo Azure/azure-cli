@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
 
 
-class MultiAPIAdaptor(object):
+class MultiAPIAdaptor:
     # We will bridge all the code difference here caused by SDK breaking changes
     def __init__(self, cli_ctx):
         self.old_api = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION,
@@ -30,8 +30,7 @@ class MultiAPIAdaptor(object):
         return [self._init_individual_permission(role_definition_input)]
 
     def create_role_definition(self, client, role_name, role_id, role_definition_input):
-        RoleDefinitionBase = get_sdk(self.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                     'RoleDefinitionProperties' if self.old_api else 'RoleDefinition',
+        RoleDefinitionBase = get_sdk(self.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleDefinition',
                                      mod='models', operation_group='role_definitions')
         role_configuration = RoleDefinitionBase(role_name=role_name,
                                                 description=role_definition_input.get('description', None),
@@ -39,11 +38,10 @@ class MultiAPIAdaptor(object):
                                                 assignable_scopes=role_definition_input['assignableScopes'],
                                                 permissions=self._init_permissions(role_definition_input))
         scope = role_definition_input['assignableScopes'][0]
-        if self.old_api:
-            return client.create_or_update(role_definition_id=role_id, scope=scope, properties=role_configuration)
         return client.create_or_update(role_definition_id=role_id, scope=scope, role_definition=role_configuration)
 
-    def create_role_assignment(self, client, assignment_name, role_id, object_id, scope, assignee_principal_type=None):
+    def create_role_assignment(self, client, assignment_name, role_id, object_id, scope, assignee_principal_type=None,
+                               description=None, condition=None, condition_version=None):
         RoleAssignmentCreateParameters = get_sdk(
             self.cli_ctx, ResourceType.MGMT_AUTHORIZATION,
             'RoleAssignmentProperties' if self.old_api else 'RoleAssignmentCreateParameters',
@@ -51,25 +49,41 @@ class MultiAPIAdaptor(object):
         parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
         if assignee_principal_type:
             parameters.principal_type = assignee_principal_type
+        if description:
+            parameters.description = description
+        if condition:
+            parameters.condition = condition
+        if condition_version:
+            parameters.condition_version = condition_version
         return client.create(scope, assignment_name, parameters)
 
-    def get_role_property(self, obj, property_name):
-        if self.old_api:
-            if isinstance(obj, dict):
-                obj = obj['properties']
-            else:
-                obj = obj.properties
+    def get_role_property(self, obj, property_name):  # pylint: disable=no-self-use
+        """Get property for RoleDefinition and RoleAssignment object."""
+        # 2015-07-01          RoleDefinition: flattened, RoleAssignment: unflattened
+        # 2018-01-01-preview  RoleDefinition: flattened
+        # 2020-04-01-preview                             RoleAssignment: flattened
+        # Get property_name from properties if the model is unflattened.
         if isinstance(obj, dict):
+            if 'properties' in obj:
+                obj = obj['properties']
             return obj[property_name]
+
+        if hasattr(obj, 'properties'):
+            obj = obj.properties
         return getattr(obj, property_name)
 
-    def set_role_property(self, obj, property_name, property_value):
-        if self.old_api:
-            if isinstance(obj, dict):
-                obj = obj['properties']
-            else:
-                obj = obj.properties
+    def set_role_property(self, obj, property_name, property_value):  # pylint: disable=no-self-use
+        """Set property for RoleDefinition and RoleAssignment object.
+        Luckily this function is only called for an RoleAssignment `obj` returned by the service, and `properties`
+         has been processed, either by being flattened or set. We can definitively know whether `obj` is flattened
+         or not.
+        There is NO use case where `obj` is provided by the user and `properties` has not been processed.
+         In such case, we won't be able to decide if `obj` is flattened or not."""
         if isinstance(obj, dict):
+            if 'properties' in obj:
+                obj = obj['properties']
             obj[property_name] = property_value
         else:
+            if hasattr(obj, 'properties'):
+                obj = obj.properties
             obj.property_name = property_value

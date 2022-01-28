@@ -4,17 +4,15 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, record_only)
+                               StorageAccountPreparer, api_version_constraint)
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@record_only()
 @api_version_constraint(ResourceType.DATA_STORAGE, min_api='2017-11-09')
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    def oauth_cmd(self, cmd, *args, **kwargs):
-        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
-
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer()
     def test_storage_blob_oauth(self, resource_group, storage_account):
@@ -27,7 +25,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             'blob': self.create_random_name(prefix='blob', length=20)
         })
 
-        self.oauth_cmd('storage container create -n {container} --account-name {account}', checks=[
+        self.oauth_cmd('storage container create -n {container} --account-name {account} --public-access off', checks=[
             JMESPathCheck('created', True)])
 
         # # upload a blob
@@ -58,9 +56,6 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                        checks=[JMESPathCheck('created', True)])
         self.oauth_cmd('storage queue exists -n {queue} --account-name {account}', checks=[
             JMESPathCheck('exists', True)])
-
-        res = self.oauth_cmd('storage queue list --account-name {account}').get_output_in_json()
-        self.assertIn(self.kwargs.get('queue'), [x['name'] for x in res], 'The newly created queue is not listed.')
 
         self.oauth_cmd('storage queue metadata show -n {queue} --account-name {account}', checks=[
             JMESPathCheck('a', 'b'),

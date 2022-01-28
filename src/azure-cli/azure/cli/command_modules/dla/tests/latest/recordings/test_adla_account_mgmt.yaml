@@ -1,1283 +1,2129 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"location": "eastus2", "properties": {"encryptionState": "Disabled"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['50']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001?api-version=2019-07-01
-  response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001","name":"cli_test_adla_mgmt000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['328']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:40:18 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1183']
-    status: {code: 201, message: Created}
-- request:
-    body: !!python/unicode '{"location": "eastus2", "properties": {"encryptionState":
-      "Disabled"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Length: ['70']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '70'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"663df726-fddc-4ab6-9bd4-da3cd3f4998d"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
+    body:
+      string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"813f5c63-02dc-44f4-9ecf-70edd14bb7e4"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/663df726-fddc-4ab6-9bd4-da3cd3f4998d0?api-version=2016-11-01&expanded=true']
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['447']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:40:20 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002/operationresults/0?api-version=2016-11-01']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/813f5c63-02dc-44f4-9ecf-70edd14bb7e4_0?api-version=2016-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '447'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:28:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002/operationresults/0?api-version=2016-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1192'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/663df726-fddc-4ab6-9bd4-da3cd3f4998d0?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/813f5c63-02dc-44f4-9ecf-70edd14bb7e4_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"InProgress"}'}
+    body:
+      string: '{"status":"InProgress","startTime":"2021-09-09T04:28:00.7566534Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['23']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:40:31 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:28:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/663df726-fddc-4ab6-9bd4-da3cd3f4998d0?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/813f5c63-02dc-44f4-9ecf-70edd14bb7e4_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"Succeeded"}'}
+    body:
+      string: '{"status":"Succeeded","startTime":"2021-09-09T04:28:00.7566534Z","endTime":"2021-09-09T04:28:44.2411849Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['22']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:28:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"663df726-fddc-4ab6-9bd4-da3cd3f4998d","creationTime":"2017-12-26T23:40:22.1899322Z","lastModifiedTime":"2017-12-26T23:40:22.1899322Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000002.azuredatalakestore.net","accountId":"813f5c63-02dc-44f4-9ecf-70edd14bb7e4","creationTime":"2021-09-09T04:28:02.4878156Z","lastModifiedTime":"2021-09-09T04:28:02.4878156Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['865']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:02 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '907'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:28:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"location": "eastus2", "properties": {"encryptionState":
-      "Disabled"}}'
+    body: '{"location": "eastus2", "properties": {"encryptionState": "Disabled"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Length: ['70']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '70'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"0eab0dab-15e3-4e15-af9e-7655f6b84984"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'}
+    body:
+      string: '{"properties":{"encryptionState":"Disabled","provisioningState":"Creating","state":null,"endpoint":null,"accountId":"f171bb45-93c5-4253-85c2-940d28fa9a13"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/0eab0dab-15e3-4e15-af9e-7655f6b849840?api-version=2016-11-01&expanded=true']
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['447']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:03 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/operationresults/0?api-version=2016-11-01']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1186']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/f171bb45-93c5-4253-85c2-940d28fa9a13_0?api-version=2016-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '447'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:28:55 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003/operationresults/0?api-version=2016-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1182'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/0eab0dab-15e3-4e15-af9e-7655f6b849840?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/f171bb45-93c5-4253-85c2-940d28fa9a13_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"InProgress"}'}
+    body:
+      string: '{"status":"InProgress","startTime":"2021-09-09T04:28:54.5381093Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['23']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:15 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:29:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/0eab0dab-15e3-4e15-af9e-7655f6b849840?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeStore/locations/eastus2/operationResults/f171bb45-93c5-4253-85c2-940d28fa9a13_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"Succeeded"}'}
+    body:
+      string: '{"status":"Succeeded","startTime":"2021-09-09T04:28:54.5381093Z","endTime":"2021-09-09T04:29:24.9757744Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['22']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:29:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dls account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakestoreaccountmanagementclient/0.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dls account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --disable-encryption
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        azure-mgmt-datalake-store/0.5.0 Azure-SDK-For-Python AZURECLI/2.28.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"0eab0dab-15e3-4e15-af9e-7655f6b84984","creationTime":"2017-12-26T23:41:04.0835595Z","lastModifiedTime":"2017-12-26T23:41:04.0835595Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallAllowDataLakeAnalytics":"Disabled","firewallRules":[],"virtualNetworkRules":[],"trustedIdProviderState":"Disabled","trustedIdProviders":[],"encryptionState":"Disabled","encryptionConfig":{},"currentTier":"Consumption","newTier":"Consumption","dataLakePerformanceTierState":"Disabled","provisioningState":"Succeeded","state":"Active","endpoint":"cliadls000003.azuredatalakestore.net","accountId":"f171bb45-93c5-4253-85c2-940d28fa9a13","creationTime":"2021-09-09T04:28:55.2492262Z","lastModifiedTime":"2021-09-09T04:28:55.2492262Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeStore/accounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeStore/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['865']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:41:45 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '907'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:29:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"sku": {"name": "Standard_GRS"}, "kind": "Storage", "location":
-      "eastus2", "properties": {"supportsHttpsTrafficOnly": false}}'
+    body: '{"sku": {"name": "Standard_GRS"}, "kind": "StorageV2", "location": "eastus2",
+      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account create]
-      Connection: [keep-alive]
-      Content-Length: ['126']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --sku
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005?api-version=2021-06-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:41:47 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/1c1e8022-f94d-4e04-96b3-3ede50b742b3?monitor=true&api-version=2017-10-01']
-      pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1185']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Thu, 09 Sep 2021 04:29:51 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/ac2ea222-5223-471e-9aa4-1c5d405f7aa9?monitor=true&api-version=2021-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1176'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --sku
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/1c1e8022-f94d-4e04-96b3-3ede50b742b3?monitor=true&api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2/asyncoperations/ac2ea222-5223-471e-9aa4-1c5d405f7aa9?monitor=true&api-version=2021-06-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005","kind":"Storage","location":"eastus2","name":"cliwasb000005","properties":{"creationTime":"2017-12-26T23:41:47.6225299Z","encryption":{"keySource":"Microsoft.Storage","services":{"blob":{"enabled":true,"lastEnabledTime":"2017-12-26T23:41:47.6255314Z"},"file":{"enabled":true,"lastEnabledTime":"2017-12-26T23:41:47.6255314Z"}}},"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://cliwasb000005.blob.core.windows.net/","file":"https://cliwasb000005.file.core.windows.net/","queue":"https://cliwasb000005.queue.core.windows.net/","table":"https://cliwasb000005.table.core.windows.net/"},"primaryLocation":"eastus2","provisioningState":"Succeeded","secondaryLocation":"centralus","statusOfPrimary":"available","statusOfSecondary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_GRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
-
-        '}
+    body:
+      string: '{"sku":{"name":"Standard_GRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"keyCreationTime":{"key1":"2021-09-09T04:29:50.0165153Z","key2":"2021-09-09T04:29:50.0165153Z"},"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-09T04:29:50.0165153Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2021-09-09T04:29:50.0165153Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2021-09-09T04:29:49.9071285Z","primaryEndpoints":{"dfs":"https://cliwasb000005.dfs.core.windows.net/","web":"https://cliwasb000005.z20.web.core.windows.net/","blob":"https://cliwasb000005.blob.core.windows.net/","queue":"https://cliwasb000005.queue.core.windows.net/","table":"https://cliwasb000005.table.core.windows.net/","file":"https://cliwasb000005.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available","secondaryLocation":"centralus","statusOfSecondary":"available"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1164']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:04 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1515'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:30:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [storage account keys list]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.Storage/storageAccounts/cliwasb000005/listKeys?api-version=2021-06-01&$expand=kerb
   response:
-    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"6b02yPoTkUJEQHz8oIZktTCCaAzRdcZtRxb0860ntxMPJoE/owceFPb+q7O+J2o64nX+V91dSUVmig7WWQSmaA=="},{"keyName":"key2","permissions":"Full","value":"fi1VuWojoqX6H7zDwtMrED+pcYwHCOwhauMzw+Di+uupEqYglP0ziyRdk20B4yq1spmadHd8JZQxS2Vt06rZOw=="}]}
-
-        '}
+    body:
+      string: '{"keys":[{"creationTime":"2021-09-09T04:29:50.0165153Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-09-09T04:29:50.0165153Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['289']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:05 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:30:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11994'
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"queryStoreRetention": 30, "maxDegreeOfParallelism":
-      30, "maxJobCount": 3, "dataLakeStoreAccounts": [{"name": "cliadls000002"}],
-      "defaultDataLakeStoreAccount": "cliadls000002"}, "location": "eastus2"}'
+    body: '{"location": "eastus2", "properties": {"defaultDataLakeStoreAccount": "cliadls000002",
+      "maxDegreeOfParallelism": 30, "queryStoreRetention": 30, "maxJobCount": 3, "dataLakeStoreAccounts":
+      [{"name": "cliadls000002"}]}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account create]
-      Connection: [keep-alive]
-      Content-Length: ['214']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '214'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --default-data-lake-store
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"maxDegreeOfParallelism":30,"maxJobCount":3,"queryStoreRetention":30,"provisioningState":"Creating","state":null,"endpoint":null,"accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'}
+    body:
+      string: '{"properties":{"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"maxDegreeOfParallelism":30,"maxJobCount":3,"queryStoreRetention":30,"provisioningState":"Creating","state":null,"endpoint":null,"accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/1a2aac57-2b22-40ab-afa9-9f643728385b0?api-version=2016-11-01&expanded=true']
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['639']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:07 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/operationresults/0?api-version=2016-11-01']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
-      x-powered-by: [ASP.NET]
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/8631c52b-1f35-449c-9646-ea4644a22a9a_0?api-version=2016-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:30:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/operationresults/0?api-version=2016-11-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1185'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --default-data-lake-store
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/1a2aac57-2b22-40ab-afa9-9f643728385b0?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/8631c52b-1f35-449c-9646-ea4644a22a9a_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"InProgress"}'}
+    body:
+      string: '{"status":"InProgress","startTime":"2021-09-09T04:30:15.4388807Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['23']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:18 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:30:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --default-data-lake-store
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/1a2aac57-2b22-40ab-afa9-9f643728385b0?api-version=2016-11-01&expanded=true
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/locations/eastus2/operationResults/8631c52b-1f35-449c-9646-ea4644a22a9a_0?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"status":"Succeeded"}'}
+    body:
+      string: '{"status":"Succeeded","startTime":"2021-09-09T04:30:15.4388807Z","endTime":"2021-09-09T04:30:46.0017352Z"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['22']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account create
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --default-data-lake-store
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","debugDataAccessLevel":"All","firewallRules":[],"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:10.1981154Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallRules":[],"virtualNetworkRules":[],"debugDataAccessLevel":"All","defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:30:17.514391Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['1300']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1323'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","debugDataAccessLevel":"All","firewallRules":[],"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:10.1981154Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Disabled","firewallAllowAzureIps":"Disabled","firewallRules":[],"virtualNetworkRules":[],"debugDataAccessLevel":"All","defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:30:17.514391Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['1300']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1323'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:10.1981154Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}]}'}
+    body:
+      string: '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:30:17.514391Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['576']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '574'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataLakeAnalytics/accounts?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:10.1981154Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"},{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"tjpdla1.azuredatalakeanalytics.net","accountId":"9606f5ce-6875-49c5-bf30-4db53bb632b0","creationTime":"2017-12-26T23:16:38.0044962Z","lastModifiedTime":"2017-12-26T23:16:38.0044962Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.DataLakeAnalytics/accounts/tjpdla1","name":"tjpdla1","type":"Microsoft.DataLakeAnalytics/accounts"}]}'}
+    body:
+      string: '{"value":[{"properties":{"provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:30:17.514391Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['1057']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '574'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"queryStoreRetention": 15, "firewallState":
-      "Enabled", "maxDegreeOfParallelism": 15, "maxJobCount": 2, "firewallAllowAzureIps":
-      "Enabled"}}'
+    body: '{"properties": {"maxDegreeOfParallelism": 15, "queryStoreRetention": 15,
+      "maxJobCount": 2, "firewallState": "Enabled", "firewallAllowAzureIps": "Enabled"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account update]
-      Connection: [keep-alive]
-      Content-Length: ['155']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '155'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --firewall-state --max-degree-of-parallelism --max-job-count --query-store-retention
+        --allow-azure-ips
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Enabled","debugDataAccessLevel":"All","firewallRules":[],"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:53.5707351Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Enabled","firewallRules":[],"virtualNetworkRules":[],"debugDataAccessLevel":"All","defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"storageAccounts":[],"maxDegreeOfParallelism":30,"maxJobCount":3,"maxDegreeOfParallelismPerJob":30,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":30,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:31:12.3565178Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['1055']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1182']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1079'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1183'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Enabled","debugDataAccessLevel":"All","firewallRules":[],"defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":15,"maxJobCount":2,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":15,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":15,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"1a2aac57-2b22-40ab-afa9-9f643728385b","creationTime":"2017-12-26T23:42:10.1981154Z","lastModifiedTime":"2017-12-26T23:42:53.5707351Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'}
+    body:
+      string: '{"properties":{"firewallState":"Enabled","firewallAllowAzureIps":"Enabled","firewallRules":[],"virtualNetworkRules":[],"debugDataAccessLevel":"All","defaultDataLakeStoreAccount":"cliadls000002","dataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"cliadls000002"}],"publicDataLakeStoreAccounts":[{"properties":{"suffix":"azuredatalakestore.net"},"name":"adltrainingsampledata"},{"properties":{"suffix":"azuredatalakestore.net"},"name":"ghinsights"}],"storageAccounts":[],"maxDegreeOfParallelism":15,"maxJobCount":2,"systemMaxDegreeOfParallelism":100,"systemMaxJobCount":20,"maxDegreeOfParallelismPerJob":15,"minPriorityPerJob":1,"computePolicies":[],"queryStoreRetention":15,"hiveMetastores":[],"currentTier":"Consumption","newTier":"Consumption","provisioningState":"Succeeded","state":"Active","endpoint":"cliadla000004.azuredatalakeanalytics.net","accountId":"8631c52b-1f35-449c-9646-ea4644a22a9a","creationTime":"2021-09-09T04:30:17.514391Z","lastModifiedTime":"2021-09-09T04:31:12.3565178Z"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004","name":"cliadla000004","type":"Microsoft.DataLakeAnalytics/accounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['1298']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1322'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"accessKey": "6b02yPoTkUJEQHz8oIZktTCCaAzRdcZtRxb0860ntxMPJoE/owceFPb+q7O+J2o64nX+V91dSUVmig7WWQSmaA=="}}'
+    body: '{"properties": {"accessKey": "veryFakedStorageAccountKey=="}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account blob-storage add]
-      Connection: [keep-alive]
-      Content-Length: ['121']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account blob-storage add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '121'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --storage-account-name --access-key
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/StorageAccounts/cliwasb000005?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}'}
+    body:
+      string: '{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['367']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:54 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '367'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account blob-storage show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account blob-storage show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --storage-account-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/StorageAccounts/cliwasb000005?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}'}
+    body:
+      string: '{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['367']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:54 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '367'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account blob-storage list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account blob-storage list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/StorageAccounts/?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}]}'}
+    body:
+      string: '{"value":[{"properties":{"suffix":"core.windows.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/storageAccounts/cliwasb000005","name":"cliwasb000005","type":"Microsoft.DataLakeAnalytics/accounts/storageAccounts"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['379']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:55 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '379'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account blob-storage delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account blob-storage delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --storage-account-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/StorageAccounts/cliwasb000005?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:42:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1185']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 09 Sep 2021 04:31:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14996'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account blob-storage list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account blob-storage list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/StorageAccounts/?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body:
+      string: '{"value":[]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['12']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:58 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account data-lake-store add]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account data-lake-store add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --data-lake-store-account-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/DataLakeStoreAccounts/cliadls000003?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}'}
+    body:
+      string: '{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['385']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '385'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1187'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account data-lake-store show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account data-lake-store show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --data-lake-store-account-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/DataLakeStoreAccounts/cliadls000003?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}'}
+    body:
+      string: '{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['385']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '385'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account data-lake-store list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account data-lake-store list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/DataLakeStoreAccounts/?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"},{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}]}'}
+    body:
+      string: '{"value":[{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"},{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000003","name":"cliadls000003","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['783']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:42:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '783'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account data-lake-store delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account data-lake-store delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --data-lake-store-account-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/DataLakeStoreAccounts/cliadls000003?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:43:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1183']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 09 Sep 2021 04:31:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14993'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account data-lake-store list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account data-lake-store list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/DataLakeStoreAccounts/?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}]}'}
+    body:
+      string: '{"value":[{"properties":{"suffix":"azuredatalakestore.net"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/dataLakeStoreAccounts/cliadls000002","name":"cliadls000002","type":"Microsoft.DataLakeAnalytics/accounts/dataLakeStoreAccounts"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['397']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:02 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '397'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"objectType": "User", "objectId": "8ce05900-7a9e-4895-b3f0-0fbcee507803",
-      "maxDegreeOfParallelismPerJob": 2}}'
+    body: '{"properties": {"objectId": "181c08fa-7ac8-48a6-a869-342ab74566a4", "objectType":
+      "User", "maxDegreeOfParallelismPerJob": 2}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy create]
-      Connection: [keep-alive]
-      Content-Length: ['125']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '125'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --compute-policy-name --object-id --object-type --max-dop-per-job
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"objectId":"8ce05900-7a9e-4895-b3f0-0fbcee507803","objectType":"User","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'}
+    body:
+      string: '{"properties":{"objectId":"181c08fa-7ac8-48a6-a869-342ab74566a4","objectType":"User","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['448']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:06 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1183']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '448'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1191'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --compute-policy-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"objectId":"8ce05900-7a9e-4895-b3f0-0fbcee507803","objectType":"User","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'}
+    body:
+      string: '{"properties":{"objectId":"181c08fa-7ac8-48a6-a869-342ab74566a4","objectType":"User","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['448']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:07 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '448'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"objectType": "Group", "objectId": "0583cfd7-60f5-43f0-9597-68b85591fc69",
-      "maxDegreeOfParallelismPerJob": 2}}'
+    body: '{"properties": {"objectId": "f0bec09f-45a4-4c58-ac5b-cf0516d7bc68", "objectType":
+      "Group", "maxDegreeOfParallelismPerJob": 2}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy create]
-      Connection: [keep-alive]
-      Content-Length: ['126']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '126'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --compute-policy-name --object-id --object-type --max-dop-per-job
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"objectId":"0583cfd7-60f5-43f0-9597-68b85591fc69","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'}
+    body:
+      string: '{"properties":{"objectId":"f0bec09f-45a4-4c58-ac5b-cf0516d7bc68","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['451']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:09 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '451'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1182'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
-    body: !!python/unicode '{"properties": {"minPriorityPerJob": 2}}'
+    body: '{"properties": {"minPriorityPerJob": 2}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy update]
-      Connection: [keep-alive]
-      Content-Length: ['40']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --compute-policy-name --min-priority-per-job
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"properties":{"objectId":"8ce05900-7a9e-4895-b3f0-0fbcee507803","objectType":"User","maxDegreeOfParallelismPerJob":2,"minPriorityPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'}
+    body:
+      string: '{"properties":{"objectId":"181c08fa-7ac8-48a6-a869-342ab74566a4","objectType":"User","maxDegreeOfParallelismPerJob":2,"minPriorityPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['470']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:11 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '470'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1186'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"objectId":"0583cfd7-60f5-43f0-9597-68b85591fc69","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"},{"properties":{"objectId":"8ce05900-7a9e-4895-b3f0-0fbcee507803","objectType":"User","maxDegreeOfParallelismPerJob":2,"minPriorityPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}]}'}
+    body:
+      string: '{"value":[{"properties":{"objectId":"f0bec09f-45a4-4c58-ac5b-cf0516d7bc68","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"},{"properties":{"objectId":"181c08fa-7ac8-48a6-a869-342ab74566a4","objectType":"User","maxDegreeOfParallelismPerJob":2,"minPriorityPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy","name":"pycliuserpolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['934']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:11 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '934'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --compute-policy-name
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycliuserpolicy?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:43:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1181']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 09 Sep 2021 04:31:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14994'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account compute-policy list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account compute-policy list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"objectId":"0583cfd7-60f5-43f0-9597-68b85591fc69","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}]}'}
+    body:
+      string: '{"value":[{"properties":{"objectId":"f0bec09f-45a4-4c58-ac5b-cf0516d7bc68","objectType":"Group","maxDegreeOfParallelismPerJob":2},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004/computePolicies/pycligrouppolicy","name":"pycligrouppolicy","type":"Microsoft.DataLakeAnalytics/accounts/computePolicies"}]}'
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['463']
-      content-type: [application/json]
-      date: ['Tue, 26 Dec 2017 23:43:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-content-type-options: [nosniff]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '463'
+      content-type:
+      - application/json
+      date:
+      - Thu, 09 Sep 2021 04:31:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts/cliadla000004?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      connection: [close]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:43:16 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 09 Sep 2021 04:32:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14996'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dla account list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 datalakeanalyticsaccountmanagementclient/0.1.6
-          Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dla account list
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
+        datalakeanalyticsaccountmanagementclient/0.1.6 Azure-SDK-For-Python AZURECLI/2.28.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adla_mgmt000001/providers/Microsoft.DataLakeAnalytics/accounts?api-version=2016-11-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body:
+      string: '{"value":[]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:43:17 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_adla_mgmt000001?api-version=2019-07-01
-  response:
-    body: {string: !!python/unicode ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:43:18 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGQURMQTo1Rk1HTVRRRFFYT1pTMzUyUVBGN1pET0hDV1FNSXxDQ0U0NkY2REU1Q0FDN0RDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 09 Sep 2021 04:32:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

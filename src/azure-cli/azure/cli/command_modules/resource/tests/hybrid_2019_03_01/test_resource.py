@@ -6,11 +6,11 @@
 import json
 import os
 import time
-import mock
+from unittest import mock
 import unittest
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 
@@ -88,8 +88,10 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
         self.cmd('resource list --resource-type {rt}',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --name {vnet}',
-                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}', checks=[
+            self.check("length([?name=='{vnet}'])", vnet_count),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
         self.cmd('resource list --tag cli-test',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
         self.cmd('resource list --tag cli-test=test',
@@ -240,10 +242,10 @@ class TagScenarioTest(ScenarioTest):
             'tag': 'cli_test_tag'
         })
 
-        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
-        for tag in tags:
-            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
-        self.cmd('tag delete -n {tag}')
+        tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
+        for tag_value in tag_values:
+            self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -261,7 +263,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
@@ -270,7 +272,7 @@ class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
 
-        self.kwargs.update({'prov': 'TrendMicro.DeepSecurity'})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
@@ -325,15 +327,15 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params_uri}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file "{tf}" --parameters @"{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+        self.cmd('deployment create -n {dn} --location WestUS --template-file "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
@@ -365,7 +367,7 @@ class DeploymentTest(ScenarioTest):
             'dn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -377,21 +379,21 @@ class DeploymentTest(ScenarioTest):
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the test_params.json above
-            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/test-params.json',
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment'
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment validate -g {rg} --template-file "{tf}" --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -422,13 +424,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -446,13 +448,13 @@ class DeploymentTest(ScenarioTest):
             'sdn': self.create_random_name('azure-cli-deployment', 30)
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment', None)
         ])
 
-        self.cmd('group deployment create -g {rg} -n {sdn} --template-file {tf} --rollback-on-error {dn}', checks=[
+        self.cmd('group deployment create -g {rg} -n {sdn} --template-file "{tf}" --rollback-on-error {dn}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.onErrorDeployment.deploymentName', '{dn}'),
@@ -476,12 +478,12 @@ class DeploymentLiveTest(LiveScenarioTest):
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
@@ -497,7 +499,7 @@ class DeploymentNoWaitTest(ScenarioTest):
             'dn': 'azure-cli-deployment'
         })
 
-        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file "{tf}" --parameters @"{params}" --no-wait',
                  checks=self.is_empty())
 
         self.cmd('group deployment wait -g {rg} -n {dn} --created',
@@ -515,10 +517,10 @@ class DeploymentThruUriTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
         self.kwargs.update({
-            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/simple_deploy.json',
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
         })
-        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri "{tf}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
         ]).get_output_in_json()['name']
@@ -951,7 +953,7 @@ class InvokeActionTest(ScenarioTest):
             'pass': self.create_random_name('Longpassword#1', 30)
         })
 
-        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password --nsg-rule None').get_output_in_json()['id']
 
         self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')

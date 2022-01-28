@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, record_only
+from knack.util import CLIError
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
@@ -97,6 +99,9 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         # verify order is stable
         list_1 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
+        with self.assertRaisesRegex(CLIError, 'Please double check the name of the autoscale profile.'):
+            self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name falseprofile')
+
         list_2 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_1) == 3 and len(list_2) == 3)
         for x in range(len(list_1)):
@@ -131,6 +136,86 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         list_4 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_4) == 0)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_with_dimensions')
+    def test_monitor_autoscale_rule_with_dimensions(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username testadmin --admin-password TestTest12#$ --instance-count 2')
+        self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
+
+        self.cmd('monitor autoscale create --resource {vmss_id} --min-count 1 --count 3 --max-count 5')
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "\'Mynamespace.abcd\' Percentage CPU > 75 avg 5m where VMName == cliname1 or cliname2" --scale to 5',
+            checks=[
+                self.check('metricTrigger.metricName', 'Percentage CPU'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 75),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT5M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'VMName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', 'cliname1'),
+                self.check('metricTrigger.dimensions[0].values[1]', 'cliname2'),
+                self.check('metricTrigger.metricNamespace', 'Mynamespace.abcd'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'None'),
+                self.check('scaleAction.type', 'ExactCount'),
+                self.check('scaleAction.value', '5')
+            ])
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}', checks=[
+            self.check('length(@)', 3)
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_fixed')
     def test_monitor_autoscale_fixed(self, resource_group):
         self.kwargs.update({
@@ -152,11 +237,17 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('recurrence', None)
         ])
 
+        # test autoscale profile show
+        self.cmd('monitor autoscale profile show -g {rg} --autoscale-name {vmss} -n {sched}', checks=[
+            self.check('name', '{sched}')
+        ])
+
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 2))
         self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n {sched}')
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_recurring')
     def test_monitor_autoscale_recurring(self, resource_group):
@@ -230,3 +321,105 @@ class TestMonitorAutoscaleTimezones(LiveScenarioTest):
                  checks=self.check('length(@)', 6))
         self.cmd('monitor autoscale profile list-timezones -q pacific --offset -4',
                  checks=self.check('length(@)', 1))
+
+
+class TestMonitorAutoscaleComplexRules(LiveScenarioTest):
+
+    def setUp(self):
+        super(TestMonitorAutoscaleComplexRules, self).setUp()
+        self.cmd('extension add -n spring-cloud')
+
+    def tearDown(self):
+        self.cmd('extension remove -n spring-cloud')
+        super(TestMonitorAutoscaleComplexRules, self).tearDown()
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_for_spring_cloud', location='westus2')
+    def test_monitor_autoscale_rule_for_spring_cloud(self, resource_group):
+        self.kwargs.update({
+            'sc': self.create_random_name('clitestsc', 15),
+            'rg': resource_group,
+            'scapp': 'app1',
+            'gitrepo': 'https://github.com/Azure-Samples/piggymetrics-config',
+        })
+
+        self.cmd('spring-cloud create -n {sc} -g {rg}')
+        self.cmd('spring-cloud config-server git set -n {sc} -g {rg} --uri {gitrepo}')
+        self.kwargs['deployment_id'] = self.cmd('spring-cloud app create -n {scapp} -s {sc} -g {rg}').get_output_in_json()['properties']['activeDeployment']['id']
+
+        self.cmd('monitor autoscale create -g {rg} --resource {deployment_id} --min-count 1 --count 1 --max-count 3')
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {sc}')
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
+            checks=[
+                self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 0),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT3M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
+                self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
+                self.check('metricTrigger.dimensions[1].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[1].values[0]', 'default'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'Increase'),
+                self.check('scaleAction.type', 'ChangeCount'),
+                self.check('scaleAction.value', '1')
+            ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
+            checks=[
+                self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 0),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT3M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
+                self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
+                self.check('metricTrigger.dimensions[1].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[1].values[0]', 'default'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'Increase'),
+                self.check('scaleAction.type', 'ChangeCount'),
+                self.check('scaleAction.value', '1')
+            ])
+
+        self.cmd(
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
+            checks=[
+                self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
+                self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
+                self.check('metricTrigger.operator', 'GreaterThan'),
+                self.check('metricTrigger.threshold', 0),
+                self.check('metricTrigger.statistic', 'Average'),
+                self.check('metricTrigger.timeAggregation', 'Average'),
+                self.check('metricTrigger.timeWindow', 'PT3M'),
+                self.check('metricTrigger.timeGrain', 'PT1M'),
+                self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
+                self.check('metricTrigger.dimensions[0].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
+                self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
+                self.check('metricTrigger.dimensions[1].operator', 'Equals'),
+                self.check('metricTrigger.dimensions[1].values[0]', 'default'),
+                self.check('scaleAction.cooldown', 'PT5M'),
+                self.check('scaleAction.direction', 'Increase'),
+                self.check('scaleAction.type', 'ChangeCount'),
+                self.check('scaleAction.value', '1')
+            ])
+
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {sc}', checks=[
+            self.check('length(@)', 3)
+        ])

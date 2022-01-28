@@ -67,7 +67,7 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
 def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
     from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccount, DataLakeStoreAccountInfo
-    adls_list = list()
+    adls_list = []
     adls_list.append(DataLakeStoreAccountInfo(default_data_lake_store))
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     create_params = DataLakeAnalyticsAccount(location,
@@ -300,7 +300,7 @@ def wait_adla_job(client, account_name, job_id, wait_interval_sec=5, max_wait_ti
     job = client.get(account_name, job_id)
     time_waited_sec = 0
     while job.state != JobState.ended:
-        if max_wait_time_sec > 0 and time_waited_sec >= max_wait_time_sec:
+        if 0 < time_waited_sec >= max_wait_time_sec:
             # pylint: disable=line-too-long
             raise CLIError('Data Lake Analytics Job with ID: {0} has not completed in {1} seconds. Check job runtime or increase the value of --max-wait-time-sec'.format(job_id, time_waited_sec))
         logger.info('Job is not yet done. Current job state: \'%s\'', job.state)

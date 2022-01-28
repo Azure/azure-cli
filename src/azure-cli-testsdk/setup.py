@@ -7,34 +7,27 @@
 
 from codecs import open
 from setuptools import setup
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
 
-VERSION = "0.2.4"
+VERSION = "0.3.0"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
+    'ConfigArgParse>=0.12.0',
     'jmespath',
-    'mock',
     'vcrpy>=1.10.3',
-    'azure-devtools~=1.0.0'
+    'pytest'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -54,10 +47,8 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure',
-        'azure.cli',
-        'azure.cli.testsdk'
+        'azure.cli.testsdk',
+        'azure.cli.testsdk.scenario_tests',
     ],
-    install_requires=DEPENDENCIES,
-    cmdclass=cmdclass
+    install_requires=DEPENDENCIES
 )

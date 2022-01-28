@@ -10,11 +10,13 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['kusto'] = """
 type: group
 short-summary: Manage Azure Kusto resources
+long-summary: This module will not be supported starting January 1, 2021. Please execute "az extension add -n kusto" to install the supported Kusto extension
 """
 
 helps['kusto cluster'] = """
 type: group
 short-summary: Manage Azure Kusto clusters.
+long-summary: This module will not be supported starting January 1, 2021. Please execute "az extension add -n kusto" to install the supported Kusto extension
 """
 
 helps['kusto cluster create'] = """
@@ -79,6 +81,7 @@ long-summary: If an operation on a cluster was interrupted or was started with `
 helps['kusto database'] = """
 type: group
 short-summary: Manage Azure Kusto databases.
+long-summary: Azure CLI commands for Kusto are now an extension.  Execute "az extension add -n kusto" to install the extension.  The original core module for Kusto is no longer supported.
 """
 
 helps['kusto database create'] = """

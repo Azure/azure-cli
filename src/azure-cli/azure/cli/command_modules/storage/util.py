@@ -5,11 +5,21 @@
 
 
 import os
+from azure.cli.core.profiles import ResourceType
+from datetime import datetime
 
 
 def collect_blobs(blob_service, container, pattern=None):
     """
     List the blobs in the given blob container, filter the blob by comparing their path to the given pattern.
+    """
+    return [name for (name, _) in collect_blob_objects(blob_service, container, pattern)]
+
+
+def collect_blob_objects(blob_service, container, pattern=None):
+    """
+    List the blob name and blob in the given blob container, filter the blob by comparing their path to
+     the given pattern.
     """
     if not blob_service:
         raise ValueError('missing parameter blob_service')
@@ -18,19 +28,17 @@ def collect_blobs(blob_service, container, pattern=None):
         raise ValueError('missing parameter container')
 
     if not _pattern_has_wildcards(pattern):
-        return [pattern] if blob_service.exists(container, pattern) else []
+        if blob_service.exists(container, pattern):
+            yield pattern, blob_service.get_blob_properties(container, pattern)
+    else:
+        for blob in blob_service.list_blobs(container):
+            try:
+                blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
+            except NameError:
+                blob_name = blob.name
 
-    results = []
-    for blob in blob_service.list_blobs(container):
-        try:
-            blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
-        except NameError:
-            blob_name = blob.name
-
-        if not pattern or _match_path(blob_name, pattern):
-            results.append(blob_name)
-
-    return results
+            if not pattern or _match_path(blob_name, pattern):
+                yield blob_name, blob
 
 
 def collect_files(cmd, file_service, share, pattern=None):
@@ -81,7 +89,7 @@ def glob_files_locally(folder_path, pattern):
                 yield (full_path, full_path[len_folder_path:])
 
 
-def glob_files_remotely(cmd, client, share_name, pattern):
+def glob_files_remotely(cmd, client, share_name, pattern, snapshot=None):
     """glob the files in remote file share based on the given pattern"""
     from collections import deque
     t_dir, t_file = cmd.get_models('file.models#Directory', 'file.models#File')
@@ -89,7 +97,7 @@ def glob_files_remotely(cmd, client, share_name, pattern):
     queue = deque([""])
     while queue:
         current_dir = queue.pop()
-        for f in client.list_directories_and_files(share_name, current_dir):
+        for f in client.list_directories_and_files(share_name, current_dir, snapshot=snapshot):
             if isinstance(f, t_file):
                 if not pattern or _match_path(os.path.join(current_dir, f.name), pattern):
                     yield current_dir, f.name
@@ -98,7 +106,7 @@ def glob_files_remotely(cmd, client, share_name, pattern):
 
 
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -110,8 +118,20 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
     return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
+def create_short_lived_blob_sas_v2(cmd, account_name, account_key, container, blob):
+    from datetime import timedelta
+
+    t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
+                           resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+    t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+
+
 def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -127,7 +147,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
 
 
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -140,7 +160,7 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -219,10 +239,21 @@ def check_precondition_success(func):
             return True, func(*args, **kwargs)
         except AzureHttpError as ex:
             # Precondition failed error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/412
             # Not modified error
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+            # https://developer.mozilla.org/docs/Web/HTTP/Status/304
             if ex.status_code not in [304, 412]:
                 raise
             return False, None
     return wrapper
+
+
+def get_datetime_from_string(dt_str):
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
+                             '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    for form in accepted_date_formats:
+        try:
+            return datetime.strptime(dt_str, form)
+        except ValueError:
+            continue
+    raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))

@@ -8,36 +8,60 @@ import base64
 import binascii
 from datetime import datetime
 import re
+import sys
+from ipaddress import ip_network
 
+from enum import Enum
+from knack.deprecation import Deprecated
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
 
 
+class KeyEncryptionDataType(str, Enum):
+    BASE64 = 'base64'
+    PLAINTEXT = 'plaintext'
+
+
 def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
-def _get_resource_group_from_vault_name(cli_ctx, vault_name):
+def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     """
     Fetch resource group from vault name
     :param str vault_name: name of the key vault
+    :param str hsm_name: name of the managed hsm
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
-    for vault in client.list():
-        id_comps = parse_resource_id(vault.id)
-        if id_comps['name'] == vault_name:
-            return id_comps['resource_group']
+    if vault_name:
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+        for vault in client.list():
+            id_comps = parse_resource_id(vault.id)
+            if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
+                return id_comps['resource_group']
+
+    if hsm_name:
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
+        try:
+            for hsm in client.list_by_subscription():
+                id_comps = parse_resource_id(hsm.id)
+                if id_comps.get('name', None) and id_comps['name'].lower() == hsm_name.lower():
+                    return id_comps['resource_group']
+        except:  # pylint: disable=bare-except
+            return None
+
     return None
 
 
@@ -61,7 +85,6 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    from azure.cli.core.profiles import ResourceType
     SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
@@ -109,6 +132,27 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
+def process_sas_token_parameter(cmd, ns):
+    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
+    return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
+
+
+def process_hsm_name(ns):
+    if not ns.identifier and not ns.hsm_name:
+        raise CLIError('Please specify --hsm-name or --id.')
+    if ns.identifier:
+        ns.hsm_name = ns.identifier
+
+
+def validate_vault_name_and_hsm_name(ns):
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if vault_name and hsm_name:
+        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+    if not vault_name and not hsm_name:
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
 # PARAMETER NAMESPACE VALIDATORS
 
 
@@ -127,14 +171,26 @@ def get_attribute_validator(name, attribute_class, create=False):
 
 def validate_key_import_source(ns):
     byok_file = ns.byok_file
+    byok_string = ns.byok_string
     pem_file = ns.pem_file
+    pem_string = ns.pem_string
     pem_password = ns.pem_password
-    if (not byok_file and not pem_file) or (byok_file and pem_file):
-        raise ValueError('supply exactly one: --byok-file, --pem-file')
-    if byok_file and pem_password:
-        raise ValueError('--byok-file cannot be used with --pem-password')
-    if pem_password and not pem_file:
-        raise ValueError('--pem-password must be used with --pem-file')
+    if len([arg for arg in [byok_file, byok_string, pem_file, pem_string] if arg]) != 1:
+        raise ValueError('supply exactly one: --byok-file, --byok-string, --pem-file, --pem-string')
+    if (byok_file or byok_string) and pem_password:
+        raise ValueError('--byok-file or --byok-string cannot be used with --pem-password')
+    if pem_password and not pem_file and not pem_string:
+        raise ValueError('--pem-password must be used with --pem-file or --pem-string')
+
+
+def validate_key_import_type(ns):
+    # Default value of kty is: RSA
+    kty = getattr(ns, 'kty', None)
+    crv = getattr(ns, 'curve', None)
+
+    if (kty == 'EC' and crv is None) or (kty != 'EC' and crv):
+        from azure.cli.core.azclierror import ValidationError
+        raise ValidationError('parameter --curve should be specified when key type --kty is EC.')
 
 
 def validate_key_type(ns):
@@ -153,6 +209,22 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
+def process_key_release_policy(cmd, ns):
+    if not ns.release_policy:
+        return
+
+    import os
+    if os.path.exists(ns.release_policy):
+        data = get_file_json(ns.release_policy)
+    else:
+        data = shell_safe_json_parse(ns.release_policy)
+
+    import json
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
+                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    ns.release_policy = KeyReleasePolicy(data=json.dumps(data).encode('utf-8'))
+
+
 def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
     secret_perms = ns.secret_permissions
@@ -166,6 +238,29 @@ def validate_policy_permissions(ns):
             '--certificate-permissions --storage-permissions')
 
 
+def validate_private_endpoint_connection_id(cmd, ns):
+    if ns.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(ns.connection_id)
+        ns.resource_group_name = result['resource_group']
+        if result['type'] and 'managedHSM' in result['type']:
+            ns.hsm_name = result['name']
+        else:
+            ns.vault_name = result['name']
+        ns.private_endpoint_connection_name = result['child_name_1']
+
+    if not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_resource_name(cli_ctx=cmd.cli_ctx,
+                                                                        vault_name=getattr(ns, 'vault_name', None),
+                                                                        hsm_name=getattr(ns, 'hsm_name', None))
+
+    if not all([(getattr(ns, 'vault_name', None) or getattr(ns, 'hsm_name', None)),
+                ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME | --name NAME --hsm-name NAME]')
+
+    del ns.connection_id
+
+
 def validate_principal(ns):
     num_set = sum(1 for p in [ns.object_id, ns.spn, ns.upn] if p)
     if num_set != 1:
@@ -177,53 +272,89 @@ def validate_resource_group_name(cmd, ns):
     """
     Populate resource_group_name, if not provided
     """
+    if 'keyvault purge' in cmd.name or 'keyvault recover' in cmd.name:
+        return
+
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if 'keyvault update-hsm' in cmd.name:
+        hsm_name = getattr(ns, 'name', None)
+
+    if vault_name and hsm_name:
+        raise CLIError('--name/-n and --hsm-name are mutually exclusive.')
+
+    if vault_name:
+        # This is a temporary solution for showing deprecation message only for vaults
+        _show_vault_only_deprecate_message(ns)
+
     if not ns.resource_group_name:
-        vault_name = ns.vault_name
-        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
+        group_name = _get_resource_group_from_resource_name(cmd.cli_ctx, vault_name, hsm_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
-            msg = "The Resource 'Microsoft.KeyVault/vaults/{}' not found within subscription."
-            raise CLIError(msg.format(vault_name))
+            if vault_name:
+                resource_type = 'Vault'
+            else:
+                resource_type = 'HSM'
+            msg = "The {} '{}' not found within subscription."
+            raise CLIError(msg.format(resource_type, vault_name if vault_name else hsm_name))
 
 
-def validate_deleted_vault_name(cmd, ns):
+def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
-    vault_name = ns.vault_name
-    vault = None
+    vault_name = getattr(ns, 'vault_name', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
 
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+    if not vault_name and not hsm_name:
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
+    if vault_name:
+        resource_name = vault_name
+    else:
+        resource_name = hsm_name
+    resource = None
+
+    if vault_name:
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+    else:
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
 
     # if the location is specified, use get_deleted rather than list_deleted
     if ns.location:
-        vault = client.get_deleted(vault_name, ns.location)
-        id_comps = parse_resource_id(vault.properties.vault_id)
+        resource = client.get_deleted(resource_name, ns.location)
+        if vault_name:
+            id_comps = parse_resource_id(resource.properties.vault_id)
+        else:
+            id_comps = parse_resource_id(resource.properties.mhsm_id)
 
     # otherwise, iterate through deleted vaults to find one with a matching name
     else:
         for v in client.list_deleted():
-            id_comps = parse_resource_id(v.properties.vault_id)
-            if id_comps['name'].lower() == vault_name.lower():
-                vault = v
-                ns.location = vault.properties.location
+            if vault_name:
+                id_comps = parse_resource_id(v.properties.vault_id)
+            else:
+                id_comps = parse_resource_id(v.properties.mhsm_id)
+            if id_comps['name'].lower() == resource_name.lower():
+                resource = v
+                ns.location = resource.properties.location
                 break
 
     # if the vault was not found, throw an error
-    if not vault:
-        raise CLIError('No deleted vault was found with name ' + ns.vault_name)
+    if not resource:
+        raise CLIError('No deleted Vault or HSM was found with name ' + resource_name)
 
-    setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
+    if 'keyvault purge' not in cmd.name and 'keyvault show-deleted' not in cmd.name:
+        setattr(ns, 'resource_group_name', getattr(ns, 'resource_group_name', None) or id_comps['resource_group'])
 
-    # resource_group_name must match the resource group of the deleted vault
-    if id_comps['resource_group'] != ns.resource_group_name:
-        raise CLIError("The specified resource group does not match that of the deleted vault %s. The vault "
-                       "must be recovered to the original resource group %s."
-                       % (vault_name, id_comps['resource_group']))
+        # resource_group_name must match the resource group of the deleted vault
+        if id_comps['resource_group'] != ns.resource_group_name:
+            raise CLIError("The specified resource group does not match that of the deleted vault or hsm %s. The vault "
+                           "or hsm must be recovered to the original resource group %s."
+                           % (vault_name, id_comps['resource_group']))
 
 
 def validate_x509_certificate_chain(ns):
@@ -266,19 +397,47 @@ def datetime_type(string):
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 
 
-def get_vault_base_url_type(cli_ctx):
+def _get_base_url_type(cli_ctx, service):
+    suffix = ''
+    if service == 'vault':
+        suffix = cli_ctx.cloud.suffixes.keyvault_dns
+    elif service == 'hsm':
+        from azure.cli.core.cloud import CloudSuffixNotSetException
+        try:
+            suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        except CloudSuffixNotSetException:  # For Azure Stack and Air-Gaped Cloud
+            suffix = ''
 
-    suffix = cli_ctx.cloud.suffixes.keyvault_dns
-
-    def vault_base_url_type(name):
+    def base_url_type(name):
         return 'https://{}{}'.format(name, suffix)
 
-    return vault_base_url_type
+    return base_url_type
+
+
+def get_vault_base_url_type(cli_ctx):
+    return _get_base_url_type(cli_ctx, service='vault')
+
+
+def get_hsm_base_url_type(cli_ctx):
+    return _get_base_url_type(cli_ctx, service='hsm')
+
+
+def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
+    from msrestazure.tools import resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_name,
+        child_type_1='subnets',
+        child_name_1=subnet_name)
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -288,35 +447,150 @@ def validate_subnet(cmd, namespace):
         return
 
     if subnet and not subnet_is_id and vnet:
-        namespace.subnet = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet,
-            child_type_1='subnets',
-            child_name_1=subnet)
+        namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
-def validate_vault_id(entity_type):
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+
+    if not ip_address:
+        return
+
+    ip_address_networks = [ip_network(ip) for ip in ip_address]
+    for idx, ip_address_network in enumerate(ip_address_networks):
+        for idx2, ip_address_network2 in enumerate(ip_address_networks):
+            if idx == idx2:
+                continue
+            if ip_address_network.overlaps(ip_address_network2):
+                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
+                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
+
+
+def validate_role_assignment_args(ns):
+    if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
+        raise RequiredArgumentMissingError(
+            'Please specify at least one of these parameters: '
+            '--name, --scope, --assignee, --assignee-object-id, --role, --ids')
+
+
+def validate_vault_or_hsm(ns):
+    identifier = getattr(ns, 'identifier', None)
+    vault_base_url = getattr(ns, 'vault_base_url', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+    if identifier:
+        if vault_base_url:
+            raise CLIError('--vault-name and --id are mutually exclusive.')
+        if hsm_name:
+            raise CLIError('--hsm-name and --id are mutually exclusive.')
+
+        items = identifier.split('/')
+        if len(items) < 3:
+            raise CLIError('Invalid id for Vault or HSM.')
+
+        ns.vault_base_url = ns.identifier = '/'.join(items[:3])
+    else:
+        if vault_base_url and hsm_name:
+            raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+        if not vault_base_url and not hsm_name:
+            raise CLIError('Please specify --vault-name or --hsm-name.')
+
+
+def _show_vault_only_deprecate_message(ns):
+    message_dict = {
+        'keyvault delete':
+            Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
+                       'Warning! If you have soft-delete protection enabled on this key vault, you will '
+                       'not be able to reuse this key vault name until the key vault has been purged from '
+                       'the soft deleted state. Please see the following documentation for additional '
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+        'keyvault key delete':
+            Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
+                       'Warning! If you have soft-delete protection enabled on this key vault, this key '
+                       'will be moved to the soft deleted state. You will not be able to create a key with '
+                       'the same name within this key vault until the key has been purged from the '
+                       'soft-deleted state. Please see the following documentation for additional '
+                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
+    }
+    cmds = ['keyvault delete', 'keyvault key delete']
+    for cmd in cmds:
+        if cmd == getattr(ns, 'command', None):
+            print(message_dict[cmd].message, file=sys.stderr)
+
+
+def set_vault_base_url(ns):
+    vault_base_url = getattr(ns, 'vault_base_url', None)
+    hsm_name = getattr(ns, 'hsm_name', None)
+
+    if not hsm_name:
+        # This is a temporary solution for showing deprecation message only for vaults
+        _show_vault_only_deprecate_message(ns)
+
+    if hsm_name and not vault_base_url:
+        setattr(ns, 'vault_base_url', hsm_name)
+
+
+def validate_key_id(entity_type):
     def _validate(ns):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_name', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
+            vault_base_url = getattr(ns, 'vault_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
+            if vault_base_url:
+                raise CLIError('--vault-name and --id are mutually exclusive.')
+            if hsm_name:
+                raise CLIError('--hsm-name and --id are mutually exclusive.')
+
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if hasattr(ns, pure_entity_type + '_version'):
+            if ident.version and hasattr(ns, pure_entity_type + '_version'):
                 setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
-            raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
+            raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
+                           '--name/-n NAME [--version VERSION]')
+
+    return _validate
+
+
+def validate_keyvault_resource_id(entity_type):
+    def _validate(ns):
+        from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None) or getattr(ns, 'name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_name', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            vault_base_url = getattr(ns, 'vault_base_url', None)
+            hsm_name = getattr(ns, 'hsm_name', None)
+            if vault_base_url:
+                raise CLIError('--vault-name and --id are mutually exclusive.')
+            if hsm_name:
+                raise CLIError('--hsm-name and --id are mutually exclusive.')
+
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            setattr(ns, 'name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            if ident.version and (hasattr(ns, pure_entity_type + '_version') or hasattr(ns, 'version')):
+                setattr(ns, 'version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name/--hsm-name VAULT/HSM '
+                           '--name/-n NAME [--version VERSION]')
 
     return _validate
 
@@ -357,3 +631,15 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
         attr_arg = attr_type(enabled=(not disabled))
         setattr(ns, attr_arg_name, attr_arg)
     return _validate
+
+
+def validate_encryption(ns):
+    if ns.data_type == KeyEncryptionDataType.BASE64:
+        ns.value = base64.b64decode(ns.value.encode('utf-8'))
+    else:
+        ns.value = ns.value.encode('utf-8')
+    del ns.data_type
+
+
+def validate_decryption(ns):
+    ns.value = base64.b64decode(ns.value)

@@ -35,6 +35,7 @@ short-summary: Show the contents of a specific object in the cache.
 helps['configure'] = """
 type: command
 short-summary: Manage Azure CLI configuration. This command is interactive.
+long-summary: For automation scenarios or to set all available options, use the new `az config`.
 parameters:
   - name: --defaults -d
     short-summary: >
@@ -44,4 +45,43 @@ examples:
     text: az configure --defaults group=myRG web=myweb vm=myvm
   - name: Clear default webapp and VM names.
     text: az configure --defaults vm='' web=''
+"""
+
+helps['local-context'] = """
+type: group
+short-summary: Manage Local Context
+"""
+
+helps['local-context on'] = """
+type: command
+short-summary: Turn on local context
+"""
+
+helps['local-context off'] = """
+type: command
+short-summary: Turn off local context
+"""
+
+helps['local-context show'] = """
+type: command
+short-summary: Show local context data
+examples:
+  - name: Show all local context value
+    text: az local-context show
+  - name: Show resource_group_name local context value
+    text: az local-context show --name resource_group_name
+"""
+
+helps['local-context delete'] = """
+type: command
+short-summary: Delete local context data
+examples:
+  - name: Delete resource_group_name from local context
+    text: az local-context delete --name resource_group_name
+  - name: Clear all local context data
+    text: az local-context delete --all
+  - name: Delete local context persistence file
+    text: az local-context delete --all --purge
+  - name: Delete local context persistence file recursively
+    text: az local-context delete --all --purge --recursive
 """

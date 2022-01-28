@@ -31,6 +31,17 @@ def change_ssl_cert_verification(client):
     return client
 
 
-def allow_debug_adal_connection():
+def change_ssl_cert_verification_track2():
+    client_kwargs = {}
     if should_disable_connection_verify():
+        logger.warning("Connection verification disabled by environment variable %s",
+                       DISABLE_VERIFY_VARIABLE_NAME)
         os.environ[ADAL_PYTHON_SSL_NO_VERIFY] = '1'
+        client_kwargs['connection_verify'] = False
+    elif REQUESTS_CA_BUNDLE in os.environ:
+        ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
+        if not os.path.isfile(ca_bundle_file):
+            raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
+        logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
+        client_kwargs['connection_verify'] = ca_bundle_file
+    return client_kwargs

@@ -60,7 +60,7 @@ class TestProgress(unittest.TestCase):
         before = view.spinner.total
         view.write({})
         after = view.spinner.total
-        self.assertTrue(after >= before)
+        self.assertTrue(after == before)
         view.write({'message': 'TESTING'})
 
     def test_progress_indicator_det_stdview(self):

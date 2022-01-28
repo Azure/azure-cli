@@ -86,7 +86,7 @@ def sqlvm_group_create(client, cmd, sql_virtual_machine_group_name, resource_gro
                                                 tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update, resource_group_name,
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update, resource_group_name,
                                                   sql_virtual_machine_group_name, sqlvm_group_object))
 
     return client.get(resource_group_name, sql_virtual_machine_group_name)
@@ -127,13 +127,10 @@ def sqlvm_group_update(instance, domain_fqdn=None, cluster_operator_account=None
 def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_virtual_machine_group_name,
                             resource_group_name, availability_group_name, ip_address, subnet_resource_id,
                             load_balancer_resource_id, probe_port, sql_virtual_machine_instances, port=1433,
-                            public_ip_address_resource_id=None, vnet_name=None):
+                            public_ip_address_resource_id=None, vnet_name=None):  # pylint: disable=unused-argument
     '''
     Creates an availability group listener
     '''
-    # Not using vnet, just for validation
-    vnet_name = vnet_name
-
     # Create the private ip address
     private_ip_object = PrivateIPAddress(ip_address=ip_address,
                                          subnet_resource_id=subnet_resource_id
@@ -151,7 +148,7 @@ def sqlvm_aglistener_create(client, cmd, availability_group_listener_name, sql_v
                                                    load_balancer_configurations=[load_balancer_object],
                                                    port=port)
 
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update, resource_group_name,
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update, resource_group_name,
                                                   sql_virtual_machine_group_name, availability_group_listener_name,
                                                   ag_listener_object))
 
@@ -170,7 +167,7 @@ def aglistener_update(instance, sql_virtual_machine_instances=None):
 
 
 # pylint: disable=too-many-arguments, too-many-locals, line-too-long, too-many-boolean-expressions
-def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type,
+def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql_server_license_type=None,
                  location=None, sql_image_sku=None, enable_auto_patching=None, sql_management_mode="LightWeight",
                  day_of_week=None, maintenance_window_starting_hour=None, maintenance_window_duration=None,
                  enable_auto_backup=None, enable_encryption=False, retention_period=None, storage_account_url=None,
@@ -262,7 +259,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update,
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)
@@ -383,7 +380,7 @@ def sqlvm_add_to_group(client, cmd, sql_virtual_machine_name, resource_group_nam
                                                                  sql_service_account_password=sql_service_account_password)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update,
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)
@@ -400,7 +397,7 @@ def sqlvm_remove_from_group(client, cmd, sql_virtual_machine_name, resource_grou
     sqlvm_object.wsfc_domain_credentials = None
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.create_or_update,
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(False, client.begin_create_or_update,
                                                   resource_group_name, sql_virtual_machine_name, sqlvm_object))
 
     return client.get(resource_group_name, sql_virtual_machine_name)

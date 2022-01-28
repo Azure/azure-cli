@@ -19,6 +19,70 @@ IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 TEST_INDEX_FORMAT = 'testIndex_{}.json'
 
 
+def _separator_line():
+    print('-' * 100)
+
+
+def _extract_module_name(path):
+    _CORE_NAME_REGEX = re.compile(r'azure-cli-(?P<name>[^/\\]+)[/\\]azure[/\\]cli')
+    _MOD_NAME_REGEX = re.compile(r'azure-cli[/\\]azure[/\\]cli[/\\]command_modules[/\\](?P<name>[^/\\]+)')
+    _EXT_NAME_REGEX = re.compile(r'.*(?P<name>azext_[^/\\]+).*')
+
+    for expression in [_MOD_NAME_REGEX, _CORE_NAME_REGEX, _EXT_NAME_REGEX]:
+        match = re.search(expression, path)
+        if not match:
+            continue
+        return match.groupdict().get('name')
+    raise ValueError('unexpected error: unable to extract name from path: {}'.format(path))
+
+
+def _extract_modified_files(target_branch=os.environ.get('ADO_PULL_REQUEST_TARGET_BRANCH')):
+    ado_raw_env_replacement = '$(System.PullRequest.TargetBranch)'
+
+    if target_branch is None or target_branch == ado_raw_env_replacement:
+        # in ADO env but not in PR stage or want to run full test
+
+        # dummy file name src/azure-cli-core/azure/cli/core/__init__.py
+        return [os.path.join('src', 'azure-cli-core', 'azure', 'cli', 'core', '__init__.py')]
+    else:
+        qualified_target_branch = 'origin/{}'.format(target_branch)
+
+    cmd_tpl = 'git --no-pager diff --name-only --diff-filter=ACMRT {} -- src/'
+    cmd = cmd_tpl.format(qualified_target_branch)
+
+    modified_files = check_output(cmd, shell=True).decode('utf-8').split('\n')
+    modified_files = [f for f in modified_files if len(f) > 0]
+
+    _separator_line()
+    if modified_files:
+        print('modified files in src/ :', '\n'.join(modified_files))
+    else:
+        print('no modified files in src/, no need to run automation test')
+
+    return modified_files
+
+
+def _extract_top_level_modified_modules():
+    modified_modules = set()
+
+    modified_files = _extract_modified_files()
+
+    for file_path in modified_files:
+        try:
+            mod = _extract_module_name(file_path)
+            modified_modules.add(mod)
+        except ValueError:
+            continue
+
+    _separator_line()
+    if modified_modules:
+        print('related top level modules:', list(modified_modules))
+    else:
+        print('no related top level modules modified, no need to run automation test')
+
+    return modified_modules
+
+
 def extract_module_name(path):
     mod_name_regex = re.compile(r'azure[/\\]cli[/\\]([^/\\]+)')
     ext_name_regex = re.compile(r'.*(azext_[^/\\]+).*')
@@ -42,6 +106,20 @@ def execute(args):
         output('Running in CI Mode')
         selected_modules = [('All modules', 'azure.cli', 'azure.cli'),
                             ('CLI Linter', 'automation.cli_linter', 'automation.cli_linter')]
+
+        modified_modules = _extract_top_level_modified_modules()
+        if any(base_mod in modified_modules for base_mod in ['core', 'testsdk', 'telemetry']):
+            pass    # if modified modules contains those 3 modules, run all tests
+        else:
+            test_paths = set()
+            for mod in modified_modules:
+                try:
+                    test_paths.add(os.path.normpath(test_index[mod]))
+                except KeyError:
+                    display("no tests found in module: {}".format(mod))
+            args.tests = test_paths
+
+            selected_modules = []
     elif not (args.tests or args.src_file):
         # Default is to run with modules (possibly via environment variable)
         if os.environ.get('AZURE_CLI_TEST_MODULES', None):

@@ -46,7 +46,8 @@ def action_group_list_table(results):
                                      ('webhookReceivers', 'webhook'), ('armRoleReceivers', 'armrole'),
                                      ('azureAppPushReceivers', 'azureapppush'), ('itsmReceivers', 'itsm'),
                                      ('automationRunbookReceivers', 'automationrunbook'), ('voiceReceivers', 'voice'),
-                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'))
+                                     ('logicAppReceivers', 'logicapp'), ('azureFunctionReceivers', 'azurefunction'),
+                                     ('eventHubReceivers', 'eventhub'))
 
         output_results.append(data)
 
@@ -66,6 +67,16 @@ def metrics_definitions_table(results):
 
         return result
 
+    return _generic_table_convert(results, row_convert)
+
+
+def metrics_namespaces_table(results):
+    def row_convert(item):
+        from collections import OrderedDict
+        result = OrderedDict()
+        result['Classification'] = item['classification']
+        result['Metric Namespace Name'] = item['properties']['metricNamespaceName']
+        return result
     return _generic_table_convert(results, row_convert)
 
 

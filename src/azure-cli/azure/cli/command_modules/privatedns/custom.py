@@ -4,13 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from __future__ import print_function
-from collections import Counter
+from collections import Counter, OrderedDict
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+from azure.core.exceptions import HttpResponseError
 
 logger = get_logger(__name__)
 
@@ -24,6 +26,242 @@ def list_privatedns_zones(cmd, resource_group_name=None):
     return client.list()
 
 
+# pylint: disable=too-many-statements, too-many-locals, too-many-branches
+def import_zone(cmd, resource_group_name, private_zone_name, file_name):
+    from azure.cli.core.util import read_file_content
+    import sys
+    from azure.mgmt.privatedns.models import RecordSet
+
+    from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
+    try:
+        file_text = read_file_content(file_name)
+    except FileNotFoundError:
+        raise FileOperationError("No such file: " + str(file_name))
+    except IsADirectoryError:
+        raise FileOperationError("Is a directory: " + str(file_name))
+    except PermissionError:
+        raise FileOperationError("Permission denied: " + str(file_name))
+    except OSError as e:
+        raise UnclassifiedUserFault(e)
+
+    zone_obj = parse_zone_file(file_text, private_zone_name)
+    origin = private_zone_name
+    record_sets = {}
+
+    for record_set_name in zone_obj:
+        for record_set_type in zone_obj[record_set_name]:
+            record_set_obj = zone_obj[record_set_name][record_set_type]
+
+            if record_set_type == 'soa':
+                origin = record_set_name.rstrip('.')
+
+            if not isinstance(record_set_obj, list):
+                record_set_obj = [record_set_obj]
+
+            for entry in record_set_obj:
+
+                record_set_ttl = entry['ttl']
+                record_set_key = '{}{}'.format(record_set_name.lower(), record_set_type)
+
+                record = _build_record(cmd, entry)
+                if not record:
+                    logger.warning('Cannot import %s. RecordType is not found. Skipping...', entry['delim'].lower())
+                    continue
+
+                record_set = record_sets.get(record_set_key, None)
+                if not record_set:
+
+                    # Workaround for issue #2824
+                    relative_record_set_name = record_set_name.rstrip('.')
+                    if not relative_record_set_name.endswith(origin):
+                        logger.warning(
+                            'Cannot import %s. Only records relative to origin may be '
+                            'imported at this time. Skipping...', relative_record_set_name)
+                        continue
+
+                    record_set = RecordSet(ttl=record_set_ttl)
+                    record_sets[record_set_key] = record_set
+                _privatedns_add_record(record_set, record, record_set_type, is_list=record_set_type.lower() not in ['soa', 'cname'])
+
+    total_records = 0
+    for key, rs in record_sets.items():
+        rs_name, rs_type = key.lower().rsplit('.', 1)
+        rs_name = rs_name[:-(len(origin) + 1)] if rs_name != origin else '@'
+        try:
+            record_count = len(getattr(rs, _privatedns_type_to_property_name(rs_type)))
+        except TypeError:
+            record_count = 1
+        total_records += record_count
+    cum_records = 0
+
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    from azure.mgmt.privatedns.models import PrivateZone
+    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient)
+
+    print('== BEGINNING ZONE IMPORT: {} ==\n'.format(private_zone_name), file=sys.stderr)
+
+    if private_zone_name.endswith(".local"):
+        logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
+                        "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
+    zone = PrivateZone(location='global')
+    result = LongRunningOperation(cmd.cli_ctx)(client.private_zones.begin_create_or_update(resource_group_name, private_zone_name, zone))
+    if result.provisioning_state != 'Succeeded':
+        raise CLIError('Error occured while creating or updating private dns zone.')
+
+    for key, rs in record_sets.items():
+
+        rs_name, rs_type = key.lower().rsplit('.', 1)
+        rs_name = '@' if rs_name == origin else rs_name
+        if rs_name.endswith(origin):
+            rs_name = rs_name[:-(len(origin) + 1)]
+
+        try:
+            record_count = len(getattr(rs, _privatedns_type_to_property_name(rs_type)))
+        except TypeError:
+            record_count = 1
+        if rs_name == '@' and rs_type == 'soa':
+            root_soa = client.record_sets.get(resource_group_name, private_zone_name, 'soa', '@')
+            rs.soa_record.host = root_soa.soa_record.host
+            rs_name = '@'
+        try:
+            client.record_sets.create_or_update(
+                resource_group_name, private_zone_name, rs_type, rs_name, rs)
+            cum_records += record_count
+            print("({}/{}) Imported {} records of type '{}' and name '{}'"
+                  .format(cum_records, total_records, record_count, rs_type, rs_name), file=sys.stderr)
+        except HttpResponseError as ex:
+            logger.error(ex)
+    print("\n== {}/{} RECORDS IMPORTED SUCCESSFULLY: '{}' =="
+          .format(cum_records, total_records, private_zone_name), file=sys.stderr)
+
+
+# pylint: disable=too-many-branches
+def export_zone(cmd, resource_group_name, private_zone_name, file_name=None):
+    from azure.mgmt.privatedns import PrivateDnsManagementClient
+    from time import localtime, strftime
+    client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient).record_sets
+    record_sets_soa = client.list_by_type(resource_group_name, private_zone_name, "soa")
+    record_sets_all = client.list(resource_group_name, private_zone_name)
+    zone_obj = OrderedDict({
+        '$origin': private_zone_name.rstrip('.') + '.',
+        'resource-group': resource_group_name,
+        'zone-name': private_zone_name.rstrip('.'),
+        'datetime': strftime('%a, %d %b %Y %X %z', localtime())
+    })
+
+    for record_set in record_sets_soa:
+        record_type = record_set.type.rsplit('/', 1)[1].lower()
+        if record_type == 'soa':
+            record_set_name = record_set.name
+            record_data = getattr(record_set, _privatedns_type_to_property_name(record_type), None)
+
+            if not isinstance(record_data, list):
+                record_data = [record_data]
+
+            for record in record_data:
+
+                record_obj = {'ttl': record_set.ttl}
+
+                if record_type == 'soa':
+                    zone_obj[record_set_name] = OrderedDict()
+                    zone_obj[record_set_name][record_type] = []
+                    record_obj.update({
+                        'mname': record.host.rstrip('.') + '.',
+                        'rname': record.email.rstrip('.') + '.',
+                        'serial': int(record.serial_number), 'refresh': record.refresh_time,
+                        'retry': record.retry_time, 'expire': record.expire_time,
+                        'minimum': record.minimum_ttl
+                    })
+                    zone_obj['$ttl'] = record.minimum_ttl
+                    zone_obj[record_set_name][record_type].append(record_obj)
+
+    for record_set in record_sets_all:
+        record_type = record_set.type.rsplit('/', 1)[1].lower()
+        record_set_name = record_set.name
+        record_data = getattr(record_set, _privatedns_type_to_property_name(record_type), None)
+
+        # ignore empty record sets
+        if not record_data:
+            continue
+
+        if not isinstance(record_data, list):
+            record_data = [record_data]
+
+        if record_set_name not in zone_obj:
+            zone_obj[record_set_name] = OrderedDict()
+
+        for record in record_data:
+
+            record_obj = {'ttl': record_set.ttl}
+
+            if record_type not in zone_obj[record_set_name]:
+                zone_obj[record_set_name][record_type] = []
+
+            if record_type == 'aaaa':
+                record_obj.update({'ip': record.ipv6_address})
+            elif record_type == 'a':
+                record_obj.update({'ip': record.ipv4_address})
+            elif record_type == 'caa':
+                record_obj.update({'val': record.value, 'tag': record.tag, 'flags': record.flags})
+            elif record_type == 'cname':
+                record_obj.update({'alias': record.cname.rstrip('.') + '.'})
+            elif record_type == 'mx':
+                record_obj.update({'preference': record.preference, 'host': record.exchange})
+            elif record_type == 'ns':
+                record_obj.update({'host': record.nsdname})
+            elif record_type == 'ptr':
+                record_obj.update({'host': record.ptrdname})
+            elif record_type == 'soa':
+                continue
+            elif record_type == 'srv':
+                record_obj.update({'priority': record.priority, 'weight': record.weight,
+                                   'port': record.port, 'target': record.target})
+            elif record_type == 'txt':
+                record_obj.update({'txt': ''.join(record.value)})
+
+            zone_obj[record_set_name][record_type].append(record_obj)
+
+    zone_file_content = make_zone_file(zone_obj)
+    print(zone_file_content)
+    if file_name:
+        try:
+            with open(file_name, 'w') as f:
+                f.write(zone_file_content)
+        except IOError:
+            raise CLIError('Unable to export to file: {}'.format(file_name))
+
+
+# pylint: disable=too-many-return-statements, inconsistent-return-statements, unused-argument
+def _build_record(cmd, data):
+    from azure.mgmt.privatedns.models import AaaaRecord, ARecord, CnameRecord, MxRecord, PtrRecord, SoaRecord, SrvRecord, TxtRecord
+    record_type = data['delim'].lower()
+    try:
+        if record_type == 'aaaa':
+            return AaaaRecord(ipv6_address=data['ip'])
+        if record_type == 'a':
+            return ARecord(ipv4_address=data['ip'])
+        if record_type == 'cname':
+            return CnameRecord(cname=data['alias'])
+        if record_type == 'mx':
+            return MxRecord(preference=data['preference'], exchange=data['host'])
+        if record_type == 'ptr':
+            return PtrRecord(ptrdname=data['host'])
+        if record_type == 'soa':
+            return SoaRecord(host=data['host'], email=data['email'], serial_number=data['serial'],
+                             refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
+                             minimum_ttl=data['minimum'])
+        if record_type == 'srv':
+            return SrvRecord(
+                priority=int(data['priority']), weight=int(data['weight']), port=int(data['port']),
+                target=data['target'])
+        if record_type in ['txt', 'spf']:
+            text_data = data['txt']
+            return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
+    except KeyError as ke:
+        raise CLIError("The {} record '{}' is missing a property.  {}"
+                       .format(record_type, data['name'], ke))
+
+
 def create_privatedns_zone(cmd, resource_group_name, private_zone_name, tags=None):
     from azure.mgmt.privatedns import PrivateDnsManagementClient
     from azure.mgmt.privatedns.models import PrivateZone
@@ -32,7 +270,7 @@ def create_privatedns_zone(cmd, resource_group_name, private_zone_name, tags=Non
         logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
                         "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
     zone = PrivateZone(location='global', tags=tags)
-    return client.create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
+    return client.begin_create_or_update(resource_group_name, private_zone_name, zone, if_none_match='*')
 
 
 def update_privatedns_zone(instance, tags=None):
@@ -54,7 +292,7 @@ def create_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_
         link.virtual_network = virtual_network
 
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
+    return client.begin_create_or_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_none_match='*')
 
 
 def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_network_link_name, registration_enabled=None, tags=None, if_match=None, **kwargs):
@@ -69,7 +307,7 @@ def update_privatedns_link(cmd, resource_group_name, private_zone_name, virtual_
 
     aux_subscription = parse_resource_id(link.virtual_network.id)['subscription']
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient, aux_subscriptions=[aux_subscription]).virtual_network_links
-    return client.update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
+    return client.begin_update(resource_group_name, private_zone_name, virtual_network_link_name, link, if_match=if_match)
 
 
 def create_privatedns_record_set(cmd, resource_group_name, private_zone_name, relative_record_set_name, record_type, metadata=None, ttl=3600):
@@ -121,7 +359,7 @@ def _privatedns_add_save_record(client, record, record_type, relative_record_set
     try:
         record_set = client.get(
             resource_group_name, private_zone_name, record_type, relative_record_set_name)
-    except CloudError:
+    except HttpResponseError:
         record_set = RecordSet(ttl=3600)
 
     _privatedns_add_record(record_set, record, record_type, is_list)
@@ -331,6 +569,7 @@ def dict_matches_filter(d, filter_dict):
                or lists_match(filter_dict[key], d.get(key, [])) for key in filter_dict)  # noqa
 
 
+# pylint: disable=too-many-function-args
 def lists_match(l1, l2):
     try:
         return Counter(l1) == Counter(l2)

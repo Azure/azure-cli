@@ -3,7 +3,26 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.mgmt.security.models import SecurityContact, AutoProvision
+from azure.mgmt.security.models import (SecurityContact,
+                                        AutoProvisioningSetting,
+                                        SecurityAssessment,
+                                        SecurityAssessmentMetadata,
+                                        AzureResourceDetails,
+                                        AssessmentStatus,
+                                        IoTSecuritySolutionModel,
+                                        UpdateIotSecuritySolutionData,
+                                        Pricing,
+                                        WorkspaceSetting,
+                                        AdvancedThreatProtectionSetting,
+                                        RuleResultsInput,
+                                        RulesResultsInput,
+                                        AlertSyncSettings,
+                                        DataExportSettings)
+from azure.mgmt.security.models._security_center_enums import Enum69
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from msrestazure.tools import resource_id
+from msrestazure.azure_exceptions import CloudError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -13,7 +32,7 @@ from azure.mgmt.security.models import SecurityContact, AutoProvision
 def list_security_tasks(client, resource_group_name=None):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.tasks.list_by_resource_group(resource_group_name)
@@ -24,7 +43,7 @@ def list_security_tasks(client, resource_group_name=None):
 def get_security_task(client, resource_name, resource_group_name=None):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     if resource_group_name:
         return client.tasks.get_resource_group_level_task(resource_group_name, resource_name)
@@ -39,12 +58,12 @@ def get_security_task(client, resource_name, resource_group_name=None):
 def list_security_alerts(client, resource_group_name=None, location=None):
 
     if location:
-        client.config.asc_location = location
+        client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
-            return client.list_resource_group_level_alerts_by_region(resource_group_name)
+            return client.list_resource_group_level_by_region(resource_group_name)
 
-        return client.list_subscription_level_alerts_by_region()
+        return client.list_subscription_level_by_region()
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -54,22 +73,32 @@ def list_security_alerts(client, resource_group_name=None, location=None):
 
 def get_security_alert(client, location, resource_name, resource_group_name=None):
 
-    client.config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
-        return client.get_resource_group_level_alerts(resource_name, resource_group_name)
+        return client.get_resource_group_level(resource_name, resource_group_name)
 
-    return client.get_subscription_level_alert(resource_name)
+    return client.get_subscription_level(resource_name)
 
 
 def update_security_alert(client, location, resource_name, status, resource_group_name=None):
 
-    client.config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     if resource_group_name:
-        client.update_resource_group_level_alert_state(resource_name, status, resource_group_name)
+        if status == "Dismiss":
+            client.update_resource_group_level_state_to_dismiss(resource_name, resource_group_name)
+        if status == "Activate":
+            client.update_resource_group_level_state_to_activate(resource_name, resource_group_name)
+        if status == "Resolve":
+            client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
     else:
-        client.update_subscription_level_alert_state(resource_name, status)
+        if status == "Dismiss":
+            client.update_subscription_level_state_to_dismiss(resource_name)
+        if status == "Activate":
+            client.update_subscription_level_state_to_activate(resource_name)
+        if status == "Resolve":
+            client.update_subscription_level_state_to_resolve(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -82,9 +111,20 @@ def list_security_settings(client):
     return client.list()
 
 
-def get_security_setting(client, resource_name):
+def get_security_setting(client, setting_name):
 
-    return client.get(resource_name)
+    return client.get(setting_name)
+
+
+def update_security_setting(client, setting_name, enabled):
+
+    if setting_name == Enum69.SENTINEL:
+        setting = AlertSyncSettings()
+    else:
+        setting = DataExportSettings()
+
+    setting.enabled = enabled
+    return client.update(setting_name, setting)
 
 
 # --------------------------------------------------------------------------------------------
@@ -142,13 +182,13 @@ def get_security_auto_provisioning_setting(client, resource_name):
 
 def update_security_auto_provisioning_setting(client, auto_provision, resource_name):
 
-    new_auto_provision = AutoProvision(auto_provision)
+    new_auto_provision = AutoProvisioningSetting(auto_provision=auto_provision)
     return client.create(resource_name, new_auto_provision)
 
 
 def turn_off_security_auto_provisioning_setting(client, resource_name):
 
-    new_auto_provision = AutoProvision('Off')
+    new_auto_provision = AutoProvisioningSetting(auto_provision='Off')
     return client.create(resource_name, new_auto_provision)
 
 
@@ -159,7 +199,7 @@ def turn_off_security_auto_provisioning_setting(client, resource_name):
 def list_security_discovered_security_solutions(client):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.discovered_security_solutions.list()
 
@@ -167,7 +207,7 @@ def list_security_discovered_security_solutions(client):
 def get_security_discovered_security_solution(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.discovered_security_solutions.get(resource_group_name, resource_name)
 
@@ -179,7 +219,7 @@ def get_security_discovered_security_solution(client, resource_name, resource_gr
 def list_security_external_security_solutions(client):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.external_security_solutions.list()
 
@@ -187,7 +227,7 @@ def list_security_external_security_solutions(client):
 def get_security_external_security_solution(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.external_security_solutions.get(resource_group_name, resource_name)
 
@@ -199,7 +239,7 @@ def get_security_external_security_solution(client, resource_name, resource_grou
 def list_security_jit_network_access_policies(client, resource_group_name=None, location=None):
 
     if location:
-        client.config.asc_location = location
+        client._config.asc_location = location  # pylint: disable=protected-access
 
         if resource_group_name:
             return client.list_by_resource_group_and_region(resource_group_name)
@@ -214,7 +254,7 @@ def list_security_jit_network_access_policies(client, resource_group_name=None, 
 
 def get_security_jit_network_access_policy(client, location, resource_name, resource_group_name):
 
-    client.config.asc_location = location
+    client._config.asc_location = location  # pylint: disable=protected-access
 
     return client.get(resource_group_name, resource_name)
 
@@ -230,7 +270,7 @@ def list_security_locations(client):
 
 def get_security_location(client, resource_name):
 
-    client.config.asc_location = resource_name
+    client._config.asc_location = resource_name  # pylint: disable=protected-access
 
     return client.get()
 
@@ -244,21 +284,14 @@ def list_security_pricings(client):
     return client.list()
 
 
-def get_security_pricing(client, resource_name, resource_group_name=None):
+def get_security_pricing(client, resource_name):
 
-    if resource_group_name:
-        return client.get_resource_group_pricing(resource_group_name, resource_name)
-
-    return client.get_subscription_pricing(resource_name)
+    return client.get(resource_name)
 
 
-def create_security_pricing(client, resource_name, tier, resource_group_name=None):
+def create_security_pricing(client, resource_name, tier):
 
-    if resource_group_name:
-        return client.create_or_update_resource_group_pricing(resource_group_name, resource_name, tier)
-
-    return client.update_subscription_pricing(resource_name, tier)
-
+    return client.update(resource_name, Pricing(pricing_tier=tier))
 
 # --------------------------------------------------------------------------------------------
 # Security Topology
@@ -268,7 +301,7 @@ def create_security_pricing(client, resource_name, tier, resource_group_name=Non
 def list_security_topology(client):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.topology.list()
 
@@ -276,13 +309,13 @@ def list_security_topology(client):
 def get_security_topology(client, resource_name, resource_group_name):
 
     for loc in client.locations.list():
-        client.config.asc_location = loc.name
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
 
     return client.topology.get(resource_group_name, resource_name)
 
 
 # --------------------------------------------------------------------------------------------
-# Security Topology
+# Security Workspace
 # --------------------------------------------------------------------------------------------
 
 
@@ -296,12 +329,490 @@ def get_security_workspace_setting(client, resource_name):
     return client.get(resource_name)
 
 
-def create_security_workspace_setting(client, resource_name, target_workspace):
+def create_security_workspace_setting(cmd, client, resource_name, target_workspace):
 
-    scope = '/subscriptions/' + client.config.subscription_id
-    return client.create(resource_name, target_workspace, scope)
+    scope = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
+    return client.create(resource_name, WorkspaceSetting(workspace_id=target_workspace, scope=scope))
 
 
 def delete_security_workspace_setting(client, resource_name):
 
     client.delete(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security ATP
+# --------------------------------------------------------------------------------------------
+
+def get_atp_setting(cmd, client, resource_group_name, storage_account_name):
+
+    return client.get(_construct_resource_id(cmd, resource_group_name, storage_account_name))
+
+
+def update_atp_setting(cmd, client, resource_group_name, storage_account_name, is_enabled):
+
+    return client.create(_construct_resource_id(cmd, resource_group_name, storage_account_name),
+                         AdvancedThreatProtectionSetting(is_enabled=is_enabled))
+
+
+def _construct_resource_id(cmd, resource_group_name, storage_account_name):
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Storage',
+        type='storageAccounts',
+        name=storage_account_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Sql Vulnerability Assessment
+# --------------------------------------------------------------------------------------------
+
+
+# pylint: disable=line-too-long
+def get_va_sql_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def get_va_sql_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, rule_id, workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(scan_id, workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def get_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(rule_id, workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def list_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.delete(rule_id, workspace_id, va_sql_resource_id)
+
+
+# pylint: disable=line-too-long
+def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest is True and baseline is None:
+        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RuleResultsInput(latest_scan=True))
+    if baseline_latest is False and baseline is not None:
+        return client.create_or_update(rule_id, workspace_id, va_sql_resource_id, RuleResultsInput(results=baseline))
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+
+
+# pylint: disable=line-too-long
+def set_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest is True and baseline is None:
+        return client.add(workspace_id, va_sql_resource_id, RulesResultsInput(latest_scan=True))
+    if baseline_latest is False and baseline is not None:
+        return client.add(workspace_id, va_sql_resource_id, RulesResultsInput(results=baseline))
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+
+
+def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
+
+    if vm_name is None and agent_id is None and vm_uuid is None:
+        return f'{vm_resource_id}/sqlServers/{server_name}/databases/{database_name}'
+    if vm_name is not None and agent_id is not None and vm_uuid is not None:
+        vm_identifier = f'{vm_name}_{agent_id}_{vm_uuid}'
+        return f'{vm_resource_id}/onPremiseMachines/{vm_identifier}/sqlServers/{server_name}/databases/{database_name}'
+    raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessments
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessments(cmd, client):
+
+    return client.list(scope='/subscriptions/' + get_subscription_id(cmd.cli_ctx))
+
+
+def get_security_assessment(cmd, client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
+    return client.get(assessed_resource_id,
+                      assessment_name=resource_name)
+
+
+def create_security_assessment(cmd,
+                               client,
+                               resource_name,
+                               status_code,
+                               status_cause=None,
+                               status_description=None,
+                               additional_data=None,
+                               assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx))
+
+    resource_details = AzureResourceDetails(source="Azure")
+
+    status = AssessmentStatus(code=status_code,
+                              cause=status_cause,
+                              description=status_description)
+
+    new_assessment = SecurityAssessment(resource_details=resource_details,
+                                        status=status,
+                                        additional_data=additional_data,
+                                        assessed_resource_id=assessed_resource_id)
+
+    return client.create_or_update(resource_id=assessed_resource_id,
+                                   assessment_name=resource_name,
+                                   assessment=new_assessment)
+
+
+def delete_security_assessment(cmd, client, resource_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx))
+
+    return client.delete(assessment_name=resource_name,
+                         resource_id=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Assessment Metadata
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_assessment_metadata(client):
+
+    return client.list_by_subscription()
+
+
+def get_security_assessment_metadata(client, resource_name):
+
+    try:
+        return client.get(resource_name)
+    except CloudError:
+        return client.get_in_subscription(resource_name)
+
+
+def create_security_assessment_metadata(client, resource_name,
+                                        display_name,
+                                        severity,
+                                        description,
+                                        remediation_description=None):
+
+    new_assessment_metadata = SecurityAssessmentMetadata(display_name=display_name,
+                                                         severity=severity,
+                                                         assessment_type="CustomerManaged",
+                                                         remediation_description=remediation_description,
+                                                         description=description)
+
+    return client.create_in_subscription(assessment_metadata_name=resource_name,
+                                         assessment_metadata=new_assessment_metadata)
+
+
+def delete_security_assessment_metadata(client, resource_name):
+
+    return client.delete_in_subscription(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Sub Assessment
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_sub_assessments(cmd, client, assessment_name=None, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
+        return client.list_all(scope=assessed_resource_id)
+
+    return client.list(scope=assessed_resource_id, assessment_name=assessment_name)
+
+
+def get_security_sub_assessment(cmd, client, resource_name, assessment_name, assessed_resource_id=None):
+
+    if assessed_resource_id is None:
+        assessed_resource_id = '/subscriptions/' + get_subscription_id(cmd.cli_ctx)
+
+    return client.get(sub_assessment_name=resource_name,
+                      assessment_name=assessment_name,
+                      scope=assessed_resource_id)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Application Controls
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_adaptive_application_controls(client):
+
+    return client.list()
+
+
+def get_security_adaptive_application_controls(client, group_name):
+
+    return client.get(group_name=group_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Adaptive Network Hardenings
+# --------------------------------------------------------------------------------------------
+
+
+def get_security_adaptive_network_hardenings(client,
+                                             adaptive_network_hardenings_resource_name,
+                                             resource_name,
+                                             resource_type,
+                                             resource_namespace,
+                                             resource_group_name):
+
+    return client.get(resource_group_name,
+                      resource_namespace,
+                      resource_type,
+                      resource_name,
+                      adaptive_network_hardenings_resource_name)
+
+
+def list_security_adaptive_network_hardenings(client,
+                                              resource_name,
+                                              resource_type,
+                                              resource_namespace,
+                                              resource_group_name):
+
+    return client.list_by_extended_resource(resource_group_name,
+                                            resource_namespace,
+                                            resource_type,
+                                            resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Allowed Connections
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_allowed_connections(client):
+
+    for loc in client.locations.list():
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
+
+    return client.allowed_connections.list()
+
+
+def get_security_allowed_connections(client, resource_name, resource_group_name):
+
+    for loc in client.locations.list():
+        client._config.asc_location = loc.name  # pylint: disable=protected-access
+
+    return client.allowed_connections.get(resource_group_name, resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Solution
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_solution(client, resource_group_name=None):
+
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    return client.list_by_subscription()
+
+
+def show_security_iot_solution(client, resource_group_name, iot_solution_name):
+
+    return client.get(resource_group_name=resource_group_name, solution_name=iot_solution_name)
+
+
+def delete_security_iot_solution(client, resource_group_name, iot_solution_name):
+
+    return client.delete(resource_group_name=resource_group_name, solution_name=iot_solution_name)
+
+
+def create_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name, iot_solution_iot_hubs, location):
+
+    iot_security_solution_data = IoTSecuritySolutionModel(display_name=iot_solution_display_name,
+                                                          iot_hubs=iot_solution_iot_hubs.split(","),
+                                                          location=location)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        iot_security_solution_data=iot_security_solution_data)
+
+
+def update_security_iot_solution(client, resource_group_name, iot_solution_name,
+                                 iot_solution_display_name=None, iot_solution_iot_hubs=None):
+
+    return client.update(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        update_iot_security_solution_data=UpdateIotSecuritySolutionData(
+            displayName=iot_solution_display_name,
+            iotHubs=iot_solution_iot_hubs))
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Analytics
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_analytics(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_analytics(client, resource_group_name, iot_solution_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Alerts
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_alerts(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
+
+
+def dismiss_security_iot_alerts(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.dismiss(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_alert_name=resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security IoT Recommendations
+# --------------------------------------------------------------------------------------------
+
+
+def list_security_iot_recommendations(client, resource_group_name, iot_solution_name):
+
+    return client.list(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name)
+
+
+def show_security_iot_recommendations(client, resource_group_name, iot_solution_name, resource_name):
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        solution_name=iot_solution_name,
+        aggregated_recommendation_name=resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security Regulatory Compliance
+# --------------------------------------------------------------------------------------------
+
+
+def list_regulatory_compliance_standards(client):
+
+    return client.list()
+
+
+def get_regulatory_compliance_standard(client, resource_name):
+
+    return client.get(regulatory_compliance_standard_name=resource_name)
+
+
+def list_regulatory_compliance_controls(client, standard_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name)
+
+
+def get_regulatory_compliance_control(client, resource_name, standard_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=resource_name)
+
+
+def list_regulatory_compliance_assessments(client, standard_name, control_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name,
+                       regulatory_compliance_control_name=control_name)
+
+
+def get_regulatory_compliance_assessment(client, resource_name, standard_name, control_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=control_name,
+                      regulatory_compliance_assessment_name=resource_name)
+
+# --------------------------------------------------------------------------------------------
+# Security Secure Score
+# --------------------------------------------------------------------------------------------
+
+
+def list_secure_scores(client):
+
+    return client.list()
+
+
+def get_secure_score(client, resource_name):
+
+    return client.get(resource_name)
+
+
+def list_secure_score_controls(client):
+
+    return client.list()
+
+
+def list_by_score(client, resource_name):
+
+    return client.list_by_secure_score(resource_name)
+
+
+def list_secure_score_control_definitions(client):
+
+    return client.list_by_subscription()

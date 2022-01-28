@@ -1,0 +1,20 @@
+; Exported zone file from Azure DNS
+; Resource Group Name: TheOne
+; Zone name: zone7.com
+; Date and time (UTC): Mon Jan 22 2018 09:09:43 GMT+0000
+
+$TTL 3600
+$ORIGIN zone7.com.
+
+@ 3600 IN SOA ns1-03.azure-dns.com. azuredns-hostmaster.microsoft.com. (
+                                1
+                                3600
+                                300
+                                2419200
+                                300
+                                )
+
+@ 60 IN TXT "a\\b\255\000\;" "\"\"\"testtesttest\"\"\"" ; "some test record
+
+txt1 TXT ab\ cd
+cn1 CNAME contoso.com.;comment1;comment2;comment3

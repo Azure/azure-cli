@@ -13,7 +13,7 @@ def get_sdk_model_class(class_name):
 
 
 def get_stand_alone_presets():
-    return ['AudioAnalyzer', 'VideoAnalyzer']
+    return ['AudioAnalyzer', 'VideoAnalyzer', 'FaceDetector']
 
 
 def get_cdn_providers():
@@ -30,7 +30,7 @@ def get_token_types():
 
 
 def get_rentalandlease_types():
-    return ['Undefined', 'PersistentUnlimited', 'PersistentLimited']
+    return ['Undefined', 'DualExpiry', 'PersistentUnlimited', 'PersistentLimited']
 
 
 def get_tokens():
@@ -46,6 +46,10 @@ def get_allowed_languages_for_preset():
             'pt-BR', 'zh-CN', 'de-DE', 'ar-EG', 'ru-RU', 'hi-IN']
 
 
+def get_allowed_resolutions():
+    return ['StandardDefinition', 'SourceResolution']
+
+
 def get_media_namespace():
     return 'Microsoft.Media'
 
@@ -55,4 +59,21 @@ def get_media_type():
 
 
 def get_encoding_types():
-    return ['Basic', 'None', 'Standard']
+    return ['Premium1080p', 'None', 'Standard']
+
+
+def get_transcription_langauges():
+    return ['ca-ES', 'da-DK', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-IN', 'en-NZ', 'en-US', 'es-ES',
+            'es-MX', 'fi-FI', 'fr-CA', 'fr-FR', 'it-IT', 'nl-NL', 'pt-BR', 'pt-PT', 'sv-SE']
+
+
+def get_analysis_modes():
+    return ['Standard', 'Basic']
+
+
+def get_stretch_mode_types():
+    return ['None', 'AutoSize', 'AutoFit']
+
+
+def get_storage_authentication_allowed_values():
+    return ['System', 'ManagedIdentity']

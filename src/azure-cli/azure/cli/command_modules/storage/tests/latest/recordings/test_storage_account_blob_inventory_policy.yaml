@@ -1,0 +1,631 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2021-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2021-09-07T07:08:50.9443651Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2021-09-07T07:08:50.9443651Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '380'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11998'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.9; Windows 10) AZURECLI/2.28.0
+      x-ms-date:
+      - Tue, 07 Sep 2021 07:09:13 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://clitest000002.blob.core.windows.net/mycontainer?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 Sep 2021 07:09:16 GMT
+      etag:
+      - '"0x8D971CE67622458"'
+      last-modified:
+      - Tue, 07 Sep 2021 07:09:16 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"policy": {"enabled": true, "type": "Inventory", "rules":
+      [{"enabled": true, "name": "inventoryPolicyRule1", "destination": "mycontainer",
+      "definition": {"format": "Parquet", "schedule": "Weekly", "objectType": "Container",
+      "schemaFields": ["Name", "Last-Modified", "Metadata", "LeaseStatus", "LeaseState",
+      "LeaseDuration", "PublicAccess", "HasImmutabilityPolicy", "HasLegalHold"]}}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '402'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --policy
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:17.4142052Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"inventoryPolicyRule1","definition":{"format":"Parquet","schedule":"Weekly","objectType":"Container","schemaFields":["Name","Last-Modified","Metadata","LeaseStatus","LeaseState","LeaseDuration","PublicAccess","HasImmutabilityPolicy","HasLegalHold"]}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1189'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:17.4142052Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"inventoryPolicyRule1","definition":{"format":"Parquet","schedule":"Weekly","objectType":"Container","schemaFields":["Name","Last-Modified","Metadata","LeaseStatus","LeaseState","LeaseDuration","PublicAccess","HasImmutabilityPolicy","HasLegalHold"]}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '761'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --enable-versioning
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"enabled":false}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '443'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"cors": {"corsRules": []}, "deleteRetentionPolicy": {"enabled":
+      false}, "isVersioningEnabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-service-properties update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '117'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --enable-versioning
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/blobServices/default","name":"default","type":"Microsoft.Storage/storageAccounts/blobServices","properties":{"cors":{"corsRules":[]},"deleteRetentionPolicy":{"enabled":false},"isVersioningEnabled":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '422'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"policy": {"enabled": true, "type": "Inventory", "rules":
+      [{"enabled": true, "name": "inventoryPolicyRule2", "destination": "mycontainer",
+      "definition": {"filters": {"prefixMatch": ["inventoryprefix1", "inventoryprefix2"],
+      "blobTypes": ["blockBlob"], "includeBlobVersions": true, "includeSnapshots":
+      true}, "format": "Csv", "schedule": "Daily", "objectType": "Blob", "schemaFields":
+      ["Name", "Creation-Time", "Last-Modified", "Content-Length", "Content-MD5",
+      "BlobType", "AccessTier", "AccessTierChangeTime", "Snapshot", "VersionId", "IsCurrentVersion",
+      "Metadata"]}}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '587'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --policy
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:24.1175986Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"inventoryPolicyRule2","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","Content-Length","Content-MD5","BlobType","AccessTier","AccessTierChangeTime","Snapshot","VersionId","IsCurrentVersion","Metadata"],"filters":{"blobTypes":["blockBlob"],"prefixMatch":["inventoryprefix1","inventoryprefix2"],"includeBlobVersions":true,"includeSnapshots":true}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '933'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1193'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:24.1175986Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"inventoryPolicyRule2","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","Content-Length","Content-MD5","BlobType","AccessTier","AccessTierChangeTime","Snapshot","VersionId","IsCurrentVersion","Metadata"],"filters":{"blobTypes":["blockBlob"],"prefixMatch":["inventoryprefix1","inventoryprefix2"],"includeBlobVersions":true,"includeSnapshots":true}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '933'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g --set
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:24.1175986Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"inventoryPolicyRule2","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","Content-Length","Content-MD5","BlobType","AccessTier","AccessTierChangeTime","Snapshot","VersionId","IsCurrentVersion","Metadata"],"filters":{"blobTypes":["blockBlob"],"prefixMatch":["inventoryprefix1","inventoryprefix2"],"includeBlobVersions":true,"includeSnapshots":true}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '933'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"policy": {"enabled": true, "type": "Inventory", "rules":
+      [{"enabled": true, "name": "newname", "destination": "mycontainer", "definition":
+      {"filters": {"prefixMatch": ["inventoryprefix1", "inventoryprefix2"], "blobTypes":
+      ["blockBlob"], "includeBlobVersions": true, "includeSnapshots": true}, "format":
+      "Csv", "schedule": "Daily", "objectType": "Blob", "schemaFields": ["Name", "Creation-Time",
+      "Last-Modified", "Content-Length", "Content-MD5", "BlobType", "AccessTier",
+      "AccessTierChangeTime", "Snapshot", "VersionId", "IsCurrentVersion", "Metadata"]}}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '574'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --account-name -g --set
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:27.9459197Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"newname","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","Content-Length","Content-MD5","BlobType","AccessTier","AccessTierChangeTime","Snapshot","VersionId","IsCurrentVersion","Metadata"],"filters":{"blobTypes":["blockBlob"],"prefixMatch":["inventoryprefix1","inventoryprefix2"],"includeBlobVersions":true,"includeSnapshots":true}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '920'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1186'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default","name":"DefaultInventoryPolicy","type":"Microsoft.Storage/storageAccounts/inventoryPolicies","properties":{"lastModifiedTime":"2021-09-07T07:09:27.9459197Z","policy":{"enabled":true,"type":"Inventory","rules":[{"destination":"mycontainer","enabled":true,"name":"newname","definition":{"format":"Csv","schedule":"Daily","objectType":"Blob","schemaFields":["Name","Creation-Time","Last-Modified","Content-Length","Content-MD5","BlobType","AccessTier","AccessTierChangeTime","Snapshot","VersionId","IsCurrentVersion","Metadata"],"filters":{"blobTypes":["blockBlob"],"prefixMatch":["inventoryprefix1","inventoryprefix2"],"includeBlobVersions":true,"includeSnapshots":true}}}]}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '920'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --account-name -g -y
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Tue, 07 Sep 2021 07:09:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14995'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account blob-inventory-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name -g
+      User-Agent:
+      - AZURECLI/2.28.0 azsdk-python-azure-mgmt-storage/18.0.0 Python/3.7.9 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_blob_inventory000001/providers/Microsoft.Storage/storageAccounts/clitest000002/inventoryPolicies/default?api-version=2021-06-01
+  response:
+    body:
+      string: '{"error":{"code":"BlobInventoryPolicyNotFound","message":"Blob inventory
+        policy does not exist for the storage account."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Tue, 07 Sep 2021 07:09:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+version: 1

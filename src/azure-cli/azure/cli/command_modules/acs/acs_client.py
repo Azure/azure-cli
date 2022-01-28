@@ -79,7 +79,7 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
         subprocess.call(["scp", "{}@{}:{}".format(user, host, src), dest])
 
 
-class ACSClient(object):
+class ACSClient:
     def __init__(self, client=None):
         self.client = client
         self.transport = None

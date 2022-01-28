@@ -12,17 +12,17 @@ from azure.cli.command_modules.privatedns._format import (transform_privatedns_z
 def load_command_table(self, _):
 
     network_privatedns_zone_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.privatedns.operations.private_zones_operations#PrivateZonesOperations.{}',
+        operations_tmpl='azure.mgmt.privatedns.operations#PrivateZonesOperations.{}',
         client_factory=cf_privatedns_mgmt_zones
     )
 
     network_privatedns_virtual_network_link_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.privatedns.operations.virtual_network_links_operations#VirtualNetworkLinksOperations.{}',
+        operations_tmpl='azure.mgmt.privatedns.operations#VirtualNetworkLinksOperations.{}',
         client_factory=cf_privatedns_mgmt_virtual_network_links
     )
 
     network_privatedns_record_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.privatedns.operations.record_sets_operations#RecordSetsOperations.{}',
+        operations_tmpl='azure.mgmt.privatedns.operations#RecordSetsOperations.{}',
         client_factory=cf_privatedns_mgmt_record_sets
     )
 
@@ -32,15 +32,17 @@ def load_command_table(self, _):
     )
 
     with self.command_group('network private-dns zone', network_privatedns_zone_sdk) as g:
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.show_command('show', 'get', table_transformer=transform_privatedns_zone_table_output)
         g.custom_command('list', 'list_privatedns_zones', client_factory=cf_privatedns_mgmt_zones, table_transformer=transform_privatedns_zone_table_output)
+        g.custom_command('import', 'import_zone')
+        g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_privatedns_zone', client_factory=cf_privatedns_mgmt_zones, supports_no_wait=True)
-        g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('network private-dns link vnet', network_privatedns_virtual_network_link_sdk) as g:
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.show_command('show', 'get', table_transformer=transform_privatedns_link_table_output)
         g.command('list', 'list', table_transformer=transform_privatedns_link_table_output)
         g.custom_command('create', 'create_privatedns_link', client_factory=cf_privatedns_mgmt_virtual_network_links, supports_no_wait=True)

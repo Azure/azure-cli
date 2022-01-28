@@ -14,6 +14,10 @@ def configstore_output_format(result):
     return _output_format(result, _configstore_format_group)
 
 
+def configstore_identity_format(result):
+    return _output_format(result, _configstore_identity_format_group)
+
+
 def configstore_credential_format(result):
     return _output_format(result, _configstore_credential_format_group)
 
@@ -47,13 +51,21 @@ def _configstore_format_group(item):
         sku = ""
 
     return OrderedDict([
-        ('CREATIONDATE', _format_datetime(_get_value(item, 'creationDate'))),
+        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
         ('ENDPOINT', _get_value(item, 'endpoint')),
         ('LOCATION', _get_value(item, 'location')),
         ('NAME', _get_value(item, 'name')),
-        ('PROVISIONINGSTATE', _get_value(item, 'provisioningState')),
-        ('RESOURCEGROUP', _get_value(item, 'resourceGroup')),
+        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
         ('SKU', sku)
+    ])
+
+
+def _configstore_identity_format_group(item):
+    return OrderedDict([
+        ('PRINCIPAL ID', _format_datetime(_get_value(item, 'principalId'))),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type'))
     ])
 
 
@@ -69,11 +81,20 @@ def _configstore_credential_format_group(item):
 
 
 def _keyvalue_entry_format_group(item):
+    # CLI core converts KeyValue object field names to camelCase (eg: content_type becomes contentType)
+    # But when customers specify field filters, we return a dict of requested fields instead of KeyValue object
+    # In that case, field names are not converted to camelCase. We need to check for both content_type and contentType
+    content_type = _get_value(item, 'contentType')
+    content_type = content_type if content_type != ' ' else _get_value(item, 'content_type')
+
+    last_modified = _get_value(item, 'lastModified')
+    last_modified = last_modified if last_modified != ' ' else _get_value(item, 'last_modified')
+
     return OrderedDict([
-        ('CONTENT TYPE', _get_value(item, 'contentType')),
+        ('CONTENT TYPE', content_type),
         ('KEY', _get_value(item, 'key')),
         ('VALUE', _get_value(item, 'value')),
-        ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
+        ('LAST MODIFIED', _format_datetime(last_modified)),
         ('TAGS', _get_value(item, 'tags')),
         ('LABEL', _get_value(item, 'label')),
         ('LOCKED', _get_value(item, 'locked'))
@@ -81,13 +102,16 @@ def _keyvalue_entry_format_group(item):
 
 
 def _featureflag_entry_format_group(item):
+    last_modified = _get_value(item, 'lastModified')
+    last_modified = last_modified if last_modified != ' ' else _get_value(item, 'last_modified')
+
     return OrderedDict([
         ('KEY', _get_value(item, 'key')),
         ('LABEL', _get_value(item, 'label')),
         ('STATE', _get_value(item, 'state')),
         ('LOCKED', _get_value(item, 'locked')),
         ('DESCRIPTION', _get_value(item, 'description')),
-        ('LAST MODIFIED', _format_datetime(_get_value(item, 'lastModified'))),
+        ('LAST MODIFIED', _format_datetime(last_modified)),
         ('CONDITIONS', _get_value(item, 'conditions'))
     ])
 

@@ -1,0 +1,176 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "function-app-name": {
+            "defaultValue": "orderProcessing",
+            "type": "String",
+            "metadata": {
+                "description": "The name of the function app that you wish to create."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "allowedValues": [
+                "S1",
+                "S2",
+                "S3"
+            ],
+            "defaultValue": "S3",
+            "metadata": {
+                "description": "The pricing tier for the hosting plan."
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "metadata": {
+                "description": "Storage Account type"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "southcentralus",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "deploymentEnvironment": {
+            "type": "string",
+            "defaultValue": "CI",
+            "allowedValues": [
+                "CI",
+                "DEV",
+                "QA",
+                "TRN",
+                "STG",
+                "PROD"
+            ],
+            "metadata": {
+                "description": "Type of environment being deployed to. AKA \"Stage\" in release definition."
+            }
+        },
+        "applicationSettings": {
+            "type": "object",
+            "metadata": {
+                "description": "Application settings from local.settings.json"
+            }
+        }
+    },
+    "variables": {
+        "storageAccountName": "[concat('store', uniquestring(resourceGroup().id))]",
+        "appServicePlanName": "[concat('ASP-', uniquestring(resourceGroup().id))]",
+        "applicationInsightsName": "[concat('appInsights-', uniquestring(resourceGroup().id))]",
+        "projectName": "Digital Platform"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('storageAccountName')]",
+            "kind": "Storage",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "tags": {
+                "project": "[variables('projectName')]",
+                "env": "[parameters('deploymentEnvironment')]"
+            }
+        },
+        {
+            "name": "[variables('appServicePlanName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2019-08-01",
+            "location": "[parameters('location')]",
+            "properties": {
+            },
+            "tags": {
+                "project": "[variables('projectName')]",
+                "env": "[parameters('deploymentEnvironment')]"
+            },
+            "sku": {
+                "Name": "[parameters('sku')]",
+                "capacity": 2
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ]
+        },
+        {
+            "name": "[variables('applicationInsightsName')]",
+            "apiVersion": "2015-05-01",
+            "type": "Microsoft.Insights/components",
+            "kind": "web",
+            "location": "[parameters('location')]",
+            "tags": {
+                "project": "[variables('projectName')]",
+                "env": "[parameters('deploymentEnvironment')]"
+            },
+            "properties": {
+                "Application_Type": "web"
+            }
+        },
+        {
+            "name": "[parameters('function-app-name')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "kind": "functionapp",
+            "location": "[parameters('location')]",
+            "tags": {
+                "project": "[variables('projectName')]",
+                "env": "[parameters('deploymentEnvironment')]"
+            },
+            "properties": {
+                "enabled": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appServicePlanName'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/components/', variables('applicationInsightsName'))]",
+                "[resourceId('Microsoft.Web/serverfarms/', variables('appServicePlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ],
+            "resources": [
+                {
+                    "name": "appsettings",
+                    "type": "config",
+                    "apiVersion": "2018-11-01",
+                    "properties": "[parameters('applicationSettings')[parameters('deploymentEnvironment')]]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites/', parameters('function-app-name'))]"
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('function-app-name'), '/stage')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/', parameters('function-app-name'))]"
+            ],
+            "tags": {
+                "project": "[variables('projectName')]",
+                "env": "[parameters('deploymentEnvironment')]"
+            },
+            "kind": "functionapp",
+            "properties": {
+                "enabled": true,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appServicePlanName'))]"
+            },
+            "resources": [
+                {
+                    "name": "appsettings",
+                    "type": "config",
+                    "apiVersion": "2018-11-01",
+                    "properties": "[parameters('applicationSettings')[parameters('deploymentEnvironment')]]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites/', parameters('function-app-name'))]",
+                        "[resourceId('Microsoft.Web/sites/slots/', parameters('function-app-name'), 'stage')]"
+                    ]
+                }
+            ]
+        }
+    ]
+}

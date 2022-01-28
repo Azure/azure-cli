@@ -22,7 +22,8 @@ def load_command_table(self, _):
 
     with self.command_group('kusto cluster',
                             clusters_operations,
-                            client_factory=cf_cluster) as g:
+                            client_factory=cf_cluster,
+                            deprecate_info=self.deprecate(redirect='"az extension add -n kusto" to install the supported Kusto extension', hide=False)) as g:
         g.custom_command('create', 'cluster_create', supports_no_wait=True, validator=validate_cluster_args)
         g.custom_command('stop', 'cluster_stop', supports_no_wait=True)
         g.custom_command('start', 'cluster_start', supports_no_wait=True)
@@ -34,7 +35,8 @@ def load_command_table(self, _):
 
     with self.command_group('kusto database',
                             database_operations,
-                            client_factory=cf_database) as g:
+                            client_factory=cf_database,
+                            deprecate_info=self.deprecate(redirect='"az extension add -n kusto" to install the supported Kusto extension', hide=False)) as g:
         g.custom_command('create', 'database_create', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
         g.generic_update_command('update', custom_func_name='update_kusto_database', supports_no_wait=True)

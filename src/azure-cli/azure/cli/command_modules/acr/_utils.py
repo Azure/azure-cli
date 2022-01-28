@@ -8,8 +8,10 @@ import tempfile
 
 from knack.util import CLIError
 from knack.log import get_logger
-from knack.prompting import prompt_y_n, NoTTYException
+
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -192,22 +194,12 @@ def _invalid_sku_downgrade():
         "Managed registries could not be downgraded to Classic SKU.")
 
 
-def user_confirmation(message, yes=False):
-    if yes:
-        return
-    try:
-        if not prompt_y_n(message):
-            raise CLIError('Operation cancelled.')
-    except NoTTYException:
-        raise CLIError(
-            'Unable to prompt for confirmation as no tty available. Use --yes.')
-
-
 def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
+
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -255,7 +247,7 @@ def get_yaml_template(cmd_value, timeout, file):
     """
     yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
@@ -294,10 +286,14 @@ def get_custom_registry_credentials(cmd,
     :param str password: The password for custom registry (plain text or a key vault secret URI)
     :param str identity: The task managed identity used for the credential
     """
+    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
+        SecretObjectType = cmd.get_models(
+            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
+            'SecretObjectType',
+            operation_group='tasks')
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -309,12 +305,6 @@ def get_custom_registry_credentials(cmd,
         is_identity_credential = False
         if not username and not password:
             is_identity_credential = identity is not None
-
-        CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
-            'CustomRegistryCredentials',
-            'SecretObject',
-            'SecretObjectType'
-        )
 
         if not is_remove:
             if is_identity_credential:
@@ -338,7 +328,6 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials')
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -346,9 +335,8 @@ def get_custom_registry_credentials(cmd,
 
 
 def build_timers_info(cmd, schedules):
-    TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus')
     timer_triggers = []
+    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
@@ -417,25 +405,7 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
     )
 
 
-def parse_actions_from_repositories(allow_or_remove_repository):
-    from .scope_map import ScopeMapActions
-    valid_actions = {action.value for action in ScopeMapActions}
-    REPOSITORIES = 'repositories'
-    actions = []
-    for rule in allow_or_remove_repository:
-        repository = rule[0]
-        if len(rule) < 2:
-            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
-        for action in rule[1:]:
-            action = action.lower()
-            if action not in valid_actions:
-                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
-
-    return actions
-
-
-def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
+def prepare_source_location(cmd, source_location, client_registries, registry_name, resource_group_name):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
     elif os.path.exists(source_location):
@@ -448,7 +418,7 @@ def prepare_source_location(source_location, client_registries, registry_name, r
 
         try:
             source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
+                cmd, client_registries, registry_name, resource_group_name,
                 source_location, tar_file_path, "", "")
         except Exception as err:
             raise CLIError(err)
@@ -469,3 +439,136 @@ def prepare_source_location(source_location, client_registries, registry_name, r
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """
+
+
+# Scope & Tokens help functions
+def parse_repositories_from_actions(actions):
+    if not actions:
+        return []
+    from .scope_map import RepoScopeMapActions
+    valid_actions = {action.value for action in RepoScopeMapActions}
+    repositories = []
+    REPOSITORY = 'repositories/'
+    for action in actions:
+        if action.startswith(REPOSITORY):
+            for rule in valid_actions:
+                if action.endswith(rule):
+                    repo = action[len(REPOSITORY):-len(rule) - 1]
+                    repositories.append(repo)
+    return list(set(repositories))
+
+
+def parse_scope_map_actions(repository_actions_list=None, gateway_actions_list=None):
+    from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
+    valid_actions = {action.value for action in RepoScopeMapActions}
+    actions = _parse_scope_map_actions(repository_actions_list, valid_actions, 'repositories')
+    valid_actions = {action.value for action in GatewayScopeMapActions}
+    actions.extend(_parse_scope_map_actions(gateway_actions_list, valid_actions, 'gateway'))
+    return actions
+
+
+def _parse_scope_map_actions(actions_list, valid_actions, action_prefix):
+    if not actions_list:
+        return []
+    actions = []
+    for rule in actions_list:
+        resource = rule[0].lower()
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with "{}".'.format(resource))
+        for action in rule[1:]:
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(action_prefix, resource, action))
+    return actions
+
+
+def create_default_scope_map(cmd,
+                             resource_group_name,
+                             registry_name,
+                             scope_map_name,
+                             repositories,
+                             gateways,
+                             scope_map_description="",
+                             force=False):
+    from ._client_factory import cf_acr_scope_maps
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    actions = parse_scope_map_actions(repositories, gateways)
+    try:
+        existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
+        # for command idempotency, if the actions are the same, we accept it
+        if sorted(existing_scope_map.actions) == sorted(actions):
+            return existing_scope_map
+        if force and existing_scope_map:
+            logger.warning("Overriding scope map '%s' properties", scope_map_name)
+        else:
+            raise CLIError('The default scope map was already configured with different repository permissions.' +
+                           '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
+                           .format(registry_name, scope_map_name))
+    except ResourceNotFoundError:
+        pass
+    logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
+    scope_map_request = {
+        'actions': actions,
+        'scope_map_description': scope_map_description
+    }
+    poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
+    scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
+    return scope_map
+
+
+def build_token_id(subscription_id, resource_group_name, registry_name, token_name):
+    return "/subscriptions/{}/resourceGroups/{}".format(subscription_id, resource_group_name) + \
+        "/providers/Microsoft.ContainerRegistry/registries/{}/tokens/{}".format(registry_name, token_name)
+
+
+def get_token_from_id(cmd, token_id):
+    from ._client_factory import cf_acr_tokens
+    from .token import acr_token_show
+    token_client = cf_acr_tokens(cmd.cli_ctx)
+    # SCOPE MAP ID example
+    # /subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/tokens/<9>'
+    token_info = token_id.lstrip('/').split('/')
+    if len(token_info) != 10:
+        raise CLIError("Not valid scope map id: {}".format(token_id))
+    resource_group_name = token_info[3]
+    registry_name = token_info[7]
+    token_name = token_info[9]
+    return acr_token_show(cmd, token_client, registry_name, token_name, resource_group_name)
+
+
+def get_scope_map_from_id(cmd, scope_map_id):
+    from ._client_factory import cf_acr_scope_maps
+    from .scope_map import acr_scope_map_show
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    # SCOPE MAP ID example
+    # /subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/scopeMaps/<9>'
+    scope_info = scope_map_id.lstrip('/').split('/')
+    if len(scope_info) != 10:
+        raise CLIError("Not valid scope map id: {}".format(scope_map_id))
+    resource_group_name = scope_info[3]
+    registry_name = scope_info[7]
+    scope_map_name = scope_info[9]
+    return acr_scope_map_show(cmd, scope_map_client, registry_name, scope_map_name, resource_group_name)
+# endregion
+
+
+def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from msrestazure.tools import parse_resource_id
+
+    res = parse_resource_id(managed_identity_resource_id)
+    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
+    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+
+def get_task_details_by_name(cli_ctx, resource_group_name, registry_name, task_name):
+    """Returns the task details.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str task_name: The name of task
+    """
+    from ._client_factory import cf_acr_tasks
+    client = cf_acr_tasks(cli_ctx)
+    return client.get_details(resource_group_name, registry_name, task_name)

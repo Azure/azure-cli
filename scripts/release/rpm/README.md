@@ -6,26 +6,37 @@ On a machine with Docker, execute the following command from the root directory 
 
 _Enterprise Linux:_
 ``` bash
-docker build --target build-env -f ./scripts/release/rpm/Dockerfile.centos -t mcr.microsoft.com/azure-cli:centos7-builder .
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.centos -t azure/azure-cli:centos7-builder .
 ```
 _Fedora:_
 
 ```bash
-docker build --target build-env -f ./scripts/release/rpm/Dockerfile.fedora -t mcr.microsoft.com/azure-cli:fedora29-builder .
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.fedora -t azure/azure-cli:fedora29-builder .
 ```
 
-After several minutes, this will have created a Docker image named `microsoft/azure-cli:centos7-builder` containing an
+_Mariner:_
+
+```bash
+docker build --target build-env -f ./scripts/release/rpm/Dockerfile.mariner -t azure/azure-cli:mariner-builder .
+```
+
+After several minutes, this will have created a Docker image named `azure/azure-cli:centos7-builder` containing an
 unsigned `.rpm` built from the current contents of your azure-cli directory. To extract the build product from the image
 you can run the following command:
 
 _Enterprise Linux:_
 ``` bash
-docker run mcr.microsoft.com/azure-cli:centos7-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.el7.x86_64.rpm > ./bin/azure-cli-dev-1.el7.x86_64.rpm
+docker run azure/azure-cli:centos7-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.el7.x86_64.rpm > ./bin/azure-cli-dev-1.el7.x86_64.rpm
 ```
 
 _Fedora:_
 ``` bash
-docker run mcr.microsoft.com/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.fc29.x86_64.rpm > ./bin/azure-cli-dev-1.fc29.x86_64.rpm
+docker run azure/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.fc29.x86_64.rpm > ./bin/azure-cli-dev-1.fc29.x86_64.rpm
+```
+
+_Mariner:_
+``` bash
+docker run azure/azure-cli:mariner-builder cat /usr/src/mariner/RPMS/x86_64/azure-cli-dev-1.cm1.x86_64.rpm > ./bin/azure-cli-dev-1.cm1.x86_64.rpm
 ```
 
 This launches a container running from the image built and tagged by the previous command, prints the contents of the
@@ -50,7 +61,7 @@ Run the RPM package
 On a machine with Docker, execute the following command from the root directory of this repository:
 
 ``` bash
-docker build -f ./scripts/release/rpm/Dockerfile.centos -t mcr.microsoft.com/azure-cli:centos7 .
+docker build -f ./scripts/release/rpm/Dockerfile.centos -t azure/azure-cli:centos7 .
 ``` 
 
 If you had previously followed this instructions above for building an RPM package, this should finish very quickly.

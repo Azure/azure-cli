@@ -47,6 +47,32 @@ helps['ams account check-name'] = """
     short-summary: Checks whether the Media Service resource name is available.
 """
 
+helps['ams account encryption'] = """
+    type: group
+    short-summary: Manage encryption for an Azure Media Services account.
+"""
+
+helps['ams account encryption show'] = """
+    type: command
+    short-summary: Show the details of encryption settings for an Azure Media Services account.
+    examples:
+        - name: Show the media account's encryption details
+          text: >
+            az ams account encryption show --account-name myAmsAccount -g myRG
+"""
+
+helps['ams account encryption set'] = """
+    type: command
+    short-summary: Set the encryption settings for an Azure Media Services account.
+    examples:
+        - name: Set the media account's encryption to a customer managed key
+          text: >
+            az ams account encryption set -a myAmsAccount -g myRG --key-type CustomerKey --key-identifier keyVaultId
+        - name: Set the media account's encryption to a system managed key
+          text: >
+            az ams account encryption set -a myAmsAccount -g myRG --key-type SystemKey
+"""
+
 helps['ams account storage'] = """
     type: group
     short-summary: Manage storage for an Azure Media Services account.
@@ -69,12 +95,15 @@ helps['ams account sp'] = """
 
 helps['ams account sp create'] = """
     type: command
-    short-summary: Create a service principal and configure its access to an Azure Media Services account.
+    short-summary: Create or update a service principal and configure its access to an Azure Media Services account.
     long-summary: Service principal propagation throughout Azure Active Directory may take some extra seconds to complete.
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
             az ams account sp create -a myAmsAccount -g myRG -n mySpName --password mySecret --role Owner --xml
+        - name: Update a service principal with a new role and new name.
+          text: >
+            az ams account sp create -a myAmsAccount -g myRG -n mySpName --new-sp-name myNewSpName --role newRole
     """
 
 helps['ams account sp reset-credentials'] = """
@@ -85,6 +114,11 @@ helps['ams account sp reset-credentials'] = """
 helps['ams account storage sync-storage-keys'] = """
     type: command
     short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
+"""
+
+helps['ams account storage set-authentication'] = """
+    type: command
+    short-summary: Set the authentication of a storage account attached to an Azure Media Services account.
 """
 
 helps['ams transform'] = """
@@ -250,6 +284,10 @@ helps['ams content-key-policy'] = """
 helps['ams content-key-policy create'] = """
     type: command
     short-summary: Create a new content key policy.
+    examples:
+        - name: Create an content-key-policy with a FairPlay Configuration.
+          text: >
+            az ams content-key-policy create -a amsAccount -g resourceGroup -n contentKeyPolicyName --policy-option-name policyOptionName --open-restriction --ask "ask-32-chars-hex-string" --fair-play-pfx pfxPath --fair-play-pfx-password "pfxPassword" --rental-and-lease-key-type PersistentUnlimited --rental-duration 5000
 """
 
 helps['ams content-key-policy show'] = """
@@ -475,6 +513,11 @@ helps['ams live-event start'] = """
     short-summary: Start a live event.
 """
 
+helps['ams live-event standby'] = """
+    type: command
+    short-summary: Allocate a live event to be started later.
+"""
+
 helps['ams live-event show'] = """
     type: command
     short-summary: Show the details of a live event.
@@ -581,15 +624,15 @@ helps['ams account-filter delete'] = """
 
 helps['ams account mru'] = """
     type: group
-    short-summary: Manage media reserved units for an Azure Media Services account.
+    short-summary: Manage media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru set'] = """
     type: command
-    short-summary: Set the type and number of media reserved units for an Azure Media Services account.
+    short-summary: Set the type and number of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """
 
 helps['ams account mru show'] = """
     type: command
-    short-summary: Show the details of media reserved units for an Azure Media Services account.
+    short-summary: Show the details of media reserved units for an Azure Media Services account. This doesn't work with accounts created with 2020-05-01 version of the Media Services API or later. Accounts created this way no longer need to set media reserved units as the system will automaticaly scale up and down based on load.
 """

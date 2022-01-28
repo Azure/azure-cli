@@ -31,6 +31,13 @@ def get_policy_assignment_completion_list(cmd, prefix, namespace, **kwargs):  # 
 
 
 @Completer
+def get_policy_exemption_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
+    result = policy_client.policy_exemptions.list()
+    return [i.name for i in result]
+
+
+@Completer
 def get_providers_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     rcf = _resource_client_factory(cmd.cli_ctx)
     result = rcf.providers.list()
