@@ -111,15 +111,15 @@ copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
-:: Use universal files and remove Py3 only files
+:: Use Py3 only files and remove universal files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
 for /f %%a in ('dir /b /s _models.py') do (
-    set PY2_FILE=%%a
-    if exist !PY2_FILE! del !PY2_FILE!
+    set MODELS_FILE=%%a
+    if exist !MODELS_FILE! del !MODELS_FILE!
 )
 for /f %%a in ('dir /b /s _models.*.pyc') do (
-    set PY2_FILE=%%a
-    if exist !PY2_FILE! del !PY2_FILE!
+    set MODELS_FILE=%%a
+    if exist !MODELS_FILE! del !MODELS_FILE!
 )
 popd
 
