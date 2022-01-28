@@ -46,11 +46,11 @@ Release History
 **Compute **
 
 * `az image builder create`: Add new parameter `--proxy-vm-size` to support proxy VM size customization (#20904)
-* `az image builder create`: Add new parameter `--build-vm-identities` to  support user assigned identities customization (#20904)
+* `az image builder create`: Add new parameter `--build-vm-identities` to support user assigned identities customization (#20904)
 * `az vmss update`: Add new parameter `--force-deletion` to support force delete VMSS (#20622)
 * `az vm/vmss create`: Add warning log and modify help to inform that the default value `Contributor` of `--role` will be removed (#20924)
 * `az disk-encryption-set create`: Make the parameter `--source-vault` un-required (#20256)
-* `az vm create/update`: Add new parameters `--v-cpus-available`  and `--v-cpus-per-core` to support  VMSize customization (#20818)
+* `az vm create/update`: Add new parameters `--v-cpus-available` and `--v-cpus-per-core` to support VMSize customization (#20818)
 
 **Cosmos DB**
 
