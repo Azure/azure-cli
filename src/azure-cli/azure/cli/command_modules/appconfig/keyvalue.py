@@ -140,12 +140,15 @@ def import_config(cmd,
     if strict or not yes:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
-                                               key=SearchFilterOptions.ANY_KEY,
+                                               key=prefix + '*' if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL)
-    # if customer needs preview & confirmation
-    if not yes:
+        all_features = __read_kv_from_config_store(azconfig_client,
+                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                   label=label if label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
+    # if customer needs preview & confirmation
+    if not yes:
         # generate preview and wait for user confirmation
         need_kv_change = __print_preview(
             old_json=__serialize_kv_list_to_comparable_json_object(keyvalues=dest_kvs, level=source),
@@ -154,9 +157,6 @@ def import_config(cmd,
         need_feature_change = False
         if strict or (src_features and not skip_features):
             # Append all features to dest_features list
-            all_features = __read_kv_from_config_store(azconfig_client,
-                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
-                                                       label=label if label else SearchFilterOptions.EMPTY_LABEL)
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     dest_features.append(feature)
@@ -176,6 +176,8 @@ def import_config(cmd,
 
     # In strict mode, delete kvs with specific label that are missing from the imported file
     if strict:
+        dest_kvs.extend(all_features)  # append the discarded features back
+
         kvs_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and label == kv.label
                                                         for kv_import in src_kvs), dest_kvs))
         for kv in kvs_to_delete:

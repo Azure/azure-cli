@@ -583,7 +583,7 @@ def __serialize_kv_list_to_comparable_json_list(keyvalues, profile=None):
     return res
 
 
-def __print_features_preview(old_json, new_json, strict):
+def __print_features_preview(old_json, new_json, strict=False):
     logger.warning('\n---------------- Feature Flags Preview (Beta) -------------')
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
@@ -635,7 +635,7 @@ def __print_features_preview(old_json, new_json, strict):
     return True
 
 
-def __print_preview(old_json, new_json, strict):
+def __print_preview(old_json, new_json, strict=False):
     logger.warning('\n---------------- Key Values Preview (Beta) ----------------')
     if not strict and not new_json:
         logger.warning('\nSource configuration is empty. No changes will be made.')
