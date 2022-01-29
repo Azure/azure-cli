@@ -124,7 +124,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_rg = self.create_random_name(prefix='cli-rg-subnet', length=24)
         subs_id = self.current_subscription()
-        self.cmd("az group create -n %s --subscription %s -l %s" % (subnet_rg, subs_id, VNET_LOCATION)).get_output_in_json()
+        self.cmd("az group create -n %s --subscription %s -l %s --tags 'owner=cli_test'" % (subnet_rg, subs_id, VNET_LOCATION)).get_output_in_json()
 
         rg = '{rg}'
         self.setup_vnet(subnet_rg, vnet_name, subnet_name, '10.0.0.0', VNET_LOCATION)

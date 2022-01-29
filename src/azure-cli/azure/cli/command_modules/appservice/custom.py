@@ -4016,7 +4016,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                sku=sku,
                                create_rg=_create_new_rg,
                                resource_group_name=rg_name,
-                               plan=plan)
+                               plan=plan,
+                               is_linux=_is_linux,
+                               client=client)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
@@ -4102,13 +4104,31 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)
-    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
-        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
-        cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
-        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
-        cmd.cli_ctx.config.set_value('defaults', 'location', loc)
-        cmd.cli_ctx.config.set_value('defaults', 'web', name)
+
+    _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
+
     return create_json
+
+
+def _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name):
+    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
+        logger.warning("Setting 'az webapp up' default arguments for current directory. "
+                       "Manage defaults with 'az configure --scope local'")
+
+        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+        logger.warning("--resource-group/-g default: %s", rg_name)
+
+        cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
+        logger.warning("--sku default: %s", sku)
+
+        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
+        logger.warning("--plan/-p default: %s", plan)
+
+        cmd.cli_ctx.config.set_value('defaults', 'location', loc)
+        logger.warning("--location/-l default: %s", loc)
+
+        cmd.cli_ctx.config.set_value('defaults', 'web', name)
+        logger.warning("--name/-n default: %s", name)
 
 
 def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
