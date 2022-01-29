@@ -3,6 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+try:
+    from urllib.parse import unquote
+except ImportError:
+    from urllib import unquote
+
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -45,12 +50,7 @@ def _get_v2_manifest_path(repository, manifest):
     return '/v2/{}/manifests/{}'.format(repository, manifest)
 
 
-def _get_references_path(repository, manifest, artifact_type=None):
-    if artifact_type:
-        return '/oras/artifacts/v1/{}/manifests/{}/referrers?artifactType={}'.format(repository,
-                                                                                     manifest,
-                                                                                     artifact_type)
-
+def _get_referrers_path(repository, manifest):
     return '/oras/artifacts/v1/{}/manifests/{}/referrers'.format(repository, manifest)
 
 
@@ -70,6 +70,48 @@ def _obtain_manifest_from_registry(login_server,
                                            manifest_headers=True)
 
     return result
+
+
+def _obtain_referrers_from_registry(login_server,
+                                    path,
+                                    username,
+                                    password,
+                                    artifact_type=None):
+
+    result_list = {'references': []}
+    execute_next_http_call = True
+
+    params = {
+        'artifactType': artifact_type
+    }
+
+    while execute_next_http_call:
+        execute_next_http_call = False
+
+        result, next_link = request_data_from_registry(
+            http_method='get',
+            login_server=login_server,
+            path=path,
+            username=username,
+            password=password,
+            result_index=None,
+            params=params)
+
+        if result:
+            result_list['references'].extend(result['references'])
+
+        if next_link:
+            # The registry is telling us there's more items in the list,
+            # and another call is needed. The link header looks something
+            # like `Link: </v2/_catalog?last=hello-world&n=1>; rel="next"`
+            # we should follow the next path indicated in the link header
+            next_link_path = next_link[(next_link.index('<') + 1):next_link.index('>')]
+            tokens = next_link_path.split('?', 1)
+            params = {y[0]: unquote(y[1]) for y in (x.split('=', 1) for x in tokens[1].split('&'))}
+
+            execute_next_http_call = True
+
+    return result_list
 
 
 def _parse_fqdn(cmd, fqdn, is_manifest=True):
@@ -107,15 +149,15 @@ def _validate_login_server_suffix(cmd, reg_suffix):
                                         '\'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
 
 
-def acr_list_manifests(cmd,
-                       registry_name=None,
-                       repository=None,
-                       ID=None,
-                       top=None,
-                       orderby=None,
-                       tenant_suffix=None,
-                       username=None,
-                       password=None):
+def acr_manifest_list(cmd,
+                      registry_name=None,
+                      repository=None,
+                      ID=None,
+                      top=None,
+                      orderby=None,
+                      tenant_suffix=None,
+                      username=None,
+                      password=None):
     if (ID and repository) or (not ID and not (registry_name and repository)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_REPO)
 
@@ -153,7 +195,7 @@ def acr_list_manifests(cmd,
     return manifest_list
 
 
-def acr_list_manifest_metadata(cmd,
+def acr_manifest_metadata_list(cmd,
                                registry_name=None,
                                repository=None,
                                ID=None,
@@ -189,7 +231,7 @@ def acr_list_manifest_metadata(cmd,
     return raw_result
 
 
-def acr_list_manifest_referrers(cmd,
+def acr_manifest_list_referrers(cmd,
                                 registry_name=None,
                                 manifest_id=None,
                                 artifact_type=None,
@@ -220,11 +262,12 @@ def acr_list_manifest_referrers(cmd,
         repository=repository,
         permission=RepoAccessTokenPermission.PULL.value)
 
-    raw_result = _obtain_manifest_from_registry(
+    raw_result = _obtain_referrers_from_registry(
         login_server=login_server,
-        path=_get_references_path(repository, manifest, artifact_type),
+        path=_get_referrers_path(repository, manifest),
         username=username,
-        password=password)
+        password=password,
+        artifact_type=artifact_type)
 
     ref_key = "references"
     if recursive:
@@ -233,7 +276,7 @@ def acr_list_manifest_referrers(cmd,
             for referrers_obj in raw_result[ref_key]:
                 internal_referrers_obj = _obtain_manifest_from_registry(
                     login_server=login_server,
-                    path=_get_references_path(repository, referrers_obj["digest"]),
+                    path=_get_referrers_path(repository, referrers_obj["digest"]),
                     username=username,
                     password=password)
 
@@ -244,7 +287,7 @@ def acr_list_manifest_referrers(cmd,
     return raw_result
 
 
-def acr_show_manifest(cmd,
+def acr_manifest_show(cmd,
                       registry_name=None,
                       manifest_id=None,
                       ID=None,
@@ -281,6 +324,9 @@ def acr_show_manifest(cmd,
         username=username,
         password=password)
 
+    # We are forced to print directly here in order to preserve bit for bit integrity and
+    # avoid any formatting so that the output can successfully be hashed. Customer will expect that
+    # az acr manifest show myreg.azurecr.io/myrepo@sha256:abc123 --raw | shasum -a 256 will result in abc123
     if raw_output:
         print(raw_result, end='')
         return
@@ -288,7 +334,7 @@ def acr_show_manifest(cmd,
     return raw_result
 
 
-def acr_show_manifest_metadata(cmd,
+def acr_manifest_metadata_show(cmd,
                                registry_name=None,
                                manifest_id=None,
                                ID=None,
@@ -300,33 +346,22 @@ def acr_show_manifest_metadata(cmd,
 
     if ID:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
+        manifest_id = repository + ':' + tag if tag else repository + '@' + manifest
 
-    else:
-        repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
-
-    if not manifest:
-        image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
-
-    login_server, username, password = get_access_credentials(
+    return _acr_repository_attributes_helper(
         cmd=cmd,
         registry_name=registry_name,
+        http_method='get',
+        json_payload=None,
+        permission=RepoAccessTokenPermission.METADATA_READ.value,
+        repository=None,
+        image=manifest_id,
         tenant_suffix=tenant_suffix,
-        username=username,
-        password=password,
-        repository=repository,
-        permission=RepoAccessTokenPermission.PULL.value)
-
-    raw_result = _obtain_manifest_from_registry(
-        login_server=login_server,
-        path=_get_manifest_path(repository, manifest),
         username=username,
         password=password)
 
-    return raw_result
 
-
-def acr_update_manifest_metadata(cmd,
+def acr_manifest_metadata_update(cmd,
                                  registry_name=None,
                                  manifest_id=None,
                                  ID=None,
@@ -342,16 +377,7 @@ def acr_update_manifest_metadata(cmd,
 
     if ID:
         registry_name, repository, tag, manifest = _parse_fqdn(cmd, ID[0])
-
-    else:
-        repository, tag, manifest = _parse_image_name(manifest_id, allow_digest=True)
-
-    if not manifest:
-        image = repository + ':' + tag
-        repository, tag, manifest = get_image_digest(cmd, registry_name, image)
-
-    if not manifest_id:
-        manifest_id = repository + '@' + manifest
+        manifest_id = repository + ':' + tag if tag else repository + '@' + manifest
 
     json_payload = {}
 
@@ -387,14 +413,14 @@ def acr_update_manifest_metadata(cmd,
         password=password)
 
 
-def acr_delete_manifests(cmd,
-                         registry_name=None,
-                         manifest_id=None,
-                         ID=None,
-                         tenant_suffix=None,
-                         username=None,
-                         password=None,
-                         yes=False):
+def acr_manifest_delete(cmd,
+                        registry_name=None,
+                        manifest_id=None,
+                        ID=None,
+                        tenant_suffix=None,
+                        username=None,
+                        password=None,
+                        yes=False):
     if (ID and manifest_id) or (not ID and not (registry_name and manifest_id)):
         raise InvalidArgumentValueError(BAD_ARGS_ERROR_MANIFEST)
 
@@ -420,10 +446,9 @@ def acr_delete_manifests(cmd,
     user_confirmation("Are you sure you want to delete the artifact '{}'"
                       " and all manifests that refer to it?".format(manifest), yes)
 
-    path = _get_v2_manifest_path(repository, manifest)
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path=path,
+        path=_get_v2_manifest_path(repository, manifest),
         username=username,
         password=password)[0]

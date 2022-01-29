@@ -213,15 +213,15 @@ def load_command_table(self, _):
         g.command('untag', 'acr_repository_untag')
 
     with self.command_group('acr manifest', acr_manifest_util, is_preview=True) as g:
-        g.show_command('show', 'acr_show_manifest', table_transformer=manifest_output_format)
-        g.command('list', 'acr_list_manifests', table_transformer=manifest_output_format)
-        g.command('delete', 'acr_delete_manifests')
-        g.command('list-referrers', 'acr_list_manifest_referrers', table_transformer=list_references_output_format)
+        g.show_command('show', 'acr_manifest_show', table_transformer=manifest_output_format)
+        g.command('list', 'acr_manifest_list', table_transformer=manifest_output_format)
+        g.command('delete', 'acr_manifest_delete')
+        g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_references_output_format)
 
     with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True) as g:
-        g.show_command('show', 'acr_show_manifest_metadata')
-        g.command('list', 'acr_list_manifest_metadata')
-        g.command('update', 'acr_update_manifest_metadata')
+        g.show_command('show', 'acr_manifest_metadata_show')
+        g.command('list', 'acr_manifest_metadata_list')
+        g.command('update', 'acr_manifest_metadata_update')
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')

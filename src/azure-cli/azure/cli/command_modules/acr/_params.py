@@ -143,7 +143,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
         c.argument('repository', help="The name of the repository.")
-        c.argument('image', arg_type=image_by_tag_or_digest_type, deprecate_info=c.deprecate(hide=True, redirect='az acr manifest metadata show'))
+        c.argument('image', arg_type=image_by_tag_or_digest_type)
         c.argument('top', type=int, help='Limit the number of items in the results.')
         c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
         c.argument('detail', help='Show detailed information.', action='store_true')

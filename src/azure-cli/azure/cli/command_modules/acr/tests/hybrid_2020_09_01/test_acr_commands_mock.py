@@ -17,7 +17,7 @@ from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
     acr_repository_show_tags,
-    acr_repository_list_manifests,
+    acr_repository_show_manifests,
     acr_repository_show,
     acr_repository_update,
     acr_repository_delete,
@@ -170,7 +170,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Show manifests using Basic auth without detail
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
-        acr_repository_list_manifests(cmd, 'testregistry', 'testrepository')
+        acr_repository_show_manifests(cmd, 'testregistry', 'testrepository')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests',
@@ -186,7 +186,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Show manifests using Bearer auth with detail
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
-        acr_repository_list_manifests(cmd, 'testregistry', 'testrepository', top=10, orderby='time_desc', detail=True)
+        acr_repository_show_manifests(cmd, 'testregistry', 'testrepository', top=10, orderby='time_desc', detail=True)
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests',
