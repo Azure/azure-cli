@@ -1057,9 +1057,10 @@ def __import_kvset_from_file(client, path, strict, yes):
         if __validate_import_config_setting(config_setting):
             kvset_to_import.append(config_setting)
 
-    existing_kvset = __read_kv_from_config_store(client,
-                                                 key=SearchFilterOptions.ANY_KEY,
-                                                 label=SearchFilterOptions.ANY_LABEL)
+    if strict or not yes:
+        existing_kvset = __read_kv_from_config_store(client,
+                                                     key=SearchFilterOptions.ANY_KEY,
+                                                     label=SearchFilterOptions.ANY_LABEL)
     kvset_to_delete = []
     if strict:
         kvset_to_delete = list(filterfalse(lambda kv: any(kv_import.key == kv.key and kv_import.label == kv.label
