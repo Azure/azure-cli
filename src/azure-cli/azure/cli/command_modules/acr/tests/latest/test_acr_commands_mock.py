@@ -399,6 +399,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             timeout=300,
             verify=mock.ANY)
 
+
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
@@ -414,17 +415,15 @@ class AcrMockCommandsTests(unittest.TestCase):
             'mediaType': 'application/vnd.docker.distribution.manifest.v2+json'
         }).encode()
 
-
         mock_requests_get.return_value = response
-
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
 
         # Get manifest by tag
         acr_manifest_show(cmd,
-                            registry_name='testregistry',
-                            manifest_id='testrepository:testtag')
+                          registry_name='testregistry',
+                          manifest_id='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -436,8 +435,8 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Get manifest by digest
         acr_manifest_show(cmd,
-                            registry_name='testregistry',
-                            manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
+                          registry_name='testregistry',
+                          manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -449,7 +448,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Get manifest by fqdn
         acr_manifest_show(cmd,
-                            ID=['testregistry.azurecr.io/testrepository:testtag'])
+                          ID=['testregistry.azurecr.io/testrepository:testtag'])
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -458,6 +457,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             json=None,
             timeout=300,
             verify=mock.ANY)
+
 
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -501,17 +501,19 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
-        # Get manifest by tag
+        # List manifests
         result = acr_manifest_list(cmd,
                                    registry_name='testregistry',
                                    repository='testrepository')
 
         assert result == expected_output
 
+        #List manifests by fqdn
         result = acr_manifest_list(cmd,
                                    ID=['testregistry.azurecr.io/testrepository'])
 
         assert result == expected_output
+
 
     @mock.patch('azure.cli.command_modules.acr.manifest.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -526,8 +528,8 @@ class AcrMockCommandsTests(unittest.TestCase):
         referrers_response.content = json.dumps({
             'referrers': {}
         }).encode()
-        mock_requests_get.return_value = referrers_response
 
+        mock_requests_get.return_value = referrers_response
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
@@ -582,8 +584,8 @@ class AcrMockCommandsTests(unittest.TestCase):
         delete_response = mock.MagicMock()
         delete_response.headers = {}
         delete_response.status_code = 200
-        mock_requests_delete.return_value = delete_response
 
+        mock_requests_delete.return_value = delete_response
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
@@ -644,8 +646,8 @@ class AcrMockCommandsTests(unittest.TestCase):
             'registry': 'testregistry.azurecr.io',
             'imageName': 'testrepository'
         }).encode()
-        mock_requests_get.return_value = response
 
+        mock_requests_get.return_value = response
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
@@ -709,13 +711,12 @@ class AcrMockCommandsTests(unittest.TestCase):
                 'digest': 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                 'tags': ['testtag3']
             }]}).encode()
-        mock_requests_get.return_value = response
 
-        # Show manifest metadata using Basic auth
+        mock_requests_get.return_value = response
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', 'username', 'password'
 
-
+        # Show manifest metadata using Basic auth
         acr_manifest_metadata_list(cmd,
                                    registry_name='testregistry',
                                    repository='testrepository')
@@ -751,6 +752,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             timeout=300,
             verify=mock.ANY)
 
+
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository._get_manifest_digest', autospec=True)
     @mock.patch('requests.request', autospec=True)
@@ -764,16 +766,16 @@ class AcrMockCommandsTests(unittest.TestCase):
             'registry': 'testregistry.azurecr.io',
             'imageName': 'testrepository'
         }).encode()
-        mock_requests_patch.return_value = response
 
+        mock_requests_patch.return_value = response
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', 'username', 'password'
         mock_get_manifest_digest.return_value = 'sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7'
 
         # Update attributes for an artifact by tag
         acr_manifest_metadata_update(cmd,
-                              registry_name='testregistry',
-                              manifest_id='testrepository:testtag',
-                              write_enabled='false')
+                                     registry_name='testregistry',
+                                     manifest_id='testrepository:testtag',
+                                     write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
@@ -787,9 +789,9 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Update attributes for an artifact by manifest digest
         acr_manifest_metadata_update(cmd,
-                              registry_name='testregistry',
-                              manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-                              write_enabled='false')
+                                     registry_name='testregistry',
+                                     manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                                     write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -803,8 +805,8 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Update attributes for an artifact by fqdn
         acr_manifest_metadata_update(cmd,
-                              ID=['testregistry.azurecr.io/testrepository:testtag'],
-                              write_enabled='false')
+                                     ID=['testregistry.azurecr.io/testrepository:testtag'],
+                                     write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',

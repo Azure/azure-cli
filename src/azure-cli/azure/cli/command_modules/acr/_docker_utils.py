@@ -50,7 +50,6 @@ class RepoAccessTokenPermission(Enum):
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL = 'pull'
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
-    PULL_DELETE_META_READ = '{},{},{}'.format(PULL, DELETE, METADATA_READ)
 
 
 class HelmAccessTokenPermission(Enum):
@@ -560,8 +559,7 @@ def request_data_from_registry(http_method,
             log_registry_response(response)
 
             if manifest_headers and raw and response.status_code == 200:
-                next_link = response.headers['link'] if 'link' in response.headers else None
-                return response.content.decode('utf-8'), next_link
+                return response.content.decode('utf-8'), None
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None

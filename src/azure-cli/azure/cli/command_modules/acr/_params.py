@@ -47,14 +47,14 @@ repo_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_repo_id,
-    help="A fully qualified repository specifier such as 'myreg.azurecr.io/myrepo'."
+    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
 )
 
 manifest_id_type = CLIArgumentType(
     nargs='*',
     default=None,
     validator=validate_manifest_id,
-    help="A fully qualified manifest specifier such as 'myreg.azurecr.io/myrepo:latest'."
+    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
 )
 
 image_by_tag_or_digest_type = CLIArgumentType(
@@ -176,6 +176,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr manifest list-referrers') as c:
         c.positional('ID', arg_type=manifest_id_type)
         c.argument('artifact_type', help='Filter referrers based on artifact type.')
+        c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
 
     with self.argument_context('acr manifest metadata show') as c:
         c.positional('ID', arg_type=manifest_id_type)

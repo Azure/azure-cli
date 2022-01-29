@@ -11,6 +11,7 @@ except ImportError:
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import InvalidArgumentValueError
+
 from .repository import (
     _parse_image_name,
     get_image_digest,
@@ -30,6 +31,7 @@ from ._validators import (
     BAD_MANIFEST_FQDN,
     BAD_REPO_FQDN
 )
+
 logger = get_logger(__name__)
 
 ORDERBY_PARAMS = {
@@ -39,11 +41,11 @@ ORDERBY_PARAMS = {
 DEFAULT_PAGINATION = 100
 
 BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository specifier such as"\
-                      " 'myreg.azurecr.io/myrepo' as a positional parameter or provide '-r myreg -n myrepo'"\
-                      " argument values."
+                      " 'MyRegistry.azurecr.io/hello-world' as a positional parameter or"\
+                      " provide '-r MyRegistry -n hello-world' argument values."
 BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest specifier such as"\
-                          " 'myreg.azurecr.io/myrepo:mytag' as a positional parameter or provide"\
-                          "  '-r myreg -n myrepo:mytag' argument values."
+                          " 'MyRegistry.azurecr.io/hello-world:latest' as a positional parameter or provide"\
+                          "  '-r myRegistry -n hello-world:latest' argument values."
 
 
 def _get_v2_manifest_path(repository, manifest):
@@ -145,8 +147,8 @@ def _validate_login_server_suffix(cmd, reg_suffix):
 
     if reg_suffix != login_server_suffix:
         raise InvalidArgumentValueError(f'Provided registry suffix \'{reg_suffix}\' does not match the configured az'
-                                        f'cli acr login server suffix \'{login_server_suffix}\'. Check the'
-                                        '\'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
+                                        f' cli acr login server suffix \'{login_server_suffix}\'. Check the'
+                                        ' \'acrLoginServerEndpoint\' value when running \'az cloud show\'.')
 
 
 def acr_manifest_list(cmd,
@@ -271,18 +273,15 @@ def acr_manifest_list_referrers(cmd,
 
     ref_key = "references"
     if recursive:
-        # checking for ref_key only necessary because of backend bug when manifest has no referrers
-        if ref_key in raw_result:
-            for referrers_obj in raw_result[ref_key]:
-                internal_referrers_obj = _obtain_manifest_from_registry(
-                    login_server=login_server,
-                    path=_get_referrers_path(repository, referrers_obj["digest"]),
-                    username=username,
-                    password=password)
+        for referrers_obj in raw_result[ref_key]:
+            internal_referrers_obj = _obtain_referrers_from_registry(
+                login_server=login_server,
+                path=_get_referrers_path(repository, referrers_obj["digest"]),
+                username=username,
+                password=password)
 
-                if ref_key in internal_referrers_obj:
-                    for ref in internal_referrers_obj[ref_key]:
-                        raw_result[ref_key].append(ref)
+            for ref in internal_referrers_obj[ref_key]:
+                raw_result[ref_key].append(ref)
 
     return raw_result
 
@@ -326,7 +325,7 @@ def acr_manifest_show(cmd,
 
     # We are forced to print directly here in order to preserve bit for bit integrity and
     # avoid any formatting so that the output can successfully be hashed. Customer will expect that
-    # az acr manifest show myreg.azurecr.io/myrepo@sha256:abc123 --raw | shasum -a 256 will result in abc123
+    # 'az acr manifest show myreg.azurecr.io/myrepo@sha256:abc123 --raw | shasum -a 256' will result in 'abc123'
     if raw_output:
         print(raw_result, end='')
         return

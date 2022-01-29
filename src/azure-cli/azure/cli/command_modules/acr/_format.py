@@ -129,7 +129,7 @@ def connected_registry_list_output_format(result):
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
-def list_references_output_format(result):
+def list_referrers_output_format(result):
     manifests = []
     for manifest in result['references']:
         manifests.append(OrderedDict([
@@ -138,13 +138,11 @@ def list_references_output_format(result):
             ('MediaType', _get_value(manifest, 'mediaType')),
             ('Size', _get_value(manifest, 'size'))
         ]))
-
     return manifests
 
 
 def manifest_output_format(result):
     manifests = []
-
     for manifest in result:
         manifests.append(OrderedDict([
             ('MediaType', _get_value(manifest, 'mediaType')),

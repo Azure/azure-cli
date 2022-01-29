@@ -29,7 +29,7 @@ from ._format import (
     agentpool_output_format,
     connected_registry_output_format,
     connected_registry_list_output_format,
-    list_references_output_format,
+    list_referrers_output_format,
     manifest_output_format,
 )
 from ._client_factory import (
@@ -216,7 +216,7 @@ def load_command_table(self, _):
         g.show_command('show', 'acr_manifest_show', table_transformer=manifest_output_format)
         g.command('list', 'acr_manifest_list', table_transformer=manifest_output_format)
         g.command('delete', 'acr_manifest_delete')
-        g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_references_output_format)
+        g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_referrers_output_format)
 
     with self.command_group('acr manifest metadata', acr_manifest_util, is_preview=True) as g:
         g.show_command('show', 'acr_manifest_metadata_show')
