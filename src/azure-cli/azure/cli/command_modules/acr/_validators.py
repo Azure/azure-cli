@@ -9,9 +9,9 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
 BAD_REPO_FQDN = "The positional parameter 'ID' must be a fully qualified repository specifier such"\
-                " as 'myreg.azurecr.io/myrepo'."
-BAD_MANIFEST_FQDN = "The positional parameter 'ID' must be a fully qualified manifest specifier such"\
-                    " as 'myreg.azurecr.io/myrepo:latest' or 'myreg.azurecr.io/myrepo@sha256:abc123'."
+                " as 'MyRegistry.azurecr.io/hello-world'."
+BAD_MANIFEST_FQDN = "The positional parameter 'ID' must be a fully qualified manifest specifier such as"\
+                    " 'MyRegistry.azurecr.io/hello-world:latest' or 'MyRegistry.azurecr.io/hello-world@sha256:abc123'."
 
 logger = get_logger(__name__)
 

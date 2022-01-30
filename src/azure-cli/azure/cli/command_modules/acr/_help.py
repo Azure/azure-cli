@@ -535,7 +535,7 @@ examples:
 
 helps['acr manifest list-referrers'] = """
 type: command
-short-summary: List the referrers to a manifest of an artifact in an Azure Container Registry.
+short-summary: List the ORAS referrers to a manifest of an artifact in an Azure Container Registry.
 examples:
   - name: List the referrers to the manifest of the artifact 'hello-world:latest'.
     text: az acr manifest list-referrers -r MyRegistry -n hello-world:latest

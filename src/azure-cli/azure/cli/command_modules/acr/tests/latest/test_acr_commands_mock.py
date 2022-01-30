@@ -508,7 +508,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         assert result == expected_output
 
-        #List manifests by fqdn
+        # List manifests by fqdn
         result = acr_manifest_list(cmd,
                                    ID=['testregistry.azurecr.io/testrepository'])
 
@@ -655,8 +655,8 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Show metadata for an artifact by tag
         acr_manifest_metadata_show(cmd,
-                            registry_name='testregistry',
-                            manifest_id='testrepository:testtag')
+                                   registry_name='testregistry',
+                                   manifest_id='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
@@ -668,8 +668,8 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Show metadata for an artifact by manifest digest
         acr_manifest_metadata_show(cmd,
-                            registry_name='testregistry',
-                            manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
+                                   registry_name='testregistry',
+                                   manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -681,7 +681,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Show metadata for an artifact by fqdn
         acr_manifest_metadata_show(cmd,
-                            ID=['testregistry.azurecr.io/testrepository:testtag'])
+                                   ID=['testregistry.azurecr.io/testrepository:testtag'])
 
         mock_requests_get.assert_called_with(
             method='get',

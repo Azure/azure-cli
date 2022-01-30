@@ -163,6 +163,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'], validator=validate_repository)
         c.argument('manifest_id', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
 
+    # Positional arguments must be specified on each individual command, they cannot be assigned to a command group
     with self.argument_context('acr manifest show') as c:
         c.positional('ID', arg_type=manifest_id_type)
         c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
