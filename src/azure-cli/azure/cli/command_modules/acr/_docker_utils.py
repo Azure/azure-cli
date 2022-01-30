@@ -527,7 +527,6 @@ def request_data_from_registry(http_method,
 
     if manifest_headers:
         headers = get_manifest_authorization_header(username, password)
-
     else:
         headers = get_authorization_header(username, password)
 
