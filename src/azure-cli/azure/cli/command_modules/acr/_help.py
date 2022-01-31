@@ -568,7 +568,7 @@ short-summary: List the metadata of the manifests in a repository in an Azure Co
 examples:
   - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest metadata list -r MyRegistry -n hello-world
-  - name: List the metadata of manifests in the repository 'hello-world'.
+  - name: List the metadata of the manifests in the repository 'hello-world'.
     text: az acr manifest metadata list MyRegistry.azurecr.io/hello-world
 """
 
