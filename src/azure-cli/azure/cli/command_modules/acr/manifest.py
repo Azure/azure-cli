@@ -45,7 +45,7 @@ BAD_ARGS_ERROR_REPO = "You must provide either a fully qualified repository spec
                       " provide '-r MyRegistry -n hello-world' argument values."
 BAD_ARGS_ERROR_MANIFEST = "You must provide either a fully qualified manifest specifier such as"\
                           " 'MyRegistry.azurecr.io/hello-world:latest' as a positional parameter or provide"\
-                          "  '-r myRegistry -n hello-world:latest' argument values."
+                          " '-r MyRegistry -n hello-world:latest' argument values."
 
 
 def _get_v2_manifest_path(repository, manifest):

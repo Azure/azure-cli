@@ -213,7 +213,7 @@ def load_command_table(self, _):
         g.command('untag', 'acr_repository_untag')
 
     with self.command_group('acr manifest', acr_manifest_util, is_preview=True) as g:
-        g.show_command('show', 'acr_manifest_show', table_transformer=manifest_output_format)
+        g.show_command('show', 'acr_manifest_show')
         g.command('list', 'acr_manifest_list', table_transformer=manifest_output_format)
         g.command('delete', 'acr_manifest_delete')
         g.command('list-referrers', 'acr_manifest_list_referrers', table_transformer=list_referrers_output_format)
