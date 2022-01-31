@@ -2083,7 +2083,7 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
         return rcf.template_specs.list_by_resource_group(resource_group_name)
     return rcf.template_specs.list_by_subscription()
 
-def create_deployment_stack_at_subscription(cmd, name, location, update_behavior = None, resource_group = None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
+def create_deployment_stack_at_subscription(cmd, name, location, update_behavior = None, resource_group = None, template_file = None, template_spec = None, template_uri = None, parameters = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if not update_behavior:
         update_behavior = "detachResources"
@@ -2107,11 +2107,11 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     else:
         deployment_scope = "/subscriptions/" + get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + resource_group
     
-    t_spec, t_uri, t_file = None, None, None
-    p_uri, parameters = None, None
+    t_spec, t_uri = None, None
+    template_obj = None
 
     if template_file:
-        t_file = template_file
+        pass
     elif template_spec:
         t_spec = template_spec
     elif template_uri:
@@ -2119,35 +2119,36 @@ def create_deployment_stack_at_subscription(cmd, name, location, update_behavior
     else:
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    if parameters:
-        parameters = json.load(open(parameters))
-    elif param_uri:
-        p_uri = "'" + param_uri + "'"
-    
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, location = location, update_behavior = update_behavior, deployment_scope = deployment_scope)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
         deployment_stack_model.template_link = deployment_stacks_template_link
+        api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     elif t_uri:
         deployment_stacks_template_link.uri = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        if is_bicep_file(t_file):
-            template_content = run_bicep_command(["build", "--stdout", t_file])
-            input_content = _remove_comments_from_json(template_content, file_path=t_file)
-            input_template = json.loads(json.dumps(input_content))
+        template_content = (
+            run_bicep_command(["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
+        if is_bicep_file(template_file):
+            deployment_stack_model.template = json.loads(json.dumps(template_obj))
         else:
-            input_template =  json.load(open(t_file))
-
-        deployment_stack_model.template = input_template
+            deployment_stack_model.template = json.load(open(template_file))
     
-    if p_uri:
-        parameters_link = rcf.deployment_stacks.models.DeploymentStacksParametersLink(uri = param_uri)
-        deployment_stack_model.parameters_link = parameters_link
-    elif parameters:
-        deployment_stack_model.parameters = parameters
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+    parameters = json.loads(json.dumps(parameters))
+    deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_subscription,name, deployment_stack_model)
 
@@ -2186,7 +2187,7 @@ def delete_deployment_stack_at_subscription(cmd, name=None, id=None):
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
-def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, template_file = None, template_spec = None, template_uri = None, parameters = None, param_uri = None, description = None):
+def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_behavior=None, template_file = None, template_spec = None, template_uri = None, parameters = None, description = None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     if not update_behavior:
         update_behavior = "detachResources"
@@ -2201,11 +2202,11 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
             pass
     except:
         pass
-    t_spec, t_uri, t_file = None, None, None
-    parameters, p_uri = None, None
+    t_spec, t_uri = None, None
+    template_obj = None
 
     if template_file:
-        t_file = template_file
+        pass
     elif template_spec:
         t_spec = template_spec
     elif template_uri:
@@ -2213,36 +2214,36 @@ def create_deployment_stack_at_resource_group(cmd, name, resource_group, update_
     else:
         raise InvalidArgumentValueError("Please enter one of the following: template file, template spec, or template url")
     
-    if parameters:
-        parameters = json.load(open(parameters))
-    elif param_uri:
-        p_uri = param_uri
-    
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(description = description, update_behavior = update_behavior)
     deployment_stacks_template_link = rcf.deployment_stacks.models.DeploymentStacksTemplateLink()
 
     if t_spec:
         deployment_stacks_template_link.id = t_spec
         deployment_stack_model.template_link = deployment_stacks_template_link
+        api_version = get_api_version(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec], api_version=api_version).properties['mainTemplate']
     elif t_uri:
         deployment_stacks_template_link.uri = t_uri
         deployment_stack_model.template_link = deployment_stacks_template_link
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        if is_bicep_file(t_file):
-            template_content = run_bicep_command(["build", "--stdout", t_file])
-            input_content = _remove_comments_from_json(template_content, file_path=t_file)
-            input_template = json.loads(json.dumps(input_content))
+        template_content = (
+            run_bicep_command(["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
+        if is_bicep_file(template_file):
+            deployment_stack_model.template = json.loads(json.dumps(template_obj))
         else:
-            input_template =  json.load(open(t_file))
+            deployment_stack_model.template = json.load(open(template_file))
 
-        deployment_stack_model.template = input_template
-
-    if p_uri:
-        parameters_link = rcf.deployment_stacks.models.DeploymentStacksParametersLink(uri = param_uri)
-        deployment_stack_model.parameters_link = parameters_link
-    elif parameters:
-        deployment_stack_model.parameters = parameters
-
+    template_param_defs = template_obj.get('parameters', {})
+    template_obj['resources'] = template_obj.get('resources', [])
+    parameters = _process_parameters(template_param_defs, parameters) or {}
+    parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters)
+    parameters = json.loads(json.dumps(parameters))
+    deployment_stack_model.parameters = parameters
 
     return sdk_no_wait(False,rcf.deployment_stacks.begin_create_or_update_at_resource_group,resource_group, name, deployment_stack_model)
 

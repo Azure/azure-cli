@@ -46,8 +46,6 @@ def _validate_template_spec_out(namespace):
 def validate_deployment_stack_files(namespace):
     if namespace.template_file and not os.path.isfile(namespace.template_file):
         raise InvalidArgumentValueError('Please enter a valid template file path')
-    if namespace.parameters and not os.path.isfile(namespace.parameters):
-        raise InvalidArgumentValueError('Please enter a valid parameter file path')
 
 
 def _validate_deployment_name_with_template_specs(namespace):

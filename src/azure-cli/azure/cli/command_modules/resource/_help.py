@@ -2571,7 +2571,7 @@ short-summary: List out all available versions of Bicep CLI.
 
 helps['stack'] = """
 type: group
-short-summary: (Version 1.0.0) Manage deployment stacks at subscription or resource group scope
+short-summary: (Version 0.1.4) Manage deployment stacks at subscription or resource group scope
 """
 
 helps['stack sub create'] = """
@@ -2590,6 +2590,10 @@ examples:
     text: az stack sub create --name "StackName" --update-behavior "detachResources" --template-file simpleTemplate.json --location "westus2" --description "description --subscription "subscriptionId"
   - name: Create a deployment stack and deploy at the resource group scope.
     text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --resource-group "ResourceGroup" --description "description"
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack sub create --name "StackName" --template-file simpleTemplate.json  --location "westus" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack sub create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location "westus"
 """
 
 helps['stack sub list'] = """
@@ -2634,6 +2638,10 @@ examples:
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simple.bicep --description "description"
   - name: Create a deployment stack at a different subscription
     text: az stack group create --name "StackName" --resource-group "ResourceGroup" --update-behavior "detachResources" --template-file simpleTemplate.json --description "description --subscription "subscriptionId"
+  - name: Create a deployment stack using parameters from key/value pairs
+    text: az stack group create --name "StackName" --template-file simpleTemplate.json  --resource-group "ResourceGroup" --description "description" --parameters simpleTemplateParams.json value1=foo value2=bar
+  - name: Create a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack group create --name rollout01 --template-file azuredeploy.json  --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group "ResourceGroup"
 """
 
 helps['stack group list'] = """

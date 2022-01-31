@@ -2075,7 +2075,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack sub delete --name {name} --yes')
 
         # create deployment stack with bicep file and rg scope
-        self.cmd('stack sub create --name {name} --location {location} --template-file "{bicep-file}" --parameters "{parameter-file}" -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack sub create --name {name} --location {location} --template-file "{bicep-file}" -g {resource-group}', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack sub delete --name {name} --yes')
@@ -2210,7 +2210,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
 
         # create deployment stack with bicep file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{bicep-file}" --parameters "{parameter-file}"', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{bicep-file}"', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --yes')
