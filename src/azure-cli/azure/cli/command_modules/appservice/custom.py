@@ -69,9 +69,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
-from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
-                         FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME)
@@ -1125,7 +1124,13 @@ def list_function_app_runtimes(cmd, os_type=None):
         windows = False
 
     runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only()
+    linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
+    windows_stacks = [r.to_dict() for r in runtime_helper.stacks if not r.linux]
+    if linux and not windows:
+        return linux_stacks
+    if windows and not linux:
+        return windows_stacks
+    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -2843,7 +2848,7 @@ class _AbstractStackRuntimeHelper:
             return linux_stacks
         if self._windows and not self._linux:
             return windows_stacks
-        return {"linux": linux_stacks, "windows": windows_stacks}
+        return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
 
     def _get_raw_stacks_from_api(self):
         raise NotImplementedError
@@ -2939,7 +2944,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         versions = self.get_version_list(lang, linux, get_windows_config_version)
         versions.sort()
         if not versions:
-            os = "windows" if not linux else "linux"
+            os = WINDOWS_OS_NAME if not linux else LINUX_OS_NAME
             raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
         return versions[0]
 
@@ -3095,25 +3100,81 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
 
 class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
-        def __init__(self, name=None, version=None, is_preview=False, linux=False):
+        def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
+                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False):
             self.name = name
             self.version = version
             self.is_preview = is_preview
-            # self.configs = configs if configs is not None else dict()
+            self.supported_func_versions = [] if not supported_func_versions else supported_func_versions
             self.linux = linux
+            self.app_settings_dict = dict() if not app_settings_dict else app_settings_dict
+            self.site_config_dict = dict() if not site_config_dict else site_config_dict
+            self.app_insights = app_insights
+            self.default = default
+
             self.display_name = "{}|{}".format(name, version) if version else name
+
+
+        # used for displaying stacks
+        def to_dict(self):
+            return {"runtime": self.name,
+                    "version": self.version,
+                    "supported_functions_versions": self.supported_func_versions}
 
     def __init__(self, cmd, linux=False, windows=False):
         self.disallowed_functions_versions = {"~1", "~2"}
         self.KEYS = FUNCTIONS_STACKS_API_KEYS()
         super().__init__(cmd, linux=linux, windows=windows)
 
+    def resolve(self, runtime, version=None, functions_version=None, linux=False):
+        stacks = self.stacks
+        runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
+        os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
+        if not runtimes:
+            supported_runtimes = [r.name for r in stacks if r.linux == linux]
+            raise ValidationError("Runtime {0} not supported for os {1}. Supported runtimes for os {1} are: {2}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(runtime, os, supported_runtimes))
+        if version is None:
+            return self.get_default_version(runtime, functions_version, linux)
+        matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+        if not matched_runtime_version:
+            # help convert previously acceptable versions into correct ones if match not found
+            old_to_new_version = {
+                "11": "11.0",
+                "8": "8.0"
+            }
+            version = old_to_new_version.get(version)
+            matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+        if not matched_runtime_version:
+            versions = [r.version for r in runtimes]
+            raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
+                                  "{1} and os {2} are: {3}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(version, runtime, os, versions))
+        if functions_version not in matched_runtime_version.supported_func_versions:
+            supported_func_versions = matched_runtime_version.supported_func_versions
+            raise ValidationError("Functions version {} is not supported for runtime {} with version {} and os {}. "
+                                  "Supported functions versions are {}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(functions_version, runtime, version, os, supported_func_versions))
+        return matched_runtime_version
+
+    def get_default_version(self, runtime, functions_version, linux=False):
+        runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
+        runtimes.sort(key=lambda r: r.default, reverse=True)  # make runtimes with default=True appear first
+        for r in runtimes:
+            if functions_version in r.supported_func_versions:
+                return r
+        raise ValidationError("Could not find a runtime version for runtime {} with functions version {} and os {}"
+                              "Run 'az functionapp list-runtimes' for more details on supported runtimes. ")
+
     def _get_raw_stacks_from_api(self):
         return list(self._client.provider.get_function_app_stacks(stack_os_type=None))
 
-    # remove non-digit or non-"." chars, unless name used already
+    # remove non-digit or non-"." chars
     @classmethod
     def _format_version_name(cls, name):
         import re
@@ -3131,19 +3192,48 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 formatted_runtime_to_version[runtime][formatted_name] = version_info
         return formatted_runtime_to_version
 
+    @classmethod
+    def _format_function_version(cls, v):
+        return v.replace("~", "")
+
+    def _get_valid_function_versions(self, runtime_settings):
+        supported_function_versions = runtime_settings.supported_functions_extension_versions
+        valid_versions = []
+        for v in supported_function_versions:
+            if v not in self.disallowed_functions_versions:
+                valid_versions.append(self._format_version_name(v))
+        return valid_versions
+
     def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
         if not runtime_settings.is_deprecated:
-            supported_function_versions = runtime_settings.supported_functions_extension_versions
-            # check if the runtime supports function good versions
-            if [v for v in supported_function_versions if v not in self.disallowed_functions_versions]:
+            functions_versions = self._get_valid_function_versions(runtime_settings)
+            if functions_versions:
                 runtime_version_properties = {
                     self.KEYS.IS_PREVIEW: runtime_settings.is_preview,
+                    self.KEYS.SUPPORTED_EXTENSION_VERSIONS: functions_versions,
+                    self.KEYS.APP_SETTINGS_DICT: runtime_settings.app_settings_dictionary,
+                    self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
+                    self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
+                    self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
                 }
 
                 runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
                                 major_version_name)
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
                 runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+    def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
+        supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
+        return self.Runtime(name=runtime_name,
+                            version=version_name,
+                            is_preview=version_properties[self.KEYS.IS_PREVIEW],
+                            supported_func_versions=supported_func_versions,
+                            linux=linux,
+                            site_config_dict=version_properties[self.KEYS.SITE_CONFIG_DICT],
+                            app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
+                            app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
+                            default=version_properties[self.KEYS.IS_DEFAULT],
+                            )
 
     def _parse_raw_stacks(self, stacks):
         # build a map of runtime -> runtime version -> runtime version properties
@@ -3173,17 +3263,13 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
         for runtime_name, versions in runtime_to_version_windows.items():
             for version_name, version_properties in versions.items():
-                self._stacks.append(self.Runtime(name=runtime_name,
-                                                 version=version_name,
-                                                 is_preview=version_properties[self.KEYS.IS_PREVIEW],
-                                                 linux=False))
+                r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=False)
+                self._stacks.append(r)
 
         for runtime_name, versions in runtime_to_version_linux.items():
             for version_name, version_properties in versions.items():
-                self._stacks.append(self.Runtime(name=runtime_name,
-                                                 version=version_name,
-                                                 is_preview=version_properties[self.KEYS.IS_PREVIEW],
-                                                 linux=True))
+                r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
+                self._stacks.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -3244,9 +3330,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
         functions_version = '3'
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
-        raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+        raise MutuallyExclusiveArgumentError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
@@ -3285,7 +3371,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id)
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
+
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
@@ -3294,11 +3380,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         locations = list_consumption_locations(cmd)
         location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
-            raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
+            raise ValidationError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
         # if os_type is None, the os type is windows
-        is_linux = os_type and os_type.lower() == 'linux'
+        is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
 
     else:  # apps with SKU based plan
         if is_valid_resource_id(plan):
@@ -3309,71 +3395,27 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if not plan_info:
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
-        is_linux = plan_info.reserved
+        is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
-        raise CLIError("2.x functions are not supported in this region. To create a 3.x function, "
-                       "pass in the flag '--functions-version 3'")
+        raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
+                              "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
-    runtime_stacks_json = _load_runtime_stacks_json_functionapp(is_linux)
-
     if runtime is None and runtime_version is not None:
-        raise CLIError('Must specify --runtime to use --runtime-version')
+        raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
-    # get the matching runtime stack object
-    runtime_json = _get_matching_runtime_json_functionapp(runtime_stacks_json, runtime if runtime else 'dotnet')
-    if not runtime_json:
-        # no matching runtime for os
-        os_string = "linux" if is_linux else "windows"
-        supported_runtimes = list(map(lambda x: x[KEYS.NAME], runtime_stacks_json))
-        raise CLIError("usage error: Currently supported runtimes (--runtime) in {} function apps are: {}."
-                       .format(os_string, ', '.join(supported_runtimes)))
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+    matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
+                                             runtime_version, functions_version, is_linux)
 
-    runtime_version_json = _get_matching_runtime_version_json_functionapp(runtime_json,
-                                                                          functions_version,
-                                                                          runtime_version,
-                                                                          is_linux)
-
-    if not runtime_version_json:
-        supported_runtime_versions = list(map(lambda x: x[KEYS.DISPLAY_VERSION],
-                                              _get_supported_runtime_versions_functionapp(runtime_json,
-                                                                                          functions_version)))
-        if runtime_version:
-            if runtime == 'dotnet':
-                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
-                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
-                               .format(runtime_version, functions_version))
-            raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions-version {}. Supported versions are: {}.'
-                           .format(runtime_version,
-                                   runtime,
-                                   functions_version,
-                                   ', '.join(supported_runtime_versions)))
-
-        # if runtime_version was not specified, then that runtime is not supported for that functions version
-        raise CLIError('no supported --runtime-version found for the selected --runtime {} and '
-                       '--functions-version {}'
-                       .format(runtime, functions_version))
-
-    if runtime == 'dotnet':
-        logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
-                       '--functions-version. Dotnet version will be %s for this function app.',
-                       runtime_version_json[KEYS.DISPLAY_VERSION])
-
-    if runtime_version_json[KEYS.IS_DEPRECATED]:
-        logger.warning('%s version %s has been deprecated. In the future, this version will be unavailable. '
-                       'Please update your command to use a more recent version. For a list of supported '
-                       '--runtime-versions, run \"az functionapp create -h\"',
-                       runtime_json[KEYS.PROPERTIES][KEYS.DISPLAY], runtime_version_json[KEYS.DISPLAY_VERSION])
-
-    site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
-    app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
+    site_config_dict = matched_runtime.site_config_dict
+    app_settings_dict = matched_runtime.app_settings_dict
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -3394,11 +3436,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
 
                 # clear all runtime specific configs and settings
-                site_config_json = {KEYS.USE_32_BIT_WORKER_PROC: False}
-                app_settings_json = {}
+                site_config_dict.use32_bit_worker_process = False
+                app_settings_dict = {}
 
                 # ensure that app insights is created if not disabled
-                runtime_version_json[KEYS.APPLICATION_INSIGHTS] = True
+                matched_runtime.app_insights = True
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
@@ -3406,7 +3448,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.kind = 'functionapp'
 
     # set site configs
-    for prop, value in site_config_json.items():
+    for prop, value in site_config_dict.as_dict().items():
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
@@ -3415,7 +3457,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.linux_fx_version = ''
 
     # adding app settings
-    for app_setting, value in app_settings_json.items():
+    for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
@@ -3441,10 +3483,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
-    elif disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+    elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+    elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
@@ -3478,56 +3520,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     return functionapp
-
-
-def _load_runtime_stacks_json_functionapp(is_linux):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    if is_linux:
-        return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux'])[KEYS.VALUE]
-    return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows'])[KEYS.VALUE]
-
-
-def _get_matching_runtime_json_functionapp(stacks_json, runtime):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    matching_runtime_json = list(filter(lambda x: x[KEYS.NAME] == runtime, stacks_json))
-    if matching_runtime_json:
-        return matching_runtime_json[0]
-    return None
-
-
-def _get_supported_runtime_versions_functionapp(runtime_json, functions_version):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    extension_version = _get_extension_version_functionapp(functions_version)
-    supported_versions_list = []
-
-    for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
-        if extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]:
-            supported_versions_list.append(runtime_version_json)
-    return supported_versions_list
-
-
-def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version, is_linux):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    extension_version = _get_extension_version_functionapp(functions_version)
-    if runtime_version:
-        for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
-            if (runtime_version_json[KEYS.DISPLAY_VERSION] == runtime_version and
-                    extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]):
-                return runtime_version_json
-        return None
-
-    # find the matching default runtime version
-    supported_versions_list = _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
-    default_version_json = {}
-    default_version = 0.0
-    for current_runtime_version_json in supported_versions_list:
-        if current_runtime_version_json[KEYS.IS_DEFAULT]:
-            current_version = _get_runtime_version_functionapp(current_runtime_version_json[KEYS.RUNTIME_VERSION],
-                                                               is_linux)
-            if not default_version_json or default_version < current_version:
-                default_version_json = current_runtime_version_json
-                default_version = current_version
-    return default_version_json
 
 
 def _get_extension_version_functionapp(functions_version):
@@ -4178,7 +4170,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
     os_name = os_type if os_type else detect_os_form_src(src_dir, html)
-    _is_linux = os_name.lower() == 'linux'
+    _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime and html:
@@ -4188,7 +4180,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
         if not match:
-            os_name = WINDOWS_OS_NAME if not _is_linux else LINUX_OS_NAME
             raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
                                   "'az webapp list-runtimes --os {0}'".format(os_name, runtime))
 
@@ -5330,7 +5321,7 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
     requests.delete(store_secret_url, headers=headers)
 
 
-# TODO replace
+# TODO replace and remove RUNTIME_STACKS variable
 def _runtime_supports_github_actions(runtime_string, is_linux):
     if is_linux:
         stacks = get_file_json(RUNTIME_STACKS)['linux']
@@ -5345,6 +5336,7 @@ def _runtime_supports_github_actions(runtime_string, is_linux):
     return supports
 
 
+# TODO replace
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     app_settings = None
     app_runtime = None
@@ -5384,7 +5376,7 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
         return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
 
 
-# TODO replace
+# TODO replace and remove RUNTIME_STACKS variable
 def _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux):
     if is_linux:
         stacks = get_file_json(RUNTIME_STACKS)['linux']
