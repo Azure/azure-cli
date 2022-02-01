@@ -59,9 +59,6 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
 
 
-RUNTIME_STACKS = os.path.abspath(os.path.join(os.path.abspath(__file__),
-                                              '../resources/WebappRuntimeStacks.json'))
-
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),
                                                          '../resources/GenerateRandomAppNames.json'))
 

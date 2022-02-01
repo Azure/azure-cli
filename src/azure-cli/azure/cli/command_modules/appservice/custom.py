@@ -41,7 +41,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait, get_file_json
+    ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
@@ -70,7 +70,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
-                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
                          WINDOWS_OS_NAME)
@@ -5003,7 +5003,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
     if not app_runtime_string:
         raise CLIError('Could not detect runtime. Please specify using the --runtime flag.')
 
-    if not _runtime_supports_github_actions(runtime_string=app_runtime_string, is_linux=is_linux):
+    if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
         raise CLIError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
 
     # Get workflow template
@@ -5027,7 +5027,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
     else:
         file_name = "{}_{}.yml".format(branch.replace('/', '-'), name.lower())
     dir_path = "{}/{}".format('.github', 'workflows')
-    file_path = "/{}/{}".format(dir_path, file_name)
+    file_path = "{}/{}".format(dir_path, file_name)
     try:
         existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
         existing_publish_profile_name = _get_publish_profile_from_workflow_file(
@@ -5320,22 +5320,16 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
     requests.delete(store_secret_url, headers=headers)
 
 
-# TODO replace and remove RUNTIME_STACKS variable
-def _runtime_supports_github_actions(runtime_string, is_linux):
-    if is_linux:
-        stacks = get_file_json(RUNTIME_STACKS)['linux']
-    else:
-        stacks = get_file_json(RUNTIME_STACKS)['windows']
-
-    supports = False
-    for stack in stacks:
-        if stack['displayName'].lower() == runtime_string.lower():
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                supports = True
-    return supports
+def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
+    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    matched_runtime = helper.resolve(runtime_string, is_linux)
+    if not matched_runtime:
+        return False
+    if matched_runtime.github_actions_properties:
+        return True
+    return False
 
 
-# TODO replace
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     app_settings = None
     app_runtime = None
@@ -5343,28 +5337,29 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime = getattr(app_metadata, 'linux_fx_version', None)
-        return _get_app_runtime_info_helper(app_runtime, "", is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, "", is_linux)
 
     app_metadata = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'list_metadata', slot)
     app_metadata_properties = getattr(app_metadata, 'properties', {})
     if 'CURRENT_STACK' in app_metadata_properties:
         app_runtime = app_metadata_properties['CURRENT_STACK']
 
+    # TODO try and get better API support for windows stacks
     if app_runtime and app_runtime.lower() == 'node':
         app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         for app_setting in app_settings:
             if 'name' in app_setting and app_setting['name'] == 'WEBSITE_NODE_DEFAULT_VERSION':
                 app_runtime_version = app_setting['value'] if 'value' in app_setting else None
                 if app_runtime_version:
-                    return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+                    return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'python':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = getattr(app_settings, 'python_version', '')
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'dotnetcore':
         app_runtime_version = '3.1'
         app_runtime_version = ""
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'java':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = "{java_version}, {java_container}, {java_container_version}".format(
@@ -5372,31 +5367,28 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
             java_container=getattr(app_settings, 'java_container', '').lower(),
             java_container_version=getattr(app_settings, 'java_container_version', '').lower()
         )
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
 
 
-# TODO replace and remove RUNTIME_STACKS variable
-def _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux):
-    if is_linux:
-        stacks = get_file_json(RUNTIME_STACKS)['linux']
-        for stack in stacks:
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                if stack['displayName'].lower() == app_runtime.lower():
-                    return {
-                        "display_name": stack['displayName'],
-                        "github_actions_version": stack['github_actions_properties']['github_actions_version']
-                    }
+def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
+    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    if not is_linux:
+        matched_runtime = helper.resolve("{}|{}".format(app_runtime, app_runtime_version), is_linux)
     else:
-        stacks = get_file_json(RUNTIME_STACKS)['windows']
-        for stack in stacks:
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                if (stack['github_actions_properties']['app_runtime'].lower() == app_runtime.lower() and
-                        stack['github_actions_properties']['app_runtime_version'].lower() ==
-                        app_runtime_version.lower()):
-                    return {
-                        "display_name": stack['displayName'],
-                        "github_actions_version": stack['github_actions_properties']['github_actions_version']
-                    }
+        matched_runtime = helper.resolve(app_runtime, is_linux)
+    gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
+    if gh_props:
+        if gh_props.get("github_actions_version"):
+            if is_linux:
+                return {
+                    "display_name": app_runtime,
+                    "github_actions_version": gh_props["github_actions_version"]
+                }
+            if gh_props.get("app_runtime_version").lower() == app_runtime_version.lower():
+                return {
+                    "display_name": app_runtime,
+                    "github_actions_version": gh_props["github_actions_version"]
+                }
     return None
 
 
