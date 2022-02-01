@@ -8132,7 +8132,7 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
     logger.debug("Running ssh command %s", ' '.join(command))
-    try:        
+    try:
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
         raise CLIInternalError(ex)
@@ -8189,7 +8189,7 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Ctrl + C to close')
 
     import signal
-    #handle closing the tunnel with an active session still connected
+    # handle closing the tunnel with an active session still connected
     signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))
 
     if timeout:

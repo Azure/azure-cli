@@ -193,7 +193,7 @@ class TunnelServer:
 
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
             response = requests.delete(web_address, headers=custom_header,
-                                verify=(not should_disable_connection_verify()))
+                                       verify=(not should_disable_connection_verify()))
             if response.status_code == 404:
                 logger.info('Session already deleted')
             elif response.status_code not in [200, 204]:
