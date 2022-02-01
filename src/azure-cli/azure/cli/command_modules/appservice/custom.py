@@ -3116,7 +3116,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
 
             self.display_name = "{}|{}".format(name, version) if version else name
 
-
         # used for displaying stacks
         def to_dict(self):
             return {"runtime": self.name,
