@@ -3146,8 +3146,8 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "11": "11.0",
                 "8": "8.0"
             }
-            version = old_to_new_version.get(version)
-            matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+            new_version = old_to_new_version.get(version)
+            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
