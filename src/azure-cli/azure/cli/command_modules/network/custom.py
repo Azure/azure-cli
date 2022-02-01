@@ -8132,10 +8132,12 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
     command = command + ['-o', "LogLevel=Error"]
     logger.debug("Running ssh command %s", ' '.join(command))
-    try:
+    try:        
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
         raise CLIInternalError(ex)
+    finally:
+        tunnel_server.cleanup()
 
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
@@ -8169,6 +8171,12 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     return tunnel_server
 
 
+def tunnel_close_handler(tunnel):
+    logger.info("Ctrl + C received. Clean up and then exit.")
+    tunnel.cleanup()
+    exit(0)
+
+
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
@@ -8179,6 +8187,10 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
+
+    import signal
+    #handle closing the tunnel with an active session still connected
+    signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))
 
     if timeout:
         time.sleep(int(timeout))
