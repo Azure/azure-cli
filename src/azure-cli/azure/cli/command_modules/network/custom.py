@@ -8174,7 +8174,8 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
 def tunnel_close_handler(tunnel):
     logger.info("Ctrl + C received. Clean up and then exit.")
     tunnel.cleanup()
-    exit(0)
+    import sys
+    sys.exit()
 
 
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
