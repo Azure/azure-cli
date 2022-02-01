@@ -3444,7 +3444,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                     taint = taint.strip()
                     taints_array.append(taint)
                 except ValueError:
-                    raise CLIError(
+                    raise InvalidArgumentValueError(
                         'Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
         instance.node_taints = taints_array
 
