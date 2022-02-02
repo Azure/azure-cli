@@ -766,28 +766,6 @@ class AcsCustomCommandTest(unittest.TestCase):
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
 
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.cf_resources', autospec=True)
-    @mock.patch('azure.cli.command_modules.acs.addonconfiguration._invoke_deployment')
-    def test_ensure_container_insights_for_monitoring(self, invoke_def, cf_resources):
-        cmd = mock.Mock()
-        addon = mock.Mock()
-        wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
-        subscription_id = "test_subscription_id"
-        rg_name = "test_rg_name"
-        cluster_name = "test_cluster_name"
-        location = "test_location"
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-
-        # when addon config key is lower cased
-        addon.config = {
-            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
-        }
-        self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-
-
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
