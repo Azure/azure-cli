@@ -140,10 +140,10 @@ def import_config(cmd,
     if strict or not yes:
         # fetch key values from user's configstore
         dest_kvs = __read_kv_from_config_store(azconfig_client,
-                                               key=prefix + '*' if prefix else SearchFilterOptions.ANY_KEY,
+                                               key=prefix + SearchFilterOptions.ANY_KEY if prefix else SearchFilterOptions.ANY_KEY,
                                                label=label if label else SearchFilterOptions.EMPTY_LABEL)
         all_features = __read_kv_from_config_store(azconfig_client,
-                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                   key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + SearchFilterOptions.ANY_KEY,
                                                    label=label if label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
