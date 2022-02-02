@@ -26,6 +26,24 @@ from ._exception_handler import managementgroups_exception_handler
 
 logger = get_logger(__name__)
 
+resource_managementgroups_subscriptions_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
+    client_factory=cf_management_group_subscriptions,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_hierarchy_settings_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#HierarchySettingsOperations.{}',
+    client_factory=cf_hierarchy_settings,
+    exception_handler=managementgroups_exception_handler
+)
+
+resource_managementgroups_entities_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.managementgroups.operations#EntitiesOperations.{}',
+    client_factory=cf_management_group_entities,
+    exception_handler=managementgroups_exception_handler
+)
+
 
 # Resource group commands
 def transform_resource_group_list(result):
@@ -168,24 +186,6 @@ def load_command_table(self, _):
     resource_managementgroups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupsOperations.{}',
         client_factory=cf_management_groups,
-        exception_handler=managementgroups_exception_handler
-    )
-
-    resource_managementgroups_subscriptions_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations#ManagementGroupSubscriptionsOperations.{}',
-        client_factory=cf_management_group_subscriptions,
-        exception_handler=managementgroups_exception_handler
-    )
-
-    resource_hierarchy_settings_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations#HierarchySettingsOperations.{}',
-        client_factory=cf_hierarchy_settings,
-        exception_handler=managementgroups_exception_handler
-    )
-
-    resource_managementgroups_entities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.managementgroups.operations#EntitiesOperations.{}',
-        client_factory=cf_management_group_entities,
         exception_handler=managementgroups_exception_handler
     )
 
