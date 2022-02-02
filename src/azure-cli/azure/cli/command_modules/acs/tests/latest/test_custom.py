@@ -625,7 +625,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         # http_application_routing enabled
         instance = mock.MagicMock()
         instance.addon_profiles = None
-        
+
         instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
                                   'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
         self.assertIn(CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, instance.addon_profiles)
@@ -780,18 +780,13 @@ class AcsCustomCommandTest(unittest.TestCase):
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
         }
         self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
 
         # when addon config key is lower cased
         addon.config = {
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
         }
         self.assertTrue(ensure_container_insights_for_monitoring(cmd, addon, subscription_id, rg_name, cluster_name, location))
-        args, kwargs = invoke_def.call_args
-        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
-        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
