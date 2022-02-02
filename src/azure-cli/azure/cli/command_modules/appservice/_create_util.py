@@ -72,7 +72,7 @@ def zip_contents_from_dir(dirPath, lang):
     return zip_file_path
 
 
-def get_runtime_version_details(file_path, lang_name, is_linux=False, stack_helper=None):
+def get_runtime_version_details(file_path, lang_name, stack_helper, is_linux=False):
     version_detected = None
     version_to_create = None
 

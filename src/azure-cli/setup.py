@@ -192,9 +192,6 @@ setup(
             'template/service/parameter.json'
         ],
         'azure.cli.command_modules.appservice': [
-            'resources/WindowsFunctionsStacks.json',
-            'resources/LinuxFunctionsStacks.json',
-            'resources/WebappRuntimeStacks.json',
             'resources/GenerateRandomAppNames.json'
         ],
         'azure.cli.command_modules.rdbms': [

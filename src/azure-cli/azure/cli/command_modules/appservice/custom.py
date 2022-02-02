@@ -4189,7 +4189,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         # detect the version
         _lang_details = get_lang_from_content(src_dir, html, is_linux=_is_linux)
         language = _lang_details.get('language')
-        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, _is_linux, helper)
+        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, helper, _is_linux)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
 
