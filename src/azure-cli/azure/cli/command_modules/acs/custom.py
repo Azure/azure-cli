@@ -2950,6 +2950,7 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
 
+
 def _ensure_aks_acr(cmd,
                     assignee,
                     acr_name_or_id,

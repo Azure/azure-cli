@@ -478,7 +478,6 @@ def ensure_container_insights_for_monitoring(
                 raise error
 
 
-
 def _invoke_deployment(
     cmd,
     resource_group_name,
