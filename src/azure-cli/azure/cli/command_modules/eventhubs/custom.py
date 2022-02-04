@@ -641,7 +641,3 @@ def cli_show_encryption(cmd, client, resource_group_name, namespace_name):
         return get_namespace.encryption
     else:
         return get_namespace
-
-
-
-
