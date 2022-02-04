@@ -6,7 +6,9 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
+import argparse
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
@@ -14,11 +16,15 @@ from azure.cli.core.profiles import ResourceType
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
                          default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None):
+                         disable_local_auth=None, identity_type=None, identity_id=None, encryption_config=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    from azure.cli.core import CLIError
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         ehparam = EHNamespace()
@@ -31,8 +37,30 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.zone_redundant = zone_redundant
         ehparam.disable_local_auth = disable_local_auth
         ehparam.cluster_arm_id = cluster_arm_id
+
         if identity:
             ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
+
+        if identity_type:
+            if identity_type=='SystemAssigned':
+                ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
+            if identity_type=='UserAssigned':
+                ehparam.identity = Identity(type=IdentityType.USER_ASSIGNED)
+            if identity_type=='SystemAssigned, UserAssigned':
+                ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED)
+            if identity_type=='None':
+                ehparam.identity = Identity(type=IdentityType.NONE)
+
+        if identity_id:
+            if ehparam.identity:
+                default_user_identity = UserAssignedIdentity()
+                ehparam.identity.user_assigned_identities = dict.fromkeys(identity_id, default_user_identity)
+            else:
+                raise CLIError('please specify --identity-type before setting --identity-id')
+
+        if encryption_config:
+            ehparam.encryption = Encryption()
+            ehparam.encryption.key_vault_properties = encryption_config
 
         client.begin_create_or_update(
             resource_group_name=resource_group_name,
@@ -47,6 +75,60 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     return client.get(resource_group_name, namespace_name)
 
+class AlertAddEncryption(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        config_length = len(values)
+        from azure.mgmt.eventhub.models import KeyVaultProperties
+        from azure.mgmt.eventhub.models import UserAssignedIdentityProperties
+
+        if 'keyname' not in [x.lower() for x in values]:
+            raise InvalidArgumentValueError('keyname and keyvaulturi are mandatory arguments for encryption configs.'.format(option_string))
+
+        if 'keyvaulturi' not in [x.lower() for x in values]:
+            raise InvalidArgumentValueError('keyname and keyvaulturi are mandatory arguments for encryption configs.'.format(option_string))
+
+        if config_length<4:
+            raise InvalidArgumentValueError('Please make sure that keyname and keyvaulturi arguments are present for every encryptionconfig'.format(option_string))
+
+        keyVaultObject = KeyVaultProperties()
+
+        if(values[0].lower()=='keyname'):
+            keyVaultObject.key_name = values[1]
+        else:
+            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+
+        if (values[2].lower() == 'keyvaulturi'):
+            keyVaultObject.key_vault_uri = values[3]
+        else:
+            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+
+        if (config_length>=6):
+            if(values[4].lower()=='keyversion'):
+                keyVaultObject.key_version = values[5]
+            if(values[4].lower()=='userassignedidentity'):
+                keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[5])
+            else:
+                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+
+        if (config_length>=8):
+            if(values[4].lower()=='keyversion'):
+                keyVaultObject.key_version = values[5]
+            else:
+                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+
+            if(values[6].lower()=='userassignedidentity'):
+                keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[7])
+            else:
+                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+
+        if keyVaultObject.key_version is None:
+            keyVaultObject.key_version=''
+
+        return keyVaultObject;
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
@@ -403,3 +485,163 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, namespa
         cmd, client, resource_group_name=resource_group_name, namespace_name=namespace_name, is_approved=False,
         private_endpoint_connection_name=private_endpoint_connection_name, description=description
     )
+
+def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
+    namespace = client.get(resource_group_name, namespace_name);
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    identity_id = {}
+
+    if namespace.identity is None:
+        namespace.identity = Identity()
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+
+    if user_assigned:
+        default_user_identity = UserAssignedIdentity()
+        identity_id.update(dict.fromkeys(user_assigned, default_user_identity));
+
+        if namespace.identity.user_assigned_identities is None:
+            namespace.identity.user_assigned_identities = identity_id
+        else:
+            namespace.identity.user_assigned_identities.update(identity_id)
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+
+        elif namespace.identity.type == IdentityType.NONE or namespace.identity.type is None:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    if get_namespace.identity:
+        return get_namespace.identity
+    else:
+        return get_namespace
+
+def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned = None, user_assigned = None):
+    namespace = client.get(resource_group_name, namespace_name);
+    IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    from azure.cli.core import CLIError
+
+    if namespace.identity is None:
+        raise CLIError('The namespace does not have identity enabled')
+
+    if system_assigned:
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED:
+            namespace.identity.type = IdentityType.NONE
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            namespace.identity.type = IdentityType.USER_ASSIGNED
+
+    if user_assigned:
+        if namespace.identity.type == IdentityType.USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities)==0:
+                    namespace.identity.type = IdentityType.NONE
+                    namespace.identity.user_assigned_identities = None
+
+        if namespace.identity.type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            if namespace.identity.user_assigned_identities:
+                for x in user_assigned:
+                    namespace.identity.user_assigned_identities.pop(x)
+                # if all identities are popped off of the dictionary, we disable user assigned identity
+                if len(namespace.identity.user_assigned_identities)==0:
+                    namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
+                    namespace.identity.user_assigned_identities = None
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    if get_namespace.identity:
+        return get_namespace.identity
+    else:
+        return get_namespace
+
+def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+    namespace = client.get(resource_group_name, namespace_name)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
+    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    if namespace.encryption:
+        if namespace.encryption.key_vault_properties:
+            namespace.encryption.key_vault_properties.extend(encryption_config)
+        else:
+            namespace.encryption.key_vault_properties = encryption_config
+
+    else:
+        namespace.encryption = Encryption()
+        namespace.encryption.key_vault_properties = encryption_config
+
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    if get_namespace.encryption:
+        return get_namespace.encryption
+    else:
+        return get_namespace
+
+
+def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+    namespace = client.get(resource_group_name, namespace_name)
+    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
+    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    if namespace.encryption is None:
+        raise CLIError('The namespace does not have encryption enabled')
+
+    else:
+        if namespace.encryption.key_vault_properties:
+            for property in encryption_config:
+                if(property in namespace.encryption.key_vault_properties):
+                    namespace.encryption.key_vault_properties.remove(property)
+
+        client.begin_create_or_update(
+            resource_group_name=resource_group_name,
+            namespace_name=namespace_name,
+            parameters=namespace).result()
+
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    if get_namespace.encryption:
+        return get_namespace.encryption
+    else:
+        return get_namespace
+
+def cli_show_encryption(cmd, client, resource_group_name, namespace_name):
+    get_namespace = client.get(resource_group_name, namespace_name)
+
+    if get_namespace.encryption:
+        return get_namespace.encryption
+    else:
+        return get_namespace
+
+
+
+
