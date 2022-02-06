@@ -158,10 +158,8 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace identity', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('assign', 'cli_add_identity')
         g.custom_command('remove', 'cli_remove_identity')
-        g.custom_command('show', 'cli_show_identity')
 
 # Encryption Region
     with self.command_group('eventhubs namespace encryption', eh_namespace_util, min_api='2021-06-01-preview', resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.custom_command('add', 'cli_add_encryption')
         g.custom_command('remove', 'cli_remove_encryption')
-        g.custom_command('show', 'cli_show_encryption')

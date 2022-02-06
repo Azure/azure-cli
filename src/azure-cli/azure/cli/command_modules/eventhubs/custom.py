@@ -623,8 +623,3 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
     get_namespace = client.get(resource_group_name, namespace_name)
 
     return get_namespace
-
-def cli_show_encryption(cmd, client, resource_group_name, namespace_name):
-    get_namespace = client.get(resource_group_name, namespace_name)
-
-    return get_namespace
