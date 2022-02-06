@@ -16,7 +16,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
                          default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None, identity_type=None, identity_id=None, encryption_config=None):
+                         disable_local_auth=None, system_assigned=None, user_assigned=None, encryption_config=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -38,25 +38,20 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.disable_local_auth = disable_local_auth
         ehparam.cluster_arm_id = cluster_arm_id
 
-        if identity:
+        if identity or system_assigned:
             ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
 
-        if identity_type:
-            if identity_type=='SystemAssigned':
-                ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
-            if identity_type=='UserAssigned':
-                ehparam.identity = Identity(type=IdentityType.USER_ASSIGNED)
-            if identity_type=='SystemAssigned, UserAssigned':
-                ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED)
-            if identity_type=='None':
-                ehparam.identity = Identity(type=IdentityType.NONE)
-
-        if identity_id:
+        if user_assigned:
             if ehparam.identity:
-                default_user_identity = UserAssignedIdentity()
-                ehparam.identity.user_assigned_identities = dict.fromkeys(identity_id, default_user_identity)
+                if ehparam.identity.type == IdentityType.SYSTEM_ASSIGNED:
+                    ehparam.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+                else:
+                    ehparam.identity.type = IdentityType.USER_ASSIGNED
             else:
-                raise CLIError('please specify --identity-type before setting --identity-id')
+                ehparam.identity = Identity(type=IdentityType.USER_ASSIGNED)
+
+            default_user_identity = UserAssignedIdentity()
+            ehparam.identity.user_assigned_identities = dict.fromkeys(user_assigned, default_user_identity)
 
         if encryption_config:
             ehparam.encryption = Encryption()
@@ -85,43 +80,50 @@ class AlertAddEncryption(argparse._AppendAction):
         from azure.mgmt.eventhub.models import KeyVaultProperties
         from azure.mgmt.eventhub.models import UserAssignedIdentityProperties
 
-        if 'keyname' not in [x.lower() for x in values]:
-            raise InvalidArgumentValueError('keyname and keyvaulturi are mandatory arguments for encryption configs.'.format(option_string))
+        if 'key-name' not in [x.lower() for x in values]:
+            raise InvalidArgumentValueError('key-name and key-vault-uri are mandatory arguments for encryption configs.'.format(option_string))
 
-        if 'keyvaulturi' not in [x.lower() for x in values]:
-            raise InvalidArgumentValueError('keyname and keyvaulturi are mandatory arguments for encryption configs.'.format(option_string))
+        if 'key-vault-uri' not in [x.lower() for x in values]:
+            raise InvalidArgumentValueError('key-name and key-vault-uri are mandatory arguments for encryption configs.'.format(option_string))
 
         if config_length<4:
-            raise InvalidArgumentValueError('Please make sure that keyname and keyvaulturi arguments are present for every encryptionconfig'.format(option_string))
+            raise InvalidArgumentValueError('Please make sure that key-name and key-vault-uri arguments are present for every encryptionconfig'.format(option_string))
 
         keyVaultObject = KeyVaultProperties()
 
-        if(values[0].lower()=='keyname'):
+        if(values[0].lower()=='key-name'):
             keyVaultObject.key_name = values[1]
         else:
-            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order key-name key-vault-uri key-version. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
 
-        if (values[2].lower() == 'keyvaulturi'):
+        if (values[2].lower() == 'key-vault-uri'):
             keyVaultObject.key_vault_uri = values[3]
+            #remove trailing slash from keyvaulturi. KeyVault returns url with a trailing slash
+            if(keyVaultObject.key_vault_uri.endswith('/')):
+                keyVaultObject.key_vault_uri = keyVaultObject.key_vault_uri[:-1]
         else:
-            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
+            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order key-name key-vault-uri key-version. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
 
         if (config_length>=6):
-            if(values[4].lower()=='keyversion'):
+            if (values[4].lower()=='key-version'):
                 keyVaultObject.key_version = values[5]
-            if(values[4].lower()=='userassignedidentity'):
+            if (values[4].lower()=='user-assigned-identity'):
                 keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[5])
+                if (keyVaultObject.identity.user_assigned_identity.endswith('/')):
+                    keyVaultObject.identity.user_assigned_identity = keyVaultObject.identity.user_assigned_identity[:-1]
             else:
                 raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
 
         if (config_length>=8):
-            if(values[4].lower()=='keyversion'):
+            if(values[4].lower()=='key-version'):
                 keyVaultObject.key_version = values[5]
             else:
                 raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
 
-            if(values[6].lower()=='userassignedidentity'):
+            if(values[6].lower()=='user-assigned-identity'):
                 keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[7])
+                if (keyVaultObject.identity.user_assigned_identity.endswith('/')):
+                    keyVaultObject.identity.user_assigned_identity = keyVaultObject.identity.user_assigned_identity[:-1]
             else:
                 raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
 
@@ -526,10 +528,7 @@ def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_as
 
     get_namespace = client.get(resource_group_name, namespace_name)
 
-    if get_namespace.identity:
-        return get_namespace.identity
-    else:
-        return get_namespace
+    return get_namespace
 
 def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned = None, user_assigned = None):
     namespace = client.get(resource_group_name, namespace_name);
@@ -575,10 +574,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
 
     get_namespace = client.get(resource_group_name, namespace_name)
 
-    if get_namespace.identity:
-        return get_namespace.identity
-    else:
-        return get_namespace
+    return get_namespace
 
 def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
@@ -602,10 +598,7 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
 
     get_namespace = client.get(resource_group_name, namespace_name)
 
-    if get_namespace.encryption:
-        return get_namespace.encryption
-    else:
-        return get_namespace
+    return get_namespace
 
 
 def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
@@ -619,7 +612,7 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
     else:
         if namespace.encryption.key_vault_properties:
             for property in encryption_config:
-                if(property in namespace.encryption.key_vault_properties):
+                if property in namespace.encryption.key_vault_properties:
                     namespace.encryption.key_vault_properties.remove(property)
 
         client.begin_create_or_update(
@@ -629,15 +622,9 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
 
     get_namespace = client.get(resource_group_name, namespace_name)
 
-    if get_namespace.encryption:
-        return get_namespace.encryption
-    else:
-        return get_namespace
+    return get_namespace
 
 def cli_show_encryption(cmd, client, resource_group_name, namespace_name):
     get_namespace = client.get(resource_group_name, namespace_name)
 
-    if get_namespace.encryption:
-        return get_namespace.encryption
-    else:
-        return get_namespace
+    return get_namespace

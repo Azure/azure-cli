@@ -53,10 +53,10 @@ def load_arguments_eh(self, _):
                    help='A boolean value that indicates whether Managed Identity is enabled.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
-        c.argument('identity_type', arg_group='Managed Identity', options_list=['--identity-type'],
-                   arg_type=get_enum_type(ManagedServiceIdentityType),
-                   help='Type of identity ("SystemAssigned", "UserAssigned","SystemAssigned, UserAssigned","None")')
-        c.argument('identity_id', arg_group='Managed Identity', options_list=['--identity-id'], nargs='+', help='List of identity ids.')
+        c.argument('system_assigned', arg_group='Managed Identity',
+                   arg_type=get_three_state_flag(),
+                   help='Enable System Assigned Identity')
+        c.argument('user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
