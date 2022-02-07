@@ -20,6 +20,7 @@ BODY = sys.argv[2]
 
 
 class CustomFormatter(logging.Formatter):
+    # logging with color
     FORMATS = {
         logging.DEBUG: grey + format + reset,
         logging.INFO: grey + format + reset,
@@ -65,18 +66,21 @@ def check_pull_request(title, body):
 
 def regex_line(line):
     error_flag = False
+    # Check each line for these words, case insensitive
     sub_pattern = r'\b(added|adding|adds|changed|changing|changes|deprecated|deprecating|deprecates|removed|removing|removes|fixed|fixing|fixes|made|making|makes)\b'
     ref = re.findall(sub_pattern, line, re.IGNORECASE)
     if ref:
         logger.warning('Please use the right verb of%s %s %swith present-tense in base form and capitalized first letter to describe what is done, '
                        'follow https://aka.ms/submitAzPR\n' % (red, ref, yellow))
         error_flag = True
+    # Check Fix #number in title, just give a warning here, because it is not necessarily
     if 'Fix' in line:
         sub_pattern = r'#\d'
         ref = re.findall(sub_pattern, line)
         if not ref:
             logger.warning('If it\'s related to fixing an issue, put Fix #number in title\n')
     for idx, i in enumerate(line):
+        # ] } : must be followed by a space
         for j in [']', '}', ':']:
             if i == j:
                 try:
@@ -86,6 +90,7 @@ def regex_line(line):
                     logger.info('%s%s: missing space after %s' % (line, yellow, j))
                     logger.error(' ' * idx + '↑')
                     error_flag = True
+        # az xxx commands must be enclosed in `, e.g., `az vm`
         if i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
             command = 'az '
             index = idx + 3
@@ -98,6 +103,7 @@ def regex_line(line):
                 logger.info('%s%s: missing ` around %s' % (line, yellow, command))
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
+        # First word after the colon must be capitalized
         if i == ':':
             if line[idx + 1] == ' ' and line[idx + 2].islower() and line[idx + 2: idx + 5] != 'az ':
                 index = idx + 2
@@ -108,6 +114,7 @@ def regex_line(line):
             logger.info('%s%s: should use capital letters after :' % (line, yellow))
             logger.error(' ' * index + '↑')
             error_flag = True
+        # --xxx parameters must be enclosed in `, e.g., `--size`
         if i == '-' and line[idx + 1] == '-':
             param = '--'
             index = idx + 2
