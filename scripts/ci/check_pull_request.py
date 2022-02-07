@@ -71,7 +71,7 @@ def regex_line(line):
     ref = re.findall(sub_pattern, line, re.IGNORECASE)
     if ref:
         logger.warning('Please use the right verb of%s %s %swith present-tense in base form and capitalized first letter to describe what is done, '
-                       'follow https://aka.ms/submitAzPR\n' % (red, ref, yellow))
+                       'follow https://aka.ms/submitAzPR\n', red, ref, yellow)
         error_flag = True
     # Check Fix #number in title, just give a warning here, because it is not necessarily
     if 'Fix' in line:
@@ -87,7 +87,7 @@ def regex_line(line):
                     assert line[idx + 1] == ' '
                     break
                 except:
-                    logger.info('%s%s: missing space after %s' % (line, yellow, j))
+                    logger.info('%s%s: missing space after %s', line, yellow, j)
                     logger.error(' ' * idx + '↑')
                     error_flag = True
         # az xxx commands must be enclosed in `, e.g., `az vm`
@@ -100,7 +100,7 @@ def regex_line(line):
             try:
                 assert line[idx - 1] == '`'
             except:
-                logger.info('%s%s: missing ` around %s' % (line, yellow, command))
+                logger.info('%s%s: missing ` around %s', line, yellow, command)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
         # First word after the colon must be capitalized
@@ -111,7 +111,7 @@ def regex_line(line):
                 index = idx + 1
             else:
                 continue
-            logger.info('%s%s: should use capital letters after :' % (line, yellow))
+            logger.info('%s%s: should use capital letters after :', line, yellow)
             logger.error(' ' * index + '↑')
             error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
@@ -124,7 +124,7 @@ def regex_line(line):
             try:
                 assert line[idx - 1] == '`'
             except:
-                logger.info('%s%s: missing ` around %s' % (line, yellow, param))
+                logger.info('%s%s: missing ` around %s', line, yellow, param)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
     return error_flag
