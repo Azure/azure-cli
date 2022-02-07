@@ -62,53 +62,53 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
 
         #5
-        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --name {namespacename} --system-assigned').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
         self.assertEqual(namespace['identity'], None)
 
         #1
-        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --name {namespacename} --system-assigned').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
 
         #2
-        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --name {namespacename} --user-assigned {id1} {id2}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1} {id2}').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 2
 
         #9
-        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --name {namespacename} --system-assigned --user-assigned {id1} {id2}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --system-assigned --user-assigned {id1} {id2}').get_output_in_json()
         self.assertEqual(namespace['identity'], None)
 
         #3
-        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --name {namespacename} --user-assigned {id1} {id2} {id3}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1} {id2} {id3}').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['user'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 3
 
         #4
-        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --name {namespacename} --system-assigned').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 3
 
         #8
-        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --name {namespacename} --user-assigned {id1} {id2} {id3}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1} {id2} {id3}').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
 
         #2
-        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --name {namespacename} --user-assigned {id1}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity assign --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1}').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 1
 
         #6
-        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --name {namespacename} --system-assigned').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --system-assigned').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['user'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
         assert len(n) == 1
 
         #7
-        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --name {namespacename} --user-assigned {id1}').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace identity remove --resource-group {rg} --namespace-name {namespacename} --user-assigned {id1}').get_output_in_json()
         self.assertEqual(namespace['identity'], None)
 
         # Create Namespace
