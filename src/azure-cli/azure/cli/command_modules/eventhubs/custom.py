@@ -489,7 +489,7 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, namespa
     )
 
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
-    namespace = client.get(resource_group_name, namespace_name);
+    namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -508,7 +508,7 @@ def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_as
 
     if user_assigned:
         default_user_identity = UserAssignedIdentity()
-        identity_id.update(dict.fromkeys(user_assigned, default_user_identity));
+        identity_id.update(dict.fromkeys(user_assigned, default_user_identity))
 
         if namespace.identity.user_assigned_identities is None:
             namespace.identity.user_assigned_identities = identity_id
@@ -531,7 +531,7 @@ def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_as
     return get_namespace
 
 def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned = None, user_assigned = None):
-    namespace = client.get(resource_group_name, namespace_name);
+    namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
