@@ -30,7 +30,7 @@ jobs:
           echo "Hotfix PR should target release branch."
           exit 1
         fi
-        python /home/vsts/work/1/s/scripts/ci/check_pull_request.py "$title" "$body"
+        python scripts/ci/check_pull_request.py "$title" "$body"
 
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
