@@ -277,7 +277,7 @@ def acr_connected_registry_delete(cmd,
                 "az acr token delete -n {} -r {} --yes\n\t".format(sync_token_name, registry_name) + \
                 "az acr scope-map delete -n {} -r {} --yes\n".format(sync_scope_map_name, registry_name) + \
                 "Run the following command on all ascendency to remove the deleted registry gateway access: \n\t" + \
-                "az acr scope-map update -n <scope-map-name> -r {} --remove-gateway {} --yes".format(
+                "az acr scope-map update -n <scope-map-name> -r {} --remove-gateway {}".format(
                     registry_name, " ".join([connected_registry_name] + DEFAULT_GATEWAY_SCOPE))
             logger.warning(msg)
         return result
