@@ -1869,11 +1869,12 @@ def validate_status_code_ranges(namespace):
 
     namespace.status_code_ranges = values
 
+
 def validate_capture_size_and_limit(namespace):
     if namespace.capture_limit:
         if namespace.capture_limit < 0:
             raise CLIError('usage error: --capture-limit cannot be a negative value.')
-    
+
     if namespace.capture_size:
         if namespace.capture_size < 0:
             raise CLIError('usage error: --capture-size cannot be a negative value.')
@@ -1881,6 +1882,7 @@ def validate_capture_size_and_limit(namespace):
     if namespace.time_limit:
         if namespace.time_limit < 0:
             raise CLIError('usage error: --time-limit cannot be a negative value.')
+
 
 def validate_subnet_ranges(namespace):
     if not namespace.subnets:
