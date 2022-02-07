@@ -19,7 +19,7 @@ class EHNamespaceMSITesting(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
-    def test_eh_namespace_byok(self, resource_group):
+    def test_eh_namespace_msi(self, resource_group):
         self.kwargs.update({
             'loc': 'northeurope',
             'rg': resource_group,
