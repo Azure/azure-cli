@@ -9,8 +9,8 @@ yum --nogpgcheck localinstall /mnt/yum/$YUM_NAME -y
 
 yum install git gcc python3-devel -y
 
-ln -s /usr/bin/python3 /usr/bin/python
-ln -s /usr/bin/pip3 /usr/bin/pip
+ln -s -f /usr/bin/python3 /usr/bin/python
+ln -s -f /usr/bin/pip3 /usr/bin/pip
 time az self-test
 time az --version
 
