@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script should be run in a centos8 docker.
+# This script should be run in a centos7 docker.
 set -exv
 
 export USERNAME=azureuser
