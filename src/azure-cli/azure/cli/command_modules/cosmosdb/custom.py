@@ -2206,7 +2206,7 @@ def cli_cosmosdb_managed_cassandra_cluster_create(client,
 
     """Creates an Azure Managed Cassandra Cluster"""
 
-    if initial_cassandra_admin_password is None and external_gossip_certificates is None:
+    if authentication_method != 'None' and initial_cassandra_admin_password is None and external_gossip_certificates is None:
         raise CLIError('At least one out of the Initial Cassandra Admin Password or External Gossip Certificates is required.')
 
     if initial_cassandra_admin_password is not None and external_gossip_certificates is not None:

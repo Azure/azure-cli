@@ -36,6 +36,8 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
             'syncSchedule': '0 0/10 * * *',
             'defaultSyncSchedule': '* * * * *',
             'syncWindow': 'PT4H',
+            'notificationStr': 'hello-world:tag:push',
+            'notificationStr2': '*:*'
         })
         # Create Registr and enable data endpoint
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
@@ -59,14 +61,15 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
         self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo_1} content/read --no-passwords')
-        self.cmd('acr connected-registry create -n {root_name} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken}',
+        self.cmd('acr connected-registry create -n {root_name} -r {registry_name} --sync-token {syncToken} -m ReadOnly --log-level Warning -s "{syncSchedule}" -w PT4H --client-tokens {clientToken} --notifications {notificationStr}',
                  checks=[self.check('name', '{root_name}'),
                          self.check('mode', 'ReadOnly'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('logging.logLevel', 'Warning'),
                          self.check('parent.syncProperties.schedule', '{syncSchedule}'),
                          self.check('parent.syncProperties.syncWindow', '4:00:00'),
-                         self.check('resourceGroup', '{rg}')])
+                         self.check('resourceGroup', '{rg}'),
+                         self.check('notificationsList[0]', '{notificationStr}')])
 
         # Create Child connected registry
         self.cmd('acr connected-registry create -n {child_name} -p {root_name} -r {registry_name} --repository {repo_2} -m ReadOnly',
@@ -95,12 +98,13 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
 
         # Update the connected registry
         self.cmd('acr token create -r {registry_name} -n {clientToken2} --repository {repo_2} metadata/read --no-passwords')
-        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}" --remove-client-tokens {clientToken} --add-client-tokens {clientToken2}',
+        self.cmd('acr connected-registry update -n {root_name} -r {registry_name} --log-level Information -s "{defaultSyncSchedule}" --remove-client-tokens {clientToken} --add-client-tokens {clientToken2} --add-notifications {notificationStr2} --remove-notifications {notificationStr}',
                  checks=[self.check('name', '{root_name}'),
                          self.check('logging.logLevel', 'Information'),
                          self.check('parent.syncProperties.schedule', '{defaultSyncSchedule}'),
                          self.check('parent.syncProperties.syncWindow', 'None'),
-                         self.check('resourceGroup', '{rg}')])
+                         self.check('resourceGroup', '{rg}'),
+                         self.check('notificationsList[0]', '{notificationStr2}')])
 
         # List client tokens
         self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',

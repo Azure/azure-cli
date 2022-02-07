@@ -103,7 +103,7 @@ def load_arguments(self, _):
 
     for command in ['create', 'activate']:
         with self.argument_context('batch application package {}'.format(command)) as c:
-            c.argument('package_file', type=file_type, help='The path of the application package in zip format', completer=FilesCompleter())
+            c.argument('package_file', type=file_type, help='The local filesystem path of the application package in zip format to upload to Azure Storage.', completer=FilesCompleter())
             c.argument('application_name', options_list=('--application-name',), help="The name of the application.")
             c.argument('version_name', options_list=('--version-name',), help="The version name of the application.")
             c.argument('f_ormat', options_list=('--format',), help="The format of the application package binary file.")
