@@ -131,6 +131,7 @@ class TunnelServer:
             logger.info('Successfully connected to local server..')
             debugger_thread.join()
             web_socket_thread.join()
+            self.cleanup()
             logger.info('Both debugger and websocket threads stopped...')
             logger.info('Stopped local server..')
 
@@ -193,13 +194,16 @@ class TunnelServer:
             web_address = 'https://{}/api/tokens/{}'.format(self.bastion.dns_name, self.last_token)
             response = requests.delete(web_address, headers=custom_header,
                                        verify=(not should_disable_connection_verify()))
-
-            if response.status_code not in [200, 204]:
+            if response.status_code == 404:
+                logger.info('Session already deleted')
+            elif response.status_code not in [200, 204]:
                 exp = CloudError(response)
                 raise exp
 
             self.last_token = None
             self.node_id = None
+        else:
+            logger.debug('Nothing to clean up')
 
     def get_port(self):
         return self.local_port
