@@ -90,7 +90,7 @@ THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 EOM
 
-# TODO: Instead of "_ssl.cpython-36m-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
+# TODO: Instead of "_ssl.cpython-38-x86_64-linux-gnu.so" only, find all .so files with "find debian/azure-cli/opt/az -type f -name '*.so'"
 
 cat > $debian_dir/rules << EOM
 #!/usr/bin/make -f
