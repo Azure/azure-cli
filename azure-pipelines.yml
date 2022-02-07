@@ -13,8 +13,8 @@ pr:
       - '*'
 
 jobs:
-- job: CheckPullRequestTitle
-  displayName: "Check the Format of Pull Request Title"
+- job: CheckPullRequest
+  displayName: "Check the Format of Pull Request Title and Content"
   condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
 
   pool:
@@ -23,13 +23,14 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        echo $title
+        body=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.body')
+        echo $body
         if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
           echo "Hotfix PR should target release branch."
           exit 1
         fi
-        [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
-        echo "Pull Request title should follow https://aka.ms/submitAzPR"
-        exit 1
+        python /home/vsts/work/1/s/scripts/ci/check_pull_request.py "$title" "$body"
 
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
