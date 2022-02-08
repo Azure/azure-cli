@@ -17,7 +17,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
                                                                cf_or_policy, cf_container_client,
-                                                               cf_queue_service, cf_sa_blob_inventory, cf_blob_service)
+                                                               cf_queue_service, cf_table_service,
+                                                               cf_sa_blob_inventory, cf_blob_service)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -738,6 +739,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                    client_factory=table_data_service_factory,
                                    resource_type=ResourceType.DATA_COSMOS_TABLE)
 
+    table_service_sdk = CliCommandType(operations_tmpl='azure.data.tables._table_service_client#TableServiceClient.{}',
+                                       client_factory=cf_table_service,
+                                       resource_type=ResourceType.DATA_STORAGE_TABLE)
+
     with self.command_group('storage table', table_sdk,
                             custom_command_type=get_custom_sdk('acl', table_data_service_factory)) as g:
         from ._format import transform_boolean_for_table
@@ -751,8 +756,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command(
             'generate-sas', 'generate_table_shared_access_signature')
-        g.storage_command('list', 'list_tables',
-                          transform=transform_storage_list_output)
+        # g.storage_command('list', 'list_tables',
+        #                   transform=transform_storage_list_output)
         g.storage_command('stats', 'get_table_service_stats',
                           min_api='2016-05-31')
 
@@ -763,6 +768,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command(
             'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
+
+    with self.command_group('storage table', table_service_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE) as g:
+        g.storage_command_oauth('list', 'list_tables')
 
     with self.command_group('storage entity', table_sdk,
                             custom_command_type=get_custom_sdk('table', table_data_service_factory)) as g:

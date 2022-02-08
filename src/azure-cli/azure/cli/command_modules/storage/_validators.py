@@ -117,7 +117,7 @@ def get_config_value(cmd, section, key, default):
 
 
 def is_storagev2(import_prefix):
-    return import_prefix.startswith('azure.multiapi.storagev2.')
+    return import_prefix.startswith('azure.multiapi.storagev2.') or import_prefix.startswith('azure.data.tables')
 
 
 def validate_client_parameters(cmd, namespace):
