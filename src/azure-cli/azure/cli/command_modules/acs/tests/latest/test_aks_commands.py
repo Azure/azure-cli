@@ -4042,7 +4042,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         nodepool1_name = "nodepool1"
         nodepool2_name = "nodepool2"
         nodepool3_name = "nodepool3"
-        taints = "key1=value1:NoSchedule"
+        taints = "key1=value1:PreferNoSchedule"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -4100,17 +4100,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck(resource_group),
             StringContainCheck(nodepool1_name),
             self.check('[0].mode', 'System'),
-            self.check('[0].nodeTaints[0]', 'key1=value1:NoSchedule'),
+            self.check('[0].nodeTaints[0]', 'key1=value1:PreferNoSchedule'),
         ])
 
         # nodepool update nodepool2 taint
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints key1=value2:NoSchedule', checks=[
-            self.check('nodeTaints[0]', 'key1=value2:NoSchedule'),
+            self.check('nodeTaints[0]', 'key1=value2:PreferNoSchedule'),
         ])
 
         # nodepool show
         self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name}', checks=[
-            self.check('nodeTaints[0]', 'key1=value2:NoSchedule')
+            self.check('nodeTaints[0]', 'key1=value2:PreferNoSchedule')
         ])
 
         # nodepool delete nodepool2 taint
