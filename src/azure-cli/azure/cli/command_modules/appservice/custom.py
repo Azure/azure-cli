@@ -42,7 +42,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.util import get_az_user_agent, send_raw_request
+from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
                                        RequiredArgumentMissingError, ValidationError, CLIInternalError,
@@ -1111,7 +1111,7 @@ def list_runtimes(cmd, os_type=None, linux=False):
             windows = False
 
     runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only()
+    return runtime_helper.get_stack_names_only(delimiter=":")
 
 
 def list_function_app_runtimes(cmd, os_type=None):
@@ -2828,6 +2828,7 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
+# pylint: disable=too-few-public-methods
 class _AbstractStackRuntimeHelper:
     def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
@@ -2840,15 +2841,6 @@ class _AbstractStackRuntimeHelper:
     def stacks(self):
         self._load_stacks()
         return self._stacks
-
-    def get_stack_names_only(self):
-        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
-        linux_stacks = [s.display_name for s in self.stacks if s.linux]
-        if self._linux and not self._windows:
-            return linux_stacks
-        if self._windows and not self._linux:
-            return windows_stacks
-        return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
 
     def _get_raw_stacks_from_api(self):
         raise NotImplementedError
@@ -2884,7 +2876,21 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             'dotnet': 'net_framework_version',
             'dotnetcore': None
         }
+        self.default_delimeter = "|"  # character that separates runtime name from version
+        self.allowed_delimeters = "|:"  # delimiters allowed: '|', ':'
         super().__init__(cmd, linux=linux, windows=windows)
+
+    def get_stack_names_only(self, delimiter=None):
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux]
+        if delimiter is not None:
+            windows_stacks = [n.replace(self.default_delimeter, delimiter) for n in windows_stacks]
+            linux_stacks = [n.replace(self.default_delimeter, delimiter) for n in linux_stacks]
+        if self._linux and not self._windows:
+            return linux_stacks
+        if self._windows and not self._linux:
+            return windows_stacks
+        return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
 
     def _get_raw_stacks_from_api(self):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
@@ -2899,17 +2905,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
-    @staticmethod
-    def remove_delimiters(runtime):
+    def remove_delimiters(self, runtime):
         import re
-        # delimiters allowed: '|', ':'
-        if '|' in runtime:
-            runtime = re.split('[|]', runtime)
-        elif ':' in runtime:
-            runtime = re.split('[:]', runtime)
-        else:
-            runtime = [runtime]
-        return '|'.join(filter(None, runtime))
+        runtime = re.split("[{}]".format(self.allowed_delimeters), runtime)
+        return self.default_delimeter.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
         display_name = display_name.lower()
@@ -3097,6 +3096,29 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if gh_properties.is_supported:
                     runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
                 parsed_results.append(runtime)
+
+    # override _load_stacks() to call this method to use hardcoded stacks
+    def _load_stacks_hardcoded(self):
+        import os
+        stacks_file = os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WebappRuntimeStacks.json'))
+        if self._stacks:
+            return
+        stacks = []
+        if self._linux:
+            stacks_json = get_file_json(stacks_file)['linux']
+            for r in stacks_json:
+                stacks.append(self.Runtime(display_name=r.get("displayName"),
+                                           configs=r.get("configs"),
+                                           github_actions_properties=r.get("github_actions_properties"),
+                                           linux=True))
+        if self._windows:  # Windows stacks
+            stacks_json = get_file_json(stacks_file)['windows']
+            for r in stacks_json:
+                stacks.append(self.Runtime(display_name=r.get("displayName"),
+                                           configs=r.get("configs"),
+                                           github_actions_properties=r.get("github_actions_properties"),
+                                           linux=False))
+        self._stacks = stacks
 
 
 class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):

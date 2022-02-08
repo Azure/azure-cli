@@ -1441,7 +1441,7 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a Java 11 runtime using ':' delimiter.
@@ -1823,7 +1823,7 @@ short-summary: List available built-in stacks which can be used for web apps.
 
 helps['functionapp list-runtimes'] = """
 type: command
-short-summary: List available built-in stacks which can be used for function apps. Runtimes are shown in the form "runtime|version"
+short-summary: List available built-in stacks which can be used for function apps.
 """
 
 helps['webapp log'] = """
@@ -2015,7 +2015,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
