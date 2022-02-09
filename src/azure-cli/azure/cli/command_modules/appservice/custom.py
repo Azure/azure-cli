@@ -2741,7 +2741,7 @@ def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                    slot, updated_webapp)
 
 
-def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
+def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None, cmd_app_type="webapp"):
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
@@ -2772,21 +2772,26 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)
 
-        return show_webapp(cmd, resource_group_name, name, slot)
+        if cmd_app_type == 'functionapp':
+            return show_functionapp(cmd, resource_group_name, name, slot)
+        else:
+            return show_webapp(cmd, resource_group_name, name, slot)
 
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
 
 def bind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, slot=None):
     SslState = cmd.get_models('SslState')
+    app_type = 'functionapp' if cmd.name and 'functionapp' in cmd.name.lower() else 'webapp'
     return _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint,
-                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot)
+                               SslState.sni_enabled if ssl_type == 'SNI' else SslState.ip_based_enabled, slot, app_type)
 
 
 def unbind_ssl_cert(cmd, resource_group_name, name, certificate_thumbprint, slot=None):
     SslState = cmd.get_models('SslState')
+    app_type = 'functionapp' if cmd.name and 'functionapp' in cmd.name.lower() else 'webapp'
     return _update_ssl_binding(cmd, resource_group_name, name,
-                               certificate_thumbprint, SslState.disabled, slot)
+                               certificate_thumbprint, SslState.disabled, slot, app_type)
 
 
 def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
