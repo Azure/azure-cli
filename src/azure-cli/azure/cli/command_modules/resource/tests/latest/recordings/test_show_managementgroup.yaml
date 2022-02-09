@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:25 GMT
+      - Tue, 08 Feb 2022 23:09:07 GMT
       expires:
       - '-1'
       pragma:
@@ -77,7 +77,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:35 GMT
+      - Tue, 08 Feb 2022 23:09:17 GMT
       expires:
       - '-1'
       pragma:
@@ -116,23 +116,80 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","type":"Microsoft.Management/managementGroups","name":"testcligetgroup","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup","details":{"version":7,"updatedTime":"2022-01-20T22:30:52.1255618Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/c7a87cda-9a66-4920-b0f8-869baa04efe0","name":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"Root
-        Management Group"}}}}'
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","type":"Microsoft.Management/managementGroups","name":"testcligetgroup","status":"NotStarted"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup?api-version=2021-04-01
       cache-control:
       - no-cache
       content-length:
-      - '550'
+      - '167'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:36 GMT
+      - Tue, 08 Feb 2022 23:09:17 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup?api-version=2021-04-01
       pragma:
       - no-cache
       request-id:
-      - 64cde2e5-3b0f-4622-9731-77e8688f620c
+      - 1ecb1df4-d42d-4883-b1ce-fcf0b742c705
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-managementgroups-requests:
+      - '59'
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup","name":"testcligetgroup","status":"Running"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup?api-version=2021-04-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '163'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Feb 2022 23:09:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/testcligetgroup?api-version=2021-04-01
+      pragma:
+      - no-cache
+      request-id:
+      - 84522a2e-effc-4500-bf46-7906d8a78d11
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -145,10 +202,107 @@ interactions:
       - 1.0.3.2425
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-managementgroups-requests:
-      - '59'
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup","name":"testcligetgroup","status":"Succeeded","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup","details":{"version":12,"updatedTime":"2022-02-08T23:09:24.7360301Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '383'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Feb 2022 23:09:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - c3445fdb-f64c-4a9c-abb4-be3a89ace6ca
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - account management-group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.32.0 azsdk-python-mgmt-managementgroups/1.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup?api-version=2021-04-01
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","type":"Microsoft.Management/managementGroups","name":"testcligetgroup","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup","details":{"version":12,"updatedTime":"2022-02-08T23:09:24.7360301Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/c7a87cda-9a66-4920-b0f8-869baa04efe0","name":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"Root
+        Management Group"}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '551'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Feb 2022 23:09:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 873381f0-cf1d-498d-a228-56959a86a251
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ba-restapi:
+      - 1.0.3.2425
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -184,7 +338,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:37 GMT
+      - Tue, 08 Feb 2022 23:09:39 GMT
       expires:
       - '-1'
       pragma:
@@ -230,7 +384,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:47 GMT
+      - Tue, 08 Feb 2022 23:09:50 GMT
       expires:
       - '-1'
       pragma:
@@ -281,7 +435,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:47 GMT
+      - Tue, 08 Feb 2022 23:09:51 GMT
       expires:
       - '-1'
       location:
@@ -289,13 +443,13 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - 3e1f490c-1e62-4526-b910-180ba1065655
+      - f6d30e5f-52b2-48ce-931f-905891ff5732
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-ba-restapi:
-      - 1.0.3.2425
+      - 1.0.3.2454
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-managementgroups-requests:
@@ -335,7 +489,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:32:57 GMT
+      - Tue, 08 Feb 2022 23:10:01 GMT
       expires:
       - '-1'
       location:
@@ -343,7 +497,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - aed0f074-1470-4a4a-acbb-edc689e328e3
+      - c47a95ec-6c12-4171-a041-d67abbb631ea
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -353,7 +507,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ba-restapi:
-      - 1.0.3.2425
+      - 1.0.3.2454
       x-content-type-options:
       - nosniff
     status:
@@ -378,22 +532,22 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup1?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup1","name":"testcligetgroup1","status":"Succeeded","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":20,"updatedTime":"2022-01-20T22:32:54.49124Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701"}}}'
+      string: '{"id":"/providers/Microsoft.Management/operationResults/create/asyncOperation/status/managementGroups/testcligetgroup1","name":"testcligetgroup1","status":"Succeeded","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":26,"updatedTime":"2022-02-08T23:09:57.460122Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '384'
+      - '385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:08 GMT
+      - Tue, 08 Feb 2022 23:10:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - a199466a-c7a5-4c28-8740-82981c861dd9
+      - 2228b96e-1bec-4661-963f-99c4eee1256d
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -403,7 +557,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ba-restapi:
-      - 1.0.3.2425
+      - 1.0.3.2454
       x-content-type-options:
       - nosniff
     status:
@@ -428,22 +582,22 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"Microsoft.Management/managementGroups","name":"testcligetgroup1","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":20,"updatedTime":"2022-01-20T22:32:54.49124Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","name":"testcligetgroup","displayName":"testcligetgroup"}}}}'
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"Microsoft.Management/managementGroups","name":"testcligetgroup1","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":26,"updatedTime":"2022-02-08T23:09:57.460122Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","name":"testcligetgroup","displayName":"testcligetgroup"}}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '504'
+      - '505'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:08 GMT
+      - Tue, 08 Feb 2022 23:10:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 6228ac44-ecbe-4316-ba7d-ff8c135620f8
+      - 95bcf53c-ed7d-44d0-aeb4-0cbbf4d8d756
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -453,7 +607,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ba-restapi:
-      - 1.0.3.2425
+      - 1.0.3.2454
       x-content-type-options:
       - nosniff
     status:
@@ -491,7 +645,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:10 GMT
+      - Tue, 08 Feb 2022 23:10:26 GMT
       expires:
       - '-1'
       pragma:
@@ -537,7 +691,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:19 GMT
+      - Tue, 08 Feb 2022 23:10:36 GMT
       expires:
       - '-1'
       pragma:
@@ -572,22 +726,22 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/testcligetgroup1?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"Microsoft.Management/managementGroups","name":"testcligetgroup1","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":20,"updatedTime":"2022-01-20T22:32:54.49124Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","name":"testcligetgroup","displayName":"testcligetgroup"}}}}'
+      string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup1","type":"Microsoft.Management/managementGroups","name":"testcligetgroup1","properties":{"tenantId":"c7a87cda-9a66-4920-b0f8-869baa04efe0","displayName":"testcligetgroup1","details":{"version":26,"updatedTime":"2022-02-08T23:09:57.460122Z","updatedBy":"27e85fe3-7b1b-4de4-8d55-d58291b5d701","parent":{"id":"/providers/Microsoft.Management/managementGroups/testcligetgroup","name":"testcligetgroup","displayName":"testcligetgroup"}}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '504'
+      - '505'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:20 GMT
+      - Tue, 08 Feb 2022 23:10:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 342ba574-01c6-46e7-b2c5-9dde5c7c6778
+      - b2cb0c7d-f99d-41c5-84c3-f83bf6f6f4cf
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -597,7 +751,7 @@ interactions:
       vary:
       - Accept-Encoding
       x-ba-restapi:
-      - 1.0.3.2425
+      - 1.0.3.2454
       x-content-type-options:
       - nosniff
     status:
@@ -635,7 +789,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:21 GMT
+      - Tue, 08 Feb 2022 23:10:36 GMT
       expires:
       - '-1'
       pragma:
@@ -681,7 +835,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:31 GMT
+      - Tue, 08 Feb 2022 23:10:47 GMT
       expires:
       - '-1'
       pragma:
@@ -729,7 +883,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:33 GMT
+      - Tue, 08 Feb 2022 23:10:48 GMT
       expires:
       - '-1'
       location:
@@ -737,7 +891,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - e94c502a-eac4-4410-a98e-84b978697064
+      - d0c2726e-a9b7-4080-a781-7cf47d1ca073
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -781,13 +935,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:43 GMT
+      - Tue, 08 Feb 2022 23:10:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 3920b6c2-cd0a-46c6-b833-f448fb54c8ff
+      - bff3dca9-c775-4067-8912-bf67e8fbfaf5
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -835,7 +989,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:44 GMT
+      - Tue, 08 Feb 2022 23:10:59 GMT
       expires:
       - '-1'
       pragma:
@@ -849,7 +1003,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -881,7 +1035,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:54 GMT
+      - Tue, 08 Feb 2022 23:11:09 GMT
       expires:
       - '-1'
       pragma:
@@ -929,7 +1083,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:33:55 GMT
+      - Tue, 08 Feb 2022 23:11:11 GMT
       expires:
       - '-1'
       location:
@@ -937,7 +1091,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - f8be9d42-8f8f-4a8f-9839-b9074db601e1
+      - 374a7a0a-64b9-4a66-adff-26f007932673
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
@@ -981,13 +1135,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Jan 2022 22:34:06 GMT
+      - Tue, 08 Feb 2022 23:11:21 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - d7999f78-dfba-45ae-9f7d-b7740b09a97f
+      - 4d0fc058-7332-41bb-9bcc-e649409dea44
       server:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:

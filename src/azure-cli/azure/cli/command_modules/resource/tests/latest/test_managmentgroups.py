@@ -335,7 +335,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark
     def test_update_managementgroup_with_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"
@@ -373,6 +372,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
+    @pytest.mark.custom_mark
     def test_update_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"
@@ -416,7 +416,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name testcligroup')
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_add_remove_subscription(self):
         name = "testcligroup"
         sub = "5602fbd9-fb0d-4fbb-98b3-10c8ea20b6de"
@@ -428,7 +427,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group delete --name ' + name)
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_show_subscription(self):
         name = "testcligroup"
         subName = "5602fbd9-fb0d-4fbb-98b3-10c8ea20b6de"
@@ -455,7 +453,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/subscriptions")
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_show_subscription_under_mg(self):
         name = "testcligroup"
         subName = "5602fbd9-fb0d-4fbb-98b3-10c8ea20b6de"
@@ -480,7 +477,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertEqual(show_sub_under_mg[0]["type"], 
                          "Microsoft.Management/managementGroups/subscriptions")
 
-    #@pytest.mark.custom_mark
     def test_managementgroup_get_entities(self):
         name = "testcligroup"
         self.cmd('account management-group create --name ' + name)
@@ -489,7 +485,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertIsNotNone(getEntities)
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_delete(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         self.cmd('account management-group hierarchy-settings create -n ' + 
@@ -498,7 +493,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                  name)
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_default_mg(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         defaultmgName = "defaultmg"
@@ -521,7 +515,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/settings")
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_auth(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         mgPath = "/providers/Microsoft.Management/managementGroups/"
@@ -541,7 +534,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/settings")
 
     @live_only()
-    @pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_default_mg_auth(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         defaultmgName = "defaultmg"
@@ -566,7 +558,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/settings")
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_update_default_mg(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         defaultmgName1 = "defaultmg1"
@@ -594,7 +585,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/settings")
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_auth(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         mgPath = "/providers/Microsoft.Management/managementGroups/"
@@ -616,7 +606,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                          "Microsoft.Management/managementGroups/settings")
 
     @live_only()
-    #@pytest.mark.custom_mark
     def test_managementgroup_hierarchysetting_create_default_mg_auth(self):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         defaultmgName1 = "defaultmg1"
@@ -645,21 +634,18 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertEqual(showSetting["value"][0]["type"], 
                          "Microsoft.Management/managementGroups/settings")
 
-    #@pytest.mark.custom_mark
     def test_managementgroup_get_tenant_backfill_status(self):
         backfillStatus  = self.cmd('account management-group tenant-backfill get').get_output_in_json()
         self.assertIsNotNone(backfillStatus)
         self.assertEqual(backfillStatus["status"],
                          "Completed")
 
-    #@pytest.mark.custom_mark
     def test_managementgroup_start_tenant_backfill(self):
         startBackfill  = self.cmd('account management-group tenant-backfill start').get_output_in_json()
         self.assertIsNotNone(startBackfill)
         self.assertEqual(startBackfill["status"],
                          "Completed")
 
-    #@pytest.mark.custom_mark
     def test_managementgroup_name_availability(self):
         existingMGName = "testcligroup1"
         nonExistingMGName = "testcligroup2"
