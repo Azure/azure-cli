@@ -4416,7 +4416,7 @@ def _update_artifact_type(params):
         params.artifact_type = 'startup'
     else:
         params.artifact_type = 'static'
-    logger.warning("Deployment type: %s. To override deloyment type, please specify the --type parameter. "
+    logger.warning("Deployment type: %s. To override deployment type, please specify the --type parameter. "
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
 
