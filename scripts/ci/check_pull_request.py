@@ -9,11 +9,19 @@ import logging
 import re
 import sys
 
-grey = "\x1b[38;20m"
-yellow = "\x1b[33;20m"
+
+# http://noyobo.com/2015/11/13/ANSI-escape-code.html
+# Reset all to default: 0
+# Bold or increased intensity: 1
+# Fraktur (Gothic): 20
+# red: 31
+# yellow: 33
+# grey: 38
+reset = "\x1b[0m"
 red = "\x1b[31;20m"
 bold_red = "\x1b[31;1m"
-reset = "\x1b[0m"
+yellow = "\x1b[33;20m"
+grey = "\x1b[38;20m"
 format = "%(message)s"
 TITLE = sys.argv[1]
 BODY = sys.argv[2]
@@ -71,7 +79,7 @@ def regex_line(line):
     ref = re.findall(sub_pattern, line, re.IGNORECASE)
     if ref:
         logger.warning('Please use the right verb of%s %s %swith present-tense in base form and capitalized first letter to describe what is done, '
-                       'follow https://aka.ms/submitAzPR\n' % (red, ref, yellow))
+                       'follow https://aka.ms/submitAzPR\n', red, ref, yellow)
         error_flag = True
     # Check Fix #number in title, just give a warning here, because it is not necessarily
     if 'Fix' in line:
@@ -87,20 +95,20 @@ def regex_line(line):
                     assert line[idx + 1] == ' '
                     break
                 except:
-                    logger.info('%s%s: missing space after %s' % (line, yellow, j))
+                    logger.info('%s%s: missing space after %s', line, yellow, j)
                     logger.error(' ' * idx + '↑')
                     error_flag = True
         # az xxx commands must be enclosed in `, e.g., `az vm`
         if i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
             command = 'az '
             index = idx + 3
-            while index <= len(line) and line[index] != ':':
+            while index < len(line) and line[index] != ':':
                 command += line[index]
                 index += 1
             try:
                 assert line[idx - 1] == '`'
             except:
-                logger.info('%s%s: missing ` around %s' % (line, yellow, command))
+                logger.info('%s%s: missing ` around %s', line, yellow, command)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
         # First word after the colon must be capitalized
@@ -111,7 +119,7 @@ def regex_line(line):
                 index = idx + 1
             else:
                 continue
-            logger.info('%s%s: should use capital letters after :' % (line, yellow))
+            logger.info('%s%s: should use capital letters after :', line, yellow)
             logger.error(' ' * index + '↑')
             error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
@@ -124,7 +132,7 @@ def regex_line(line):
             try:
                 assert line[idx - 1] == '`'
             except:
-                logger.info('%s%s: missing ` around %s' % (line, yellow, param))
+                logger.info('%s%s: missing ` around %s', line, yellow, param)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
     return error_flag
