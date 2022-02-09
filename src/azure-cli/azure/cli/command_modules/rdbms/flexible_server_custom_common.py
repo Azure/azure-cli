@@ -55,7 +55,7 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
     with open(properties_filepath, "r") as f:
         try:
             request_payload = json.load(f)
-            request_payload.get("properties")['TriggerCutover']='true'
+            request_payload.get("properties")['TriggerCutover'] = 'true'
             json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
