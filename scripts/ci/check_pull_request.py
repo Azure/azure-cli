@@ -43,7 +43,6 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-#
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
