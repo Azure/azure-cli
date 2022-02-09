@@ -698,16 +698,10 @@ jobs:
       ArtifactName: rpm-mariner
 
 
-- job: BuildRpmPackage
-  displayName: Build Rpm Package
+- job: BuildRpmPackageCentOS7
+  displayName: Build Rpm Package CentOS 7
   pool:
     vmImage: 'ubuntu-20.04'
-  strategy:
-    matrix:
-      CentOS7:
-        image: centos7
-      CentOSStream8:
-        image: centos_stream8
   steps:
   - task: Bash@3
     displayName: 'Build Rpm Package'
@@ -715,18 +709,37 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
     env:
-      IMAGE: $(image)
+      IMAGE: centos7
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: rpm'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: rpm-$(image)
+      ArtifactName: rpm-centos7
+
+
+- job: BuildRpmPackageCentOSStream8
+  displayName: Build Rpm Package CentOS Stream 8
+  pool:
+    vmImage: 'ubuntu-20.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Build Rpm Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline.sh
+    env:
+      IMAGE: centos_stream8
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: rpm'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: rpm-centos_stream8
 
 
 - job: TestRpmPackage
   displayName: Test Rpm Package
   timeoutInMinutes: 120
-  dependsOn: BuildRpmPackage
+  dependsOn: BuildRpmPackageCentOS7
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   pool:
     vmImage: 'ubuntu-20.04'
