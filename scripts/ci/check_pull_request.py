@@ -103,7 +103,7 @@ def regex_line(line):
         if i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
             command = 'az '
             index = idx + 3
-            while index <= len(line) and line[index] != ':':
+            while index < len(line) and line[index] != ':':
                 command += line[index]
                 index += 1
             try:
