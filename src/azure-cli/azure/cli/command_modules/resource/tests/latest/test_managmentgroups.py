@@ -301,7 +301,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.assertEqual(
             managementgroup_create["type"],
             "Microsoft.Management/managementGroups")
-
+    
     def test_update_managementgroup_with_displayname(self):
         name = "testcligroup"
         displayName = "testcligroupDisplayName"
@@ -372,7 +372,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
-    @pytest.mark.custom_mark
     def test_update_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"

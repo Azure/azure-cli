@@ -6,10 +6,8 @@
 from azure.cli.testsdk import ScenarioTest, record_only
 import pytest
 
-@pytest.mark.custom_mark
 class AzureManagementGroupsScenarioTest(ScenarioTest):
     
-    #@pytest.mark.custom_mark
     def test_list_managementgroups(self):
         managementgroups_list = self.cmd(
             'account management-group list').get_output_in_json()
@@ -24,7 +22,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroups_list[0]["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_show_managementgroup(self):
         self.cmd('account management-group create --name testcligetgroup')
         self.cmd('account management-group create --name testcligetgroup1 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup')
@@ -57,7 +54,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_get["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_show_managementgroup_with_expand(self):
         self.cmd('account management-group create --name testcligetgroup')
         self.cmd('account management-group create --name testcligetgroup1 --parent testcligetgroup')
@@ -104,7 +100,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_get["children"][0]["name"],
             "testcligetgroup2")
 
-    #@pytest.mark.custom_mark1
     def test_show_managementgroup_with_expand_and_recurse(self):
         self.cmd('account management-group create --name testcligetgroup1')
         self.cmd('account management-group create --name testcligetgroup2 --parent /providers/Microsoft.Management/managementGroups/testcligetgroup1')
@@ -165,7 +160,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_get["children"][0]["children"][0]["name"],
             "testcligetgroup4")
     
-    #@pytest.mark.custom_mark1
     def test_create_managementgroup(self):
         name = "testcligroup"
         displayName = "testcligroup"
@@ -198,7 +192,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_create["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_create_managementgroup_with_displayname(self):
         name = "testcligroup"
         displayName = "TestCliDisplayName"
@@ -233,7 +226,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_create["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark
     def test_create_managementgroup_with_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"
@@ -271,7 +263,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_create["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_create_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchildDisplayName"
@@ -311,7 +302,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_create["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark
     def test_update_managementgroup_with_displayname(self):
         name = "testcligroup"
         displayName = "testcligroupDisplayName"
@@ -345,7 +335,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_update_managementgroup_with_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"
@@ -383,7 +372,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_update_managementgroup_with_displayname_and_parentid(self):
         name = "testcligroupchild"
         displayName = "testcligroupchild"
@@ -422,7 +410,6 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
-    #@pytest.mark.custom_mark1
     def test_create_delete_group_managementgroup(self):
         self.cmd('account management-group create --name testcligroup')
         self.cmd('account management-group delete --name testcligroup')
