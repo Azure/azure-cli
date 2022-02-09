@@ -130,7 +130,7 @@ class AlertAddEncryption(argparse._AppendAction):
         if keyVaultObject.key_version is None:
             keyVaultObject.key_version=''
 
-        return keyVaultObject;
+        return keyVaultObject
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
