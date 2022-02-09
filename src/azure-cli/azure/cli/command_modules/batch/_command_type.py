@@ -82,7 +82,7 @@ def find_param_type(model, param):
     :returns: str
     """
     # Search for the :type param_name: in the docstring
-    pattern = r":type {}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\s*\"{{3}})".format(param)
+    pattern = rf":type {param}:(.*?)\n(\s*:param |\s*:rtype:|\s*:raises:|\s*\"{{3}})"
     param_type = re.search(pattern, model.__doc__, re.DOTALL)
     return re.sub(r"\n\s*", "", param_type.group(1).strip())
 
@@ -94,7 +94,7 @@ def find_param_help(model, param):
     :returns: str
     """
     # Search for :param param_name: in the docstring
-    pattern = r":param {}:(.*?)\n\s*:type ".format(param)
+    pattern = rf":param {param}:(.*?)\n\s*:type "
     param_doc = re.search(pattern, model.__doc__, re.DOTALL)
     return re.sub(r"\n\s*", " ", param_doc.group(1).strip())
 
@@ -182,7 +182,7 @@ def format_options_name(operation):
     operation = operation.split('#')[-1]
     op_class, op_function = operation.split('.')
     op_class = operations_name(op_class)
-    return "{}_{}_options".format(op_class, op_function)
+    return f"{op_class}_{op_function}_options"
 
 
 class BatchArgumentTree:
@@ -292,7 +292,7 @@ class BatchArgumentTree:
             # Use from_dict in order to deserialize with case insensitive
             kwargs[self._request_param['name']] = model_type.from_dict(json_obj)
         except DeserializationError as error:
-            message += ": {}".format(error)
+            message += f": {error}"
             raise ValueError(message.format(self._request_param['model']))
         else:
             if kwargs[self._request_param['name']] is None:
@@ -408,7 +408,7 @@ class BatchArgumentTree:
                 except EnvironmentError:
                     raise ValueError("Cannot access JSON request file: " + namespace.json_file)
                 except ValueError as err:
-                    raise ValueError("Invalid JSON file: {}".format(err))
+                    raise ValueError(f"Invalid JSON file: {err}")
                 other_values = [arg_name(n) for n in self._arg_tree if getattr(namespace, n)]
                 if other_values:
                     message = "--json-file cannot be combined with:\n"
@@ -431,7 +431,7 @@ class AzureBatchDataPlaneCommand:
     def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
         if not isinstance(operation, str):
-            raise ValueError("Operation must be a string. Got '{}'".format(operation))
+            raise ValueError(f"Operation must be a string. Got '{operation}'")
 
         self._flatten = kwargs.pop('flatten', pformat.FLATTEN)  # Number of object levels to flatten
         self._head_cmd = False
@@ -521,7 +521,7 @@ class AzureBatchDataPlaneCommand:
                     message = ex.error.message.value
                     if ex.error.values:
                         for detail in ex.error.values:
-                            message += "\n{}: {}".format(detail.key, detail.value)
+                            message += f"\n{detail.key}: {detail.value}"
                     raise CLIError(message)
                 except AttributeError:
                     raise CLIError(ex)
@@ -764,10 +764,10 @@ class AzureBatchDataPlaneCommand:
                 for flattened_arg in self.parser.compile_args():
                     args.append(flattened_arg)
                 param = 'json_file'
-                docstring = "A file containing the {} specification in JSON " \
+                docstring = f"A file containing the {arg[0].replace('_', ' ')} specification in JSON " \
                             "(formatted to match the respective REST API body). " \
-                            "If this parameter is specified, all '{} Arguments'" \
-                            " are ignored.".format(arg[0].replace('_', ' '), group_title(arg[0]))
+                            "If this parameter is specified, all '{group_title(arg[0])} Arguments'" \
+                            " are ignored."
                 args.append((param, CLICommandArgument(param,
                                                        options_list=[arg_name(param)],
                                                        required=False,
@@ -828,7 +828,7 @@ class BatchCommandGroup(AzCommandGroup):
         merged_kwargs.update(kwargs)
 
         operations_tmpl = merged_kwargs.get('operations_tmpl')
-        command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        command_name = f'{self.group_name} {name}' if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
         command = AzureBatchDataPlaneCommand(operation, self.command_loader, **merged_kwargs)
 
