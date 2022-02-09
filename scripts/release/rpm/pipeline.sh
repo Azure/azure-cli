@@ -37,7 +37,7 @@ docker cp $id:/root/rpmbuild/RPMS/x86_64/. ${BUILD_STAGINGDIRECTORY}
 # a registry.
 #
 # The products of `docker save` can be rehydrated using `docker load`.
-mkdir -p ${BUILD_STAGINGDIRECTORY}/docker
-docker save azure/azure-cli:${IMAGE}-builder | gzip > ${BUILD_STAGINGDIRECTORY}/docker/azure_azure-cli_${IMAGE}-builder.tar.gz &
-docker save azure/azure-cli:${IMAGE} | gzip > ${BUILD_STAGINGDIRECTORY}/docker/azure_azure-cli_${IMAGE}.tar.gz &
-wait
+# mkdir -p ${BUILD_STAGINGDIRECTORY}/docker
+# docker save azure/azure-cli:${IMAGE}-builder | gzip > ${BUILD_STAGINGDIRECTORY}/docker/azure_azure-cli_${IMAGE}-builder.tar.gz &
+# docker save azure/azure-cli:${IMAGE} | gzip > ${BUILD_STAGINGDIRECTORY}/docker/azure_azure-cli_${IMAGE}.tar.gz &
+# wait
