@@ -106,7 +106,6 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.',
                    deprecate_info=c.deprecate(expiration='0.2.17'))
         c.ignore('max_burst')
@@ -116,6 +115,7 @@ def load_arguments(self, _):
                    validator=validate_asp_create,
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice', 'webapp', 'functionapp']))
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
                    help="Name or ID of the app service environment",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
@@ -131,6 +131,9 @@ def load_arguments(self, _):
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
+        c.argument('elastic_scale', arg_type=get_three_state_flag(), is_preview=True, help='Enable or disable automatic scaling. Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan. The SKU must be a Premium V2 SKU (P1V2, P2V2, P3V2) or a Premium V3 SKU (P1V3, P2V3, P3V3)')
+        c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, is_preview=True, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
+        c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
         c.ignore('allow_pending_state')
 
     with self.argument_context('appservice plan delete') as c:
@@ -198,6 +201,8 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
         c.argument('skip_dns_registration', help="If true web app hostname is not registered with DNS on creation",
                    arg_type=get_three_state_flag(return_label=True), deprecate_info=c.deprecate(expiration='3.0.0'))
+        c.argument('minimum_elastic_instance_count', options_list=["--minimum-elastic-instance-count", "-i"], type=int, is_preview=True, help="Minimum number of instances. App must be in an elastic scale App Service Plan.")
+        c.argument('prewarmed_instance_count', options_list=["--prewarmed-instance-count", "-w"], type=int, is_preview=True, help="Number of preWarmed instances. App must be in an elastic scale App Service Plan.")
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -615,10 +620,10 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
-        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+        c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the appserviceplan associated with the webapp",
-                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+                   help="name of the app service plan associated with the webapp",
+                   configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\" or \":\". "

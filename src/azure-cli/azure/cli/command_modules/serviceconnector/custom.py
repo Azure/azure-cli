@@ -157,8 +157,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
                       key_space=None, graph=None, table=None,                # Resource.Cosmos*,
-                      # config_store=None,                                   # Resource.AppConfig
-                      # namespace=None,                                      # Resource.EventHub
+                      config_store=None,                                     # Resource.AppConfig
+                      namespace=None,                                        # Resource.EventHub
                       signalr=None):                                         # Resource.SignalR
 
     if not source_id:

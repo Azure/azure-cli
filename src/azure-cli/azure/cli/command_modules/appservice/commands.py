@@ -67,20 +67,23 @@ def _polish_bad_errors(ex, creating_plan):
     import json
     from knack.util import CLIError
     try:
-        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-            detail = ex.response.text
+        if hasattr(ex, "response"):
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text())['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with requested features is not supported in current region. \n"
+                                  "If creating an App Service Plan with --zone-redundant/-z, "
+                                  "please see supported regions here: "
+                                  "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
         else:
-            detail = json.loads(ex.response.text())['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with requested features is not supported in current region. \n"
-                              "If creating an App Service Plan with --zone-redundant/-z, "
-                              "please see supported regions here: "
-                              "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
     except Exception:  # pylint: disable=broad-except
         pass
@@ -133,7 +136,8 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
-        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
+        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
+                                 custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
