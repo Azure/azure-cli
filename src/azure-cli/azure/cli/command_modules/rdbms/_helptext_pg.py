@@ -332,8 +332,6 @@ examples:
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --db-names db1 db2
   - name: Allow the migration workflow to overwrite the DB on the target.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --overwrite-dbs
-  - name: Cutover the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --cutover
   - name: This command helps in starting the data migration immediately between the source and target. Any migration scheduled for a future date and time will be cancelled.
     text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --start-data-migration
 """
