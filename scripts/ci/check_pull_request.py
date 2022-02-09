@@ -9,11 +9,19 @@ import logging
 import re
 import sys
 
-grey = "\x1b[38;20m"
-yellow = "\x1b[33;20m"
+
+# http://noyobo.com/2015/11/13/ANSI-escape-code.html
+# Reset all to default: 0
+# Bold or increased intensity: 1
+# Fraktur (Gothic): 20
+# red: 31
+# yellow: 33
+# grey: 38
+reset = "\x1b[0m"
 red = "\x1b[31;20m"
 bold_red = "\x1b[31;1m"
-reset = "\x1b[0m"
+yellow = "\x1b[33;20m"
+grey = "\x1b[38;20m"
 format = "%(message)s"
 TITLE = sys.argv[1]
 BODY = sys.argv[2]
@@ -35,6 +43,7 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
+#
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
