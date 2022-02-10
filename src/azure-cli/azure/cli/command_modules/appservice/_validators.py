@@ -116,10 +116,10 @@ def validate_functionapp_asp_create(namespace):
     if namespace.max_burst is not None:
         if tier.lower() != "elasticpremium":
             raise ArgumentUsageError("--max-burst is only supported for Elastic Premium (EP) plans")
-        namespace.max_burst = validate_range_of_int_flag('--max-burst', namespace.max_burst, min_val=0, max_val=20)
+        namespace.max_burst = validate_range_of_int_flag('--max-burst', namespace.max_burst, min_val=0, max_val=100)
     if namespace.number_of_workers is not None:
         namespace.number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-elastic-worker-count',
-                                                                 namespace.number_of_workers, min_val=0, max_val=20)
+                                                                 namespace.number_of_workers, min_val=0, max_val=100)
 
 
 def validate_app_or_slot_exists_in_rg(cmd, namespace):
