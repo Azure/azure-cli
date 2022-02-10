@@ -612,9 +612,7 @@ short-summary: Adds Encryption properties to a namespace.
 examples:
   - name: Set 2 different encryption properties for a namespace that has User Assigned Identity already enabled
     text: |
-        az eventhubs namespace encryption add --namespace-name mynamespace -g MyResourceGroup
-            --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
-            --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
+        az eventhubs namespace encryption add --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName2
 """
 
 helps['eventhubs namespace encryption remove'] = """
@@ -623,8 +621,7 @@ short-summary: Removes one or more Encryption properties from a namespace.
 examples:
   - name: Remove encryption properties for a namespace that has User Assigned Identity already enabled
     text: |
-        az eventhubs namespace encryption remove --namespace-name mynamespace -g MyResourceGroup
-            --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
+        az eventhubs namespace encryption remove --namespace-name mynamespace -g MyResourceGroup --encryption-config key-name key1 key-vault-uri https://mykeyvault.vault.azure.net/ user-assigned-identity /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
 """
 
 helps['eventhubs namespace identity'] = """
