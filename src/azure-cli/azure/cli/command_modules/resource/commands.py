@@ -512,7 +512,7 @@ def load_command_table(self, _):
     with self.command_group('account management-group hierarchy-settings', resource_hierarchy_settings_sdk, client_factory=cf_hierarchy_settings) as g:
         g.custom_command('list', 'cli_hierarchy_settings_list')
         g.custom_command('create', 'cli_hierarchy_settings_create')
-        g.custom_command('delete', 'cli_hierarchy_settings_delete')
+        g.custom_command('delete', 'cli_hierarchy_settings_delete', confirmation=True)
         g.generic_update_command(
             'update',
             getter_name='cli_hierarchysettings_group_update_get',

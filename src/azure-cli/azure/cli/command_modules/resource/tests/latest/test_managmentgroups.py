@@ -488,7 +488,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         name = "c7a87cda-9a66-4920-b0f8-869baa04efe0"
         self.cmd('account management-group hierarchy-settings create -n ' + 
                  name + ' -r True')
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
 
     @live_only()
@@ -500,7 +500,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group hierarchy-settings create -n ' + 
                  name + ' -m ' + mgPath + defaultmgName)
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
         self.cmd('account management-group delete --name ' + defaultmgName)
         self.assertIsNotNone(showSetting)
@@ -520,7 +520,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group hierarchy-settings create -n ' + 
                  name + ' -r True')
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
         self.assertIsNotNone(showSetting)
         self.assertEqual(showSetting["value"][0]["id"], 
@@ -542,7 +542,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                  name + ' -m ' + mgPath + defaultmgName + 
                  ' -r True')
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings  --yes -n ' + 
                  name)
         self.cmd('account management-group delete --name ' + defaultmgName)
         self.assertEqual(showSetting["value"][0]["defaultManagementGroup"], 
@@ -569,7 +569,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group hierarchy-settings update -n ' + 
                  name + ' -m ' + mgPath + defaultmgName2)
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
         self.cmd('account management-group delete --name ' + defaultmgName1)
         self.cmd('account management-group delete --name ' + defaultmgName2)
@@ -592,7 +592,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
         self.cmd('account management-group hierarchy-settings update -n ' + 
                  name + ' -r True')
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
         self.assertIsNotNone(showSetting)
         self.assertEqual(showSetting["value"][0]["id"], 
@@ -619,7 +619,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
                  name + ' -m ' + mgPath + defaultmgName2 +
                  ' -r True')
         showSetting = self.cmd('account management-group hierarchy-settings list -n' + name).get_output_in_json()
-        self.cmd('account management-group hierarchy-settings delete -n ' + 
+        self.cmd('account management-group hierarchy-settings delete --yes -n ' + 
                  name)
         self.cmd('account management-group delete --name ' + defaultmgName1)
         self.cmd('account management-group delete --name ' + defaultmgName2)

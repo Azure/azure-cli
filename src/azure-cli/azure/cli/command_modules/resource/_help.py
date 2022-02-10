@@ -90,13 +90,13 @@ examples:
 helps['account management-group check-name-availability'] = """
 type: command
 short-summary: Check if a Management Group Name is Valid.
-long-summary: Check if a Management Group Name is Valid..
+long-summary: Check if a Management Group Name is Valid.
 parameters:
   - name: --name -n
     type: string
     short-summary: Name of the management group.
 examples:
-  - name: Create a new management group.
+  - name: Check if a Management Group Name is Valid.
     text: >
         az account management-group check-name-availability --name GroupName
 """
@@ -293,91 +293,91 @@ examples:
 
 helps['account management-group hierarchy-settings'] = """
 type: group
-short-summary: Provides operations for hierarchy settings defined at the management group level. Settings can only be set on the root Management Group of the hierarchy.
+short-summary: Provide operations for hierarchy settings defined at the management group level. Settings can only be set on the root Management Group of the hierarchy.
 """
 
 helps['account management-group hierarchy-settings create'] = """
 type: command
-short-summary: Creates hierarchy settings defined at the Management Group level.
-long-summary: Creates hierarchy settings defined at the Management Group level.
+short-summary: Create hierarchy settings defined at the Management Group level.
+long-summary: Create hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
     short-summary: Name of the management group.
   - name: --default-management-group -m
     type: string
-    short-summary: Sets the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
   - name: --require-authorization-for-group-creation -r
     type: boolean
-    short-summary: Indicates whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
 examples:
   - name: Create hierarchy settings defined at the Management Group level.
     text: >
         az account management-group hierarchy-settings create --name GroupName
-  - name: Sets the default Management Group new Subscriptions get placed under.
+  - name: Set the default Management Group new Subscriptions get placed under.
     text: >
         az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
   - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
     text: >
         az account management-group hierarchy-settings create --name GroupName -r True
-  - name: Updates both hierarchy settings.
+  - name: Update both hierarchy settings.
     text: >
         az account management-group hierarchy-settings create --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
 """
 
 helps['account management-group hierarchy-settings list'] = """
 type: command
-short-summary: Gets all the hierarchy settings defined at the Management Group level.
-long-summary: Gets all the hierarchy settings defined at the Management Group level.
+short-summary: Get all the hierarchy settings defined at the Management Group level.
+long-summary: Get all the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
     short-summary: Name of the management group.
 examples:
-  - name: Gets all hierarchy settings defined at the Management Group level.
+  - name: Get all hierarchy settings defined at the Management Group level.
     text: >
         az account management-group hierarchy-settings list --name GroupName
 """
 
 helps['account management-group hierarchy-settings delete'] = """
 type: command
-short-summary: Deletes the hierarchy settings defined at the Management Group level.
-long-summary: Deletes the hierarchy settings defined at the Management Group level.
+short-summary: Delete the hierarchy settings defined at the Management Group level.
+long-summary: Delete the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
     short-summary: Name of the management group.
 examples:
-  - name: Deletes all hierarchy settings defined at the Management Group level.
+  - name: Delete all hierarchy settings defined at the Management Group level.
     text: >
         az account management-group hierarchy-settings delete --name GroupName
 """
 
 helps['account management-group hierarchy-settings update'] = """
 type: command
-short-summary: Updates the hierarchy settings defined at the Management Group level.
-long-summary: Updates the hierarchy settings defined at the Management Group level.
+short-summary: Update the hierarchy settings defined at the Management Group level.
+long-summary: Update the hierarchy settings defined at the Management Group level.
 parameters:
   - name: --name -n
     type: string
     short-summary: Name of the management group.
   - name: --default-management-group -m
     type: string
-    short-summary: Sets the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
+    short-summary: Set the default Management Group under which new subscriptions get added in this tenant. Default setting is the Root Management Group.
   - name: --require-authorization-for-group-creation -r
     type: boolean
-    short-summary: Indicates whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
+    short-summary: Indicate whether RBAC access is required upon group creation under the root Management Group. True means user will require Microsoft.Management/managementGroups/write action on the root Management Group. Default setting is false.
 examples:
   - name: Create hierarchy settings defined at the Management Group level.
     text: >
         az account management-group hierarchy-settings update --name GroupName
-  - name: Sets the default Management Group new Subscriptions get placed under.
+  - name: Set the default Management Group new Subscriptions get placed under.
     text: >
         az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup
   - name: Require user to have Microsoft.Management/managementGroups/write access on the Root to create new Management Groups under the Root.
     text: >
         az account management-group hierarchy-settings update --name GroupName -r True
-  - name: Updates both hierarchy settings.
+  - name: Update both hierarchy settings.
     text: >
         az account management-group hierarchy-settings update --name GroupName -m /providers/Microsoft.Management/managementGroups/DefaultGroup -r True
 """
