@@ -498,6 +498,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
         return profile
 
+    vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
+                     'storageProfile': _build_storage_profile()}
+
     vm_size_properties = {}
     if v_cpus_available is not None:
         vm_size_properties['vCPUsAvailable'] = v_cpus_available
@@ -505,8 +508,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if v_cpus_per_core is not None:
         vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
 
-    vm_properties = {'hardwareProfile': {'vmSize': size, 'vmSizeProperties': vm_size_properties},
-                     'networkProfile': {'networkInterfaces': nics}, 'storageProfile': _build_storage_profile()}
+    if vm_size_properties:
+        vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}
