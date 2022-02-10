@@ -127,7 +127,7 @@ short-summary: Methods that show, set, add, and remove access restrictions on a 
 
 helps['functionapp config access-restriction add'] = """
 type: command
-short-summary: Adds an Access Restriction to the functionapp
+short-summary: Adds an Access Restriction to the function app
 examples:
   - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
