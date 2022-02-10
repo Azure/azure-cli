@@ -403,3 +403,21 @@ class RedisCacheTests(ScenarioTest):
             time.sleep(5 * 60)
         self.cmd('az redis delete -n {name} -g {rg} -y')
         self.cmd('az redis delete -n {secname} -g {rg} -y')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_redis')
+    def test_redis_cache_update(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'name': self.create_random_name(prefix=name_prefix, length=24),
+            'location': location,
+            'sku': premium_sku,
+            'size': premium_size
+        }
+
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis update -n {name} -g {rg} --set "publicNetworkAccess=Disabled"')
+        if self.is_live:
+            time.sleep(5*60)
+        self.cmd('az redis create -n {name} -g {rg} -l {location} --sku {sku} --vm-size {size}')
