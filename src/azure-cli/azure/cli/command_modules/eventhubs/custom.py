@@ -77,8 +77,8 @@ class AlertAddEncryption(argparse._AppendAction):
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         config_length = len(values)
-        from azure.mgmt.eventhub.models import KeyVaultProperties
-        from azure.mgmt.eventhub.models import UserAssignedIdentityProperties
+        from azure.mgmt.eventhub.v2021_06_01_preview.models import KeyVaultProperties
+        from azure.mgmt.eventhub.v2021_06_01_preview.models import UserAssignedIdentityProperties
 
         if 'key-name' not in [x.lower() for x in values]:
             raise InvalidArgumentValueError('key-name and key-vault-uri are mandatory arguments for encryption configs.'.format(option_string))
@@ -610,8 +610,11 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
         raise CLIError('The namespace does not have encryption enabled')
 
     else:
+        for x in namespace.encryption.key_vault_properties:
+            print(x)
         if namespace.encryption.key_vault_properties:
             for property in encryption_config:
+                print(property)
                 if property in namespace.encryption.key_vault_properties:
                     namespace.encryption.key_vault_properties.remove(property)
 
