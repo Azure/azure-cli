@@ -655,8 +655,6 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
-
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
@@ -699,8 +697,7 @@ def _get_managed_dropped_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
 
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
@@ -829,8 +826,7 @@ class DatabaseIdentity():  # pylint: disable=too-few-public-methods
         self.cli_ctx = cli_ctx
 
     def id(self):
-        # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-        from six.moves.urllib.parse import quote  # pylint: disable=import-error
+        from urllib.parse import quote
         from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
@@ -1655,8 +1651,7 @@ def _get_storage_account_name(storage_endpoint):
     Determines storage account name from endpoint url string.
     e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
     '''
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+    from urllib.parse import urlparse
 
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
@@ -3703,6 +3698,20 @@ def server_ad_admin_set(
         parameters=kwargs)
 
 
+def server_ad_admin_delete(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Sets a server's AD admin.
+    '''
+
+    return client.begin_delete(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY)
+
+
 def server_ad_admin_update(
         instance,
         login=None,
@@ -3718,6 +3727,37 @@ def server_ad_admin_update(
     instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
+
+
+def server_ad_admin_update_setter(
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+    '''
+    Updates a server' AD admin.
+    '''
+
+    return client.begin_create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY,
+        parameters=kwargs["parameters"])
+
+
+def server_ad_admin_update_getter(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Updates a server' AD admin.
+    '''
+
+    return client.get(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        administrator_name=AdministratorName.ACTIVE_DIRECTORY)
+
 
 #####
 #           sql server firewall-rule
@@ -3912,8 +3952,7 @@ def server_dns_alias_set(
     '''
     Sets a server DNS alias.
     '''
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Build the old alias id
@@ -5135,7 +5174,7 @@ def failover_group_create(
     Creates a failover group.
     '''
 
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Build the partner server id

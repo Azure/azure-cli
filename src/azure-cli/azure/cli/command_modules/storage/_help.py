@@ -1054,6 +1054,39 @@ examples:
     crafted: true
 """
 
+helps['storage blob immutability-policy'] = """
+type: group
+short-summary: Manage blob immutability policy.
+"""
+
+helps['storage blob immutability-policy set'] = """
+type: command
+short-summary: Set blob's immutability policy.
+examples:
+  - name: Set an unlocked immutability policy.
+    text: az storage blob immutability-policy set --expiry-time 2021-09-07T08:00:00Z --policy-mode Unlocked -c mycontainer -n myblob --account-name mystorageaccount
+  - name: Lock a immutability policy.
+    text: az storage blob immutability-policy set --policy-mode Locked -c mycontainer -n myblob --account-name mystorageaccount
+"""
+
+helps['storage blob immutability-policy delete'] = """
+type: command
+short-summary: Delete blob's immutability policy.
+examples:
+  - name: Delete an unlocked immutability policy.
+    text: az storage blob immutability-policy delete -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage blob set-legal-hold'] = """
+type: command
+short-summary: Set blob legal hold.
+examples:
+  - name: Configure blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+  - name: Clear blob legal hold.
+    text: az storage blob set-legal-hold --legal-hold false -c mycontainer -n myblob --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage blob show'] = """
 type: command
 short-summary: Get the details of a blob.
@@ -1391,8 +1424,10 @@ type: command
 short-summary: Restore soft-deleted container.
 long-summary:  Operation will only be successful if used within the specified number of days set in the delete retention policy.
 examples:
-  - name: Restore soft-deleted container.
-    text: az storage container restore -n deletedcontainer --deleted-version deletedversion
+  - name: List and restore soft-deleted container.
+    text: |
+          az storage container list --include-deleted
+          az storage container restore -n deletedcontainer --deleted-version deletedversion
 """
 
 helps['storage copy'] = """
@@ -1457,6 +1492,8 @@ examples:
     text: az storage copy -s https://[account].file.core.windows.net/[share]/[path/to/directory] -d /path/to/dir --recursive
   - name: Download a set of files from Azure File Share using wildcards, and you can also specify your storage account and share information as above.
     text: az storage copy -s https://[account].file.core.windows.net/[share]/ --include-pattern foo* -d /path/to/dir --recursive
+  - name: Upload a single file to Azure Blob using url with azcopy options pass-through.
+    text: az storage copy -s /path/to/file.txt -d https://[account].blob.core.windows.net/[container]/[path/to/blob] -- --block-size-mb=0.25 --check-length
 """
 
 helps['storage cors'] = """
@@ -2565,6 +2602,40 @@ examples:
     text: |
         az storage share url --account-key 00000000 --account-name MyAccount --name MyFileShare
     crafted: true
+"""
+
+helps['storage share list-handle'] = """
+type: command
+short-summary: List file handles of a file share.
+examples:
+  - name: List all file handles of a file share recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --recursive
+  - name: List all file handles of a file directory recursively.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1' --recursive
+  - name: List all file handles of a file.
+    text: |
+        az storage share list-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt'
+"""
+
+helps['storage share close-handle'] = """
+type: command
+short-summary: Close file handles of a file share.
+examples:
+  - name: Close all file handles of a file share recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --close-all --recursive
+        az storage share close-handle --account-name MyAccount --name MyFileShare --handle-id "*" --recursive
+  - name: Close all file handles of a file directory recursively.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1' --close-all --recursive
+  - name: Close all file handles of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --close-all
+  - name: Close file handle with a specific handle-id of a file.
+    text: |
+        az storage share close-handle --account-name MyAccount --name MyFileShare --path 'dir1/test.txt' --handle-id "id"
 """
 
 helps['storage table'] = """

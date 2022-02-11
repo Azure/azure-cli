@@ -58,25 +58,30 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help="Use CLI's old authentication flow based on device code. CLI will also use this if it can't launch a browser in your behalf, e.g. in remote SSH or Cloud Shell")
             c.argument('use_cert_sn_issuer', action='store_true', help='used with a service principal configured with Subject Name and Issuer Authentication in order to support automatic certificate rolls')
             c.argument('scopes', options_list=['--scope'], nargs='+', help='Used in the /authorize request. It can cover only one static resource.')
+            c.argument('client_assertion', options_list=['--federated-token'], help='Federated token that can be used for OIDC token exchange.')
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account') as c:
-            c.argument('subscription', options_list=['--subscription', '-s'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
+            c.argument('subscription', options_list=['--subscription', '-s', '--name', '-n'], arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
             c.ignore('_subscription')
 
         with self.argument_context('account list') as c:
-            c.argument('all', help="List all subscriptions, rather than just 'Enabled' ones", action='store_true')
+            c.argument('all', help="List all subscriptions from all clouds, rather than just 'Enabled' ones", action='store_true')
             c.argument('refresh', help="retrieve up-to-date subscriptions from server", action='store_true')
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account show') as c:
-            c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true', help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
+            c.argument('show_auth_for_sdk', options_list=['--sdk-auth'], action='store_true',
+                       deprecate_info=c.deprecate(target='--sdk-auth'),
+                       help='Output result to a file compatible with Azure SDK auth. Only applicable when authenticating with a Service Principal.')
 
         with self.argument_context('account get-access-token') as c:
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
+            c.argument('resource', options_list=['--resource'], help='Azure resource endpoints in AAD v1.0.')
+            c.argument('scopes', options_list=['--scope'], nargs='*', help='Space-separated AAD scopes in AAD v2.0. Default to Azure Resource Manager.')
             c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
 

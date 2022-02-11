@@ -1553,10 +1553,13 @@ examples:
             { \\"value\\": [ \\"australiaeast\\", \\"eastus\\", \\"japaneast\\" ] } }"
   - name: Create a resource policy assignment with a system assigned identity.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity
+        az policy assignment create --name myPolicy --policy {PolicyName} --mi-system-assigned --location eastus
   - name: Create a resource policy assignment with a system assigned identity. The identity will have 'Contributor' role access to the subscription.
     text: >
-        az policy assignment create --name myPolicy --policy {PolicyName} --assign-identity --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor
+        az policy assignment create --name myPolicy --policy {PolicyName} --mi-system-assigned --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --role Contributor --location eastus
+  - name: Create a resource policy assignment with a user assigned identity.
+    text: >
+        az policy assignment create --name myPolicy --policy {PolicyName} -g MyResourceGroup --mi-user-assigned myAssignedId --location westus
   - name: Create a resource policy assignment with an enforcement mode. It indicates whether a policy effect will be enforced or not during assignment creation and update. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.
     text: >
         az policy assignment create --name myPolicy --policy {PolicyName} --enforcement-mode 'DoNotEnforce'
@@ -1588,14 +1591,17 @@ short-summary: Manage a policy assignment's managed identity.
 
 helps['policy assignment identity assign'] = """
 type: command
-short-summary: Add a system assigned identity to a policy assignment.
+short-summary: Add a system assigned identity or a user assigned identity to a policy assignment.
 examples:
   - name: Add a system assigned managed identity to a policy assignment.
     text: >
-        az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment
   - name: Add a system assigned managed identity to a policy assignment and grant it the 'Contributor' role for the current resource group.
     text: >
-        az policy assignment identity assign -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+        az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment --role Contributor --identity-scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/MyResourceGroup
+  - name: Add a user assigned managed identity to a policy assignment.
+    text: >
+        az policy assignment identity assign --user-assigned MyAssignedId -g MyResourceGroup -n MyPolicyAssignment
 """
 
 helps['policy assignment identity remove'] = """
@@ -2504,6 +2510,8 @@ examples:
     text: az bicep install
   - name: Install a specific version of Bicep CLI.
     text: az bicep install --version v0.2.212
+  - name: Install Bicep CLI and specify the target platform.
+    text: az bicep install --target-platform linux-x64
 """
 
 helps['bicep uninstall'] = """
@@ -2514,6 +2522,11 @@ short-summary: Uninstall Bicep CLI.
 helps['bicep upgrade'] = """
 type: command
 short-summary: Upgrade Bicep CLI to the latest version.
+examples:
+  - name: Upgrade Bicep CLI.
+    text: az bicep upgrade
+  - name: Upgrade Bicep CLI and specify the target platform.
+    text: az bicep upgrade --target-platform linux-x64
 """
 
 helps['bicep build'] = """
@@ -2536,6 +2549,14 @@ short-summary: Attempt to decompile an ARM template file to a Bicep file.
 examples:
   - name: Decompile an ARM template file.
     text: az bicep decompile --file {json_template_file}
+"""
+
+helps['bicep publish'] = """
+type: command
+short-summary: Publish a bicep file to a remote module registry.
+examples:
+  - name: Publish a bicep file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
 """
 
 helps['bicep version'] = """

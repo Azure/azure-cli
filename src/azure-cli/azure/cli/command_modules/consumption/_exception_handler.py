@@ -11,6 +11,4 @@ def consumption_exception_handler(ex):
     if isinstance(ex, ErrorResponseException):
         message = ex.message
         raise CLIError(message)
-    import sys
-    from six import reraise
-    reraise(*sys.exc_info())
+    raise ex

@@ -108,16 +108,17 @@ long-summary: |
     -) source -> target
     1) SQL -> SQLDB
     2) PostgreSQL -> AzureDbForPostgreSQL
+    3) MySQL -> AzureDbForMySQL
 
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL, PostgreSQL.
+        The type of server for the source database. The supported types are: SQL, PostgreSQL, MySQL.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForPostgreSQL, AzureDbForMySQL.
 examples:
   - name: Create a SQL to SQLDB project for a DMS instance.
     text: >
@@ -125,6 +126,9 @@ examples:
   - name: Create a PostgreSql to AzureDbForPostgreSql project for a DMS instance.
     text: >
         az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
+  - name: Create a MySQL to AzureDbForMySQL project for a DMS instance.
+    text: >
+        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
@@ -187,11 +191,12 @@ long-summary: |
     -) source -> target :: task type
     1) SQL -> SQLDB :: OfflineMigration
     2) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
+    3) MySQL -> AzureDbForMySQL :: OfflineMigration
 parameters:
   - name: --task-type
     type: string
     short-summary: >
-        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL and OnlineMigration for PostgreSQL.
+        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL, MySQL and OnlineMigration for PostgreSQL.
   - name: --database-options-json
     type: string
     short-summary: >
@@ -244,6 +249,55 @@ parameters:
                 },
                 ...n
             ]
+
+        For MySQL, the format of the database options JSON object.
+        {
+            // Details of mapped schemas that needs to be migrated. Multiple schemas can be migrated at a time.
+            "selected_databases":[
+                // database/schema 1 details
+                {
+                  "name": "sourceSchema1",
+                  "target_database_name": "targetSchema1",
+                  // Table mapping from source to target schemas [Optional]
+                  // Don't add it if all tables of this database needs to be migrated
+                  "table_map": {"sourceSchema1.table1": "targetSchema1.table1",
+                                "sourceSchema1.table2": "targetSchema1.table2",
+                                "sourceSchema1.table3": "targetSchema1.table3",
+                                ..n}
+                },
+                ...n
+            ],
+
+            // Used for manipulating the underlying migration engine. [Optional]
+            // Only provide if instructed to do so or if you really know what you are doing.
+            "migration_level_settings": {
+                // Optional setting that configures the maximum number of parallel reads on tables located on the source database.
+                "DesiredRangesCount": "4",
+                // Optional setting that configures that size of the largest batch that will be committed to the target server.
+                "MaxBatchSizeKb": "4096",
+                // Optional setting that configures the minimum number of rows in each batch written to the target.
+                "MinBatchRows": null,
+                // Optional setting that configures the number of databases that will be prepared for migration in parallel.
+                "PrepareDatabaseForBulkImportTaskCount": null,
+                // Optional setting that configures the number of tables that will be prepared for migration in parallel.
+                "PrepareTableForBulkImportTaskCount": null,
+                // Optional setting that configures the number of threads available to read ranges on the source.
+                "QueryTableDataRangeTaskCount": "8",
+                // Optional setting that configures the number of threads available to write batches to the target.
+                "WriteDataRangeBatchTaskCount": "12",
+                // Optional setting that configures how much memory will be used to cache batches in memory before reads on the source are throttled.
+                "MaxBatchCacheSizeMb": null,
+                // Optional setting that configures the amount of available memory at which point reads on the source will be throttled.
+                "ThrottleQueryTableDataRangeTaskAtAvailableMemoryMb": null,
+                // Optional setting that configures the number of batches cached in memory that will trigger read throttling on the source.
+                "ThrottleQueryTableDataRangeTaskAtBatchCount": 36,
+                // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
+                "DelayProgressUpdatesInStorageInterval": "00:00:30",
+                },
+            // [Optional]
+            "make_source_server_read_only": "true|false"
+        }
+
   - name: --source-connection-json
     type: string
     short-summary: >
@@ -268,6 +322,14 @@ parameters:
             "port": 5432,                // if this is missing, it will default to 5432
             "encryptConnection": true,      // highly recommended to leave as true
             "trustServerCertificate": false  // highly recommended to leave as false
+        }
+
+      The format of the connection JSON object for MySQL connections.
+        {
+            "userName": "user name",    // if this is missing or null, you will be prompted
+            "password": null,           // if this is missing or null (highly recommended) you will be prompted
+            "serverName": "server name",
+            "port": 3306                // if this is missing, it will default to 3306
         }
   - name: --target-connection-json
     type: string

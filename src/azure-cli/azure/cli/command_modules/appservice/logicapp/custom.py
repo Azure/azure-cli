@@ -11,11 +11,9 @@ from knack.log import get_logger
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import (InvalidArgumentValueError, ResourceNotFoundError, RequiredArgumentMissingError,
-                                       MutuallyExclusiveArgumentError)
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
-from azure.cli.command_modules.appservice._appservice_utils import _generic_site_operation
-from azure.cli.command_modules.appservice.utils import (_list_app, _rename_server_farm_props)
+from azure.cli.command_modules.appservice.utils import (_list_app)
 from azure.cli.command_modules.appservice._client_factory import web_client_factory
 from azure.cli.command_modules.appservice.custom import (
     _format_fx_version,
@@ -28,7 +26,7 @@ from azure.cli.command_modules.appservice.custom import (
     update_container_settings_functionapp,
     try_create_application_insights,
     _set_remote_or_local_git,
-    _fill_ftp_publishing_url)
+    _show_app, create_app_service_plan)
 
 from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          DEFAULT_LOGICAPP_RUNTIME,
@@ -36,7 +34,6 @@ from ._constants import (DEFAULT_LOGICAPP_FUNCTION_VERSION,
                          FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS,
                          FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION,
                          DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
-
 
 logger = get_logger(__name__)
 
@@ -57,16 +54,10 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         runtime_version = DEFAULT_LOGICAPP_RUNTIME_VERSION
 
     if deployment_source_url and deployment_local_git:
-        raise MutuallyExclusiveArgumentError(
-            'usage error: --deployment-source-url <url> | --deployment-local-git')
-
-    if not plan and not consumption_plan_location:
-        raise RequiredArgumentMissingError(
-            "Either Plan or Consumption Plan must be specified")
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     if consumption_plan_location and plan:
-        raise MutuallyExclusiveArgumentError(
-            "Consumption Plan and Plan cannot be used together")
+        raise MutuallyExclusiveArgumentError("Consumption Plan and Plan cannot be used together")
 
     SiteConfig, Site, NameValuePair = cmd.get_models('SiteConfig', 'Site', 'NameValuePair')
 
@@ -92,18 +83,22 @@ def create_logicapp(cmd, resource_group_name, name, storage_account, plan=None,
         # if os_type is None, the os type is windows
         is_linux = os_type and os_type.lower() == 'linux'
 
-    else:  # apps with SKU based plan
-        if is_valid_resource_id(plan):
-            parse_result = parse_resource_id(plan)
-            plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
-        else:
-            plan_info = client.app_service_plans.get(resource_group_name, plan)
-        if not plan_info:
-            raise ResourceNotFoundError("The plan '{}' doesn't exist".format(plan))
-        location = plan_info.location
+    else:
+        if not plan:  # no plan passed in, so create a WS1 ASP
+            plan_name = "{}_app_service_plan".format(name)
+            create_app_service_plan(cmd, resource_group_name, plan_name, False, False, sku='WS1')
+            logger.warning("Created App Service Plan %s in resource group %s", plan_name, resource_group_name)
+            plan_info = client.app_service_plans.get(resource_group_name, plan_name)
+        else:  # apps with SKU based plan
+            if is_valid_resource_id(plan):
+                parse_result = parse_resource_id(plan)
+                plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
+            else:
+                plan_info = client.app_service_plans.get(resource_group_name, plan)
+
         is_linux = plan_info.reserved
         logicapp_def.server_farm_id = plan_info.id
-        logicapp_def.location = location
+        logicapp_def.location = plan_info.location
 
     if runtime:
         site_config.app_settings.append(NameValuePair(
@@ -230,14 +225,7 @@ def list_logicapp(cmd, resource_group_name=None):
 
 
 def show_logicapp(cmd, resource_group_name, name, slot=None):
-    logicapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    if not logicapp or 'workflow' not in logicapp.kind.lower():
-        raise ResourceNotFoundError("Unable to find Logic App {} in resource group {}".format(name,
-                                    resource_group_name))
-    logicapp.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
-    _rename_server_farm_props(logicapp)
-    _fill_ftp_publishing_url(cmd, logicapp, resource_group_name, name, slot)
-    return logicapp
+    return _show_app(cmd, resource_group_name, name, "logicapp", slot)
 
 
 def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):

@@ -18,6 +18,8 @@ from knack.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -41,7 +43,6 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     if vault_name:
@@ -84,7 +85,6 @@ def process_secret_set_namespace(cmd, namespace):
     if (content and file_path) or (not content and not file_path):
         raise use_error
 
-    from azure.cli.core.profiles import ResourceType
     SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
@@ -133,8 +133,6 @@ def process_secret_set_namespace(cmd, namespace):
 
 
 def process_sas_token_parameter(cmd, ns):
-    from azure.cli.core.profiles import ResourceType
-
     SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
     return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
 
@@ -209,6 +207,22 @@ def validate_key_type(ns):
             raise CLIError('The key type {} is invalid for software protected keys. Omit --protection')
 
     setattr(ns, 'kty', kty)
+
+
+def process_key_release_policy(cmd, ns):
+    if not ns.release_policy:
+        return
+
+    import os
+    if os.path.exists(ns.release_policy):
+        data = get_file_json(ns.release_policy)
+    else:
+        data = shell_safe_json_parse(ns.release_policy)
+
+    import json
+    KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
+                                          resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    ns.release_policy = KeyReleasePolicy(data=json.dumps(data).encode('utf-8'))
 
 
 def validate_policy_permissions(ns):
@@ -290,7 +304,6 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from azure.cli.core.profiles import ResourceType
     from msrestazure.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)

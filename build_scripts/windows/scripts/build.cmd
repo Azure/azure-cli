@@ -3,7 +3,7 @@ SetLocal EnableDelayedExpansion
 echo build a msi installer using local cli sources and python executables. You need to have curl.exe, unzip.exe and msbuild.exe available under PATH
 echo.
 
-set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin;"
+set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
 
 if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
@@ -111,18 +111,6 @@ copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
-:: Use universal files and remove Py3 only files
-pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
-for /f %%a in ('dir /b /s *_py3.py') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
-)
-for /f %%a in ('dir /b /s *_py3.*.pyc') do (
-    set PY3_FILE=%%a
-    if exist !PY3_FILE! del !PY3_FILE!
-)
-popd
-
 :: Remove .py and only deploy .pyc files
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
@@ -179,6 +167,8 @@ if exist "%PROPAGATE_ENV_CHANGE_DIR%\propagate_env_change.exe" (
 
 echo Building MSI...
 msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+
+if %errorlevel% neq 0 goto ERROR
 
 start %OUTPUT_DIR%
 

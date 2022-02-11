@@ -41,7 +41,7 @@ class CdnAfdSecurityPolicyScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
 
         # Create a security policy
         security_policy_name = self.create_random_name(prefix='security', length=24)
-        domain_ids = list()
+        domain_ids = []
         domain_ids.append(f'/subscriptions/{self.get_subscription_id()}/resourcegroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/afdEndpoints/{endpoint1_name}')
         domain_ids.append(f'/subscriptions/{self.get_subscription_id()}/resourcegroups/{resource_group}/providers/Microsoft.Cdn/profiles/{profile_name}/afdEndpoints/{endpoint2_name}')
         waf_policy_id = f'/subscriptions/{self.get_subscription_id()}/resourcegroups/CliDevReservedGroup/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/SampleStandard'

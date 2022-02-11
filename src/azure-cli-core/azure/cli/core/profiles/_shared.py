@@ -64,6 +64,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', 'IotCentralClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_IOTDPS = ('azure.mgmt.iothubprovisioningservices', 'IotDpsClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShift4Client')
     MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     MGMT_CUSTOMLOCATION = ('azure.mgmt.extendedlocation', 'CustomLocations')
@@ -143,35 +144,37 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-06-01',
-        ResourceType.MGMT_NETWORK: '2021-02-01',
+        ResourceType.MGMT_NETWORK: '2021-05-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2020-12-01',
+            'disks': '2021-04-01',
             'disk_encryption_sets': '2020-12-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2020-12-01',
+            'snapshots': '2021-04-01',
             'galleries': '2021-07-01',
             'gallery_images': '2020-09-30',
             'gallery_image_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-04-01',
+            'virtual_machine_scale_sets': '2021-07-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
-        ResourceType.MGMT_RESOURCE_POLICY: '2020-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2021-06-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2021-04-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
         ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2021-05-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2021-04-01-preview',
+        ResourceType.MGMT_KEYVAULT: SDKProfile('2021-04-01-preview', {
+            'vaults': '2021-06-01-preview'
+        }),
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2020-04-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-06-01-preview', {
+        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2021-08-01-preview', {
             'agent_pools': '2019-06-01-preview',
             'tasks': '2019-06-01-preview',
             'task_runs': '2019-06-01-preview',
@@ -185,13 +188,14 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
-        ResourceType.DATA_STORAGE_BLOB: '2020-04-08',
+        ResourceType.DATA_STORAGE_BLOB: '2020-10-02',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',
         ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'action_groups': '2021-09-01',
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
@@ -225,11 +229,12 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2020-09-01',
         ResourceType.MGMT_IOTHUB: '2021-07-01',
+        ResourceType.MGMT_IOTDPS: '2020-03-01',
         ResourceType.MGMT_IOTCENTRAL: '2018-09-01',
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-07-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-10-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })

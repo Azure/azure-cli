@@ -23,7 +23,6 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
     from argcomplete.completers import FilesCompleter
-    from six import u as unicode_string
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -1062,7 +1061,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage message') as c:
         c.argument('queue_name', queue_name_type)
         c.argument('message_id', options_list='--id')
-        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+        c.argument('content', type=str, help='Message content, up to 64KB in size.')
 
     with self.argument_context('storage remove') as c:
         from .completers import file_path_completer

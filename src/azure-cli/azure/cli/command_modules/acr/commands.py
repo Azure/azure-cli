@@ -359,10 +359,19 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_connected_registry_show')
         g.command('deactivate', 'acr_connected_registry_deactivate')
         g.command('update', 'acr_connected_registry_update')
-        g.command('repo', 'acr_connected_registry_repo')
-        g.command('install info', 'acr_connected_registry_install_info')
-        g.command('install renew-credentials', 'acr_connected_registry_install_renew_credentials')
+        g.command('get-settings', 'acr_connected_registry_get_settings')
+        g.command('permissions update', 'acr_connected_registry_permissions_update')
+        g.show_command('permissions show', 'acr_connected_registry_permissions_show',
+                       table_transformer=scope_map_output_format)
         g.command('list', 'acr_connected_registry_list',
                   table_transformer=connected_registry_list_output_format)
         g.command('list-client-tokens', 'acr_connected_registry_list_client_tokens',
                   table_transformer=token_output_format)
+        g.command('repo', 'acr_connected_registry_permissions_update',
+                  deprecate_info=self.deprecate(redirect='permissions update', hide=True))
+
+    with self.command_group('acr connected-registry install', acr_connected_registry_util,
+                            deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',
+                                                          hide=True)) as g:
+        g.command('info', 'acr_connected_registry_install_info')
+        g.command('renew-credentials', 'acr_connected_registry_install_renew_credentials')

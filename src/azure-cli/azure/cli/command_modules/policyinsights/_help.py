@@ -194,6 +194,15 @@ examples:
   - name: Get latest policy states for a resource including policy evaluation details.
     text: >
         az policy state list --resource "myKeyVault" --namespace "Microsoft.KeyVault" --resource-type "vaults" -g "myresourcegroup" --expand PolicyEvaluationDetails
+  - name: Get latest component policy states for a resource (eg. vault) and policy assignment referencing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant')"
+  - name: Get latest component policy states for a resource (eg. vault) and policy assignment referencing an initiative containing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa' and policyDefinitionReferenceId eq 'myResourceProviderModeDefinitionReferenceId'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant')"
+  - name: Get latest component counts by compliance state for a resource (eg. vault) and policy assignment referencing a resource provider mode policy definition
+    text: >
+        az policy state list --resource "/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault" --filter "policyAssignmentId eq '/subscriptions/fff10b27-fff3-fff5-fff8-fffbe01e86a5/providers/Microsoft.Authorization/policyAssignments/myPa'" --expand "Components($filter=ComplianceState eq 'NonCompliant' or ComplianceState eq 'Compliant' or ComplianceState eq 'Conflict';$apply=groupby((complianceState),aggregate($count as count)))"
 """
 
 helps['policy state summarize'] = """

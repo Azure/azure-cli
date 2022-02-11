@@ -49,7 +49,7 @@ class TestClusterScenarios(ScenarioTest):
 
         self.cmd("monitor log-analytics cluster delete -g {rg1} -n {new_cluster_name} -y", checks=[])
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegex(SystemExit, '3'):
             self.cmd('monitor log-analytics cluster show -g {rg1} -n {new_cluster_name}')
 
     @record_only()

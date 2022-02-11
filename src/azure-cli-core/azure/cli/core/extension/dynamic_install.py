@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core.telemetry as telemetry
+from azure.cli.core import telemetry
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.azclierror import CommandNotFoundError
 from knack.log import get_logger

@@ -67,15 +67,15 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Is a directory: ') as e:
             self._test_zone('404zone.com', '')
             self.assertEqual(e.errno, 1)
 
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied: ') as e:
             self._test_zone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
@@ -87,12 +87,12 @@ class DnsZoneImportTest(ScenarioTest):
             self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+        with self.assertRaisesRegex(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
             self.assertEqual(e.errno, 1)
 
         # Difference with Linux platform while reading a directory
-        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+        with self.assertRaisesRegex(FileOperationError, 'Permission denied:') as e:
             self._test_zone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 

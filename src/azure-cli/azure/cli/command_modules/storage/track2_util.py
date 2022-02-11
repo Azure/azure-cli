@@ -88,8 +88,7 @@ def url_quote(url):
 
 
 def encode_base64(data):
-    import six
-    if isinstance(data, six.text_type):
+    if isinstance(data, str):
         data = data.encode('utf-8')
     encoded = base64.b64encode(data)
     return encoded.decode('utf-8')

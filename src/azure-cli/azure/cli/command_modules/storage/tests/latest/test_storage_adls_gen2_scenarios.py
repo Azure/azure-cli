@@ -376,7 +376,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         # Upload File to an existing non-empty file with default overwrite=false
         new_local_file = self.create_temp_file(512)
-        with self.assertRaisesRegexp(CLIError, 'You cannot upload to an existing non-empty file with overwrite=false.'):
+        with self.assertRaisesRegex(CLIError, 'You cannot upload to an existing non-empty file with overwrite=false.'):
             self.storage_cmd('storage fs file upload -p {} -f {} -s "{}"', account_info, file_path, filesystem,
                              new_local_file)
 
@@ -419,7 +419,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         import os
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_dir)))
 
-        with self.assertRaisesRegexp(CLIError, "The specified path already exists. Please change to a valid path."):
+        with self.assertRaisesRegex(CLIError, "The specified path already exists. Please change to a valid path."):
             self.storage_cmd('storage fs file download -p {} -f {} -d "{}" --overwrite false', account_info, file_path,
                              filesystem, local_dir)
 
@@ -486,7 +486,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
-        with self.assertRaisesRegexp(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
             self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
                      '--auth-mode login'.format(storage_account, f, expiry))
 

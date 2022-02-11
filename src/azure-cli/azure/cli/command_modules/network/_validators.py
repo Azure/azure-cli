@@ -19,7 +19,7 @@ from azure.cli.core.commands.template_create import get_folded_parameter_validat
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 
 logger = get_logger(__name__)
 
@@ -741,6 +741,13 @@ def validate_private_dns_zone(cmd, namespace):
             type='privateDnsZones')
 
 
+def validate_scale_unit_ranges(namespace):
+    unit_num = namespace.scale_units
+    err_msg = "The number of --scale-units should in range [2, 50]."
+    if unit_num is not None and (unit_num < 2 or unit_num > 50):
+        raise InvalidArgumentValueError(err_msg)
+
+
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
                                   default_none=False):
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -1049,11 +1056,14 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
     routing_type = profile.traffic_routing_method  # pylint: disable=no-member
     endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', 'endpoint_location']
+    all_options = ['target_resource_id', 'target', 'min_child_endpoints',
+                   'min_child_ipv4', 'min_child_ipv6', 'priority', 'weight', 'endpoint_location']
     props_to_options = {
         'target_resource_id': '--target-resource-id',
         'target': '--target',
         'min_child_endpoints': '--min-child-endpoints',
+        'min_child_ipv4': '--min-child-ipv4',
+        'min_child_ipv6': '--min-child-ipv6',
         'priority': '--priority',
         'weight': '--weight',
         'endpoint_location': '--endpoint-location',
@@ -1861,6 +1871,20 @@ def validate_status_code_ranges(namespace):
             raise usage_error
 
     namespace.status_code_ranges = values
+
+
+def validate_capture_size_and_limit(namespace):
+    if namespace.capture_limit:
+        if namespace.capture_limit < 0:
+            raise CLIError('usage error: --capture-limit cannot be a negative value.')
+
+    if namespace.capture_size:
+        if namespace.capture_size < 0:
+            raise CLIError('usage error: --capture-size cannot be a negative value.')
+
+    if namespace.time_limit:
+        if namespace.time_limit < 0:
+            raise CLIError('usage error: --time-limit cannot be a negative value.')
 
 
 def validate_subnet_ranges(namespace):

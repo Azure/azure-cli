@@ -6,7 +6,7 @@
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServerPreparer
 
 
@@ -106,13 +106,13 @@ class MonitorTests(ScenarioTest):
         })
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'
                      ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
 
-        with self.assertRaisesRegexp(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
+        with self.assertRaisesRegex(HttpResponseError, "Couldn't find a metric named MS-ERRORCODE|,-SU001"):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
                      ' --region {storage_location}'
@@ -556,6 +556,27 @@ class MonitorTests(ScenarioTest):
                      self.check('windowSize', '0:05:00'),
                      self.check('evaluationFrequency', '0:01:00'),
                      self.check('length(scopes)', 2),
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_skip_metric_validation')
+    @StorageAccountPreparer()
+    def test_metric_alert_skip_metric_validation(self, resource_group, storage_account):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts')
+        })
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --description "Test"'
+                 ' --condition "avg MyNs.UnemittedMetric >= 10 with skipMetricValidation"',
+                 checks=[
+                     self.check('description', 'Test'),
+                     self.check('length(criteria.allOf)', 1),
+                     self.check('criteria.allOf[0].skipMetricValidation', True)
                  ])
 
 

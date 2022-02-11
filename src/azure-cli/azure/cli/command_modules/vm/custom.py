@@ -16,17 +16,18 @@ import os
 
 import requests
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
+from urllib.parse import urlparse
 # the urlopen is imported for automation purpose
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
+from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import CLIInternalError, ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    CLIInternalError,
+    ResourceNotFoundError,
+    ValidationError,
+    RequiredArgumentMissingError
+)
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
@@ -293,7 +294,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None):
+                        tier=None, enable_bursting=None, edge_zone=None, security_type=None, support_hibernation=None,
+                        public_network_access=None, accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -403,6 +405,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.security_profile = {'securityType': security_type}
     if support_hibernation is not None:
         disk.supports_hibernation = support_hibernation
+    if public_network_access is not None:
+        disk.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if disk.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            disk.supported_capabilities = supportedCapabilities
+        else:
+            disk.supported_capabilities.accelerated_network = accelerated_network
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -423,7 +433,8 @@ def list_managed_disks(cmd, resource_group_name=None):
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
-                        disk_mbps_read_only=None, enable_bursting=None):
+                        disk_mbps_read_only=None, enable_bursting=None, public_network_access=None,
+                        accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -454,13 +465,22 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
         instance.encryption.type = encryption_type
     if network_access_policy is not None:
         instance.network_access_policy = network_access_policy
-    if disk_access is not None and not is_valid_resource_id(disk_access):
-        disk_access = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+    if disk_access is not None:
+        if not is_valid_resource_id(disk_access):
+            disk_access = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
     if enable_bursting is not None:
         instance.bursting_enabled = enable_bursting
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.accelerated_network = accelerated_network
     return instance
 # endregion
 
@@ -538,11 +558,12 @@ def list_images(cmd, resource_group_name=None):
 # region Snapshots
 # pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, incremental=None,
+                    source=None, for_upload=None, copy_start=None, incremental=None,
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
+                    public_network_access=None, accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -554,6 +575,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         option = DiskCreateOption.import_enum
     elif source_disk or source_snapshot:
         option = DiskCreateOption.copy
+        if cmd.supported_api_version(min_api='2021-04-01', operation_group='snapshots'):
+            option = DiskCreateOption.copy_start if copy_start else DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
     else:
@@ -595,6 +618,14 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         snapshot.disk_access_id = disk_access
     if edge_zone:
         snapshot.extended_location = edge_zone
+    if public_network_access is not None:
+        snapshot.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if snapshot.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            snapshot.supported_capabilities = supportedCapabilities
+        else:
+            snapshot.supported_capabilities.accelerated_network = accelerated_network
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
@@ -613,7 +644,8 @@ def list_snapshots(cmd, resource_group_name=None):
 
 
 def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None,
-                    encryption_type=None, network_access_policy=None, disk_access=None):
+                    encryption_type=None, network_access_policy=None, disk_access=None, public_network_access=None,
+                    accelerated_network=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -637,6 +669,14 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
+    if accelerated_network is not None:
+        if instance.supported_capabilities is None:
+            supportedCapabilities = cmd.get_models('SupportedCapabilities')(accelerated_network=accelerated_network)
+            instance.supported_capabilities = supportedCapabilities
+        else:
+            instance.supported_capabilities.accelerated_network = accelerated_network
     return instance
 # endregion
 
@@ -730,14 +770,16 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None,
-              boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+              boot_diagnostics_storage=None, ultra_ssd_enabled=None,
+              ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
               encryption_at_host=None, enable_auto_update=None, patch_mode=None, ssh_key_name=None,
               enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
               enable_vtpm=None, count=None, edge_zone=None, nic_delete_option=None, os_disk_delete_option=None,
-              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None):
+              data_disk_delete_option=None, user_data=None, capacity_reservation_group=None, enable_hibernation=None,
+              v_cpus_available=None, v_cpus_per_core=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -955,7 +997,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_auto_update=enable_auto_update, patch_mode=patch_mode, enable_hotpatching=enable_hotpatching,
         platform_fault_domain=platform_fault_domain, security_type=security_type, enable_secure_boot=enable_secure_boot,
         enable_vtpm=enable_vtpm, count=count, edge_zone=edge_zone, os_disk_delete_option=os_disk_delete_option,
-        user_data=user_data, capacity_reservation_group=capacity_reservation_group)
+        user_data=user_data, capacity_reservation_group=capacity_reservation_group,
+        enable_hibernation=enable_hibernation, v_cpus_available=v_cpus_available, v_cpus_per_core=v_cpus_per_core)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1374,7 +1417,9 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
-              enable_vtpm=None, user_data=None, capacity_reservation_group=None, **kwargs):
+              enable_vtpm=None, user_data=None, capacity_reservation_group=None,
+              dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
+              enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1405,9 +1450,29 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vm.capacity_reservation = capacity_reservation
+
+    if dedicated_host is not None:
+        if vm.host is None:
+            DedicatedHost = cmd.get_models('SubResource')
+            vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        else:
+            vm.host.id = dedicated_host
+        if vm.host_group is not None:
+            vm.host_group = None
+
+    if dedicated_host_group is not None:
+        if vm.host_group is None:
+            DedicatedHostGroup = cmd.get_models('SubResource')
+            vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
+        else:
+            vm.host_group.id = dedicated_host_group
+        if vm.host is not None:
+            vm.host = None
 
     if ultra_ssd_enabled is not None:
         if vm.additional_capabilities is None:
@@ -1415,6 +1480,13 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
         else:
             vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+
+    if enable_hibernation is not None:
+        if vm.additional_capabilities is None:
+            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
+            vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        else:
+            vm.additional_capabilities.hibernation_enabled = enable_hibernation
 
     if priority is not None:
         vm.priority = priority
@@ -1449,6 +1521,26 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     aux_subscriptions = None
     if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
         aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
+
+    if size is not None:
+        if vm.hardware_profile.vm_size == size:
+            logger.warning("VM size is already %s", size)
+        else:
+            vm.hardware_profile.vm_size = size
+
+    if v_cpus_available is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
+
+    if ephemeral_os_disk_placement is not None:
+        if vm.storage_profile.os_disk.diff_disk_settings is not None:
+            vm.storage_profile.os_disk.diff_disk_settings.placement = ephemeral_os_disk_placement
+        else:
+            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
+                                  "creating VM with the option '--ephemeral-os-disk true'")
+
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -1581,7 +1673,11 @@ class BootLogStreamWriter:  # pylint: disable=too-few-public-methods
     def write(self, str_or_bytes):
         content = str_or_bytes
         if isinstance(str_or_bytes, bytes):
-            content = str_or_bytes.decode('utf8')
+            try:
+                content = str_or_bytes.decode('utf8')
+            except UnicodeDecodeError:
+                logger.warning("A few characters have been ignored because they were not valid unicode.")
+                content = str_or_bytes.decode('ascii', 'ignore')
         try:
             self.out.write(content)
         except UnicodeEncodeError:
@@ -2182,6 +2278,197 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
     return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
 
+
+def vm_run_command_create(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          location,
+                          tags=None,
+                          script=None,
+                          script_uri=None,
+                          command_id=None,
+                          parameters=None,
+                          protected_parameters=None,
+                          async_execution=None,
+                          run_as_user=None,
+                          run_as_password=None,
+                          timeout_in_seconds=None,
+                          output_blob_uri=None,
+                          error_blob_uri=None,
+                          no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vm_run_command_update(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          location,
+                          tags=None,
+                          script=None,
+                          script_uri=None,
+                          command_id=None,
+                          parameters=None,
+                          protected_parameters=None,
+                          async_execution=None,
+                          run_as_user=None,
+                          run_as_password=None,
+                          timeout_in_seconds=None,
+                          output_blob_uri=None,
+                          error_blob_uri=None,
+                          no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vm_run_command_delete(client,
+                          resource_group_name,
+                          vm_name,
+                          run_command_name,
+                          no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       vm_name=vm_name,
+                       run_command_name=run_command_name)
+
+
+def vm_run_command_list(client,
+                        resource_group_name=None,
+                        vm_name=None,
+                        expand=None,
+                        location=None):
+    if resource_group_name or vm_name is not None:
+        return client.list_by_virtual_machine(resource_group_name=resource_group_name,
+                                              vm_name=vm_name,
+                                              expand=expand)
+    return client.list(location=location)
+
+
+def vm_run_command_show(client,
+                        resource_group_name=None,
+                        vm_name=None,
+                        run_command_name=None,
+                        expand=None,
+                        instance_view=False,
+                        location=None,
+                        command_id=None):
+    if resource_group_name or vm_name is not None or run_command_name is not None:
+        if instance_view:
+            expand = 'instanceView'
+        return client.get_by_virtual_machine(resource_group_name=resource_group_name,
+                                             vm_name=vm_name,
+                                             run_command_name=run_command_name,
+                                             expand=expand)
+    return client.get(location=location,
+                      command_id=command_id)
+
 # endregion
 
 
@@ -2518,7 +2805,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
-                application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
+                application_security_groups=None, ultra_ssd_enabled=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='Uniform', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
@@ -2527,7 +2815,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2541,6 +2829,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     master_template = ArmTemplateBuilder()
 
     uniform_str = 'Uniform'
+    flexible_str = 'Flexible'
     if orchestration_mode:
         from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -2646,7 +2935,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                                         public_ip_address)
 
             # calculate default names if not provided
-            nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+            if orchestration_mode.lower() == flexible_str.lower():
+                # inbound nat pools are not supported on VMSS Flex
+                nat_pool_name = None
+            else:
+                nat_pool_name = nat_pool_name or '{}NatPool'.format(load_balancer)
+
             if not backend_port:
                 backend_port = 3389 if os_type == 'windows' else 22
 
@@ -2782,7 +3076,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             prioritize_unhealthy_instances=prioritize_unhealthy_instances, edge_zone=edge_zone, user_data=user_data,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
-            capacity_reservation_group=capacity_reservation_group)
+            capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
+            patch_mode=patch_mode, enable_agent=enable_agent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2942,6 +3237,12 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     from msrestazure.tools import parse_resource_id
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
+
     # find the load balancer
     nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
     primary_nic_config = next((n for n in nic_configs if n.primary), None)
@@ -2979,8 +3280,16 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
-    result = cf_public_ip_addresses(cmd.cli_ctx).list_virtual_machine_scale_set_public_ip_addresses(
-        resource_group_name, vm_scale_set_name)
+
+    compute_client = _compute_client_factory(cmd.cli_ctx)
+    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss
+    raise_unsupported_error_for_flex_vmss(
+        vmss, 'This command is not available for VMSS in Flex mode. '
+              'Please use the "az network public-ip list/show" to retrieve networking information.')
+
+    public_ip_client = cf_public_ip_addresses(cmd.cli_ctx)
+    result = public_ip_client.list_virtual_machine_scale_set_public_ip_addresses(resource_group_name, vm_scale_set_name)
     # filter away over-provisioned instances which are deleted after 'create/update' returns
     return [r for r in result if r.ip_address]
 
@@ -3058,7 +3367,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3103,6 +3412,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
+        if capacity_reservation_group == 'None':
+            capacity_reservation_group = None
         sub_resource = SubResource(id=capacity_reservation_group)
         capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
         vmss.virtual_machine_profile.capacity_reservation = capacity_reservation
@@ -3136,9 +3447,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             else:
                 vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
 
-    if scale_in_policy is not None:
+    if scale_in_policy is not None or force_deletion is not None:
         ScaleInPolicy = cmd.get_models('ScaleInPolicy')
-        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy)
+        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
 
     if enable_spot_restore is not None:
         vmss.spot_restore_policy.enabled = enable_spot_restore
@@ -3181,6 +3492,20 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
             vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
             vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
+
+    if vm_sku is not None:
+        if vmss.sku.name == vm_sku:
+            logger.warning("VMSS sku is already %s", vm_sku)
+        else:
+            vmss.sku.name = vm_sku
+
+    if ephemeral_os_disk_placement is not None:
+        if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
+            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
+                ephemeral_os_disk_placement
+        else:
+            raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
+                                  "creating VMSS with the option '--ephemeral-os-disk true'")
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
@@ -3412,6 +3737,199 @@ def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=
 # region VirtualMachineScaleSets RunCommand
 def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, instance_id, scripts=None, parameters=None):  # pylint: disable=line-too-long
     return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
+
+
+def vmss_run_command_create(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            location,
+                            tags=None,
+                            script=None,
+                            script_uri=None,
+                            command_id=None,
+                            parameters=None,
+                            protected_parameters=None,
+                            async_execution=None,
+                            run_as_user=None,
+                            run_as_password=None,
+                            timeout_in_seconds=None,
+                            output_blob_uri=None,
+                            error_blob_uri=None,
+                            no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vmss_run_command_update(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            location,
+                            tags=None,
+                            script=None,
+                            script_uri=None,
+                            command_id=None,
+                            parameters=None,
+                            protected_parameters=None,
+                            async_execution=None,
+                            run_as_user=None,
+                            run_as_password=None,
+                            timeout_in_seconds=None,
+                            output_blob_uri=None,
+                            error_blob_uri=None,
+                            no_wait=False):
+    run_command = {}
+    run_command['location'] = location
+    if tags is not None:
+        run_command['tags'] = tags
+    source = {}
+    if script is not None:
+        source['script'] = script
+    if script_uri is not None:
+        source['script_uri'] = script_uri
+    if command_id is not None:
+        source['command_id'] = command_id
+    run_command['source'] = source
+    if parameters is not None:
+        auto_arg_name_num = 0
+        run_command['parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['parameters'].append({'name': n, 'value': v})
+    if protected_parameters is not None:
+        auto_arg_name_num = 0
+        run_command['protected_parameters'] = []
+        for p in parameters:
+            if '=' in p:
+                n, v = p.split('=', 1)
+            else:
+                auto_arg_name_num += 1
+                n = 'arg{}'.format(auto_arg_name_num)
+                v = p
+            run_command['protected_parameters'].append({'name': n, 'value': v})
+    if async_execution is not None:
+        run_command['async_execution'] = async_execution
+    else:
+        run_command['async_execution'] = False
+    if run_as_user is not None:
+        run_command['run_as_user'] = run_as_user
+    if run_as_password is not None:
+        run_command['run_as_password'] = run_as_password
+    if timeout_in_seconds is not None:
+        run_command['timeout_in_seconds'] = timeout_in_seconds
+    if output_blob_uri is not None:
+        run_command['output_blob_uri'] = output_blob_uri
+    if error_blob_uri is not None:
+        run_command['error_blob_uri'] = error_blob_uri
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name,
+                       run_command=run_command)
+
+
+def vmss_run_command_delete(client,
+                            resource_group_name,
+                            vmss_name,
+                            instance_id,
+                            run_command_name,
+                            no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.begin_delete,
+                       resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       run_command_name=run_command_name)
+
+
+def vmss_run_command_list(client,
+                          resource_group_name,
+                          vmss_name,
+                          instance_id,
+                          expand=None):
+    return client.list(resource_group_name=resource_group_name,
+                       vm_scale_set_name=vmss_name,
+                       instance_id=instance_id,
+                       expand=expand)
+
+
+def vmss_run_command_show(client,
+                          resource_group_name,
+                          vmss_name,
+                          instance_id,
+                          run_command_name,
+                          expand=None,
+                          instance_view=False):
+    if instance_view:
+        expand = 'instanceView'
+    return client.get(resource_group_name=resource_group_name,
+                      vm_scale_set_name=vmss_name,
+                      instance_id=instance_id,
+                      run_command_name=run_command_name,
+                      expand=expand)
 # endregion
 
 
@@ -3884,20 +4402,21 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 
 # disk encryption set
 def create_disk_encryption_set(
-        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault, encryption_type=None,
+        cmd, client, resource_group_name, disk_encryption_set_name, key_url, source_vault=None, encryption_type=None,
         location=None, tags=None, no_wait=False, enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
-        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
+    DiskEncryptionSet, EncryptionSetIdentity, KeyForDiskEncryptionSet, SourceVault = cmd.get_models(
+        'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyForDiskEncryptionSet', 'SourceVault')
     encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
-    source_vault = SourceVault(id=source_vault)
-    key_vault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
+    if source_vault is not None:
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        source_vault = SourceVault(id=source_vault)
+    key_for_disk_emcryption_set = KeyForDiskEncryptionSet(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
-                                            active_key=key_vault_and_key_reference, encryption_type=encryption_type,
+                                            active_key=key_for_disk_emcryption_set, encryption_type=encryption_type,
                                             rotation_to_latest_key_version_enabled=enable_auto_key_rotation)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
@@ -3913,15 +4432,19 @@ def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_u
                                enable_auto_key_rotation=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-                                   namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
+
     if source_vault:
-        instance.active_key.source_vault.id = source_vault
+        if not is_valid_resource_id(source_vault):
+            source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
+                                       namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
+        instance.active_key.source_vault = {'id': source_vault}
+
     if enable_auto_key_rotation is not None:
         instance.rotation_to_latest_key_version_enabled = enable_auto_key_rotation
+
     return instance
 
 # endregion
@@ -3968,8 +4491,44 @@ def sig_shared_gallery_list(client, location, shared_to=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       shared_to=shared_to)
+    return client.list(location=location, shared_to=shared_to)
+
+
+def get_page_result(generator, marker, show_next_marker=None):
+    pages = generator.by_page(continuation_token=marker)  # ContainerPropertiesPaged
+    result = list_generator(pages=pages)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
+
+
+def list_generator(pages, num_results=50):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result
 
 
 def sig_share_update(cmd, client, resource_group_name, gallery_name, subscription_ids=None, tenant_ids=None,
@@ -3998,21 +4557,155 @@ def sig_share_reset(cmd, client, resource_group_name, gallery_name):
                                sharing_update=sharing_update)
 
 
-def sig_shared_image_definition_list(client, location, gallery_unique_name, shared_to=None):
+def sig_shared_image_definition_list(client, location, gallery_unique_name,
+                                     shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location,
-                       gallery_unique_name=gallery_unique_name,
-                       shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
 
 
-def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name, shared_to=None):
+def sig_shared_image_version_list(client, location, gallery_unique_name, gallery_image_name,
+                                  shared_to=None, marker=None, show_next_marker=None):
     # Keep it here as it will add subscription in the future and we need to set it to None to make it work
     if shared_to == 'subscription':
         shared_to = None
-    return client.list(location=location, gallery_unique_name=gallery_unique_name,
-                       gallery_image_name=gallery_image_name, shared_to=shared_to)
+    generator = client.list(location=location, gallery_unique_name=gallery_unique_name,
+                            gallery_image_name=gallery_image_name, shared_to=shared_to)
+    return get_page_result(generator, marker, show_next_marker)
+
+
+def gallery_application_create(client,
+                               resource_group_name,
+                               gallery_name,
+                               gallery_application_name,
+                               os_type,
+                               location,
+                               tags=None,
+                               description=None,
+                               no_wait=False):
+    gallery_application = {}
+    gallery_application['location'] = location
+    if tags is not None:
+        gallery_application['tags'] = tags
+    if description is not None:
+        gallery_application['description'] = description
+    if os_type is not None:
+        gallery_application['supported_os_type'] = os_type
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application=gallery_application)
+
+
+def gallery_application_update(client,
+                               resource_group_name,
+                               gallery_name,
+                               gallery_application_name,
+                               location,
+                               tags=None,
+                               description=None,
+                               no_wait=False):
+    gallery_application = {}
+    gallery_application['location'] = location
+    if tags is not None:
+        gallery_application['tags'] = tags
+    if description is not None:
+        gallery_application['description'] = description
+    return sdk_no_wait(no_wait,
+                       client.begin_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application=gallery_application)
+
+
+def gallery_application_version_create(client,
+                                       resource_group_name,
+                                       gallery_name,
+                                       gallery_application_name,
+                                       gallery_application_version_name,
+                                       location,
+                                       package_file_link,
+                                       install_command,
+                                       remove_command,
+                                       tags=None,
+                                       update_command=None,
+                                       target_regions=None,
+                                       default_file_link=None,
+                                       end_of_life_date=None,
+                                       exclude_from=None,
+                                       no_wait=False):
+    gallery_application_version = {}
+    gallery_application_version['publishing_profile'] = {}
+    gallery_application_version['location'] = location
+    if tags is not None:
+        gallery_application_version['tags'] = tags
+    source = {}
+    source['media_link'] = package_file_link
+    if default_file_link is not None:
+        source['default_configuration_link'] = default_file_link
+    gallery_application_version['publishing_profile']['source'] = source
+    manage_actions = {}
+    manage_actions['install'] = install_command
+    manage_actions['remove'] = remove_command
+    if update_command is not None:
+        manage_actions['update'] = update_command
+    gallery_application_version['publishing_profile']['manage_actions'] = manage_actions
+    if target_regions is not None:
+        gallery_application_version['publishing_profile']['target_regions'] = target_regions
+    if exclude_from is not None:
+        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
+    if end_of_life_date is not None:
+        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application_version_name=gallery_application_version_name,
+                       gallery_application_version=gallery_application_version)
+
+
+def gallery_application_version_update(client,
+                                       resource_group_name,
+                                       gallery_name,
+                                       gallery_application_name,
+                                       gallery_application_version_name,
+                                       location,
+                                       package_file_link,
+                                       tags=None,
+                                       target_regions=None,
+                                       default_file_link=None,
+                                       end_of_life_date=None,
+                                       exclude_from=None,
+                                       no_wait=False):
+    gallery_application_version = {}
+    gallery_application_version['publishing_profile'] = {}
+    gallery_application_version['location'] = location
+    if tags is not None:
+        gallery_application_version['tags'] = tags
+    source = {}
+    source['media_link'] = package_file_link
+    if default_file_link is not None:
+        source['default_configuration_link'] = default_file_link
+    gallery_application_version['publishing_profile']['source'] = source
+    if target_regions is not None:
+        gallery_application_version['publishing_profile']['target_regions'] = [target_regions]
+    if exclude_from is not None:
+        gallery_application_version['publishing_profile']['exclude_from_latest'] = exclude_from
+    if end_of_life_date is not None:
+        gallery_application_version['publishing_profile']['end_of_life_date'] = end_of_life_date
+    return sdk_no_wait(no_wait,
+                       client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       gallery_name=gallery_name,
+                       gallery_application_name=gallery_application_name,
+                       gallery_application_version_name=gallery_application_version_name,
+                       gallery_application_version=gallery_application_version)
 
 
 def get_gallery_instance(cmd, resource_group_name, gallery_name):
@@ -4112,3 +4805,71 @@ def show_capacity_reservation(client, resource_group_name, capacity_reservation_
 def list_capacity_reservation(client, resource_group_name, capacity_reservation_group_name):
     return client.list_by_capacity_reservation_group(resource_group_name=resource_group_name,
                                                      capacity_reservation_group_name=capacity_reservation_group_name)
+
+
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
+    try:
+        vm = client.virtual_machines.get(resource_group_name, vm_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
+
+    vm.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+
+    if order_applications:
+        index = 1
+        for app in vm.application_profile.gallery_applications:
+            app.order = index
+            index += 1
+
+    if application_configuration_overrides:
+        index = 0
+        for over_ride in application_configuration_overrides:
+            if over_ride or over_ride.lower() != 'null':
+                vm.application_profile.gallery_applications[index].configuration_reference = over_ride
+            index += 1
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, vm)
+
+
+def list_vm_applications(cmd, vm_name, resource_group_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    try:
+        vm = client.virtual_machines.get(resource_group_name, vm_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vm {}.'.format(vm_name))
+    return vm.application_profile
+
+
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, no_wait=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
+    try:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+
+    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+
+    if order_applications:
+        index = 1
+        for app in vmss.virtual_machine_profile.application_profile.gallery_applications:
+            app.order = index
+            index += 1
+
+    if application_configuration_overrides:
+        index = 0
+        for over_ride in application_configuration_overrides:
+            if over_ride or over_ride.lower() != 'null':
+                vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
+            index += 1
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update, resource_group_name, vmss_name, vmss)
+
+
+def list_vmss_applications(cmd, vmss_name, resource_group_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    try:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+    return vmss.virtual_machine_profile.application_profile

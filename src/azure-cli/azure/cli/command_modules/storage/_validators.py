@@ -1244,7 +1244,7 @@ def services_type(loader):
 
 def get_char_options_validator(types, property_name):
     def _validator(namespace):
-        service_types = set(getattr(namespace, property_name, list()))
+        service_types = set(getattr(namespace, property_name, []))
 
         if not service_types:
             raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
@@ -1897,3 +1897,11 @@ def validate_allow_protected_append_writes_all(namespace):
 def validate_blob_name_for_upload(namespace):
     if not namespace.blob_name:
         namespace.blob_name = os.path.basename(namespace.file_path)
+
+
+def validate_share_close_handle(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.close_all and namespace.handle_id:
+        raise InvalidArgumentValueError("usage error: Please only specify either --handle-id or --close-all, not both.")
+    if not namespace.close_all and not namespace.handle_id:
+        raise InvalidArgumentValueError("usage error: Please specify either --handle-id or --close-all.")

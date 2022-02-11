@@ -102,7 +102,8 @@ class MetricAlertConditionAction(argparse._AppendAction):
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
                 '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
-                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
+                '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n' \
+                '                         [with skipmetricvalidation]'
 
         string_val = ' '.join(values)
 
@@ -346,7 +347,7 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
     def deserialize_object(self, type_name, type_properties):
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver, \
             ArmRoleReceiver, AzureAppPushReceiver, ItsmReceiver, AutomationRunbookReceiver, \
-            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver
+            VoiceReceiver, LogicAppReceiver, AzureFunctionReceiver, EventHubReceiver
         syntax = {
             'email': 'NAME EMAIL_ADDRESS [usecommonalertschema]',
             'sms': 'NAME COUNTRY_CODE PHONE_NUMBER',
@@ -359,7 +360,8 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
             'voice': 'NAME COUNTRY_CODE PHONE_NUMBER',
             'logicapp': 'NAME RESOURCE_ID CALLBACK_URL [usecommonalertschema]',
             'azurefunction': 'NAME FUNCTION_APP_RESOURCE_ID '
-                             'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]'
+                             'FUNCTION_NAME HTTP_TRIGGER_URL [usecommonalertschema]',
+            'eventhub': 'NAME SUBSCRIPTION_ID EVENT_HUB_NAME_SPACE EVENT_HUB_NAME [usecommonalertschema] '
         }
 
         receiver = None
@@ -414,6 +416,10 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                                                  function_name=type_properties[2],
                                                  http_trigger_url=type_properties[3],
                                                  use_common_alert_schema=useCommonAlertSchema)
+            elif type_name == 'eventhub':
+                receiver = EventHubReceiver(name=type_properties[0], subscription_id=type_properties[1],
+                                            event_hub_name_space=type_properties[2], event_hub_name=type_properties[3],
+                                            use_common_alert_schema=useCommonAlertSchema)
             else:
                 raise InvalidArgumentValueError('The type "{}" is not recognizable.'.format(type_name))
 

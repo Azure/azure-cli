@@ -209,7 +209,8 @@ def _postgres_parse_list_skus(result, database_engine):
 
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az
+    return {'sku_info': tiers_dict,
+            'single_az': single_az}
 
 
 def _mysql_parse_list_skus(result, database_engine):
@@ -217,6 +218,7 @@ def _mysql_parse_list_skus(result, database_engine):
     if not result:
         raise InvalidArgumentValueError("No available SKUs in this location")
     single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
+    geo_paried_region = result[0].supported_geo_backup_regions
 
     tiers = result[0].supported_flexible_server_editions
     tiers_dict = {}
@@ -243,7 +245,10 @@ def _mysql_parse_list_skus(result, database_engine):
         iops_dict[tier_name] = sku_iops_dict
         tiers_dict[tier_name] = tier_dict
 
-    return tiers_dict, single_az, iops_dict
+    return {'sku_info': tiers_dict,
+            'single_az': single_az,
+            'iops_info': iops_dict,
+            'geo_paired_regions': geo_paried_region}
 
 
 def _get_available_values(sku_info, argument, tier=None):

@@ -67,3 +67,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+
+    with self.command_group('redis identity', redis_sdk) as g:
+        g.custom_show_command('show', 'cli_redis_identity_show')
+        g.custom_command('assign', 'cli_redis_identity_assign')
+        g.custom_command('remove', 'cli_redis_identity_remove')

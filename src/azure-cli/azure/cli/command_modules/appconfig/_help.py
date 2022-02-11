@@ -125,6 +125,8 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
   - name: Export all keys to another App Configuration using your 'az login' credentials.
     text: az appconfig kv export -d appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --dest-endpoint https://anotherappconfiguration.azconfig.io --dest-auth-mode login --key * --label * --preserve-labels
+  - name: Export all keys and feature flags with label test using appconfig/kvset profile.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --profile appconfig/kvset
 """
 
 helps['appconfig kv import'] = """
@@ -145,7 +147,8 @@ examples:
     text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --separator . --content-type application/json
   - name: Import all keys to another App Configuration using your 'az login' credentials.
     text: az appconfig kv import -s appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --src-endpoint https://anotherappconfiguration.azconfig.io --src-auth-mode login --src-key * --src-label * --preserve-labels
-
+  - name: Import all keys and feature flags from a file using the appconfig/kvset format.
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
 """
 
 helps['appconfig kv list'] = """

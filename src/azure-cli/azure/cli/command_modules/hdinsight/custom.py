@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -38,7 +37,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False,
                    resource_provider_connection=None, enable_private_link=None, enable_compute_isolation=None,
-                   host_sku=None, no_validation_timeout=False):
+                   host_sku=None, zones=None, private_link_configurations=None,
+                   no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
@@ -345,32 +345,33 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         else:
             disk_encryption_properties = DiskEncryptionProperties(encryption_at_host=encryption_at_host)
 
-    kafka_rest_properties = (kafka_client_group_id and kafka_client_group_name) and KafkaRestProperties(
+    kafka_rest_properties = KafkaRestProperties(
         client_group_info=ClientGroupInfo(
             group_id=kafka_client_group_id,
             group_name=kafka_client_group_name
         )
-    )
+    ) if (kafka_client_group_id and kafka_client_group_name) else None
 
-    encryption_in_transit_properties = encryption_in_transit and EncryptionInTransitProperties(
+    encryption_in_transit_properties = EncryptionInTransitProperties(
         is_encryption_in_transit_enabled=encryption_in_transit
-    )
+    ) if encryption_in_transit is True else None
 
     # relay outbound and private link
-    network_properties = (resource_provider_connection or enable_private_link) and NetworkProperties(
+    network_properties = NetworkProperties(
         resource_provider_connection=resource_provider_connection,
         private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
-    )
+    ) if (resource_provider_connection is not None or enable_private_link is not None) else None
 
     # compute isolation
-    compute_isolation_properties = enable_compute_isolation and ComputeIsolationProperties(
+    compute_isolation_properties = ComputeIsolationProperties(
         enable_compute_isolation=enable_compute_isolation,
         host_sku=host_sku
-    )
+    ) if enable_compute_isolation is True else None
 
     create_params = ClusterCreateParametersExtended(
         location=location,
         tags=tags,
+        zones=zones,
         properties=ClusterCreateProperties(
             cluster_version=cluster_version,
             os_type=OSType.linux,
@@ -392,7 +393,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             min_supported_tls_version=minimal_tls_version,
             encryption_in_transit_properties=encryption_in_transit_properties,
             network_properties=network_properties,
-            compute_isolation_properties=compute_isolation_properties
+            compute_isolation_properties=compute_isolation_properties,
+            private_link_configurations=private_link_configurations
         ),
         identity=cluster_identity
     )
