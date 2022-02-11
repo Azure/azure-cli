@@ -1056,11 +1056,14 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
     routing_type = profile.traffic_routing_method  # pylint: disable=no-member
     endpoint_type = namespace.endpoint_type
-    all_options = ['target_resource_id', 'target', 'min_child_endpoints', 'priority', 'weight', 'endpoint_location']
+    all_options = ['target_resource_id', 'target', 'min_child_endpoints',
+                   'min_child_ipv4', 'min_child_ipv6', 'priority', 'weight', 'endpoint_location']
     props_to_options = {
         'target_resource_id': '--target-resource-id',
         'target': '--target',
         'min_child_endpoints': '--min-child-endpoints',
+        'min_child_ipv4': '--min-child-ipv4',
+        'min_child_ipv6': '--min-child-ipv6',
         'priority': '--priority',
         'weight': '--weight',
         'endpoint_location': '--endpoint-location',
@@ -1868,6 +1871,20 @@ def validate_status_code_ranges(namespace):
             raise usage_error
 
     namespace.status_code_ranges = values
+
+
+def validate_capture_size_and_limit(namespace):
+    if namespace.capture_limit:
+        if namespace.capture_limit < 0:
+            raise CLIError('usage error: --capture-limit cannot be a negative value.')
+
+    if namespace.capture_size:
+        if namespace.capture_size < 0:
+            raise CLIError('usage error: --capture-size cannot be a negative value.')
+
+    if namespace.time_limit:
+        if namespace.time_limit < 0:
+            raise CLIError('usage error: --time-limit cannot be a negative value.')
 
 
 def validate_subnet_ranges(namespace):

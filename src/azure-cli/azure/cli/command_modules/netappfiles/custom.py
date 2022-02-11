@@ -57,6 +57,36 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
     return body
 
 
+# pylint: disable=unused-argument, disable=too-many-locals
+# update an active directory on the netapp account
+# current limitation is 1 AD/subscription
+def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password, domain,
+                            dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                            server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                            administrators=None, encrypt_dc_conn=None, tags=None):
+    ad_list = instance.active_directories
+
+    active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name,
+                                       organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
+                                       backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
+                                       aes_encryption=aes_encryption, ldap_signing=ldap_signing,
+                                       security_operators=security_operators, ldap_over_tls=ldap_over_tls,
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
+
+    for ad in ad_list:
+        if ad.active_directory_id == active_directory_id:
+            instance.active_directories.remove(ad)
+
+    instance.active_directories.append(active_directory)
+
+    body = NetAppAccountPatch(active_directories=ad_list)
+    _update_mapper(instance, body, ['active_directories'])
+    return body
+
+
 # list all active directories
 def list_active_directories(client, account_name, resource_group_name):
     return client.get(resource_group_name, account_name).active_directories
@@ -85,7 +115,7 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
 def patch_account(instance, account_name, resource_group_name, tags=None, encryption=None):
     account_encryption = AccountEncryption(key_source=encryption)
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
-    _update_mapper(instance, body, ['tags'])
+    _update_mapper(instance, body, ['tags', 'encryption'])
     return body
 
 
