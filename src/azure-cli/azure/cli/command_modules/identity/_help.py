@@ -7,12 +7,12 @@ from knack.help_files import helps
 
 helps['identity'] = """
 type: group
-short-summary: Managed Service Identities
+short-summary: Managed Identities
 """
 
 helps['identity list'] = """
 type: command
-short-summary: List Managed Service Identities
+short-summary: List Managed Identities
 """
 
 helps['identity list-operations'] = """
