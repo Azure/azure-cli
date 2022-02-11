@@ -1339,7 +1339,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return _random_password(34), None, None, None, None
+        return _generate_password(34), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -1848,29 +1848,37 @@ def _gen_guid():
 
 
 # reference: https://pynative.com/python-generate-random-string/
-def _random_password(length):
+def _generate_password(length):
     import random
     import string
-    safe_punctuation = '-_.~'
-    random_source = string.ascii_letters + string.digits + safe_punctuation
-    alphanumeric = string.ascii_letters + string.digits
 
-    # make sure first character is not a punctuation like '--' which will make CLI command break
-    first_character = random.SystemRandom().choice(alphanumeric)
+    alphanumeric = string.ascii_letters + string.digits
+    safe_punctuation = '-_.~'
+    random_source = alphanumeric + safe_punctuation
+    random_generator = random.SystemRandom()
+
+    # make sure first character is not a punctuation like '-' which will make CLI command break
+    first_character = random_generator.choice(alphanumeric)
 
     # make sure we have special character in the password
-    password = random.SystemRandom().choice(string.ascii_lowercase)
-    password += random.SystemRandom().choice(string.ascii_uppercase)
-    password += random.SystemRandom().choice(string.digits)
-    password += random.SystemRandom().choice(safe_punctuation)
+    rest_characters = []
+    character_collections = [
+        string.ascii_lowercase,
+        string.ascii_uppercase,
+        string.digits,
+        safe_punctuation
+    ]
+
+    for character_collection in character_collections:
+        rest_characters.append(random_generator.choice(character_collection))
 
     # generate a password of the given length from the options in the random_source variable
-    for _ in range(length - 5):
-        password += random.SystemRandom().choice(random_source)
+    for _ in range(length - (len(first_character) + len(rest_characters))):
+        rest_characters.append(random_generator.choice(random_source))
 
-    # turn it into a list for some extra shuffling
-    password_list = list(password)
-    random.SystemRandom().shuffle(password_list)
+    # some extra shuffling
+    random_generator.shuffle(rest_characters)
+    rest_characters = ''.join(rest_characters)
 
-    password = first_character + ''.join(password_list)
+    password = first_character + rest_characters
     return password
