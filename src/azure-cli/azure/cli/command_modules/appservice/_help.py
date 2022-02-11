@@ -127,7 +127,7 @@ short-summary: Methods that show, set, add, and remove access restrictions on a 
 
 helps['functionapp config access-restriction add'] = """
 type: command
-short-summary: Adds an Access Restriction to the functionapp
+short-summary: Adds an Access Restriction to the function app
 examples:
   - name: Add Access Restriction opening (Allow) named developers for IPv4 address 130.220.0.0/27 with priority 200 to main site.
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200
@@ -1441,7 +1441,7 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a Java 11 runtime using '|' delimiter.
+  - name: Create a web app with a Java 11 runtime using '|' delimiter. (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a Java 11 runtime using ':' delimiter.
@@ -1449,7 +1449,7 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:11"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|12LTS" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -1821,6 +1821,11 @@ type: command
 short-summary: List available built-in stacks which can be used for web apps.
 """
 
+helps['functionapp list-runtimes'] = """
+type: command
+short-summary: List available built-in stacks which can be used for function apps.
+"""
+
 helps['webapp log'] = """
 type: group
 short-summary: Manage web app logs.
@@ -2010,7 +2015,7 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
-  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter
+  - name: Create a web app with a specified name and a Java 11 runtime using '|' delimiter (not recommended for powershell; use the ":" delimiter instead)
     text: >
         az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|11"
   - name: Create a web app with a specified name and a Java 11 runtime using ':' delimiter
