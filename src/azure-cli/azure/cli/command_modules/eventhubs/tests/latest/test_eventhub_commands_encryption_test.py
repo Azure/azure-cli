@@ -86,9 +86,9 @@ class EHNamespaceMSITesting(ScenarioTest):
 
         namespace = self.cmd(
             'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --system-assigned --user-assigned {id1} {id2}' +
-            ' --encryption-config key-name {key1} key-vault-uri {key_uri} user-assigned-identity {id1}' +
-            ' --encryption-config key-name {key2} key-vault-uri {key_uri} user-assigned-identity {id1}' +
-            ' --encryption-config key-name {key3} key-vault-uri {key_uri} user-assigned-identity {id1}'
+            ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+            ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+            ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}'
         ).get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
@@ -98,7 +98,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 3
 
         namespace = self.cmd('eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name {key1} key-vault-uri {key_uri} user-assigned-identity {id1}').get_output_in_json()
+                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
@@ -107,7 +107,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 2
 
         namespace = self.cmd('eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name {key1} key-vault-uri {key_uri} user-assigned-identity {id1}').get_output_in_json()
+                             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
@@ -116,8 +116,8 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 3
 
         namespace = self.cmd('eventhubs namespace encryption remove --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name {key2} key-vault-uri {key_uri} user-assigned-identity {id1}' +
-                             ' --encryption-config key-name {key3} key-vault-uri {key_uri} user-assigned-identity {id1}').get_output_in_json()
+                             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+                             ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]
@@ -126,8 +126,8 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 1
 
         namespace = self.cmd('eventhubs namespace encryption add --resource-group {rg} --namespace-name {namespacename}' +
-                             ' --encryption-config key-name {key2} key-vault-uri {key_uri} user-assigned-identity {id1}' +
-                             ' --encryption-config key-name {key3} key-vault-uri {key_uri} user-assigned-identity {id1}').get_output_in_json()
+                             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
+                             ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}').get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
         n = [i for i in namespace['identity']['userAssignedIdentities']]

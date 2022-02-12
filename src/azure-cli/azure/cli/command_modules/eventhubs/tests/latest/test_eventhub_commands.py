@@ -64,7 +64,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             checks=[self.check('sku.name', self.kwargs['sku'])])
 
         # Get Created Namespace list by subscription
-        listnamespaceresult = self.cmd('eventhubs namespace list').output
+        listnamespaceresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
         self.assertGreater(len(listnamespaceresult), 0)
 
         # Get Created Namespace list by ResourceGroup

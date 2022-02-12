@@ -16,7 +16,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
                          is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
                          default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None, trusted_service_access_enabled=None,
-                         disable_local_auth=None, system_assigned=None, user_assigned=None, encryption_config=None):
+                         disable_local_auth=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -38,10 +38,10 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.disable_local_auth = disable_local_auth
         ehparam.cluster_arm_id = cluster_arm_id
 
-        if identity or system_assigned:
+        if identity or mi_system_assigned:
             ehparam.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
 
-        if user_assigned:
+        if mi_user_assigned:
             if ehparam.identity:
                 if ehparam.identity.type == IdentityType.SYSTEM_ASSIGNED:
                     ehparam.identity.type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
@@ -51,7 +51,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
                 ehparam.identity = Identity(type=IdentityType.USER_ASSIGNED)
 
             default_user_identity = UserAssignedIdentity()
-            ehparam.identity.user_assigned_identities = dict.fromkeys(user_assigned, default_user_identity)
+            ehparam.identity.user_assigned_identities = dict.fromkeys(mi_user_assigned, default_user_identity)
 
         if encryption_config:
             ehparam.encryption = Encryption()
@@ -70,67 +70,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
     return client.get(resource_group_name, namespace_name)
 
-class AlertAddEncryption(argparse._AppendAction):
-    def __call__(self, parser, namespace, values, option_string=None):
-        action = self.get_action(values, option_string)
-        super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
-
-    def get_action(self, values, option_string):  # pylint: disable=no-self-use
-        config_length = len(values)
-        from azure.mgmt.eventhub.v2021_06_01_preview.models import KeyVaultProperties
-        from azure.mgmt.eventhub.v2021_06_01_preview.models import UserAssignedIdentityProperties
-
-        if 'key-name' not in [x.lower() for x in values]:
-            raise InvalidArgumentValueError('key-name and key-vault-uri are mandatory arguments for encryption configs.'.format(option_string))
-
-        if 'key-vault-uri' not in [x.lower() for x in values]:
-            raise InvalidArgumentValueError('key-name and key-vault-uri are mandatory arguments for encryption configs.'.format(option_string))
-
-        if config_length<4:
-            raise InvalidArgumentValueError('Please make sure that key-name and key-vault-uri arguments are present for every encryptionconfig'.format(option_string))
-
-        keyVaultObject = KeyVaultProperties()
-
-        if(values[0].lower()=='key-name'):
-            keyVaultObject.key_name = values[1]
-        else:
-            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order key-name key-vault-uri key-version. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
-
-        if (values[2].lower() == 'key-vault-uri'):
-            keyVaultObject.key_vault_uri = values[3]
-            #remove trailing slash from keyvaulturi. KeyVault returns url with a trailing slash
-            if(keyVaultObject.key_vault_uri.endswith('/')):
-                keyVaultObject.key_vault_uri = keyVaultObject.key_vault_uri[:-1]
-        else:
-            raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order key-name key-vault-uri key-version. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
-
-        if (config_length>=6):
-            if (values[4].lower()=='key-version'):
-                keyVaultObject.key_version = values[5]
-            if (values[4].lower()=='user-assigned-identity'):
-                keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[5])
-                if (keyVaultObject.identity.user_assigned_identity.endswith('/')):
-                    keyVaultObject.identity.user_assigned_identity = keyVaultObject.identity.user_assigned_identity[:-1]
-            else:
-                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
-
-        if (config_length>=8):
-            if(values[4].lower()=='key-version'):
-                keyVaultObject.key_version = values[5]
-            else:
-                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
-
-            if(values[6].lower()=='user-assigned-identity'):
-                keyVaultObject.identity = UserAssignedIdentityProperties(user_assigned_identity=values[7])
-                if (keyVaultObject.identity.user_assigned_identity.endswith('/')):
-                    keyVaultObject.identity.user_assigned_identity = keyVaultObject.identity.user_assigned_identity[:-1]
-            else:
-                raise InvalidArgumentValueError('Arguements for encryption configs must be given in the order keyname keyvaulturi keyversion. --encryption-config keyname [arg] keyvaulturi [arg] keyversion [arg]'.format(option_string))
-
-        if keyVaultObject.key_version is None:
-            keyVaultObject.key_version=''
-
-        return keyVaultObject
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
@@ -610,11 +549,8 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
         raise CLIError('The namespace does not have encryption enabled')
 
     else:
-        for x in namespace.encryption.key_vault_properties:
-            print(x)
         if namespace.encryption.key_vault_properties:
             for property in encryption_config:
-                print(property)
                 if property in namespace.encryption.key_vault_properties:
                     namespace.encryption.key_vault_properties.remove(property)
 

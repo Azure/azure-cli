@@ -18,7 +18,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (KeyType, AccessRights, SkuName, KeySource, ManagedServiceIdentityType) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', 'ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.custom import AlertAddEncryption
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -53,10 +53,10 @@ def load_arguments_eh(self, _):
                    help='A boolean value that indicates whether Managed Identity is enabled.')
         c.argument('disable_local_auth', options_list=['--disable-local-auth'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether SAS authentication is enabled/disabled for the Event Hubs')
-        c.argument('system_assigned', arg_group='Managed Identity',
+        c.argument('mi_system_assigned', arg_group='Managed Identity',
                    arg_type=get_three_state_flag(),
                    help='Enable System Assigned Identity')
-        c.argument('user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
 
     with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:

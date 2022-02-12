@@ -58,7 +58,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         #self.cmd('eventhubs namespace exists --name {namespacename}', checks=[self.check('nameAvailable', True)])
 
         #0.1
-        namespace = self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --sku {sku} --system-assigned').get_output_in_json()
+        namespace = self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --sku {sku} --mi-system-assigned').get_output_in_json()
         self.assertEqual(namespace['identity']['type'], self.kwargs['system'])
 
         #5
