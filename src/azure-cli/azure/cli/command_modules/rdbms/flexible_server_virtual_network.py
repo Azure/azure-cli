@@ -209,7 +209,7 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     server_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=get_subscription_id(cmd.cli_ctx))
     vnet_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=vnet_subscription)
     dns_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
-    
+
     # check existence DNS zone and change resource group
     if dns_rg is not None:
         _create_and_verify_resource_group(dns_sub_resource_client, dns_rg, location, yes)
