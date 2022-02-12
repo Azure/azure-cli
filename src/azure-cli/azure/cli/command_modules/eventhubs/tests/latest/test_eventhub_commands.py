@@ -67,10 +67,6 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         listnamespaceresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
         self.assertGreater(len(listnamespaceresult), 0)
 
-        # Get Created Namespace list by ResourceGroup
-        listnamespacebyresourcegroupresult = self.cmd('eventhubs namespace list --resource-group {rg}').output
-        self.assertGreater(len(listnamespacebyresourcegroupresult), 0)
-
         # Create Authoriazation Rule
         self.cmd('eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}',
                  checks=[self.check('name', self.kwargs['authoname'])])
