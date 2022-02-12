@@ -284,7 +284,7 @@ def load_arguments_sb(self, _):
                                resource_type=ResourceType.MGMT_SERVICEBUS) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['servicebus namespace identity assign', 'eventhubs namespace identity remove']:
+    for scope in ['servicebus namespace identity assign', 'servicebus namespace identity remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
             c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
             c.argument('system_assigned', arg_type=get_three_state_flag(), help='System Assigned Identity')
@@ -294,6 +294,6 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace encryption', resource_type=ResourceType.MGMT_SERVICEBUS) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
-    for scope in ['eventhubs namespace encryption add', 'eventhubs namespace identity remove']:
+    for scope in ['servicebus namespace encryption add', 'servicebus namespace identity remove']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
             c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
