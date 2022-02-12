@@ -628,7 +628,7 @@ short-summary: Manage eventhubs namespace identity.
 
 helps['eventhubs namespace identity assign'] = """
 type: command
-short-summary: Assign System or User or System,User assigned identities to a namespace 
+short-summary: Assign System or User or System,User assigned identities to a namespace
 examples:
   - name: Assign system assigned and user assigned identity to a namespace. (give a list of identity id's for --user-assigned)
     text: |
@@ -637,7 +637,7 @@ examples:
 
 helps['eventhubs namespace identity remove'] = """
 type: command
-short-summary: Removes System or User or System,User assigned identities from a namespace 
+short-summary: Removes System or User or System,User assigned identities from a namespace
 examples:
   - name: Remove system assigned and a user assigned identity from a namespace. (give a list of identity id's for --user-assigned)
     text: |

@@ -427,6 +427,7 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, namespa
         private_endpoint_connection_name=private_endpoint_connection_name, description=description
     )
 
+
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -469,11 +470,10 @@ def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_as
 
     return get_namespace
 
-def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned = None, user_assigned = None):
+
+def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
-    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
-    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
 
     from azure.cli.core import CLIError
 
@@ -493,7 +493,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
                 for x in user_assigned:
                     namespace.identity.user_assigned_identities.pop(x)
                 # if all identities are popped off of the dictionary, we disable user assigned identity
-                if len(namespace.identity.user_assigned_identities)==0:
+                if len(namespace.identity.user_assigned_identities) == 0:
                     namespace.identity.type = IdentityType.NONE
                     namespace.identity.user_assigned_identities = None
 
@@ -502,7 +502,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
                 for x in user_assigned:
                     namespace.identity.user_assigned_identities.pop(x)
                 # if all identities are popped off of the dictionary, we disable user assigned identity
-                if len(namespace.identity.user_assigned_identities)==0:
+                if len(namespace.identity.user_assigned_identities) == 0:
                     namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
                     namespace.identity.user_assigned_identities = None
 
@@ -515,10 +515,10 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
 
     return get_namespace
 
+
 def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if namespace.encryption:
         if namespace.encryption.key_vault_properties:
@@ -542,8 +542,8 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
 
 def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
-    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
+
+    from azure.cli.core import CLIError
 
     if namespace.encryption is None:
         raise CLIError('The namespace does not have encryption enabled')
