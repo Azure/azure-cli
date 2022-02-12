@@ -637,7 +637,7 @@ examples:
 
 helps['eventhubs namespace identity remove'] = """
 type: command
-short-summary: Removes System or User or System,User assigned identities from a namespace
+short-summary: Remove System or User or System,User assigned identities from a namespace
 examples:
   - name: Remove system assigned and a user assigned identity from a namespace. (give a list of identity id's for --user-assigned)
     text: |
