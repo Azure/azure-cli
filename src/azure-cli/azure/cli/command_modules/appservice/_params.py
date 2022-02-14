@@ -717,9 +717,7 @@ def load_arguments(self, _):
                        help="name or resource id of the {} app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.".format(scope),
                        local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
             c.argument('name', options_list=['--name', '-n'], help='name of the new {} app'.format(app_type),
-                       local_context_attribute=LocalContextAttribute(name=scope + '_name',
-                       actions=[LocalContextAction.SET],
-                       scopes=[scope]))
+                       local_context_attribute=LocalContextAttribute(name=scope + '_name', actions=[LocalContextAction.SET], scopes=[scope]))
             c.argument('storage_account', options_list=['--storage-account', '-s'],
                        help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
                        local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
@@ -873,8 +871,7 @@ def load_arguments(self, _):
             c.argument('ignore_missing_vnet_service_endpoint',
                        options_list=['--ignore-missing-endpoint', '-i'],
                        help='Create access restriction rule with checking if the subnet has Microsoft.Web service endpoint enabled',
-                       arg_type=get_three_state_flag(),
-                       default=False)
+                       arg_type=get_three_state_flag(), default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
