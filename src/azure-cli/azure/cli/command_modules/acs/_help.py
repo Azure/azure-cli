@@ -907,7 +907,7 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+    short-summary: The node taints for the node pool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
@@ -1018,6 +1018,9 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --node-taints
+    type: string
+    short-summary: The node taints for the node pool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
