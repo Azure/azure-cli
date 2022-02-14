@@ -170,8 +170,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         subnet_resource_id = None
 
-    if using_webapp_up or https_only:
-        https_only == 'true'
+    if using_webapp_up:
+        https_only = using_webapp_up
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
