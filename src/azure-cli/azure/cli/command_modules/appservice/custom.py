@@ -174,7 +174,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         https_only == 'true'
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
 
