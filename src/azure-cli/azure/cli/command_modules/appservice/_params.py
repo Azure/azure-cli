@@ -155,6 +155,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
+                   arg_type=get_three_state_flag(return_label=True))
         c.ignore('language')
         c.ignore('using_webapp_up')
 

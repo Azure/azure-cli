@@ -90,7 +90,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     from azure.mgmt.web.models import Site
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
@@ -157,8 +157,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         subnet_resource_id = None
 
+    if using_webapp_up or https_only:
+        https_only == 'true'
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
+    helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
 
