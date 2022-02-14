@@ -28,6 +28,41 @@ acr helm show:
     chart:
       rule_exclusions:
       - no_positional_parameters
+acr manifest delete:
+  parameters:
+    manifest_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list:
+  parameters:
+    repo_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest list-referrers:
+  parameters:
+    manifest_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata list:
+  parameters:
+    repo_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata show:
+  parameters:
+    manifest_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest metadata update:
+  parameters:
+    manifest_specifier:
+      rule_exclusions:
+      - no_positional_parameters
+acr manifest show:
+  parameters:
+    manifest_specifier:
+      rule_exclusions:
+      - no_positional_parameters
 acr pack build:
   parameters:
     source_location:
@@ -261,7 +296,7 @@ aks create:
       - option_length_too_long
     enable_encryption_at_host:
       rule_exclusions:
-      - option_length_too_long  
+      - option_length_too_long
     assign_kubelet_identity:
       rule_exclusions:
       - option_length_too_long
