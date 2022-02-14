@@ -12,7 +12,7 @@ Release History
 
 **Packaging**
 
-* BREAKING CHANGE: Drop jmespath-terminal from docker image (#21277)
+* [BREAKING CHANGE]: Drop jmespath-terminal from docker image (#21277)
 
 2.33.0
 ++++++
