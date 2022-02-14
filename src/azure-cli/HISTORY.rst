@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.33.1
+++++++
+
+**Compute**
+
+Hotfix: Fix #21224: Fix the issue that VMCustomization is not enabled (#21241)
+
 2.33.0
 ++++++
 
