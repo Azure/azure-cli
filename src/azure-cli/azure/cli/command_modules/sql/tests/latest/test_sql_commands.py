@@ -265,7 +265,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('federated_client_id_1', federated_client_id_1)])
+                     JMESPathCheck('federatedClientId', federated_client_id_1)])
         
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
