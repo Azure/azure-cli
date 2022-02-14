@@ -52,6 +52,9 @@ examples:
   - name: Create SQL virtual machine and configure SQL connectivity settings.
     text: >
         az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type PAYG --sql-mgmt-type Full --connectivity-type private --port 1433 --sql-auth-update-username {newlogin} --sql-auth-update-pwd {sqlpassword}
+  - name: Create SQL virtual machine and configure SQL Best Pracices Assessment settings.
+    text: >
+        az sql vm create -n sqlvm -g myresourcegroup -l eastus --license-type PAYG --sql-mgmt-type Full --enable-assessment true --enable-assessment-schedule true --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
 """
 
 helps['sql vm group'] = """
@@ -115,6 +118,15 @@ examples:
         az sql vm remove-from-group -n sqlvm -g myresourcegroup
 """
 
+helps['sql vm start-assessment'] = """
+type: command
+short-summary: Starts SQL Best Practice Assessment on SQL virtual machine
+examples:
+  - name: Starts SQL Best Practice Assessment.
+    text: >
+        az sql vm start-assessment -n sqlvm -g myresourcegroup
+"""
+
 helps['sql vm update'] = """
 type: command
 short-summary: Updates the properties of a SQL virtual machine.
@@ -149,4 +161,16 @@ examples:
   - name: Update a SQL virtual machine billing tag to DR.
     text: >
         az sql vm update -n sqlvm -g myresourcegroup --license-type DR
+  - name: Update a SQL virtual machine to disable SQL Best Practice Assessment.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment false
+  - name: Update a SQL virtual machine to disable schedule for SQL Best Practice Assessment.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment-schedule false
+  - name: Update a SQL virtual machine to enable schedule with weekly interval for SQL Best Practice Assessment.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --enable-assessment-schedule true --assessment-weekly-interval 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
+  - name: Update a SQL virtual machine to enable schedule with monthly occurrence for SQL Best Practice Assessment.
+    text: >
+        az sql vm update -n sqlvm -g myresourcegroup --enable-assessment true --enable-assessment-schedule true --assessment-monthly-occurrence 1 --assessment-day-of-week monday --assessment-start-time-local '19:30'
 """

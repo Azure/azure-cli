@@ -24,6 +24,8 @@ from azure.mgmt.sqlvirtualmachine.models import (
     SqlWorkloadTypeUpdateSettings,
     AdditionalFeaturesServerConfigurations,
     ServerConfigurationsManagementSettings,
+    Schedule,
+    AssessmentSettings,
     SqlVirtualMachine
 )
 
@@ -175,7 +177,9 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
                  service_principal_secret=None, connectivity_type=None, port=None, sql_auth_update_username=None,
-                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None):
+                 sql_auth_update_password=None, sql_workload_type=None, enable_r_services=None, tags=None, sql_image_offer=None,
+                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
+                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
     '''
     Creates a SQL virtual machine.
     '''
@@ -227,6 +231,14 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
         if not service_principal_secret:
             service_principal_secret = prompt_pass('Service Principal Secret: ', confirm=True)
 
+    # If customer has provided any assessment.schedule settings, enabling assessment.schedule should be True
+    if (assessment_weekly_interval or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local):
+        enable_assessment_schedule = True
+
+    # If customer has enabled assessment.schedule, enabling assessment should be True
+    if enable_assessment_schedule:
+        enable_assessment = True
+
     keyvault_object = KeyVaultCredentialSettings(enable=enable_key_vault_credential,
                                                  credential_name=credential_name,
                                                  azure_key_vault_url=azure_key_vault_url,
@@ -246,6 +258,15 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                                                          sql_workload_type_update_settings=workload_type_object,
                                                                          additional_features_server_configurations=additional_features_object)
 
+    assessment_schedule_object = Schedule(enable=enable_assessment_schedule,
+                                          weekly_interval=assessment_weekly_interval,
+                                          monthly_occurrence=assessment_monthly_occurrence,
+                                          day_of_week=assessment_day_of_week,
+                                          start_time=assessment_start_time_local)
+
+    assessment_object = AssessmentSettings(enable=enable_assessment,
+                                           schedule=assessment_schedule_object)
+
     sqlvm_object = SqlVirtualMachine(location=location,
                                      virtual_machine_resource_id=virtual_machine_resource_id,
                                      sql_server_license_type=sql_server_license_type,
@@ -256,6 +277,7 @@ def sqlvm_create(client, cmd, sql_virtual_machine_name, resource_group_name, sql
                                      auto_backup_settings=auto_backup_object,
                                      key_vault_credential_settings=keyvault_object,
                                      server_configurations_management_settings=server_configuration_object,
+                                     assessment_settings=assessment_object,
                                      tags=tags)
 
     # Since it's a running operation, we will do the put and then the get to display the instance.
@@ -272,7 +294,9 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
                  storage_access_key=None, backup_password=None, backup_system_dbs=False, backup_schedule_type=None, sql_management_mode=None,
                  full_backup_frequency=None, full_backup_start_time=None, full_backup_window_hours=None, log_backup_frequency=None,
                  enable_key_vault_credential=None, credential_name=None, azure_key_vault_url=None, service_principal_name=None,
-                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None):
+                 service_principal_secret=None, connectivity_type=None, port=None, sql_workload_type=None, enable_r_services=None, tags=None,
+                 enable_assessment=None, enable_assessment_schedule = None, assessment_weekly_interval = None,
+                 assessment_monthly_occurrence = None, assessment_day_of_week = None, assessment_start_time_local = None):
     '''
     Updates a SQL virtual machine.
     '''
@@ -354,6 +378,29 @@ def sqlvm_update(instance, sql_server_license_type=None, sql_image_sku=None, ena
             instance.server_configurations_management_settings.sql_storage_update_settings is None and
             instance.server_configurations_management_settings.additional_features_server_configurations is None):
         instance.server_configurations_management_settings = None
+
+    # If assessment.schedule settings are provided but enable schedule is skipped, ensure schedule is enabled 
+    if (enable_assessment_schedule is None and 
+        (assessment_weekly_interval is not None or assessment_monthly_occurrence or assessment_day_of_week or assessment_start_time_local)):
+        enable_assessment_schedule = True
+
+    # If assessment.schedule setting is provided but enable assessment is skipped, ensure assessment is enabled
+    if (enable_assessment_schedule is not None and enable_assessment is None):
+        enable_assessment = True
+
+    if enable_assessment is not None:
+        instance.assessment_settings = AssessmentSettings()
+        instance.assessment_settings.enable = enable_assessment
+
+        if enable_assessment_schedule is not None:
+            instance.assessment_settings.schedule = Schedule()
+            instance.assessment_settings.schedule.enable = enable_assessment_schedule
+
+            if enable_assessment_schedule:
+                instance.assessment_settings.schedule.weekly_interval = assessment_weekly_interval
+                instance.assessment_settings.schedule.monthly_occurrence = assessment_monthly_occurrence
+                instance.assessment_settings.schedule.day_of_week = assessment_day_of_week
+                instance.assessment_settings.schedule.start_time = assessment_start_time_local
 
     return instance
 

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from datetime import datetime
 from msrestazure.tools import resource_id, is_valid_resource_id
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -117,3 +118,54 @@ def validate_expand(namespace):
     '''
     if namespace.expand is not None:
         namespace.expand = ",".join(namespace.expand)
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_assessment(namespace):
+    '''
+    Validates assessment settings
+    '''
+    enable_assessment = namespace.enable_assessment
+    enable_assessment_schedule = namespace.enable_assessment_schedule
+    assessment_weekly_interval = namespace.assessment_weekly_interval
+    assessment_monthly_occurrence = namespace.assessment_monthly_occurrence
+    assessment_day_of_week = namespace.assessment_day_of_week
+    assessment_start_time_local = namespace.assessment_start_time_local
+
+    is_assessment_schedule_provided = False
+    if (assessment_weekly_interval is not None or 
+        assessment_weekly_interval is not None or assessment_monthly_occurrence is not None or
+        assessment_day_of_week is not None or assessment_start_time_local is not None):
+        is_assessment_schedule_provided = True
+
+    # Validate conflicting settings
+    if (enable_assessment_schedule is False and is_assessment_schedule_provided):
+        raise CLIError("Assessment schedule settings cannot be provided while enable-assessment-schedule is False")
+
+    # Validate conflicting settings
+    if (enable_assessment is False and is_assessment_schedule_provided):
+        raise CLIError("Assessment schedule settings cannot be provided while enable-assessment is False")
+
+    # Validate necessary fields for Assessment schedule
+    if (is_assessment_schedule_provided):
+        if (assessment_weekly_interval is not None and assessment_monthly_occurrence is not None):
+            raise CLIError("Both assessment-weekly-interval and assessment-montly-occurrence cannot be provided at the same time for Assessment schedule")
+        if (assessment_weekly_interval is None and assessment_monthly_occurrence is None):
+            raise CLIError("Either assessment-weekly-interval and assessment-montly-occurrence must be provided for Assessment schedule")
+        if (assessment_day_of_week is None):
+            raise CLIError("assessment-day-of-week must be provided for Assessment schedule")
+        if (assessment_start_time_local is None):
+            raise CLIError("assessment-start-time-local must be provided for Assessment schedule")
+
+# pylint: disable=too-many-statements,line-too-long
+def validate_assessment_start_time_local(namespace):
+    '''
+    Validates assessment start time format
+    '''
+    assessment_start_time_local = namespace.assessment_start_time_local
+
+    TIME_FORMAT = '%H:%M'
+    if assessment_start_time_local:
+        try:
+            datetime.strptime(assessment_start_time_local, TIME_FORMAT)
+        except ValueError:
+            raise CLIError("assessment-start-time-local input '{}' is not valid time. Valid example: 19:30".format(assessment_start_time_local))
