@@ -126,7 +126,7 @@ def regex_line(line):
         if i == '-' and line[idx + 1] == '-':
             param = '--'
             index = idx + 2
-            while index <= len(line) and line[index] != ' ':
+            while index < len(line) and line[index] != ' ':
                 param += line[index]
                 index += 1
             try:
