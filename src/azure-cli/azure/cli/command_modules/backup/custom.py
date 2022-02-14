@@ -13,13 +13,14 @@ from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+    AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
+    BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest, ListRecoveryPointsRecommendedForMoveRequest
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -32,7 +33,7 @@ from azure.cli.command_modules.backup._client_factory import (
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
     _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf,
-    backup_storage_configs_non_crr_cf)
+    backup_storage_configs_non_crr_cf, recovery_points_passive_cf)
 
 import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_help as cust_help
@@ -53,6 +54,8 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "chinaeast": "chinanorth",
                         "chinanorth2": "chinaeast2",
                         "chinaeast2": "chinanorth2",
+                        "chinanorth3": "chinaeast3",
+                        "chinaeast3": "chinanorth3",
                         "northeurope": "westeurope",
                         "westeurope": "northeurope",
                         "francecentral": "francesouth",
@@ -850,12 +853,17 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
+    identity_based_restore_details = None
+    target_storage_account_id = storage_account_id
     if mi_system_assigned or mi_user_assigned:
         if not recovery_point.properties.is_managed_virtual_machine:
             raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
             is_system_assigned_identity=mi_system_assigned is not None,
             managed_identity_resource_id=mi_user_assigned)
+        identity_based_restore_details = IdentityBasedRestoreDetails(
+            target_storage_account_id=target_storage_account_id)
+        target_storage_account_id = None
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -867,14 +875,15 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             recovery_point_id=rp_name,
             recovery_type='RestoreDisks',
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             recovery_point_rehydration_info=rehydration_info,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     else:
         trigger_restore_properties = IaasVMRestoreRequest(
@@ -882,13 +891,14 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             recovery_point_id=rp_name,
             recovery_type='RestoreDisks',
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     return trigger_restore_properties
 
@@ -1226,7 +1236,7 @@ def _get_backup_request(workload_type, retain_until):
 def _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri, item_uri, rp_name):
     aad_client = aad_properties_cf(cmd.cli_ctx)
     aad_result = aad_client.get(azure_region)
-    rp_client = recovery_points_cf(cmd.cli_ctx)
+    rp_client = recovery_points_passive_cf(cmd.cli_ctx)
     crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
                                                   item_uri, rp_name, aad_result).properties
     crr_access_token.object_type = "CrrAccessToken"

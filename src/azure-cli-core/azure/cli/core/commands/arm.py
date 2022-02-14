@@ -169,7 +169,7 @@ def deployment_validate_table_format(result):
 class ResourceId(str):
 
     def __new__(cls, val):
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(val):
             raise ValueError()
         return str.__new__(cls, val)
@@ -782,7 +782,7 @@ def _gen_guid():
 
 
 def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
     if not is_valid_resource_id(arm_id):
         raise CLIError("'{}' is not a valid ID.".format(arm_id))

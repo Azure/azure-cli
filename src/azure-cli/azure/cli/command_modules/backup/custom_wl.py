@@ -13,21 +13,23 @@ from datetime import datetime, timedelta, timezone
 
 from knack.log import get_logger
 
-from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, CrossRegionRestoreRequest
+    AzureWorkloadSQLRestoreWithRehydrateRequest
+
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.backup._validators import datetime_type
+from azure.cli.command_modules.backup._validators import datetime_type, validate_wl_restore, validate_log_point_in_time
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf
+    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
@@ -301,7 +303,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def list_protectable_items(client, resource_group_name, vault_name, workload_type,
+def list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
                            backup_management_type="AzureWorkload", container_uri=None, protectable_item_type=None,
                            server_name=None):
 
@@ -326,8 +328,11 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
         paged_items = [item for item in paged_items if hasattr(item.properties, 'server_name') and
                        item.properties.server_name.lower() == server_name.lower()]
     if container_uri:
-        return [item for item in paged_items if
-                cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+        # Container URI filter
+        paged_items = [item for item in paged_items if
+                       cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+
+    _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name)
 
     return paged_items
 
@@ -519,10 +524,10 @@ def auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_obj
     protectable_item_object = protectable_item
     item_id = protectable_item_object.id
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() != 'sqlinstance':
+    if protectable_item_type.lower() not in ['sqlinstance', 'sqlavailabilitygroupcontainer']:
         raise CLIError(
             """
-            Protectable Item can only be of type SQLInstance.
+            Protectable Item can only be of type SQLInstance or SQLAG.
             """)
 
     policy_id = policy_object.id
@@ -546,10 +551,10 @@ def disable_auto_for_azure_wl(cmd, client, resource_group_name, vault_name, prot
     protectable_item_type = protectable_item_object.properties.protectable_item_type
     protectable_item_name = protectable_item_object.properties.friendly_name
     container_name = cust_help.get_protection_container_uri_from_id(item_id)
-    if protectable_item_type.lower() != 'sqlinstance':
+    if protectable_item_type.lower() not in ['sqlinstance', 'sqlavailabilitygroupcontainer']:
         raise CLIError(
             """
-            Protectable Item can only be of type SQLInstance.
+            Protectable Item can only be of type SQLInstance or SQLAG.
             """)
 
     filter_string = cust_help.get_filter_string({
@@ -599,6 +604,11 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
+
+    item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                            container_uri, item_uri, "AzureWorkload")
+    cust_help.validate_item(item)
+    validate_wl_restore(item, item_type, restore_mode, recovery_mode)
 
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
     if log_point_in_time is None:
@@ -658,7 +668,10 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
             trigger_restore_properties.recovery_mode = recovery_mode
 
     if log_point_in_time is not None:
-        setattr(trigger_restore_properties, 'point_in_time', datetime_type(log_point_in_time))
+        log_point_in_time = datetime_type(log_point_in_time)
+        time_range_list = _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region)
+        validate_log_point_in_time(log_point_in_time, time_range_list)
+        setattr(trigger_restore_properties, 'point_in_time', log_point_in_time)
 
     if 'sql' in item_type.lower():
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
@@ -675,7 +688,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         aad_client = aad_properties_cf(cmd.cli_ctx)
         filter_string = cust_help.get_filter_string({'backupManagementType': 'AzureWorkload'})
         aad_result = aad_client.get(azure_region, filter_string)
-        rp_client = recovery_points_cf(cmd.cli_ctx)
+        rp_client = recovery_points_passive_cf(cmd.cli_ctx)
         crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
                                                       item_uri, recovery_point_id, aad_result).properties
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
@@ -799,8 +812,57 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'alternate_directory_paths': alternate_directory_paths}
 
 
-def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
+def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name):
+    protection_intent_client = backup_protection_intent_cf(cmd.cli_ctx)
+    protection_containers_client = protection_containers_cf(cmd.cli_ctx)
 
+    for item in paged_items:
+        item_id = item.id
+        protectable_item_type = item.properties.protectable_item_type
+        protectable_item_name = item.properties.friendly_name
+        container_name = cust_help.get_protection_container_uri_from_id(item_id)
+
+        # fetch AutoProtectionPolicy for SQLInstance and SQLAG
+        if protectable_item_type and protectable_item_type.lower() in ['sqlinstance', 'sqlavailabilitygroupcontainer']:
+            setattr(item.properties, "auto_protection_policy", None)
+            filter_string = cust_help.get_filter_string({
+                'backupManagementType': "AzureWorkload",
+                'itemType': protectable_item_type,
+                'itemName': protectable_item_name,
+                'parentName': container_name})
+            protection_intents = protection_intent_client.list(vault_name, resource_group_name, filter_string)
+            paged_protection_intents = cust_help.get_list_from_paged_response(protection_intents)
+
+            if paged_protection_intents:
+                item.properties.auto_protection_policy = paged_protection_intents[0].properties.policy_id
+
+        # fetch NodesList for SQLAG
+        if protectable_item_type and protectable_item_type.lower() == 'sqlavailabilitygroupcontainer':
+            setattr(item.properties, "nodes_list", None)
+            container = protection_containers_client.get(vault_name, resource_group_name, fabric_name, container_name)
+            if container.properties.extended_info:
+                item.properties.nodes_list = container.properties.extended_info.nodes_list
+
+
+def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    filter_string = cust_help.get_filter_string({
+        'restorePointQueryType': 'Log'})
+
+    client = recovery_points_cf(cmd.cli_ctx)
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+
+    # Get recovery points
+    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
+    paged_recovery_points = cust_help.get_none_one_or_many(cust_help.get_list_from_paged_response(recovery_points))
+    _check_none_and_many(paged_recovery_points, "Log time range")
+    return paged_recovery_points.properties.time_ranges
+
+
+def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
     if rehydration_priority is None:
         if item_type.lower() == "saphana":
             if log_point_in_time is not None:
@@ -868,10 +930,10 @@ def _get_protectable_container_name(cmd, resource_group_name, vault_name, resour
 
 def _check_none_and_many(item, item_name):
     if item is None:
-        error_text = "{} must be provided.".format(item_name)
+        error_text = "Could not find the {}.".format(item_name)
         az_error = ResourceNotFoundError(error_text)
         raise az_error
     if isinstance(item, list):
-        error_text = "Multiple {}s found. Please check if you have given correct target server type.".format(item_name)
+        error_text = "Multiple {}s found.".format(item_name)
         az_error = InvalidArgumentValueError(error_text)
         raise az_error

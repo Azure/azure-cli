@@ -5,7 +5,7 @@
 
 import time
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, create_random_name, record_only
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 

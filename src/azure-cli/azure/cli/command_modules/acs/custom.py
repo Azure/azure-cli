@@ -79,6 +79,7 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_agent_pools
+from ._client_factory import cf_snapshots_client
 from ._client_factory import get_msi_client
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
@@ -110,6 +111,7 @@ from .addonconfiguration import (
     ensure_container_insights_for_monitoring,
 )
 from ._resourcegroup import get_rg_location
+from ._validators import extract_comma_separated_string
 
 logger = get_logger(__name__)
 
@@ -847,6 +849,30 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
 
 def _get_user_assigned_identity_object_id(cli_ctx, resource_id):
     return _get_user_assigned_identity(cli_ctx, resource_id).principal_id
+
+
+_re_snapshot_resource_id = re.compile(
+    r'/subscriptions/(.*?)/resourcegroups/(.*?)/providers/microsoft.containerservice/snapshots/(.*)',
+    flags=re.IGNORECASE)
+
+
+def _get_snapshot(cli_ctx, snapshot_id):
+    snapshot_id = snapshot_id.lower()
+    match = _re_snapshot_resource_id.search(snapshot_id)
+    if match:
+        subscription_id = match.group(1)
+        resource_group_name = match.group(2)
+        snapshot_name = match.group(3)
+        snapshot_client = cf_snapshots_client(cli_ctx, subscription_id=subscription_id)
+        try:
+            snapshot = snapshot_client.get(resource_group_name, snapshot_name)
+        except CloudError as ex:
+            if 'was not found' in ex.message:
+                raise ResourceNotFoundError("Snapshot {} not found.".format(snapshot_id))
+            raise CLIError(ex.message)
+        return snapshot
+    raise InvalidArgumentValueError(
+        "Cannot parse snapshot name from provided resource id {}.".format(snapshot_id))
 
 
 # pylint: disable=too-many-locals
@@ -1603,103 +1629,111 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
         raise ValidationError("Can not find kubectl executable in PATH")
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(
-        cmd, client, resource_group_name, name, admin=False, path=browse_path
-    )
-
-    # Get kubectl minor version
-    kubectl_minor_version = -1
+    return_msg = None
+    fd, browse_path = tempfile.mkstemp()
     try:
-        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-        output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        jsonS, _ = output.communicate()
-        kubectl_version = json.loads(jsonS)
-        # Remove any non-numeric characters like + from minor version
-        kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
-        kubectl_server_minor_version = int(
-            kubectl_version["serverVersion"]["minor"])
-        kubectl_server_patch = int(
-            kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
-        if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
-                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                           'more information.')
-    except subprocess.CalledProcessError as err:
-        raise ValidationError(
-            "Could not find kubectl minor version: {}".format(err))
-    if kubectl_minor_version == -1:
-        raise ValidationError("Failed to get kubectl version")
-
-    podName = "canipull-" + str(uuid.uuid4())
-    overrides = {
-        "spec": {
-            "restartPolicy": "Never",
-            "hostNetwork": True,
-            "containers": [
-                {
-                    "securityContext": {"runAsUser": 0},
-                    "name": podName,
-                    "image": CONST_CANIPULL_IMAGE,
-                    "args": ["-v6", acr],
-                    "stdin": True,
-                    "stdinOnce": True,
-                    "tty": True,
-                    "volumeMounts": [
-                        {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                        {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                    ],
-                }
-            ],
-            "tolerations": [
-                {"key": "CriticalAddonsOnly", "operator": "Exists"},
-                {"effect": "NoExecute", "operator": "Exists"},
-            ],
-            "volumes": [
-                {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
-                {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
-            ],
-            "nodeSelector": {"kubernetes.io/os": "linux"},
-        }
-    }
-
-    try:
-        cmd = [
-            "kubectl",
-            "run",
-            "--kubeconfig",
-            browse_path,
-            "--rm",
-            "--quiet",
-            "--image",
-            CONST_CANIPULL_IMAGE,
-            "--overrides",
-            json.dumps(overrides),
-            "-it",
-            podName,
-            "--namespace=default",
-        ]
-
-        # Support kubectl versons < 1.18
-        if kubectl_minor_version < 18:
-            cmd += ["--generator=run-pod/v1"]
-
-        output = subprocess.check_output(
-            cmd,
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
+        aks_get_credentials(
+            cmd, client, resource_group_name, name, admin=False, path=browse_path
         )
-    except subprocess.CalledProcessError as err:
-        raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
-    if output:
-        print(output)
-        test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
-        if test_hook_data:
-            test_configs = test_hook_data.get("configs", None)
-            if test_configs and test_configs.get("returnOutput", False):
-                return output
-    else:
-        raise AzureInternalError("Failed to check the ACR.")
+
+        # Get kubectl minor version
+        kubectl_minor_version = -1
+        try:
+            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
+            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            jsonS, _ = output.communicate()
+            kubectl_version = json.loads(jsonS)
+            # Remove any non-numeric characters like + from minor version
+            kubectl_minor_version = int(re.sub(r"\D", "", kubectl_version["clientVersion"]["minor"]))
+            kubectl_server_minor_version = int(
+                kubectl_version["serverVersion"]["minor"])
+            kubectl_server_patch = int(
+                kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
+            if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
+                logger.warning(
+                    "There is a known issue for Kubernetes versions < 1.17.14 when connecting to "
+                    "ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for"
+                    "more information."
+                )
+        except subprocess.CalledProcessError as err:
+            raise ValidationError(
+                "Could not find kubectl minor version: {}".format(err))
+        if kubectl_minor_version == -1:
+            raise ValidationError("Failed to get kubectl version")
+
+        podName = "canipull-" + str(uuid.uuid4())
+        overrides = {
+            "spec": {
+                "restartPolicy": "Never",
+                "hostNetwork": True,
+                "containers": [
+                    {
+                        "securityContext": {"runAsUser": 0},
+                        "name": podName,
+                        "image": CONST_CANIPULL_IMAGE,
+                        "args": ["-v6", acr],
+                        "stdin": True,
+                        "stdinOnce": True,
+                        "tty": True,
+                        "volumeMounts": [
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
+                        ],
+                    }
+                ],
+                "tolerations": [
+                    {"key": "CriticalAddonsOnly", "operator": "Exists"},
+                    {"effect": "NoExecute", "operator": "Exists"},
+                ],
+                "volumes": [
+                    {"name": "azurejson", "hostPath": {"path": "/etc/kubernetes"}},
+                    {"name": "sslcerts", "hostPath": {"path": "/etc/ssl/certs"}},
+                ],
+                "nodeSelector": {"kubernetes.io/os": "linux"},
+            }
+        }
+
+        try:
+            cmd = [
+                "kubectl",
+                "run",
+                "--kubeconfig",
+                browse_path,
+                "--rm",
+                "--quiet",
+                "--image",
+                CONST_CANIPULL_IMAGE,
+                "--overrides",
+                json.dumps(overrides),
+                "-it",
+                podName,
+                "--namespace=default",
+            ]
+
+            # Support kubectl versons < 1.18
+            if kubectl_minor_version < 18:
+                cmd += ["--generator=run-pod/v1"]
+
+            output = subprocess.check_output(
+                cmd,
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+        except subprocess.CalledProcessError as err:
+            raise AzureInternalError("Failed to check the ACR: {} Command output: {}".format(err, err.output))
+        if output:
+            print(output)
+            # only return the output in test case "test_aks_create_attach_acr"
+            test_hook_data = get_cmd_test_hook_data("test_aks_create_attach_acr.hook")
+            if test_hook_data:
+                test_configs = test_hook_data.get("configs", None)
+                if test_configs and test_configs.get("returnOutput", False):
+                    return_msg = output
+        else:
+            raise AzureInternalError("Failed to check the ACR.")
+    finally:
+        os.close(fd)
+    return return_msg
 
 
 # pylint: disable=too-many-statements,too-many-branches
@@ -1750,121 +1784,155 @@ def _aks_browse(
     if not which('kubectl'):
         raise FileOperationError('Can not find kubectl executable in PATH')
 
-    _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(cmd, client, resource_group_name,
-                        name, admin=False, path=browse_path)
-
-    # find the dashboard pod's name
+    fd, browse_path = tempfile.mkstemp()
     try:
-        dashboard_pod = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--output", "name", "--selector", "k8s-app=kubernetes-dashboard"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
-    if dashboard_pod:
-        # remove any "pods/" or "pod/" prefix from the name
-        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
-    else:
-        raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+        aks_get_credentials(cmd, client, resource_group_name,
+                            name, admin=False, path=browse_path)
 
-    # find the port
-    try:
-        dashboard_port = subprocess.check_output(
-            ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system",
-             "--selector", "k8s-app=kubernetes-dashboard",
-             "--output", "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'"],
-            universal_newlines=True,
-            stderr=subprocess.STDOUT,
-        )
-        # output format: "'{port}'"
-        dashboard_port = int((dashboard_port.replace("'", "")))
-    except subprocess.CalledProcessError as err:
-        raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
-
-    # use https if dashboard container is using https
-    if dashboard_port == 8443:
-        protocol = 'https'
-    else:
-        protocol = 'http'
-
-    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
-                                                                                                        protocol)
-    # launch kubectl port-forward locally to access the remote dashboard
-    if in_cloud_console():
-        # TODO: better error handling here.
-        response = requests.post(
-            'http://localhost:8888/openport/{0}'.format(listen_port))
-        result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
-            result['url'], protocol)
-        term_id = os.environ.get('ACC_TERM_ID')
-        if term_id:
-            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
-                                     json={"url": dashboardURL})
-        logger.warning(
-            'To view the console, please open %s in a new tab', dashboardURL)
-    else:
-        logger.warning('Proxy running on %s', proxy_url)
-
-    timeout = None
-    test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
-    if test_hook_data:
-        test_configs = test_hook_data.get("configs", None)
-        if test_configs and test_configs.get("enableTimeout", False):
-            timeout = test_configs.get("timeoutInterval", None)
-    logger.warning('Press CTRL+C to close the tunnel...')
-    if not disable_browser:
-        wait_then_open_async(dashboardURL)
-    try:
+        # find the dashboard pod's name
         try:
-            subprocess.check_output(
-                ["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
-                 listen_address, "--port", listen_port],
+            dashboard_pod = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--output",
+                    "name",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                ],
                 universal_newlines=True,
                 stderr=subprocess.STDOUT,
-                timeout=timeout,
             )
         except subprocess.CalledProcessError as err:
-            if err.output.find('unknown flag: --address'):
-                return_msg = "Test Invalid Address! "
-                if listen_address != '127.0.0.1':
-                    logger.warning(
-                        '"--address" is only supported in kubectl v1.13 and later.')
-                    logger.warning(
-                        'The "--listen-address" argument will be ignored.')
-                try:
-                    subprocess.call(["kubectl", "--kubeconfig",
-                                    browse_path, "proxy", "--port", listen_port], timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-                    return_msg = return_msg if return_msg else ""
-                    return_msg += "Test Passed!"
-                except subprocess.CalledProcessError as new_err:
+            raise ResourceNotFoundError('Could not find dashboard pod: {} Command output: {}'.format(err, err.output))
+        if dashboard_pod:
+            # remove any "pods/" or "pod/" prefix from the name
+            dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
+        else:
+            raise ResourceNotFoundError("Couldn't find the Kubernetes dashboard pod.")
+
+        # find the port
+        try:
+            dashboard_port = subprocess.check_output(
+                [
+                    "kubectl",
+                    "get",
+                    "pods",
+                    "--kubeconfig",
+                    browse_path,
+                    "--namespace",
+                    "kube-system",
+                    "--selector",
+                    "k8s-app=kubernetes-dashboard",
+                    "--output",
+                    "jsonpath='{.items[0].spec.containers[0].ports[0].containerPort}'",
+                ],
+                universal_newlines=True,
+                stderr=subprocess.STDOUT,
+            )
+            # output format: "'{port}'"
+            dashboard_port = int((dashboard_port.replace("'", "")))
+        except subprocess.CalledProcessError as err:
+            raise ResourceNotFoundError('Could not find dashboard port: {} Command output: {}'.format(err, err.output))
+
+        # use https if dashboard container is using https
+        if dashboard_port == 8443:
+            protocol = 'https'
+        else:
+            protocol = 'http'
+
+        proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+        dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                            protocol)
+        # launch kubectl port-forward locally to access the remote dashboard
+        if in_cloud_console():
+            # TODO: better error handling here.
+            response = requests.post(
+                'http://localhost:8888/openport/{0}'.format(listen_port))
+            result = json.loads(response.text)
+            dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+                result['url'], protocol)
+            term_id = os.environ.get('ACC_TERM_ID')
+            if term_id:
+                response = requests.post(
+                    "http://localhost:8888/openLink/{0}".format(term_id),
+                    json={"url": dashboardURL},
+                )
+            logger.warning(
+                'To view the console, please open %s in a new tab', dashboardURL)
+        else:
+            logger.warning('Proxy running on %s', proxy_url)
+
+        timeout = None
+        test_hook_data = get_cmd_test_hook_data("test_aks_browse_legacy.hook")
+        if test_hook_data:
+            test_configs = test_hook_data.get("configs", None)
+            if test_configs and test_configs.get("enableTimeout", False):
+                timeout = test_configs.get("timeoutInterval", None)
+        logger.warning('Press CTRL+C to close the tunnel...')
+        if not disable_browser:
+            wait_then_open_async(dashboardURL)
+        try:
+            try:
+                subprocess.check_output(
+                    [
+                        "kubectl",
+                        "--kubeconfig",
+                        browse_path,
+                        "proxy",
+                        "--address",
+                        listen_address,
+                        "--port",
+                        listen_port,
+                    ],
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                    timeout=timeout,
+                )
+            except subprocess.CalledProcessError as err:
+                if err.output.find('unknown flag: --address'):
+                    return_msg = "Test Invalid Address! "
+                    if listen_address != '127.0.0.1':
+                        logger.warning(
+                            '"--address" is only supported in kubectl v1.13 and later.')
+                        logger.warning(
+                            'The "--listen-address" argument will be ignored.')
+                    try:
+                        subprocess.call(["kubectl", "--kubeconfig",
+                                        browse_path, "proxy", "--port", listen_port], timeout=timeout)
+                    except subprocess.TimeoutExpired:
+                        logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                        return_msg = return_msg if return_msg else ""
+                        return_msg += "Test Passed!"
+                    except subprocess.CalledProcessError as new_err:
+                        raise AzureInternalError(
+                            "Could not open proxy: {} Command output: {}".format(
+                                new_err, new_err.output
+                            )
+                        )
+                else:
                     raise AzureInternalError(
                         "Could not open proxy: {} Command output: {}".format(
-                            new_err, new_err.output
+                            err, err.output
                         )
                     )
-            else:
-                raise AzureInternalError(
-                    "Could not open proxy: {} Command output: {}".format(
-                        err, err.output
-                    )
-                )
-        except subprocess.TimeoutExpired:
-            logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
-            return_msg = return_msg if return_msg else ""
-            return_msg += "Test Passed!"
-    except KeyboardInterrupt:
-        # Let command processing finish gracefully after the user presses [Ctrl+C]
-        pass
+            except subprocess.TimeoutExpired:
+                logger.warning("Currently in a test environment, the proxy is closed due to a preset timeout!")
+                return_msg = return_msg if return_msg else ""
+                return_msg += "Test Passed!"
+        except KeyboardInterrupt:
+            # Let command processing finish gracefully after the user presses [Ctrl+C]
+            pass
+        finally:
+            if in_cloud_console():
+                requests.post('http://localhost:8888/closeport/8001')
     finally:
-        if in_cloud_console():
-            requests.post('http://localhost:8888/closeport/8001')
+        os.close(fd)
     return return_msg
 
 
@@ -1917,7 +1985,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_password=None,
                enable_ahub=False,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
+               node_vm_size=None,
                node_osdisk_type=None,
                node_osdisk_size=0,
                node_osdisk_diskencryptionset_id=None,
@@ -1989,11 +2057,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_ultra_ssd=False,
                edge_zone=None,
                disable_local_accounts=False,
+               enable_fips_image=False,
                no_wait=False,
                yes=False,
                enable_azure_rbac=False,
-               aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
+               aks_custom_headers=None,
+               snapshot_id=None,
+               ):
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
     # decorator pattern
@@ -2282,7 +2353,7 @@ def aks_update(cmd, client, resource_group_name, name,
                tags=None,
                nodepool_labels=None,
                aks_custom_headers=None):
-    # get all the original parameters and save them as a dictionary
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
 
     # decorator pattern
@@ -2294,12 +2365,12 @@ def aks_update(cmd, client, resource_group_name, name,
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
     )
     try:
-        # construct mc profile
+        # update mc profile
         mc = aks_update_decorator.update_default_mc_profile()
     except DecoratorEarlyExitException:
         # exit gracefully
         return None
-    # send request to create a real managed cluster
+    # send request to update the real managed cluster
     return aks_update_decorator.update_mc(mc)
 
 
@@ -2382,6 +2453,7 @@ def aks_upgrade(cmd,
     if upgrade_all:
         for agent_profile in instance.agent_pool_profiles:
             agent_profile.orchestrator_version = kubernetes_version
+            agent_profile.creation_data = None
 
     # null out the SP and AAD profile because otherwise validation complains
     instance.service_principal_profile = None
@@ -2390,14 +2462,19 @@ def aks_upgrade(cmd,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
-def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
+def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name,
+                                           snapshot_id=None):
+    headers = {}
+    if snapshot_id:
+        headers["AKSSnapshotId"] = snapshot_id
+
     return sdk_no_wait(
         no_wait,
         client.begin_upgrade_node_image_version,
         resource_group_name,
         cluster_name,
         nodepool_name,
-    )
+        headers=headers)
 
 
 def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
@@ -3053,7 +3130,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       vnet_subnet_id=None,
                       ppg=None,
                       max_pods=0,
-                      os_type="Linux",
+                      os_type=None,
                       os_sku=None,
                       min_count=None,
                       max_count=None,
@@ -3068,7 +3145,10 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       mode="User",
                       enable_encryption_at_host=False,
                       enable_ultra_ssd=False,
-                      no_wait=False):
+                      enable_fips_image=False,
+                      snapshot_id=None,
+                      no_wait=False,
+                      aks_custom_headers=None):
     AgentPool = cmd.get_models('AgentPool',
                                resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                operation_group='agent_pools')
@@ -3083,6 +3163,27 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     upgradeSettings = AgentPoolUpgradeSettings()
     taints_array = []
+    creationData = None
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    if snapshot_id:
+        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version:
+            kubernetes_version = snapshot.kubernetes_version
+        if not os_type:
+            os_type = snapshot.os_type
+        if not os_sku:
+            os_sku = snapshot.os_sku
+        if not node_vm_size:
+            node_vm_size = snapshot.vm_size
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
+
+    if not os_type:
+        os_type = "Linux"
 
     if node_taints is not None:
         for taint in node_taints.split(','):
@@ -3123,7 +3224,9 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
-        mode=mode
+        mode=mode,
+        enable_fips=enable_fips_image,
+        creation_data=creationData
     )
 
     if priority == CONST_SCALE_SET_PRIORITY_SPOT:
@@ -3141,6 +3244,14 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     if node_osdisk_type:
         agent_pool.os_disk_type = node_osdisk_type
 
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3148,6 +3259,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         cluster_name,
         nodepool_name,
         agent_pool,
+        headers=aks_custom_headers,
     )
 
 
@@ -3178,7 +3290,9 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           kubernetes_version='',
                           node_image_only=False,
                           max_surge=None,
-                          no_wait=False):
+                          no_wait=False,
+                          aks_custom_headers=None,
+                          snapshot_id=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings', operation_group='agent_pools')
     if kubernetes_version != '' and node_image_only:
         raise CLIError(
@@ -3200,16 +3314,40 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                                                       client,
                                                       resource_group_name,
                                                       cluster_name,
-                                                      nodepool_name)
+                                                      nodepool_name,
+                                                      snapshot_id)
+
+    # load model CreationData
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+
+    creationData = None
+    if snapshot_id:
+        snapshot = _get_snapshot(cmd.cli_ctx, snapshot_id)
+        if not kubernetes_version and not node_image_only:
+            kubernetes_version = snapshot.kubernetes_version
+
+        creationData = CreationData(
+            source_resource_id=snapshot_id
+        )
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     instance.orchestrator_version = kubernetes_version
+    instance.creation_data = creationData
 
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
 
     return sdk_no_wait(
         no_wait,
@@ -3218,9 +3356,11 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
+# pylint: disable=too-many-boolean-expressions
 def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepool_name,
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
@@ -3230,7 +3370,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          max_surge=None,
                          mode=None,
                          labels=None,
-                         no_wait=False):
+                         node_taints=None,
+                         no_wait=False,
+                         aks_custom_headers=None):
     AgentPoolUpgradeSettings = cmd.get_models('AgentPoolUpgradeSettings',
                                               resource_type=ResourceType.MGMT_CONTAINERSERVICE,
                                               operation_group='agent_pools')
@@ -3242,11 +3384,11 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge and not labels):
+    if (update_autoscaler == 0 and not tags and not mode and not max_surge and labels is None and node_taints is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge" or "--labels"')
+                       '"--tags" or "--mode" or "--max-surge" or "--labels"or "--node-taints"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -3294,6 +3436,26 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
     if labels is not None:
         instance.node_labels = labels
 
+    if node_taints is not None:
+        taints_array = []
+        if node_taints != '':
+            for taint in node_taints.split(','):
+                try:
+                    taint = taint.strip()
+                    taints_array.append(taint)
+                except ValueError:
+                    raise InvalidArgumentValueError(
+                        'Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
+        instance.node_taints = taints_array
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -3301,6 +3463,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         cluster_name,
         nodepool_name,
         instance,
+        headers=aks_custom_headers,
     )
 
 
@@ -3995,3 +4158,69 @@ def _ensure_cluster_identity_permission_on_kubelet_identity(cmd, cluster_identit
                                 is_service_principal=False, scope=scope):
         raise UnauthorizedError('Could not grant Managed Identity Operator '
                                 'permission to cluster identity at scope {}'.format(scope))
+
+
+def aks_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+                        client,
+                        resource_group_name,
+                        name,
+                        nodepool_id,
+                        location=None,
+                        tags=None,
+                        aks_custom_headers=None,
+                        no_wait=False):
+
+    rg_location = get_rg_location(cmd.cli_ctx, resource_group_name)
+    if location is None:
+        location = rg_location
+
+    # load model CreationData, Snapshot
+    from azure.cli.command_modules.acs.decorator import AKSModels
+    CreationData = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).CreationData
+    Snapshot = AKSModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).Snapshot
+
+    creationData = CreationData(
+        source_resource_id=nodepool_id
+    )
+
+    snapshot = Snapshot(
+        name=name,
+        tags=tags,
+        location=location,
+        creation_data=creationData
+    )
+
+    # custom headers
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+    )
+    return client.create_or_update(resource_group_name, name, snapshot, headers=aks_custom_headers)
+
+
+def aks_snapshot_show(cmd, client, resource_group_name, name):   # pylint: disable=unused-argument
+    snapshot = client.get(resource_group_name, name)
+    return snapshot
+
+
+def aks_snapshot_delete(cmd,    # pylint: disable=unused-argument
+                        client,
+                        resource_group_name,
+                        name,
+                        no_wait=False,
+                        yes=False):
+
+    msg = 'This will delete the snapshot "{}" in resource group "{}", Are you sure?'.format(name, resource_group_name)
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
+    return client.delete(resource_group_name, name)
+
+
+def aks_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
+    if resource_group_name is None or resource_group_name == '':
+        return client.list()
+
+    return client.list_by_resource_group(resource_group_name)

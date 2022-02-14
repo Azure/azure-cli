@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only, StorageAccountPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
 class TestLogProfileScenarios(ScenarioTest):
@@ -30,6 +30,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('retentionInDays', 100)
         ])
 
+
         self.cmd("monitor log-analytics workspace list-usages -g {rg} -n {name}")
         self.cmd("monitor log-analytics workspace list -g {rg}", checks=[
             self.check('length(@)', 1),
@@ -52,6 +53,11 @@ class TestLogProfileScenarios(ScenarioTest):
             "monitor log-analytics workspace pack disable -g {rg} --workspace-name {name} -n AzureSecurityOfThings")
         self.cmd("monitor log-analytics workspace pack list -g {rg} --workspace-name {name}", checks=[
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[False]')
+        ])
+
+        # test list-management-groups
+        self.cmd("monitor log-analytics workspace list-management-groups -g {rg} -n {name}", checks=[
+            self.check('length(@)', 0)
         ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
@@ -346,6 +352,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      # self.check('length(tags)', 2)
                  ])
 
+
         self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}', checks=[
             # self.check('category', '{category}'),
             # self.check('displayName', '{display_name}'),
@@ -355,7 +362,7 @@ class TestLogProfileScenarios(ScenarioTest):
             # self.check('length(tags)', 2)
         ])
         self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
-            self.check('length(@)', 2)
+            self.check('length(@)', 1)
         ])
 
         self.cmd(
@@ -422,7 +429,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
@@ -432,7 +439,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'you can create 10 export rules to 10 different destinations'):
+        with self.assertRaisesRegex(HttpResponseError,'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[

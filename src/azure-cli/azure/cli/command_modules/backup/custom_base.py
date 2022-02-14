@@ -9,7 +9,7 @@ from azure.cli.command_modules.backup import custom_help
 import azure.cli.command_modules.backup.custom_common as common
 from azure.cli.command_modules.backup import custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
-    backup_protection_containers_cf, backup_protectable_items_cf
+    backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError
 # pylint: disable=import-error
@@ -274,7 +274,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                 Multiple containers with same Friendly Name found. Please give native names instead.
                 """)
             container_uri = container.name
-    return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type,
+    return custom_wl.list_protectable_items(cmd, client, resource_group_name, vault_name, workload_type,
                                             backup_management_type, container_uri, protectable_item_type, server_name)
 
 
@@ -298,30 +298,22 @@ def initialize_protectable_items(client, resource_group_name, vault_name, contai
 
 def unregister_container(cmd, client, vault_name, resource_group_name, container_name, backup_management_type=None):
     container = None
-    # container_friendly_name = None
+    container_friendly_name = None
     container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
-    if not custom_help.is_native_name(container_name):
-        containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
-        container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
-                                   backup_management_type)
-        container_name = container.name
-        # container_friendly_name = container.properties.friendly_name
+
+    containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
+    container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
+                               backup_management_type)
+    container_name = container.name
+    container_friendly_name = container.properties.friendly_name
 
     if container_type.lower() == "azurestorage":
         return custom_afs.unregister_afs_container(cmd, client, vault_name, resource_group_name, container_name)
     if container_type.lower() == "azureworkload":
         return custom_wl.unregister_wl_container(cmd, client, vault_name, resource_group_name, container_name)
-    # if container_type.lower() == "mab":
-    #    if container_friendly_name is None:
-    #        containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
-    #        container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
-    #                                   backup_management_type)
-    #        container_friendly_name = container.properties.friendly_name
-    #    mab_client = registered_identities_cf(cmd.cli_ctx)
-    #    result = mab_client.delete(resource_group_name, vault_name, container_friendly_name,
-    #                               cls=custom_help.get_pipeline_response)
-    #    return custom_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name,
-    #                                                container_name)
+    if container_type.lower() == "mab":
+        mab_client = registered_identities_cf(cmd.cli_ctx)
+        mab_client.delete(resource_group_name, vault_name, container_friendly_name)
     return None
 
 

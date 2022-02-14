@@ -440,6 +440,8 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(invitation_expiration_in_hours, arg_list[2].num_hours_to_expiration)
 
     def test_update_staticsite_users_with_resourcegroup_with_all_args(self):
+        from azure.mgmt.web.models import StaticSiteUserARMResource
+
         roles = 'Contributor,Reviewer'
         authentication_provider = 'GitHub'
         user_details = 'JohnDoe'
@@ -448,10 +450,12 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
                                 user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
 
-        self.staticapp_client.update_static_site_user.assert_called_once_with(
-            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+        self.staticapp_client.update_static_site_user.assert_called_once_with(self.rg1, self.name1,
+            authentication_provider, user_id, static_site_user_envelope=StaticSiteUserARMResource(roles=roles))
 
     def test_update_staticsite_users_with_resourcegroup_without_auth_provider(self):
+        from azure.mgmt.web.models import StaticSiteUserARMResource
+
         roles = 'Contributor,Reviewer'
         user_details = 'JohnDoe'
         authentication_provider = 'GitHub'
@@ -461,8 +465,8 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite_users(self.mock_cmd, self.name1, roles,
                                 user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
 
-        self.staticapp_client.update_static_site_user.assert_called_once_with(
-            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+        self.staticapp_client.update_static_site_user.assert_called_once_with(self.rg1, self.name1,
+            authentication_provider, user_id, static_site_user_envelope=StaticSiteUserARMResource(roles=roles))
 
     def test_update_staticsite_users_with_resourcegroup_without_auth_provider_user_not_found(self):
         roles = 'Contributor,Reviewer'
@@ -476,6 +480,8 @@ class TestStaticAppCommands(unittest.TestCase):
                                     user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
 
     def test_update_staticsite_users_with_resourcegroup_without_user_id_without_auth_provider(self):
+        from azure.mgmt.web.models import StaticSiteUserARMResource
+
         roles = 'Contributor,Reviewer'
         user_details = 'JohnDoe'
         authentication_provider = 'GitHub'
@@ -485,8 +491,8 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite_users(self.mock_cmd, self.name1, roles,
                                 user_details=user_details, resource_group_name=self.rg1)
 
-        self.staticapp_client.update_static_site_user.assert_called_once_with(
-            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+        self.staticapp_client.update_static_site_user.assert_called_once_with(self.rg1, self.name1,
+            authentication_provider, user_id, static_site_user_envelope=StaticSiteUserARMResource(roles=roles))
 
     def test_update_staticsite_users_with_resourcegroup_without_user_id_without_auth_provider_user_not_found(self):
         roles = 'Contributor,Reviewer'
@@ -499,6 +505,8 @@ class TestStaticAppCommands(unittest.TestCase):
                                     user_details=user_details, resource_group_name=self.rg1)
 
     def test_update_staticsite_users_with_resourcegroup_without_user_id(self):
+        from azure.mgmt.web.models import StaticSiteUserARMResource
+
         roles = 'Contributor,Reviewer'
         user_details = 'JohnDoe'
         authentication_provider = 'GitHub'
@@ -508,8 +516,8 @@ class TestStaticAppCommands(unittest.TestCase):
         update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
                                 user_details=user_details, resource_group_name=self.rg1)
 
-        self.staticapp_client.update_static_site_user.assert_called_once_with(
-            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+        self.staticapp_client.update_static_site_user.assert_called_once_with(self.rg1, self.name1,
+            authentication_provider, user_id, static_site_user_envelope=StaticSiteUserARMResource(roles=roles))
 
     def test_update_staticsite_users_with_resourcegroup_without_user_id_user_not_found(self):
         roles = 'Contributor,Reviewer'

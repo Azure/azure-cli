@@ -5,9 +5,11 @@
 
 import json
 import os
+import pickle
 import re
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.decorators import retry
 from msal import PublicClientApplication
 
 from knack.log import get_logger
@@ -45,7 +47,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     # It follows singleton pattern so that _secret_file is read only once.
     _service_principal_store_instance = None
 
-    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False):
+    def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -58,7 +60,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.authority = authority
         self.tenant_id = tenant_id
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self.encrypt = encrypt
+        self._encrypt = encrypt
+        self._use_msal_http_cache = use_msal_http_cache
 
         # Build the authority in MSAL style
         self._msal_authority, self._is_adfs = _get_authority_url(authority, tenant_id)
@@ -80,7 +83,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if not Identity._msal_token_cache:
             Identity._msal_token_cache = self._load_msal_token_cache()
 
-        if not Identity._msal_http_cache:
+        if self._use_msal_http_cache and not Identity._msal_http_cache:
             Identity._msal_http_cache = self._load_msal_http_cache()
 
         return {
@@ -100,25 +103,46 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def _load_msal_token_cache(self):
         # Store for user token persistence
-        cache = load_persisted_token_cache(self._token_cache_file, self.encrypt)
+        cache = load_persisted_token_cache(self._token_cache_file, self._encrypt)
         return cache
+
+    @retry()
+    def __load_msal_http_cache(self):
+        """Load MSAL HTTP cache with retry. If it still fails at last, raise the original exception as-is."""
+        logger.debug("__load_msal_http_cache: %s", self._http_cache_file)
+        try:
+            with open(self._http_cache_file, 'rb') as f:
+                return pickle.load(f)
+        except FileNotFoundError:
+            # The cache file has not been created. This is expected.
+            logger.debug("%s not found. Using a fresh one.", self._http_cache_file)
+            return {}
+
+    def _dump_msal_http_cache(self):
+        logger.debug("_dump_msal_http_cache: %s", self._http_cache_file)
+        with open(self._http_cache_file, 'wb') as f:
+            # At this point, an empty cache file will be created. Loading this cache file will
+            # trigger EOFError. This can be simulated by adding time.sleep(30) here.
+            # So, during loading, EOFError is ignored.
+            pickle.dump(self._msal_http_cache, f)
 
     def _load_msal_http_cache(self):
         import atexit
-        import pickle
 
         logger.debug("_load_msal_http_cache: %s", self._http_cache_file)
         try:
-            with open(self._http_cache_file, 'rb') as f:
-                persisted_http_cache = pickle.load(f)
-        except (pickle.UnpicklingError, FileNotFoundError) as ex:
-            logger.debug("Failed to load MSAL HTTP cache: %s", ex)
+            persisted_http_cache = self.__load_msal_http_cache()
+        except (pickle.UnpicklingError, EOFError) as ex:
+            # We still get exception after retry:
+            # - pickle.UnpicklingError is caused by corrupted cache file, perhaps due to concurrent writes.
+            # - EOFError is caused by empty cache file created by other az instance, but hasn't been filled yet.
+            logger.debug("Failed to load MSAL HTTP cache: %s. Using a fresh one.", ex)
             persisted_http_cache = {}  # Ignore a non-exist or corrupted http_cache
-        atexit.register(lambda: pickle.dump(
-            # When exit, flush it back to the file.
-            # If 2 processes write at the same time, the cache will be corrupted,
-            # but that is fine. Subsequent runs would reach eventual consistency.
-            persisted_http_cache, open(self._http_cache_file, 'wb')))
+
+        # When exiting, flush it back to the file.
+        # If 2 processes write at the same time, the cache will be corrupted,
+        # but that is fine. Subsequent runs would reach eventual consistency.
+        atexit.register(self._dump_msal_http_cache)
 
         return persisted_http_cache
 
@@ -128,14 +152,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         The instance is lazily created.
         """
         if not Identity._service_principal_store_instance:
-            store = load_secret_store(self._secret_file, self.encrypt)
+            store = load_secret_store(self._secret_file, self._encrypt)
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
 
@@ -263,8 +287,9 @@ class ServicePrincipalAuth:
         """
         entry = {}
         if secret_or_certificate:
-            if os.path.isfile(secret_or_certificate):
-                entry[_CERTIFICATE] = secret_or_certificate
+            user_expanded = os.path.expanduser(secret_or_certificate)
+            if os.path.isfile(user_expanded):
+                entry[_CERTIFICATE] = user_expanded
                 if use_cert_sn_issuer:
                     entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
             else:

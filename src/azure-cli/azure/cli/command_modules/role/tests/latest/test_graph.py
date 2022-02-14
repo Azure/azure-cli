@@ -8,7 +8,7 @@ import unittest
 import datetime
 import dateutil
 import dateutil.parser
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NAME
 from knack.util import CLIError
 
@@ -23,7 +23,6 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
         result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
                           checks=self.check('displayName', '{display_name}')).get_output_in_json()
 
-        self.assertEqual(result['name'], result['appId'])
         self.kwargs['app_id'] = result['appId']
 
         # show/list app
@@ -289,11 +288,37 @@ class ApplicationSetScenarioTest(ScenarioTest):
 class CreateForRbacScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    def test_revoke_sp_for_rbac(self):
+    def test_create_for_rbac_no_role_assignment(self):
+        # Verify no role assignment is created by default
         self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             result = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+
+            self.cmd('ad sp list --spn {app_id}',
+                     checks=self.check('length([*])', 1))
+
+            self.cmd('ad app list --app-id {app_id}',
+                     checks=self.check('length([*])', 1))
+
+            result = self.cmd('role assignment list --assignee {app_id}').get_output_in_json()
+
+            # No role assignment
+            self.assertFalse(result)
+
+            self.cmd('ad sp delete --id {app_id}')
+            self.cmd('ad sp list --spn {app_id}',
+                     checks=self.check('length([])', 0))
+            self.cmd('ad app list --app-id {app_id}',
+                     checks=self.check('length([])', 0))
+
+    @AllowLargeResponse()
+    def test_create_for_rbac_with_role_assignment(self):
+        self.kwargs['display_name'] = self.create_random_name(prefix='cli-graph', length=14)
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            result = self.cmd('ad sp create-for-rbac -n {display_name} --role Reader').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
 
             self.cmd('ad sp list --spn {app_id}',

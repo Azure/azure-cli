@@ -64,6 +64,14 @@ def load_arguments(self, _):
     disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
     ephemeral_placement_type = CLIArgumentType(options_list=['--ephemeral-os-disk-placement', '--ephemeral-placement'], arg_type=get_enum_type(['ResourceDisk', 'CacheDisk']), min_api='2019-12-01')
 
+    license_type = CLIArgumentType(
+        help="Specifies that the Windows image or disk was licensed on-premises. To enable Azure Hybrid Benefit for "
+             "Windows Server, use 'Windows_Server'. To enable Multi-tenant Hosting Rights for Windows 10, "
+             "use 'Windows_Client'. For more information see the Azure Windows VM online docs.",
+        arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE',
+                                'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES_SAP', 'SLES_HPC',
+                                'None', 'RHEL_ELS_6']))
+
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
 
@@ -112,6 +120,13 @@ def load_arguments(self, _):
         help='The query parameter to decide what shared galleries to fetch when doing listing operations. '
              'If not specified, list by subscription id.'
     )
+
+    marker_type = CLIArgumentType(
+        help='A string value that identifies the portion of the list of containers to be '
+             'returned with the next listing operation. The operation returns the NextMarker value within '
+             'the response body if the listing operation did not return all containers remaining to be listed '
+             'with the current page. If specified, this generator will begin returning results from the point '
+             'where the previous generator stopped.')
 
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
@@ -236,6 +251,8 @@ def load_arguments(self, _):
         c.argument('os_disk_size', type=int, help='Size of the OS disk in GB. Omit or specify 0 to use Azure\'s default OS disk size')
         c.argument('vnet', help='Name of VNET to deploy the build virtual machine. You should only specify it when subnet is a name')
         c.argument('subnet', help='Name or ID of subnet to deploy the build virtual machine')
+        c.argument('proxy_vm_size', help='Size of the virtual machine used to build, customize and capture images (Standard_D1_v2 for Gen1 images and Standard_D2ds_v4 for Gen2 images).')
+        c.argument('build_vm_identities', nargs='+', help='Optional configuration of the virtual network to use to deploy the build virtual machine in. Omit if no specific virtual network needs to be used.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -352,6 +369,8 @@ def load_arguments(self, _):
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
+        c.argument('v_cpus_available', type=int, min_api='2021-07-01', help='Specify the number of vCPUs available for the VM')
+        c.argument('v_cpus_per_core', type=int, min_api='2021-07-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -391,6 +410,8 @@ def load_arguments(self, _):
                    help='Enable vTPM. It is part of trusted launch.')
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
+        c.argument('v_cpus_available', type=int, min_api='2021-07-01', help='Specify the number of vCPUs available for the VM')
+        c.argument('v_cpus_per_core', type=int, min_api='2021-07-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -678,6 +699,7 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('force_deletion', action='store_true', is_preview=True, help='This property allow you to specify if virtual machines chosen for removal have to be force deleted when a virtual machine scale set is being scaled-in.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_spot_restore', arg_type=get_three_state_flag(), min_api='2021-04-01',
                    help='Enable the Spot-Try-Restore feature where evicted VMSS SPOT instances will be tried to be restored opportunistically based on capacity availability and pricing constraints')
@@ -991,8 +1013,18 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
-            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
             c.ignore('identity_role_id')
+
+    for scope in ['vm create', 'vmss create']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
+                       help='Role name or id the system assigned identity will have. '
+                            'Please note that the default value "Contributor" will be removed in the future, '
+                            "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
+
+    for scope in ['vm identity assign', 'vmss identity assign']:
+        with self.argument_context(scope) as c:
+            c.argument('identity_role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
     with self.argument_context('vm auto-shutdown') as c:
         c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
@@ -1050,11 +1082,7 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update', 'vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
-            license_msg = "Specifies that the Windows image or disk was licensed on-premises. " \
-                          "To enable Azure Hybrid Benefit for Windows Server, use 'Windows_Server'. " \
-                          "To enable Multitenant Hosting Rights for Windows 10, use 'Windows_Client'. " \
-                          "For more information see the Azure Windows VM online docs."
-            c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'None']))
+            c.argument('license_type', license_type)
             c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
                        help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
@@ -1065,8 +1093,7 @@ def load_arguments(self, _):
                        min_api='2021-04-01', is_preview=True)
 
     with self.argument_context('vm update') as c:
-        c.argument('license_type', help=license_msg, arg_type=get_enum_type(
-            ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_ELS_6', 'None']))
+        c.argument('license_type', license_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string. If empty string is passed in, the existing value will be deleted.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
 
     with self.argument_context('vmss create') as c:
@@ -1138,6 +1165,8 @@ def load_arguments(self, _):
         c.argument('gallery_unique_name', type=str, help='The unique name of the Shared Gallery.',
                    id_part='child_name_1')
         c.argument('shared_to', shared_to_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     with self.argument_context('sig image-definition show-shared') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part='name')
@@ -1203,6 +1232,8 @@ def load_arguments(self, _):
                    'of the Shared Gallery Image Definition from which the Image Versions are to be listed.',
                    id_part='child_name_2')
         c.argument('shared_to', shared_to_type)
+        c.argument('marker', arg_type=marker_type)
+        c.argument('show_next_marker', action='store_true', help='Show nextMarker in result when specified.')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")

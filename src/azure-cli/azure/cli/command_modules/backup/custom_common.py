@@ -9,7 +9,7 @@ from azure.cli.command_modules.backup._client_factory import backup_protected_it
     protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
-from azure.mgmt.recoveryservicesbackup.models import RecoveryPointTierStatus, RecoveryPointTierType
+from azure.mgmt.recoveryservicesbackup.activestamp.models import RecoveryPointTierStatus, RecoveryPointTierType
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -248,7 +248,12 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
             raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
         return recovery_point
 
-    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    try:
+        response = client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
+    except Exception as ex:
+        errorMessage = str(ex)
+        raise InvalidArgumentValueError("Specified recovery point can not be fetched - \n" + errorMessage)
+    return response
 
 
 def delete_policy(client, resource_group_name, vault_name, name):

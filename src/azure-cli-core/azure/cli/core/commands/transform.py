@@ -15,6 +15,11 @@ def register_global_transforms(cli_ctx):
     cli_ctx.register_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
 
 
+def unregister_global_transforms(cli_ctx):
+    cli_ctx.unregister_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _resource_group_transform)
+    cli_ctx.unregister_event(events.EVENT_INVOKER_TRANSFORM_RESULT, _x509_from_base64_to_hex_transform)
+
+
 def _parse_id(strid):
     parsed = {}
     parts = re.split('/', strid)

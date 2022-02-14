@@ -221,6 +221,11 @@ def load_arguments(self, _):
         c.argument('source_database_id', help='The source database id.')
         c.argument('recoverable_database_id', help='The recoverable database id.')
         c.argument('tags', arg_type=tags_type)
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
 
     with self.argument_context('synapse sql pool update') as c:
         c.argument('sku_name', options_list=['--performance-level'], help='The performance level.')
@@ -230,6 +235,12 @@ def load_arguments(self, _):
         c.argument('performance_level', help='The performance level.')
         c.argument('destination_name', options_list=['--dest-name', '--destination-name'],
                    help='Name of the sql pool that will be created as the restore destination.')
+        c.argument('storage_account_type',
+                   options_list=['--storage-type'],
+                   arg_group=storage_arg_group,
+                   help='The Storage Account Type.',
+                   arg_type=get_enum_type(['GRS', 'LRS']))
+        c.argument('tags', arg_type=tags_type)
 
         restore_point_arg_group = 'Restore Point'
         c.argument('restore_point_in_time',
@@ -939,8 +950,14 @@ def load_arguments(self, _):
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
 
     with self.argument_context('synapse managed-private-endpoints create') as c:
-        c.argument('private_Link_Resource_Id', options_list=['--resource-id'], help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}')
-        c.argument('group_Id', help='The groupId to which the managed private endpoint is created')
+        c.argument('private_Link_Resource_Id',
+                   options_list=['--resource-id'],
+                   help='The ARM resource ID of the resource to which the managed private endpoint is created. Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('group_Id',
+                   help='The groupId to which the managed private endpoint is created',
+                   deprecate_info=c.deprecate(hide=True))
+        c.argument('definition_file', arg_type=definition_file_arg_type)
 
     # synapse artifacts spark job definition
     with self.argument_context('synapse spark-job-definition list') as c:
@@ -1058,3 +1075,26 @@ def load_arguments(self, _):
                    options_list=['--attached-database-configuration-name', '--adcn'],
                    type=str, help='Resource name of the attached database '
                    'configuration in the follower cluster.')
+
+    for scope in ['import', 'create']:
+        with self.argument_context('synapse kql-script ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('kusto_pool_name', type=str, help='The name of the Kusto pool.')
+            c.argument('kusto_database_name', type=str, help='The name of the Kusto database.')
+            c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')
+            c.argument('definition_file', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                       help='The KQL query file path')
+
+    for scope in ['show', 'wait', 'delete']:
+        with self.argument_context('synapse kql-script ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+            c.argument('script_name', arg_type=name_type,
+                       help='The name of the KQL script.')
+
+    with self.argument_context('synapse kql-script list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+
+    with self.argument_context('synapse kql-script export') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, help='The name of the workspace')
+        c.argument('output_folder', type=str, help='The name of the output folder')
+        c.argument('script_name', arg_type=name_type, help='The name of the KQL script.')

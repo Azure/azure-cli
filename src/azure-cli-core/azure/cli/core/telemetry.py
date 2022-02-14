@@ -45,6 +45,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.module_correlation = None
         self.extension_name = None
         self.extension_version = None
+        self.event_id = str(uuid.uuid4())
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
@@ -105,7 +106,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
                 props.update(base)
                 props.update(cli)
                 props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
-                              'Reserved.EventId': str(uuid.uuid4())})
+                              'Reserved.EventId': self.event_id})
                 self.events[DEFAULT_INSTRUMENTATION_KEY].append({
                     'name': name,
                     'properties': props
@@ -117,7 +118,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
     def _get_base_properties(self):
         return {
             'Reserved.ChannelUsed': 'AI',
-            'Reserved.EventId': str(uuid.uuid4()),
+            'Reserved.EventId': self.event_id,
             'Reserved.SequenceNumber': 1,
             'Reserved.SessionId': _get_session_id(),
             'Reserved.TimeSinceSessionStart': 0,

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, KeyVaultPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
 

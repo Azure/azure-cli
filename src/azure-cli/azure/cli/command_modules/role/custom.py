@@ -37,15 +37,10 @@ CREDENTIAL_WARNING = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
-ROLE_ASSIGNMENT_CREATE_WARNING = (
-    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
-    "If needed, use the --role argument to explicitly create a role assignment."
-)
-
-NAME_DEPRECATION_WARNING = \
-    "'name' property in the output is deprecated and will be removed in the future. Use 'appId' instead."
-
 logger = get_logger(__name__)
+
+SCOPE_WARNING = "In a future release, --scopes argument will become required for creating a role assignment. " \
+                "Please explicitly specify --scopes."
 
 # pylint: disable=too-many-lines
 
@@ -1404,14 +1399,18 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
-        # pylint:disable=too-many-statements,too-many-locals, too-many-branches
+        # pylint:disable=too-many-statements,too-many-locals, too-many-branches, unused-argument
         cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
     role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
-    scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
+
+    if role and not scopes:
+        logger.warning(SCOPE_WARNING)
+        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+
     years = years or 1
     _RETRY_TIMES = 36
     existing_sps = None
@@ -1470,13 +1469,10 @@ def create_service_principal_for_rbac(
                     raise
     sp_oid = aad_sp.object_id
 
-    # retry while server replication is done
-    if not skip_assignment:
-        if not role:
-            role = "Contributor"
-            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
+    if role:
         for scope in scopes:
             logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
+            # retry till server replication is done
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False,
@@ -1500,7 +1496,6 @@ def create_service_principal_for_rbac(
                     raise
 
     logger.warning(CREDENTIAL_WARNING)
-    logger.warning(NAME_DEPRECATION_WARNING)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1514,7 +1509,6 @@ def create_service_principal_for_rbac(
     result = {
         'appId': app_id,
         'password': password,
-        'name': app_id,
         'displayName': app_display_name,
         'tenant': graph_client.config.tenant_id
     }
@@ -1880,11 +1874,3 @@ def _random_password(length):
 
     password = first_character + ''.join(password_list)
     return password
-
-
-def list_user_assigned_identities(cmd, resource_group_name=None):
-    from azure.cli.command_modules.role._client_factory import _msi_client_factory
-    client = _msi_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
-    return client.user_assigned_identities.list_by_subscription()
