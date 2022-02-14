@@ -170,8 +170,12 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
+
         admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        admin_passwords = ['SecretPassword123', 'SecretPassword456', 'SecretPassword789']
+        federated_client_id_1 = '748eaea0-6dbc-4be9-a50b-6a2d3dad00d4'
+        federated_client_id_2 = '17deee33-9da7-40ce-a33c-8a96f2f8f07d'
 
         # test create sql server with minimal required parameters
         server_1 = self.cmd('sql server create -g {} --name {} '
@@ -250,6 +254,38 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
+
+        # test create third sql server, with identity and federated client id
+        self.cmd('sql server create -g {} --name {} -l {} -i '
+                 '--admin-user {} --admin-password {} --federated_client_id {}'
+                 .format(resource_group_1, server_name_3, resource_group_location, admin_login, admin_passwords[0], federated_client_id_1),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('identity.type', 'SystemAssigned'),
+                     JMESPathCheck('federated_client_id_1', federated_client_id_1)])
+        
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group_1, server_name_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('federatedClientId', federated_client_id_1)])
+
+        # test update sql server's federated client id
+        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
+                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_2),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('federatedClientId', federated_client_id_2)])
+                     
+        # delete sql server
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group_1, server_name_3), checks=NoneCheck())
 
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
