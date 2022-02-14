@@ -133,7 +133,7 @@ class AAZCommand(CLICommand):
             cli_ctx=loader.cli_ctx,
             name=self.AZ_NAME,
             arguments_loader=self._cli_arguments_loader,
-            handler=None,
+            handler=True,  # knack use cmd.handler to check whether it is group or command, however this property will not be used in AAZCommand. So use True value for it. https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
         )
         self.command_kwargs = {}
 

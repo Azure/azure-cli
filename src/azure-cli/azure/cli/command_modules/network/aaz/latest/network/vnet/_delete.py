@@ -6,7 +6,7 @@ from azure.cli.core.aaz import AAZStrArg, AAZResourceGroupNameArg, AAZBoolArg
 from azure.cli.core.aaz import AAZObjectType, AAZStrType, AAZBoolType, AAZListType, AAZDictType, AAZIntType
 
 
-@register_command("network vnet delete")
+@register_command("network vnet delete", is_preview=True)
 class Delete(AAZCommand):
     """ Delete a virtual network.
 

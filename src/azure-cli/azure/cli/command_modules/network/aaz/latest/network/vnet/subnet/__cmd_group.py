@@ -1,7 +1,7 @@
 from azure.cli.core.aaz._command import AAZCommandGroup, register_command_group
 
 
-@register_command_group("network vnet subnet")
+@register_command_group("network vnet subnet", is_experimental=True)
 class __CMDGroup(AAZCommandGroup):
     """Manage subnets in an Azure Virtual Network.
 

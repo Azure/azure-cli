@@ -4,7 +4,7 @@
 from azure.cli.core.aaz import AAZCommand, register_command, AAZStrArg, AAZDictArg, AAZObjectArg, AAZListArg, AAZIntArg, AAZArgEnum, AAZBoolArg, AAZFloatArg
 
 
-@register_command("network vnet create")
+@register_command("network vnet create", is_experimental=True)
 class Create(AAZCommand):
     """ Create a virtual network.
 
