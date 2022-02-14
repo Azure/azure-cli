@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from enum import Enum
+import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import user_confirmation
@@ -64,9 +65,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         raise CLIError("usage error: you must provide either --sync-token-name or --repository, but not both.")
     # Check needed since the sync token gateway actions must be at least 5 characters long.
     if len(connected_registry_name) < 5:
-        raise CLIError("argument error: Connected registry name must be at least 5 characters long.")
-    if connected_registry_name.isupper():
-        raise CLIError("argument error: Connected registry name must be only lowercase.")
+        raise InvalidArgumentValueError("argument error: Connected registry name must be at least 5 characters long.")
+    if re.match(r'\w*[A-Z]\w*', connected_registry_name):
+        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 

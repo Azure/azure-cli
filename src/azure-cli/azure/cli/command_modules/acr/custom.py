@@ -5,6 +5,8 @@
 
 # pylint: disable=too-many-locals
 
+import re
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
@@ -62,8 +64,8 @@ def acr_create(cmd,
     if sku not in get_managed_sku(cmd):
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
-    if registry_name.isupper():
-        raise CLIError("argument error: Connected registry name must be only lowercase.")
+    if re.match(r'\w*[A-Z]\w*', registry_name):
+        raise InvalidArgumentValueError("argument error: Connected registry name must use only lowercase.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
