@@ -31,15 +31,6 @@ class NetworkCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.network.commands import load_command_table
-        self.load_aaz_command_table(args)
-        load_command_table(self, args)
-        return self.command_table
-
-    def load_arguments(self, command):
-        from azure.cli.command_modules.network._params import load_arguments
-        load_arguments(self, command)
-
-    def load_aaz_command_table(self, args):
         from azure.cli.core.aaz import load_aaz_command_table
         from . import aaz
         load_aaz_command_table(
@@ -47,6 +38,12 @@ class NetworkCommandsLoader(AzCommandsLoader):
             aaz_pkg_name=aaz.__name__,
             args=args
         )
+        load_command_table(self, args)
+        return self.command_table
+
+    def load_arguments(self, command):
+        from azure.cli.command_modules.network._params import load_arguments
+        load_arguments(self, command)
 
 
 COMMAND_LOADER_CLS = NetworkCommandsLoader

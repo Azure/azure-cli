@@ -131,6 +131,3 @@ class Create(AAZCommand):
         )
 
         return schema
-
-
-

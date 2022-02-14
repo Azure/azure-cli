@@ -1,7 +1,9 @@
 import importlib
 import os
 from ._utils import _get_profile_pkg
-from knack.commands import CLICommand
+from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
+from knack.preview import PreviewItem
+from knack.experimental import ExperimentalItem
 from azure.cli.core._profile import Profile
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
@@ -9,7 +11,8 @@ from ._field_type import AAZObjectType
 from ._field_value import AAZObject
 from ._base import AAZUndefined, AAZBaseValue
 from ._poller import AAZLROPoller
-
+from azure.cli.core.azclierror import CLIInternalError
+from functools import partial
 
 _DOC_EXAMPLE_FLAG = ':example:'
 
@@ -19,13 +22,20 @@ class AAZCommandGroup:
     AZ_NAME = None
     AZ_HELP = None
 
+    AZ_PREVIEW_INFO = None
+    AZ_EXPERIMENTAL_INFO = None
+
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.group_kwargs = {
             # 'deprecate_info'  # deprecate_info should be in group_kwargs
-            # 'preview_info'
-            # 'experimental_info'
         }
+
+        if self.AZ_PREVIEW_INFO:
+            self.group_kwargs['preview_info'] = self.AZ_PREVIEW_INFO(cli_ctx=self.cli_ctx)
+        if self.AZ_EXPERIMENTAL_INFO:
+            self.group_kwargs['experimental_info'] = self.AZ_EXPERIMENTAL_INFO(cli_ctx=self.cli_ctx)
+
         self.help = self.AZ_HELP  # TODO: change knack to load help directly
 
 
@@ -104,6 +114,9 @@ class AAZCommand(CLICommand):
     AZ_HELP = None
     AZ_SUPPORT_NO_WAIT = False
 
+    AZ_PREVIEW_INFO = None
+    AZ_EXPERIMENTAL_INFO = None
+
     @classmethod
     def get_arguments_schema(cls):
         if not hasattr(cls, "_arguments_schema"):
@@ -116,13 +129,19 @@ class AAZCommand(CLICommand):
 
     def __init__(self, loader):
         self.loader = loader
-        super(AAZCommand, self).__init__(
+        super().__init__(
             cli_ctx=loader.cli_ctx,
             name=self.AZ_NAME,
             arguments_loader=self._cli_arguments_loader,
             handler=None,
         )
         self.command_kwargs = {}
+
+        if self.AZ_PREVIEW_INFO:
+            self.preview_info = self.AZ_PREVIEW_INFO(cli_ctx=self.cli_ctx)
+        if self.AZ_EXPERIMENTAL_INFO:
+            self.experimental_info = self.AZ_EXPERIMENTAL_INFO(cli_ctx=self.cli_ctx)
+
         self.help = self.AZ_HELP
 
         self.ctx = None
@@ -185,11 +204,14 @@ class AAZCommand(CLICommand):
         return AAZLROPoller(polling_method=polling, result_callback=result_callback)
 
 
-def register_command_group(name):
+def register_command_group(name, is_preview=False, is_experimental=False):
     """register AAZCommandGroup"""
+    if is_preview and is_experimental:
+        raise CLIInternalError(
+            PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
+        )
+
     def decorator(cls):
-        import yaml
-        from knack.help_files import helps
         assert issubclass(cls, AAZCommandGroup)
         cls.AZ_NAME = name
         short_summary, long_summary, _ = parse_cls_doc(cls)
@@ -201,13 +223,26 @@ def register_command_group(name):
 
         # the only way to load command group help in knack is by _load_from_file
         # TODO: change knack to load AZ_HELP directly
+        import yaml
+        from knack.help_files import helps
         helps[name] = yaml.safe_dump(cls.AZ_HELP)
+
+        if is_preview:
+            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=name, object_type='command group')
+        if is_experimental:
+            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=name, object_type='command group')
+
         return cls
     return decorator
 
 
-def register_command(name):
+def register_command(name, is_preview=False, is_experimental=False):
     """register AAZCommand"""
+    if is_preview and is_experimental:
+        raise CLIInternalError(
+            PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
+        )
+
     def decorator(cls):
         assert issubclass(cls, AAZCommand)
         cls.AZ_NAME = name
@@ -218,6 +253,12 @@ def register_command(name):
             "long-summary": long_summary,
             "examples": examples
         }
+
+        if is_preview:
+            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=name, object_type='command')
+        if is_experimental:
+            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=name, object_type='command')
+
         return cls
     return decorator
 
