@@ -4,6 +4,7 @@ from ._utils import _get_profile_pkg
 from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
+from knack.deprecation import Deprecated
 from azure.cli.core._profile import Profile
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
@@ -24,9 +25,11 @@ class AAZCommandGroup:
 
     AZ_PREVIEW_INFO = None
     AZ_EXPERIMENTAL_INFO = None
+    AZ_DEPRECATE_INFO = None
 
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
+
         self.group_kwargs = {
             # 'deprecate_info'  # deprecate_info should be in group_kwargs
         }
@@ -35,6 +38,8 @@ class AAZCommandGroup:
             self.group_kwargs['preview_info'] = self.AZ_PREVIEW_INFO(cli_ctx=self.cli_ctx)
         if self.AZ_EXPERIMENTAL_INFO:
             self.group_kwargs['experimental_info'] = self.AZ_EXPERIMENTAL_INFO(cli_ctx=self.cli_ctx)
+        if self.AZ_DEPRECATE_INFO:
+            self.group_kwargs['deprecate_info'] = self.AZ_DEPRECATE_INFO(cli_ctx=self.cli_ctx)
 
         self.help = self.AZ_HELP  # TODO: change knack to load help directly
 
@@ -116,6 +121,7 @@ class AAZCommand(CLICommand):
 
     AZ_PREVIEW_INFO = None
     AZ_EXPERIMENTAL_INFO = None
+    AZ_DEPRECATE_INFO = None
 
     @classmethod
     def get_arguments_schema(cls):
@@ -141,6 +147,8 @@ class AAZCommand(CLICommand):
             self.preview_info = self.AZ_PREVIEW_INFO(cli_ctx=self.cli_ctx)
         if self.AZ_EXPERIMENTAL_INFO:
             self.experimental_info = self.AZ_EXPERIMENTAL_INFO(cli_ctx=self.cli_ctx)
+        if self.AZ_DEPRECATE_INFO:
+            self.deprecate_info = self.AZ_DEPRECATE_INFO(cli_ctx=self.cli_ctx)
 
         self.help = self.AZ_HELP
 
@@ -204,12 +212,19 @@ class AAZCommand(CLICommand):
         return AAZLROPoller(polling_method=polling, result_callback=result_callback)
 
 
-def register_command_group(name, is_preview=False, is_experimental=False):
+def register_command_group(name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
     """register AAZCommandGroup"""
     if is_preview and is_experimental:
         raise CLIInternalError(
             PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
         )
+    deprecated_info = {}
+    if hide:
+        deprecated_info['hide'] = hide
+    if redirect:
+        deprecated_info['redirect'] = f'az {redirect}'
+    if expiration:
+        deprecated_info['expiration'] = expiration
 
     def decorator(cls):
         assert issubclass(cls, AAZCommandGroup)
@@ -228,20 +243,28 @@ def register_command_group(name, is_preview=False, is_experimental=False):
         helps[name] = yaml.safe_dump(cls.AZ_HELP)
 
         if is_preview:
-            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=name, object_type='command group')
+            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=f'az {name}', object_type='command group')
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=name, object_type='command group')
-
+            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=f'az {name}', object_type='command group')
+        if deprecated_info:
+            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command group', **deprecated_info)
         return cls
     return decorator
 
 
-def register_command(name, is_preview=False, is_experimental=False):
+def register_command(name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):
     """register AAZCommand"""
     if is_preview and is_experimental:
         raise CLIInternalError(
             PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format(name)
         )
+    deprecated_info = {}
+    if hide:
+        deprecated_info['hide'] = hide
+    if redirect:
+        deprecated_info['redirect'] = f'az {redirect}'
+    if expiration:
+        deprecated_info['expiration'] = expiration
 
     def decorator(cls):
         assert issubclass(cls, AAZCommand)
@@ -255,10 +278,11 @@ def register_command(name, is_preview=False, is_experimental=False):
         }
 
         if is_preview:
-            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=name, object_type='command')
+            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=f'az {name}', object_type='command')
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=name, object_type='command')
-
+            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=f'az {name}', object_type='command')
+        if deprecated_info:
+            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command', **deprecated_info)
         return cls
     return decorator
 

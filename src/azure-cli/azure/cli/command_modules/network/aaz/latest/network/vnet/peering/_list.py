@@ -3,7 +3,7 @@
 from azure.cli.core.aaz import AAZCommand, register_command
 
 
-@register_command("network vnet peering list")
+@register_command("network vnet peering list", expiration='3.0.0')
 class List(AAZCommand):
     """ List peerings.
 

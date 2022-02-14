@@ -3,7 +3,7 @@
 from azure.cli.core.aaz import AAZCommand, register_command
 
 
-@register_command("network vnet peering delete")
+@register_command("network vnet peering delete", redirect='network vnet peering show')
 class Delete(AAZCommand):
     """ Delete a peering.
 
