@@ -1425,7 +1425,7 @@ def load_arguments(self, _):
                    'UserAssigned, SystemAssigned,UserAssigned and None.')
 
         c.argument('federated_client_id',
-                   options_list=['--federated-client-id', '-fid'],
+                   options_list=['--federated-client-id', '--fid'],
                    help='The federated client id used in cross tenant CMK scenario.')
 
     with self.argument_context('sql server create') as c:
