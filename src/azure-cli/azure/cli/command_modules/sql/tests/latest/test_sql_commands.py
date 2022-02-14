@@ -257,7 +257,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test create third sql server, with identity and federated client id
         self.cmd('sql server create -g {} --name {} -l {} -i '
-                 '--admin-user {} --admin-password {} --federated_client_id {}'
+                 '--admin-user {} --admin-password {} --federated-client-id {}'
                  .format(resource_group_1, server_name_3, resource_group_location, admin_login, admin_passwords[0], federated_client_id_1),
                  checks=[
                      JMESPathCheck('name', server_name_3),
