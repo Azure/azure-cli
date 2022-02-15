@@ -262,20 +262,11 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/docker/pipeline.sh
 
-#  - bash: |
-#       #!/bin/bash
-#       root=$(cd $(dirname $0); pwd)
-#       set -evx
-#       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#    displayName: 'SBOM Prepare'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#      displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
-#      PackageName: 'Azure Cli'
-#      PackageVersion: $CLI_VERSION
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
@@ -340,19 +331,10 @@ jobs:
       scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
 
-#  - bash: |
-#       #!/bin/bash
-#       root=$(cd $(dirname $0); pwd)
-#       set -evx
-#       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#    displayName: 'SBOM Prepare'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#      PackageName: 'Azure Cli'
-#      PackageVersion: $CLI_VERSION
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
@@ -729,19 +711,10 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
 
-#  - bash: |
-#       #!/bin/bash
-#       root=$(cd $(dirname $0); pwd)
-#       set -evx
-#       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#    displayName: 'SBOM Prepare'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#      PackageName: 'Azure Cli'
-#      PackageVersion: $CLI_VERSION
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum-mariner'
@@ -761,19 +734,10 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
 
-#  - bash: |
-#       #!/bin/bash
-#       root=$(cd $(dirname $0); pwd)
-#       set -evx
-#       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#    displayName: 'SBOM Prepare'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#      PackageName: 'Azure Cli'
-#      PackageVersion: $CLI_VERSION
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
@@ -871,19 +835,10 @@ jobs:
       DISTRO: $(distro)
       DISTRO_BASE_IMAGE: $(deb_system):$(distro)
 
-#  - bash: |
-#       #!/bin/bash
-#       root=$(cd $(dirname $0); pwd)
-#       set -evx
-#       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-#    displayName: 'SBOM Prepare'
-#
-#  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-#    displayName: 'SBOM'
-#    inputs:
-#      BuildDropPath: $(Build.ArtifactStagingDirectory)
-#      PackageName: 'Azure Cli'
-#      PackageVersion: $CLI_VERSION
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
