@@ -172,6 +172,13 @@ jobs:
        build_scripts/windows/scripts/build.cmd
     displayName: 'Build Windows MSI'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: 'build_scripts/windows/out/'
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
     inputs:
@@ -257,6 +264,13 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/docker/pipeline.sh
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
@@ -312,7 +326,6 @@ jobs:
     inputs:
       versionSpec: 3.10
 
-
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
         branch=$(System.PullRequest.TargetBranch)
@@ -322,12 +335,19 @@ jobs:
       scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pypi
+
 
 - job: TestPythonWheel
   displayName: Test Python Wheels
@@ -607,6 +627,13 @@ jobs:
        docker rm --force azurecli
     displayName: 'Build homebrew formula'
 
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
     inputs:
@@ -691,6 +718,14 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum-mariner'
     inputs:
@@ -708,6 +743,14 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
+
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
     inputs:
@@ -803,6 +846,13 @@ jobs:
     env:
       DISTRO: $(distro)
       DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure Cli'
+      PackageVersion: '2.33.0'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
