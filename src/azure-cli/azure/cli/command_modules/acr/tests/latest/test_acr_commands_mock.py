@@ -423,7 +423,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Get manifest by tag
         acr_manifest_show(cmd,
                           registry_name='testregistry',
-                          manifest_id='testrepository:testtag')
+                          manifest_spec='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -436,7 +436,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Get manifest by digest
         acr_manifest_show(cmd,
                           registry_name='testregistry',
-                          manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
+                          manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -448,7 +448,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Get manifest by fqdn
         acr_manifest_show(cmd,
-                          ID=['testregistry.azurecr.io/testrepository:testtag'])
+                          manifest_id=['testregistry.azurecr.io/testrepository:testtag'])
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -510,7 +510,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # List manifests by fqdn
         result = acr_manifest_list(cmd,
-                                   ID=['testregistry.azurecr.io/testrepository'])
+                                   repo_id=['testregistry.azurecr.io/testrepository'])
 
         assert result == expected_output
 
@@ -537,7 +537,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # List referrers by tag
         acr_manifest_list_referrers(cmd,
                                     registry_name='testregistry',
-                                    manifest_id='testrepository:testtag')
+                                    manifest_spec='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/oras/artifacts/v1/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7/referrers',
@@ -550,7 +550,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # List referrers by digest
         acr_manifest_list_referrers(cmd,
                                     registry_name='testregistry',
-                                    manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
+                                    manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/oras/artifacts/v1/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7/referrers',
@@ -562,7 +562,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # List referrers by fqdn and filter by artifact type
         acr_manifest_list_referrers(cmd,
-                                    ID=['testregistry.azurecr.io/testrepository:testtag'],
+                                    manifest_id=['testregistry.azurecr.io/testrepository:testtag'],
                                     artifact_type='sbom/example')
         mock_requests_get.assert_called_with(
             method='get',
@@ -593,7 +593,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Delete artifact by tag
         acr_manifest_delete(cmd,
                             registry_name='testregistry',
-                            manifest_id='testrepository:testtag',
+                            manifest_spec='testrepository:testtag',
                             yes=True)
         mock_requests_delete.assert_called_with(
             method='delete',
@@ -607,7 +607,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Delete artifact by manifest digest
         acr_manifest_delete(cmd,
                             registry_name='testregistry',
-                            manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                            manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                             yes=True)
         mock_requests_delete.assert_called_with(
             method='delete',
@@ -620,7 +620,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Delete artifact by fqdn
         acr_manifest_delete(cmd,
-                            ID=['testregistry.azurecr.io/testrepository:testtag'],
+                            manifest_id=['testregistry.azurecr.io/testrepository:testtag'],
                             yes=True)
         mock_requests_delete.assert_called_with(
             method='delete',
@@ -656,7 +656,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Show metadata for an artifact by tag
         acr_manifest_metadata_show(cmd,
                                    registry_name='testregistry',
-                                   manifest_id='testrepository:testtag')
+                                   manifest_spec='testrepository:testtag')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_tags/testtag',
@@ -669,7 +669,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Show metadata for an artifact by manifest digest
         acr_manifest_metadata_show(cmd,
                                    registry_name='testregistry',
-                                   manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
+                                   manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7')
         mock_requests_get.assert_called_with(
             method='get',
             url='https://testregistry.azurecr.io/acr/v1/testrepository/_manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
@@ -681,7 +681,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Show metadata for an artifact by fqdn
         acr_manifest_metadata_show(cmd,
-                                   ID=['testregistry.azurecr.io/testrepository:testtag'])
+                                   manifest_id=['testregistry.azurecr.io/testrepository:testtag'])
 
         mock_requests_get.assert_called_with(
             method='get',
@@ -737,7 +737,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_get_access_credentials_manifest.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
         acr_manifest_metadata_list(cmd,
-                                   ID=['testregistry.azurecr.io/testrepository'],
+                                   repo_id=['testregistry.azurecr.io/testrepository'],
                                    top=10,
                                    orderby='time_desc')
         mock_requests_get.assert_called_with(
@@ -774,7 +774,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Update attributes for an artifact by tag
         acr_manifest_metadata_update(cmd,
                                      registry_name='testregistry',
-                                     manifest_id='testrepository:testtag',
+                                     manifest_spec='testrepository:testtag',
                                      write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
@@ -790,7 +790,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         # Update attributes for an artifact by manifest digest
         acr_manifest_metadata_update(cmd,
                                      registry_name='testregistry',
-                                     manifest_id='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                                     manifest_spec='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
                                      write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
@@ -805,7 +805,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Update attributes for an artifact by fqdn
         acr_manifest_metadata_update(cmd,
-                                     ID=['testregistry.azurecr.io/testrepository:testtag'],
+                                     manifest_id=['testregistry.azurecr.io/testrepository:testtag'],
                                      write_enabled='false')
         mock_requests_patch.assert_called_with(
             method='patch',
