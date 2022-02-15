@@ -177,7 +177,7 @@ jobs:
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
@@ -265,12 +265,12 @@ jobs:
       filePath: scripts/release/docker/pipeline.sh
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
+      displayName: 'SBOM'
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: docker image'
@@ -340,7 +340,7 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
@@ -632,7 +632,7 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
@@ -724,7 +724,7 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum-mariner'
@@ -749,7 +749,7 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: yum'
@@ -852,7 +852,7 @@ jobs:
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       PackageName: 'Azure Cli'
-      PackageVersion: '2.33.0'
+      PackageVersion: '$CLI_VERSION'
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
