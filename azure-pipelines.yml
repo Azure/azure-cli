@@ -176,6 +176,8 @@ jobs:
     displayName: 'SBOM'
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
+      PackageName: 'Azure CLI'
+      PackageVersion: $CLI_VERSION
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
@@ -263,7 +265,7 @@ jobs:
       filePath: scripts/release/docker/pipeline.sh
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-      displayName: 'SBOM'
+    displayName: 'SBOM'
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
       DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
@@ -322,6 +324,11 @@ jobs:
     inputs:
       versionSpec: 3.10
 
+  - bash: |
+       set -exv
+       CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
+
   - script: |
       if [[ "$(Build.Reason)" == "PullRequest" ]]; then
         branch=$(System.PullRequest.TargetBranch)
@@ -335,6 +342,8 @@ jobs:
     displayName: 'SBOM'
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
+      PackageName: 'Azure CLI'
+      PackageVersion: $CLI_VERSION
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: pypi'
