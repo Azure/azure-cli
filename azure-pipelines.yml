@@ -264,6 +264,13 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/docker/pipeline.sh
 
+  - bash: |
+       #!/bin/bash
+       root=$(cd $(dirname $0); pwd)
+       set -evx
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
+
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
     inputs:
@@ -334,6 +341,13 @@ jobs:
       fi
       scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
+
+  - bash: |
+       #!/bin/bash
+       root=$(cd $(dirname $0); pwd)
+       set -evx
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -719,6 +733,13 @@ jobs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline_mariner.sh
 
+  - bash: |
+       #!/bin/bash
+       root=$(cd $(dirname $0); pwd)
+       set -evx
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
+
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
     inputs:
@@ -743,6 +764,13 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/rpm/pipeline.sh
+
+  - bash: |
+       #!/bin/bash
+       root=$(cd $(dirname $0); pwd)
+       set -evx
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
@@ -846,6 +874,13 @@ jobs:
     env:
       DISTRO: $(distro)
       DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+
+  - bash: |
+       #!/bin/bash
+       root=$(cd $(dirname $0); pwd)
+       set -evx
+       CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
+    displayName: 'SBOM Prepare'
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
