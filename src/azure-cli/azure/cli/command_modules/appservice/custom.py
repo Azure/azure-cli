@@ -1675,7 +1675,6 @@ def _resolve_hostname_through_dns(hostname):
     return socket.gethostbyname(hostname)
 
 
-# TODO test container options with windows app
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None,
                        deployment_container_image_name=None, docker_registry_server_password=None,
                        docker_registry_server_user=None):
