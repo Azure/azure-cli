@@ -10,13 +10,13 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
-from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
+from ._constants import (FUNCTIONS_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME)
+
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address,
                           validate_service_tag, validate_public_cloud)
@@ -32,8 +32,6 @@ AUTH_TYPES = {
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
-LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
-WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
@@ -79,8 +77,6 @@ def load_arguments(self, _):
         help='The pricing tiers for Static Web App',
         arg_type=get_enum_type(['Free', 'Standard'])
     )
-
-    functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -151,7 +147,7 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\" or \":\". "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". Allowed delimiters: \"|\" or \":\". If using powershell, please use the \":\" delimiter or be sure to properly escape the \"|\" character. "
                                                                      "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -170,7 +166,11 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
+        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
+        c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
+
+    with self.argument_context('functionapp list-runtimes') as c:
+        c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -322,7 +322,7 @@ def load_arguments(self, _):
             c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
-            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|10.14\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
+            c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|12LTS\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
@@ -620,13 +620,13 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
-        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+        c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the appserviceplan associated with the webapp",
-                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+                   help="name of the app service plan associated with the webapp",
+                   configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\" or \":\". "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". Allowed delimiters: \"|\" or \":\". If using powershell, please use the \":\" delimiter or be sure to properly escape the \"|\" character. "
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
@@ -735,11 +735,10 @@ def load_arguments(self, _):
                        help='The container registry server password. Required for private registries.')
             if scope == 'functionapp':
                 c.argument('functions_version', help='The functions app version. NOTE: This will be required starting the next release cycle', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
-                c.argument('runtime', help='The functions runtime stack.',
-                           arg_type=get_enum_type(functionapp_runtime_strings))
+                c.argument('runtime', help='The functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions')
                 c.argument('runtime_version',
                            help='The version of the functions runtime stack. '
-                           'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
+                           'The functions runtime stack. Use "az functionapp list-runtimes" to check supported runtimes and versions')
 
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=functionapp_name_arg_type, id_part='name')
@@ -1052,47 +1051,3 @@ def load_arguments(self, _):
     with self.argument_context('staticwebapp functions link') as c:
         c.argument('function_resource_id', help="Resource ID of the functionapp to link. Can be retrieved with 'az functionapp --query id'")
         c.argument('force', help="Force the function link even if the function is already linked to a static webapp. May be needed if the function was previously linked to a static webapp.")
-
-
-def _get_functionapp_runtime_versions():
-    # set up functionapp create help menu
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    stacks_api_json_list = []
-    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows']))
-    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux']))
-
-    # build a map of runtime -> runtime version -> runtime version properties
-    runtime_to_version = {}
-    for stacks_api_json in stacks_api_json_list:
-        for runtime_json in stacks_api_json[KEYS.VALUE]:
-            runtime_name = runtime_json[KEYS.NAME]
-            for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
-                runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
-                runtime_version_properties = {
-                    KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
-                    KEYS.IS_DEPRECATED: runtime_version_json[KEYS.IS_DEPRECATED],
-                    KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
-                }
-                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
-                runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
-
-    # traverse the map to build an ordered string of runtimes -> runtime versions,
-    # taking their properties into account (i.e. isHidden, isPreview)
-    runtime_to_version_strings = []
-    for runtime, runtime_versions in runtime_to_version.items():
-        # dotnet and custom version is not configurable, so leave out of help menu
-        if runtime in ('dotnet', 'custom'):
-            continue
-        ordered_runtime_versions = list(runtime_versions.keys())
-        ordered_runtime_versions.sort(key=float)
-        ordered_runtime_versions_strings = []
-        for version in ordered_runtime_versions:
-            if runtime_versions[version][KEYS.IS_HIDDEN] or runtime_versions[version][KEYS.IS_DEPRECATED]:
-                continue
-            if runtime_versions[version][KEYS.IS_PREVIEW]:
-                ordered_runtime_versions_strings.append(version + ' (preview)')
-            else:
-                ordered_runtime_versions_strings.append(version)
-        runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
-
-    return runtime_to_version.keys(), runtime_to_version_strings

@@ -8,7 +8,7 @@
 from knack.arguments import CLIArgumentType
 from azure.graphrbac.models import ConsentType
 
-from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 from azure.cli.core.commands.validators import validate_file_or_dict
 # from azure.cli.core.profiles import ResourceType
 
@@ -231,10 +231,3 @@ def load_arguments(self, _):
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')
         c.argument('role_definition', help="json formatted content which defines the new role.")
         c.argument('name', arg_type=name_arg_type, completer=get_role_definition_name_completion_list, help="the role's name")
-
-    with self.argument_context('identity') as c:
-        c.argument('resource_name', arg_type=name_arg_type, id_part='name')
-
-    with self.argument_context('identity create') as c:
-        c.argument('location', get_location_type(self.cli_ctx))
-        c.argument('tags', tags_type)

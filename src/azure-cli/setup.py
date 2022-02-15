@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.32.0"
+VERSION = "2.33.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=11.0.0',
+    'azure-batch~=12.0.0',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.2.0',
-    'azure-mgmt-containerservice~=16.1.0',
+    'azure-mgmt-containerservice~=16.4.0',
     'azure-mgmt-cosmosdb~=7.0.0b2',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -105,7 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=7.0',
     'azure-mgmt-monitor~=3.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=5.1.0',
+    'azure-mgmt-netapp~=6.0.1',
     'azure-mgmt-network~=19.3.0',
     'azure-mgmt-policyinsights~=1.0.0',
     'azure-mgmt-privatedns~=1.0.0',
@@ -128,7 +128,7 @@ DEPENDENCIES = [
     'azure-mgmt-sql~=3.0.1',
     'azure-mgmt-storage~=19.0.0',
     'azure-mgmt-synapse~=2.1.0b2',
-    'azure-mgmt-trafficmanager~=0.51.0',
+    'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web~=4.0.0',
     'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
@@ -192,8 +192,6 @@ setup(
             'template/service/parameter.json'
         ],
         'azure.cli.command_modules.appservice': [
-            'resources/WindowsFunctionsStacks.json',
-            'resources/LinuxFunctionsStacks.json',
             'resources/WebappRuntimeStacks.json',
             'resources/GenerateRandomAppNames.json'
         ],

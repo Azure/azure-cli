@@ -39,7 +39,9 @@ from azure.cli.command_modules.acs.custom import (
     _get_user_assigned_identity,
     _put_managed_cluster_ensuring_permission,
     subnet_role_assignment_exists,
+    _get_snapshot,
 )
+
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -72,6 +74,7 @@ ManagedClusterLoadBalancerProfile = TypeVar("ManagedClusterLoadBalancerProfile")
 ManagedClusterPropertiesAutoScalerProfile = TypeVar("ManagedClusterPropertiesAutoScalerProfile")
 ResourceReference = TypeVar("ResourceReference")
 ManagedClusterAddonProfile = TypeVar("ManagedClusterAddonProfile")
+Snapshot = TypeVar("Snapshot")
 
 # TODO
 # add validation for all/some of the parameters involved in the getter of outbound_type/enable_addons
@@ -259,6 +262,16 @@ class AKSModels:
         )
         self.ManagedClusterPropertiesAutoScalerProfile = self.__cmd.get_models(
             "ManagedClusterPropertiesAutoScalerProfile",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.CreationData = self.__cmd.get_models(
+            "CreationData",
+            resource_type=self.resource_type,
+            operation_group="managed_clusters",
+        )
+        self.Snapshot = self.__cmd.get_models(
+            "Snapshot",
             resource_type=self.resource_type,
             operation_group="managed_clusters",
         )
@@ -811,20 +824,95 @@ class AKSContext:
         """
         return self._get_dns_name_prefix(enable_validation=True)
 
-    def get_kubernetes_version(self) -> str:
-        """Obtain the value of kubernetes_version.
+    def get_snapshot_id(self) -> Union[str, None]:
+        """Obtain the values of snapshot_id.
 
-        :return: string
+        :return: string or None
         """
         # read the original value passed by the command
-        kubernetes_version = self.raw_param.get("kubernetes_version")
+        snapshot_id = self.raw_param.get("snapshot_id")
         # try to read the property value corresponding to the parameter from the `mc` object
-        if self.mc and self.mc.kubernetes_version is not None:
-            kubernetes_version = self.mc.kubernetes_version
+        if self.mc and self.mc.agent_pool_profiles:
+            agent_pool_profile = safe_list_get(
+                self.mc.agent_pool_profiles, 0, None
+            )
+            if (
+                agent_pool_profile and
+                agent_pool_profile.creation_data and
+                agent_pool_profile.creation_data.source_resource_id is not None
+            ):
+                snapshot_id = (
+                    agent_pool_profile.creation_data.source_resource_id
+                )
 
         # this parameter does not need dynamic completion
         # this parameter does not need validation
+        return snapshot_id
+
+    def get_snapshot(self) -> Union[Snapshot, None]:
+        """Helper function to retrieve the Snapshot object corresponding to a snapshot id.
+
+        This fuction will store an intermediate "snapshot" to avoid sending the same request multiple times.
+
+        Function "_get_snapshot" will be called to retrieve the Snapshot object corresponding to a snapshot id, which
+        internally used the snapshot client (snapshots operations belonging to container service client) to send
+        the request.
+
+        :return: Snapshot or None
+        """
+        # try to read from intermediates
+        snapshot = self.get_intermediate("snapshot")
+        if snapshot:
+            return snapshot
+
+        snapshot_id = self.get_snapshot_id()
+        if snapshot_id:
+            snapshot = _get_snapshot(self.cmd.cli_ctx, snapshot_id)
+            self.set_intermediate("snapshot", snapshot, overwrite_exists=True)
+        return snapshot
+
+    # pylint: disable=unused-argument
+    def _get_kubernetes_version(self, read_only: bool = False, **kwargs) -> str:
+        """Internal function to dynamically obtain the value of kubernetes_version according to the context.
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `mc` takes precedence over user's
+        explicit input over snapshot over default vaule.
+        :return: string
+        """
+        # read the original value passed by the command
+        raw_value = self.raw_param.get("kubernetes_version")
+        # try to read the property value corresponding to the parameter from the `mc` object
+        value_obtained_from_mc = None
+        if self.mc:
+            value_obtained_from_mc = self.mc.kubernetes_version
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.kubernetes_version
+
+        # set default value
+        if value_obtained_from_mc is not None:
+            kubernetes_version = value_obtained_from_mc
+        # default value is an empty string
+        elif raw_value:
+            kubernetes_version = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            kubernetes_version = value_obtained_from_snapshot
+        else:
+            kubernetes_version = raw_value
+
+        # this parameter does not need validation
         return kubernetes_version
+
+    def get_kubernetes_version(self) -> str:
+        """Obtain the value of kubernetes_version.
+        Note: Inherited and extended in aks-preview to add support for getting values from snapshot.
+        :return: string
+        """
+        return self._get_kubernetes_version()
 
     def _get_vm_set_type(self, read_only: bool = False) -> Union[str, None]:
         """Internal function to dynamically obtain the value of vm_set_type according to the context.
@@ -976,11 +1064,16 @@ class AKSContext:
         # this parameter does not need validation
         return nodepool_labels
 
-    def get_node_vm_size(self) -> str:
-        """Obtain the value of node_vm_size.
+    def _get_node_vm_size(self, read_only: bool = False) -> str:
+        """Internal function to dynamically obtain the value of node_vm_size according to the context.
+
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `mc` takes precedence over user's
+        explicit input over snapshot over default vaule.
 
         :return: string
         """
+        default_value = "Standard_DS2_v2"
         # read the original value passed by the command
         raw_value = self.raw_param.get("node_vm_size")
         # try to read the property value corresponding to the parameter from the `mc` object
@@ -991,20 +1084,42 @@ class AKSContext:
             )
             if agent_pool_profile:
                 value_obtained_from_mc = agent_pool_profile.vm_size
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.vm_size
 
         # set default value
         if value_obtained_from_mc is not None:
             node_vm_size = value_obtained_from_mc
-        else:
+        elif raw_value is not None:
             node_vm_size = raw_value
+        elif value_obtained_from_snapshot is not None:
+            node_vm_size = value_obtained_from_snapshot
+        else:
+            node_vm_size = default_value
 
-        # this parameter does not need dynamic completion
         # this parameter does not need validation
         return node_vm_size
 
-    def get_os_sku(self) -> Union[str, None]:
-        """Obtain the value of os_sku.
+    def get_node_vm_size(self) -> str:
+        """Obtain the value of node_vm_size.
 
+        Note: Inherited and extended in aks-preview to add support for getting values from snapshot.
+
+        :return: string
+        """
+        return self._get_node_vm_size()
+
+    # pylint: disable=unused-argument
+    def _get_os_sku(self, read_only: bool = False, **kwargs) -> Union[str, None]:
+        """Internal function to dynamically obtain the value of os_sku according to the context.
+        If snapshot_id is specified, dynamic completion will be triggerd, and will try to get the corresponding value
+        from the Snapshot. When determining the value of the parameter, obtaining from `mc` takes precedence over user's
+        explicit input over snapshot over default vaule.
         :return: string or None
         """
         # read the original value passed by the command
@@ -1017,16 +1132,33 @@ class AKSContext:
             )
             if agent_pool_profile:
                 value_obtained_from_mc = agent_pool_profile.os_sku
+        # try to retrieve the value from snapshot
+        value_obtained_from_snapshot = None
+        # skip dynamic completion if read_only is specified
+        if not read_only:
+            snapshot = self.get_snapshot()
+            if snapshot:
+                value_obtained_from_snapshot = snapshot.os_sku
 
         # set default value
         if value_obtained_from_mc is not None:
             os_sku = value_obtained_from_mc
+        elif raw_value is not None:
+            os_sku = raw_value
+        elif not read_only and value_obtained_from_snapshot is not None:
+            os_sku = value_obtained_from_snapshot
         else:
             os_sku = raw_value
 
-        # this parameter does not need dynamic completion
         # this parameter does not need validation
         return os_sku
+
+    def get_os_sku(self) -> Union[str, None]:
+        """Obtain the value of os_sku.
+        Note: Inherited and extended in aks-preview to add support for getting values from snapshot.
+        :return: string or None
+        """
+        return self._get_os_sku()
 
     def get_vnet_subnet_id(self) -> Union[str, None]:
         """Obtain the value of vnet_subnet_id.
@@ -4515,6 +4647,16 @@ class AKSCreateDecorator:
             enable_auto_scaling=enable_auto_scaling,
             enable_fips=self.context.get_enable_fips_image(),
         )
+
+        # snapshot creation data
+        creation_data = None
+        snapshot_id = self.context.get_snapshot_id()
+        if snapshot_id:
+            creation_data = self.models.CreationData(
+                source_resource_id=snapshot_id
+            )
+        agent_pool_profile.creation_data = creation_data
+
         mc.agent_pool_profiles = [agent_pool_profile]
         return mc
 
@@ -5404,7 +5546,8 @@ class AKSUpdateDecorator:
         # some parameters support the use of empty string or dictionary to update/remove previously set values
         is_default = (
             self.context.get_cluster_autoscaler_profile() is None and
-            self.context.get_api_server_authorized_ip_ranges() is None
+            self.context.get_api_server_authorized_ip_ranges() is None and
+            self.context.get_nodepool_labels() is None
         )
 
         if not is_changed and is_default:
