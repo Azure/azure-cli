@@ -1624,7 +1624,7 @@ examples:
     crafted: true
   - name: Attach multiple managed disks to a VM. (Please run "az config set core.disable_concurrent_ids=True" to disable parallel operation for --ids parameter first)
     text: |
-        az vm disk attach --vm-name MyVm --resource-group MyResourceGroup --sku Standard_LRS --disk $diskId1 $diskId2 $diskId3
+        az vm disk attach --vm-name MyVm --resource-group MyResourceGroup --sku Standard_LRS --disk diskId1 diskId2 diskId3
     crafted: true
 """
 
