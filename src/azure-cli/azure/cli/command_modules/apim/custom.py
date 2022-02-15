@@ -24,6 +24,7 @@ import re
 from knack.util import CLIError
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, ArgumentUsageError
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties,
                                              ApiManagementServiceBackupRestoreParameters,
@@ -62,7 +63,7 @@ def _get_subscription_key_parameter_names(subscription_key_query_param_name=None
             query=subscription_key_query_param_name
         )
     elif subscription_key_query_param_name is not None or subscription_key_header_name is not None:
-        raise CLIError(
+        raise ArgumentUsageError(
             "Please specify 'subscription_key_query_param_name' and 'subscription_key_header_name' at the same time.")
     return names
 
@@ -347,10 +348,10 @@ def apim_api_import(
     elif specification_url is not None and specification_path is None:
         parameters.value = specification_url
     elif specification_path is not None and specification_url is not None:
-        raise CLIError(
+        raise ArgumentUsageError(
             "Can't specify specification-url and specification-path at the same time.")
     else:
-        raise CLIError(
+        raise ArgumentUsageError(
             "Please either specify specification-url or specification-path.")
 
     FORMAT_MAPPINGS = {
@@ -381,8 +382,8 @@ def apim_api_import(
     if specification_format in FORMAT_MAPPINGS:
         parameters.format = FORMAT_MAPPINGS[specification_format][specification_path is not None]
     else:
-        raise CLIError(
-            "Please provide valid value for specificationFormat: " + specification_format)
+        raise InvalidArgumentValueError(
+            "SpecificationFormat: " + specification_format + "is not supported.")
 
     if specification_format == ImportFormat.Wsdl.value:
         if api_type == ApiType.http.value:
@@ -473,7 +474,8 @@ def apim_product_create(
         elif state == ProductState.published:
             parameters.state = ProductState.published
         else:
-            raise CLIError("State " + state + " is not supported.")
+            raise InvalidArgumentValueError(
+                "State: " + state + " is not supported.")
 
     if product_id is None:
         product_id = uuid.uuid4().hex
@@ -515,7 +517,8 @@ def apim_product_update(
         elif state == ProductState.published:
             instance.state = ProductState.published
         else:
-            raise CLIError("State " + state + " is not supported.")
+            raise InvalidArgumentValueError(
+                "State: " + state + " is not supported.")
 
     return instance
 
@@ -759,14 +762,14 @@ def apim_api_vs_create(
 
     if versioning_scheme == VersioningScheme.header:
         if version_header_name is None:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "Please specify version header name while using 'header' as version scheme.")
 
         resource.version_header_name = version_header_name
 
     if versioning_scheme == VersioningScheme.query:
         if version_query_name is None:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "Please specify version query name while using 'query' as version scheme.")
 
         resource.version_query_name = version_query_name
@@ -793,14 +796,14 @@ def apim_api_vs_update(
         instance.versioning_scheme = versioning_scheme
         if versioning_scheme == VersioningScheme.header:
             if version_header_name is None:
-                raise CLIError(
+                raise ArgumentUsageError(
                     "Please specify version header name while using 'header' as version scheme.")
 
             instance.version_header_name = version_header_name
             instance.version_query_name = None
         if versioning_scheme == VersioningScheme.query:
             if version_query_name is None:
-                raise CLIError(
+                raise ArgumentUsageError(
                     "Please specify version query name while using 'query' as version scheme.")
 
             instance.version_query_name = version_query_name
