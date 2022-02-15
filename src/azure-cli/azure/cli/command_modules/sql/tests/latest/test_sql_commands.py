@@ -176,6 +176,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_passwords = ['SecretPassword123', 'SecretPassword456', 'SecretPassword789']
         federated_client_id_1 = '748eaea0-6dbc-4be9-a50b-6a2d3dad00d4'
         federated_client_id_2 = '17deee33-9da7-40ce-a33c-8a96f2f8f07d'
+        federated_client_id_3 = '00000000-0000-0000-0000-000000000000'
 
         # test create sql server with minimal required parameters
         server_1 = self.cmd('sql server create -g {} --name {} '
@@ -282,6 +283,15 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('federatedClientId', federated_client_id_2)])
+
+        # test update sql server's federated client id to empty guid
+        self.cmd('sql server update -g {} --name {} --admin-password {} --federated-client-id {} -i'
+                 .format(resource_group_1, server_name_3, admin_passwords[2], federated_client_id_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('federatedClientId', None)])
                      
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
