@@ -176,8 +176,6 @@ jobs:
     displayName: 'SBOM'
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
-      PackageName: 'Azure Cli'
-      PackageVersion: $CLI_VERSION
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: MSI'
@@ -645,8 +643,6 @@ jobs:
     displayName: 'SBOM'
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
-      PackageName: 'Azure Cli'
-      PackageVersion: $CLI_VERSION
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: homebrew'
