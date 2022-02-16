@@ -128,7 +128,7 @@ class TunnelServer:
             debugger_thread.start()
             web_socket_thread.start()
             logger.info('Both debugger and websocket threads started...')
-            logger.info('Successfully connected to local server...')
+            logger.info('Successfully connected to local server..')
             debugger_thread.join()
             web_socket_thread.join()
             self.cleanup()
