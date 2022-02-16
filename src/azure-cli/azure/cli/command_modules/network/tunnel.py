@@ -116,7 +116,6 @@ class TunnelServer:
 
             auth_token = self._get_auth_token()
             host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
-            logger.info("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
                                         sslopt={'cert_reqs': ssl.CERT_REQUIRED},
