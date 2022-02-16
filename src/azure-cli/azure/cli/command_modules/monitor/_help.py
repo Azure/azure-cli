@@ -1133,7 +1133,7 @@ short-summary: Create a Log Analytics workspace search results table. The table 
 examples:
   - name: Create a Log Analytics workspace search result table.
     text: |
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
+        az monitor log-analytics workspace table search-job create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
 """
 
 
