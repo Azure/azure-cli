@@ -44,41 +44,41 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'sub': subscription_id,
-            'scope': '/subscriptions/{}'.format(subscription_id),
+            'scope': f'/subscriptions/{subscription_id}/resourceGroups/{resource_group}',
+            'role': 'Reader',
             'display_name': resource_group
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg}',
+                result = self.cmd('ad sp create-for-rbac -n {display_name} '
+                                  '--scopes {scope} --role {role}',
                                   checks=self.check('displayName', '{display_name}')).get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
-                self.cmd('role assignment list --assignee {app_id} --scope {scope}',
-                         checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {app_id} -g {rg}',
-                         checks=self.check("length([])", 1))
+                         checks=[
+                             self.check("length([])", 1),
+                             self.check("[0].properties.roleDefinitionName", 'Reader'),
+                             self.check("[0].properties.scope", '{scope}')
+                         ])
                 self.cmd('role assignment delete --assignee {app_id} -g {rg}',
-                         checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {app_id}',
                          checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {app_id}')
 
 
 class RbacSPCertScenarioTest(RoleScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
-    def test_create_for_rbac_with_cert_with_assignment(self, resource_group):
 
-        subscription_id = self.get_subscription_id()
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
+    def test_create_for_rbac_with_cert_no_assignment(self, resource_group):
+
         self.kwargs.update({
-            'sub': subscription_id,
-            'scope': '/subscriptions/{}'.format(subscription_id),
-            'display_name': resource_group
+            'display_name': resource_group,
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
+                result = self.cmd('ad sp create-for-rbac -n {display_name} --create-cert',
                                   checks=self.check('displayName', '{display_name}')).get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
 
@@ -91,6 +91,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
         finally:
             self.cmd('ad app delete --id {app_id}',
                      checks=self.is_empty())
+
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')

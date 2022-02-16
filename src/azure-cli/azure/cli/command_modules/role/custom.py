@@ -39,9 +39,6 @@ CREDENTIAL_WARNING = (
 
 logger = get_logger(__name__)
 
-SCOPE_WARNING = "In a future release, --scopes argument will become required for creating a role assignment. " \
-                "Please explicitly specify --scopes."
-
 # pylint: disable=too-many-lines
 
 
@@ -1405,11 +1402,11 @@ def create_service_principal_for_rbac(
     import time
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
-    role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
 
-    if role and not scopes:
-        logger.warning(SCOPE_WARNING)
-        scopes = ['/subscriptions/' + role_client.config.subscription_id]
+    if role and not scopes or not role and scopes:
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError("To create role assignments, "
+                                 "specify both --role and --scopes at the same time.")
 
     years = years or 1
     _RETRY_TIMES = 36

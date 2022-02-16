@@ -33,7 +33,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         self.kwargs['display_name_new'] = self.create_random_name('cli-test-sp', 15)
 
         try:
-            sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
+            sp_info = self.cmd('ad sp create-for-rbac -n {display_name}').get_output_in_json()
             self.assertTrue(sp_info['displayName'] == sp_name)
             self.kwargs['app_id'] = sp_info['appId']
 
@@ -51,7 +51,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
 
         self.kwargs['display_name'] = resource_group
         try:
-            result = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment',
+            result = self.cmd('ad sp create-for-rbac -n {display_name}',
                               checks=self.check('displayName', '{display_name}')).get_output_in_json()
             self.kwargs['app_id'] = result['appId']
         finally:
@@ -64,41 +64,58 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'sub': subscription_id,
-            'scope': '/subscriptions/{}'.format(subscription_id),
+            'scope': f'/subscriptions/{subscription_id}/resourceGroups/{resource_group}',
+            'role': 'Reader',
             'display_name': resource_group
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg}',
+                result = self.cmd('ad sp create-for-rbac -n {display_name} '
+                                  '--scopes {scope} --role {role}',
                                   checks=self.check('displayName', '{display_name}')).get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
-                self.cmd('role assignment list --assignee {app_id} --scope {scope}',
-                         checks=self.check("length([])", 1))
                 self.cmd('role assignment list --assignee {app_id} -g {rg}',
-                         checks=self.check("length([])", 1))
+                         checks=[
+                             self.check("length([])", 1),
+                             self.check("[0].roleDefinitionName", 'Reader'),
+                             self.check("[0].scope", '{scope}')
+                         ])
                 self.cmd('role assignment delete --assignee {app_id} -g {rg}',
-                         checks=self.is_empty())
-                self.cmd('role assignment delete --assignee {app_id}',
                          checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {app_id}')
 
-
-class RbacSPCertScenarioTest(RoleScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
-    def test_create_for_rbac_with_cert_with_assignment(self, resource_group):
+    def test_create_for_rbac_argument_error(self):
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
-            'display_name': resource_group
+            'role': 'Reader',
+        })
+
+        from azure.cli.core.azclierror import ArgumentUsageError
+
+        with self.assertRaisesRegex(ArgumentUsageError, 'both'):
+            self.cmd('ad sp create-for-rbac --scopes {scope}')
+
+        with self.assertRaisesRegex(ArgumentUsageError, 'both'):
+            self.cmd('ad sp create-for-rbac --role {role}')
+
+
+class RbacSPCertScenarioTest(RoleScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
+    def test_create_for_rbac_with_cert_no_assignment(self, resource_group):
+
+        self.kwargs.update({
+            'display_name': resource_group,
         })
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                result = self.cmd('ad sp create-for-rbac -n {display_name} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
+                result = self.cmd('ad sp create-for-rbac -n {display_name} --create-cert',
                                   checks=self.check('displayName', '{display_name}')).get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
 
@@ -421,7 +438,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
             # Service Principal
             self.kwargs['sp_name'] = self.create_random_name('sp', 15)
-            result = self.cmd('ad sp create-for-rbac --skip-assignment --name {sp_name}').get_output_in_json()
+            result = self.cmd('ad sp create-for-rbac --name {sp_name}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
             result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
             try:
