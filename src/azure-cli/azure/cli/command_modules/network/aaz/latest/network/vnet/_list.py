@@ -23,4 +23,4 @@ class List(AAZCommand):
     pass
 
 
-__all__ = [List]
+__all__ = ["List"]

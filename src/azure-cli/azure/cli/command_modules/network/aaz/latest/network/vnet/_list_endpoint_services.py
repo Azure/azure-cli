@@ -19,4 +19,4 @@ class ListEndpointServices(AAZCommand):
     pass
 
 
-__all__ = [ListEndpointServices]
+__all__ = ["ListEndpointServices"]

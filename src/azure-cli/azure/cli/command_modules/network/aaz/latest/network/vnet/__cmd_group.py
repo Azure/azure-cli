@@ -10,4 +10,4 @@ class __CMDGroup(AAZCommandGroup):
     pass
 
 
-__all__ = [__CMDGroup]
+__all__ = ["__CMDGroup"]

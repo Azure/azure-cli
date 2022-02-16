@@ -357,7 +357,7 @@ def parse_cls_doc(cls):
                 e_idx = idx + 1
                 while e_idx < len(lines) and not lines[e_idx].startswith(_DOC_EXAMPLE_FLAG):
                     e_idx += 1
-                example["text"] = ' '.join(lines[idx+1: e_idx]) or None
+                example["text"] = '\n'.join(lines[idx+1: e_idx]) or None
                 if example["text"]:
                     examples.append(example)
                 idx = e_idx - 1

@@ -16,4 +16,4 @@ class ListAvailableIps(AAZCommand):
     pass
 
 
-__all__ = [ListAvailableIps]
+__all__ = ["ListAvailableIps"]

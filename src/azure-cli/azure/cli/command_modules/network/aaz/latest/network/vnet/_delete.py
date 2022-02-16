@@ -93,4 +93,4 @@ class Delete(AAZCommand):
             return None
 
 
-__all__ = [Delete]
+__all__ = ["Delete"]

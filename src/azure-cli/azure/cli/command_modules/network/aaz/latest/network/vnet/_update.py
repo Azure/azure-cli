@@ -22,4 +22,4 @@ class Update(AAZCommand):
     pass
 
 
-__all__ = [Update]
+__all__ = ["Update"]

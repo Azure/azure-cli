@@ -12,6 +12,7 @@ class Show(AAZCommand):
 
     :example: Get details for MyVNet.
         az network vnet show -g MyResourceGroup -n MyVNet
+        az network vnet show -g MyResourceGroup -n MyVNet
 
     """
 
@@ -154,4 +155,4 @@ class Show(AAZCommand):
             return _schema
 
 
-__all__ = [Show]
+__all__ = ["Show"]
