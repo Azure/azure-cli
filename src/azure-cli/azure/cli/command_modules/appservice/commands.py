@@ -488,6 +488,9 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
 
+    with self.command_group('logicapp deployment source') as g:
+        g.custom_command('config-zip', 'enable_zip_deploy_functionapp')
+
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)

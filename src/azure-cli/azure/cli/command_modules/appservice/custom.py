@@ -480,11 +480,12 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
     return result.properties
 
 
+# note: also used for logicapps
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     if app is None:
-        raise CLIError('The function app \'{}\' was not found in resource group \'{}\'. '
+        raise CLIError('The app \'{}\' was not found in resource group \'{}\'. '
                        'Please make sure these values are correct.'.format(name, resource_group_name))
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = None

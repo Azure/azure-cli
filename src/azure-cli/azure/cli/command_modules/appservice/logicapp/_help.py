@@ -76,3 +76,32 @@ examples:
     text: az logicapp stop --name MyLogicApp --resource-group MyResourceGroup
     crafted: true
 """
+
+
+helps['logicapp deployment'] = """
+ type: group
+ short-summary: Manage logic app deployments.
+ """
+
+helps['logicapp deployment source'] = """
+type: group
+short-summary: Manage logic app deployment via source control.
+"""
+
+helps['logicapp deployment source config-zip'] = """
+type: command
+short-summary: Perform deployment using the kudu zip push deployment for a logic app.
+long-summary: >
+  By default Kudu assumes that zip deployments do not require any build-related actions like
+  npm install or dotnet publish. This can be overridden by including an .deployment file in your
+  zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
+  to enable Kudu detection logic and build script generation process.
+  See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
+  Alternately the setting can be enabled using the az logicapp config appsettings set command.
+examples:
+- name: Perform deployment by using zip file content.
+  text: >
+      az logicapp deployment source config-zip \\
+          -g {myRG} -n {myAppName} \\
+          --src {zipFilePathLocation}
+"""
