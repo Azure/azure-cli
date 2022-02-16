@@ -20,7 +20,7 @@ class RoleCommandsLoader(AzCommandsLoader):
                                                  custom_command_type=role_custom)
 
     def load_command_table(self, args):
-        if args[0] in ('role', 'ad'):
+        if args and args[0] in ('role', 'ad'):
             from knack.log import get_logger
             logger = get_logger(__name__)
             logger.warning("The underlying Active Directory Graph API will be replaced by Microsoft Graph API in "
