@@ -5,7 +5,7 @@
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
 from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
-    Schema, Column, SearchResults, RestoredLogs, ColumnTypeEnum
+    Schema, Column, SearchResults, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from knack.util import CLIError
@@ -150,17 +150,11 @@ def update_log_analytics_workspace_data_exports(cmd, instance, table_names, dest
 # pylint:disable=too-many-locals dangerous-default-value
 def create_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
-                                         description=None, query=None, search_description=None, limit=None,
-                                         start_search_time=None, end_search_time=None, start_restore_time=None,
-                                         end_restore_time=None, no_wait=False):
-    search_results = None
-    if query is not None or limit is not None or start_search_time is not None or end_search_time is not None or\
-            search_description is not None:
-        search_results = SearchResults(query=query, description=search_description, limit=limit,
-                                       start_search_time=start_search_time, end_search_time=end_search_time)
-    restored_logs = None
-    if start_restore_time is not None or end_restore_time is not None:
-        restored_logs = RestoredLogs(start_restore_time=start_restore_time, end_restore_time=end_restore_time)
+                                         description=None, no_wait=False):
+    if retention_in_days and total_retention_in_days:
+        if total_retention_in_days < retention_in_days:
+            InvalidArgumentValueError('InvalidArgumentValueError: The specified value of --retention-time'
+                                      ' should be less than --total-retention-time')
     columns_list = [] if columns else None
     for col in columns:
         if '=' in col:
@@ -177,13 +171,8 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
         if not columns:
             raise ArgumentUsageError('Usage error: When using --description, --columns must be provided')
         schema = Schema(name=table_name, columns=columns_list, description=description)
-    if not search_results and not restored_logs and not schema:
-        raise ArgumentUsageError('Usage error: Provide parameters for at least one of the tables. '
-                                 'Available types: _CL _SRCH _RST.')
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
-                  search_results=search_results,
-                  restored_logs=restored_logs,
                   schema=schema,
                   plan=plan
                   )
@@ -191,13 +180,25 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
                        workspace_name, table_name, table)
 
 
+def create_log_analytics_workspace_table_search_job(client, resource_group_name, workspace_name, table_name,
+                                                    retention_in_days=None, total_retention_in_days=None,
+                                                    search_query=None, limit=None, start_search_time=None,
+                                                    end_search_time=None, no_wait=False):
+    search_results = None
+    if search_query is not None or limit is not None or start_search_time is not None or end_search_time is not None:
+        search_results = SearchResults(query=search_query, limit=limit, start_search_time=start_search_time,
+                                       end_search_time=end_search_time)
+    table = Table(retention_in_days=retention_in_days,
+                  total_retention_in_days=total_retention_in_days,
+                  search_results=search_results,
+                  )
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
+                       workspace_name, table_name, table)
+
+
 def update_log_analytics_workspace_table(client, resource_group_name, workspace_name, table_name, columns=[],
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
-                                         description=None, start_restore_time=None, end_restore_time=None,
-                                         no_wait=False):
-    restored_logs = None
-    if start_restore_time is not None or end_restore_time is not None:
-        restored_logs = RestoredLogs(start_restore_time=start_restore_time, end_restore_time=end_restore_time)
+                                         description=None, no_wait=False):
     columns_list = [] if columns else None
     for col in columns:
         if '=' in col:
@@ -214,7 +215,6 @@ def update_log_analytics_workspace_table(client, resource_group_name, workspace_
         schema = Schema(name=table_name, columns=columns_list, description=description)
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
-                  restored_logs=restored_logs,
                   schema=schema,
                   plan=plan
                   )

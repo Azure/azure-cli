@@ -395,6 +395,9 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
+    with self.command_group('monitor log-analytics workspace table search-job', log_analytics_workspace_table_sdk, custom_command_type=log_analytics_workspace_custom, client_factory=cf_log_analytics_workspace_tables, is_preview=True) as g:
+        g.custom_command('create', 'create_log_analytics_workspace_table_search_job', supports_no_wait=True)
+
     with self.command_group('monitor log-analytics workspace data-export', log_analytics_workspace_data_exports_sdk,
                             custom_command_type=log_analytics_workspace_custom) as g:
         g.command('list', 'list_by_workspace')

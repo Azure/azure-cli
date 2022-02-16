@@ -1115,18 +1115,27 @@ examples:
 
 helps['monitor log-analytics workspace table create'] = """
 type: command
-short-summary: Create a Log Analytics workspace table. The table name needs to end with these strings(_CL,_SRCH,_RST).
+short-summary: Create a Log Analytics workspace microsoft/custom log table. The table name needs to end with '_CL'.
 examples:
   - name: Create a Log Analytics workspace custom log table.
     text: |
         az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --columns MyColumn1=string TimeGenerated=datetime
+"""
+
+helps['monitor log-analytics workspace table search-job'] = """
+type: group
+short-summary: Manage tables for log analytics workspace search results table.
+"""
+
+helps['monitor log-analytics workspace table search-job create'] = """
+type: command
+short-summary: Create a Log Analytics workspace search results table. The table name needs to end with '_SRCH'.
+examples:
   - name: Create a Log Analytics workspace search result table.
     text: |
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
-  - name: Create a Log Analytics workspace restored logs table.
-    text: |
-        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --retention-time 45 --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT"
+        az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
 """
+
 
 helps['monitor log-analytics workspace table update'] = """
 type: command

@@ -444,29 +444,26 @@ def load_arguments(self, _):
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
         c.argument('retention_in_days', type=int, options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace')
+        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
 
     with self.argument_context('monitor log-analytics workspace table create') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
-        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
         c.argument('description', help='Schema description.')
-        c.argument('query', options_list=['--search'], help='Search job query.')
+
+    with self.argument_context('monitor log-analytics workspace table search-job create') as c:
+        c.argument('search_description', help='Schema description.')
+        c.argument('search_query', options_list=['--search-query'], help='Search job query.')
         c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
-        c.argument('start_search_time', arg_type=get_datetime_type(help='The timestamp to start the search from (UTC).'))
-        c.argument('end_search_time', arg_type=get_datetime_type(help='The timestamp to end the search by (UTC).'))
-        c.argument('search_description', help='Search results table\'s Description.')
-        c.argument('start_restore_time', arg_type=get_datetime_type(help='The timestamp to start the restore from (UTC).'))
-        c.argument('end_restore_time', arg_type=get_datetime_type(help='The timestamp to end the restore by (UTC).'))
+        c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
 
     with self.argument_context('monitor log-analytics workspace table update') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
         c.argument('plan', arg_type=get_enum_type(TablePlanEnum), help='The table plan. Possible values include: "Basic", "Analytics".')
-        c.argument('total_retention_in_days', type=int, options_list='--total-retention-time', help='The table data total retention in days, between 4 and 2555. Setting this property to null will default to table retention.')
         c.argument('description', help='Table description.')
-        c.argument('start_restore_time', arg_type=get_datetime_type(help='The timestamp to start the restore from (UTC).'))
-        c.argument('end_restore_time', arg_type=get_datetime_type(help='The timestamp to end the restore by (UTC).'))
     # endregion
 
     # region Log Analytics Workspace Data Export

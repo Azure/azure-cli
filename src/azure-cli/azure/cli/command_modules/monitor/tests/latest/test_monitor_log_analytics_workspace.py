@@ -501,8 +501,6 @@ class TestLogProfileScenarios(ScenarioTest):
             'ws_name':self.create_random_name('ws-', 10),
             'table_name': self.create_random_name('TB', 10) + '_CL',
             'table2_name': self.create_random_name('TB', 10) + '_SRCH',
-            'table3_name': self.create_random_name('TB', 10) +'RST'
-
         })
 
         self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
@@ -530,16 +528,9 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
 
-        # self.cmd('monitor log-analytics workspace table create -g {rg} -n {table2_name} --workspace-name {ws_name} --search "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --description "a test table"', checks=[
-        #     self.check('name', '{table_name}'),
-        #     self.check('searchResults.query', 'Heartbeat | where SourceSystem != '' | project SourceSystem'),
-        #     self.check('searchResults.limit', 1000),
-        #     self.check('searchResults.sourceTable', "Heartbeat"),
-        #     self.check('searchResults.type', 'datetime'),
-        # ])
-
-        # self.cmd('monitor log-analytics workspace table create -g {rg} -n {table3_name} --workspace-name {ws_name} --start-restore-time "2021-08-01 05:29:18" --end-restore-time "2021-08-02 05:29:18"', checks=[
-        #     self.check('name', '{table_name}'),
-        #     self.check('restoredLogs.startRestoreTime', ''),
-        #     self.check('restoredLogs.endRestoreTime', ''),
-        # ])
+        self.cmd('monitor log-analytics workspace table search-job create -n {table2_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --search-query "Heartbeat" --limit 1', checks=[
+            self.check('name', '{table2_name}'),
+            self.check('schema.searchResults.query', 'Heartbeat'),
+            self.check('schema.searchResults.limit', 1),
+            self.check('schema.searchResults.sourceTable', "Heartbeat"),
+        ])
