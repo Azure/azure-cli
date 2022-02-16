@@ -119,8 +119,7 @@ class TunnelServer:
             verify_mode =  ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
-                                        sslopt={'cert_reqs': verify_mode},
-                                        enable_multithread=True)
+                                        sslopt={'cert_reqs': verify_mode}, enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
             logger.info('Got debugger connection... index: %s', index)
