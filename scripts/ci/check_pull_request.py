@@ -75,7 +75,7 @@ def check_pull_request(title, body):
 def regex_line(line):
     error_flag = False
     # Check each line for these words, case insensitive
-    sub_pattern = r'\b(added|adding|adds|changed|changing|changes|deprecated|deprecating|deprecates|removed|removing|removes|fixed|fixing|fixes|made|making|makes)\b'
+    sub_pattern = r'\b(added|adding|adds|changed|changing|changes|deprecated|deprecating|deprecates|fixed|fixing|fixes|made|making|makes|removed|removing|removes|updated|updating|updates)\b'
     ref = re.findall(sub_pattern, line, re.IGNORECASE)
     if ref:
         logger.warning('Please use the right verb of%s %s %swith present-tense in base form and capitalized first letter to describe what is done, '
@@ -126,7 +126,7 @@ def regex_line(line):
         if i == '-' and line[idx + 1] == '-':
             param = '--'
             index = idx + 2
-            while index <= len(line) and line[index] != ' ':
+            while index < len(line) and line[index] != ' ':
                 param += line[index]
                 index += 1
             try:
