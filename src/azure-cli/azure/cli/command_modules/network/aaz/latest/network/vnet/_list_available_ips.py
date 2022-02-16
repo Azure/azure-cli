@@ -14,3 +14,6 @@ class ListAvailableIps(AAZCommand):
         az network vnet list-available-ips -g MyResourceGroup -n MyVNet
     """
     pass
+
+
+__all__ = [ListAvailableIps]

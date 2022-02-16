@@ -14,3 +14,5 @@ class CheckIPAddressAvailability(AAZCommand):
     """
     pass
 
+
+__all__ = [CheckIPAddressAvailability]

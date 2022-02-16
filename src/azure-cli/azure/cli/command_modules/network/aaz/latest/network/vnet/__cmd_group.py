@@ -8,3 +8,6 @@ class __CMDGroup(AAZCommandGroup):
     To learn more about Virtual Networks visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-network
     """
     pass
+
+
+__all__ = [__CMDGroup]

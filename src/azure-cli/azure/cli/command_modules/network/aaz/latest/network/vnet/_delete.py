@@ -91,3 +91,6 @@ class Delete(AAZCommand):
 
         def on_200_202_204(self, session):
             return None
+
+
+__all__ = [Delete]

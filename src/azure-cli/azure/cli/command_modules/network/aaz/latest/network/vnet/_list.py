@@ -21,3 +21,6 @@ class List(AAZCommand):
 
     """
     pass
+
+
+__all__ = [List]

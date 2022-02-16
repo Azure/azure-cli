@@ -20,3 +20,6 @@ class Update(AAZCommand):
 
     """
     pass
+
+
+__all__ = [Update]

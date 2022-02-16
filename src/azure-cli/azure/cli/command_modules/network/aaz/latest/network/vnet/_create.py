@@ -131,3 +131,6 @@ class Create(AAZCommand):
         )
 
         return schema
+
+
+__all__ = [Create]

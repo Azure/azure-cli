@@ -154,3 +154,4 @@ class Show(AAZCommand):
             return _schema
 
 
+__all__ = [Show]
