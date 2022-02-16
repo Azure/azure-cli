@@ -1679,11 +1679,10 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
                        deployment_container_image_name=None, docker_registry_server_password=None,
                        docker_registry_server_user=None):
     container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
-    # TODO does this constraint make sense?
     if container_args and not configuration_source:
-        raise ArgumentUsageError("Cannot use arguments --deployment_container_image_name, "
-                                 "--docker_registry_server_password, or --docker_registry_server_user without argument "
-                                 "--configuration_source")
+        raise ArgumentUsageError("Cannot use arguments --deployment-container_image_name, "
+                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+                                 "--configuration-source")
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
@@ -1727,7 +1726,17 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     return result
 
 
-def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None):
+def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_source=None,
+                            deployment_container_image_name=None, docker_registry_server_password=None,
+                            docker_registry_server_user=None):
+    container_args = deployment_container_image_name or docker_registry_server_password or docker_registry_server_user
+    if container_args and not configuration_source:
+        raise ArgumentUsageError("Cannot use arguments --deployment-container-image_name, "
+                                 "--docker-registry-server_password, or --docker-registry-server-user without argument "
+                                 "--configuration-source")
+
+    docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
+
     Site = cmd.get_models('Site')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
@@ -1740,7 +1749,10 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if configuration_source:
-        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source)
+        update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
+                                              deployment_container_image_name, docker_registry_server_password,
+                                              docker_registry_server_user,
+                                              docker_registry_server_url=docker_registry_server_url)
 
     result.name = result.name.split('/')[-1]
     return result
