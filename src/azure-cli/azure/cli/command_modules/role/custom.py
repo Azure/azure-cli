@@ -1403,8 +1403,7 @@ def create_service_principal_for_rbac(
 
     if role and not scopes or not role and scopes:
         from azure.cli.core.azclierror import ArgumentUsageError
-        raise ArgumentUsageError("To create role assignments, "
-                                 "specify both --role and --scopes.")
+        raise ArgumentUsageError("To create role assignments, specify both --role and --scopes.")
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
