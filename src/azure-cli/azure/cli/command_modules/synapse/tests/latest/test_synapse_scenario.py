@@ -1551,6 +1551,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('status', "Enabled")
                  ])
 
+    
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
