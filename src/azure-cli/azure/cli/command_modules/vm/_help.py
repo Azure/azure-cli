@@ -1638,7 +1638,7 @@ type: group
 short-summary: "Manage encryption of VM disks."
 long-summary: |
     For more information, see:
-    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss"
+    https://docs.microsoft.com/azure/security/fundamentals/azure-disk-encryption-vms-vmss
 """
 
 helps['vm encryption disable'] = """
