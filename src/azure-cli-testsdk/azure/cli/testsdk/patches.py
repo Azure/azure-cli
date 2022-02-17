@@ -47,6 +47,7 @@ def patch_load_cached_subscriptions(unit_test):
                 "name": "Example",
                 "tenantId": MOCKED_TENANT_ID,
                 "isDefault": True,
+                "environmentName": "AzureCloud",
                 "user": {
                     "name": MOCKED_USER_NAME,
                     "type": "user"

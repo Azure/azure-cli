@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.31.0"
+VERSION = "2.33.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -64,7 +64,7 @@ DEPENDENCIES = [
 
 # dependencies for specific OSes
 if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.8')
+    DEPENDENCIES.append('psutil~=5.9')
 
 
 with open('README.rst', 'r', encoding='utf-8') as f:

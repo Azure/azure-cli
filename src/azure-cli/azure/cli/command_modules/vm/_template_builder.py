@@ -301,7 +301,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
         enable_hotpatching=None, platform_fault_domain=None, security_type=None, enable_secure_boot=None,
         enable_vtpm=None, count=None, edge_zone=None, os_disk_delete_option=None, user_data=None,
-        capacity_reservation_group=None, enable_hibernation=None):
+        capacity_reservation_group=None, enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -500,6 +500,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}

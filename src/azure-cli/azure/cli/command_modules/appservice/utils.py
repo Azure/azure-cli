@@ -9,12 +9,13 @@ import urllib
 import urllib3
 import certifi
 
-from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError)
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, ValidationError, ResourceNotFoundError)
 from azure.cli.core.commands.parameters import get_subscription_locations
 from azure.cli.core.util import should_disable_connection_verify
+
+from msrestazure.tools import parse_resource_id
 
 from ._client_factory import web_client_factory
 
@@ -42,42 +43,47 @@ def _normalize_sku(sku):
     return sku
 
 
-# FYI these function/parameter names are misnomers -- this function really maps SKU name to SKU tier, not the reverse
-def get_sku_name(tier):  # pylint: disable=too-many-return-statements
-    tier = tier.upper()
-    if tier in ['F1', 'FREE']:
+def get_sku_tier(name):  # pylint: disable=too-many-return-statements
+    name = name.upper()
+    if name in ['F1', 'FREE']:
         return 'FREE'
-    if tier in ['D1', "SHARED"]:
+    if name in ['D1', "SHARED"]:
         return 'SHARED'
-    if tier in ['B1', 'B2', 'B3', 'BASIC']:
+    if name in ['B1', 'B2', 'B3', 'BASIC']:
         return 'BASIC'
-    if tier in ['S1', 'S2', 'S3']:
+    if name in ['S1', 'S2', 'S3']:
         return 'STANDARD'
-    if tier in ['P1', 'P2', 'P3']:
+    if name in ['P1', 'P2', 'P3']:
         return 'PREMIUM'
-    if tier in ['P1V2', 'P2V2', 'P3V2']:
+    if name in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
-    if tier in ['P1V3', 'P2V3', 'P3V3']:
+    if name in ['P1V3', 'P2V3', 'P3V3']:
         return 'PREMIUMV3'
-    if tier in ['PC2', 'PC3', 'PC4']:
+    if name in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
-    if tier in ['EP1', 'EP2', 'EP3']:
+    if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
-    if tier in ['I1', 'I2', 'I3']:
+    if name in ['I1', 'I2', 'I3']:
         return 'Isolated'
-    if tier in ['I1V2', 'I2V2', 'I3V2']:
+    if name in ['I1V2', 'I2V2', 'I3V2']:
         return 'IsolatedV2'
-    if tier in ['WS1', 'WS2', 'WS3']:
+    if name in ['WS1', 'WS2', 'WS3']:
         return 'WorkflowStandard'
     raise ValidationError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
+# Deprecated; Do not use
+# Keeping this for now so that we don't break extensions that use it
+def get_sku_name(tier):
+    return get_sku_tier(name=tier)
+
+
 # resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
 def get_resource_if_exists(resource, **kwargs):
-    from azure.core.exceptions import ResourceNotFoundError
+    from azure.core.exceptions import ResourceNotFoundError as E
     try:
         return resource.get(**kwargs)
-    except ResourceNotFoundError:
+    except E:
         return None
 
 
@@ -142,10 +148,11 @@ def _rename_server_farm_props(webapp):
 def _get_location_from_webapp(client, resource_group_name, webapp):
     webapp = client.web_apps.get(resource_group_name, webapp)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist".format(webapp))
+        raise ResourceNotFoundError("'{}' app doesn't exist".format(webapp))
     return webapp.location
 
 
+# can't just normalize locations with location.lower().replace(" ", "") because of UAE/UK regions
 def _normalize_location(cmd, location):
     location = location.lower()
     locations = get_subscription_locations(cmd.cli_ctx)
@@ -181,8 +188,21 @@ def get_pool_manager(url):
             ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
             logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
             if not os.path.isfile(ca_bundle_file):
-                raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
+                raise ValidationError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
         else:
             ca_bundle_file = certifi.where()
         http.connection_pool_kw['ca_certs'] = ca_bundle_file
     return http
+
+
+def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
+    client = web_client_factory(cmd.cli_ctx, api_version=api_version)
+    plan = parse_resource_id(webapp.server_farm_id)
+    return client.app_service_plans.get(plan['resource_group'], plan['name'])
+
+
+# Allows putting additional properties on an SDK model instance
+def use_additional_properties(resource):
+    resource.enable_additional_properties_sending()
+    existing_properties = resource.serialize().get("properties")
+    resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties

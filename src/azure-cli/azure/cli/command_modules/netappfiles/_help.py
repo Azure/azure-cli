@@ -60,10 +60,60 @@ parameters:
     short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
   - name: --administrators
     short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+  - name: --encrypt-dc-conn
+    short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
 examples:
   - name: Add an active directory to the account
     text: >
         az netappfiles account ad add -g mygroup --name myname --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
+"""
+
+helps['netappfiles account ad update'] = """
+type: command
+short-summary: Updates an active directory to the account.
+parameters:
+  - name: --account-name --name -a -n
+    short-summary: The name of the ANF account
+  - name: --active-directory-id
+    short-summary: The id of the Active Directory
+  - name: --username
+    short-summary: Username of Active Directory domain administrator
+  - name: --password
+    short-summary: Plain text password of Active Directory domain administrator
+  - name: --domain
+    short-summary: Name of the Active Directory domain
+  - name: --dns
+    short-summary: Comma separated list of DNS server IP addresses for the Active Directory domain
+  - name: --smb-server-name
+    short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
+  - name: --organizational-unit
+    short-summary: The Organizational Unit (OU) within the Windows Active Directory
+  - name: --kdc-ip
+    short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
+  - name: --ad-name
+    short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
+  - name: --server-root-ca-cert
+    short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
+  - name: --backup-operators
+    short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+  - name: --aes-encryption
+    short-summary: If enabled, AES encryption will be enabled for SMB communication
+  - name: --ldap-signing
+    short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
+  - name: --ldap-over-tls
+    short-summary: Specifies whether or not the LDAP traffic needs to be secured via TLS
+  - name: --allow-local-ldap-users
+    short-summary: If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes
+  - name: --administrators
+    short-summary: Users to be added to the Built-in Administrators active directory group. A list of unique usernames without domain specifier.
+  - name: --encrypt-dc-conn
+    short-summary: If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted
+examples:
+  - name: Update an active directory on the account
+    text: >
+        az netappfiles account ad update -g mygroup --name myname --active-directory-id 123 --username aduser --password aduser --smb-server-name SMBSERVER --dns 1.2.3.4 --domain westcentralus
 """
 
 helps['netappfiles account ad list'] = """
@@ -747,6 +797,22 @@ parameters:
     short-summary: Indication that NFSv4.1 protocol is allowed
   - name: --allowed-clients
     short-summary: Client ingress specification as comma separated string with IPv4 CIDRs, IPv4 host addresses and host names)
+  - name: --kerberos5-r
+    short-summary: Kerberos5 Read only access
+  - name: --kerberos5-rw
+    short-summary: Kerberos5 Read and write access
+  - name: --kerberos5i-r
+    short-summary: Kerberos5i Read only access
+  - name: --kerberos5i-rw
+    short-summary: Kerberos5i Read and write access
+  - name: --kerberos5p-r
+    short-summary: Kerberos5p Read only access
+  - name: --kerberos5p-rw
+    short-summary: Kerberos5p Read and write access
+  - name: --has-root-access
+    short-summary: Has root access to volume
+  - name: --chown-mode
+    short-summary: This parameter specifies who is authorized to change the ownership of a file. restricted - Only root user can change the ownership of the file. unrestricted - Non-root users can change ownership of files that they own. Possible values include- Restricted, Unrestricted. Default value- Restricted.
 examples:
   - name: Add an export policy rule for the ANF volume
     text: >
@@ -849,6 +915,8 @@ parameters:
     short-summary: Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
   - name: --default-group-quota
     short-summary: Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.
+  - name: --throughput-mibps
+    short-summary: Maximum throughput in Mibps that can be achieved by this volume and this will be accepted as input only for manual qosType volume.
 examples:
   - name: Update an ANF volume
     text: >
@@ -976,6 +1044,10 @@ parameters:
     short-summary: The name of the ANF volume
   - name: --backup-name -b
     short-summary: The name of the ANF backup
+  - name: --label
+    short-summary: Label for backup.
+  - name: --use-existing-snapshot
+    short-summary: Manual backup an already existing snapshot. This will always be false for scheduled backups and true or false for manual backups.
 examples:
   - name: Update an ANF backup
     text: >

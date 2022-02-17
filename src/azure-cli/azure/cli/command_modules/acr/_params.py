@@ -76,7 +76,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auth_mode', help='Auth mode of the source registry.', arg_type=get_enum_type(SourceRegistryLoginMode))
         # Overwrite default shorthand of cmd to make availability for acr usage
         c.argument('cmd', options_list=['--__cmd__'])
-        c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
+        c.argument('cmd_value', help="Commands to execute. This also supports additional docker run parameters or even other docker commands.", options_list=['--cmd'])
         c.argument('zone_redundancy', is_preview=True, arg_type=get_enum_type(ZoneRedundancy), help="Indicates whether or not zone redundancy should be enabled for this registry or replication. For more information, such as supported locations, please visit https://aka.ms/acr/az. Zone-redundancy cannot be updated. Defaults to 'Disabled'.")
         c.argument('allow_exports', arg_type=get_three_state_flag(), is_preview=True, help="Configure exportPolicy to allow/disallow artifacts from being exported from this registry. Artifacts can be exported via import or transfer operations. For more information, please visit https://aka.ms/acr/export-policy.")
 
@@ -423,6 +423,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.')
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+        c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
 
     with self.argument_context('acr connected-registry update') as c:
         c.argument('log_level', help='Set the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.')
@@ -433,6 +434,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.')
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.')
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.')
+        c.argument('add_notifications', options_list=['--add-notifications'], nargs='*',
+                   help='List of artifact pattern to be added to notifications list. Use the format "--add-notifications [PATTERN1 PATTERN2 ...]".')
+        c.argument('remove_notifications', options_list=['--remove-notifications'], nargs='*',
+                   help='List of artifact pattern to be removed from notifications list. Use the format "--remove-notifications [PATTERN1 PATTERN2 ...]".')
 
     with self.argument_context('acr connected-registry permissions') as c:
         c.argument('add_repos', options_list=['--add'], nargs='*',

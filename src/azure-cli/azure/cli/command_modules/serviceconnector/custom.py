@@ -23,7 +23,10 @@ from ._validators import (
     get_target_resource_name
 )
 from ._addon_factory import AddonFactory
-from ._utils import set_user_token_header
+from ._utils import (
+    set_user_token_header,
+    auto_register
+)
 # pylint: disable=unused-argument
 
 
@@ -38,7 +41,7 @@ def connection_list(client,
                     spring=None, app=None, deployment=None):
     if not source_id:
         raise RequiredArgumentMissingError(err_msg.format('--source-id'))
-    return client.list(resource_uri=source_id)
+    return auto_register(client.list, resource_uri=source_id)
 
 
 def connection_list_support_types(cmd, client,
@@ -81,8 +84,7 @@ def connection_show(client,
                     spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return client.get(resource_uri=source_id,
-                      linker_name=connection_name)
+    return auto_register(client.get, resource_uri=source_id, linker_name=connection_name)
 
 
 def connection_delete(client,
@@ -96,10 +98,10 @@ def connection_delete(client,
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
 
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_uri=source_id,
-                       linker_name=connection_name)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_delete,
+                         resource_uri=source_id,
+                         linker_name=connection_name)
 
 
 def connection_list_configuration(client,
@@ -111,8 +113,9 @@ def connection_list_configuration(client,
                                   spring=None, app=None, deployment=None):
     if not source_id or not connection_name:
         raise RequiredArgumentMissingError(err_msg.format('--source-id, --connection'))
-    return client.list_configurations(resource_uri=source_id,
-                                      linker_name=connection_name)
+    return auto_register(client.list_configurations,
+                         resource_uri=source_id,
+                         linker_name=connection_name)
 
 
 def connection_validate(cmd, client,
@@ -137,8 +140,7 @@ def connection_validate(cmd, client,
         if matched and resource_type in TARGET_RESOURCES_USERTOKEN:
             client = set_user_token_header(client, cmd.cli_ctx)
 
-    return client.begin_validate(resource_uri=source_id,
-                                 linker_name=connection_name)
+    return auto_register(client.begin_validate, resource_uri=source_id, linker_name=connection_name)
 
 
 def connection_create(cmd, client,  # pylint: disable=too-many-locals
@@ -155,8 +157,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
                       vault=None,                                            # Resource.KeyVault
                       account=None,                                          # Resource.Storage*
                       key_space=None, graph=None, table=None,                # Resource.Cosmos*,
-                      # config_store=None,                                   # Resource.AppConfig
-                      # namespace=None,                                      # Resource.EventHub
+                      config_store=None,                                     # Resource.AppConfig
+                      namespace=None,                                        # Resource.EventHub
                       signalr=None):                                         # Resource.SignalR
 
     if not source_id:
@@ -208,11 +210,11 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
             raise AzureResponseError('{}. Provision failed, please create the target resource '
                                      'manually and then create the connection.'.format(str(e)))
 
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_uri=source_id,
-                       linker_name=connection_name,
-                       parameters=parameters)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
 
 
 def connection_update(cmd, client,
@@ -268,11 +270,11 @@ def connection_update(cmd, client,
     if target_type in TARGET_RESOURCES_USERTOKEN:
         client = set_user_token_header(client, cmd.cli_ctx)
 
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_uri=source_id,
-                       linker_name=connection_name,
-                       parameters=parameters)
+    return auto_register(sdk_no_wait, no_wait,
+                         client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
 
 
 def connection_create_kafka(cmd, client,  # pylint: disable=too-many-locals

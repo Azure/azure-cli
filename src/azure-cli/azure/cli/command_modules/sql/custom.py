@@ -3535,6 +3535,7 @@ def server_create(
         enable_public_network=None,
         restrict_outbound_network_access=None,
         key_id=None,
+        federated_client_id=None,
         user_assigned_identity_id=None,
         primary_user_assigned_identity_id=None,
         identity_type=None,
@@ -3563,6 +3564,7 @@ def server_create(
             else ServerNetworkAccessFlag.DISABLED)
 
     kwargs['key_id'] = key_id
+    kwargs['federated_client_id'] = federated_client_id
 
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
@@ -3634,6 +3636,7 @@ def server_update(
         restrict_outbound_network_access=None,
         primary_user_assigned_identity_id=None,
         key_id=None,
+        federated_client_id=None,
         identity_type=None,
         user_assigned_identity_id=None):
     '''
@@ -3670,6 +3673,7 @@ def server_update(
         primary_user_assigned_identity_id or instance.primary_user_assigned_identity_id)
 
     instance.key_id = (key_id or instance.key_id)
+    instance.federated_client_id = (federated_client_id or instance.federated_client_id)
 
     return instance
 

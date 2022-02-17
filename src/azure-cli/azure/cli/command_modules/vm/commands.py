@@ -264,12 +264,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
-        g.command('run', 'run', supports_no_wait=True)
+        g.command('run', 'begin_run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
-        g.command('cancel', 'cancel')
+        g.command('cancel', 'begin_cancel')
 
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
@@ -578,7 +578,7 @@ def load_command_table(self, _):
         g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
         g.command('show-shared', 'get', is_experimental=True)
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.command('list', 'list_by_gallery')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
@@ -586,7 +586,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.command('list', 'list_by_gallery_application')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
