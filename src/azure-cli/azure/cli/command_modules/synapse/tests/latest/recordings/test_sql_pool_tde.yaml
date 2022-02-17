@@ -1429,12 +1429,15 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003/transparentDataEncryption/current?api-version=2021-06-01
   response:
     body:
-      string: '{"name":"current","location":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003/transparentDataEncryption/current","type":"Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption","properties":{"status":"Enabled"}}'
+      string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
+        a response from ''Microsoft.Synapse'' within the specified time period."}}'
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
-      - '347'
+      - '145'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1443,48 +1446,52 @@ interactions:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
-      code: 200
-      message: OK
+      code: 504
+      message: Gateway Timeout
 - request:
-    body: null
+    body: '{"properties": {"status": "Enabled"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool tde show
+      - synapse sql pool tde set
       Connection:
       - keep-alive
+      Content-Length:
+      - '37'
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - --name --workspace-name --resource-group --transparent-data-encryption-name
+      - --status --name --workspace-name --resource-group --transparent-data-encryption-name
       User-Agent:
       - AZURECLI/2.36.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.8.9 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003/transparentDataEncryption/current?api-version=2021-06-01
   response:
     body:
-      string: '{"name":"current","location":"East US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000004/sqlPools/testsqlpool000003/transparentDataEncryption/current","type":"Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption","properties":{"status":"Enabled"}}'
+      string: '{"code":"40627","message":"Operation on server \u0027clitest000004\u0027
+        and database \u0027testsqlpool000003\u0027 is in progress.  Please wait a
+        few minutes before trying again.","target":null,"details":[{"code":"40627","message":"Operation
+        on server \u0027clitest000004\u0027 and database \u0027testsqlpool000003\u0027
+        is in progress.  Please wait a few minutes before trying again.","target":null,"severity":"20"}],"innererror":[]}'
     headers:
       cache-control:
-      - no-cache
+      - no-store, no-cache
       content-length:
-      - '352'
+      - '435'
       content-type:
-      - application/json; charset=utf-8
+      - application/json
+      dataserviceversion:
+      - 3.0;
       date:
       - Tue, 17 May 2022 16:53:52 GMT
       expires:
@@ -1493,10 +1500,13 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
       code: 201
       message: Created
