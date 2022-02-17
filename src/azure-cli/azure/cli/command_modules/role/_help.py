@@ -390,7 +390,7 @@ long-summary: >-
 
 
     By default, this command does not assign any role to the service principal.
-    You may use --role and --scopes to assign a specific role and narrow the scope to a resource or resource group.
+    Specify both --role and --scopes to assign a specific role and narrow the scope to a resource or resource group.
     You may also use `az role assignment create` to create role assignments for this service principal later.
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
 parameters:
@@ -409,6 +409,7 @@ parameters:
   - name: --scopes
     short-summary: >
         Space-separated list of scopes the service principal's role assignment applies to.
+        Starting from Azure CLI 2.35.0, --scopes argument will become required for creating role assignments.
         Defaults to the root of the current subscription. e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333,
         /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or
         /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
