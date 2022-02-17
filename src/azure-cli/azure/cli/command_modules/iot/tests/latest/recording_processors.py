@@ -34,7 +34,7 @@ class KeyReplacer(RecordingProcessor):
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
         if any(['SharedAccessKey=' in val, 'sharedaccesskey=' in val]):
             # Replaces live key with `mock_key` in `SharedAccessKey=live_key` or `sharedaccesskey=live_key` string response
-            val = re.sub(r'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
+            val = re.sub(r'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=);+', 'SharedAccessKey={};'
                          .format(MOCK_KEY), val, flags=re.IGNORECASE)
         return val
 
@@ -49,6 +49,6 @@ class KeyReplacer(RecordingProcessor):
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         if any([b'SharedAccessKey=' in val, b'sharedaccesskey=' in val]):
             # Replaces live key with `mock_key` in `SharedAccessKey=live_key` or `sharedaccesskey=live_key` byte response
-            val = re.sub(br'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=)', 'SharedAccessKey={}'
+            val = re.sub(br'[S|s]hared[A|a]ccess[K|k]ey=([^\*].+=);+', 'SharedAccessKey={};'
                          .format(MOCK_KEY).encode(), val, flags=re.IGNORECASE)
         return val
