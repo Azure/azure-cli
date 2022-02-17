@@ -1406,7 +1406,7 @@ def create_service_principal_for_rbac(
     if role and not scopes or not role and scopes:
         from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError("To create role assignments, "
-                                 "specify both --role and --scopes at the same time.")
+                                 "specify both --role and --scopes.")
 
     years = years or 1
     _RETRY_TIMES = 36
