@@ -390,7 +390,7 @@ long-summary: >-
 
 
     By default, this command does not assign any role to the service principal.
-    Specify both --role and --scopes to assign a specific role and narrow the scope to a resource or resource group.
+    You may use --role and --scopes to assign a specific role and narrow the scope to a resource or resource group.
     You may also use `az role assignment create` to create role assignments for this service principal later.
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
 parameters:
