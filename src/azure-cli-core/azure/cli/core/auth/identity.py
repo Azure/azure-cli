@@ -237,10 +237,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
 
-    def get_service_principal_entry(self, client_id):
-        """This method is only used by --sdk-auth. DO NOT use it elsewhere."""
-        return self._service_principal_store.load_entry(client_id, self.tenant_id)
-
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError
 

@@ -578,7 +578,7 @@ def load_command_table(self, _):
         g.custom_command('list-shared', 'sig_shared_image_version_list', is_experimental=True)
         g.command('show-shared', 'get', is_experimental=True)
 
-    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application', compute_gallery_application_sdk, client_factory=cf_gallery_application, min_api='2021-07-01', operation_group='gallery_applications') as g:
         g.command('list', 'list_by_gallery')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_create', supports_no_wait=True)
@@ -586,7 +586,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.wait_command('wait')
 
-    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01') as g:
+    with self.command_group('sig gallery-application version', compute_gallery_application_version_sdk, client_factory=cf_gallery_application_version, min_api='2021-07-01', operation_group='gallery_application_versions') as g:
         g.command('list', 'list_by_gallery_application')
         g.show_command('show', 'get')
         g.custom_command('create', 'gallery_application_version_create', supports_no_wait=True)
