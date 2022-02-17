@@ -181,12 +181,10 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
 
 
 def create_log_analytics_workspace_table_search_job(client, resource_group_name, workspace_name, table_name,
-                                                    retention_in_days=None, total_retention_in_days=None,
-                                                    search_query=None, limit=None, start_search_time=None,
-                                                    end_search_time=None, no_wait=False):
-    search_results = None
-    if search_query is not None or limit is not None or start_search_time is not None or end_search_time is not None:
-        search_results = SearchResults(query=search_query, limit=limit, start_search_time=start_search_time,
+                                                    search_query, start_search_time, end_search_time,
+                                                    retention_in_days=None, total_retention_in_days=None, limit=None,
+                                                    no_wait=False):
+    search_results = SearchResults(query=search_query, limit=limit, start_search_time=start_search_time,
                                        end_search_time=end_search_time)
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
