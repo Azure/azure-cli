@@ -66,10 +66,11 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('name', plan)
         ])
-        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan), checks=[
+        self.cmd('webapp create -g {} -n {} --plan {} --https-only'.format(resource_group, webapp_name, plan, 'true'), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', webapp_name),
-            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
+            JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net'),
+            JMESPathCheck('httpsOnly', 'True')
         ])
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group,
                                                               webapp_name, plan))  # test idempotency
