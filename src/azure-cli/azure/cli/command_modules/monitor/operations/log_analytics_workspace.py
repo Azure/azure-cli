@@ -185,7 +185,7 @@ def create_log_analytics_workspace_table_search_job(client, resource_group_name,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
     search_results = SearchResults(query=search_query, limit=limit, start_search_time=start_search_time,
-                                       end_search_time=end_search_time)
+                                   end_search_time=end_search_time)
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
                   search_results=search_results,

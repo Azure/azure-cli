@@ -453,7 +453,6 @@ def load_arguments(self, _):
         c.argument('description', help='Schema description.')
 
     with self.argument_context('monitor log-analytics workspace table search-job create') as c:
-        c.argument('search_description', help='Schema description.')
         c.argument('search_query', options_list=['--search-query'], help='Search job query.')
         c.argument('limit', type=int, help='Limit the search job to return up to specified number of rows.')
         c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
