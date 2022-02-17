@@ -6,7 +6,7 @@ RUN apt-get update
 RUN apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev wget
 
 # Download Python source code
-ARG python_version="3.6.10"
+ARG python_version="3.8.12"
 ENV PYTHON_SRC_DIR=/usr/src/python
 RUN mkdir -p ${PYTHON_SRC_DIR} && \
     wget -qO- https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz \

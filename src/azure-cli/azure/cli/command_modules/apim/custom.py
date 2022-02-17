@@ -208,8 +208,8 @@ def create_apim_api(client, resource_group_name, service_name, api_id, descripti
         description=description,
         authentication_settings=authentication_settings,
         subscription_key_parameter_names=get_subscription_key_parameter_names(
-            subscription_key_query_param_name,
-            subscription_key_header_name),
+            subscription_key_header_name,
+            subscription_key_query_param_name),
         display_name=display_name,
         service_url=service_url,
         protocols=protocols if protocols is not None else [
@@ -265,7 +265,7 @@ def update_apim_api(instance, description=None, subscription_key_header_name=Non
 
     if subscription_key_header_name is not None:
         instance.subscription_key_parameter_names = get_subscription_key_parameter_names(
-            subscription_key_query_param_name, subscription_key_header_name)
+            subscription_key_header_name, subscription_key_query_param_name)
 
     if display_name is not None:
         instance.display_name = display_name
@@ -364,7 +364,7 @@ def import_apim_api(
     resource.description = description
     resource.subscription_required = subscription_required
     resource.subscription_key_parameter_names = get_subscription_key_parameter_names(
-        subscription_key_query_param_name, subscription_key_header_name)
+        subscription_key_header_name, subscription_key_query_param_name)
     resource.api_version = api_version
     resource.api_version_set_id = _get_vs_fullpath(api_version_set_id)
 

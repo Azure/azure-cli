@@ -134,8 +134,8 @@ def storage_account_id(cmd, namespace):
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:
-            raise ValueError("Storage account named '{}' not found in the resource group '{}'.".
-                             format(namespace.storage_account, namespace.resource_group_name))
+            raise ValueError(f"Storage account named '{namespace.storage_account}'" +
+                             f" not found in the resource group '{namespace.resource_group_name}'.")
         namespace.storage_account = acc.id  # pylint: disable=no-member
 
 
@@ -156,12 +156,11 @@ def keyvault_id(cmd, namespace):
         keyvault_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
         vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
-            raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
-                             format(kv_name, kv_rg))
+            raise ValueError(f"KeyVault named '{kv_name}' not found in the resource group '{kv_rg}'.")
         namespace.keyvault = vault.id  # pylint: disable=no-member
         namespace.keyvault_url = vault.properties.vault_uri
     except Exception as exp:
-        raise ValueError('Invalid KeyVault reference: {}\n{}'.format(namespace.keyvault, exp))
+        raise ValueError(f'Invalid KeyVault reference: {namespace.keyvault}\n{exp}')
 
 
 def application_enabled(cmd, namespace):
@@ -172,10 +171,9 @@ def application_enabled(cmd, namespace):
     client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
-        raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+        raise ValueError(f"Batch account '{namespace.account_name}' not found.")
     if not acc.auto_storage or not acc.auto_storage.storage_account_id:  # pylint: disable=no-member
-        raise ValueError("Batch account '{}' needs auto-storage enabled.".
-                         format(namespace.account_name))
+        raise ValueError(f"Batch account '{namespace.account_name}' needs auto-storage enabled.")
 
 
 def validate_pool_resize_parameters(namespace):
@@ -192,7 +190,7 @@ def validate_json_file(namespace):
         except EnvironmentError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:
-            raise ValueError("Invalid JSON file: {}".format(err))
+            raise ValueError(f"Invalid JSON file: {err}")
 
 
 def validate_cert_file(namespace):
@@ -218,7 +216,7 @@ def validate_options(namespace):
         if start or end:
             start = start if start else 0
             end = end if end else ""
-            namespace.ocp_range = "bytes={}-{}".format(start, end)
+            namespace.ocp_range = f"bytes={start}-{end}"
 
 
 def validate_file_destination(namespace):
@@ -241,7 +239,7 @@ def validate_file_destination(namespace):
                 message = "Directory {} does not exist, and cannot be created: {}"
                 raise ValueError(message.format(file_dir, exp))
         if os.path.isfile(file_path):
-            raise ValueError("File {} already exists.".format(file_path))
+            raise ValueError(f"File {file_path} already exists.")
         namespace.destination = file_path
 
 # CUSTOM REQUEST VALIDATORS
@@ -325,7 +323,7 @@ def validate_client_parameters(cmd, namespace):
                     client.batch_account.get_keys(rg,  # pylint: disable=no-member
                                                   namespace.account_name).primary
             else:
-                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+                raise ValueError(f"Batch account '{namespace.account_name}' not found.")
     else:
         if not namespace.account_name:
             raise ValueError("Specify batch account in command line or environment variable.")

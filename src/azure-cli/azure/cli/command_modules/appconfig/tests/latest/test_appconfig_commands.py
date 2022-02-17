@@ -733,6 +733,46 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             expected_kvs = json.load(json_file)
         assert exported_kvs == expected_kvs
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_strict_import(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='StrictImportTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # File <--> AppConfig tests
+        imported_file_path = os.path.join(TEST_DIR, 'kvset_import.json')
+        exported_file_path = os.path.join(TEST_DIR, 'kvset_export.json')
+        strict_import_file_path = os.path.join(TEST_DIR, 'strict_import.json')
+
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'profile': ImportExportProfiles.KVSET,
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path,
+            'strict_import_file_path': strict_import_file_path
+        })
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --profile {profile} -y')
+        self.cmd(
+            'appconfig kv import -n {config_store_name} -s {import_source} --path "{strict_import_file_path}" --format {imported_format} --profile {profile} --strict -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --label * --key * --path "{exported_file_path}" --format {imported_format} --profile {profile} -y')
+        with open(strict_import_file_path) as json_file:
+            expected_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert expected_kvs == exported_kvs
+
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 

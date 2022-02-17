@@ -74,7 +74,7 @@ def load_arguments(self, _):
 
     with self.argument_context('apim api show') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
@@ -84,7 +84,7 @@ def load_arguments(self, _):
 
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
         c.argument('path', arg_group='API', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.', required=True)
         c.argument('display_name', arg_group='API', help='API name. Must be 1 to 300 characters long.', required=True)
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
@@ -103,13 +103,13 @@ def load_arguments(self, _):
 
     with self.argument_context('apim api delete') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
         c.argument('delete_revisions', help='Delete all revisions of the Api.')
         c.argument('if_match', help='ETag of the Entity.')
 
     with self.argument_context('apim api update') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help='The name of the API Management service instance.')
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
         c.argument('display_name', arg_group='API', help='API name. Must be 1 to 300 characters long.')
         c.argument('path', arg_group='API', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.')
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
@@ -128,7 +128,7 @@ def load_arguments(self, _):
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
         c.argument('subscription_key_header_name', arg_group='API', help='Specifies the subscription key header name.')
         c.argument('subscription_key_query_param_name', arg_group='API', help='Specifies the subscription key query string parameter name.')
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
         c.argument('api_revision', arg_group='API', help='Describes the Revision of the Api. If no value is provided, default revision 1 is created.')
         c.argument('api_version', arg_group='API', help='Describes the Version of the Api. If you add a version to a non-versioned API, an Original version will be automatically created and will respond on the default URL')
         c.argument('api_version_set_id', arg_group='API', help='Describes the Version Set to be used with the API')
@@ -150,17 +150,17 @@ def load_arguments(self, _):
     with self.argument_context('apim product api check') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim product api add') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim product api delete') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
         c.argument('product_id', help="Product identifier. Must be unique in the current API Management service instance.")
-        c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim product') as c:
         c.argument('service_name', options_list=['--service-name', '-n'], help="The name of the api management service instance", id_part=None)
