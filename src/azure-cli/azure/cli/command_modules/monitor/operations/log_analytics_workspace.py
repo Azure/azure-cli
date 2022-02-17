@@ -7,7 +7,7 @@ from azure.cli.core.commands.transform import _parse_id
 from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
     Schema, Column, SearchResults, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.util import CLIError
 
 
@@ -169,7 +169,7 @@ def create_log_analytics_workspace_table(client, resource_group_name, workspace_
     schema = None
     if columns or description is not None:
         if not columns:
-            raise ArgumentUsageError('Usage error: When using --description, --columns must be provided')
+            raise RequiredArgumentMissingError('Usage error: When using --description, --columns must be provided')
         schema = Schema(name=table_name, columns=columns_list, description=description)
     table = Table(retention_in_days=retention_in_days,
                   total_retention_in_days=total_retention_in_days,
