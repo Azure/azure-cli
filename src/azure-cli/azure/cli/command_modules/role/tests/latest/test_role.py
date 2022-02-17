@@ -88,10 +88,8 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
 
     def test_create_for_rbac_argument_error(self):
 
-        subscription_id = self.get_subscription_id()
         self.kwargs.update({
-            'sub': subscription_id,
-            'scope': '/subscriptions/{}'.format(subscription_id),
+            'scope': '/subscriptions/00000000-0000-0000-0000-000000000000',
             'role': 'Reader',
         })
 
