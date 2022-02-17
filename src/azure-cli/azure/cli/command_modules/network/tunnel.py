@@ -116,9 +116,10 @@ class TunnelServer:
 
             auth_token = self._get_auth_token()
             host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
+            verify_mode = ssl.CERT_NONE if should_disable_connection_verify() else ssl.CERT_REQUIRED
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
-                                        sslopt={'cert_reqs': ssl.CERT_NONE},
+                                        sslopt={'cert_reqs': verify_mode},
                                         enable_multithread=True)
             logger.info('Websocket, connected status: %s', self.ws.connected)
             index = index + 1
