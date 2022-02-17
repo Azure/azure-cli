@@ -2852,7 +2852,7 @@ class NetworkPrivateLinkRecoveryServicesScenarioTest(ScenarioTest):
             'network private-link-resource list --id {vault_id} ').get_output_in_json()
         self.kwargs['group_id'] = vault_private_link_resources[0]['properties']['groupId']
 
-        # Create private endpoint with manual request approval
+        # Create private endpoint
         private_endpoint = self.cmd(
             'network private-endpoint create -g {rg} -n {private_endpoint} --vnet-name {vnet} --subnet {subnet} '
             '--private-connection-resource-id {vault_id} --connection-name {private_endpoint_connection} '
