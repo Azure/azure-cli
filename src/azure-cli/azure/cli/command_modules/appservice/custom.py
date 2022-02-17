@@ -2157,6 +2157,12 @@ def _get_local_git_url(cli_ctx, client, resource_group_name, name, slot=None):
 def _get_scm_url(cmd, resource_group_name, name, slot=None):
     from azure.mgmt.web.models import HostType
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+    if app is None:
+        if slot:
+            raise ResourceNotFoundError("Slot not found")
+        else:
+            raise ResourceNotFoundError("App not found")
     for host in app.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
