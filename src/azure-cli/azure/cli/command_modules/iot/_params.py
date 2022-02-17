@@ -74,9 +74,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('unit', help='Units in your IoT Hub Device Provisioning Service.', type=int)
         c.argument('enable_data_residency', arg_type=get_three_state_flag(),
                    options_list=['--enforce-data-residency', '--edr'],
-                   help='Enforce data residency for this IoT Hub Device Provisioning Service by '
-                   'disabling cross geo-pair disaster recovery. This property cannot be updated '
-                   'for this resource once set. Learn more at https://aka.ms/dpsdr')
+                   help='Enforce data residency for this IoT Hub Device Provisioning Service by disabling '
+                   'cross geo-pair disaster recovery. This property is immutable once set on the resource. '
+                   'Only available in select regions. Learn more at https://aka.ms/dpsdr')
 
     # To deprecate
     for subgroup in ['access-policy', 'linked-hub', 'certificate']:
@@ -382,7 +382,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('enable_data_residency', arg_type=get_three_state_flag(),
                    options_list=['--enforce-data-residency', '--edr'],
                    help='Enforce data residency for this IoT Hub by disabling cross-region disaster recovery. '
-                   'This property cannot be updated on this resource once set. '
+                   'This property is immutable once set on the resource. Only available in select regions. '
                    'Learn more at https://aka.ms/iothubdisabledr')
 
     with self.argument_context('iot hub show-connection-string') as c:

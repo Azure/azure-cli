@@ -209,7 +209,7 @@ examples:
   - name: Create an Azure IoT Hub Device Provisioning Service with the standard pricing tier S1, in the 'eastus' region.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
-  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced (warning - this will disable cross-region disaster recovery)
+  - name: Create an Azure IoT Hub Device Provisioning Service with data residency enforced. This will disable cross-region disaster recovery.
     text: >
         az iot dps create --name MyDps --resource-group MyResourceGroup --edr
 """
@@ -461,7 +461,7 @@ examples:
   - name: Create an IoT Hub with local authentication, device SAS keys, and module SAS keys all disabled
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --disable-local-auth --disable-device-sas --disable-module-sas
-  - name: Create an IoT Hub with data residency enforced (warning - this will disable cross-region disaster recovery)
+  - name: Create an IoT Hub with data residency enforced. This will disable cross-region disaster recovery.
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIoTHub --edr
 """
