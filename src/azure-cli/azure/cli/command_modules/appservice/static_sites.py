@@ -7,7 +7,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, RequiredArgumentMissingError
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
@@ -163,7 +163,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
 
 
 def show_identity(cmd, resource_group_name, name):
-    return show_staticsite(cmd, name, resource_group_name).identity
+    return show_staticsite(cmd, name, resource_group_name, format_output=False).identity
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', scope=None):
@@ -367,7 +367,7 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 
 def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals
                        source, branch, token=None,
-                       app_location='.', api_location='.', output_location=None,
+                       app_location="/", api_location=None, output_location=None,
                        tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
     from azure.core.exceptions import ResourceNotFoundError
 
@@ -407,10 +407,10 @@ def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disa
         sku=sku_def)
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    if not no_wait:
-        return _format_staticsite(client.begin_create_or_update_static_site(
-            resource_group_name=resource_group_name, name=name,
-            static_site_envelope=staticsite_deployment_properties), format_output)
+    if not no_wait and format_output:
+        client.begin_create_or_update_static_site(resource_group_name=resource_group_name, name=name,
+                                                  static_site_envelope=staticsite_deployment_properties)
+        return show_staticsite(cmd, name, resource_group_name, format_output=True)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
@@ -420,7 +420,7 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
                       tags=None, sku=None, no_wait=False, format_output=None):
     existing_staticsite = show_staticsite(cmd, name, format_output=False)
     if not existing_staticsite:
-        raise CLIError("No static web app found with name {0}".format(name))
+        raise ResourceNotFoundError("No static web app found with name {0}".format(name))
 
     if tags is not None:
         existing_staticsite.tags = tags
