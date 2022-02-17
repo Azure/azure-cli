@@ -7,7 +7,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
@@ -365,7 +365,7 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
                                           static_site_user_envelope=user_envelope)
 
 
-def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals
+def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disable=too-many-locals,
                        source, branch, token=None,
                        app_location="/", api_location=None, output_location=None,
                        tags=None, no_wait=False, sku='Free', login_with_github=False, format_output=True):
@@ -420,7 +420,7 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
                       tags=None, sku=None, no_wait=False, format_output=None):
     existing_staticsite = show_staticsite(cmd, name, format_output=False)
     if not existing_staticsite:
-        raise ResourceNotFoundError("No static web app found with name {0}".format(name))
+        raise CLIError("No static web app found with name {0}".format(name))
 
     if tags is not None:
         existing_staticsite.tags = tags
