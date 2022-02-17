@@ -419,6 +419,11 @@ def validate_and_extract_container_type(container_name, backup_management_type):
 
     if container_type in container_type_mappings:
         return container_type_mappings[container_type]
+    logger.warning(
+        """ 
+        Could not extract the backup management type. If the command fails check if the container name specified is
+        complete or try using container friendly name instead.
+        """)
     return None
 
 
