@@ -150,7 +150,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 try:
-                    result = self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert '
+                    result = self.cmd('ad sp create-for-rbac --create-cert '
                                       '--keyvault {kv} --cert {cert} -n {display_name}').get_output_in_json()
                     self.kwargs['app_id'] = result['appId']
                 except KeyVaultErrorException:
@@ -190,7 +190,7 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 result = self.cmd('ad sp create-for-rbac -n {display_name} --keyvault {kv} '
-                                  '--cert {cert} --scopes {scope}/resourceGroups/{rg}').get_output_in_json()
+                                  '--cert {cert}').get_output_in_json()
                 self.kwargs['app_id'] = result['appId']
             self.cmd('ad sp credential reset -n {app_id} --keyvault {kv} --cert {cert}')
         finally:
@@ -204,7 +204,7 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
         try:
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                result = self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} '
+                result = self.cmd('ad sp create-for-rbac --keyvault {kv} '
                                   '--cert {cert} -n {display_name2}').get_output_in_json()
                 self.kwargs['app_id2'] = result['appId']
             self.cmd('ad sp credential reset -n {app_id2} --keyvault {kv} --cert {cert}')
