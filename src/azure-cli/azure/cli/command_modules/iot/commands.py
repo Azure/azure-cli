@@ -81,7 +81,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_dps_linked_hub_delete', supports_no_wait=True)
 
     # iot dps certificate commands
-    with self.command_group('iot dps certificate', client_factory=iot_service_provisioning_factory,  transform=_dps_certificate_response_transform) as g:
+    with self.command_group('iot dps certificate',
+                            client_factory=iot_service_provisioning_factory,
+                            transform=_dps_certificate_response_transform) as g:
         g.custom_command('list', 'iot_dps_certificate_list')
         g.custom_show_command('show', 'iot_dps_certificate_get')
         g.custom_command('create', 'iot_dps_certificate_create')
