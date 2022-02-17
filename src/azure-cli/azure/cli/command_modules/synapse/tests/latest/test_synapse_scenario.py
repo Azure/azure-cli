@@ -1552,6 +1552,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('status', "Enabled")
                  ])
 
+    
     @record_only()
     @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
     @StorageAccountPreparer(name_prefix='adlsgen2', length=16, location=location, key='storage-account')
@@ -2985,3 +2986,72 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse sql-script show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @record_only()
+    def test_link_connection(self):
+        self.kwargs.update({
+            'workspace_name': 'xiaoyuxingtestne',
+            'link_connection_name': 'linkconnectionfortest',
+            'link_table_id': '887e9d4df0fa4afaaad0d7a2c7f42d88',
+            'edit_table_file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'link-connection-table.json'),
+            'file': os.path.join(os.path.join(os.path.dirname(__file__), 'assets'), 'linkconnectionfortest.json')
+        })
+        # create link connnection
+        self.cmd(
+            'az synapse link-connection create --workspace-name {workspace_name} '
+            '--name {link_connection_name} --file @"{file}" ',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        time.sleep(600)
+        # get link connnection
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('name', self.kwargs['link_connection_name'])
+            ])
+
+        # list link connnection
+        self.cmd(
+            'az synapse link-connection list --workspace-name {workspace_name}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/linkconnections')
+            ])
+
+        # edit link tables
+        self.cmd(
+            'az synapse link-connection edit-link-tables --workspace-name {workspace_name} --n {link_connection_name} --file @"{edit_table_file}" ')
+        
+        time.sleep(600)
+        # start a link connnection
+        self.cmd(
+            'az synapse link-connection start --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Starting')
+            ])
+
+        # stop a link connnection
+        self.cmd(
+            'az synapse link-connection stop --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection get-status --workspace-name {workspace_name} --name {link_connection_name}',
+            checks=[
+                self.check('status', 'Stopping')
+            ])
+
+         # list link tables
+        self.cmd(
+            'az synapse link-connection list-link-tables --workspace-name {workspace_name} --n {link_connection_name} ',
+            checks=[
+                self.check('[0].id', self.kwargs['link_table_id'])
+            ])
+
+        time.sleep(300)
+        #delete a link connnection
+        self.cmd(
+            'az synapse link-connection delete --workspace-name {workspace_name} --name {link_connection_name}')
+        self.cmd(
+            'az synapse link-connection show --workspace-name {workspace_name} --name {link_connection_name}',
+            expect_failure=True)
