@@ -2161,8 +2161,8 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
     if app is None:
         if slot:
             raise ResourceNotFoundError("Slot not found")
-        else:
-            raise ResourceNotFoundError("App not found")
+        raise ResourceNotFoundError("App not found")
+
     for host in app.host_name_ssl_states or []:
         if host.host_type == HostType.repository:
             return "https://{}".format(host.name)
