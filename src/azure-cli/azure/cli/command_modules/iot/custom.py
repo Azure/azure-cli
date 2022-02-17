@@ -410,12 +410,7 @@ def iot_dps_certificate_delete(client, dps_name, certificate_name, etag, resourc
 
 def iot_dps_certificate_gen_code(client, dps_name, certificate_name, etag, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    response = client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
-    properties = getattr(response, 'properties', {})
-    cert = getattr(properties, 'certificate', None)
-    if isinstance(cert, bytearray):
-        response.properties.certificate = response.properties.certificate.decode('utf-8')
-    return response
+    return client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
 
 
 def iot_dps_certificate_verify(client, dps_name, certificate_name, certificate_path, etag, resource_group_name=None):
