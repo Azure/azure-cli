@@ -223,6 +223,9 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('buildTimeoutInMinutes', 22)
                  ])
 
+        self.cmd('image builder list -g {rg}', checks=self.check('length(@)', 2))
+        self.cmd('image builder delete -n {tmpl_02} -g {rg}')
+
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
         self._identity_role(resource_group)
@@ -457,7 +460,7 @@ class ImageTemplateTest(ScenarioTest):
             self.check('length(properties.customize)', 0)
         ])
 
-    @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
+    @ResourceGroupPreparer(name_prefix='img_tmpl_outputs', location='westus2')
     def test_image_template_outputs(self, resource_group, resource_group_location):
         self._identity_role(resource_group)
 
@@ -510,7 +513,7 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('length(properties.distribute)', 0)
                  ])
 
-    @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
+    @ResourceGroupPreparer(name_prefix='img_defer_only_commands', location='westus2')
     def test_defer_only_commands(self, resource_group, resource_group_location):
         def _ensure_cmd_raises_defer_error(self, cmds):
             for cmd in cmds:

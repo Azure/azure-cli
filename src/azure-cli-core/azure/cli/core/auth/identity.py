@@ -159,7 +159,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def login_with_auth_code(self, scopes, **kwargs):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
-        logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+        logger.warning("A web browser has been opened at %s. Please continue the login in the web browser. "
                        "If no web browser is available or if the web browser fails to open, use device code flow "
                        "with `az login --use-device-code`.", self._msal_app.authority.authorization_endpoint)
 
@@ -236,10 +236,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         sp_auth = ServicePrincipalAuth(entry)
         return ServicePrincipalCredential(sp_auth, **self._msal_app_kwargs)
-
-    def get_service_principal_entry(self, client_id):
-        """This method is only used by --sdk-auth. DO NOT use it elsewhere."""
-        return self._service_principal_store.load_entry(client_id, self.tenant_id)
 
     def get_managed_identity_credential(self, client_id=None):
         raise NotImplementedError

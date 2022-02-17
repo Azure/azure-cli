@@ -193,6 +193,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         functionapp_name, functionapp_name2 = self.create_random_name(
             'func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
+        # TODO should use a storage account preparer decorator or more unique names
         storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
@@ -286,7 +287,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -339,7 +340,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'dotnet-isolated')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'dotnet-isolated|5.0')])
+            JMESPathCheck('linuxFxVersion', 'dotnet-isolated|5.0', case_sensitive=False)])
 
 
 class FunctionUpdatePlan(ScenarioTest):
@@ -483,7 +484,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathPatternCheck("[?name=='WEBSITE_CONTENTSHARE'].value|[0]", "^" + functionapp_name.lower()[0:50])])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1558,6 +1559,61 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             'functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('length(@)', 0)
+        ])
+        self.cmd(
+            'functionapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg3")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg4")
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg5")
+    @StorageAccountPreparer()
+    def test_functionapp_vnet_duplicate_name(self, storage_account, resource_group, rg2, rg3, rg4, rg5):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        plan = self.create_random_name('plan', 24)
+        subnet_name = self.create_random_name('subnet', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+        slot_functionapp_name = "slot"
+        subnet_id_fmt = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}"
+        subnet_id = subnet_id_fmt.format(self.get_subscription_id(), resource_group, vnet_name, subnet_name)
+
+        for group in [resource_group, rg2, rg3, rg4, rg5]:
+            self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+                group, vnet_name, subnet_name))
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+        self.cmd(
+            'functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp_name, plan, storage_account))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, functionapp_name, vnet_name, subnet_name), checks=[
+                JMESPathCheck('subnetResourceId', subnet_id)
+        ])
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name),
+            JMESPathCheck('[0].vnetResourceId', subnet_id)
+        ])
+        self.cmd(
+            'functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
+        self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(
+            resource_group, functionapp_name, slot_functionapp_name))
+        self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {} --slot {}'.format(resource_group, functionapp_name, vnet_name, subnet_name, slot_functionapp_name), checks=[
+            JMESPathCheck('subnetResourceId', subnet_id)
+        ])
+        self.cmd('functionapp vnet-integration list -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', subnet_name),
+            JMESPathCheck('[0].vnetResourceId', subnet_id)
         ])
         self.cmd(
             'functionapp vnet-integration remove -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_functionapp_name))

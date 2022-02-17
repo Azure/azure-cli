@@ -48,18 +48,8 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
     return subscriptions
 
 
-# pylint: disable=inconsistent-return-statements
-def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
-    import json
+def show_subscription(cmd, subscription=None):
     profile = Profile(cli_ctx=cmd.cli_ctx)
-
-    if show_auth_for_sdk:
-        from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING
-        logger.warning(CREDENTIAL_WARNING)
-        # sdk-auth file should be in json format all the time, hence the print
-        print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
-        return
-
     return profile.get_subscription(subscription)
 
 
