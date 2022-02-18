@@ -6,10 +6,9 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
-import argparse
-from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import InvalidArgumentValueError
+# pylint: disable=too-many-locals
 
+from azure.cli.core.profiles import ResourceType
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
@@ -23,8 +22,6 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
     UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_EVENTHUB)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
-
-    from azure.cli.core import CLIError
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         ehparam = EHNamespace()
@@ -540,7 +537,7 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
     return get_namespace
 
 
-def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
 
     from azure.cli.core import CLIError
@@ -548,16 +545,15 @@ def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encr
     if namespace.encryption is None:
         raise CLIError('The namespace does not have encryption enabled')
 
-    else:
-        if namespace.encryption.key_vault_properties:
-            for property in encryption_config:
-                if property in namespace.encryption.key_vault_properties:
-                    namespace.encryption.key_vault_properties.remove(property)
+    if namespace.encryption.key_vault_properties:
+        for encryption_property in encryption_config:
+            if encryption_property in namespace.encryption.key_vault_properties:
+                namespace.encryption.key_vault_properties.remove(encryption_property)
 
-        client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            parameters=namespace).result()
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
 
     get_namespace = client.get(resource_group_name, namespace_name)
 
