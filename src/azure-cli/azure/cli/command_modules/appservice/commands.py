@@ -67,20 +67,23 @@ def _polish_bad_errors(ex, creating_plan):
     import json
     from knack.util import CLIError
     try:
-        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-            detail = ex.response.text
+        if hasattr(ex, "response"):
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text())['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with requested features is not supported in current region. \n"
+                                  "If creating an App Service Plan with --zone-redundant/-z, "
+                                  "please see supported regions here: "
+                                  "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
         else:
-            detail = json.loads(ex.response.text())['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with requested features is not supported in current region. \n"
-                              "If creating an App Service Plan with --zone-redundant/-z, "
-                              "please see supported regions here: "
-                              "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
     except Exception:  # pylint: disable=broad-except
         pass
@@ -126,8 +129,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
-        # TO DO: Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
-        g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
+        g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
@@ -306,6 +308,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
                          validator=validate_vnet_integration)
+        g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')

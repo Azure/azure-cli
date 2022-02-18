@@ -193,6 +193,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         functionapp_name, functionapp_name2 = self.create_random_name(
             'func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
+        # TODO should use a storage account preparer decorator or more unique names
         storage, storage2 = 'functionappplanstorage', 'functionappplanstorage2'
         plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
             resource_group, plan)).get_output_in_json()['id']
@@ -286,7 +287,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -339,7 +340,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'dotnet-isolated')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'dotnet-isolated|5.0')])
+            JMESPathCheck('linuxFxVersion', 'dotnet-isolated|5.0', case_sensitive=False)])
 
 
 class FunctionUpdatePlan(ScenarioTest):
@@ -483,7 +484,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathPatternCheck("[?name=='WEBSITE_CONTENTSHARE'].value|[0]", "^" + functionapp_name.lower()[0:50])])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7')])
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
