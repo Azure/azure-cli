@@ -1424,6 +1424,10 @@ def load_arguments(self, _):
                    help='Type of Identity to be used. Possible values are SystemAsssigned,'
                    'UserAssigned, SystemAssigned,UserAssigned and None.')
 
+        c.argument('federated_client_id',
+                   options_list=['--federated-client-id', '--fid'],
+                   help='The federated client id used in cross tenant CMK scenario.')
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))

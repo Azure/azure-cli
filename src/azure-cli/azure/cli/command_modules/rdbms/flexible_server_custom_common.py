@@ -54,11 +54,12 @@ def migration_create_func(cmd, client, resource_group_name, server_name, propert
         raise FileOperationError("Properties file does not exist in the given location")
     with open(properties_filepath, "r") as f:
         try:
-            json_data = json.dumps(json.load(f))
+            request_payload = json.load(f)
+            request_payload.get("properties")['TriggerCutover'] = 'true'
+            json_data = json.dumps(request_payload)
         except ValueError as err:
             logger.error(err)
             raise BadRequestError("Invalid json file. Make sure that the json file content is properly formatted.")
-
     if migration_name is None:
         # Convert a UUID to a string of hex digits in standard form
         migration_name = str(uuid.uuid4())
@@ -85,7 +86,7 @@ def migration_list_func(cmd, client, resource_group_name, server_name, migration
     return r.json()
 
 
-def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, cutover=None, start_data_migration=None):
+def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, db_names=None, overwrite_dbs=None, start_data_migration=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -108,12 +109,6 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         properties = "{\"properties\": {\"overwriteDBsInTarget\": \"true\"} }"
-
-    if cutover is True:
-        if operationSpecified is True:
-            raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
-        operationSpecified = True
-        properties = "{\"properties\": {\"triggerCutover\": \"true\"} }"
 
     if start_data_migration is True:
         if operationSpecified is True:

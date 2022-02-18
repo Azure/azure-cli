@@ -145,7 +145,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2021-06-01',
         ResourceType.MGMT_NETWORK: '2021-05-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2021-07-01', {
+        ResourceType.MGMT_COMPUTE: SDKProfile('2021-11-01', {
             'resource_skus': '2019-04-01',
             'disks': '2021-04-01',
             'disk_encryption_sets': '2020-12-01',
@@ -154,8 +154,10 @@ AZURE_API_PROFILES = {
             'galleries': '2021-07-01',
             'gallery_images': '2021-07-01',
             'gallery_image_versions': '2021-07-01',
+            'gallery_applications': '2021-07-01',
+            'gallery_application_versions': '2021-07-01',
             'shared_galleries': '2020-09-30',
-            'virtual_machine_scale_sets': '2021-07-01',
+            'virtual_machine_scale_sets': '2021-11-01',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -195,6 +197,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2021-06-01-preview',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
+            'action_groups': '2021-09-01',
             'activity_log_alerts': '2017-04-01',
             'activity_logs': '2015-04-01',
             'alert_rule_incidents': '2016-03-01',
@@ -233,7 +236,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2020-04-30',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-07-01', {
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2021-10-01', {
             'container_services': '2017-07-01',
             'open_shift_managed_clusters': '2019-09-30-preview'
         })

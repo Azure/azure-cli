@@ -56,6 +56,11 @@ class CredentialAdaptor:
 
     def get_token(self, *scopes, **kwargs):
         logger.debug("CredentialAdaptor.get_token: scopes=%r, kwargs=%r", scopes, kwargs)
+
+        # SDK azure-keyvault-keys 4.5.0b5 passes tenant_id as kwargs, but we don't support tenant_id for now,
+        # so discard it.
+        kwargs.pop('tenant_id', None)
+
         scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes, **kwargs)
         return token

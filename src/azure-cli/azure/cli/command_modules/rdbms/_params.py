@@ -416,7 +416,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_D2s_v3', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='12', arg_type=version_arg_type)
+                c.argument('version', default='13', arg_type=version_arg_type)
                 c.argument('high_availability', arg_type=pg_high_availability_arg_type, default="Disabled")
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
             elif command_group == 'mysql':
@@ -637,8 +637,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Space-separated list of DBs to migrate. A minimum of 1 and a maximum of 8 DBs can be specified. You can migrate more DBs concurrently using additional migrations. Note that each additional DB affects the performance of the source server.')
                     c.argument('overwrite_dbs', options_list=['--overwrite-dbs'], action='store_true', required=False,
                                help='Allow the migration workflow to overwrite the DB on the target.')
-                    c.argument('cutover', options_list=['--cutover'], action='store_true', required=False,
-                               help='Cut-over the data migration. After this is complete, subsequent updates to the source DB will not be migrated to the target.')
                     c.argument('start_data_migration', options_list=['--start-data-migration'], action='store_true', required=False,
                                help='Reschedule the data migration to start right now.')
                 elif scope == "delete":
