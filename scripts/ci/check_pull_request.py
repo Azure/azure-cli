@@ -74,14 +74,13 @@ def check_pull_request(title, body):
 
 def regex_line(line):
     error_flag = False
-    # Check each line for these words, case insensitive
+    # Check each line for these words, case insensitive, just give a warning here, because it is impossible to judge accurately.
     sub_pattern = r'\b(added|adding|adds|changed|changing|changes|deprecated|deprecating|deprecates|fixed|fixing|fixes|made|making|makes|removed|removing|removes|updated|updating|updates)\b'
     ref = re.findall(sub_pattern, line, re.IGNORECASE)
     if ref:
         logger.warning('Please use the right verb of%s %s %swith simple present tense in base form and capitalized first letter to describe what is done, '
                        'follow https://aka.ms/submitAzPR\n', red, ref, yellow)
-        error_flag = True
-    # Check Fix #number in title, just give a warning here, because it is not necessarily
+    # Check Fix #number in title, just give a warning here, because it is not necessarily.
     if 'Fix' in line:
         sub_pattern = r'#\d'
         ref = re.findall(sub_pattern, line)
