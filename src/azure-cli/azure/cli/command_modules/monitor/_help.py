@@ -1156,7 +1156,7 @@ short-summary: Create a Log Analytics workspace restore logs table. The table na
 examples:
   - name: Create a Log Analytics workspace restore logs table.
     text: |
-        az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --retention-time 45 --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
+        az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
 """
 
 
