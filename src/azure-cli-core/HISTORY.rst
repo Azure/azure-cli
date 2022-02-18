@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.33.1
+++++++
+* No changes
+
 2.33.0
 ++++++
 * Drop `--query-examples` global argument (#20962)
