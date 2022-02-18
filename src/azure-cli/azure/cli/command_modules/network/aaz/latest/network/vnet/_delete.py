@@ -1,9 +1,7 @@
 # Resources:
 #   - /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}
 
-from azure.cli.core.aaz import AAZCommand, AAZHttpOperation, register_command
-from azure.cli.core.aaz import AAZStrArg, AAZResourceGroupNameArg, AAZBoolArg
-from azure.cli.core.aaz import AAZObjectType, AAZStrType, AAZBoolType, AAZListType, AAZDictType, AAZIntType
+from azure.cli.core.aaz import *
 
 
 @register_command("network vnet delete", is_preview=True)
@@ -19,8 +17,10 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        polling = self.VirtualNetworksDelete(ctx=self.ctx)()
-        return self.build_lro_poller(polling, result_callback=None)
+        return self.build_lro_poller(self._exe_operations(), result_callback=None)
+
+    def _exe_operations(self):
+        yield self.VirtualNetworksDelete(ctx=self.ctx)()
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

@@ -1,1 +1,1 @@
-from .__cmd_group import __CMDGroup
+from .__cmd_group import *

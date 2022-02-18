@@ -1,6 +1,6 @@
 # Resources:
 #   - /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/virtualNetworkPeerings/{}
-from azure.cli.core.aaz import AAZCommand, register_command
+from azure.cli.core.aaz import *
 
 
 @register_command("network vnet peering delete", redirect='network vnet peering show')
@@ -12,3 +12,6 @@ class Delete(AAZCommand):
 
     """
     pass
+
+
+__all__ = ["Delete"]

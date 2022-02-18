@@ -1,4 +1,4 @@
-from azure.cli.core.aaz._command import AAZCommandGroup, register_command_group
+from azure.cli.core.aaz import *
 
 
 @register_command_group("network vnet")

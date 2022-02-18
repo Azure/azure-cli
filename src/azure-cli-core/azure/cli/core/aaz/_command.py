@@ -208,8 +208,8 @@ class AAZCommand(CLICommand):
         return value.to_serialized_data(processor=processor)
 
     @staticmethod
-    def build_lro_poller(polling, result_callback):
-        return AAZLROPoller(polling_method=polling, result_callback=result_callback)
+    def build_lro_poller(polling_generator, result_callback):
+        return AAZLROPoller(polling_generator=polling_generator, result_callback=result_callback)
 
 
 def register_command_group(name, is_preview=False, is_experimental=False, hide=False, redirect=None, expiration=None):

@@ -15,9 +15,10 @@ class AAZBasePolling(LROBasePolling):
 
 class AAZLROPoller(LROPoller):
 
-    def __init__(self, polling_method, result_callback):
+    def __init__(self, polling_generator, result_callback):
+        # TODO: handle generator with multi pollings
         self._callbacks = []
-        self._polling_method = polling_method
+        self._polling_method = next(polling_generator)
         self._result_callback = result_callback
 
         self._thread = None

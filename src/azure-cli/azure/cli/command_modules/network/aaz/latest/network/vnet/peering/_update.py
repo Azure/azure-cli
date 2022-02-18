@@ -1,6 +1,6 @@
 # Resources:
 #   - /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/virtualNetworkPeerings/{}
-from azure.cli.core.aaz import AAZCommand, register_command
+from azure.cli.core.aaz import *
 
 
 @register_command("network vnet peering update")
@@ -24,3 +24,6 @@ class Update(AAZCommand):
         --set useRemoteGateways=true
     """
     pass
+
+
+__all__ = ["Update"]

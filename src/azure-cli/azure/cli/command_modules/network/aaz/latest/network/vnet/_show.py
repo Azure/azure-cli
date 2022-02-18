@@ -1,9 +1,7 @@
 # Resources:
 #   - /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}
 
-from azure.cli.core.aaz import AAZCommand, AAZHttpOperation, register_command
-from azure.cli.core.aaz import AAZStrArg, AAZResourceGroupNameArg
-from azure.cli.core.aaz import AAZObjectType, AAZStrType, AAZBoolType, AAZListType, AAZDictType, AAZIntType
+from azure.cli.core.aaz import *
 
 
 @register_command("network vnet show")
@@ -18,8 +16,11 @@ class Show(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.VirtualNetworkGet(ctx=self.ctx)()
+        self._exe_operations()
         return self.dict_output()
+
+    def _exe_operations(self):
+        self.VirtualNetworkGet(ctx=self.ctx)()
 
     def dict_output(self, *args, **kwargs):
         return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
