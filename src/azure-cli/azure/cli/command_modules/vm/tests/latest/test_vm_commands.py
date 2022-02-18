@@ -6873,6 +6873,17 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.securityType', 'TrustedLaunch')
         ])
 
+    @unittest.skip('Block issue')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
+    def test_vmss_trusted(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vm --image UbuntuLTS --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
+        self.cmd('vmss show -g {rg} -n vm', checks=[
+            self.check('securityProfile.securityType', 'TrustedLaunch'),
+            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+        ])
+
 
 class DiskHibernationScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_hibernation_')
