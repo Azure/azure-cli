@@ -6,7 +6,7 @@
 import os
 from datetime import datetime
 
-from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
+from .scenario_tests import AbstractPreparer, SingleValueReplacer
 
 from .base import LiveScenarioTest
 from .exceptions import CliTestError

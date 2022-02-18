@@ -41,7 +41,7 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
                          security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None, tags=None,
-                         administrators=None):
+                         administrators=None, encrypt_dc_conn=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
@@ -50,9 +50,39 @@ def add_active_directory(instance, account_name, resource_group_name, username, 
                                        ldap_signing=ldap_signing, security_operators=security_operators,
                                        ldap_over_tls=ldap_over_tls,
                                        allow_local_nfs_users_with_ldap=allow_local_ldap_users,
-                                       administrators=administrators)
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
+    _update_mapper(instance, body, ['active_directories'])
+    return body
+
+
+# pylint: disable=unused-argument, disable=too-many-locals
+# update an active directory on the netapp account
+# current limitation is 1 AD/subscription
+def update_active_directory(instance, account_name, resource_group_name, active_directory_id, username, password, domain,
+                            dns, smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
+                            server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None,
+                            security_operators=None, ldap_over_tls=None, allow_local_ldap_users=None,
+                            administrators=None, encrypt_dc_conn=None, tags=None):
+    ad_list = instance.active_directories
+
+    active_directory = ActiveDirectory(active_directory_id=active_directory_id, username=username, password=password,
+                                       domain=domain, dns=dns, smb_server_name=smb_server_name,
+                                       organizational_unit=organizational_unit, kdc_ip=kdc_ip, ad_name=ad_name,
+                                       backup_operators=backup_operators, server_root_ca_certificate=server_root_ca_cert,
+                                       aes_encryption=aes_encryption, ldap_signing=ldap_signing,
+                                       security_operators=security_operators, ldap_over_tls=ldap_over_tls,
+                                       allow_local_nfs_users_with_ldap=allow_local_ldap_users,
+                                       administrators=administrators, encrypt_dc_connections=encrypt_dc_conn)
+
+    for ad in ad_list:
+        if ad.active_directory_id == active_directory_id:
+            instance.active_directories.remove(ad)
+
+    instance.active_directories.append(active_directory)
+
+    body = NetAppAccountPatch(active_directories=ad_list)
     _update_mapper(instance, body, ['active_directories'])
     return body
 
@@ -85,7 +115,7 @@ def remove_active_directory(client, account_name, resource_group_name, active_di
 def patch_account(instance, account_name, resource_group_name, tags=None, encryption=None):
     account_encryption = AccountEncryption(key_source=encryption)
     body = NetAppAccountPatch(tags=tags, encryption=account_encryption)
-    _update_mapper(instance, body, ['tags'])
+    _update_mapper(instance, body, ['tags', 'encryption'])
     return body
 
 
@@ -152,22 +182,31 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
 
     # if NFSv4 is specified then the export policy must reflect this
     # the RP ordinarily only creates a default setting NFSv3.
-    if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
+    if protocol_types is not None and any(x in ['NFSv3', 'NFSv4.1'] for x in protocol_types):
         rules = []
-        if allowed_clients is None:
-            raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
-        if rule_index is None:
-            raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+        isNfs41 = False
+        isNfs3 = False
+
+        if "NFSv4.1" in protocol_types:
+            isNfs41 = True
+            if allowed_clients is None:
+                raise CLIError("Parameter allowed-clients needs to be set when protocol-type is NFSv4.1")
+            if rule_index is None:
+                raise CLIError("Parameter rule-index needs to be set when protocol-type is NFSv4.1")
+        if "NFSv3" in protocol_types:
+            isNfs3 = True
+        if "CIFS" in protocol_types:
+            cifs = True
 
         export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
                                          unix_read_write=unix_read_write, cifs=cifs,
-                                         nfsv3=False, nfsv41=True, allowed_clients=allowed_clients,
+                                         nfsv3=isNfs3, nfsv41=isNfs41, allowed_clients=allowed_clients,
                                          kerberos5_read_only=kerberos5_r,
                                          kerberos5_read_write=kerberos5_rw,
-                                         kerberos5i_read_only=kerberos5i_r,
-                                         kerberos5i_read_write=kerberos5i_rw,
-                                         kerberos5p_read_only=kerberos5p_r,
-                                         kerberos5p_read_write=kerberos5p_rw,
+                                         kerberos5_i_read_only=kerberos5i_r,
+                                         kerberos5_i_read_write=kerberos5i_rw,
+                                         kerberos5_p_read_only=kerberos5p_r,
+                                         kerberos5_p_read_write=kerberos5p_rw,
                                          has_root_access=has_root_access,
                                          chown_mode=chown_mode)
         rules.append(export_policy)
@@ -285,10 +324,22 @@ def break_replication(client, resource_group_name, account_name, pool_name, volu
 
 # ---- VOLUME EXPORT POLICY ----
 # add new rule to policy
-def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41):
+def add_export_policy_rule(instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41,
+                           kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None, kerberos5i_rw=None,
+                           kerberos5p_r=None, kerberos5p_rw=None, has_root_access=None, chown_mode=None):
     rules = []
 
-    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only, unix_read_write=unix_read_write, cifs=cifs, nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients)
+    export_policy = ExportPolicyRule(rule_index=rule_index, unix_read_only=unix_read_only,
+                                     unix_read_write=unix_read_write, cifs=cifs,
+                                     nfsv3=nfsv3, nfsv41=nfsv41, allowed_clients=allowed_clients,
+                                     kerberos5_read_only=kerberos5_r,
+                                     kerberos5_read_write=kerberos5_rw,
+                                     kerberos5_i_read_only=kerberos5i_r,
+                                     kerberos5_i_read_write=kerberos5i_rw,
+                                     kerberos5_p_read_only=kerberos5p_r,
+                                     kerberos5_p_read_write=kerberos5p_rw,
+                                     has_root_access=has_root_access,
+                                     chown_mode=chown_mode)
 
     rules.append(export_policy)
     for rule in instance.export_policy.rules:

@@ -176,6 +176,10 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     if db_context.command_group == 'mysql':
         private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
 
+    # suffix should start with .
+    if private_dns_zone_suffix[0] != '.':
+        private_dns_zone_suffix = '.' + private_dns_zone_suffix
+
     # Get Vnet Components
     vnet_sub, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
     nw_client = network_client_factory(cmd.cli_ctx, subscription_id=vnet_sub)
@@ -191,9 +195,9 @@ def prepare_private_dns_zone(db_context, database_engine, resource_group, server
     dns_subscription = get_subscription_id(cmd.cli_ctx)
     if private_dns_zone is None:
         if 'private' in private_dns_zone_suffix:
-            private_dns_zone = server_name + '.' + private_dns_zone_suffix
+            private_dns_zone = server_name + private_dns_zone_suffix
         else:
-            private_dns_zone = server_name + '.private.' + private_dns_zone_suffix
+            private_dns_zone = server_name + '.private' + private_dns_zone_suffix
     elif not _is_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
         dns_subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
 

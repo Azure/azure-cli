@@ -34,7 +34,8 @@ from azure.cli.command_modules.cosmosdb._format import (
     list_database_output,
     collection_output,
     list_collection_output,
-    list_connection_strings_output
+    list_connection_strings_output,
+    mc_cluster_status_output_table,
 )
 
 from azure.cli.command_modules.cosmosdb._transformers import (
@@ -398,7 +399,7 @@ def load_command_table(self, _):
         g.custom_command('deallocate', 'cli_cosmosdb_managed_cassandra_cluster_deallocate', supports_no_wait=True)
         g.custom_command('invoke-command', 'cli_cosmosdb_managed_cassandra_cluster_invoke_command', supports_no_wait=True)
         g.custom_command('start', 'cli_cosmosdb_managed_cassandra_cluster_start', supports_no_wait=True)
-        g.custom_command('status', 'cli_cosmosdb_managed_cassandra_cluster_status')
+        g.custom_command('status', 'cli_cosmosdb_managed_cassandra_cluster_status', table_transformer=mc_cluster_status_output_table)
         g.custom_command('list', 'cli_cosmosdb_managed_cassandra_cluster_list')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)

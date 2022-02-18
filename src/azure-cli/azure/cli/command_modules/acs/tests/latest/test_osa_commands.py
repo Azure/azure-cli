@@ -11,7 +11,7 @@ from knack.util import CLIError
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, ManagedApplicationPreparer, ScenarioTest, live_only)
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIgnoreCase)
 
 # flake8: noqa
@@ -171,7 +171,7 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
         workspace_id = workspace["id"]
         account = self.cmd("account show").get_output_in_json()
         tenant_id = account["tenantId"]
-        self.kwargs.update({            
+        self.kwargs.update({
             'workspace_id': workspace_id,
             'tenant_id': tenant_id
         })
@@ -241,4 +241,3 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-

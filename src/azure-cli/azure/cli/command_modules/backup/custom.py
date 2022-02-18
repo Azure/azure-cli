@@ -13,13 +13,14 @@ from azure.mgmt.core.tools import is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity
-from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
-    AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, BackupRequestResource, \
-    IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
+from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
+    AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
+    BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
     ILRRequestResource, IaasVMILRRegistrationRequest, BackupResourceConfig, BackupResourceConfigResource, \
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
-    CrossRegionRestoreRequest, BackupStatusRequest, CrrJobRequest
+    BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails
+from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
 from azure.cli.core.util import CLIError
@@ -31,7 +32,8 @@ from azure.cli.command_modules.backup._client_factory import (
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
-    _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf)
+    _backup_client_factory, recovery_points_recommended_cf, backup_resource_encryption_config_cf, backup_status_cf,
+    backup_storage_configs_non_crr_cf, recovery_points_passive_cf)
 
 import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_help as cust_help
@@ -52,6 +54,8 @@ secondary_region_map = {"eastasia": "southeastasia",
                         "chinaeast": "chinanorth",
                         "chinanorth2": "chinaeast2",
                         "chinaeast2": "chinanorth2",
+                        "chinanorth3": "chinaeast3",
+                        "chinaeast3": "chinanorth3",
                         "northeurope": "westeurope",
                         "westeurope": "northeurope",
                         "francecentral": "francesouth",
@@ -727,7 +731,10 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
         paged_rps = cust_help.get_list_from_paged_response(recovery_points)
         filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
-        return cust_help.get_none_one_or_many(filtered_rps)
+        recovery_point = cust_help.get_none_one_or_many(filtered_rps)
+        if recovery_point is None:
+            raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
+        return recovery_point
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
@@ -761,7 +768,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
                 """)
 
         client = recovery_points_recommended_cf(cmd.cli_ctx)
-        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                                      ListRecoveryPointsRecommendedForMoveRequest(excluded_rp_list=[]))
 
     else:
         recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
@@ -845,12 +853,17 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             raise InvalidArgumentValueError("disk_encryption_set_id can't be specified")
 
     identity_info = None
+    identity_based_restore_details = None
+    target_storage_account_id = storage_account_id
     if mi_system_assigned or mi_user_assigned:
         if not recovery_point.properties.is_managed_virtual_machine:
             raise InvalidArgumentValueError("MI based restore is not supported for unmanaged VMs.")
         identity_info = IdentityInfo(
             is_system_assigned_identity=mi_system_assigned is not None,
             managed_identity_resource_id=mi_user_assigned)
+        identity_based_restore_details = IdentityBasedRestoreDetails(
+            target_storage_account_id=target_storage_account_id)
+        target_storage_account_id = None
 
     if tier == 'VaultArchive':
         rehyd_duration = 'P' + str(rehydration_duration) + 'D'
@@ -862,14 +875,15 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             recovery_point_id=rp_name,
             recovery_type='RestoreDisks',
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             recovery_point_rehydration_info=rehydration_info,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     else:
         trigger_restore_properties = IaasVMRestoreRequest(
@@ -877,13 +891,14 @@ def _get_trigger_restore_properties(rp_name, vault_location, storage_account_id,
             recovery_point_id=rp_name,
             recovery_type='RestoreDisks',
             region=vault_location,
-            storage_account_id=storage_account_id,
+            storage_account_id=target_storage_account_id,
             source_resource_id=source_resource_id,
             target_resource_group_id=target_rg_id,
             original_storage_account_option=use_original_storage_account,
             restore_disk_lun_list=restore_disk_lun_list,
             disk_encryption_set_id=disk_encryption_set_id,
-            identity_info=identity_info)
+            identity_info=identity_info,
+            identity_based_restore_details=identity_based_restore_details)
 
     return trigger_restore_properties
 
@@ -893,7 +908,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None, rehydration_duration=15,
                   rehydration_priority=None, disk_encryption_set_id=None, mi_system_assigned=None,
-                  mi_user_assigned=None):
+                  mi_user_assigned=None, target_zone=None):
 
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM", use_secondary_region)
@@ -902,10 +917,9 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
                                          container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
 
-    rp_list = [recovery_point]
-    common.fetch_tier(rp_list)
+    common.fetch_tier_for_rp(recovery_point)
 
-    if (rp_list[0].properties.recovery_point_tier_details is not None and rp_list[0].tier_type == 'VaultArchive' and
+    if (recovery_point.tier_type is not None and recovery_point.tier_type == 'VaultArchive' and
             rehydration_priority is None):
         raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
         parameters of rehydration duration and rehydration priority.""")
@@ -970,23 +984,24 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                                  _source_resource_id, target_rg_id,
                                                                  use_original_storage_account, restore_disk_lun_list,
                                                                  rehydration_duration, rehydration_priority,
-                                                                 None if rp_list[0].
+                                                                 None if recovery_point.
                                                                  properties.recovery_point_tier_details is None else
-                                                                 rp_list[0].tier_type, disk_encryption_set_id,
+                                                                 recovery_point.tier_type, disk_encryption_set_id,
                                                                  encryption, recovery_point, use_secondary_region,
                                                                  mi_system_assigned, mi_user_assigned)
+
+    if target_zone:
+        backup_config_response = backup_storage_configs_non_crr_cf(cmd.cli_ctx).get(vault_name, resource_group_name)
+        validators.validate_czr(backup_config_response, recovery_point)
+        trigger_restore_properties.zones = [target_zone]
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
         validators.validate_crr(target_rg_id, rehydration_priority)
-
         azure_region = secondary_region_map[vault_location]
-        aad_client = aad_properties_cf(cmd.cli_ctx)
-        aad_result = aad_client.get(azure_region)
-        rp_client = recovery_points_cf(cmd.cli_ctx)
-        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
-                                                      item_uri, rp_name, aad_result).properties
-        crr_access_token.object_type = "CrrAccessToken"
+        crr_access_token = _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri,
+                                                 item_uri, rp_name)
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_restore_properties.region = azure_region
         trigger_crr_request = CrossRegionRestoreRequest(cross_region_restore_access_details=crr_access_token,
@@ -1216,6 +1231,16 @@ def _get_backup_request(workload_type, retain_until):
         trigger_backup_properties = IaasVMBackupRequest(recovery_point_expiry_time_in_utc=retain_until)
     trigger_backup_request = BackupRequestResource(properties=trigger_backup_properties)
     return trigger_backup_request
+
+
+def _get_crr_access_token(cmd, azure_region, vault_name, resource_group_name, container_uri, item_uri, rp_name):
+    aad_client = aad_properties_cf(cmd.cli_ctx)
+    aad_result = aad_client.get(azure_region)
+    rp_client = recovery_points_passive_cf(cmd.cli_ctx)
+    crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                  item_uri, rp_name, aad_result).properties
+    crr_access_token.object_type = "CrrAccessToken"
+    return crr_access_token
 
 
 def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):

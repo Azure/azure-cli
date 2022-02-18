@@ -148,7 +148,7 @@ examples:
   - name: Import all keys to another App Configuration using your 'az login' credentials.
     text: az appconfig kv import -s appconfig --endpoint https://myappconfiguration.azconfig.io --auth-mode login --src-endpoint https://anotherappconfiguration.azconfig.io --src-auth-mode login --src-key * --src-label * --preserve-labels
   - name: Import all keys and feature flags from a file using the appconfig/kvset format.
-    text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json --profile appconfig/kvset
+    text: az appconfig kv import -n MyAppConfiguration -s file --path D:/abc.json --format json --profile appconfig/kvset
 """
 
 helps['appconfig kv list'] = """

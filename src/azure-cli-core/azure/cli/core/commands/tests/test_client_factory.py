@@ -16,7 +16,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import live_only, MOCKED_USER_NAME
 from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 mock_subscriptions = [
     {

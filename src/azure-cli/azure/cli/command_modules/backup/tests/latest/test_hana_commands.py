@@ -11,14 +11,14 @@ import json
 import os
 
 
-id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/SAPHANA-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm'
-item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm/protectedItems/SAPHanaDatabase;hdb;hdb'
+id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/SAPHANA-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/saphana-clitest-vm2'
+item_id_hana = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/saphana-clitest-rg/providers/Microsoft.RecoveryServices/vaults/saphana-clitest-vault2/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;saphana-clitest-rg;saphana-clitest-vm2/protectedItems/SAPHanaDatabase;hxe;hdb'
 sub_hana = '38304e13-357e-405e-9e9a-220351dcce8c'
 rg_hana = 'saphana-clitest-rg'
-vault_hana = 'saphana-clitest-vault'
-container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm'
-container_friendly_hana = 'saphana-clitest-vm'
-item1_hana = 'SAPHanaDatabase;hdb;hdb'
+vault_hana = 'saphana-clitest-vault2'
+container_hana = 'VMAppContainer;Compute;saphana-clitest-rg;saphana-clitest-vm2'
+container_friendly_hana = 'saphana-clitest-vm2'
+item1_hana = 'SAPHanaDatabase;hxe;hdb'
 item2_hana = 'SYSTEMDB'
 
 
@@ -27,7 +27,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # SAP HANA workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
-    # For the tests using saphana-clitest-vm and saphana-clitest-vault -
+    # For the tests using saphana-clitest-vm2 and saphana-clitest-vault2 -
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
@@ -199,13 +199,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
+            'fname': 'saphana-clitest-vm2',
             'policy': 'saphana-clitest-policy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
             'default': 'saphana-clitest-policy',
             'rg': rg_hana,
-            'item': "saphanadatabase;hdb;systemdb",
+            'item': "saphanadatabase;hxe;systemdb",
             'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana,
@@ -291,7 +291,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
+            'fname': 'saphana-clitest-vm2',
             'policy': 'saphana-clitest-policy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
@@ -336,11 +336,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_hana,
             'name': container_hana,
             'rg': resource_group,
-            'fname': 'saphana-clitest-vm',
+            'fname': 'saphana-clitest-vm2',
             'policy': 'saphana-clitest-policy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'item': 'saphanadatabase;hdb;systemdb',
+            'item': 'saphanadatabase;hxe;systemdb',
             'pit': "SAPHanaDatabase",
             'item_id': item_id_hana,
             'id': id_hana,
@@ -385,18 +385,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
+            'fname': 'saphana-clitest-vm2',
             'policy': 'saphana-clitest-policy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
             'default': 'saphana-clitest-policy',
             'rg': rg_hana,
-            'item': "saphanadatabase;hdb;systemdb",
+            'item': "saphanadatabase;hxe;systemdb",
             'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana,
             'pit': "SAPHanaDatabase",
-            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm]'
+            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm2]'
         })
         self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
@@ -459,18 +459,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': 'saphana-clitest-vm',
+            'fname': 'saphana-clitest-vm2',
             'policy': 'saphana-clitest-policy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
             'default': 'saphana-clitest-policy',
             'rg': resource_group,
-            'item': "saphanadatabase;hdb;systemdb",
+            'item': "saphanadatabase;hxe;systemdb",
             'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase',
-            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm]',
+            'entityFriendlyName': 'SYSTEMDB [saphana-clitest-vm2]',
             'tpit': 'HANAInstance',
             'titem': 'HDB'
         })

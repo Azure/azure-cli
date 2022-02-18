@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure_devtools.scenario_tests import mock_in_unit_test
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
+from .scenario_tests import mock_in_unit_test
+from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
 from .exceptions import CliExecutionError
 
@@ -47,6 +47,7 @@ def patch_load_cached_subscriptions(unit_test):
                 "name": "Example",
                 "tenantId": MOCKED_TENANT_ID,
                 "isDefault": True,
+                "environmentName": "AzureCloud",
                 "user": {
                     "name": MOCKED_USER_NAME,
                     "type": "user"

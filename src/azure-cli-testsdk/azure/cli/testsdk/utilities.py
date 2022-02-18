@@ -6,9 +6,8 @@
 import os
 from contextlib import contextmanager
 
-from azure_devtools.scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
-                                           GeneralNameReplacer as _BuggyGeneralNameReplacer)
-from azure_devtools.scenario_tests.utilities import is_text_payload
+from .scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor)
+from .scenario_tests.utilities import is_text_payload
 
 
 def create_random_name(prefix='clitest', length=24):
@@ -182,27 +181,9 @@ class AADGraphUserReplacer:
         return response
 
 
-# Override until this is fixed in azure_devtools
-class GeneralNameReplacer(_BuggyGeneralNameReplacer):
-
-    def process_request(self, request):
-        for old, new in self.names_name:
-            request.uri = request.uri.replace(old, new)
-
-            if is_text_payload(request) and request.body:
-                try:
-                    body = str(request.body, 'utf-8') if isinstance(request.body, bytes) else str(request.body)
-                except TypeError:  # python 2 doesn't allow decoding through str
-                    body = str(request.body)
-                if old in body:
-                    request.body = body.replace(old, new)
-
-        return request
-
-
 class AADAuthRequestFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording.
-    This is a patch for azure_devtools.scenario_tests.recording_processors.OAuthRequestResponsesFilter
+    This is derived from OAuthRequestResponsesFilter.
     """
     def process_request(self, request):
         # filter AAD requests like:

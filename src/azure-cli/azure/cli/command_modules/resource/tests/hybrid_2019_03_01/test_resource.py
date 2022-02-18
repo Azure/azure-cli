@@ -9,8 +9,8 @@ import time
 from unittest import mock
 import unittest
 
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
 

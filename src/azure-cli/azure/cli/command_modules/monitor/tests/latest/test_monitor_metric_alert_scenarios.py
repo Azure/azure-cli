@@ -6,7 +6,7 @@
 import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServerPreparer
 
 

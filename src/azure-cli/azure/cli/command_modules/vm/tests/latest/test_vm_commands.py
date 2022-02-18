@@ -15,7 +15,7 @@ import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
@@ -484,6 +484,26 @@ class VMCustomImageTest(ScenarioTest):
             self.check('hyperVGeneration', 'V1')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_mgmt_')
+    def test_vm_custom_image_management(self, resource_group):
+        self.kwargs.update({
+            'vm1':'vm1',
+            'vm2':'vm2',
+            'image1':'myImage1',
+            'image2':'myImage2'
+        })
+
+        vm1 = self.cmd('vm create -g {rg} -n {vm1} --admin-username theuser --image centos --admin-password testPassword0 --authentication-type password --nsg-rule NONE').get_output_in_json()
+        self.cmd('vm deallocate -g {rg} -n {vm1}')
+        self.cmd('vm generalize -g {rg} -n {vm1}')    
+
+        self.cmd('image create -g {rg} -n {image1} --source {vm1}')
+
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('image update -n {image1} -g {rg} --tags foo=bar', checks=self.check('tags.foo', 'bar'))
+        self.cmd('image delete -n {image1} -g {rg}')
+        self.cmd('image list -g {rg}', checks=self.check('length(@)', 0))
+
 
 class VMImageWithPlanTest(ScenarioTest):
 
@@ -589,6 +609,7 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd(vm_create_cmd)
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 2')
+        self.cmd('vm unmanaged-disk list -g {rg} --vm-name {vm}', checks=self.check('length(@)', 2))
         vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         self.kwargs['disk_uri'] = vm1_info['storageProfile']['osDisk']['vhd']['uri']
         self.kwargs['data_disk'] = vm1_info['storageProfile']['dataDisks'][0]['vhd']['uri']
@@ -606,6 +627,55 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].caching', 'ReadOnly'),
             self.check('storageProfile.dataDisks[1].lun', 1)
         ])
+
+
+class VMRedeployTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_redeploy_')
+    def test_vm_redeploy(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })        
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm reapply -n {vm} -g {rg}')
+        self.cmd('vm redeploy -n {vm} -g {rg}')
+
+
+class VMConvertTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vm_convert_')
+    def test_vm_convert(self, resource_group):
+        self.kwargs.update({
+            'vm':'myvm'
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password --nsg-rule NONE')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+
+        output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertFalse(output[0]['managedDisk'])
+        self.assertTrue(output[0]['vhd'])
+
+        self.cmd('vm deallocate -n {vm} -g {rg}')
+        self.cmd('vm convert -n {vm} -g {rg}')
+        
+        converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
+        self.assertTrue(converted[0]['managedDisk'])
+        self.assertFalse(converted[0]['vhd'])
+
+
+class TestSnapShotAccess(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_snapshot_access_')
+    def test_snapshot_access(self, resource_group):
+        self.kwargs.update({
+            'snapshot':'snapshot'
+        })
+        
+        self.cmd('snapshot create -n {snapshot} -g {rg} --size-gb 1', checks=self.check('diskState', 'Unattached'))
+        self.cmd('snapshot grant-access --duration-in-seconds 600 -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'ActiveSAS'))
+        self.cmd('snapshot revoke-access -n {snapshot} -g {rg}')
+        self.cmd('snapshot show -n {snapshot} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
 
 class VMAttachDisksOnCreate(ScenarioTest):
@@ -627,10 +697,15 @@ class VMAttachDisksOnCreate(ScenarioTest):
             'data_snapshot': 'dSnapshot',
             'data_disk': 'dDisk'
         })
-        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk}')
-        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot}')
-        self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk}')
-        self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot}')
+        self.cmd('snapshot create -g {rg} -n {os_snapshot} --source {origin_os_disk} --no-wait')
+        self.cmd('disk create -g {rg} -n {os_disk} --source {os_snapshot} --no-wait')
+        self.cmd('snapshot create -g {rg} -n {data_snapshot} --source {origin_data_disk} --no-wait')
+        self.cmd('disk create -g {rg} -n {data_disk} --source {data_snapshot} --no-wait')
+
+        self.cmd('snapshot wait --created -g {rg} -n {os_snapshot}')
+        self.cmd('disk wait --created -g {rg} -n {os_disk}')
+        self.cmd('snapshot wait --created -g {rg} -n {data_snapshot}')
+        self.cmd('disk wait --created -g {rg} -n {data_disk}')
 
         # rebuild a new vm
         # (os disk can be resized)
@@ -1030,8 +1105,24 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_user_update_win_')
     def test_vm_user_update_win(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm user update -g {rg} -n vm --username AzureUser --password testPassword1')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_size_properties')
+    def test_vm_size_properties(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm-', 10)
+        })
+
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1')
+        self.cmd('vm show -g {rg} -n {vm} ', checks=[
+            self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', 1),
+            self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', 1)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
+            self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', 2),
+            self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
+        ])
 
 
 class VMSimulateEvictionScenarioTest(ScenarioTest):
@@ -1214,7 +1305,8 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
-        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false')
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false --no-wait')
+        self.cmd('vm extension wait --created -n {ext} -g {rg} --vm-name {vm}')
         result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
         ]).get_output_in_json()
@@ -1613,6 +1705,7 @@ class VMMonitorTestDefault(ScenarioTest):
             self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg} --admin-username azureuser --admin-password testPassword0 --authentication-type password')
         self.cmd('vm monitor log show -n {vm} -g {rg} -q "Perf | limit 10"')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_metric_tail', location='eastus')
     def test_vm_metric_tail(self, resource_group):
 
@@ -1677,6 +1770,7 @@ class VMMonitorTestCreateLinux(ScenarioTest):
 
 class VMMonitorTestCreateWindows(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_workspace_windows', location='eastus')
     def test_vm_create_with_workspace_windows(self, resource_group):
 
@@ -1688,7 +1782,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('vm create -n {vm} -g {rg} --image Win2016Datacenter --workspace {workspace} --admin-username azureuser --admin-password AzureCLI@1224 --nsg {nsg}')
+            self.cmd('vm create -n {vm} -g {rg} --image Win2022Datacenter --workspace {workspace} --admin-username azureuser --admin-password AzureCLI@1224 --nsg {nsg}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()[
             'id']
@@ -1706,6 +1800,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
 class VMMonitorTestUpdateLinux(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_linux', location='eastus')
     def test_vm_update_with_workspace_linux(self, resource_group):
 
@@ -1789,7 +1884,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
             'nsg': self.create_random_name('clinsg', 20)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vm create -n {vm} -g {rg} --image Win2016Datacenter --admin-password AzureCLI@1224 --nsg {nsg} --admin-username azureuser')
+        self.cmd('vm create -n {vm} -g {rg} --image Win2022Datacenter --admin-password AzureCLI@1224 --nsg {nsg} --admin-username azureuser')
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
@@ -1887,9 +1982,13 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
+        self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait')
+        self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
+        self.cmd('vmss extension list --vmss-name {vmss} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
         result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{net-ext}'),
@@ -1948,6 +2047,42 @@ class VMSSExtensionInstallTest(ScenarioTest):
             self.check('typePropertiesType', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
+
+
+class VMSSExtensionImageTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_extension_image_')
+    def test_vmss_extension_image(self, resource_group):
+        self.kwargs.update({
+            'pub': 'Microsoft.Azure.NetworkWatcher',
+            'name': 'NetworkWatcherAgentLinux',
+            'location': 'eastus',
+            'ver': '1.4.905.2'
+        })
+        
+        self.cmd('vmss extension image list -p {pub}', checks=[
+            self.check('[0].publisher', self.kwargs['pub'])
+        ])
+
+        result = self.cmd('vmss extension image list-names -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location'])
+        ]).get_output_in_json()
+        self.assertTrue([n for n in result if n['name'] == self.kwargs['name']])
+
+        result = self.cmd('vmss extension image list-versions -n {name} -p {pub} -l {location}', checks=[
+            self.check('[0].location', self.kwargs['location']),
+        ]).get_output_in_json()
+        self.assertTrue([v for v in result if v['name'] == self.kwargs['ver']])
+
+        self.cmd('vmss extension image show -n {name} -p {pub} -l {location} --version {ver}', checks=[
+            self.check('location', self.kwargs['location']),
+            self.check('name', self.kwargs['ver']),
+            self.check('operatingSystem', 'Linux')
+        ])
+
+        # not existing image
+        self.cmd('vmss extension image show -n fooBAR -p fooBAR -l {location} --version 0', expect_failure=True)
 
 
 class DiagnosticsExtensionInstallTest(ScenarioTest):
@@ -2014,6 +2149,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -2060,7 +2196,7 @@ class VMCreateExistingOptions(ScenarioTest):
             self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Win2019Datacenter --admin-username azureuser --admin-password {pswd} --authentication-type password --enable-agent false --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username azureuser --admin-password {pswd} --authentication-type password --enable-agent false --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
         ])
@@ -2100,6 +2236,7 @@ class VMCreateExistingOptions(ScenarioTest):
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -2500,6 +2637,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -2574,10 +2712,14 @@ class VMSSCreateAndModify(ScenarioTest):
         self.cmd('vmss update -g {rg} -n {vmss} --scale-in-policy OldestVM', checks=[
             self.check('scaleInPolicy.rules[0]', 'OldestVM')
         ])
+        self.cmd('vmss update -g {rg} -n {vmss} --force-deletion', checks=[
+            self.check('scaleInPolicy.forceDeletion', True)
+        ])
 
 
 class VMSSCreateOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
 
@@ -3068,7 +3210,7 @@ class AcceleratedNetworkingTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2016Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
+        self.cmd("vmss create -n {vmss} -g {rg} --vm-sku Standard_DS4_v2 --image Win2022Datacenter --admin-username clittester --admin-password Test12345678!!! --accelerated-networking --instance-count 1")
         self.cmd('vmss show -n {vmss} -g {rg}',
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
 
@@ -3238,6 +3380,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
@@ -3599,7 +3742,7 @@ class MSIScenarioTest(ScenarioTest):
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vm create -g {rg} -n {vm2} --image Win2016Datacenter --assign-identity --scope {vm1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE', checks=[
+            result = self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --assign-identity --scope {vm1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --nsg-rule NONE', checks=[
                 self.check('identity.role', 'reader'),
                 self.check('identity.scope', '{vm1_id}'),
             ])
@@ -3637,7 +3780,7 @@ class MSIScenarioTest(ScenarioTest):
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
@@ -4150,7 +4293,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         self.kwargs.update({
             'vmss': 'vmss1'
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
         self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
@@ -5004,6 +5147,18 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('location', '{loc}'),
         ])
 
+        self.cmd('ppg list -g {rg}', checks=[
+            self.check('length(@)', 3)
+        ])
+        self.cmd('ppg delete -n {ppg1} -g {rg}')
+        self.cmd('ppg list -g {rg}', checks=[
+            self.check('length(@)', 2),
+        ])
+        
+        self.cmd('ppg update -n {ppg3} -g {rg} --set tags.foo="bar"', checks=[
+            self.check('tags.foo', 'bar')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
     def test_ppg_with_related_resources(self, resource_group):
 
@@ -5094,6 +5249,34 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
 # region dedicated host tests
 class DedicatedHostScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_')
+    def test_vm_host_management(self, resource_group):
+        self.kwargs.update({
+            'host-group': 'my-host-group',
+            'host': 'my-host',
+        })
+
+        self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
+        self.cmd('vm host group list -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{host-group}')
+        ])
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1')
+        self.cmd('vm host list --host-group {host-group} -g {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{host}')
+        ])
+
+        self.cmd('vm host group update -n {host-group} -g {rg} --set tags.foo="bar"', checks=[
+            self.check('tags.foo','bar')
+        ])
+        self.cmd('vm host update -n {host} --host-group {host-group} -g {rg} --set tags.foo="bar"', checks=[
+            self.check('tags.foo', 'bar')
+        ])
+
+        self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
+        self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host_', location='westeurope')
     @ResourceGroupPreparer(name_prefix='cli_test_dedicated_host2_', location='centraluseuap', key='rg2')
@@ -5653,23 +5836,30 @@ class DiskEncryptionSetTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault1-', name_len=20, key='vault1', parameter_name='key_vault1', location='westcentralus', additional_params='--enable-purge-protection')
     @KeyVaultPreparer(name_prefix='vault2-', name_len=20, key='vault2', parameter_name='key_vault2', location='westcentralus', additional_params='--enable-purge-protection')
+    @KeyVaultPreparer(name_prefix='vault3-', name_len=20, key='vault3', parameter_name='key_vault3', location='westcentralus', additional_params='--enable-purge-protection')
     @AllowLargeResponse(size_kb=99999)
     def test_disk_encryption_set_update(self, resource_group, key_vault1, key_vault2):
 
         self.kwargs.update({
             'key1': self.create_random_name(prefix='key1-', length=20),
             'key2': self.create_random_name(prefix='key2-', length=20),
-            'des': self.create_random_name(prefix='des-', length=20)
+            'key3': self.create_random_name(prefix='key3-', length=20),
+            'des': self.create_random_name(prefix='des-', length=20),
+            'des2': self.create_random_name(prefix='des-', length=20)
         })
 
         kid1 = self.cmd('keyvault key create -n {key1} --vault {vault1} --protection software').get_output_in_json()['key']['kid']
         vault2_id = self.cmd('keyvault show -g {rg} -n {vault2}').get_output_in_json()['id']
+        vault3_id = self.cmd('keyvault show -g {rg} -n {vault3}').get_output_in_json()['id']
         kid2 = self.cmd('keyvault key create -n {key2} --vault {vault2} --protection software').get_output_in_json()['key']['kid']
+        kid3 = self.cmd('keyvault key create -n {key3} --vault {vault3} --protection software').get_output_in_json()['key']['kid']
 
         self.kwargs.update({
             'kid1': kid1,
             'vault2_id': vault2_id,
-            'kid2': kid2
+            'vault3_id': vault3_id,
+            'kid2': kid2,
+            'kid3': kid3
         })
 
         self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1} --enable-auto-key-rotation true')
@@ -5683,14 +5873,52 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd('keyvault set-policy -n {vault2} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
-        time.sleep(15)
+        time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
-        time.sleep(15)
+        time.sleep(30)
 
-        self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2} --enable-auto-key-rotation false', checks=[
+        self.cmd('disk-encryption-set update -g {rg} -n {des} --source-vault {vault2} --key-url {kid2} --enable-auto-key-rotation false', checks=[
             self.check('activeKey.keyUrl', '{kid2}'),
             self.check('activeKey.sourceVault.id', '{vault2_id}'),
+            self.check('rotationToLatestKeyVersionEnabled', False)
+        ])
+
+        self.cmd('disk-encryption-set delete -g {rg} -n {des}')
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true', checks=[
+            self.check('activeKey.sourceVault', None)
+        ])
+
+        des2_sp_id = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()['identity']['principalId']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+        })
+        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --source-vault {vault3}', checks=[
+            self.check('activeKey.sourceVault.id', '{vault3_id}')
+        ])
+        self.cmd('disk-encryption-set delete -n {des2} -g{rg}')
+
+        self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid3} --enable-auto-key-rotation true',
+                 checks=[
+                     self.check('activeKey.sourceVault', None)
+                 ])
+
+        des2_sp_id = self.cmd('disk-encryption-set show -g {rg} -n {des2}').get_output_in_json()['identity'][
+            'principalId']
+        self.kwargs.update({
+            'des2_sp_id': des2_sp_id,
+        })
+        self.cmd('keyvault set-policy -n {vault2} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid2}', checks=[
+            self.check('activeKey.keyUrl', '{kid2}'),
+            self.check('activeKey.sourceVault', None)
+        ])
+        self.cmd('keyvault set-policy -n {vault3} --object-id {des2_sp_id} --key-permissions wrapKey unwrapKey get')
+        self.cmd('disk-encryption-set update -g {rg} -n {des2} --key-url {kid3} --source-vault {vault3} --enable-auto-key-rotation false', checks=[
+            self.check('activeKey.keyUrl', '{kid3}'),
+            self.check('activeKey.sourceVault.id', '{vault3_id}'),
             self.check('rotationToLatestKeyVersionEnabled', False)
         ])
 
@@ -5863,7 +6091,8 @@ class DiskAccessTest(ScenarioTest):
             'snapshot': 'mysnapshot'
         })
 
-        self.cmd('disk-access create -g {rg} -l {loc} -n {diskaccess}')
+        self.cmd('disk-access create -g {rg} -l {loc} -n {diskaccess} --no-wait')
+        self.cmd('disk-access wait --created -g {rg} -n {diskaccess}')
         self.cmd('disk-access list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].name', '{diskaccess}'),
@@ -5963,6 +6192,7 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
 
 class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_subnet')
     def test_vm_create_auto_create_subnet(self, resource_group):
 
@@ -6480,7 +6710,7 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
             'vm': 'vm1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Win2019Datacenter --enable-agent --enable-auto-update --patch-mode AutomaticByPlatform --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --enable-agent --enable-auto-update --patch-mode AutomaticByPlatform --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'AutomaticByPlatform'),
@@ -6507,7 +6737,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Win2019Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Win2022Datacenter --enable-agent --enable-auto-update false --patch-mode Manual --orchestration-mode Flexible --admin-username azureuser --admin-password testPassword0')
         vm = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()[0]['name']
         self.kwargs['vm'] = vm
 
@@ -6572,7 +6802,8 @@ class VMSSHKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
     def test_vm_ssh_key(self, resource_group):
         self.kwargs.update({
-            'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0='
+            'key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+MQ7LmEsaB7e/H63lCxJzrWdaLVhuUsnwXD5Eo7QpNhG6g9Oj9fKmZTSdHRpnUdVGtyRUJbmEHoeqFBBAt8bHu2bneEJeh8qfRmj0lCJA2QTZsdGlCsVlfSQzMjv/2WiOZ07pPGFVKvwsNS3dYQ1LtsNDAT4KE7ITlCcNjc+BjfWFTYOplAO++nruv+mD8zF1wwgTln/tHs7Ieja9Noon4PqnvyTYExPx7pclDjIPC+FzBrd9JBk+IUZyYPETO5F/LWh0M/+R656SCvHnXZ+xgan+V6nFJ0mGMErUrXUYMyYp8n/k5G5uxAiHjbS6b/+7HGbGLC0OUCBXLB0UyfIBo5ZtOgH9JKbRd2u7hjPBza7SY52JUsHbt7gZU46W35WjbDnW+clB+qLArHrsGr3YvkrEFn0IaD8y/7O9DW0PJFHM8iFZdZqmT+zM/BFse+p9El08MjPydTfKrZW4fzSBogI4oxY42CRDzxTl/WbpuGkjfcGfKwSoDbSy9jqjD/0=',
+            'updated-key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC+4oSAGj8KYVXKmikS/sCD9zCTq1AqpK/jzKGhe6ujvl8B1JelAij9qkS7Maf6HdPjZmgChTbDcZmbfrOcT6opL/SCiFiGKgKi7cpL4Vo4K6DecHOtQ5cg4lUJrCDtSjuwwnuTsJvPym/AnBSW+OCGDkLC8CUdaMtdwLo6yYTSZ2fiRVTKz8/Kqv2HmXk4+M4T4U4V9enDepaCyZrFPdqaCZxzcQNQxNJhGpTGahDsCoFwsL8KNNPV3fXe12K0xJ1QEhd2MeCofDE1xkD0wr1BO5hMh7x5ui2JwOK/7BYyPNZ5Cr2UxzA/ty/L/I/qHTVoDCmaZT0gjXNp6zMz1bApJ91iGtQAr+WNsOhvXRYcTmwBzzBtMaFEYxNgv+O1qi8h++E+GH3d62NIp8rIya7JgBzjhmArefO4xSDqlQrl9vHliTBW8+58Mm0zWGMqODD3B13FG5B0f4KaZWiniDWiKNLosKsV08yK+eMulIuY2s8XvjqDifx8YPOQv+bYGL0='
         })
         self.cmd('sshkey create -g {rg} -n k1')
         self.cmd('sshkey list')
@@ -6581,6 +6812,15 @@ class VMSSHKeyScenarioTest(ScenarioTest):
             self.exists('publicKey')
         ])
         self.cmd('sshkey create -g {rg} -n k2 --public-key "{key}"')
+        self.cmd('sshkey update -g {rg} -n k2 --public-key "{updated-key}"')
+
+        self.cmd('sshkey list -g {rg}', checks=[
+            self.check('length(@)', 2)
+        ])
+        self.cmd('sshkey delete -g {rg} -n k2 --yes')
+        self.cmd('sshkey list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         # Use existing key
         self.cmd('vm create -g {rg} -n vm1 --image centos --nsg-rule None --ssh-key-name k1')
@@ -6591,10 +6831,11 @@ class VMSSHKeyScenarioTest(ScenarioTest):
 
 
 class VMInstallPatchesScenarioTest(ScenarioTest):
+    @unittest.skip('The selected VM image is not supported for VM Guest patch operations')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_install_patches_')
     def test_vm_install_patches(self, resource_group):
         # Create new one
-        self.cmd('vm create -g {rg} -n vm --image Win2019Datacenter --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --enable-hotpatching true --admin-username azureuser --admin-password testPassword0 --nsg-rule NONE')
         self.cmd('vm install-patches -g {rg} -n vm --maximum-duration PT4H --reboot-setting IfRequired --classifications-to-include-win Critical Security --exclude-kbs-requiring-reboot true', checks=[
             self.check('status', 'Succeeded')
         ])

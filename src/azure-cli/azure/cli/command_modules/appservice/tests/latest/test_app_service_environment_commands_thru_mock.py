@@ -37,9 +37,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         rg_name = 'mock_rg_name'
         ase_client = mock.MagicMock()
         ase_client_factory_mock.return_value = ase_client
-        host_env = HostingEnvironmentProfile(id='id1')
-        host_env.name = ase_name
-        host_env.resource_group = rg_name
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
+        host_env.name = ase_name        
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
 
@@ -56,14 +55,12 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         rg_name_2 = 'mock_rg_name_2'
         ase_client = mock.MagicMock()
         ase_client_factory_mock.return_value = ase_client
-        host_env1 = HostingEnvironmentProfile(id='id1')
+        host_env1 = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name_1/Microsoft.Web/hostingEnvironments/mock_ase_name_1')
         host_env1.name = ase_name_1
         host_env1.kind = 'ASEv2'
-        host_env1.resource_group = rg_name_1
-        host_env2 = HostingEnvironmentProfile(id='id2')
+        host_env2 = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name_2/Microsoft.Web/hostingEnvironments/mock_ase_name_2')
         host_env2.name = ase_name_2
         host_env2.kind = 'ASEv3'
-        host_env2.resource_group = rg_name_2
         ase_client.list.return_value = [host_env1, host_env2]
 
         ase_client.get.return_value = host_env1
@@ -141,20 +138,18 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         resource_group_mock.return_value = rg_name
 
-        host_env = HostingEnvironmentProfile(id='id1')
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         host_env.name = ase_name
         host_env.kind = 'ASEv2'
-        host_env.resource_group = rg_name
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
 
         update_appserviceenvironment(self.mock_cmd, ase_name, front_end_scale_factor=10)
 
         # Assert create_or_update is called with correct properties
-        assert_host_env = HostingEnvironmentProfile(id='id1')
+        assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         assert_host_env.name = ase_name
         assert_host_env.kind = 'ASEv2'
-        assert_host_env.resource_group = rg_name
         assert_host_env.internal_load_balancing_mode = None
         assert_host_env.front_end_scale_factor = 10
         ase_client.begin_create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
@@ -171,10 +166,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         resource_group_mock.return_value = rg_name
 
-        host_env = HostingEnvironmentProfile(id='id1')
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         host_env.name = ase_name
         host_env.kind = 'ASEv3'
-        host_env.resource_group = rg_name
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
         ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False)
@@ -198,9 +192,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         resource_group_mock.return_value = rg_name
 
-        host_env = HostingEnvironmentProfile(id='id1')
+        host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         host_env.name = ase_name
-        host_env.resource_group = rg_name
         host_env.worker_pools = []
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
@@ -208,9 +201,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         delete_appserviceenvironment(self.mock_cmd, ase_name)
 
         # Assert delete is called with correct properties
-        assert_host_env = HostingEnvironmentProfile(id='id1')
+        assert_host_env = HostingEnvironmentProfile(id='/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/mock_rg_name/Microsoft.Web/hostingEnvironments/mock_ase_name')
         assert_host_env.name = ase_name
-        assert_host_env.resource_group = rg_name
         ase_client.begin_delete.assert_called_once_with(name=ase_name, resource_group_name=rg_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)

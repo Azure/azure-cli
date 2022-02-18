@@ -478,6 +478,12 @@ parameters:
   - name: --rotation-poll-interval
     type: string
     short-summary: Set interval of rotation poll. Use with azure-keyvault-secrets-provider addon.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Use FIPS-enabled OS on agent nodes.
+  - name: --snapshot-id
+    type: string
+    short-summary: The source snapshot id used to create this cluster.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -531,6 +537,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --tags "foo=bar" "baz=qux"
   - name: Create a kubernetes cluster with custom headers
     text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+  - name: Create a kubernetes cluster with FIPS-enabled OS
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
+  - name: create a kubernetes cluster with a snapshot id.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
 """
 
 helps['aks update'] = """
@@ -897,7 +907,7 @@ parameters:
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
   - name: --node-taints
     type: string
-    short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+    short-summary: The node taints for the node pool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
@@ -922,6 +932,15 @@ parameters:
   - name: --enable-ultra-ssd
     type: bool
     short-summary: Enable UltraSSD, default value is false.
+  - name: --enable-fips-image
+    type: bool
+    short-summary: Use FIPS-enabled OS on agent nodes.
+  - name: --snapshot-id
+    type: string
+    short-summary: The source snapshot id used to create this nodepool.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -931,7 +950,10 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-ultra-ssd
   - name: Create a nodepool cluster with a specific OS SKU
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku Ubuntu
-
+  - name: Create a nodepool with FIPS-enabled OS
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --enable-fips-image
+  - name: create a kubernetes cluster with a snapshot id.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
 """
 
 helps['aks nodepool delete'] = """
@@ -996,9 +1018,15 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+  - name: --node-taints
+    type: string
+    short-summary: The node taints for the node pool.
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. See https://aka.ms/node-labels for syntax of labels.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -1021,6 +1049,12 @@ parameters:
   - name: --max-surge
     type: string
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33% (mutually exclusive with "--node-image-only". See "az aks nodepool update --max-surge" to update max surge before upgrading with "--node-image-only")
+  - name: --snapshot-id
+    type: string
+    short-summary: The source snapshot id used to upgrade this nodepool.
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -1188,6 +1222,46 @@ helps['aks command result'] = """
         - name: --command-id -i
           type: string
           short-summary: commandId returned from 'aks command invoke'.
+"""
+
+helps['aks snapshot'] = """
+    type: group
+    short-summary: Commands to manage snapshots.
+"""
+
+helps['aks snapshot show'] = """
+    type: command
+    short-summary: Show the details of a snapshot.
+"""
+
+helps['aks snapshot list'] = """
+    type: command
+    short-summary: List snapshots.
+"""
+
+helps['aks snapshot create'] = """
+    type: command
+    short-summary: Create a snapshot of a node pool.
+    parameters:
+        - name: --nodepool-id
+          type: string
+          short-summary: The source nodepool id from which to create this snapshot.
+        - name: --tags
+          type: string
+          short-summary: The tags of the snapshot.
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+    examples:
+        - name: Create a snapshot.
+          text: az aks snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1"
+        - name: Create a snapshot with custom tags.
+          text: az aks snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1" --tags "foo=bar" "key1=val1"
+"""
+
+helps['aks snapshot delete'] = """
+    type: command
+    short-summary: Delete a snapshot.
 """
 
 helps['openshift'] = """

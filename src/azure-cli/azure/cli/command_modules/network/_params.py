@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._validators import (
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
     validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-    get_network_watcher_from_vm, get_network_watcher_from_location,
+    get_network_watcher_from_vm, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
@@ -272,7 +272,6 @@ def load_arguments(self, _):
         c.argument('host_name', help='Host name to use for multisite gateways.')
         c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
-        c.argument('ssl_profile', min_api='2020-06-01', help='SSL profile resource of the application gateway.', completer=get_ag_subresource_completion_list('ssl_profiles'))
 
     with self.argument_context('network application-gateway http-listener create') as c:
         c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
@@ -898,12 +897,24 @@ def load_arguments(self, _):
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
         c.argument('edge_zone', edge_zone)
+        c.argument('custom_interface_name', nic_type, options_list='--nic-name', min_api='2021-05-01', help='The custom name of the network interface attached to the private endpoint.')
 
     with self.argument_context('network private-endpoint dns-zone-group') as c:
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
         c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
         c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+
+    with self.argument_context('network private-endpoint ip-config') as c:
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+        c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
+        c.argument('group_id', help='The ID of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('member_name', help='The member name of a group obtained from the remote resource that this private endpoint should connect to.')
+        c.argument('private_ip_address', private_ip_address_type, help="A private ip address obtained from the private endpoint's subnet.")
+
+    with self.argument_context('network private-endpoint asg') as c:
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+        c.argument('application_security_group_id', options_list='--asg-id', help='ID of application security group in which the private endpoint IP configuration is included.')
     # endregion
 
     # region PrivateLinkService
@@ -1627,7 +1638,7 @@ def load_arguments(self, _):
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
-    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packet-capture create']:
+    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view']:
         with self.argument_context('network watcher {}'.format(item)) as c:
             c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
             c.ignore('location')
@@ -1635,6 +1646,17 @@ def load_arguments(self, _):
             c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
             c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
             c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
+
+    with self.argument_context('network watcher packet-capture create') as c:
+        c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
+        c.ignore('location')
+        c.ignore('watcher_rg')
+        c.argument('capture_limit', type=int, validator=validate_capture_size_and_limit, help='The maximum size in bytes of the capture output.')
+        c.argument('capture_size', type=int, validator=validate_capture_size_and_limit, help='Number of bytes captured per packet. Excess bytes are truncated.')
+        c.argument('time_limit', type=int, validator=validate_capture_size_and_limit, help='Maximum duration of the capture session in seconds.')
+        c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
+        c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
+        c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
 
     with self.argument_context('network watcher test-connectivity') as c:
         c.argument('source_port', type=int)
@@ -1863,7 +1885,6 @@ def load_arguments(self, _):
 
     with self.argument_context('network traffic-manager profile check-dns') as c:
         c.argument('name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-        c.argument('type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
 
     endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
     with self.argument_context('network traffic-manager endpoint') as c:
@@ -1874,6 +1895,8 @@ def load_arguments(self, _):
         c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
         c.argument('endpoint_status', arg_type=get_enum_type(['Enabled', 'Disabled']), help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
         c.argument('min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
+        c.argument('min_child_ipv4', help="The minimum number of IPv4 (DNS record type A) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
+        c.argument('min_child_ipv6', help="The minimum number of IPv6 (DNS record type AAAA) endpoints that must be available in the child profile in order for the parent profile to be considered available. Only applicable to endpoint of type 'NestedEndpoints'.")
         c.argument('priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
         c.argument('target', help='Fully-qualified DNS name of the endpoint.')
         c.argument('target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")

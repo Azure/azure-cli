@@ -195,7 +195,7 @@ class Profile:
 
     def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None):
         import jwt
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
@@ -633,7 +633,7 @@ class Profile:
                 if not subscriptions:
                     continue
 
-            consolidated = self._normalize_properties(subscription_finder.user_id,
+            consolidated = self._normalize_properties(user_name,
                                                       subscriptions,
                                                       is_service_principal)
             result += consolidated
@@ -643,38 +643,19 @@ class Profile:
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
         """Generate a JSON for --sdk-auth argument when used in:
             - az ad sp create-for-rbac --sdk-auth
-            - az account show --sdk-auth
         """
         from collections import OrderedDict
         account = self.get_subscription(subscription_id)
 
         # is the credential created through command like 'create-for-rbac'?
         result = OrderedDict()
-        if name and (password or cert_file):
-            result['clientId'] = name
-            if password:
-                result['clientSecret'] = password
-            else:
-                result['clientCertificate'] = cert_file
-            result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
-        else:  # has logged in through cli
-            user_type = account[_USER_ENTITY].get(_USER_TYPE)
-            if user_type == _SERVICE_PRINCIPAL:
-                client_id = account[_USER_ENTITY][_USER_NAME]
-                result['clientId'] = client_id
-                identity = _create_identity_instance(self.cli_ctx, self._authority, tenant_id=account[_TENANT_ID])
-                sp_entry = identity.get_service_principal_entry(client_id)
 
-                from .auth.msal_authentication import _CLIENT_SECRET, _CERTIFICATE
-                secret = sp_entry.get(_CLIENT_SECRET)
-                if secret:
-                    result['clientSecret'] = secret
-                else:
-                    # we can output 'clientCertificateThumbprint' if asked
-                    result['clientCertificate'] = sp_entry.get(_CERTIFICATE)
-                result['subscriptionId'] = account[_SUBSCRIPTION_ID]
-            else:
-                raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
+        result['clientId'] = name
+        if password:
+            result['clientSecret'] = password
+        else:
+            result['clientCertificate'] = cert_file
+        result['subscriptionId'] = subscription_id or account[_SUBSCRIPTION_ID]
 
         result[_TENANT_ID] = account[_TENANT_ID]
         endpoint_mappings = OrderedDict()  # use OrderedDict to control the output sequence
@@ -731,8 +712,6 @@ class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
     def __init__(self, cli_ctx):
-
-        self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -864,7 +843,12 @@ def _create_identity_instance(cli_ctx, *args, **kwargs):
 
     # Only enable encryption for Windows (for now).
     fallback = sys.platform.startswith('win32')
+
+    # EXPERIMENTAL: Use core.encrypt_token_cache=False to turn off token cache encryption.
     # encrypt_token_cache affects both MSAL token cache and service principal entries.
     encrypt = cli_ctx.config.getboolean('core', 'encrypt_token_cache', fallback=fallback)
 
-    return Identity(*args, encrypt=encrypt, **kwargs)
+    # EXPERIMENTAL: Use core.use_msal_http_cache=False to turn off MSAL HTTP cache.
+    use_msal_http_cache = cli_ctx.config.getboolean('core', 'use_msal_http_cache', fallback=True)
+
+    return Identity(*args, encrypt=encrypt, use_msal_http_cache=use_msal_http_cache, **kwargs)

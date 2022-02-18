@@ -8,7 +8,8 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku, validate_vnet_integration, validate_asp_create
+from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
+                          validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create)
 
 
 def output_slots_in_table(slots):
@@ -66,20 +67,23 @@ def _polish_bad_errors(ex, creating_plan):
     import json
     from knack.util import CLIError
     try:
-        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-            detail = ex.response.text
+        if hasattr(ex, "response"):
+            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+                detail = ex.response.text
+            else:
+                detail = json.loads(ex.response.text())['Message']
+                if creating_plan:
+                    if 'Requested features are not supported in region' in detail:
+                        detail = ("Plan with requested features is not supported in current region. \n"
+                                  "If creating an App Service Plan with --zone-redundant/-z, "
+                                  "please see supported regions here: "
+                                  "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
+                    elif 'Not enough available reserved instance servers to satisfy' in detail:
+                        detail = ("Plan with Linux worker can only be created in a group " +
+                                  "which has never contained a Windows worker, and vice versa. " +
+                                  "Please use a new resource group. Original error:" + detail)
         else:
-            detail = json.loads(ex.response.text())['Message']
-            if creating_plan:
-                if 'Requested features are not supported in region' in detail:
-                    detail = ("Plan with requested features is not supported in current region. \n"
-                              "If creating an App Service Plan with --zone-redundant/-z, "
-                              "please see supported regions here: "
-                              "https://docs.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                elif 'Not enough available reserved instance servers to satisfy' in detail:
-                    detail = ("Plan with Linux worker can only be created in a group " +
-                              "which has never contained a Windows worker, and vice versa. " +
-                              "Please use a new resource group. Original error:" + detail)
+            detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
     except Exception:  # pylint: disable=broad-except
         pass
@@ -125,14 +129,14 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
-        # TO DO: Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
-        g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
+        g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
         g.custom_command('create-remote-connection', 'create_tunnel', exception_handler=ex_handler_factory())
         g.custom_command('deploy', 'perform_onedeploy', validator=validate_onedeploy_params, is_preview=True)
-        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp', custom_func_name='update_webapp', command_type=appservice_custom)
+        g.generic_update_command('update', getter_name='get_webapp', setter_name='set_webapp',
+                                 custom_func_name='update_webapp', command_type=appservice_custom)
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -304,6 +308,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_functionapp', exception_handler=ex_handler_factory(),
                          validator=validate_vnet_integration)
+        g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
@@ -366,7 +371,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
-        g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_functionapp_app_service_plan',
+                         exception_handler=ex_handler_factory(creating_plan=True),
+                         validator=validate_functionapp_asp_create)
         g.generic_update_command('update', setter_name='begin_create_or_update',
                                  custom_func_name='update_functionapp_app_service_plan',
                                  setter_arg_name='app_service_plan', exception_handler=ex_handler_factory())
@@ -457,9 +464,9 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_identity')
 
     with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk) as g:
-        g.custom_command('list', 'list_staticsite_function_app_settings')
-        g.custom_command('set', 'set_staticsite_function_app_settings')
-        g.custom_command('delete', 'delete_staticsite_function_app_settings')
+        g.custom_command('list', 'list_staticsite_app_settings')
+        g.custom_command('set', 'set_staticsite_app_settings')
+        g.custom_command('delete', 'delete_staticsite_app_settings')
 
     with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_users')

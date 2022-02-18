@@ -395,7 +395,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
     return params
 
 
-def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+def server_delete_func(cmd, client, resource_group_name, server_name, yes=None):
     result = None  # default return value
 
     if not yes:
@@ -611,7 +611,7 @@ def _create_mysql_connection_strings(host, user, password, database):
                        "spring.datasource.password={password}",
         'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}', "
                    "password: {password}, database: {database}, port: 3306}});",
-        'php': "host={host} port=3306 dbname={database} user={user} password={password}",
+        'php': "$con=mysqli_init(); [mysqli_ssl_set($con, NULL, NULL, {{ca-cert filename}}, NULL, NULL);] mysqli_real_connect($con, '{host}', '{user}', '{password}', '{database}', 3306);",
         'python': "cnx = mysql.connector.connect(user='{user}', password='{password}', host='{host}', "
                   "port=3306, database='{database}')",
         'ruby': "client = Mysql2::Client.new(username: '{user}', password: '{password}', "
@@ -677,7 +677,7 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
         '{} Database Create/Update'.format(logging_name))
 
 
-def database_create_func(client, resource_group_name=None, server_name=None, database_name=None, charset=None, collation=None):
+def database_create_func(client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
 
     if charset is None and collation is None:
         charset = 'utf8'

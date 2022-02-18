@@ -3,6 +3,22 @@
 Release History
 ===============
 
+2.33.1
+++++++
+* No changes
+
+2.33.0
+++++++
+* Drop `--query-examples` global argument (#20962)
+
+2.32.0
+++++++
+* Use optimistic locking for service principal entry reads (#20408)
+
+2.31.0
+++++++
+* Use MSAL HTTP cache (#20234)
+
 2.30.0
 ++++++
 * [BREAKING CHANGE] ADAL to MSAL migration (#19853)

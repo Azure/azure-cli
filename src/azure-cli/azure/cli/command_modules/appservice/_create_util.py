@@ -12,12 +12,10 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import get_file_json
 from azure.mgmt.web.models import SkuDescription
 
-from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
-                         NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
-                         ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
-                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS,
+from ._constants import (NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, STATIC_RUNTIME_NAME,
+                         PYTHON_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
                          DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES)
+from .utils import get_resource_if_exists
 
 logger = get_logger(__name__)
 
@@ -74,31 +72,31 @@ def zip_contents_from_dir(dirPath, lang):
     return zip_file_path
 
 
-def get_runtime_version_details(file_path, lang_name):
+def get_runtime_version_details(file_path, lang_name, stack_helper, is_linux=False):
     version_detected = None
     version_to_create = None
-    if lang_name.lower() == DOTNET_RUNTIME_NAME:
-        version_detected = parse_dotnet_version(file_path, DOTNET_VERSION_DEFAULT)
-        version_to_create = detect_dotnet_version_tocreate(version_detected, DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS)
+
+    if lang_name.lower() != STATIC_RUNTIME_NAME:
+        versions = stack_helper.get_version_list(lang_name, is_linux)
+        default_version = stack_helper.get_default_version(lang_name, is_linux)
+        version_to_create = default_version
+    if lang_name.lower() in [DOTNET_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME]:
+        version_detected = parse_dotnet_version(file_path, default_version)
+        version_to_create = detect_dotnet_version_tocreate(version_detected, default_version, versions)
     elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
-        version_to_create = detect_netcore_version_tocreate(version_detected)
-    elif lang_name.lower() == ASPDOTNET_RUNTIME_NAME:
-        # method returns list in DESC, pick the first
-        version_detected = parse_dotnet_version(file_path, ASPDOTNET_VERSION_DEFAULT)
-        version_to_create = detect_dotnet_version_tocreate(version_detected,
-                                                           ASPDOTNET_VERSION_DEFAULT, ASPDOTNET_VERSIONS)
+        version_to_create = detect_dotnet_version_tocreate(version_detected, default_version, versions)
     elif lang_name.lower() == NODE_RUNTIME_NAME:
         if file_path == '':
             version_detected = "-"
-            version_to_create = NODE_VERSION_DEFAULT
+            version_to_create = default_version
         else:
             version_detected = parse_node_version(file_path)[0]
-            version_to_create = detect_node_version_tocreate(version_detected)
+            version_to_create = detect_node_version_tocreate(version_detected, versions, default_version)
     elif lang_name.lower() == PYTHON_RUNTIME_NAME:
         version_detected = "-"
-        version_to_create = PYTHON_VERSION_DEFAULT
+        version_to_create = default_version
     elif lang_name.lower() == STATIC_RUNTIME_NAME:
         version_detected = "-"
         version_to_create = "-"
@@ -137,7 +135,7 @@ def get_num_apps_in_asp(cmd, rg_name, asp_name):
 
 
 # pylint:disable=unexpected-keyword-arg
-def get_lang_from_content(src_path, html=False):
+def get_lang_from_content(src_path, html=False, is_linux=False):
     # NODE: package.json should exist in the application root dir
     # NETCORE & DOTNET: *.csproj should exist in the application dir
     # NETCORE: <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -159,6 +157,8 @@ def get_lang_from_content(src_path, html=False):
                 break
             if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
+                if not os.path.isfile(package_netcore_file):
+                    package_netcore_file = os.path.join(_dirpath, file)
                 break
 
     if html:
@@ -178,7 +178,7 @@ def get_lang_from_content(src_path, html=False):
         runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netcore_file:
-        runtime_lang = detect_dotnet_lang(package_netcore_file)
+        runtime_lang = detect_dotnet_lang(package_netcore_file, is_linux=is_linux)
         runtime_details_dict['language'] = runtime_lang
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
@@ -189,9 +189,13 @@ def get_lang_from_content(src_path, html=False):
     return runtime_details_dict
 
 
-def detect_dotnet_lang(csproj_path):
+def detect_dotnet_lang(csproj_path, is_linux=False):
     import xml.etree.ElementTree as ET
     import re
+
+    if is_linux:
+        return NETCORE_RUNTIME_NAME
+
     parsed_file = ET.parse(csproj_path)
     root = parsed_file.getroot()
     version_lang = ''
@@ -266,12 +270,6 @@ def parse_node_version(file_path):
     return version_detected or ['0.0']
 
 
-def detect_netcore_version_tocreate(detected_ver):
-    if detected_ver in NETCORE_VERSIONS:
-        return detected_ver
-    return NETCORE_VERSION_DEFAULT
-
-
 def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list):
     min_ver = versions_list[0]
     if detected_ver in versions_list:
@@ -281,18 +279,11 @@ def detect_dotnet_version_tocreate(detected_ver, default_version, versions_list)
     return default_version
 
 
-def detect_node_version_tocreate(detected_ver):
-    if detected_ver in NODE_VERSIONS:
+# TODO include better detections logic here
+def detect_node_version_tocreate(detected_ver, node_versions, default_node_version):
+    if detected_ver in node_versions:
         return detected_ver
-    # get major version & get the closest version from supported list
-    major_ver = int(detected_ver.split('.')[0])
-    node_ver = NODE_VERSION_DEFAULT
-    # TODO: Handle checking for minor versions if node major version is 10
-    if major_ver <= 11:
-        node_ver = NODE_VERSION_DEFAULT
-    else:
-        node_ver = NODE_VERSION_NEWER
-    return node_ver
+    return default_node_version
 
 
 def find_key_in_json(json_data, key):
@@ -378,12 +369,22 @@ def detect_os_form_src(src_dir, html=False):
         or language.lower() == PYTHON_RUNTIME_NAME else OS_DEFAULT
 
 
-def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, plan=None):
-    _default_asp = "{}_asp_{:04}".format(user, randint(0, 9999))
+def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, client, is_linux=False, plan=None):
+    _default_asp = _get_default_plan_name(user)
     if plan is None:  # --plan not provided by user
         # get the plan name to use
-        return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg)
+        return _determine_if_default_plan_to_use(cmd, _default_asp, resource_group_name, loc, sku, create_rg, is_linux)
+
+    asp = get_resource_if_exists(client.app_service_plans, resource_group_name=resource_group_name, name=plan)
+    if asp is not None:
+        if asp.reserved != is_linux:
+            logger.warning("Existing app service plan %s has a different OS type and deployment may fail. "
+                           "Consider using a different OS or app service plan", plan)
     return plan
+
+
+def _get_default_plan_name(user):
+    return "{}_asp_{:04}".format(user, randint(0, 9999))
 
 
 # Portal uses the current_stack property in the app metadata to display the correct stack
@@ -396,12 +397,13 @@ def get_current_stack_from_runtime(runtime):
 
 
 # if plan name not provided we need to get a plan name based on the OS, location & SKU
-def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, sku, create_rg):
+def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, sku, create_rg, is_linux):
     client = web_client_factory(cmd.cli_ctx)
     if create_rg:  # if new RG needs to be created use the default name
         return plan_name
+
     # get all ASPs in the RG & filter to the ones that contain the plan_name
-    _asp_generic = plan_name[:-len(plan_name.split("_")[4])]
+    _asp_generic = plan_name[:plan_name.rindex("_")]
     _asp_list = (list(filter(lambda x: _asp_generic in x.name,
                              client.app_service_plans.list_by_resource_group(resource_group_name))))
     _num_asp = len(_asp_list)
@@ -409,7 +411,8 @@ def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, 
         # check if we have at least one app that can be used with the combination of loc, sku & os
         selected_asp = next((a for a in _asp_list if isinstance(a.sku, SkuDescription) and
                              a.sku.name.lower() == sku.lower() and
-                             (a.location.replace(" ", "").lower() == loc.lower())), None)
+                             (a.location.replace(" ", "").lower() == loc.lower()) and
+                             a.reserved == is_linux), None)
         if selected_asp is not None:
             return selected_asp.name
         # from the sorted data pick the last one & check if a new ASP needs to be created

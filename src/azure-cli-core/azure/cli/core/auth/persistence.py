@@ -13,8 +13,9 @@ from msal_extensions import (FilePersistenceWithDataProtection, KeychainPersiste
                              FilePersistence, PersistedTokenCache, CrossPlatLock)
 from msal_extensions.persistence import PersistenceNotFound
 
-from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.decorators import retry
+
 
 logger = get_logger(__name__)
 
@@ -60,13 +61,9 @@ class SecretStore:
         with CrossPlatLock(self._lock_file):
             self._persistence.save(json.dumps(content, indent=4))
 
+    @retry()
     def load(self):
-        with CrossPlatLock(self._lock_file):
-            try:
-                return json.loads(self._persistence.load())
-            except PersistenceNotFound:
-                return []
-            except Exception as ex:
-                raise CLIError("Failed to load token files. If you can reproduce, please log an issue at "
-                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
-                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
+        try:
+            return json.loads(self._persistence.load())
+        except PersistenceNotFound:
+            return []

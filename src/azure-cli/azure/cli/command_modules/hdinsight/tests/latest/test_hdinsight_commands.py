@@ -7,7 +7,7 @@
 import os
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure_devtools.scenario_tests import record_only
+from azure.cli.testsdk.scenario_tests import record_only
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 

@@ -7,7 +7,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.tools import parse_resource_id
@@ -241,15 +241,15 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_function_app_settings(cmd, name, resource_group_name=None):
+def list_staticsite_app_settings(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_function_app_settings(resource_group_name, name)
+    return client.list_static_site_app_settings(resource_group_name, name)
 
 
-def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_group_name=None):
+def set_staticsite_app_settings(cmd, name, setting_pairs, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -259,24 +259,29 @@ def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_grou
         key, value = _parse_pair(pair, "=")
         setting_dict[key] = value
 
-    return client.create_or_update_static_site_function_app_settings(
-        resource_group_name, name, app_settings=setting_dict)
+    # fetch current settings to prevent deleting existing app settings
+    settings = list_staticsite_app_settings(cmd, name, resource_group_name)
+    for k, v in setting_dict.items():
+        settings.properties[k] = v
+
+    return client.create_or_update_static_site_app_settings(
+        resource_group_name, name, app_settings=settings)
 
 
-def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
+def delete_staticsite_app_settings(cmd, name, setting_names, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    app_settings = client.list_static_site_function_app_settings(resource_group_name, name).properties
+    app_settings = client.list_static_site_app_settings(resource_group_name, name)
 
     for key in setting_names:
-        if key in app_settings:
-            app_settings.pop(key)
+        if key in app_settings.properties:
+            app_settings.properties.pop(key)
         else:
             logger.warning("key '%s' not found in app settings", key)
 
-    return client.create_or_update_static_site_function_app_settings(
+    return client.create_or_update_static_site_app_settings(
         resource_group_name, name, app_settings=app_settings)
 
 
@@ -309,6 +314,8 @@ def invite_staticsite_users(cmd, name, authentication_provider, user_details, do
 
 def update_staticsite_users(cmd, name, roles, authentication_provider=None, user_details=None, user_id=None,
                             resource_group_name=None):
+    from azure.mgmt.web.models import StaticSiteUserARMResource
+
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
@@ -322,9 +329,13 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
             client, resource_group_name, name, user_id, authentication_provider, user_details)
 
     if not authentication_provider or not user_id:
-        raise CLIError("Either user id or user details is required.")
+        raise RequiredArgumentMissingError("Either user id or user details is required.")
 
-    return client.update_static_site_user(resource_group_name, name, authentication_provider, user_id, roles=roles)
+    user_envelope = StaticSiteUserARMResource(roles=roles)
+
+    return client.update_static_site_user(resource_group_name,
+                                          name, authentication_provider, user_id,
+                                          static_site_user_envelope=user_envelope)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,

@@ -1213,20 +1213,31 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
-                namespace.identity_role))
+            raise ArgumentUsageError("usage error: '--role {}' is not applicable as the '--scope' is not provided".
+                                     format(namespace.identity_role))
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
-            raise CLIError('usage error: user assigned identity is only available under profile '
-                           'with minimum Compute API version of 2017-12-01')
+            raise ArgumentUsageError('usage error: user assigned identity is only available under profile '
+                                     'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+                raise ArgumentUsageError("usage error: '--scope'/'--role' is only applicable when "
+                                         "assign system identity")
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
-        raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+        raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+
+    # For the creation of VM and VMSS, the default value "Contributor" of "--role" will be removed in the future.
+    # Therefore, the first step is to prompt users that parameters "--role" and "--scope"  should be passed in
+    # at the same time to reduce the impact of breaking change
+    if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
+        logger.warning(
+            "Please note that the default value of parameter '--role' will be removed in the future. "
+            "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
+            "to avoid breaking your automation script when the default value of '--role' is removed."
+        )
 
 
 def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unused-argument
@@ -1641,7 +1652,17 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
                 if not source_info:
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
-                    source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx, result['resource_group'], result['name'])
+                    try:
+                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                                                                    result['resource_group'],
+                                                                    result['name'])
+                    except Exception:  # pylint: disable=broad-except
+                        # There's a chance that the source doesn't exist, eg, vmss os disk.
+                        # You can get the id of vmss os disk by
+                        #   `az vmss show -g {} -n {} --instance-id {} --query storageProfile.osDisk.managedDisk.id`
+                        # But `az disk show --ids {}` will return ResourceNotFound error
+                        # We don't autodetect copy_start in this situation
+                        return
                 if not namespace.location:
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario

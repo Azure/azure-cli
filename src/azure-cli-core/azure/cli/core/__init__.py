@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.30.0"
+__version__ = "2.33.1"
 
 import os
 import sys
@@ -65,7 +65,6 @@ class AzCli(CLI):
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
         from azure.cli.core.util import handle_version_update
-        from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
         from knack.util import ensure_dir
 
@@ -89,7 +88,6 @@ class AzCli(CLI):
         self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
-        register_global_query_examples_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
 

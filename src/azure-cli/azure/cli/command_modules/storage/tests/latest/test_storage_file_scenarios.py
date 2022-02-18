@@ -7,7 +7,7 @@ import os
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
-from azure_devtools.scenario_tests import record_only
+from azure.cli.testsdk.scenario_tests import record_only
 
 
 class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
