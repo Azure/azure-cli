@@ -128,7 +128,7 @@ def load_arguments(self, _):
         c.argument('description', arg_group='API', help='Description of the API. May include HTML formatting tags.')
         c.argument('subscription_key_header_name', arg_group='API', help='Specifies the subscription key header name.')
         c.argument('subscription_key_query_param_name', arg_group='API', help='Specifies the subscription key query string parameter name.')
-        c.argument('api_id', arg_group='API', help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', arg_group='API', help='Unique name of the api to import. If an API of the same name exists it will be replaced. Otherwise a new API resource will be created.')
         c.argument('api_revision', arg_group='API', help='Describes the Revision of the Api. If no value is provided, default revision 1 is created.')
         c.argument('api_version', arg_group='API', help='Describes the Version of the Api. If you add a version to a non-versioned API, an Original version will be automatically created and will respond on the default URL')
         c.argument('api_version_set_id', arg_group='API', help='Describes the Version Set to be used with the API')
