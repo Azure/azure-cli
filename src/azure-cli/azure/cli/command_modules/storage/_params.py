@@ -5,7 +5,7 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
+from azure.cli.core.commands.parameters import (tags_type, tags_type_preview, file_type, get_location_type, get_enum_type,
                                                 get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
@@ -22,7 +22,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_file_delete_retention_days, validator_change_feed_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
-                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle)
+                          validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
+                          add_upload_progress_callback, blob_tier_validator_track2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -905,30 +906,46 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'specifies the blob snapshot to retrieve.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
 
-    with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
-        from .sdkutil import get_blob_types, get_blob_tier_names
+    with self.argument_context('storage blob upload', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
+        from ._validators import validate_encryption_scope_client_params, validate_upload_blob
 
-        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
-        c.register_content_settings_argument(t_blob_content_settings, update=False)
-        c.register_blob_arguments()
-        c.extra('blob_name', validator=validate_blob_name_for_upload)
+        from .sdkutil import get_blob_types
 
-        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
-        c.argument('max_connections', type=int)
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+        c.register_blob_arguments_track2()
+        c.register_precondition_options()
+        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
+
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
+                   help='Path of the file to upload as the blob content.', validator=validate_upload_blob)
+        c.argument('data', help='The blob data to upload.', required=False, is_preview=True, min_api='2019-02-02')
+        c.argument('length', type=int, help='Number of bytes to read from the stream. This is optional, but should be '
+                                            'supplied for optimal performance. Cooperate with --data.', is_preview=True,
+                   min_api='2019-02-02')
+        c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
+                   help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
+                        'operation will  overwrite the existing data. If set to False, the operation will fail with '
+                        'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
+                        'data already exists, an error will not be raised and the data will be appended to the existing '
+                        'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
+                        'Defaults to False.')
+        c.argument('max_connections', type=int, arg_group="Additional Flags",
+                   help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
+        c.extra('maxsize_condition', type=int, arg_group="Content Control",
+                help='The max length in bytes permitted for the append blob.')
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
-                   arg_type=get_enum_type(get_blob_types()))
-        c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
-        # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
-        # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
-        #                              help=argparse.SUPPRESS)
-        c.argument('tier', validator=page_blob_tier_validator,
-                   arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
-                   min_api='2017-04-17')
+                   arg_type=get_enum_type(get_blob_types()), arg_group="Additional Flags")
+        c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group="Content Control")
+        c.extra('no_progress', progress_type, validator=add_upload_progress_callback, arg_group="Additional Flags")
+        c.extra('tier', tier_type, validator=blob_tier_validator_track2, arg_group="Additional Flags")
         c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
-                   help='A predefined encryption scope used to encrypt the data on the service.')
+                   help='A predefined encryption scope used to encrypt the data on the service.',
+                   arg_group="Additional Flags")
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.extra('tags', arg_type=tags_type_preview, arg_group="Additional Flags")
+        c.argument('metadata', arg_group="Additional Flags")
+        c.argument('timeout', arg_group="Additional Flags")
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types

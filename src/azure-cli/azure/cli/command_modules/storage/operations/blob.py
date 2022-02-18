@@ -500,123 +500,77 @@ def _adjust_block_blob_size(client, blob_type, length):
 
 
 # pylint: disable=too-many-locals
-def upload_blob(cmd, client, file_path, container_name=None, blob_name=None, blob_type=None, content_settings=None,
+def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None, blob_type=None,
                 metadata=None, validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None,
-                tier=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
-                timeout=None, progress_callback=None, encryption_scope=None):
+                if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                timeout=None, progress_callback=None, encryption_scope=None, overwrite=None, data=None,
+                length=None, **kwargs):
     """Upload a blob to a container."""
-
-    if encryption_scope:
-        count = os.path.getsize(file_path)
-        with open(file_path, 'rb') as stream:
-            data = stream.read(count)
-        from azure.core import MatchConditions
-        upload_args = {
-            'content_settings': content_settings,
-            'metadata': metadata,
-            'timeout': timeout,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'blob_type': transform_blob_type(cmd, blob_type),
-            'validate_content': validate_content,
-            'lease': lease_id,
-            'max_concurrency': max_connections,
-        }
-
-        if cmd.supported_api_version(min_api='2017-04-17') and tier:
-            upload_args['premium_page_blob_tier'] = tier
-        if maxsize_condition:
-            upload_args['maxsize_condition'] = maxsize_condition
-        if cmd.supported_api_version(min_api='2016-05-31'):
-            upload_args['validate_content'] = validate_content
-
-        # Precondition Check
-        if if_match:
-            if if_match == '*':
-                upload_args['match_condition'] = MatchConditions.IfPresent
-            else:
-                upload_args['etag'] = if_match
-                upload_args['match_condition'] = MatchConditions.IfNotModified
-
-        if if_none_match:
-            upload_args['etag'] = if_none_match
-            upload_args['match_condition'] = MatchConditions.IfModified
-        _adjust_block_blob_size(client, blob_type, length=count)
-        response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
-        return transform_response_with_bytearray(response)
-
-    t_content_settings = cmd.get_models('blob.models#ContentSettings')
-    content_settings = guess_content_type(file_path, content_settings, t_content_settings)
-
-    def upload_append_blob():
-        check_blob_args = {
-            'container_name': container_name,
-            'blob_name': blob_name,
-            'lease_id': lease_id,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'if_match': if_match,
-            'if_none_match': if_none_match,
-            'timeout': timeout
-        }
-
-        if client.exists(container_name, blob_name):
-            # used to check for the preconditions as append_blob_from_path() cannot
-            client.get_blob_properties(**check_blob_args)
-        else:
-            client.create_blob(content_settings=content_settings, metadata=metadata, **check_blob_args)
-
-        append_blob_args = {
-            'container_name': container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': progress_callback,
-            'maxsize_condition': maxsize_condition,
-            'lease_id': lease_id,
-            'timeout': timeout
-        }
-
-        if cmd.supported_api_version(min_api='2016-05-31'):
-            append_blob_args['validate_content'] = validate_content
-
-        return client.append_blob_from_path(**append_blob_args)
-
-    def upload_block_blob():
-        # increase the block size to 100MB when the block list will contain more than 50,000 blocks
-        if os.path.isfile(file_path) and os.stat(file_path).st_size > 50000 * 4 * 1024 * 1024:
-            client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
-            client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
-
-        create_blob_args = {
-            'container_name': container_name,
-            'blob_name': blob_name,
-            'file_path': file_path,
-            'progress_callback': progress_callback,
-            'content_settings': content_settings,
-            'metadata': metadata,
-            'max_connections': max_connections,
-            'lease_id': lease_id,
-            'if_modified_since': if_modified_since,
-            'if_unmodified_since': if_unmodified_since,
-            'if_match': if_match,
-            'if_none_match': if_none_match,
-            'timeout': timeout
-        }
-
-        if cmd.supported_api_version(min_api='2017-04-17') and tier:
-            create_blob_args['premium_page_blob_tier'] = tier
-
-        if cmd.supported_api_version(min_api='2016-05-31'):
-            create_blob_args['validate_content'] = validate_content
-
-        return client.create_blob_from_path(**create_blob_args)
-
-    type_func = {
-        'append': upload_append_blob,
-        'block': upload_block_blob,
-        'page': upload_block_blob  # same implementation
+    from azure.core.exceptions import ResourceExistsError
+    upload_args = {
+        'blob_type': transform_blob_type(cmd, blob_type),
+        'lease': lease_id,
+        'max_concurrency': max_connections
     }
-    return type_func[blob_type]()
+
+    if overwrite is not None:
+        upload_args['overwrite'] = overwrite
+    if maxsize_condition:
+        upload_args['maxsize_condition'] = maxsize_condition
+
+    if cmd.supported_api_version(min_api='2016-05-31'):
+        upload_args['validate_content'] = validate_content
+
+    if progress_callback:
+        upload_args['raw_response_hook'] = progress_callback
+
+    check_blob_args = {
+        'if_modified_since': if_modified_since,
+        'if_unmodified_since': if_unmodified_since,
+        'if_match': if_match,
+        'if_none_match': if_none_match,
+    }
+
+    # used to check for the preconditions as upload_append_blob() cannot
+    if blob_type == 'append':
+        if client.exists(timeout=timeout):
+            client.get_blob_properties(lease=lease_id, timeout=timeout, **check_blob_args)
+
+    # Because the contents of the uploaded file may be too large, it should be passed into the a stream object,
+    # upload_blob() read file data in batches to avoid OOM problems
+    try:
+        if file_path:
+            length = os.path.getsize(file_path)
+            _adjust_block_blob_size(client, blob_type, length)
+            with open(file_path, 'rb') as stream:
+                response = client.upload_blob(data=stream, length=length, metadata=metadata,
+                                              encryption_scope=encryption_scope,
+                                              **upload_args, **kwargs)
+        if data is not None:
+            _adjust_block_blob_size(client, blob_type, length)
+            response = client.upload_blob(data=data, length=length, metadata=metadata,
+                                          encryption_scope=encryption_scope,
+                                          **upload_args, **kwargs)
+    except ResourceExistsError as ex:
+        from azure.cli.core.azclierror import AzureResponseError
+        raise AzureResponseError(
+            "{}\nIf you want to overwrite the existing one, please add --overwrite in your command.".format(ex.message))
+
+    # PageBlobChunkUploader verifies the file when uploading the chunk data, If the contents of the file are
+    # all null byte("\x00"), the file will not be uploaded, and the response will be none.
+    # Therefore, the compatibility logic for response is added to keep it consistent with track 1
+    if response is None:
+        return {
+            "etag": None,
+            "lastModified": None
+        }
+
+    from msrest import Serializer
+    if 'content_md5' in response and response['content_md5'] is not None:
+        response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
+    if 'content_crc64' in response and response['content_crc64'] is not None:
+        response['content_crc64'] = Serializer.serialize_bytearray(response['content_crc64'])
+    return response
 
 
 def get_block_ids(content_length, block_length):

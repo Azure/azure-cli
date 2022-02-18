@@ -510,7 +510,10 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
 
 def validate_blob_type(namespace):
     if not namespace.blob_type:
-        namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
+        if namespace.file_path and namespace.file_path.endswith('.vhd'):
+            namespace.blob_type = 'page'
+        else:
+            namespace.blob_type = 'block'
 
 
 def validate_storage_data_plane_list(namespace):
@@ -1303,6 +1306,17 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_tier_validator_track2(cmd, namespace):
+    if namespace.tier:
+        if namespace.blob_type == 'page':
+            page_blob_tier_validator(cmd, namespace)
+        elif namespace.blob_type == 'block':
+            block_blob_tier_validator(cmd, namespace)
+        else:
+            raise ValueError('Blob tier is only applicable to block or page blob.')
+    del namespace.tier
+
+
 def blob_download_file_path_validator(namespace):
     if os.path.isdir(namespace.file_path):
         from azure.cli.core.azclierror import FileOperationError
@@ -1905,3 +1919,41 @@ def validate_share_close_handle(namespace):
         raise InvalidArgumentValueError("usage error: Please only specify either --handle-id or --close-all, not both.")
     if not namespace.close_all and not namespace.handle_id:
         raise InvalidArgumentValueError("usage error: Please specify either --handle-id or --close-all.")
+
+
+def validate_upload_blob(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if namespace.file_path and namespace.data:
+        raise InvalidArgumentValueError("usage error: please only specify one of --file and --data to upload.")
+    if not namespace.file_path and not namespace.data:
+        raise InvalidArgumentValueError("usage error: please specify one of --file and --data to upload.")
+
+
+def add_upload_progress_callback(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def validate_blob_arguments(namespace):
+    from azure.cli.core.azclierror import RequiredArgumentMissingError
+    if not namespace.blob_url and not all([namespace.blob_name, namespace.container_name]):
+        raise RequiredArgumentMissingError(
+            "Please specify --blob-url or combination of blob name, container name and storage account arguments.")

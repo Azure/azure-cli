@@ -283,6 +283,15 @@ tags_type = CLIArgumentType(
     nargs='*'
 )
 
+tags_type_preview = CLIArgumentType(
+    nargs='*', validator=validate_tags, min_api='2019-12-12', is_preview=True,
+    help='space-separated tags: key[=value] [key[=value] ...]. Tags are case-sensitive. The tag set may '
+    'contain at most 10 tags.  Tag keys must be between 1 and 128 characters, and tag values must be '
+    'between 0 and 256 characters. Valid tag key and value characters include: lowercase and uppercase '
+    'letters, digits (0-9), space (` `), plus (+), minus (-), period (.), solidus (/), colon (:), equals '
+    '(=), underscore (_).'
+)
+
 tag_type = CLIArgumentType(
     type=validate_tag,
     help="a single tag in 'key[=value]' format. {}".format(quote_text),
