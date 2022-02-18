@@ -41,12 +41,13 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait, get_file_json
-from azure.cli.core.util import get_az_user_agent, send_raw_request
+    ConfiguredDefaultSetter, sdk_no_wait
+from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
-                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
-                                       AzureInternalError, ArgumentUsageError)
+from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
+                                       RequiredArgumentMissingError, ValidationError, CLIInternalError,
+                                       UnclassifiedUserFault, AzureResponseError, AzureInternalError,
+                                       ArgumentUsageError)
 
 from .tunnel import TunnelServer
 
@@ -54,7 +55,7 @@ from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from .utils import (_normalize_sku,
-                    get_sku_name,
+                    get_sku_tier,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
@@ -62,15 +63,17 @@ from .utils import (_normalize_sku,
                     _rename_server_farm_props,
                     _get_location_from_webapp,
                     _normalize_location,
-                    get_pool_manager, get_resource_if_exists)
+                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
+                    get_resource_if_exists)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
-from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
-                         FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
-                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH)
+from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
+                         FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD,
+                         LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
+                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
+                         WINDOWS_OS_NAME)
 from ._github_oauth import (get_github_access_token)
 from ._validators import validate_and_convert_to_int, validate_range_of_int_flag
 
@@ -87,13 +90,13 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
-                  role='Contributor', scope=None, vnet=None, subnet=None):
+                  role='Contributor', scope=None, vnet=None, subnet=None, https_only=False):
     from azure.mgmt.web.models import Site
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
 
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
 
@@ -104,25 +107,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
     if not plan_info:
-        raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
+        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
+                                                                                                   resource_group_name))
     is_linux = plan_info.reserved
-    node_default_version = NODE_EXACT_VERSION_DEFAULT
+    helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = get_site_availability(cmd, name)
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
-            raise CLIError(name_validation.message)
+            raise ValidationError(name_validation.message)
         logger.warning("Webapp '%s' already exists. The command will use the existing app's settings.", name)
         app_details = get_app_details(cmd, name)
         if app_details is None:
-            raise CLIError("Unable to retrieve details of the existing app '{}'. Please check that "
-                           "the app is a part of the current subscription".format(name))
+            raise ResourceNotFoundError("Unable to retrieve details of the existing app '{}'. Please check that "
+                                        "the app is a part of the current subscription".format(name))
         current_rg = app_details.resource_group
         if resource_group_name is not None and (resource_group_name.lower() != current_rg.lower()):
-            raise CLIError("The webapp '{}' exists in resource group '{}' and does not "
-                           "match the value entered '{}'. Please re-run command with the "
-                           "correct parameters.". format(name, current_rg, resource_group_name))
+            raise ValidationError("The webapp '{}' exists in resource group '{}' and does not "
+                                  "match the value entered '{}'. Please re-run command with the "
+                                  "correct parameters.". format(name, current_rg, resource_group_name))
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
         settings = []
@@ -153,9 +157,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         subnet_resource_id = None
 
+    if using_webapp_up:
+        https_only = using_webapp_up
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
-                      https_only=using_webapp_up, virtual_network_subnet_id=subnet_resource_id)
-    helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
+                      https_only=https_only, virtual_network_subnet_id=subnet_resource_id)
     if runtime:
         runtime = helper.remove_delimiters(runtime)
 
@@ -163,17 +169,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
-            raise CLIError("usage error: --runtime | --deployment-container-image-name |"
-                           " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
+            raise ArgumentUsageError("usage error: --runtime | --deployment-container-image-name |"
+                                     " --multicontainer-config-type TYPE --multicontainer-config-file FILE")
         if startup_file:
             site_config.app_command_line = startup_file
 
         if runtime:
-            match = helper.resolve(runtime)
+            match = helper.resolve(runtime, is_linux)
             if not match:
-                raise CLIError("Linux Runtime '{}' is not supported."
-                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
-            match['setter'](cmd=cmd, stack=match, site_config=site_config)
+                raise ValidationError("Linux Runtime '{}' is not supported."
+                                      " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -197,14 +203,14 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
-            raise CLIError("usage error: --startup-file or --deployment-container-image-name or "
-                           "--multicontainer-config-type and --multicontainer-config-file is "
-                           "only appliable on linux webapp")
-        match = helper.resolve(runtime)
+            raise ArgumentUsageError("usage error: --startup-file or --deployment-container-image-name or "
+                                     "--multicontainer-config-type and --multicontainer-config-file is "
+                                     "only appliable on linux webapp")
+        match = helper.resolve(runtime, linux=is_linux)
         if not match:
-            raise CLIError("Windows runtime '{}' is not supported. "
-                           "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
-        match['setter'](cmd=cmd, stack=match, site_config=site_config)
+            raise ValidationError("Windows runtime '{}' is not supported. "
+                                  "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+        helper.get_site_config_setter(match, linux=is_linux)(cmd=cmd, stack=match, site_config=site_config)
 
         # TODO: Ask Calvin the purpose of this - seems like unneeded set of calls
         # portal uses the current_stack propety in metadata to display stack for windows apps
@@ -212,6 +218,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     else:  # windows webapp without runtime specified
         if name_validation.name_available:  # If creating new webapp
+            node_default_version = helper.get_default_version("node", is_linux, get_windows_config_version=True)
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
 
@@ -731,13 +738,41 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
     return updater(**kwargs)
 
 
-def update_webapp(instance, client_affinity_enabled=None, https_only=None):
+def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
+                  prewarmed_instance_count=None):
     if 'function' in instance.kind:
-        raise CLIError("please use 'az functionapp update' to update this function app")
+        raise ValidationError("please use 'az functionapp update' to update this function app")
+    if minimum_elastic_instance_count or prewarmed_instance_count:
+        args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
+        plan = get_app_service_plan_from_webapp(cmd, instance, api_version="2021-01-15")
+        sku = _normalize_sku(plan.sku.name)
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
+        if not plan.elastic_scale_enabled:
+            raise ValidationError("Elastic scale is not enabled on the App Service Plan. Please update the plan ")
+        if (minimum_elastic_instance_count or 0) > plan.maximum_elastic_worker_count:
+            raise ValidationError("--minimum-elastic-instance-count: Minimum elastic instance count is greater than "
+                                  "the app service plan's maximum Elastic worker count. "
+                                  "Please choose a lower count or update the plan's maximum ")
+        if (prewarmed_instance_count or 0) > plan.maximum_elastic_worker_count:
+            raise ValidationError("--prewarmed-instance-count: Prewarmed instance count is greater than "
+                                  "the app service plan's maximum Elastic worker count. "
+                                  "Please choose a lower count or update the plan's maximum ")
+
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
         instance.https_only = https_only == 'true'
+
+    if minimum_elastic_instance_count is not None:
+        from azure.mgmt.web.models import SiteConfig
+        # Need to create a new SiteConfig object to ensure that the new property is included in request body
+        conf = SiteConfig(**instance.site_config.as_dict())
+        conf.minimum_elastic_instance_count = minimum_elastic_instance_count
+        instance.site_config = conf
+
+    if prewarmed_instance_count is not None:
+        instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
 
     return instance
 
@@ -835,15 +870,16 @@ def list_function_app(cmd, resource_group_name=None):
 def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
-        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'.".format(
-                                    cmd_app_type, name, resource_group_name))
+        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'."
+                                    .format(cmd_app_type, name, resource_group_name))
     app_type = _kind_to_app_type(app.kind) if app else None
     if app_type != cmd_app_type:
         raise ResourceNotFoundError(
             "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
                 app_type=cmd_app_type, name=name, resource_group=resource_group_name),
             "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
-    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
+    app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
+                                              slot, api_version="2021-01-15")
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
     return app
@@ -1061,20 +1097,43 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-# Currently using hardcoded values instead of this function. This function calls the stacks API;
-# Stacks API is updated with Antares deployments,
-# which are infrequent and don't line up with stacks EOL schedule.
-def list_runtimes(cmd, linux=False):
-    client = web_client_factory(cmd.cli_ctx)
-    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
+def list_runtimes(cmd, os_type=None, linux=False):
+    if os_type is not None and linux:
+        raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
 
-    return [s['displayName'] for s in runtime_helper.stacks]
-
-
-def list_runtimes_hardcoded(linux=False):
     if linux:
-        return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['linux']]
-    return [s['displayName'] for s in get_file_json(RUNTIME_STACKS)['windows']]
+        linux = True
+        windows = False
+    else:
+        # show both linux and windows stacks by default
+        linux = True
+        windows = True
+        if os_type == WINDOWS_OS_NAME:
+            linux = False
+        if os_type == LINUX_OS_NAME:
+            windows = False
+
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
+    return runtime_helper.get_stack_names_only(delimiter=":")
+
+
+def list_function_app_runtimes(cmd, os_type=None):
+    # show both linux and windows stacks by default
+    linux = True
+    windows = True
+    if os_type == WINDOWS_OS_NAME:
+        linux = False
+    if os_type == LINUX_OS_NAME:
+        windows = False
+
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
+    linux_stacks = [r.to_dict() for r in runtime_helper.stacks if r.linux]
+    windows_stacks = [r.to_dict() for r in runtime_helper.stacks if not r.linux]
+    if linux and not windows:
+        return linux_stacks
+    if windows and not linux:
+        return windows_stacks
+    return {WINDOWS_OS_NAME: windows_stacks, LINUX_OS_NAME: linux_stacks}
 
 
 def delete_function_app(cmd, resource_group_name, name, slot=None):
@@ -1826,7 +1885,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
             location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
 
     # the api is odd on parameter naming, have to live with it for now
-    sku_def = SkuDescription(tier=get_sku_name(sku), name=_normalize_sku(sku), capacity=number_of_workers)
+    sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
@@ -1846,17 +1905,44 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
 
-def update_app_service_plan(instance, sku=None, number_of_workers=None):
-    if number_of_workers is None and sku is None:
-        logger.warning('No update is done. Specify --sku and/or --number-of-workers.')
+def update_app_service_plan(instance, sku=None, number_of_workers=None, elastic_scale=None,
+                            max_elastic_worker_count=None):
+    if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
+        args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+        logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
-        sku_def.tier = get_sku_name(sku)
+        sku_def.tier = get_sku_tier(sku)
         sku_def.name = sku
 
     if number_of_workers is not None:
         sku_def.capacity = number_of_workers
+    else:
+        number_of_workers = sku_def.capacity
+
+    if elastic_scale is not None or max_elastic_worker_count is not None:
+        if sku is None:
+            sku = instance.sku.name
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+            raise ValidationError("--number-of-workers and --elastic-scale can only be used on premium V2/V3 SKUs. "
+                                  "Use command help to see all available SKUs")
+
+    if elastic_scale is not None:
+        # TODO use instance.elastic_scale_enabled once the ASP client factories are updated
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["elasticScaleEnabled"] = elastic_scale
+
+    if max_elastic_worker_count is not None:
+        instance.maximum_elastic_worker_count = max_elastic_worker_count
+        if max_elastic_worker_count < number_of_workers:
+            raise InvalidArgumentValueError("--max-elastic-worker-count must be greater than or equal to the "
+                                            "plan's number of workers. To update the plan's number of workers, use "
+                                            "--number-of-workers ")
+        # TODO use instance.maximum_elastic_worker_count once the ASP client factories are updated
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
+
     instance.sku = sku_def
     return instance
 
@@ -2745,39 +2831,144 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 
 
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
-class _StackRuntimeHelper:
-
-    def __init__(self, cmd, client, linux=False):
+# pylint: disable=too-few-public-methods
+class _AbstractStackRuntimeHelper:
+    def __init__(self, cmd, linux=False, windows=False):
         self._cmd = cmd
-        self._client = client
+        self._client = web_client_factory(cmd.cli_ctx, api_version="2021-01-01")
         self._linux = linux
+        self._windows = windows
         self._stacks = []
-
-    @staticmethod
-    def remove_delimiters(runtime):
-        import re
-        # delimiters allowed: '|', ':'
-        if '|' in runtime:
-            runtime = re.split('[|]', runtime)
-        elif ':' in runtime:
-            runtime = re.split('[:]', runtime)
-        else:
-            runtime = [runtime]
-        return '|'.join(filter(None, runtime))
-
-    def resolve(self, display_name):
-        self._load_stacks_hardcoded()
-        return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
-                    None)
 
     @property
     def stacks(self):
-        self._load_stacks_hardcoded()
+        self._load_stacks()
         return self._stacks
+
+    def _get_raw_stacks_from_api(self):
+        raise NotImplementedError
+
+    # updates self._stacks
+    def _parse_raw_stacks(self, stacks):
+        raise NotImplementedError
+
+    def _load_stacks(self):
+        if self._stacks:
+            return
+        stacks = self._get_raw_stacks_from_api()
+        self._parse_raw_stacks(stacks)
+
+
+# WebApps stack class
+class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
+    # pylint: disable=too-few-public-methods
+    class Runtime:
+        def __init__(self, display_name=None, configs=None, github_actions_properties=None, linux=False):
+            self.display_name = display_name
+            self.configs = configs if configs is not None else dict()
+            self.github_actions_properties = github_actions_properties
+            self.linux = linux
+
+    def __init__(self, cmd, linux=False, windows=False):
+        # TODO try and get API support for this so it isn't hardcoded
+        self.windows_config_mappings = {
+            'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+            'python': 'python_version',
+            'php': 'php_version',
+            'aspnet': 'net_framework_version',
+            'dotnet': 'net_framework_version',
+            'dotnetcore': None
+        }
+        self.default_delimeter = "|"  # character that separates runtime name from version
+        self.allowed_delimeters = "|:"  # delimiters allowed: '|', ':'
+        super().__init__(cmd, linux=linux, windows=windows)
+
+    def get_stack_names_only(self, delimiter=None):
+        windows_stacks = [s.display_name for s in self.stacks if not s.linux]
+        linux_stacks = [s.display_name for s in self.stacks if s.linux]
+        if delimiter is not None:
+            windows_stacks = [n.replace(self.default_delimeter, delimiter) for n in windows_stacks]
+            linux_stacks = [n.replace(self.default_delimeter, delimiter) for n in linux_stacks]
+        if self._linux and not self._windows:
+            return linux_stacks
+        if self._windows and not self._linux:
+            return windows_stacks
+        return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
+
+    def _get_raw_stacks_from_api(self):
+        return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
+
+    def _parse_raw_stacks(self, stacks):
+        for lang in stacks:
+            if lang.display_text.lower() == "java":
+                continue  # info on java stacks is taken from the "java containers" stacks
+            for major_version in lang.major_versions:
+                if self._linux:
+                    self._parse_major_version_linux(major_version, self._stacks)
+                if self._windows:
+                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
+
+    def remove_delimiters(self, runtime):
+        import re
+        runtime = re.split("[{}]".format(self.allowed_delimeters), runtime)
+        return self.default_delimeter.join(filter(None, runtime))
+
+    def resolve(self, display_name, linux=False):
+        display_name = display_name.lower()
+        stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
+        if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
+            old_to_new_windows = {
+                "node|12-lts": "node|12lts",
+                "node|14-lts": "node|14lts",
+                "node|16-lts": "node|16lts",
+                "dotnet|5.0": "dotnet|5",
+                "dotnet|6.0": "dotnet|6",
+            }
+            old_to_new_linux = {
+                "dotnet|5.0": "dotnetcore|5.0",
+                "dotnet|6.0": "dotnetcore|6.0",
+            }
+            if linux:
+                display_name = old_to_new_linux.get(display_name)
+            else:
+                display_name = old_to_new_windows.get(display_name)
+            stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
+        return stack
+
+    @classmethod
+    def get_site_config_setter(cls, runtime, linux=False):
+        if linux:
+            return cls.update_site_config
+        return cls.update_site_appsettings if 'node' in runtime.display_name.lower() else cls.update_site_config
+
+    # assumes non-java
+    def get_default_version(self, lang, linux=False, get_windows_config_version=False):
+        versions = self.get_version_list(lang, linux, get_windows_config_version)
+        versions.sort()
+        if not versions:
+            os = WINDOWS_OS_NAME if not linux else LINUX_OS_NAME
+            raise ValidationError("Invalid language type {} for OS {}".format(lang, os))
+        return versions[0]
+
+    # assumes non-java
+    def get_version_list(self, lang, linux=False, get_windows_config_version=False):
+        lang = lang.upper()
+        versions = []
+
+        for s in self.stacks:
+            if s.linux == linux:
+                l_name, v, *_ = s.display_name.upper().split("|")
+                if l_name == lang:
+                    if get_windows_config_version:
+                        versions.append(s.configs[self.windows_config_mappings[lang.lower()]])
+                    else:
+                        versions.append(v)
+
+        return versions
 
     @staticmethod
     def update_site_config(stack, site_config, cmd=None):
-        for k, v in stack['configs'].items():
+        for k, v in stack.configs.items():
             setattr(site_config, k, v)
         return site_config
 
@@ -2787,7 +2978,7 @@ class _StackRuntimeHelper:
         if site_config.app_settings is None:
             site_config.app_settings = []
 
-        for k, v in stack['configs'].items():
+        for k, v in stack.configs.items():
             already_in_appsettings = False
             for app_setting in site_config.app_settings:
                 if app_setting.name == k:
@@ -2797,88 +2988,312 @@ class _StackRuntimeHelper:
                 site_config.app_settings.append(NameValuePair(name=k, value=v))
         return site_config
 
+    # format a (non-java) windows runtime display text
+    # TODO get API to return more CLI-friendly display text for windows stacks
+    @classmethod
+    def _format_windows_display_text(cls, display_text):
+        import re
+        t = display_text.upper()
+        t = t.replace(".NET CORE", NETCORE_RUNTIME_NAME.upper())
+        t = t.replace("ASP.NET", ASPDOTNET_RUNTIME_NAME.upper())
+        t = t.replace(".NET", DOTNET_RUNTIME_NAME)
+        t = re.sub(r"\(.*\)", "", t)  # remove "(LTS)"
+        return t.replace(" ", "|", 1).replace(" ", "")
+
+    @classmethod
+    def _is_valid_runtime_setting(cls, runtime_setting):
+        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+
+    @classmethod
+    def _get_runtime_setting(cls, minor_version, linux, java):
+        if not linux:
+            if not java:
+                return minor_version.stack_settings.windows_runtime_settings
+            return minor_version.stack_settings.windows_container_settings
+        if not java:
+            return minor_version.stack_settings.linux_runtime_settings
+        return minor_version.stack_settings.linux_container_settings
+
+    @classmethod
+    def _get_valid_minor_versions(cls, major_version, linux, java=False):
+        def _filter(minor_version):
+            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
+        return [m for m in major_version.minor_versions if _filter(m)]
+
+    def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
+        minor_java_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
+        default_java_version = next(iter(minor_java_versions), None)
+        if default_java_version:
+            container_settings = default_java_version.stack_settings.windows_container_settings
+            # TODO get the API to return java versions in a more parseable way
+            for java_version in ["1.8", "11"]:
+                java_container = container_settings.java_container
+                container_version = container_settings.java_container_version
+                if container_version.upper() == "SE":
+                    java_container = "Java SE"
+                    if java_version == "1.8":
+                        container_version = "8"
+                    else:
+                        container_version = "11"
+                runtime_name = "{}|{}|{}|{}".format("java",
+                                                    java_version,
+                                                    java_container,
+                                                    container_version)
+                gh_actions_version = "8" if java_version == "1.8" else java_version
+                gh_actions_runtime = "{}, {}, {}".format(java_version,
+                                                         java_container.lower().replace(" se", ""),
+                                                         container_settings.java_container_version.lower())
+                if java_container == "Java SE":  # once runtime name is set, reset configs to correct values
+                    java_container = "JAVA"
+                    container_version = "SE"
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"java_version": java_version,
+                                                "java_container": java_container,
+                                                "java_container_version": container_version},
+                                       github_actions_properties={"github_actions_version": gh_actions_version,
+                                                                  "app_runtime": "java",
+                                                                  "app_runtime_version": gh_actions_runtime},
+                                       linux=False)
+                parsed_results.append(runtime)
+        else:
+            minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            for minor_version in minor_versions:
+                settings = minor_version.stack_settings.windows_runtime_settings
+                runtime_name = self._format_windows_display_text(minor_version.display_text)
+
+                runtime = self.Runtime(display_name=runtime_name, linux=False)
+                lang_name = runtime_name.split("|")[0].lower()
+                config_key = config_mappings.get(lang_name)
+
+                if config_key:
+                    runtime.configs[config_key] = settings.runtime_version
+                gh_properties = settings.git_hub_action_settings
+                if gh_properties.is_supported:
+                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+
+                parsed_results.append(runtime)
+
+    def _parse_major_version_linux(self, major_version, parsed_results):
+        minor_java_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
+        default_java_version_linux = next(iter(minor_java_versions), None)
+        if default_java_version_linux:
+            linux_container_settings = default_java_version_linux.stack_settings.linux_container_settings
+            runtimes = [(linux_container_settings.java11_runtime, "11"), (linux_container_settings.java8_runtime, "8")]
+            for runtime_name, version in [(r, v) for (r, v) in runtimes if r is not None]:
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"linux_fx_version": runtime_name},
+                                       github_actions_properties={"github_actions_version": version},
+                                       linux=True,
+                                       )
+                parsed_results.append(runtime)
+        else:
+            minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
+            for minor_version in minor_versions:
+                settings = minor_version.stack_settings.linux_runtime_settings
+                runtime_name = settings.runtime_version
+                runtime = self.Runtime(display_name=runtime_name,
+                                       configs={"linux_fx_version": runtime_name},
+                                       linux=True,
+                                       )
+                gh_properties = settings.git_hub_action_settings
+                if gh_properties.is_supported:
+                    runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
+                parsed_results.append(runtime)
+
+    # override _load_stacks() to call this method to use hardcoded stacks
     def _load_stacks_hardcoded(self):
+        import os
+        stacks_file = os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WebappRuntimeStacks.json'))
         if self._stacks:
             return
-        result = []
+        stacks = []
         if self._linux:
-            result = get_file_json(RUNTIME_STACKS)['linux']
-            for r in result:
-                r['setter'] = _StackRuntimeHelper.update_site_config
-        else:  # Windows stacks
-            result = get_file_json(RUNTIME_STACKS)['windows']
-            for r in result:
-                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
-                               r['displayName'] else _StackRuntimeHelper.update_site_config)
-        self._stacks = result
+            stacks_json = get_file_json(stacks_file)['linux']
+            for r in stacks_json:
+                stacks.append(self.Runtime(display_name=r.get("displayName"),
+                                           configs=r.get("configs"),
+                                           github_actions_properties=r.get("github_actions_properties"),
+                                           linux=True))
+        if self._windows:  # Windows stacks
+            stacks_json = get_file_json(stacks_file)['windows']
+            for r in stacks_json:
+                stacks.append(self.Runtime(display_name=r.get("displayName"),
+                                           configs=r.get("configs"),
+                                           github_actions_properties=r.get("github_actions_properties"),
+                                           linux=False))
+        self._stacks = stacks
 
-    # Currently using hardcoded values instead of this function. This function calls the stacks API;
-    # Stacks API is updated with Antares deployments,
-    # which are infrequent and don't line up with stacks EOL schedule.
-    def _load_stacks(self):
-        if self._stacks:
-            return
-        os_type = ('Linux' if self._linux else 'Windows')
-        raw_stacks = self._client.provider.get_available_stacks(os_type_selected=os_type, raw=True)
-        bytes_value = raw_stacks._get_next().content  # pylint: disable=protected-access
-        json_value = bytes_value.decode('utf8')
-        json_stacks = json.loads(json_value)
-        stacks = json_stacks['value']
-        result = []
-        if self._linux:
-            for properties in [(s['properties']) for s in stacks]:
-                for major in properties['majorVersions']:
-                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
-                                         None)
-                    result.append({
-                        'displayName': (default_minor['runtimeVersion']
-                                        if default_minor else major['runtimeVersion'])
-                    })
-        else:  # Windows stacks
-            config_mappings = {
-                'node': 'WEBSITE_NODE_DEFAULT_VERSION',
-                'python': 'python_version',
-                'php': 'php_version',
-                'aspnet': 'net_framework_version'
+
+class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
+    class Runtime:
+        def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
+                     app_settings_dict=None, site_config_dict=None, app_insights=False, default=False):
+            self.name = name
+            self.version = version
+            self.is_preview = is_preview
+            self.supported_func_versions = [] if not supported_func_versions else supported_func_versions
+            self.linux = linux
+            self.app_settings_dict = dict() if not app_settings_dict else app_settings_dict
+            self.site_config_dict = dict() if not site_config_dict else site_config_dict
+            self.app_insights = app_insights
+            self.default = default
+
+            self.display_name = "{}|{}".format(name, version) if version else name
+
+        # used for displaying stacks
+        def to_dict(self):
+            return {"runtime": self.name,
+                    "version": self.version,
+                    "supported_functions_versions": self.supported_func_versions}
+
+    def __init__(self, cmd, linux=False, windows=False):
+        self.disallowed_functions_versions = {"~1", "~2"}
+        self.KEYS = FUNCTIONS_STACKS_API_KEYS()
+        super().__init__(cmd, linux=linux, windows=windows)
+
+    def resolve(self, runtime, version=None, functions_version=None, linux=False):
+        stacks = self.stacks
+        runtimes = [r for r in stacks if r.linux == linux and runtime == r.name]
+        os = LINUX_OS_NAME if linux else WINDOWS_OS_NAME
+        if not runtimes:
+            supported_runtimes = [r.name for r in stacks if r.linux == linux]
+            raise ValidationError("Runtime {0} not supported for os {1}. Supported runtimes for os {1} are: {2}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(runtime, os, supported_runtimes))
+        if version is None:
+            return self.get_default_version(runtime, functions_version, linux)
+        matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+        if not matched_runtime_version:
+            # help convert previously acceptable versions into correct ones if match not found
+            old_to_new_version = {
+                "11": "11.0",
+                "8": "8.0"
             }
+            new_version = old_to_new_version.get(version)
+            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+        if not matched_runtime_version:
+            versions = [r.version for r in runtimes]
+            raise ValidationError("Invalid version: {0} for runtime {1} and os {2}. Supported versions for runtime "
+                                  "{1} and os {2} are: {3}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(version, runtime, os, versions))
+        if functions_version not in matched_runtime_version.supported_func_versions:
+            supported_func_versions = matched_runtime_version.supported_func_versions
+            raise ValidationError("Functions version {} is not supported for runtime {} with version {} and os {}. "
+                                  "Supported functions versions are {}. "
+                                  "Run 'az functionapp list-runtimes' for more details on supported runtimes. "
+                                  .format(functions_version, runtime, version, os, supported_func_versions))
+        return matched_runtime_version
 
-            # get all stack version except 'java'
-            for stack in stacks:
-                if stack['name'] not in config_mappings:
-                    continue
-                name, properties = stack['name'], stack['properties']
-                for major in properties['majorVersions']:
-                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
-                                         None)
-                    result.append({
-                        'displayName': name + '|' + major['displayVersion'],
-                        'configs': {
-                            config_mappings[name]: (default_minor['runtimeVersion']
-                                                    if default_minor else major['runtimeVersion'])
-                        }
-                    })
+    def get_default_version(self, runtime, functions_version, linux=False):
+        runtimes = [r for r in self.stacks if r.linux == linux and r.name == runtime]
+        runtimes.sort(key=lambda r: r.default, reverse=True)  # make runtimes with default=True appear first
+        for r in runtimes:
+            if functions_version in r.supported_func_versions:
+                return r
+        raise ValidationError("Could not find a runtime version for runtime {} with functions version {} and os {}"
+                              "Run 'az functionapp list-runtimes' for more details on supported runtimes. ")
 
-            # deal with java, which pairs with java container version
-            java_stack = next((s for s in stacks if s['name'] == 'java'))
-            java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
-            for java_version in java_stack['properties']['majorVersions']:
-                for fx in java_container_stack['properties']['frameworks']:
-                    for fx_version in fx['majorVersions']:
-                        result.append({
-                            'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
-                                                                  fx['display'],
-                                                                  fx_version['displayVersion']),
-                            'configs': {
-                                'java_version': java_version['runtimeVersion'],
-                                'java_container': fx['name'],
-                                'java_container_version': fx_version['runtimeVersion']
-                            }
-                        })
+    def _get_raw_stacks_from_api(self):
+        return list(self._client.provider.get_function_app_stacks(stack_os_type=None))
 
-            for r in result:
-                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
-                               r['displayName'] else _StackRuntimeHelper.update_site_config)
-        self._stacks = result
+    # remove non-digit or non-"." chars
+    @classmethod
+    def _format_version_name(cls, name):
+        import re
+        return re.sub(r"[^\d\.]", "", name)
+
+    # format version names while maintaining uniqueness
+    def _format_version_names(self, runtime_to_version):
+        formatted_runtime_to_version = {}
+        for runtime, versions in runtime_to_version.items():
+            formatted_runtime_to_version[runtime] = formatted_runtime_to_version.get(runtime, dict())
+            for version_name, version_info in versions.items():
+                formatted_name = self._format_version_name(version_name)
+                if formatted_name in formatted_runtime_to_version[runtime]:
+                    formatted_name = version_name.lower().replace(" ", "-")
+                formatted_runtime_to_version[runtime][formatted_name] = version_info
+        return formatted_runtime_to_version
+
+    @classmethod
+    def _format_function_version(cls, v):
+        return v.replace("~", "")
+
+    def _get_valid_function_versions(self, runtime_settings):
+        supported_function_versions = runtime_settings.supported_functions_extension_versions
+        valid_versions = []
+        for v in supported_function_versions:
+            if v not in self.disallowed_functions_versions:
+                valid_versions.append(self._format_version_name(v))
+        return valid_versions
+
+    def _parse_minor_version(self, runtime_settings, major_version_name, minor_version_name, runtime_to_version):
+        if not runtime_settings.is_deprecated:
+            functions_versions = self._get_valid_function_versions(runtime_settings)
+            if functions_versions:
+                runtime_version_properties = {
+                    self.KEYS.IS_PREVIEW: runtime_settings.is_preview,
+                    self.KEYS.SUPPORTED_EXTENSION_VERSIONS: functions_versions,
+                    self.KEYS.APP_SETTINGS_DICT: runtime_settings.app_settings_dictionary,
+                    self.KEYS.APPLICATION_INSIGHTS: runtime_settings.app_insights_settings.is_supported,
+                    self.KEYS.SITE_CONFIG_DICT: runtime_settings.site_config_properties_dictionary,
+                    self.KEYS.IS_DEFAULT: bool(runtime_settings.is_default),
+                }
+
+                runtime_name = (runtime_settings.app_settings_dictionary.get(self.KEYS.FUNCTIONS_WORKER_RUNTIME) or
+                                major_version_name)
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name][minor_version_name] = runtime_version_properties
+
+    def _create_runtime_from_properties(self, runtime_name, version_name, version_properties, linux):
+        supported_func_versions = version_properties[self.KEYS.SUPPORTED_EXTENSION_VERSIONS]
+        return self.Runtime(name=runtime_name,
+                            version=version_name,
+                            is_preview=version_properties[self.KEYS.IS_PREVIEW],
+                            supported_func_versions=supported_func_versions,
+                            linux=linux,
+                            site_config_dict=version_properties[self.KEYS.SITE_CONFIG_DICT],
+                            app_settings_dict=version_properties[self.KEYS.APP_SETTINGS_DICT],
+                            app_insights=version_properties[self.KEYS.APPLICATION_INSIGHTS],
+                            default=version_properties[self.KEYS.IS_DEFAULT],
+                            )
+
+    def _parse_raw_stacks(self, stacks):
+        # build a map of runtime -> runtime version -> runtime version properties
+        runtime_to_version_linux = {}
+        runtime_to_version_windows = {}
+        for runtime in stacks:
+            for major_version in runtime.major_versions:
+                for minor_version in major_version.minor_versions:
+                    runtime_version = minor_version.value
+                    linux_settings = minor_version.stack_settings.linux_runtime_settings
+                    windows_settings = minor_version.stack_settings.windows_runtime_settings
+
+                    if linux_settings is not None:
+                        self._parse_minor_version(runtime_settings=linux_settings,
+                                                  major_version_name=runtime.name,
+                                                  minor_version_name=runtime_version,
+                                                  runtime_to_version=runtime_to_version_linux)
+
+                    if windows_settings is not None:
+                        self._parse_minor_version(runtime_settings=windows_settings,
+                                                  major_version_name=runtime.name,
+                                                  minor_version_name=runtime_version,
+                                                  runtime_to_version=runtime_to_version_windows)
+
+        runtime_to_version_linux = self._format_version_names(runtime_to_version_linux)
+        runtime_to_version_windows = self._format_version_names(runtime_to_version_windows)
+
+        for runtime_name, versions in runtime_to_version_windows.items():
+            for version_name, version_properties in versions.items():
+                r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=False)
+                self._stacks.append(r)
+
+        for runtime_name, versions in runtime_to_version_linux.items():
+            for version_name, version_properties in versions.items():
+                r = self._create_runtime_from_properties(runtime_name, version_name, version_properties, linux=True)
+                self._stacks.append(r)
 
 
 def get_app_insights_key(cli_ctx, resource_group, name):
@@ -2893,7 +3308,7 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
                                         max_burst=None, location=None, tags=None, zone_redundant=False):
     SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
     sku = _normalize_sku(sku)
-    tier = get_sku_name(sku)
+    tier = get_sku_tier(sku)
 
     client = web_client_factory(cmd.cli_ctx)
     if location is None:
@@ -2939,9 +3354,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        "be required. To create a 3.x function you would pass in the flag `--functions-version 3`")
         functions_version = '3'
     if deployment_source_url and deployment_local_git:
-        raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
+        raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
-        raise CLIError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
+        raise MutuallyExclusiveArgumentError("usage error: --plan NAME_OR_ID | --consumption-plan-location LOCATION")
     from azure.mgmt.web.models import Site
     SiteConfig, NameValuePair = cmd.get_models('SiteConfig', 'NameValuePair')
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
@@ -2980,7 +3395,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id)
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
+
     plan_info = None
     if runtime is not None:
         runtime = runtime.lower()
@@ -2989,11 +3404,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         locations = list_consumption_locations(cmd)
         location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
-            raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
+            raise ValidationError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
         # if os_type is None, the os type is windows
-        is_linux = os_type and os_type.lower() == 'linux'
+        is_linux = bool(os_type and os_type.lower() == LINUX_OS_NAME)
 
     else:  # apps with SKU based plan
         if is_valid_resource_id(plan):
@@ -3004,71 +3419,27 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if not plan_info:
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
-        is_linux = plan_info.reserved
+        is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
     if functions_version == '2' and functionapp_def.location in FUNCTIONS_NO_V2_REGIONS:
-        raise CLIError("2.x functions are not supported in this region. To create a 3.x function, "
-                       "pass in the flag '--functions-version 3'")
+        raise ValidationError("2.x functions are not supported in this region. To create a 3.x function, "
+                              "pass in the flag '--functions-version 3'")
 
     if is_linux and not runtime and (consumption_plan_location or not deployment_container_image_name):
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
-    runtime_stacks_json = _load_runtime_stacks_json_functionapp(is_linux)
-
     if runtime is None and runtime_version is not None:
-        raise CLIError('Must specify --runtime to use --runtime-version')
+        raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
-    # get the matching runtime stack object
-    runtime_json = _get_matching_runtime_json_functionapp(runtime_stacks_json, runtime if runtime else 'dotnet')
-    if not runtime_json:
-        # no matching runtime for os
-        os_string = "linux" if is_linux else "windows"
-        supported_runtimes = list(map(lambda x: x[KEYS.NAME], runtime_stacks_json))
-        raise CLIError("usage error: Currently supported runtimes (--runtime) in {} function apps are: {}."
-                       .format(os_string, ', '.join(supported_runtimes)))
+    runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=(not is_linux))
+    matched_runtime = runtime_helper.resolve("dotnet" if not runtime else runtime,
+                                             runtime_version, functions_version, is_linux)
 
-    runtime_version_json = _get_matching_runtime_version_json_functionapp(runtime_json,
-                                                                          functions_version,
-                                                                          runtime_version,
-                                                                          is_linux)
-
-    if not runtime_version_json:
-        supported_runtime_versions = list(map(lambda x: x[KEYS.DISPLAY_VERSION],
-                                              _get_supported_runtime_versions_functionapp(runtime_json,
-                                                                                          functions_version)))
-        if runtime_version:
-            if runtime == 'dotnet':
-                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
-                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
-                               .format(runtime_version, functions_version))
-            raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions-version {}. Supported versions are: {}.'
-                           .format(runtime_version,
-                                   runtime,
-                                   functions_version,
-                                   ', '.join(supported_runtime_versions)))
-
-        # if runtime_version was not specified, then that runtime is not supported for that functions version
-        raise CLIError('no supported --runtime-version found for the selected --runtime {} and '
-                       '--functions-version {}'
-                       .format(runtime, functions_version))
-
-    if runtime == 'dotnet':
-        logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
-                       '--functions-version. Dotnet version will be %s for this function app.',
-                       runtime_version_json[KEYS.DISPLAY_VERSION])
-
-    if runtime_version_json[KEYS.IS_DEPRECATED]:
-        logger.warning('%s version %s has been deprecated. In the future, this version will be unavailable. '
-                       'Please update your command to use a more recent version. For a list of supported '
-                       '--runtime-versions, run \"az functionapp create -h\"',
-                       runtime_json[KEYS.PROPERTIES][KEYS.DISPLAY], runtime_version_json[KEYS.DISPLAY_VERSION])
-
-    site_config_json = runtime_version_json[KEYS.SITE_CONFIG_DICT]
-    app_settings_json = runtime_version_json[KEYS.APP_SETTINGS_DICT]
+    site_config_dict = matched_runtime.site_config_dict
+    app_settings_dict = matched_runtime.app_settings_dict
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -3089,11 +3460,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
 
                 # clear all runtime specific configs and settings
-                site_config_json = {KEYS.USE_32_BIT_WORKER_PROC: False}
-                app_settings_json = {}
+                site_config_dict.use32_bit_worker_process = False
+                app_settings_dict = {}
 
                 # ensure that app insights is created if not disabled
-                runtime_version_json[KEYS.APPLICATION_INSIGHTS] = True
+                matched_runtime.app_insights = True
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
@@ -3101,7 +3472,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp_def.kind = 'functionapp'
 
     # set site configs
-    for prop, value in site_config_json.items():
+    for prop, value in site_config_dict.as_dict().items():
         snake_case_prop = _convert_camel_to_snake_case(prop)
         setattr(site_config, snake_case_prop, value)
 
@@ -3110,7 +3481,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.linux_fx_version = ''
 
     # adding app settings
-    for app_setting, value in app_settings_json.items():
+    for app_setting, value in app_settings_dict.items():
         site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
 
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
@@ -3136,10 +3507,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
-    elif disable_app_insights or not runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+    elif disable_app_insights or not matched_runtime.app_insights:
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
-    elif not disable_app_insights and runtime_version_json[KEYS.APPLICATION_INSIGHTS]:
+    elif not disable_app_insights and matched_runtime.app_insights:
         create_app_insights = True
 
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
@@ -3173,56 +3544,6 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         functionapp.identity = identity
 
     return functionapp
-
-
-def _load_runtime_stacks_json_functionapp(is_linux):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    if is_linux:
-        return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux'])[KEYS.VALUE]
-    return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows'])[KEYS.VALUE]
-
-
-def _get_matching_runtime_json_functionapp(stacks_json, runtime):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    matching_runtime_json = list(filter(lambda x: x[KEYS.NAME] == runtime, stacks_json))
-    if matching_runtime_json:
-        return matching_runtime_json[0]
-    return None
-
-
-def _get_supported_runtime_versions_functionapp(runtime_json, functions_version):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    extension_version = _get_extension_version_functionapp(functions_version)
-    supported_versions_list = []
-
-    for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
-        if extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]:
-            supported_versions_list.append(runtime_version_json)
-    return supported_versions_list
-
-
-def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version, is_linux):
-    KEYS = FUNCTIONS_STACKS_API_KEYS()
-    extension_version = _get_extension_version_functionapp(functions_version)
-    if runtime_version:
-        for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
-            if (runtime_version_json[KEYS.DISPLAY_VERSION] == runtime_version and
-                    extension_version in runtime_version_json[KEYS.SUPPORTED_EXTENSION_VERSIONS]):
-                return runtime_version_json
-        return None
-
-    # find the matching default runtime version
-    supported_versions_list = _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
-    default_version_json = {}
-    default_version = 0.0
-    for current_runtime_version_json in supported_versions_list:
-        if current_runtime_version_json[KEYS.IS_DEFAULT]:
-            current_version = _get_runtime_version_functionapp(current_runtime_version_json[KEYS.RUNTIME_VERSION],
-                                                               is_linux)
-            if not default_version_json or default_version < current_version:
-                default_version_json = current_runtime_version_json
-                default_version = current_version
-    return default_version_json
 
 
 def _get_extension_version_functionapp(functions_version):
@@ -3359,7 +3680,7 @@ def list_consumption_locations(cmd):
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
-    full_sku = get_sku_name(sku)
+    full_sku = get_sku_tier(sku)
     web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
@@ -3873,30 +4194,27 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
     os_name = os_type if os_type else detect_os_form_src(src_dir, html)
-    _is_linux = os_name.lower() == 'linux'
+    _is_linux = os_name.lower() == LINUX_OS_NAME
+    helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
     if runtime and html:
-        raise CLIError('Conflicting parameters: cannot have both --runtime and --html specified.')
+        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
 
     if runtime:
-        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
         runtime = helper.remove_delimiters(runtime)
-        match = helper.resolve(runtime)
+        match = helper.resolve(runtime, _is_linux)
         if not match:
-            if _is_linux:
-                raise CLIError("Linux runtime '{}' is not supported."
-                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
-            raise CLIError("Windows runtime '{}' is not supported."
-                           " Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+            raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
+                                  "'az webapp list-runtimes --os {0}'".format(os_name, runtime))
 
         language = runtime.split('|')[0]
         version_used_create = '|'.join(runtime.split('|')[1:])
         detected_version = '-'
     else:
         # detect the version
-        _lang_details = get_lang_from_content(src_dir, html)
+        _lang_details = get_lang_from_content(src_dir, html, is_linux=_is_linux)
         language = _lang_details.get('language')
-        _data = get_runtime_version_details(_lang_details.get('file_loc'), language)
+        _data = get_runtime_version_details(_lang_details.get('file_loc'), language, helper, _is_linux)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
 
@@ -3906,7 +4224,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
 
     if not _create_new_app:  # App exists, or App name unavailable
         if _site_availability.reason == 'Invalid':
-            raise CLIError(_site_availability.message)
+            raise ValidationError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp '%s' already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)
@@ -3958,7 +4276,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                sku=sku,
                                create_rg=_create_new_rg,
                                resource_group_name=rg_name,
-                               plan=plan)
+                               plan=plan,
+                               is_linux=_is_linux,
+                               client=client)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
@@ -3970,7 +4290,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                 "runtime_version_detected": "%s",
                 "runtime_version": "%s"
                 }
-                """ % (name, plan, rg_name, get_sku_name(sku), os_name, loc, _src_path_escaped, detected_version,
+                """ % (name, plan, rg_name, get_sku_tier(sku), os_name, loc, _src_path_escaped, detected_version,
                        runtime_version)
     create_json = json.loads(dry_run_str)
 
@@ -4006,14 +4326,14 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
-        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
-        match = helper.resolve(runtime_version)
+        helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
+        match = helper.resolve(runtime_version, _is_linux)
 
         if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
-            if match and site_config.linux_fx_version != match['configs']['linux_fx_version']:
+            if match and site_config.linux_fx_version != match.configs['linux_fx_version']:
                 logger.warning('Updating runtime version from %s to %s',
-                               site_config.linux_fx_version, match['configs']['linux_fx_version'])
-                update_site_configs(cmd, rg_name, name, linux_fx_version=match['configs']['linux_fx_version'])
+                               site_config.linux_fx_version, match.configs['linux_fx_version'])
+                update_site_configs(cmd, rg_name, name, linux_fx_version=match.configs['linux_fx_version'])
                 logger.warning('Waiting for runtime version to propagate ...')
                 time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
             elif not match:
@@ -4044,20 +4364,38 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         return get_streaming_log(cmd, rg_name, name)
-    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
-        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
-        cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
-        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
-        cmd.cli_ctx.config.set_value('defaults', 'location', loc)
-        cmd.cli_ctx.config.set_value('defaults', 'web', name)
+
+    _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name)
+
     return create_json
+
+
+def _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name):
+    with ConfiguredDefaultSetter(cmd.cli_ctx.config, True):
+        logger.warning("Setting 'az webapp up' default arguments for current directory. "
+                       "Manage defaults with 'az configure --scope local'")
+
+        cmd.cli_ctx.config.set_value('defaults', 'group', rg_name)
+        logger.warning("--resource-group/-g default: %s", rg_name)
+
+        cmd.cli_ctx.config.set_value('defaults', 'sku', sku)
+        logger.warning("--sku default: %s", sku)
+
+        cmd.cli_ctx.config.set_value('defaults', 'appserviceplan', plan)
+        logger.warning("--plan/-p default: %s", plan)
+
+        cmd.cli_ctx.config.set_value('defaults', 'location', loc)
+        logger.warning("--location/-l default: %s", loc)
+
+        cmd.cli_ctx.config.set_value('defaults', 'web', name)
+        logger.warning("--name/-n default: %s", name)
 
 
 def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
     update_needed = False
     if 'node' in runtime_version:
         settings = []
-        for k, v in match['configs'].items():
+        for k, v in match.configs.items():
             for app_setting in site_config.app_settings:
                 if app_setting.name == k and app_setting.value != v:
                     update_needed = True
@@ -4066,7 +4404,7 @@ def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_c
             logger.warning('Updating runtime version to %s', runtime_version)
             update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
     else:
-        for k, v in match['configs'].items():
+        for k, v in match.configs.items():
             if getattr(site_config, k, None) != v:
                 update_needed = True
                 setattr(site_config, k, v)
@@ -4338,7 +4676,7 @@ def _update_artifact_type(params):
         params.artifact_type = 'startup'
     else:
         params.artifact_type = 'static'
-    logger.warning("Deployment type: %s. To override deloyment type, please specify the --type parameter. "
+    logger.warning("Deployment type: %s. To override deployment type, please specify the --type parameter. "
                    "Possible values: war, jar, ear, zip, startup, script, static", params.artifact_type)
 
 
@@ -4690,7 +5028,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
     if not app_runtime_string:
         raise CLIError('Could not detect runtime. Please specify using the --runtime flag.')
 
-    if not _runtime_supports_github_actions(runtime_string=app_runtime_string, is_linux=is_linux):
+    if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
         raise CLIError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
 
     # Get workflow template
@@ -4714,7 +5052,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
     else:
         file_name = "{}_{}.yml".format(branch.replace('/', '-'), name.lower())
     dir_path = "{}/{}".format('.github', 'workflows')
-    file_path = "/{}/{}".format(dir_path, file_name)
+    file_path = "{}/{}".format(dir_path, file_name)
     try:
         existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)
         existing_publish_profile_name = _get_publish_profile_from_workflow_file(
@@ -5007,18 +5345,14 @@ def _remove_publish_profile_from_github(cmd, resource_group, name, repo, token, 
     requests.delete(store_secret_url, headers=headers)
 
 
-def _runtime_supports_github_actions(runtime_string, is_linux):
-    if is_linux:
-        stacks = get_file_json(RUNTIME_STACKS)['linux']
-    else:
-        stacks = get_file_json(RUNTIME_STACKS)['windows']
-
-    supports = False
-    for stack in stacks:
-        if stack['displayName'].lower() == runtime_string.lower():
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                supports = True
-    return supports
+def _runtime_supports_github_actions(cmd, runtime_string, is_linux):
+    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    matched_runtime = helper.resolve(runtime_string, is_linux)
+    if not matched_runtime:
+        return False
+    if matched_runtime.github_actions_properties:
+        return True
+    return False
 
 
 def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
@@ -5028,28 +5362,29 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
     if is_linux:
         app_metadata = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime = getattr(app_metadata, 'linux_fx_version', None)
-        return _get_app_runtime_info_helper(app_runtime, "", is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, "", is_linux)
 
     app_metadata = _generic_site_operation(cmd.cli_ctx, resource_group, name, 'list_metadata', slot)
     app_metadata_properties = getattr(app_metadata, 'properties', {})
     if 'CURRENT_STACK' in app_metadata_properties:
         app_runtime = app_metadata_properties['CURRENT_STACK']
 
+    # TODO try and get better API support for windows stacks
     if app_runtime and app_runtime.lower() == 'node':
         app_settings = get_app_settings(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         for app_setting in app_settings:
             if 'name' in app_setting and app_setting['name'] == 'WEBSITE_NODE_DEFAULT_VERSION':
                 app_runtime_version = app_setting['value'] if 'value' in app_setting else None
                 if app_runtime_version:
-                    return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+                    return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'python':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = getattr(app_settings, 'python_version', '')
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'dotnetcore':
         app_runtime_version = '3.1'
         app_runtime_version = ""
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
     elif app_runtime and app_runtime.lower() == 'java':
         app_settings = get_site_configs(cmd=cmd, resource_group_name=resource_group, name=name, slot=slot)
         app_runtime_version = "{java_version}, {java_container}, {java_container_version}".format(
@@ -5057,30 +5392,28 @@ def _get_app_runtime_info(cmd, resource_group, name, slot, is_linux):
             java_container=getattr(app_settings, 'java_container', '').lower(),
             java_container_version=getattr(app_settings, 'java_container_version', '').lower()
         )
-        return _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux)
+        return _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux)
 
 
-def _get_app_runtime_info_helper(app_runtime, app_runtime_version, is_linux):
-    if is_linux:
-        stacks = get_file_json(RUNTIME_STACKS)['linux']
-        for stack in stacks:
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                if stack['displayName'].lower() == app_runtime.lower():
-                    return {
-                        "display_name": stack['displayName'],
-                        "github_actions_version": stack['github_actions_properties']['github_actions_version']
-                    }
+def _get_app_runtime_info_helper(cmd, app_runtime, app_runtime_version, is_linux):
+    helper = _StackRuntimeHelper(cmd, linux=(is_linux), windows=(not is_linux))
+    if not is_linux:
+        matched_runtime = helper.resolve("{}|{}".format(app_runtime, app_runtime_version), is_linux)
     else:
-        stacks = get_file_json(RUNTIME_STACKS)['windows']
-        for stack in stacks:
-            if 'github_actions_properties' in stack and stack['github_actions_properties']:
-                if (stack['github_actions_properties']['app_runtime'].lower() == app_runtime.lower() and
-                        stack['github_actions_properties']['app_runtime_version'].lower() ==
-                        app_runtime_version.lower()):
-                    return {
-                        "display_name": stack['displayName'],
-                        "github_actions_version": stack['github_actions_properties']['github_actions_version']
-                    }
+        matched_runtime = helper.resolve(app_runtime, is_linux)
+    gh_props = None if not matched_runtime else matched_runtime.github_actions_properties
+    if gh_props:
+        if gh_props.get("github_actions_version"):
+            if is_linux:
+                return {
+                    "display_name": app_runtime,
+                    "github_actions_version": gh_props["github_actions_version"]
+                }
+            if gh_props.get("app_runtime_version").lower() == app_runtime_version.lower():
+                return {
+                    "display_name": app_runtime,
+                    "github_actions_version": gh_props["github_actions_version"]
+                }
     return None
 
 

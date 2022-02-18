@@ -137,7 +137,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
                          account_name=account_name)
     cmd.cli_ctx.config.set_value('batch', 'account', account.name)
     cmd.cli_ctx.config.set_value('batch', 'endpoint',
-                                 'https://{}/'.format(account.account_endpoint))
+                                 f'https://{account.account_endpoint}/')
 
     if shared_key_auth:
         keys = client.get_keys(resource_group_name=resource_group_name,
@@ -147,7 +147,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
         if show:
             return {
                 'account': account.name,
-                'endpoint': 'https://{}/'.format(account.account_endpoint),
+                'endpoint': f'https://{account.account_endpoint}/',
                 'primaryKey': keys.primary,
                 'secondaryKey': keys.secondary
             }
@@ -162,7 +162,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
             creds, subscription, tenant = profile.get_raw_token(resource=resource)
             return {
                 'account': account.name,
-                'endpoint': 'https://{}/'.format(account.account_endpoint),
+                'endpoint': f'https://{account.account_endpoint}/',
                 'tokenType': creds[0],
                 'accessToken': creds[1],
                 'expiresOn': creds[2]['expiresOn'],
@@ -312,7 +312,7 @@ def update_pool(client,
         except DeserializationError:
             pass
         if not param:
-            raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
+            raise ValueError(f"JSON file '{json_file}' is not in correct format.")
 
         if param.certificate_references is None:
             param.certificate_references = []
@@ -376,7 +376,7 @@ def create_task(client,
                     for json_task in json_obj:
                         tasks.append(TaskAddParameter.from_dict(json_task))
                 except (DeserializationError, TypeError):
-                    raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
+                    raise ValueError(f"JSON file '{json_file}' is not formatted correctly.")
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "

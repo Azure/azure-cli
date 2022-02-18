@@ -3317,7 +3317,7 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None):
+                            request_message=None, manual_request=None, edge_zone=None, custom_interface_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3339,6 +3339,10 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
 
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
+
+    if cmd.supported_api_version(min_api='2021-05-01') and custom_interface_name:
+        private_endpoint.custom_network_interface_name = custom_interface_name
+
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
 
@@ -3405,6 +3409,79 @@ def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_e
                                          private_endpoint_name=private_endpoint_name,
                                          private_dns_zone_group_name=private_dns_zone_group_name,
                                          parameters=private_dns_zone_group)
+
+
+def add_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name,
+                                   ip_config_name=None, group_id=None, member_name=None, private_ip_address=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
+    ip_config = PrivateEndpointIPConfiguration(
+        name=ip_config_name,
+        group_id=group_id,
+        member_name=member_name,
+        private_ip_address=private_ip_address
+    )
+    private_endpoint.ip_configurations.append(ip_config)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def remove_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name, ip_config_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    ip_config = None
+    for item in private_endpoint.ip_configurations:
+        if item.name == ip_config_name:
+            ip_config = item
+            break
+    if ip_config is None:
+        logger.warning("IP Configuration %s doesn't exist.", ip_config_name)
+        return private_endpoint
+    private_endpoint.ip_configurations.remove(ip_config)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def list_private_endpoint_ip_config(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    return private_endpoint.ip_configurations
+
+
+def add_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id=None):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
+    asg = ApplicationSecurityGroup(id=application_security_group_id)
+    try:
+        private_endpoint.application_security_groups.append(asg)
+    except AttributeError:
+        private_endpoint.application_security_groups = [asg]
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def remove_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name, application_security_group_id):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+
+    asg = None
+    for item in private_endpoint.application_security_groups:
+        if item.id == application_security_group_id:
+            asg = item
+            break
+    if asg is None:
+        logger.warning("Application security group %s doesn't exist.", application_security_group_id)
+        return private_endpoint
+    private_endpoint.application_security_groups.remove(asg)
+    return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
+
+
+def list_private_endpoint_asg(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    return private_endpoint.application_security_groups
 # endregion
 
 
@@ -6523,8 +6600,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     target_resource_id=None, target=None,
                                     endpoint_status=None, weight=None, priority=None,
                                     endpoint_location=None, endpoint_monitor_status=None,
-                                    min_child_endpoints=None, geo_mapping=None,
-                                    monitor_custom_headers=None, subnets=None):
+                                    min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
+                                    geo_mapping=None, monitor_custom_headers=None, subnets=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Endpoint
     ncf = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).endpoints
@@ -6534,6 +6611,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                         endpoint_location=endpoint_location,
                         endpoint_monitor_status=endpoint_monitor_status,
                         min_child_endpoints=min_child_endpoints,
+                        min_child_endpoints_i_pv4=min_child_ipv4,
+                        min_child_endpoints_i_pv6=min_child_ipv6,
                         geo_mapping=geo_mapping,
                         subnets=subnets,
                         custom_headers=monitor_custom_headers)
@@ -6545,7 +6624,8 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_location=None,
                                     endpoint_status=None, endpoint_monitor_status=None,
                                     priority=None, target=None, target_resource_id=None,
-                                    weight=None, min_child_endpoints=None, geo_mapping=None,
+                                    weight=None, min_child_endpoints=None, min_child_ipv4=None,
+                                    min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None):
     if endpoint_location is not None:
         instance.endpoint_location = endpoint_location
@@ -6563,6 +6643,10 @@ def update_traffic_manager_endpoint(instance, endpoint_type=None, endpoint_locat
         instance.weight = weight
     if min_child_endpoints is not None:
         instance.min_child_endpoints = min_child_endpoints
+    if min_child_ipv4 is not None:
+        instance.min_child_endpoints_i_pv4 = min_child_ipv4
+    if min_child_ipv6 is not None:
+        instance.min_child_endpoints_i_pv6 = min_child_ipv6
     if geo_mapping is not None:
         instance.geo_mapping = geo_mapping
     if subnets is not None:
@@ -6579,6 +6663,11 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
     profile = client.get(resource_group_name, profile_name)
     return [e for e in profile.endpoints if not endpoint_type or e.type.endswith(endpoint_type)]
 
+
+def check_traffic_manager_name(cmd, client, name):
+    from azure.mgmt.trafficmanager.models import CheckTrafficManagerRelativeDnsNameAvailabilityParameters
+    checknameParameters = CheckTrafficManagerRelativeDnsNameAvailabilityParameters(name=name, type='Microsoft.Network/trafficManagerProfiles')
+    return client.check_traffic_manager_relative_dns_name_availability(checknameParameters)
 
 # endregion
 
@@ -6836,6 +6925,19 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
     ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[aux_subscription])
     return ncf.virtual_network_peerings.begin_create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
+
+
+def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    ncf = network_client_factory(cmd.cli_ctx, aux_subscriptions=[subscription_id])
+
+    try:
+        peering = ncf.virtual_network_peerings.get(resource_group_name, virtual_network_name, virtual_network_peering_name)
+    except ResourceNotFoundError:
+        raise ResourceNotFoundError('Virtual network peering {} doesn\'t exist.'.format(virtual_network_peering_name))
+
+    return ncf.virtual_network_peerings.begin_create_or_update(
+        resource_group_name, virtual_network_name, virtual_network_peering_name, peering, sync_remote_address_space=True)
 
 
 def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name, **kwargs):
@@ -7947,8 +8049,13 @@ def _get_ssh_path(ssh_command="ssh"):
 
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    elif platform.system() in ('Linux', 'Darwin'):
+        import shutil
+        ssh_path = shutil.which(ssh_command)
+        if not ssh_path:
+            raise UnrecognizedArgumentError(f"{ssh_command} not found in path. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows, Darwin, Linux")
 
     return ssh_path
 
@@ -8034,6 +8141,8 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
         raise CLIInternalError(ex)
+    finally:
+        tunnel_server.cleanup()
 
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
@@ -8067,6 +8176,13 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     return tunnel_server
 
 
+def tunnel_close_handler(tunnel):
+    logger.info("Ctrl + C received. Clean up and then exit.")
+    tunnel.cleanup()
+    import sys
+    sys.exit()
+
+
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
@@ -8077,6 +8193,10 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
+
+    import signal
+    # handle closing the tunnel with an active session still connected
+    signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))
 
     if timeout:
         time.sleep(int(timeout))
