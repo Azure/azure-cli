@@ -248,14 +248,14 @@ class AAZList(AAZBaseValue):
         if idx < 0:
             idx += self._len
 
-        for i in range(idx, self._len-1):
+        for i in range(idx, self._len - 1):
             if i in self._data:
                 del self._data[i]
             if i + 1 in self._data:
-                self._data[i] = self._data[i+1]
+                self._data[i] = self._data[i + 1]
 
         if self._len - 1 in self._data:
-            del self._data[self._len-1]
+            del self._data[self._len - 1]
         self._len -= 1
 
     def __len__(self):

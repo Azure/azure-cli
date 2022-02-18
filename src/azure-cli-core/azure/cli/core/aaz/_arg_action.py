@@ -1,11 +1,13 @@
-import re
 import os
+import re
 from argparse import Action
-from azure.cli.core import azclierror
 from collections import OrderedDict
-from ._utils import AAZShortHandSyntaxParser
-from ._base import AAZUndefined
+
+from azure.cli.core import azclierror
 from knack.log import get_logger
+
+from ._base import AAZUndefined
+from ._utils import AAZShortHandSyntaxParser
 from .exceptions import AAZInvalidShorthandSyntaxError, AAZInvalidValueError
 
 logger = get_logger(__name__)
@@ -41,7 +43,6 @@ class AAZArgActionOperations:
 
 
 class AAZArgAction(Action):
-
     _schema = None
 
     _str_parser = AAZShortHandSyntaxParser()
@@ -108,7 +109,6 @@ class AAZSimpleTypeArgAction(AAZArgAction):
 
 
 class AAZCompoundTypeArgAction(AAZArgAction):
-
     key_pattern = re.compile(
         r'^(((\[-?[0-9]+])|(([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?))(\.([a-zA-Z0-9_\-]+)(\[-?[0-9]+])?)*)=(.*)$'
     )
@@ -155,7 +155,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
         if key is None:
             return tuple()
         key_items = []
-        key = key[0] + key[1:].replace('[', '.[')   # transform 'ab[2]' to 'ab.[2]', keep '[1]' unchanged
+        key = key[0] + key[1:].replace('[', '.[')  # transform 'ab[2]' to 'ab.[2]', keep '[1]' unchanged
         for part in key.split('.'):
             assert part
             if part.startswith('['):
@@ -193,7 +193,7 @@ class AAZCompoundTypeArgAction(AAZArgAction):
                     try:
                         v = shell_safe_json_parse(value, True)
                     except Exception as ex:
-                        logger.debug(ex)    # log parse json failed expression
+                        logger.debug(ex)  # log parse json failed expression
                         raise shorthand_ex  # raise shorthand syntax exception
         return v
 
@@ -251,7 +251,7 @@ class AAZListArgAction(AAZCompoundTypeArgAction):
         try:
             if self._schema.singular_options and option_string in self._schema.singular_options:
                 # if singular option is used then parsed values by element action
-                action =self._schema.Element._build_cmd_action()
+                action = self._schema.Element._build_cmd_action()
                 action.setup_operations(dest_ops, values, prefix_keys=[_ELEMENT_APPEND_KEY])
             else:
                 self.setup_operations(dest_ops, values)

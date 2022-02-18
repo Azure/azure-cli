@@ -1,7 +1,9 @@
-from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, \
-    ResourceNotFoundError, HttpResponseError
-from ._base import AAZUndefined, AAZBaseValue
 import json
+
+from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
+    HttpResponseError
+
+from ._base import AAZUndefined, AAZBaseValue
 
 try:
     from urllib import quote  # type: ignore
@@ -175,7 +177,7 @@ class AAZHttpOperation(AAZOperation):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, None)
-        elif self.method in ("PUT", "POST", "HEAD", "PATCH", ):
+        elif self.method in ("PUT", "POST", "HEAD", "PATCH",):
             request = self.client._request(
                 self.method, self.url, self.query_parameters, self.header_parameters,
                 self.content, self.form_content, self.stream_content)

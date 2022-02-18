@@ -1,6 +1,7 @@
 from ._base import AAZBaseType, AAZValuePatch
-from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, AAZUndefinedValueError
 from ._field_value import AAZObject, AAZDict, AAZList, AAZSimpleValue
+from .exceptions import AAZUnknownFieldError, AAZConflictFieldDefinitionError, AAZValuePrecisionLossError, \
+    AAZUndefinedValueError
 
 
 # build in types
@@ -134,7 +135,7 @@ class AAZObjectType(AAZBaseType):
         if isinstance(data, AAZObject):
             data = data._data
         else:
-            assert isinstance(data, (dict, ))
+            assert isinstance(data, (dict,))
 
         for key, sub_data in data.items():
             name = self.get_attr_name(key)
@@ -143,7 +144,6 @@ class AAZObjectType(AAZBaseType):
 
 
 class AAZDictType(AAZBaseType):
-
     _ValueCls = AAZDict
     _PatchDataCls = dict
 
@@ -191,7 +191,6 @@ class AAZDictType(AAZBaseType):
 
 
 class AAZListType(AAZBaseType):
-
     _ValueCls = AAZList
     _PatchDataCls = dict
 

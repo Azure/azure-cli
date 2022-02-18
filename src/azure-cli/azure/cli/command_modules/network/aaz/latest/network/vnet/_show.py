@@ -16,13 +16,13 @@ class Show(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._exe_operations()
-        return self.dict_output()
+        self._execute_operations()
+        return self._output()
 
-    def _exe_operations(self):
+    def _execute_operations(self):
         self.VirtualNetworkGet(ctx=self.ctx)()
 
-    def dict_output(self, *args, **kwargs):
+    def _output(self, *args, **kwargs):
         return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     @classmethod

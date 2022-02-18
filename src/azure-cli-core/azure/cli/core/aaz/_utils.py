@@ -1,7 +1,7 @@
 import importlib
+from collections import OrderedDict
 
 from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
-from collections import OrderedDict
 
 
 def _get_profile_pkg(aaz_module_name, cloud):
@@ -13,7 +13,6 @@ def _get_profile_pkg(aaz_module_name, cloud):
 
 
 class AAZShortHandSyntaxParser:
-
     NULL_EXPRESSIONS = ('null', 'None')
 
     def __call__(self, data, is_simple=False):
@@ -35,7 +34,7 @@ class AAZShortHandSyntaxParser:
         else:
             result, length = self.parse_shorthand_value(data)
             if length != len(data):
-                raise AAZInvalidShorthandSyntaxError(data, length, len(data)-length, "Redundant tail")
+                raise AAZInvalidShorthandSyntaxError(data, length, len(data) - length, "Redundant tail")
         return result
 
     def parse_shorthand_value(self, remain):
@@ -64,9 +63,11 @@ class AAZShortHandSyntaxParser:
                 raise ex
 
             if '"' in key:
-                raise AAZInvalidShorthandSyntaxError(remain, idx, length, f"Dict key should not contain double quotes '{key}'")
+                raise AAZInvalidShorthandSyntaxError(remain, idx, length,
+                                                     f"Dict key should not contain double quotes '{key}'")
             if "'" in key:
-                raise AAZInvalidShorthandSyntaxError(remain, idx, length, f"Dict key should not contain single quotes '{key}'")
+                raise AAZInvalidShorthandSyntaxError(remain, idx, length,
+                                                     f"Dict key should not contain single quotes '{key}'")
             if key in result:
                 raise AAZInvalidShorthandSyntaxError(remain, idx, length, f"Duplicate defined dict key '{key}'")
 

@@ -1,19 +1,21 @@
 import importlib
 import os
-from ._utils import _get_profile_pkg
-from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
-from knack.preview import PreviewItem
-from knack.experimental import ExperimentalItem
-from knack.deprecation import Deprecated
+from functools import partial
+
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import CLIInternalError
+from knack.commands import CLICommand, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
+from knack.deprecation import Deprecated
+from knack.experimental import ExperimentalItem
+from knack.preview import PreviewItem
+
 from ._arg import AAZArgumentsSchema
 from ._arg_action import AAZArgActionOperations
+from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._field_value import AAZObject
-from ._base import AAZUndefined, AAZBaseValue
 from ._poller import AAZLROPoller
-from azure.cli.core.azclierror import CLIInternalError
-from functools import partial
+from ._utils import _get_profile_pkg
 
 _DOC_EXAMPLE_FLAG = ':example:'
 
@@ -139,7 +141,8 @@ class AAZCommand(CLICommand):
             cli_ctx=loader.cli_ctx,
             name=self.AZ_NAME,
             arguments_loader=self._cli_arguments_loader,
-            handler=True,  # knack use cmd.handler to check whether it is group or command, however this property will not be used in AAZCommand. So use True value for it. https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
+            handler=True,
+            # knack use cmd.handler to check whether it is group or command, however this property will not be used in AAZCommand. So use True value for it. https://github.com/microsoft/knack/blob/e496c9590792572e680cb3ec959db175d9ba85dd/knack/parser.py#L227-L233
         )
         self.command_kwargs = {}
 
@@ -247,8 +250,10 @@ def register_command_group(name, is_preview=False, is_experimental=False, hide=F
         if is_experimental:
             cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=f'az {name}', object_type='command group')
         if deprecated_info:
-            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command group', **deprecated_info)
+            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command group',
+                                            **deprecated_info)
         return cls
+
     return decorator
 
 
@@ -284,6 +289,7 @@ def register_command(name, is_preview=False, is_experimental=False, hide=False, 
         if deprecated_info:
             cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command', **deprecated_info)
         return cls
+
     return decorator
 
 
@@ -303,7 +309,8 @@ def load_aaz_command_table(loader, aaz_pkg_name, args):
                     if not arg_str.startswith(f'{value.AZ_NAME} '):
                         cut = True
                     # add command group into command group table
-                    command_group_table[value.AZ_NAME] = value(cli_ctx=loader.cli_ctx)  # add command group even it's cut
+                    command_group_table[value.AZ_NAME] = value(
+                        cli_ctx=loader.cli_ctx)  # add command group even it's cut
                 elif issubclass(value, AAZCommand):
                     if value.AZ_NAME:
                         command_table[value.AZ_NAME] = value(loader=loader)
@@ -334,9 +341,9 @@ def parse_cls_doc(cls):
     lines = []
     if doc:
         for line in doc.splitlines():
-            l = line.strip()
-            if l:
-                lines.append(l)
+            line = line.strip()
+            if line:
+                lines.append(line)
     examples = []
     if lines:
         short_summary = lines[0]
@@ -357,7 +364,7 @@ def parse_cls_doc(cls):
                 e_idx = idx + 1
                 while e_idx < len(lines) and not lines[e_idx].startswith(_DOC_EXAMPLE_FLAG):
                     e_idx += 1
-                example["text"] = '\n'.join(lines[idx+1: e_idx]) or None
+                example["text"] = '\n'.join(lines[idx + 1: e_idx]) or None
                 if example["text"]:
                     examples.append(example)
                 idx = e_idx - 1

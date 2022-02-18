@@ -1,9 +1,11 @@
 from azure.core.configuration import Configuration
-from azure.mgmt.core import ARMPipelineClient
+from azure.core import PipelineClient
 from azure.core.polling.base_polling import LocationPolling, StatusCheckPolling
-from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
 from ._poller import AAZNoPolling, AAZBasePolling
-
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 registered_clients = {}
 
@@ -19,7 +21,7 @@ def register_client(name):
 
 
 @register_client("MgmtClient")
-class AAZMgmtClient(ARMPipelineClient):
+class AAZMgmtClient(PipelineClient):
 
     class _Configuration(Configuration):
         def __init__(self, credential, credential_scopes, **kwargs):
@@ -56,6 +58,7 @@ class AAZMgmtClient(ARMPipelineClient):
 
     def __init__(self, cli_ctx, credential, **kwargs):
         from azure.cli.core.auth.util import resource_to_scopes
+        from azure.mgmt.core.policies import ARMAutoResourceProviderRegistrationPolicy
         base_url = cli_ctx.cloud.endpoints.resource_manager
         credential_scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
         config = self._Configuration(
@@ -63,17 +66,23 @@ class AAZMgmtClient(ARMPipelineClient):
                 credential_scopes=credential_scopes,
                 **kwargs
             )
-        super(AAZMgmtClient, self).__init__(
+
+        per_call_policies = [ARMAutoResourceProviderRegistrationPolicy()]
+
+        super().__init__(
             base_url=base_url,
-            config=config
+            config=config,
+            per_call_policies=per_call_policies
         )
 
     def send_request(self, request, stream=False, **kwargs):
-        session = self._pipeline.run(request, stream=stream, **kwargs) # pylint: disable=protected-access
+        session = self._pipeline.run(request, stream=stream, **kwargs)  # pylint: disable=protected-access
         return session
 
-    def build_lro_polling(
-            self, no_wait, initial_session, deserialization_callback, lro_options=None, path_format_arguments=None):
+    def build_lro_polling(self, no_wait, initial_session, deserialization_callback, lro_options=None,
+                          path_format_arguments=None):
+
+        from azure.mgmt.core.polling.arm_polling import AzureAsyncOperationPolling, BodyContentPolling
         if no_wait == True:
             polling = AAZNoPolling()
         else:

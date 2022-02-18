@@ -17,9 +17,9 @@ class Delete(AAZCommand):
 
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._exe_operations(), result_callback=None)
+        return self.build_lro_poller(self._execute_operations(), result_callback=None)
 
-    def _exe_operations(self):
+    def _execute_operations(self):
         yield self.VirtualNetworksDelete(ctx=self.ctx)()
 
     @classmethod

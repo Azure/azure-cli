@@ -1,9 +1,11 @@
-from knack.arguments import CLICommandArgument, CaseInsensitiveList
-from ._base import AAZBaseType, AAZUndefined
-from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, AAZSimpleType
-from ._field_value import AAZObject
-from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction
 from azure.cli.core import azclierror
+from knack.arguments import CLICommandArgument, CaseInsensitiveList
+
+from ._arg_action import AAZSimpleTypeArgAction, AAZObjectArgAction, AAZDictArgAction, AAZListArgAction
+from ._base import AAZBaseType, AAZUndefined
+from ._field_type import AAZObjectType, AAZStrType, AAZIntType, AAZBoolType, AAZFloatType, AAZListType, AAZDictType, \
+    AAZSimpleType
+from ._field_value import AAZObject
 
 
 class AAZArgumentsSchema(AAZObjectType):
@@ -52,7 +54,8 @@ class AAZArgEnum:
             else:
                 raise NotImplementedError()
         else:
-            raise azclierror.InvalidArgumentValueError(f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
+            raise azclierror.InvalidArgumentValueError(
+                f"unrecognized value '{data}' from choices '{self.to_choices()}' ")
 
 
 class AAZBaseArg(AAZBaseType):
@@ -109,6 +112,7 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
     def _build_cmd_action(self):
         class Action(AAZSimpleTypeArgAction):
             _schema = self
+
         return Action
 
 
@@ -152,6 +156,7 @@ class AAZObjectArg(AAZBaseArg, AAZObjectType):
     def _build_cmd_action(self):
         class Action(AAZObjectArgAction):
             _schema = self
+
         return Action
 
 
@@ -172,6 +177,7 @@ class AAZDictArg(AAZBaseArg, AAZDictType):
     def _build_cmd_action(self):
         class Action(AAZDictArgAction):
             _schema = self
+
         return Action
 
 
@@ -197,6 +203,7 @@ class AAZListArg(AAZBaseArg, AAZListType):
     def _build_cmd_action(self):
         class Action(AAZListArgAction):
             _schema = self
+
         return Action
 
 
@@ -227,3 +234,7 @@ class AAZResourceGroupNameArg(AAZStrArg):
             scopes=[ALL]
         )
         return arg
+
+
+def has_value(arg_value):
+    return arg_value != AAZUndefined

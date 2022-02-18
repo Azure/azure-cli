@@ -1,7 +1,8 @@
-from azure.core.pipeline.policies import HTTPPolicy
-from azure.mgmt.core.policies._authentication import _parse_claims_challenge
-from azure.core.exceptions import ServiceRequestError
+import base64
 import time
+
+from azure.core.exceptions import ServiceRequestError
+from azure.core.pipeline.policies import HTTPPolicy
 
 
 class AAZBearerTokenCredentialPolicy(HTTPPolicy):
@@ -41,7 +42,8 @@ class AAZBearerTokenCredentialPolicy(HTTPPolicy):
 
         headers["Authorization"] = "Bearer {}".format(self._token.token)
         if self._aux_tokens:
-            headers["x-ms-authorization-auxiliary"] = ', '.join("Bearer {}".format(token.token) for token in self._aux_tokens)
+            headers["x-ms-authorization-auxiliary"] = ', '.join(
+                "Bearer {}".format(token.token) for token in self._aux_tokens)
 
     @property
     def _need_new_token(self):
@@ -164,6 +166,35 @@ class AAZARMChallengeAuthenticationPolicy(AAZBearerTokenCredentialPolicy):
     :param str scopes: required authentication scopes
     """
 
+    @staticmethod
+    def _parse_claims_challenge(challenge):
+        """Parse the "claims" parameter from an authentication challenge
+
+        Example challenge with claims:
+            Bearer authorization_uri="https://login.windows-ppe.net/", error="invalid_token",
+            error_description="User session has been revoked",
+            claims="eyJhY2Nlc3NfdG9rZW4iOnsibmJmIjp7ImVzc2VudGlhbCI6dHJ1ZSwgInZhbHVlIjoiMTYwMzc0MjgwMCJ9fX0="
+
+        :return: the challenge's "claims" parameter or None, if it doesn't contain that parameter
+        """
+        encoded_claims = None
+        for parameter in challenge.split(","):
+            if "claims=" in parameter:
+                if encoded_claims:
+                    # multiple claims challenges, e.g. for cross-tenant auth, would require special handling
+                    return None
+                encoded_claims = parameter[parameter.index("=") + 1:].strip(" \"'")
+
+        if not encoded_claims:
+            return None
+
+        padding_needed = -len(encoded_claims) % 4
+        try:
+            decoded_claims = base64.urlsafe_b64decode(encoded_claims + "=" * padding_needed).decode()
+            return decoded_claims
+        except Exception:  # pylint:disable=broad-except
+            return None
+
     def on_challenge(self, request, response):  # pylint:disable=unused-argument
         """Authorize request according to an ARM authentication challenge
 
@@ -174,7 +205,7 @@ class AAZARMChallengeAuthenticationPolicy(AAZBearerTokenCredentialPolicy):
 
         challenge = response.http_response.headers.get("WWW-Authenticate")
         if challenge:
-            claims = _parse_claims_challenge(challenge)
+            claims = self._parse_claims_challenge(challenge)
             if claims:
                 self.authorize_request(request, *self._scopes, claims=claims)
                 return True
