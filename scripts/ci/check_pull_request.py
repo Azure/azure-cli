@@ -15,16 +15,36 @@ import sys
 # Bold or increased intensity: 1
 # Fraktur (Gothic): 20
 # red: 31
+# green: 32
 # yellow: 33
 # grey: 38
 reset = "\x1b[0m"
 red = "\x1b[31;20m"
 bold_red = "\x1b[31;1m"
+green = "\x1b[32;20m"
 yellow = "\x1b[33;20m"
 grey = "\x1b[38;20m"
 format = "%(message)s"
 TITLE = sys.argv[1]
 BODY = sys.argv[2]
+words_to_check = {
+            'Add': r'\b(added|adding|adds)\b',
+            'Allow': r'\b(allowed|allowing|allows)\b',
+            'Change': r'\b(changed|changing|changes)\b',
+            'Deprecate': r'\b(deprecated|deprecating|deprecates)\b',
+            'Disable': r'\b(disabled|disabling|disables)\b',
+            'Enable': r'\b(enabled|enabling|enables)\b',
+            'Fix': r'\b(fixed|fixing|fixes)\b',
+            'Improve': r'\b(improved|improving|improves)\b',
+            'Make': r'\b(made|making|makes)\b',
+            'Move': r'\b(moved|moving|moves)\b',
+            'Rename': r'\b(renamed|renaming|renames)\b',
+            'Replace': r'\b(replaced|replacing|replaces)\b',
+            'Remove': r'\b(removed|removing|removes)\b',
+            'Support': r'\b(supported|supporting|supports)\b',
+            'Update': r'\b(updated|updating|updates)\b',
+            'Upgrade': r'\b(upgraded|upgrading|upgrades)\b',
+        }
 
 
 class CustomFormatter(logging.Formatter):
@@ -74,14 +94,7 @@ def check_pull_request(title, body):
 
 def regex_line(line):
     error_flag = False
-    # Check each line for these words, case insensitive
-    sub_pattern = r'\b(added|adding|adds|changed|changing|changes|deprecated|deprecating|deprecates|fixed|fixing|fixes|made|making|makes|removed|removing|removes|updated|updating|updates)\b'
-    ref = re.findall(sub_pattern, line, re.IGNORECASE)
-    if ref:
-        logger.warning('Please use the right verb of%s %s %swith simple present tense in base form and capitalized first letter to describe what is done, '
-                       'follow https://aka.ms/submitAzPR\n', red, ref, yellow)
-        error_flag = True
-    # Check Fix #number in title, just give a warning here, because it is not necessarily
+    # Check Fix #number in title, just give a warning here, because it is not necessarily.
     if 'Fix' in line:
         sub_pattern = r'#\d'
         ref = re.findall(sub_pattern, line)
@@ -89,15 +102,13 @@ def regex_line(line):
             logger.warning('If it\'s related to fixing an issue, put Fix #number in title\n')
     for idx, i in enumerate(line):
         # ] } : must be followed by a space
-        for j in [']', '}', ':']:
-            if i == j:
-                try:
-                    assert line[idx + 1] == ' '
-                    break
-                except:
-                    logger.info('%s%s: missing space after %s', line, yellow, j)
-                    logger.error(' ' * idx + '↑')
-                    error_flag = True
+        if i in [']', '}', ':']:
+            try:
+                assert line[idx + 1] == ' '
+            except:
+                logger.info('%s%s: missing space after %s', line, yellow, i)
+                logger.error(' ' * idx + '↑')
+                error_flag = True
         # az xxx commands must be enclosed in `, e.g., `az vm`
         if i == 'a' and line[idx + 1] == 'z' and line[idx + 2] == ' ':
             command = 'az '
@@ -113,15 +124,15 @@ def regex_line(line):
                 error_flag = True
         # First word after the colon must be capitalized
         if i == ':':
+            index = 0
             if line[idx + 1] == ' ' and line[idx + 2].islower() and line[idx + 2: idx + 5] != 'az ':
                 index = idx + 2
             elif line[idx + 1] != ' ' and line[idx + 1].islower() and line[idx + 1: idx + 4] != 'az ':
                 index = idx + 1
-            else:
-                continue
-            logger.info('%s%s: should use capital letters after :', line, yellow)
-            logger.error(' ' * index + '↑')
-            error_flag = True
+            if index:
+                logger.info('%s%s: should use capital letters after :', line, yellow)
+                logger.error(' ' * index + '↑')
+                error_flag = True
         # --xxx parameters must be enclosed in `, e.g., `--size`
         if i == '-' and line[idx + 1] == '-':
             param = '--'
@@ -135,6 +146,24 @@ def regex_line(line):
                 logger.info('%s%s: missing ` around %s', line, yellow, param)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
+        # verb check: only check the first word after ] or :
+        if i in [']', ':']:
+            word = ''
+            c = index = idx + 1 if line[idx + 1] != ' ' else idx + 2
+            while index < len(line) and line[index] != ' ':
+                word += line[index]
+                index += 1
+            for k, v in words_to_check.items():
+                if re.findall(v, word, re.IGNORECASE):
+                    logger.info(line)
+                    logger.error(' ' * c + '↑')
+                    logger.warning(
+                        'Please use the right verb of%s %s %swith %s(%s)%s simple present tense in base form '
+                        'and capitalized first letter to describe what is done, '
+                        'follow https://aka.ms/submitAzPR\n', red, word, yellow, green, k, yellow)
+                    error_flag = True
+                    break
+
     return error_flag
 
 
