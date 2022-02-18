@@ -634,7 +634,7 @@ def is_track2(client_class):
     """
     from inspect import getfullargspec as get_arg_spec
     args = get_arg_spec(client_class.__init__).args
-    return "credential" in args
+    return "credential" in args or hasattr(client_class, "_send_request")
 
 
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
