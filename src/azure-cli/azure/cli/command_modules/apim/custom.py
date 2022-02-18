@@ -21,10 +21,10 @@ except ImportError:
 
 import uuid
 import re
-from knack.util import CLIError
 from azure.cli.command_modules.apim._params import ImportFormat
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import (RequiredArgumentMissingError, MutuallyExclusiveArgumentError,
+                                       InvalidArgumentValueError)
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties,
                                              ApiManagementServiceBackupRestoreParameters,
