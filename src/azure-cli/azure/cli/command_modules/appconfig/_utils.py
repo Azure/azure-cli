@@ -47,6 +47,20 @@ def resolve_store_metadata(cmd, config_store_name):
     raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))
 
 
+def resolve_deleted_store_metadata(cmd, config_store_name):
+    try:
+        client = cf_configstore(cmd.cli_ctx)
+        deleted_stores = client.list_deleted()
+        for deleted_store in deleted_stores:
+            if deleted_store.name.lower() == config_store_name.lower():
+                # configuration_store_id has a fixed structure /subscriptions/subscription_id/resourceGroups/resource_group_name/providers/Microsoft.AppConfiguration/configurationStores/configuration_store_name
+                return deleted_store.configuration_store_id.split('/')[4], deleted_store.location
+    except HttpResponseError as ex:
+        raise CLIError("Failed to get the list of deleted App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
+
+    raise CLIError("Failed to find the deleted App Configuration store '{}'.".format(config_store_name))
+
+
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):
     string = ''
     error_message = '''You may have specified both store name and connection string, which is a conflict.

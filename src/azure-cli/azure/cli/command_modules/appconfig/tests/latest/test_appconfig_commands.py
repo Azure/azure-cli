@@ -24,6 +24,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
+    @AllowLargeResponse
     def test_azconfig_mgmt(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='MgmtTest', length=24)
 
@@ -41,17 +42,21 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku,
             'tags': tag,
-            'identity': system_assigned_identity
+            'identity': system_assigned_identity,
+            'retention_days': 5,
+            'enable_purge_protection': False
         })
 
-        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity}',
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}',
                          checks=[self.check('name', '{config_store_name}'),
                                  self.check('location', '{rg_loc}'),
                                  self.check('resourceGroup', resource_group),
                                  self.check('provisioningState', 'Succeeded'),
                                  self.check('sku.name', sku),
                                  self.check('tags', structured_tag),
-                                 self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+                                 self.check('identity.type', 'SystemAssigned'),
+                                 self.check('softDeleteRetentionInDays', '{retention_days}'),
+                                 self.check('enablePurgeProtection', '{enable_purge_protection}')]).get_output_in_json()
 
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
@@ -126,6 +131,24 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+        self.cmd('appconfig show-deleted -n {config_store_name}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}'),
+                    self.check('purgeProtectionEnabled', '{enable_purge_protection}')])
+
+        self.cmd('appconfig recover -n {config_store_name} -y')
+
+        self.cmd('appconfig show -n {config_store_name}',
+            checks=[self.check('name', '{config_store_name}'),
+                    self.check('location', '{rg_loc}')])
+
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+        self.cmd('appconfig purge -n {config_store_name} -y')
+
+        with self.assertRaisesRegex(CLIError, f'Failed to find the deleted App Configuration store \'{config_store_name}\'.'):
+            self.cmd('appconfig show-deleted -n {config_store_name}')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')

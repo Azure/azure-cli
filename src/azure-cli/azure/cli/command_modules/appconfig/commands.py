@@ -56,7 +56,11 @@ def load_command_table(self, _):
         g.command('delete', 'delete_configstore')
         g.command('update', 'update_configstore')
         g.command('list', 'list_configstore')
+        g.command('list-deleted', 'list_deleted_configstore', is_preview=True)
+        g.command('recover', 'recover_deleted_configstore', is_preview=True)
+        g.command('purge', 'purge_deleted_configstore', is_preview=True)
         g.show_command('show', 'show_configstore')
+        g.show_command('show-deleted', 'show_deleted_configstore', is_preview=True)
 
     with self.command_group('appconfig credential', configstore_credential_util) as g:
         g.command('list', 'list_credential')
