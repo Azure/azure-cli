@@ -39,7 +39,7 @@ class AlertAddEncryption(argparse._AppendAction):
                 if keyVaultObject.identity.user_assigned_identity.endswith('/'):
                     keyVaultObject.identity.user_assigned_identity = keyVaultObject.identity.user_assigned_identity[:-1]
             else:
-                raise InvalidArgumentValueError("Invalid Argument:'{}' Only allowed arguments are 'key-name, key-vault-uri, key-version and user-assigned-identity'".format(option_string))
+                raise InvalidArgumentValueError("Invalid Argument for:'{}' Only allowed arguments are 'key-name, key-vault-uri, key-version and user-assigned-identity'".format(option_string))
 
         if (keyVaultObject.key_name is None) or (keyVaultObject.key_vault_uri is None):
             raise CLIError('key-name and key-vault-uri are mandatory properties')
