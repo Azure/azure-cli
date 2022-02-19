@@ -8,6 +8,7 @@
 
 import argparse
 
+
 class AlertAddEncryption(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
@@ -17,19 +18,20 @@ class AlertAddEncryption(argparse._AppendAction):
         from azure.mgmt.servicebus.v2021_06_01_preview.models import KeyVaultProperties
         from azure.mgmt.servicebus.v2021_06_01_preview.models import UserAssignedIdentityProperties
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.core import CLIError
 
         keyVaultObject = KeyVaultProperties()
 
         for (k, v) in (x.split('=', 1) for x in values):
-            if k=='key-name':
+            if k == 'key-name':
                 keyVaultObject.key_name = v
-            elif k=='key-vault-uri':
+            elif k == 'key-vault-uri':
                 keyVaultObject.key_vault_uri = v
                 if keyVaultObject.key_vault_uri.endswith('/'):
                     keyVaultObject.key_vault_uri = keyVaultObject.key_vault_uri[:-1]
-            elif k=='key-version':
+            elif k == 'key-version':
                 keyVaultObject.key_version = v
-            elif k=='user-assigned-identity':
+            elif k == 'user-assigned-identity':
                 keyVaultObject.identity = UserAssignedIdentityProperties()
                 keyVaultObject.identity.user_assigned_identity = v
                 if keyVaultObject.identity.user_assigned_identity.endswith('/'):
