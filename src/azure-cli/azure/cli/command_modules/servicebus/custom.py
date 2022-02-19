@@ -323,7 +323,7 @@ def cli_topicauthokey_renew(client, resource_group_name, namespace_name, topic_n
 
 
 # Subscription Region
-def cli_sbsubscription_create(client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
+def cli_sbsubscription_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, lock_duration=None,
                               requires_session=None, default_message_time_to_live=None, dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
@@ -391,7 +391,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
 
 
 # Rule Region
-def cli_rules_create(client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
+def cli_rules_create(cmd, client, resource_group_name, namespace_name, topic_name, subscription_name, rule_name,
                      action_sql_expression=None, action_compatibility_level=None, action_requires_preprocessing=None,
                      filter_sql_expression=None, filter_requires_preprocessing=None, correlation_id=None,
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
@@ -587,7 +587,7 @@ def return_valid_duration_create(update_value):
 
 
 # NetwrokRuleSet Region
-def cli_networkrule_createupdate(client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
+def cli_networkrule_createupdate(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
 
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -610,7 +610,7 @@ def cli_networkrule_createupdate(client, resource_group_name, namespace_name, su
     return client.create_or_update_network_rule_set(resource_group_name, namespace_name, netwrokruleset)
 
 
-def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
+def cli_networkrule_delete(cmd, client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
     NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
 
