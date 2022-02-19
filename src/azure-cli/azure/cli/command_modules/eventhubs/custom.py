@@ -10,6 +10,7 @@
 
 from azure.cli.core.profiles import ResourceType
 
+
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
