@@ -5,6 +5,7 @@
 
 # pylint: disable=too-many-lines
 # pylint: disable=protected-access
+# pylint: disable=line-too-long
 
 import argparse
 

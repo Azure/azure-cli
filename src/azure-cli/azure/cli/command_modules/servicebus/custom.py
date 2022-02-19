@@ -755,7 +755,7 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
     return get_namespace
 
 
-def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
+def cli_remove_encryption(client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
 
     from azure.cli.core import CLIError
