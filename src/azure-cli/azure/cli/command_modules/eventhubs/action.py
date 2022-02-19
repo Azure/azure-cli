@@ -21,6 +21,7 @@ class AlertAddEncryption(argparse._AppendAction):
         from azure.mgmt.eventhub.v2021_06_01_preview.models import KeyVaultProperties
         from azure.mgmt.eventhub.v2021_06_01_preview.models import UserAssignedIdentityProperties
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.core import CLIError
 
         keyVaultObject = KeyVaultProperties()
 
