@@ -7,6 +7,7 @@
 # pylint: disable=too-many-lines
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=unused-variable
+# pylint: disable=too-many-locals
 
 import re
 from azure.cli.core.profiles import ResourceType
