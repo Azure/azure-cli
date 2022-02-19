@@ -16,7 +16,8 @@ from azure.cli.core.profiles import ResourceType
 def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                          capacity=None, default_action=None, mi_system_assigned=None, mi_user_assigned=None, encryption_config=None):
 
-    from azure.mgmt.servicebus.models import SBNamespace, SBSku
+    SBSku = cmd.get_models('SBSku', resource_type=ResourceType.MGMT_SERVICEBUS)
+    SBNamespace = cmd.get_models('SBNamespace', resource_type=ResourceType.MGMT_SERVICEBUS)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_SERVICEBUS)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
     UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -129,7 +130,7 @@ def cli_sbqueue_create(cmd, client, resource_group_name, namespace_name, queue_n
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
-    from azure.mgmt.servicebus.models import SBQueue
+    SBQueue = cmd.get_models('SBQueue', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
@@ -238,7 +239,7 @@ def cli_sbtopic_create(cmd, client, resource_group_name, namespace_name, topic_n
                        duplicate_detection_history_time_window=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
-    from azure.mgmt.servicebus.models import SBTopic
+    SBTopic = cmd.get_models('SBTopic', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if max_size_in_megabytes:
         cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_megabytes)
@@ -327,7 +328,7 @@ def cli_sbsubscription_create(client, resource_group_name, namespace_name, topic
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
 
-    from azure.mgmt.servicebus.models import SBSubscription
+    SBSubscription = cmd.get_models('SBSubscription', resource_type=ResourceType.MGMT_SERVICEBUS)
     subscription_params = SBSubscription(
         lock_duration=return_valid_duration_create(lock_duration),
         requires_session=requires_session,
@@ -396,7 +397,10 @@ def cli_rules_create(client, resource_group_name, namespace_name, topic_name, su
                      message_id=None, to=None, reply_to=None, label=None, session_id=None, reply_to_session_id=None,
                      content_type=None, requires_preprocessing=None):
 
-    from azure.mgmt.servicebus.models import Rule, Action, SqlFilter, CorrelationFilter
+    Rule = cmd.get_models('Rule', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Action = cmd.get_models('Action', resource_type=ResourceType.MGMT_SERVICEBUS)
+    SqlFilter = cmd.get_models('SqlFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
+    CorrelationFilter = cmd.get_models('CorrelationFilter', resource_type=ResourceType.MGMT_SERVICEBUS)
     parameters = Rule()
     parameters.action = Action(
         sql_expression=action_sql_expression,
@@ -584,7 +588,10 @@ def return_valid_duration_create(update_value):
 
 # NetwrokRuleSet Region
 def cli_networkrule_createupdate(client, resource_group_name, namespace_name, subnet=None, ip_mask=None, ignore_missing_vnet_service_endpoint=False, action='Allow'):
-    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, Subnet, NWRuleSetIpRules
+
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_SERVICEBUS)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if netwrokruleset.virtual_network_rules is None:
@@ -604,7 +611,9 @@ def cli_networkrule_createupdate(client, resource_group_name, namespace_name, su
 
 
 def cli_networkrule_delete(client, resource_group_name, namespace_name, subnet=None, ip_mask=None):
-    from azure.mgmt.servicebus.models import NWRuleSetVirtualNetworkRules, NWRuleSetIpRules
+    NWRuleSetVirtualNetworkRules = cmd.get_models('NWRuleSetVirtualNetworkRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+    NWRuleSetIpRules = cmd.get_models('NWRuleSetIpRules', resource_type=ResourceType.MGMT_SERVICEBUS)
+
     netwrokruleset = client.get_network_rule_set(resource_group_name, namespace_name)
 
     if subnet:
