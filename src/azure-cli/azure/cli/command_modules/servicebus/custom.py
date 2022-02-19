@@ -10,8 +10,6 @@
 
 import re
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import InvalidArgumentValueError
-import argparse
 
 
 # Namespace Region
@@ -27,7 +25,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
     parameter = SBNamespace(location=location)
 
     parameter.tags = tags
-    parameter.sku = SBSku(name = sku, tier = sku, capacity = capacity)
+    parameter.sku = SBSku(name=sku, tier=sku, capacity=capacity)
 
     if mi_system_assigned:
         parameter.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
@@ -83,11 +81,13 @@ def cli_namespace_update(client, instance, tags=None, sku=None, capacity=None, d
 
     return instance
 
+
 def cli_namespace_list(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
 
     return client.list()
+
 
 def cli_namespace_exists(client, name):
 
@@ -642,6 +642,7 @@ def cli_returnnsdetails(cmd, resource_group_name, namespace_name, max_size_in_me
         raise CLIError(
             '--max-size on Premium sku namespace only supports upto [1024, 2048, 3072, 4096, 5120, 10240, 20480, 40960, 81920] GB')
 
+
 def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
@@ -684,11 +685,10 @@ def cli_add_identity(cmd, client, resource_group_name, namespace_name, system_as
 
     return get_namespace
 
-def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned = None, user_assigned = None):
+
+def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
     namespace = client.get(resource_group_name, namespace_name)
     IdentityType = cmd.get_models('ManagedServiceIdentityType', resource_type=ResourceType.MGMT_SERVICEBUS)
-    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_SERVICEBUS)
-    UserAssignedIdentity = cmd.get_models('UserAssignedIdentity', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     from azure.cli.core import CLIError
 
@@ -708,7 +708,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
                 for x in user_assigned:
                     namespace.identity.user_assigned_identities.pop(x)
                 # if all identities are popped off of the dictionary, we disable user assigned identity
-                if len(namespace.identity.user_assigned_identities)==0:
+                if len(namespace.identity.user_assigned_identities) == 0:
                     namespace.identity.type = IdentityType.NONE
                     namespace.identity.user_assigned_identities = None
 
@@ -717,7 +717,7 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
                 for x in user_assigned:
                     namespace.identity.user_assigned_identities.pop(x)
                 # if all identities are popped off of the dictionary, we disable user assigned identity
-                if len(namespace.identity.user_assigned_identities)==0:
+                if len(namespace.identity.user_assigned_identities) == 0:
                     namespace.identity.type = IdentityType.SYSTEM_ASSIGNED
                     namespace.identity.user_assigned_identities = None
 
@@ -730,10 +730,10 @@ def cli_remove_identity(cmd, client, resource_group_name, namespace_name, system
 
     return get_namespace
 
+
 def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_SERVICEBUS)
 
     if namespace.encryption:
         if namespace.encryption.key_vault_properties:
@@ -757,22 +757,21 @@ def cli_add_encryption(cmd, client, resource_group_name, namespace_name, encrypt
 
 def cli_remove_encryption(cmd, client, resource_group_name, namespace_name, encryption_config):
     namespace = client.get(resource_group_name, namespace_name)
-    Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_SERVICEBUS)
-    KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_SERVICEBUS)
+
+    from azure.cli.core import CLIError
 
     if namespace.encryption is None:
         raise CLIError('The namespace does not have encryption enabled')
 
-    else:
-        if namespace.encryption.key_vault_properties:
-            for property in encryption_config:
-                if property in namespace.encryption.key_vault_properties:
-                    namespace.encryption.key_vault_properties.remove(property)
+    if namespace.encryption.key_vault_properties:
+        for encryption_property in encryption_config:
+            if encryption_property in namespace.encryption.key_vault_properties:
+                namespace.encryption.key_vault_properties.remove(encryption_property)
 
-        client.begin_create_or_update(
-            resource_group_name=resource_group_name,
-            namespace_name=namespace_name,
-            parameters=namespace).result()
+    client.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        namespace_name=namespace_name,
+        parameters=namespace).result()
 
     get_namespace = client.get(resource_group_name, namespace_name)
 

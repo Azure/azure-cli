@@ -290,7 +290,7 @@ def load_arguments_sb(self, _):
             c.argument('system_assigned', arg_type=get_three_state_flag(), help='System Assigned Identity')
             c.argument('user_assigned', nargs='+', help='User Assigned Identity')
 
-#Encryption
+# Encryption
     with self.argument_context('servicebus namespace encryption', resource_type=ResourceType.MGMT_SERVICEBUS) as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
 
