@@ -46,21 +46,19 @@ def _format_staticsite(site, format_site=False):
     return site
 
 
-def list_staticsites(cmd, resource_group_name=None, format_output=True):
+def list_staticsites(cmd, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if resource_group_name:
-        result = list(client.get_static_sites_by_resource_group(resource_group_name))
-    else:
-        result = list(client.list())
-    return [_format_staticsite(site, format_output) for site in result]
+        return list(client.get_static_sites_by_resource_group(resource_group_name))
+    return list(client.list())
 
 
-def show_staticsite(cmd, name, resource_group_name=None, format_output=True):
+def show_staticsite(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return _format_staticsite(client.get_static_site(resource_group_name, name), format_output)
+    return client.get_static_site(resource_group_name, name)
 
 
 def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
@@ -163,7 +161,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
 
 
 def show_identity(cmd, resource_group_name, name):
-    return show_staticsite(cmd, name, resource_group_name, format_output=False).identity
+    return show_staticsite(cmd, name, resource_group_name).identity
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', scope=None):
@@ -410,15 +408,15 @@ def create_staticsites(cmd, resource_group_name, name, location,  # pylint: disa
     if not no_wait and format_output:
         client.begin_create_or_update_static_site(resource_group_name=resource_group_name, name=name,
                                                   static_site_envelope=staticsite_deployment_properties)
-        return show_staticsite(cmd, name, resource_group_name, format_output=True)
+        return show_staticsite(cmd, name, resource_group_name)
     return sdk_no_wait(no_wait, client.begin_create_or_update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
 
 
 def update_staticsite(cmd, name, source=None, branch=None, token=None,
-                      tags=None, sku=None, no_wait=False, format_output=None):
-    existing_staticsite = show_staticsite(cmd, name, format_output=False)
+                      tags=None, sku=None, no_wait=False):
+    existing_staticsite = show_staticsite(cmd, name)
     if not existing_staticsite:
         raise CLIError("No static web app found with name {0}".format(name))
 
@@ -442,12 +440,6 @@ def update_staticsite(cmd, name, source=None, branch=None, token=None,
 
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     resource_group_name = _get_resource_group_name_of_staticsite(client, name)
-    if not no_wait:
-        # get around CLI linter rules for default parameter values on update commands
-        format_output = (format_output is None) or (format_output is True)
-        return _format_staticsite(client.update_static_site(
-            resource_group_name=resource_group_name, name=name,
-            static_site_envelope=staticsite_deployment_properties), format_output)
     return sdk_no_wait(no_wait, client.update_static_site,
                        resource_group_name=resource_group_name, name=name,
                        static_site_envelope=staticsite_deployment_properties)
@@ -554,7 +546,7 @@ def reset_staticsite_api_key(cmd, name, resource_group_name=None):
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    existing_staticsite = show_staticsite(cmd, name, resource_group_name, format_output=False)
+    existing_staticsite = show_staticsite(cmd, name, resource_group_name)
     ResetPropertiesEnvelope = cmd.get_models('StaticSiteResetPropertiesARMResource')
     reset_envelope = ResetPropertiesEnvelope(repository_token=existing_staticsite.repository_token)
     return client.reset_static_site_api_key(resource_group_name=resource_group_name,
