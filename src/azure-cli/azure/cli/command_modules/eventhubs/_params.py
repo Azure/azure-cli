@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', 'ManagedServiceIdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
+    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
     from azure.cli.command_modules.eventhubs.action import AlertAddEncryption
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
