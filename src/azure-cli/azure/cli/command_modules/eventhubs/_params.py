@@ -63,13 +63,6 @@ def load_arguments_eh(self, _):
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
 
     with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2021-06-01-preview') as c:
-        c.argument('identity_type', arg_group='Managed Identity', options_list=['--identity-type'],
-                   arg_type=get_enum_type(ManagedServiceIdentityType),
-                   help='Type of identity ("SystemAssigned", "UserAssigned","SystemAssigned, UserAssigned","None")')
-        c.argument('identity_id', arg_group='Managed Identity', options_list=['--identity-id'], nargs='+',
-                   help='List of identity ids.')
-        c.argument('encryption_config', action=AlertAddEncryption, nargs='+',
-                   help='List of KeyVaultProperties objects.')
         c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
                    help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
         c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
