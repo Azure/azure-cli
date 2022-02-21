@@ -234,6 +234,7 @@ def cf_blob_service(cli_ctx, kwargs):
 
 
 def cf_blob_client(cli_ctx, kwargs):
+    # track2 partial migration
     if kwargs.get('blob_url'):
         t_blob_client = get_sdk(cli_ctx, CUSTOM_DATA_STORAGE_BLOB, '_blob_client#BlobClient')
         credential = get_credential(kwargs)
@@ -245,7 +246,9 @@ def cf_blob_client(cli_ctx, kwargs):
         return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
                                            credential=credential,
                                            snapshot=kwargs.pop('snapshot', None))
-    kwargs.pop('blob_url')
+    if 'blob_url' in kwargs:
+        kwargs.pop('blob_url')
+
     return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs.pop('container_name'),
                                                             blob=kwargs.pop('blob_name'),
                                                             snapshot=kwargs.pop('snapshot', None))

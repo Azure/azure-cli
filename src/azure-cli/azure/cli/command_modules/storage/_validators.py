@@ -1549,7 +1549,8 @@ def validate_client_auth_parameter(cmd, ns):
 def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
-        del ns.socket_timeout
+        if 'socket_timeout' in ns:
+            del ns.socket_timeout
 
 
 def validate_access_control(namespace):

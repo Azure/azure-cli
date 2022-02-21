@@ -760,6 +760,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
         c.argument('destination_path', help='The destination path that will be prepended to the blob name.')
+        c.argument('socket_timeout', deprecate_info=c.deprecate(hide=True),
+                   help='The socket timeout(secs), used by the service to regulate data flow.')
 
     with self.argument_context('storage blob list') as c:
         from ._validators import get_include_help_string
@@ -916,6 +918,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_blob_arguments_track2()
         c.register_precondition_options()
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
+        c.extra('blob_name', validator=validate_blob_name_for_upload)
 
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
                    help='Path of the file to upload as the blob content.', validator=validate_upload_blob)
@@ -962,7 +965,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type,
@@ -972,14 +974,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'))
         c.extra('no_progress', progress_type)
-        c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int,
                    help='Maximum number of parallel connections to use when the blob size exceeds 64MB.')
 

@@ -2378,7 +2378,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         })
         time.sleep(60)
         self.cmd('storage blob upload -f "{f}" -c {c} -n {b} --account-name {sa} --sas-token "{acct_sas}"',
-                 checks=[self.exists('lastModified')])
+                 checks=[self.exists('last_modified')])
 
         # create a service sas token
         blob_sas_template = self.cmd('storage blob generate-sas -c {c} -n {b} --account-name {sa}'

@@ -173,38 +173,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    def test_storage_blob_socket_timeout(self, resource_group, storage_account):
-        local_dir = self.create_temp_dir()
-        local_file = self.create_temp_file(1)
-        blob_name = self.create_random_name(prefix='blob', length=24)
-        account_info = self.get_account_info(resource_group, storage_account)
-
-        container = self.create_container(account_info)
-
-        from azure.common import AzureException
-        with self.assertRaises(AzureException):
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout -11',
-                             account_info, container, local_file, blob_name)
-
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('exists', False))
-
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout 10',
-                         account_info, container, local_file, blob_name)
-        self.storage_cmd('storage blob exists -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('exists', True))
-
-        self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
-            .assert_with_checks(JMESPathCheck('name', blob_name))
-
-        downloaded = os.path.join(local_dir, 'test.file')
-
-        self.storage_cmd('storage blob download -n {} -c {} --file "{}" --socket-timeout 10',
-                         account_info, blob_name, container, downloaded)
-        self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
     def test_storage_blob_lease_operations(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         local_file = self.create_temp_file(128)
