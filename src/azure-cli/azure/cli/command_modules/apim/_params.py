@@ -192,7 +192,7 @@ def load_arguments(self, _):
                    help='Specifies the subscription key query string parameter name.')
         c.argument(
             'api_id', arg_group='API',
-            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+            help='Unique name of the api to import. If an API of the same name exists it will be replaced. Otherwise a new API resource will be created.')
         c.argument(
             'api_revision', arg_group='API',
             help='Describes the Revision of the Api. If no value is provided, default revision 1 is created.')
