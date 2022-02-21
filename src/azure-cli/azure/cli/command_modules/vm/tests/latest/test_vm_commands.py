@@ -1111,7 +1111,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_size_properties')
     def test_vm_size_properties(self, resource_group):
         self.kwargs.update({
-            'vm': self.create_random_name('vm-', 10)
+            'vm': self.create_random_name('vm-', 10),
+            'vmss': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1')
@@ -1122,6 +1123,16 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm update -g {rg} -n {vm} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
             self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', 2),
             self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --vm-sku Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1')
+        self.cmd('vmss show -g {rg} -n {vmss} ', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusAvailable', 1),
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 1)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusAvailable', 2),
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
 

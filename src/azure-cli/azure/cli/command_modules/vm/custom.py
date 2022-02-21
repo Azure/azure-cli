@@ -2815,7 +2815,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
+                v_cpus_available=None, v_cpus_per_core=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3077,7 +3078,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
             capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
-            patch_mode=patch_mode, enable_agent=enable_agent)
+            patch_mode=patch_mode, enable_agent=enable_agent, v_cpus_available=v_cpus_available,
+            v_cpus_per_core=v_cpus_per_core)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3367,7 +3369,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None,
+                v_cpus_available=None, v_cpus_per_core=None,**kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3408,6 +3411,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if user_data is not None:
         vmss.virtual_machine_profile.user_data = b64encode(user_data)
+
+    if v_cpus_available is not None:
+        vmss.virtual_machine_profile.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vmss.virtual_machine_profile.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
 
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')

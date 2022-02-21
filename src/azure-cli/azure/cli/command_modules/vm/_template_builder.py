@@ -847,7 +847,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                        enable_auto_update=None, patch_mode=None, enable_agent=None):
+                        enable_auto_update=None, patch_mode=None, enable_agent=None, v_cpus_available=None,
+                        v_cpus_per_core=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1077,6 +1078,20 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if storage_properties:
         virtual_machine_profile['storageProfile'] = storage_properties
+
+    hardware_profile = {}
+    vm_size_properties = {}
+    if v_cpus_available is not None:
+        vm_size_properties['vCPUsAvailable'] = v_cpus_available
+
+    if v_cpus_per_core is not None:
+        vm_size_properties['vCPUsPerCore'] = v_cpus_per_core
+
+    if vm_size_properties:
+        hardware_profile['vmSizeProperties'] = vm_size_properties
+
+    if hardware_profile:
+        virtual_machine_profile['hardwareProfile'] = hardware_profile
 
     if not specialized and os_profile:
         virtual_machine_profile['osProfile'] = os_profile
