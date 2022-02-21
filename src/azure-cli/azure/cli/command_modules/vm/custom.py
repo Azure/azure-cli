@@ -4873,3 +4873,66 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
     return vmss.virtual_machine_profile.application_profile
+
+
+# region Restore point collection
+def restore_point_create(client,
+                         resource_group_name,
+                         restore_point_collection_name,
+                         restore_point_name,
+                         exclude_disks=None,
+                         no_wait=False):
+    parameters = {}
+    if exclude_disks is not None:
+        parameters['exclude_disks'] = []
+        for disk in exclude_disks:
+            parameters['exclude_disks'].append({'id': disk})
+    return sdk_no_wait(no_wait,
+                       client.begin_create,
+                       resource_group_name=resource_group_name,
+                       restore_point_collection_name=restore_point_collection_name,
+                       restore_point_name=restore_point_name,
+                       parameters=parameters)
+
+# endRegion
+
+
+# region Restore point collection
+def restore_point_collection_show(client,
+                                  resource_group_name,
+                                  restore_point_collection_name):
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      expand="restorePoints")
+
+
+def restore_point_collection_create(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    location,
+                                    source_id,
+                                    tags=None):
+    parameters = {}
+    properties = {}
+    parameters['location'] = location
+    if tags is not None:
+        parameters['tags'] = tags
+    properties['source'] = {'id': source_id}
+    parameters['properties'] = properties
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   restore_point_collection_name=restore_point_collection_name,
+                                   parameters=parameters)
+
+
+def restore_point_collection_update(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    tags=None):
+    parameters = {}
+    if tags is not None:
+        parameters['tags'] = tags
+    return client.update(resource_group_name=resource_group_name,
+                         restore_point_collection_name=restore_point_collection_name,
+                         parameters=parameters)
+
+# endRegion
