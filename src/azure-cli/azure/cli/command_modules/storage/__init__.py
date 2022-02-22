@@ -190,8 +190,8 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('container_name')
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
         self.extra('blob_url', help='The full endpoint URL to the Blob, including SAS token and snapshot if used. '
-                                    'This could be either the primary endpoint, or the secondary endpoint depending on the current '
-                                    '`location_mode`.', validator=validate_blob_arguments)
+                                    'This could be either the primary endpoint, or the secondary endpoint depending on '
+                                    'the current `location_mode`.', validator=validate_blob_arguments)
 
     def register_container_arguments(self):
         from ._validators import get_not_none_validator

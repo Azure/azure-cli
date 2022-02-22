@@ -233,10 +233,18 @@ def cf_blob_service(cli_ctx, kwargs):
     return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)
 
 
+def get_credential(kwargs):
+    account_key = kwargs.pop('account_key', None)
+    token_credential = kwargs.pop('token_credential', None)
+    sas_token = kwargs.pop('sas_token', None)
+    credential = account_key or sas_token or token_credential
+    return credential
+
+
 def cf_blob_client(cli_ctx, kwargs):
     # track2 partial migration
     if kwargs.get('blob_url'):
-        t_blob_client = get_sdk(cli_ctx, CUSTOM_DATA_STORAGE_BLOB, '_blob_client#BlobClient')
+        t_blob_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
         credential = get_credential(kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')

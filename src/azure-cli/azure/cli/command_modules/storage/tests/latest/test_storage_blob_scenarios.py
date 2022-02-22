@@ -495,6 +495,49 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaisesRegex(ClientAuthenticationError, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', location='centraluseuap')
+    def test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):
+        account_info = storage_account_info
+        container = self.create_container(account_info, prefix="con")
+
+        local_file = self.create_temp_file(128)
+
+        # test with file
+        block_blob_tiers = ['Hot','Cool','Archive']
+        for tier in block_blob_tiers:
+            blob_name = self.create_random_name(prefix='blob', length=24)
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} ', account_info,
+                             container, local_file, blob_name, 'block', tier)
+            self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+                .assert_with_checks(JMESPathCheck('name', blob_name),
+                                    JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                    JMESPathCheck('properties.contentLength', 128 * 1024),
+                                    JMESPathCheck('properties.blobTier', tier))
+
+        page_blob_tiers = ["P4","P6","P10","P15","P20","P30","P40","P50","P60","P70","P80"]
+        for tier in page_blob_tiers:
+            blob_name = self.create_random_name(prefix='blob', length=24)
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} --debug', account_info,
+                             container, local_file, blob_name, 'page', tier)
+            self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+                .assert_with_checks(JMESPathCheck('name', blob_name),
+                                    JMESPathCheck('properties.blobType', 'PageBlob'),
+                                    JMESPathCheck('properties.contentLength', 128 * 1024),
+                                    JMESPathCheck('properties.blobTier', tier))
+
+        # test with data
+        blob_name = self.create_random_name(prefix='blob', length=24)
+        test_string = "testupload"
+        length = len(test_string)
+
+        self.storage_cmd('storage blob upload -c {} --data "{}" --length {} -n {} --overwrite', account_info,
+                         container, test_string, length, blob_name)
+        self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+            .assert_with_checks(JMESPathCheck('name', blob_name),
+                                JMESPathCheck('properties.blobType', 'BlockBlob'),
+                                JMESPathCheck('properties.contentLength', length))
+
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):

@@ -5,8 +5,8 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, tags_type_preview, file_type, get_location_type, get_enum_type,
-                                                get_three_state_flag, edge_zone_type)
+from azure.cli.core.commands.parameters import (tags_type, tags_type_preview, file_type, get_location_type,
+                                                get_enum_type, get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
@@ -73,8 +73,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
-    socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
-                                          type=int)
     large_file_share_type = CLIArgumentType(
         action='store_true', min_api='2019-04-01',
         help='Enable the capability to support large file shares with more than 5 TiB capacity for storage account.'
@@ -908,6 +906,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                  'specifies the blob snapshot to retrieve.')
         c.argument('lease_id', help='Required if the blob has an active lease.')
 
+    # pylint: disable=line-too-long
     with self.argument_context('storage blob upload', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from ._validators import validate_encryption_scope_client_params, validate_upload_blob
 
@@ -928,7 +927,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2019-02-02')
         c.argument('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags", is_preview=True,
                    help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
-                        'operation will  overwrite the existing data. If set to False, the operation will fail with '
+                        'operation will overwrite the existing data. If set to False, the operation will fail with '
                         'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
                         'data already exists, an error will not be raised and the data will be appended to the existing '
                         'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
