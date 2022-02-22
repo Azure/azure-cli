@@ -407,32 +407,32 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
                               source_files=None, destination_path=None,
-                              destination_container_name=None, blob_type=None,
+                              container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
-                              if_none_match=None, timeout=None, dryrun=False):
-    def _create_return_result(blob_name, blob_content_settings, upload_result=None):
-        blob_name = normalize_blob_file_path(destination_path, blob_name)
+                              if_none_match=None, timeout=None, dryrun=False, socket_timeout=None, **kwargs):
+    def _create_return_result(blob_content_settings, upload_result=None):
         return {
-            'Blob': client.make_blob_url(destination_container_name, blob_name),
+            'Blob': client.url,
             'Type': blob_content_settings.content_type,
-            'Last Modified': upload_result.last_modified if upload_result else None,
-            'eTag': upload_result.etag if upload_result else None}
+            'Last Modified': upload_result['last_modified'] if upload_result else None,
+            'eTag': upload_result['etag'] if upload_result else None}
 
     source_files = source_files or []
-    t_content_settings = cmd.get_models('blob.models#ContentSettings')
+    t_content_settings = cmd.get_models('_models#ContentSettings', resource_type=cmd.command_kwargs['resource_type'])
 
     results = []
     if dryrun:
         logger.info('upload action: from %s to %s', source, destination)
         logger.info('    pattern %s', pattern)
-        logger.info('  container %s', destination_container_name)
+        logger.info('  container %s', container_name)
         logger.info('       type %s', blob_type)
         logger.info('      total %d', len(source_files))
         results = []
         for src, dst in source_files:
-            results.append(_create_return_result(dst, guess_content_type(src, content_settings, t_content_settings)))
+            results.append(_create_return_result(blob_content_settings=guess_content_type(src, content_settings,
+                                                                                          t_content_settings)))
     else:
         @check_precondition_success
         def _upload_blob(*args, **kwargs):
@@ -451,18 +451,19 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             if progress_callback:
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
-
-            include, result = _upload_blob(cmd, client, file_path=src, container_name=destination_container_name,
-                                           blob_name=normalize_blob_file_path(destination_path, dst),
+            blob_client = client.get_blob_client(container=container_name,
+                                                 blob=normalize_blob_file_path(destination_path, dst))
+            include, result = _upload_blob(cmd, blob_client, file_path=src,
                                            blob_type=blob_type, content_settings=guessed_content_settings,
                                            metadata=metadata, validate_content=validate_content,
                                            maxsize_condition=maxsize_condition, max_connections=max_connections,
                                            lease_id=lease_id, progress_callback=progress_callback,
                                            if_modified_since=if_modified_since,
                                            if_unmodified_since=if_unmodified_since, if_match=if_match,
-                                           if_none_match=if_none_match, timeout=timeout)
+                                           if_none_match=if_none_match, timeout=timeout, **kwargs)
             if include:
-                results.append(_create_return_result(dst, guessed_content_settings, result))
+                results.append(_create_return_result(blob_content_settings=guessed_content_settings,
+                                                     upload_result=result))
         # end progress hook
         if progress_callback:
             progress_callback.hook.end()
