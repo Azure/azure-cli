@@ -3431,17 +3431,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if enable_automatic_repairs is not None or \
             automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
-        if vmss.automatic_repairs_policy is None:
-            AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
-            vmss.automatic_repairs_policy = \
-                AutomaticRepairsPolicy(enabled="true",
-                                       grace_period=automatic_repairs_grace_period,
-                                       repair_action=automatic_repairs_action)
-        else:
-            if automatic_repairs_grace_period is not None:
-                vmss.automatic_repairs_policy.grace_period = automatic_repairs_grace_period
-            if automatic_repairs_action is not None:
-                vmss.automatic_repairs_policy.repair_action = automatic_repairs_action
+        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
+        vmss.automatic_repairs_policy = \
+            AutomaticRepairsPolicy(enabled="true",
+                                   grace_period=automatic_repairs_grace_period,
+                                   repair_action=automatic_repairs_action)
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):

@@ -1170,7 +1170,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         automatic_repairs_policy = {
             'enabled': 'true',
             'gracePeriod': automatic_repairs_grace_period or 'PT10M',
-            'repairAction': automatic_repairs_action or 'Replcae'
+            'repairAction': automatic_repairs_action or 'Replace'
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 
