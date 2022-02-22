@@ -1151,7 +1151,7 @@ def encrypt_key(cmd, client, algorithm, value, iv=None, aad=None, name=None, ver
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.encrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  additional_authenticated_data=binascii.unhexlify(aad) if aad else None)
@@ -1162,7 +1162,7 @@ def decrypt_key(cmd, client, algorithm, value, iv=None, tag=None, aad=None,
     EncryptionAlgorithm = cmd.loader.get_sdk('EncryptionAlgorithm', mod='crypto._enums',
                                              resource_type=ResourceType.DATA_KEYVAULT_KEYS)
     import binascii
-    crypto_client = client.get_cryptography_client(name, version=version)
+    crypto_client = client.get_cryptography_client(name, key_version=version)
     return crypto_client.decrypt(EncryptionAlgorithm(algorithm), value,
                                  iv=binascii.unhexlify(iv) if iv else None,
                                  authentication_tag=binascii.unhexlify(tag) if tag else None,
