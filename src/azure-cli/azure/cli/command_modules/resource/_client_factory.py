@@ -128,12 +128,24 @@ def cf_resource_managedappdefinitions(cli_ctx, _):
     return _resource_managedapps_client_factory(cli_ctx).application_definitions
 
 
+def cf_management_groups_mixin(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx)
+
+
 def cf_management_groups(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_groups
 
 
 def cf_management_group_subscriptions(cli_ctx, _):
     return _resource_managementgroups_client_factory(cli_ctx).management_group_subscriptions
+
+
+def cf_management_group_entities(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).entities
+
+
+def cf_hierarchy_settings(cli_ctx, _):
+    return _resource_managementgroups_client_factory(cli_ctx).hierarchy_settings
 
 
 def cf_resource_templatespecs(cli_ctx, _):

@@ -99,7 +99,7 @@ DEPENDENCIES = [
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=13.0.0b1',
     'azure-mgmt-managedservices~=1.0',
-    'azure-mgmt-managementgroups~=0.1',
+    'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=7.0',
