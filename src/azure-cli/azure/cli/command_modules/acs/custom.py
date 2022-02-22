@@ -2210,19 +2210,11 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         if admin:
             raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
-        if serverType is None:
-            credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name)
-        else:
-            credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name, serverType)
+        credentialResults = client.list_cluster_admin_credentials(
+            resource_group_name, name, serverType)
     else:
-        if serverType is None:
-            credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, format=credential_format)
-        else:
-            credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType, format=credential_format)
+        credentialResults = client.list_cluster_user_credentials(
+            resource_group_name, name, serverType, credential_format)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
