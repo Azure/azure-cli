@@ -976,7 +976,7 @@ parameters:
 
 helps['aks nodepool list'] = """
 type: command
-short-summary: List node pools in the managed Kubernetes cluster.
+short-summary: List node pools in the managed Kubernetes cluster. To get list of nodes in the cluster run `kubectl get nodes` command.
 """
 
 helps['aks nodepool scale'] = """
