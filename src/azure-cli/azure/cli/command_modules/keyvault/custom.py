@@ -802,6 +802,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                                 vault_name=vault_name,
                                 parameters=VaultCreateOrUpdateParameters(
                                     location=parameters.location,
+                                    tags=parameters.tags,
                                     properties=parameters.properties),
                                 no_wait=no_wait)
 
