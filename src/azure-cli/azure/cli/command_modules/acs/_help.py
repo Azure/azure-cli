@@ -905,6 +905,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --scale-down-mode
+    type: string
+    short-summary: "Describe how VMs are added to or removed from nodepools."
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool.
@@ -1012,6 +1015,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --scale-down-mode
+    type: string
+    short-summary: "Describe how VMs are added to or removed from nodepools."
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.

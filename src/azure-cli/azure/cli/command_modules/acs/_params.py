@@ -32,6 +32,8 @@ from ._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_DISK_TYPE_EPHEMERAL,
     CONST_RAPID_UPGRADE_CHANNEL,
@@ -435,6 +437,7 @@ def load_arguments(self, _):
             c.argument('os_sku', completer=get_ossku_completion_list)
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
+            c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
             c.argument('node_taints', validator=validate_taints)
             c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
             c.argument('eviction_policy', arg_type=get_enum_type(node_eviction_policies), validator=validate_eviction_policy)
@@ -470,6 +473,7 @@ def load_arguments(self, _):
                    "--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', type=str, validator=validate_max_surge)
