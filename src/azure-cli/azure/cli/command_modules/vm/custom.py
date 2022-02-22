@@ -3412,11 +3412,14 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if user_data is not None:
         vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
-    if v_cpus_available is not None:
-        vmss.virtual_machine_profile.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+    if v_cpus_available is not None or v_cpus_per_core is not None:
+        HardwareProfile= cmd.get_models('HardwareProfile')
+        VMSizeProperties = cmd.get_models('VMSizeProperties')
+        hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
+                                                                               v_cpus_per_core=v_cpus_per_core))
 
-    if v_cpus_per_core is not None:
-        vmss.virtual_machine_profile.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
+        vmss.virtual_machine_profile.hardware_profile = hardware_profile
+
 
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
