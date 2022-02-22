@@ -88,14 +88,19 @@ long-summary: >
   See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
   Alternately the setting can be enabled using the az logicapp config appsettings set command.
 examples:
-- name: Perform deployment by using zip file content.
+- name: Perform deployment by using zip file content with remote build enabled.
   text: >
       az logicapp deploy \\
           -g {myRG} -n {myAppName} \\
-          --src /path/to/file.zip
-- name: Deploy a zip file in the current working directory
+          --src /path/to/file.zip --build
+- name: Deploy a zip file in the current working directory with remote build enabled.
   text: >
       az logicapp deploy \\
           -g {myRG} -n {myAppName} \\
-          --src file.zip
+          --src file.zip --build
+- name: Deploy a zip file and check deployment status for at most 120 seconds
+  text: >
+      az logicapp deploy \\
+          -g {myRG} -n {myAppName} \\
+          --src file.zip --build --timeout 120
 """
