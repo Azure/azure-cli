@@ -377,7 +377,7 @@ def load_arguments(self, _):
     with self.argument_context('aks get-credentials', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
         c.argument('context_name', options_list=['--context'],
-                   help='If specified, overwrite the default context name.')
+                   help='If specified, overwrite the default context name. The `--admin` parameter takes precedence over `--context`')
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
         c.argument('public_fqdn', default=False, action='store_true')
