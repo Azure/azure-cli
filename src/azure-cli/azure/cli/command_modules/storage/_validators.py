@@ -1276,10 +1276,10 @@ def page_blob_tier_validator(cmd, namespace):
         else:
             namespace.premium_page_blob_tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
     except AttributeError:
-        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
-        tier_names = get_blob_tier_names(cmd.cli_ctx, 'blob.models#PremiumPageBlobTier', track2)
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#PremiumPageBlobTier', track2)
         if track2:
-            tier_names = get_blob_tier_names(cmd.cli_ctx,
+            tier_names = get_blob_tier_names_track2(cmd.cli_ctx,
                                              '_generated.models._azure_blob_storage_enums#PremiumPageBlobAccessTier',
                                              track2)
         raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(tier_names)))
@@ -1300,10 +1300,10 @@ def block_blob_tier_validator(cmd, namespace):
         else:
             namespace.standard_blob_tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
     except AttributeError:
-        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
-        tier_names = get_blob_tier_names(cmd.cli_ctx, 'blob.models#StandardBlobTier', track2)
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names_track2
+        tier_names = get_blob_tier_names_track2(cmd.cli_ctx, 'blob.models#StandardBlobTier', track2)
         if track2:
-            tier_names = get_blob_tier_names(cmd.cli_ctx, '_models#StandardBlobTier', track2)
+            tier_names = get_blob_tier_names_track2(cmd.cli_ctx, '_models#StandardBlobTier', track2)
         raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(tier_names)))
 
 
