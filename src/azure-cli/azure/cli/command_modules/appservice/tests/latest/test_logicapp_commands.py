@@ -106,18 +106,27 @@ class LogicappBasicE2ETest(ScenarioTest):
             JMESPathCheck('length([])', 0)
         ])
 
+
+class LogicAppDeployTest(LiveScenarioTest):
+    # Must be run live because the API response throws a UnicodeDecode Error in VCR
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_zip_deploy_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
         zip_file = os.path.join(TEST_DIR, 'logicapp.zip')
         storage = 'logicpplanstorage1'
-        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan)).get_output_in_json()['id']
+        self.cmd('appservice plan create -g {} -n {} --sku WS1'.format(resource_group, plan))
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, DEFAULT_LOCATION))
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage))
 
-        self.cmd('logicapp deployment source config-zip -g {} -n {} --build-remote --src {}'.format(resource_group, logicapp_name, zip_file))
+        self.cmd('logicapp deploy -g {} -n {} --build --src {}'.format(resource_group, logicapp_name, zip_file), checks=[
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('active', True),
+            JMESPathCheck('complete', True),
+            JMESPathCheck('message', 'Created via a push deployment'),
+            JMESPathCheck('site_name', logicapp_name),
+        ])
 
 
 class LogicAppPlanTest(ScenarioTest):

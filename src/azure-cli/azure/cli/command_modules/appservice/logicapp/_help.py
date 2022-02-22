@@ -77,20 +77,9 @@ examples:
     crafted: true
 """
 
-
-helps['logicapp deployment'] = """
- type: group
- short-summary: Manage logic app deployments.
- """
-
-helps['logicapp deployment source'] = """
-type: group
-short-summary: Manage logic app deployment via source control.
-"""
-
-helps['logicapp deployment source config-zip'] = """
+helps['logicapp deploy'] = """
 type: command
-short-summary: Perform deployment using the kudu zip push deployment for a logic app.
+short-summary: Deploy a zip file to a logic app and perform a remote build
 long-summary: >
   By default Kudu assumes that zip deployments do not require any build-related actions like
   npm install or dotnet publish. This can be overridden by including an .deployment file in your
@@ -101,7 +90,12 @@ long-summary: >
 examples:
 - name: Perform deployment by using zip file content.
   text: >
-      az logicapp deployment source config-zip \\
+      az logicapp deploy \\
           -g {myRG} -n {myAppName} \\
-          --src {zipFilePathLocation}
+          --src /path/to/file.zip
+- name: Deploy a zip file in the current working directory
+  text: >
+      az logicapp deploy \\
+          -g {myRG} -n {myAppName} \\
+          --src file.zip
 """

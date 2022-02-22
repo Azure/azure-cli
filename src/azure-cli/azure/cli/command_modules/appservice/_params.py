@@ -235,14 +235,6 @@ def load_arguments(self, _):
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
 
-        with self.argument_context(scope + ' deployment source config-zip') as c:
-            c.argument('src', help='a zip file path for deployment')
-            c.argument('build_remote', help='enable remote build during deployment',
-                       arg_type=get_three_state_flag(return_label=True))
-            c.argument('timeout', type=int, options_list=['--timeout', '-t'],
-                       help='Configurable timeout in seconds for checking the status of deployment',
-                       validator=validate_timeout_value)
-
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope) as c:
             c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
@@ -294,6 +286,14 @@ def load_arguments(self, _):
             c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
         with self.argument_context(scope + ' identity remove') as c:
             c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+
+        with self.argument_context(scope + ' deployment source config-zip') as c:
+            c.argument('src', help='a zip file path for deployment')
+            c.argument('build_remote', help='enable remote build during deployment',
+                       arg_type=get_three_state_flag(return_label=True))
+            c.argument('timeout', type=int, options_list=['--timeout', '-t'],
+                       help='Configurable timeout in seconds for checking the status of deployment',
+                       validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type),
@@ -369,6 +369,14 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
                        arg_type=get_three_state_flag(return_label=True))
+
+    with self.argument_context('logicapp deploy') as c:
+        c.argument('src', help='a zip file path for deployment')
+        c.argument('build_remote', options_list=['--build', '-b'], help='enable remote build during deployment',
+                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('timeout', type=int, options_list=['--timeout', '-t'],
+                   help='Configurable timeout in seconds for checking the status of deployment',
+                   validator=validate_timeout_value)
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
