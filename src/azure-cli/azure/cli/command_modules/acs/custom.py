@@ -2199,11 +2199,16 @@ def aks_get_versions(cmd, client, location):
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
-                        overwrite_existing=False, context_name=None, public_fqdn=False):
+                        overwrite_existing=False, context_name=None, public_fqdn=False,
+                        credential_format=None):
     credentialResults = None
     serverType = None
     if public_fqdn:
         serverType = 'public'
+    if credential_format:
+        credential_format = credential_format.lower()
+        if admin:
+            raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
         if serverType is None:
             credentialResults = client.list_cluster_admin_credentials(
@@ -2214,10 +2219,10 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     else:
         if serverType is None:
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name)
+                resource_group_name, name, format=credential_format)
         else:
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType)
+                resource_group_name, name, serverType, format=credential_format)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
