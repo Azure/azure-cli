@@ -665,7 +665,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # Set version to 1.0
         self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
                  .format(connection_string))
-        time.sleep(10)
+        time.sleep(60)
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('table.version', '1.0'),
             JMESPathCheck('table.delete', False),
@@ -2160,6 +2160,7 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('allowCrossTenantReplication', True)])
 
     @record_only()
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2021-04-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
     @StorageAccountPreparer(parameter_name='destination_account', location='eastus2euap', kind='StorageV2')
