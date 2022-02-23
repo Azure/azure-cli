@@ -762,8 +762,9 @@ def list_revision(cmd,
     label = prep_label_filter_for_url_encoding(label)
 
     try:
-        query_fields = []
+        query_fields = None
         if fields:
+            query_fields = []
             for field in fields:
                 query_fields.append(field.name.lower())
 

@@ -577,7 +577,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
                     self.check('value', updated_entry_value),
                     self.check('label', updated_label)])
 
-        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag key label last_modified locked tags value').get_output_in_json()
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
         assert len(revisions) == 2
 
         assert revisions[0]['content_type'] == 'text'
