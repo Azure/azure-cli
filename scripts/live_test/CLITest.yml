@@ -467,10 +467,11 @@ jobs:
         # pip install certifi
         # Send notification
         az -v
-        echo "login to user azureclitest\n"
+        echo "login to user azureclitest"
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "set account"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-        echo "sendemail to grid\n"
+        echo "sendemail to grid"
         python /home/vsts/work/1/s/scripts/live_test/sendemail.py "$(SENDGRID_KEY)" "$(Build.BuildId)" "$(USER_REPO)" "$(USER_BRANCH)" "$(USER_TARGET)" "$(USER_LIVE)" "$(System.ArtifactsDirectory)" "$(Build.RequestedForEmail)" "$(ACCOUNT_KEY)" "$commit_id" "$(DB_PWD)"
         # python /home/vsts/work/1/s/scripts/live_test/upload.py "$(System.ArtifactsDirectory)" "$(ACCOUNT_KEY)" "$(USER_LIVE)"
         # Clean resources
