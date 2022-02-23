@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     CLIInternalError
 )
@@ -90,14 +91,30 @@ def set_user_token_header(client, cli_ctx):
     return client
 
 
-def register_provider():
+def provider_is_registered(subscription=None):
+    # register the provider
+    subs_arg = ''
+    if subscription:
+        subs_arg = '--subscription {}'.format(subscription)
+    output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
+    if output.get('registrationState') == 'NotRegistered':
+        return False
+    return True
+
+
+def register_provider(subscription=None):
     from knack.log import get_logger
     logger = get_logger(__name__)
 
     logger.warning('Provider Microsoft.ServiceLinker is not registered, '
                    'trying to register. This usually takes 1-2 minutes.')
+
+    subs_arg = ''
+    if subscription:
+        subs_arg = '--subscription {}'.format(subscription)
+
     # register the provider
-    run_cli_cmd('az provider register -n Microsoft.ServiceLinker')
+    run_cli_cmd('az provider register -n Microsoft.ServiceLinker {}'.format(subs_arg))
 
     # verify the registration, 30 * 10s polling the result
     MAX_RETRY_TIMES = 30
@@ -106,7 +123,7 @@ def register_provider():
     count = 0
     while count < MAX_RETRY_TIMES:
         time.sleep(RETRY_INTERVAL)
-        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker')
+        output = run_cli_cmd('az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
         current_state = output.get('registrationState')
         if current_state == 'Registered':
             return True
@@ -118,14 +135,36 @@ def register_provider():
 
 
 def auto_register(func, *args, **kwargs):
+    import copy
+    from azure.core.polling._poller import LROPoller
     from azure.core.exceptions import HttpResponseError
 
+    # kwagrs will be modified in SDK
+    kwargs_backup = copy.deepcopy(kwargs)
     try:
-        return func(*args, **kwargs)
+        res = func(*args, **kwargs)
+        if isinstance(res, LROPoller):
+            # polling the result to handle the case when target subscription is not registered
+            return res.result()
+        return res
+
     except HttpResponseError as ex:
+        # source subscription is not registered
         if ex.error and ex.error.code == 'SubscriptionNotRegistered':
             if register_provider():
-                return func(*args, **kwargs)
+                return func(*args, **kwargs_backup)
             raise CLIInternalError('Registeration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
+        # target subscription is not registered, raw check
+        if ex.error and ex.error.code == 'UnauthorizedResourceAccess' and 'not registered' in ex.error.message:
+            if 'parameters' in kwargs_backup and 'target_id' in kwargs_backup.get('parameters'):
+                segments = parse_resource_id(kwargs_backup.get('parameters').get('target_id'))
+                target_subs = segments.get('subscription')
+                # double check whether target subscription is registered
+                if not provider_is_registered(target_subs):
+                    if register_provider(target_subs):
+                        return func(*args, **kwargs_backup)
+                    raise CLIInternalError('Registeration failed, please manually run command '
+                                           '`az provider register -n Microsoft.ServiceLinker --subscription {}` '
+                                           'to register the provider.'.format(target_subs))
         raise ex

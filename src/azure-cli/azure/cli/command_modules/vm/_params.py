@@ -1019,7 +1019,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('identity_role', options_list=['--role'], arg_group='Managed Service Identity',
                        help='Role name or id the system assigned identity will have. '
-                            'Please note that the default value "Contributor" will be removed in the future, '
+                            'Please note that the default value "Contributor" will be removed in the future version 2.35.0, '
                             "so please specify '--role' and '--scope' at the same time when assigning a role to the managed identity")
 
     for scope in ['vm identity assign', 'vmss identity assign']:
@@ -1381,6 +1381,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
     # endRegion
 
+    # region Capacity
     with self.argument_context('capacity reservation group') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
@@ -1412,3 +1413,42 @@ def load_arguments(self, _):
 
     with self.argument_context('capacity reservation show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')
+    # endRegion
+
+    # region Restore point
+    with self.argument_context('restore-point') as c:
+        c.argument('restore_point_collection_name', options_list=['--collection-name'],
+                   help='The name of the restore point collection.')
+
+    with self.argument_context('restore-point create') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+        c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
+                   'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
+                   'included.')
+
+    with self.argument_context('restore-point show') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+
+    with self.argument_context('restore-point delete') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+
+    with self.argument_context('restore-point wait') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+    # endRegion
+
+    # region Restore point collection
+    with self.argument_context('restore-point collection create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
+                   arg_group='Source')
+
+    with self.argument_context('restore-point collection update') as c:
+        c.argument('tags', tags_type)
+
+    # endRegion
