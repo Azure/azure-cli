@@ -31,10 +31,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Each test will register the container at the start and unregister at the end of the test
     # Make sure that the container is not already registered since the start of the test
 
-    # For the tests using PSTestVM664243 and hiagaSrcVault -
-    # Each test will register the container at the start and unregister at the end of the test
-    # Make sure that the container is not already registered since the start of the test
-
     # Note: Archive and CRR test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
     @record_only()
     def test_backup_wl_sql_container(self):
