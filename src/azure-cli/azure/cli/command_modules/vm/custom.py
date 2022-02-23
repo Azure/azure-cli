@@ -2816,7 +2816,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
                 capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
-                automatic_repairs_action=None):
+                security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None):
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3078,7 +3079,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
             capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
-            patch_mode=patch_mode, enable_agent=enable_agent, automatic_repairs_action=automatic_repairs_action)
+            patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
+            enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
+            automatic_repairs_action=automatic_repairs_action)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3368,8 +3371,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, automatic_repairs_action=None,
-                **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
+                enable_vtpm=None, automatic_repairs_action=None, **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3471,6 +3474,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}
@@ -4878,3 +4887,66 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
     return vmss.virtual_machine_profile.application_profile
+
+
+# region Restore point collection
+def restore_point_create(client,
+                         resource_group_name,
+                         restore_point_collection_name,
+                         restore_point_name,
+                         exclude_disks=None,
+                         no_wait=False):
+    parameters = {}
+    if exclude_disks is not None:
+        parameters['exclude_disks'] = []
+        for disk in exclude_disks:
+            parameters['exclude_disks'].append({'id': disk})
+    return sdk_no_wait(no_wait,
+                       client.begin_create,
+                       resource_group_name=resource_group_name,
+                       restore_point_collection_name=restore_point_collection_name,
+                       restore_point_name=restore_point_name,
+                       parameters=parameters)
+
+# endRegion
+
+
+# region Restore point collection
+def restore_point_collection_show(client,
+                                  resource_group_name,
+                                  restore_point_collection_name):
+    return client.get(resource_group_name=resource_group_name,
+                      restore_point_collection_name=restore_point_collection_name,
+                      expand="restorePoints")
+
+
+def restore_point_collection_create(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    location,
+                                    source_id,
+                                    tags=None):
+    parameters = {}
+    properties = {}
+    parameters['location'] = location
+    if tags is not None:
+        parameters['tags'] = tags
+    properties['source'] = {'id': source_id}
+    parameters['properties'] = properties
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   restore_point_collection_name=restore_point_collection_name,
+                                   parameters=parameters)
+
+
+def restore_point_collection_update(client,
+                                    resource_group_name,
+                                    restore_point_collection_name,
+                                    tags=None):
+    parameters = {}
+    if tags is not None:
+        parameters['tags'] = tags
+    return client.update(resource_group_name=resource_group_name,
+                         restore_point_collection_name=restore_point_collection_name,
+                         parameters=parameters)
+
+# endRegion

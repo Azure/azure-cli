@@ -458,6 +458,11 @@ def load_arguments(self, _):
         c.argument('start_search_time', arg_type=get_datetime_type(help='Datetime format.'))
         c.argument('end_search_time', arg_type=get_datetime_type(help='Datetime format.'))
 
+    with self.argument_context('monitor log-analytics workspace table restore create') as c:
+        c.argument('start_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('end_restore_time', arg_type=get_datetime_type(help='Datetime format.'))
+        c.argument('restore_source_table', help='The table to restore data from.')
+
     with self.argument_context('monitor log-analytics workspace table update') as c:
         from azure.mgmt.loganalytics.models import TablePlanEnum
         c.argument('columns', nargs='+', help='A list of table custom columns.Extracts multiple space-separated colunms in colunm_name=colunm_type format')
