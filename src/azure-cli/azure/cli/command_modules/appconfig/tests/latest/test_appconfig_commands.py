@@ -586,6 +586,12 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert revisions[0]['value'] == 'Green'
         assert revisions[0]['last_modified'] is not None
         assert revisions[1]['etag'] is not None
+        assert 'key' not in revisions[0]
+        assert 'key' not in revisions[1]
+        assert 'locked' not in revisions[0]
+        assert 'locked' not in revisions[1]
+        assert 'tags' not in revisions[0]
+        assert 'tags' not in revisions[1]
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
