@@ -3433,7 +3433,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
         vmss.automatic_repairs_policy = \
-            AutomaticRepairsPolicy(enabled="true",
+            AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
                                    grace_period=automatic_repairs_grace_period,
                                    repair_action=automatic_repairs_action)
 
