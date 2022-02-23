@@ -1122,6 +1122,15 @@ examples:
         az monitor log-analytics workspace table create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL --retention-time 45 --columns MyColumn1=string TimeGenerated=datetime
 """
 
+helps['monitor log-analytics workspace table migrate'] = """
+type: command
+short-summary: Migrate a Log Analytics table from support of the Data Collector API and Custom Fields features to support of Data Collection Rule-based Custom Logs.
+examples:
+  - name: Migrate a Log Analytics workspace table.
+    text: |
+        az monitor log-analytics workspace table migrate --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_CL
+"""
+
 helps['monitor log-analytics workspace table search-job'] = """
 type: group
 short-summary: Manage tables for log analytics workspace search results table.
@@ -1134,6 +1143,20 @@ examples:
   - name: Create a Log Analytics workspace search result table.
     text: |
         az monitor log-analytics workspace table search-job create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_SRCH --retention-time 45 --search-query "Heartbeat | where SourceSystem != '' | project SourceSystem" --limit 1000 --start-search-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-search-time "Sat, 28 Aug 2021 08:29:18 GMT"
+"""
+
+helps['monitor log-analytics workspace table restore'] = """
+type: group
+short-summary: Manage tables for log analytics workspace restore logs table.
+"""
+
+helps['monitor log-analytics workspace table restore create'] = """
+type: command
+short-summary: Create a Log Analytics workspace restore logs table. The table name needs to end with '_RST'.
+examples:
+  - name: Create a Log Analytics workspace restore logs table.
+    text: |
+        az monitor log-analytics workspace table restore create --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable_RST --start-restore-time "Sat, 28 Aug 2021 05:29:18 GMT" --end-restore-time "Sat, 28 Aug 2021 08:29:18 GMT" --restore-source-table MyTable
 """
 
 
