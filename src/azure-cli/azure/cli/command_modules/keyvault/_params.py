@@ -71,6 +71,7 @@ def load_arguments(self, _):
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+        oct = "oct"  #: Octet sequence (used to represent symmetric keys)
 
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
