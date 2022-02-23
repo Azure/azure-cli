@@ -71,6 +71,7 @@ def load_arguments(self, _):
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+        oct = "oct"  #: Octet sequence (used to represent symmetric keys)
 
     class CLISecurityDomainOperation(str, Enum):
         download = "download"  #: Download operation
@@ -445,6 +446,10 @@ def load_arguments(self, _):
                        validator=process_key_release_policy, is_preview=True,
                        help='The policy rules under which the key can be exported. '
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
+            c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
+                    help='Mark a release policy as immutable. '
+                         'An immutable release policy cannot be changed or updated after being marked immutable. '
+                         'Release policies are mutable by default.')
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -505,6 +510,10 @@ def load_arguments(self, _):
                 validator=process_key_release_policy, is_preview=True,
                 help='The policy rules under which the key can be exported. '
                      'Policy definition as JSON, or a path to a file containing JSON policy definition.')
+        c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
+                help='Mark a release policy as immutable. '
+                     'An immutable release policy cannot be changed or updated after being marked immutable. '
+                     'Release policies are mutable by default.')
         c.extra('tags', tags_type)
 
     with self.argument_context('keyvault key rotation-policy update') as c:

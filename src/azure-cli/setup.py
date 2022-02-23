@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.33.0"
+VERSION = "2.33.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -60,11 +60,11 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys==4.5.0b4',
+    'azure-keyvault-keys==4.5.0b6',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
-    'azure-mgmt-apimanagement~=0.2.0',
+    'azure-mgmt-apimanagement~=3.0.0',
     'azure-mgmt-appconfiguration~=2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=0.61.0',
@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=9.1.0',
     'azure-mgmt-containerregistry==8.2.0',
-    'azure-mgmt-containerservice~=16.4.0',
+    'azure-mgmt-containerservice~=17.0.0',
     'azure-mgmt-cosmosdb~=7.0.0b2',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -97,9 +97,9 @@ DEPENDENCIES = [
     'azure-mgmt-iothubprovisioningservices~=1.0.0',
     'azure-mgmt-keyvault==9.3.0',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=13.0.0b1',
+    'azure-mgmt-loganalytics~=13.0.0b2',
     'azure-mgmt-managedservices~=1.0',
-    'azure-mgmt-managementgroups~=0.1',
+    'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=7.0',
@@ -119,7 +119,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource==20.0.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=2.0.0b1',
-    'azure-mgmt-servicebus~=6.0.0',
+    'azure-mgmt-servicebus~=7.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0b1',
     'azure-mgmt-servicefabric~=1.0.0',
