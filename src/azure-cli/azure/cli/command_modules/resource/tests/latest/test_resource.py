@@ -3938,6 +3938,10 @@ class BicepScenarioTest(ScenarioTest):
             self.greater_than('length(@)', 0)
         ])
 
+
+# Because don't want to record bicep cli binary
+class BicepBuildTest(LiveScenarioTest):
+    
     def test_bicep_build_decompile(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'storage_account_deploy.bicep').replace('\\', '\\\\')
