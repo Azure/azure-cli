@@ -376,7 +376,7 @@ jobs:
 
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
         # Clean resources
@@ -467,8 +467,8 @@ jobs:
         # pip install certifi
         # Send notification
         az -v
-        echo "login to user azureclitest"
-        az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
+        echo "login to user azureclilivetest"
+        az login -u azureclilivetest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         echo "set account"
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
         echo "sendemail to grid"
