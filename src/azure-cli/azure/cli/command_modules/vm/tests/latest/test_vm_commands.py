@@ -1800,6 +1800,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
 class VMMonitorTestUpdateLinux(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_linux', location='eastus')
     def test_vm_update_with_workspace_linux(self, resource_group):
 
@@ -2148,6 +2149,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -2234,6 +2236,7 @@ class VMCreateExistingOptions(ScenarioTest):
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -2634,6 +2637,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -2715,6 +2719,7 @@ class VMSSCreateAndModify(ScenarioTest):
 
 class VMSSCreateOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
 
@@ -3375,6 +3380,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
@@ -6186,6 +6192,7 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
 
 class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_subnet')
     def test_vm_create_auto_create_subnet(self, resource_group):
 
@@ -7437,6 +7444,107 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
             self.check_pattern('completionPercent', '\d?.\d?')
         ])
+
+
+class RestorePointScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collections', location='westus')
+    def test_restore_point(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('collection_', 20),
+            'point_name': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+            self.check('name', '{point_name}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'point_id': point['id']
+        })
+
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+            self.check('id', '{point_id}'),
+            self.check('name', '{point_name}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('restorePoints[0].id', '{point_id}'),
+            self.check('restorePoints[0].name', '{point_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}')
+        ])
+
+        self.cmd('restore-point delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')
+    def test_restore_point_collection(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}'),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection update -g {rg} --collection-name {collection_name} --tags tag=test', checks=[
+            self.check('tags', {'tag': 'test'})
+        ])
+
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}'),
+            self.check('tags', {'tag': 'test'}),
+            self.check('type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection list -g {rg}', checks=[
+            self.check('[0].location', 'westus'),
+            self.check('[0].name', '{collection_name}'),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].source.id', '{vm_id}'),
+            self.check('[0].tags', {'tag': 'test'}),
+            self.check('[0].type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection list-all', checks=[
+            self.check('type(@)', 'array')
+        ])
+
+        self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
+
 
 if __name__ == '__main__':
     unittest.main()

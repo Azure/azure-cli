@@ -1234,7 +1234,7 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
     # at the same time to reduce the impact of breaking change
     if not from_set_command and namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None):
         logger.warning(
-            "Please note that the default value of parameter '--role' will be removed in the future. "
+            "Please note that the default value of parameter '--role' will be removed in the future version 2.35.0. "
             "So specify '--role' and '--scope' at the same time when assigning a role to the managed identity "
             "to avoid breaking your automation script when the default value of '--role' is removed."
         )
