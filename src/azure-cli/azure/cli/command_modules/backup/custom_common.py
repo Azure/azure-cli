@@ -145,18 +145,17 @@ def fetch_tier_for_rp(rp):
 
     for i in range(len(rp.properties.recovery_point_tier_details)):
         currRpTierDetails = rp.properties.recovery_point_tier_details[i]
-        if (currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP") and
-                currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Rehydrated")):
+        if (currRpTierDetails.type == "ArchivedRP" and currRpTierDetails.status == "Rehydrated"):
             isRehydrated = True
 
-        if currRpTierDetails.status == _get_enum_position(RecoveryPointTierStatus, "Valid"):
-            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "InstantRP"):
+        if currRpTierDetails.status == "Valid":
+            if currRpTierDetails.type == "InstantRP":
                 isInstantRecoverable = True
 
-            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "HardenedRP"):
+            if currRpTierDetails.type == "HardenedRP":
                 isHardenedRP = True
 
-            if currRpTierDetails.type == _get_enum_position(RecoveryPointTierType, "ArchivedRP"):
+            if currRpTierDetails.type == "ArchivedRP":
                 isArchived = True
 
     if (isHardenedRP and isArchived) or (isRehydrated):
@@ -176,6 +175,9 @@ def fetch_tier_for_rp(rp):
 
     elif isHardenedRP:
         setattr(rp, "tier_type", "VaultStandard")
+
+    else:
+        setattr(rp, "tier_type", None)
 
 
 def fetch_tier(paged_recovery_points):
@@ -318,14 +320,3 @@ def _check_map(item_type, item_type_map):
     az_error.set_recommendation(recommendation_text)
     raise az_error
 
-
-def _get_enum_position(enum, value):
-    enum_len = len(enum)
-    count = 0
-    for val in enum:
-        if val == value:
-            break
-        count += 1
-    if count == enum_len:
-        raise InvalidArgumentValueError("enum value not present.")
-    return str(count)

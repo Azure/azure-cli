@@ -348,7 +348,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @RPPreparer()
     def test_backup_rp(self, resource_group, vault_name, vm_name):
 
         self.kwargs.update({
@@ -357,7 +356,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         })
 
         rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [].name', checks=[
-            self.check("length(@)", 2)
+            self.check("length(@)", 1)
         ]).get_output_in_json()
 
         self.kwargs['rp1'] = rp_names[0]
@@ -367,14 +366,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
-
-        self.kwargs['rp2'] = rp_names[1]
-        rp2_json = self.cmd('backup recoverypoint show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} -n {rp2}', checks=[
-            self.check("name", '{rp2}'),
-            self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
-        self.assertIn(vault_name.lower(), rp2_json['id'].lower())
-        self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer(soft_delete=False)
