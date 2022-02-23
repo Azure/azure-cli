@@ -1,6 +1,7 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard"}}'
+    body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"softDeleteRetentionInDays":
+      7, "enablePurgeProtection": false}}'
     headers:
       Accept:
       - application/json
@@ -11,29 +12,29 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '51'
+      - '131'
       Content-Type:
       - application/json
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-02-02T05:26:21.6118754+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002","name":"IdentityTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-02-23T23:04:10.1014317+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002","name":"IdentityTest000002","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/324c8907-b034-e106-2c09-6e3c7ee2376f?api-version=2021-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/c70d9cc8-172f-7b52-a224-347c48cf3393?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '515'
+      - '577'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:21 GMT
+      - Wed, 23 Feb 2022 23:04:10 GMT
       expires:
       - '-1'
       pragma:
@@ -63,15 +64,15 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/324c8907-b034-e106-2c09-6e3c7ee2376f?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/c70d9cc8-172f-7b52-a224-347c48cf3393?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/324c8907-b034-e106-2c09-6e3c7ee2376f","name":"324c8907-b034-e106-2c09-6e3c7ee2376f","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/c70d9cc8-172f-7b52-a224-347c48cf3393","name":"c70d9cc8-172f-7b52-a224-347c48cf3393","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/324c8907-b034-e106-2c09-6e3c7ee2376f?api-version=2021-03-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/c70d9cc8-172f-7b52-a224-347c48cf3393?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -79,7 +80,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:31 GMT
+      - Wed, 23 Feb 2022 23:04:20 GMT
       expires:
       - '-1'
       pragma:
@@ -111,23 +112,23 @@ interactions:
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:23+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:11+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '792'
+      - '852'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:31 GMT
+      - Wed, 23 Feb 2022 23:04:20 GMT
       etag:
-      - W/"2601314d-0000-0100-0000-61fa15fe0000"
+      - W/"ca00fe29-0000-0100-0000-6216bd6a0000"
       expires:
       - '-1'
       pragma:
@@ -159,12 +160,12 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2021-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-02-02T05:26:18Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2022-02-23T23:04:01Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -173,7 +174,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:31 GMT
+      - Wed, 23 Feb 2022 23:04:20 GMT
       expires:
       - '-1'
       pragma:
@@ -206,14 +207,14 @@ interactions:
       - -n -g
       User-Agent:
       - python/3.9.7 (Windows-10-10.0.22538-SP0) msrest/0.6.21 msrest_azure/0.6.4
-        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.32.0
+        azure-mgmt-msi/0.2.0 Azure-SDK-For-Python AZURECLI/2.33.1
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003?api-version=2015-08-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003","name":"UserAssignedIdentity000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"62b2c792-efbc-4b23-9348-628a0728a8b9","clientId":"7fd24de5-69ce-4b86-b446-34b030d31c26","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=62b2c792-efbc-4b23-9348-628a0728a8b9&aid=7fd24de5-69ce-4b86-b446-34b030d31c26"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003","name":"UserAssignedIdentity000003","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"d01ade9c-43c1-4d7d-a6d2-be5aea4c3a6a","clientId":"c7f03f99-bf92-4ede-b27d-2c26d41d48de","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=d01ade9c-43c1-4d7d-a6d2-be5aea4c3a6a&aid=c7f03f99-bf92-4ede-b27d-2c26d41d48de"}}'
     headers:
       cache-control:
       - no-cache
@@ -222,7 +223,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:33 GMT
+      - Wed, 23 Feb 2022 23:04:24 GMT
       expires:
       - '-1'
       location:
@@ -252,23 +253,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:23+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:11+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '792'
+      - '852'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:34 GMT
+      - Wed, 23 Feb 2022 23:04:24 GMT
       etag:
-      - W/"2601314d-0000-0100-0000-61fa15fe0000"
+      - W/"ca00fe29-0000-0100-0000-6216bd6a0000"
       expires:
       - '-1'
       pragma:
@@ -304,328 +305,23 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:37+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:27+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '932'
+      - '992'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:36 GMT
+      - Wed, 23 Feb 2022 23:04:26 GMT
       etag:
-      - W/"26017151-0000-0100-0000-61fa160d0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity assign
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:37+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '932'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:36 GMT
-      etag:
-      - W/"26017151-0000-0100-0000-61fa160d0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity assign
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --identities
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:37+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '932'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:37 GMT
-      etag:
-      - W/"26017151-0000-0100-0000-61fa160d0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"identity": {"type": "UserAssigned,SystemAssigned", "userAssignedIdentities":
-      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
-      {}}}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity assign
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '258'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n -g --identities
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"62b2c792-efbc-4b23-9348-628a0728a8b9","clientId":"7fd24de5-69ce-4b86-b446-34b030d31c26"}},"principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:40+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1250'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:39 GMT
-      etag:
-      - W/"26010852-0000-0100-0000-61fa160f0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity assign
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --identities
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"62b2c792-efbc-4b23-9348-628a0728a8b9","clientId":"7fd24de5-69ce-4b86-b446-34b030d31c26"}},"principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:40+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1250'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:39 GMT
-      etag:
-      - W/"26010852-0000-0100-0000-61fa160f0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity remove
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --identities
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
-        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"62b2c792-efbc-4b23-9348-628a0728a8b9","clientId":"7fd24de5-69ce-4b86-b446-34b030d31c26"}},"principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:40+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1250'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:40 GMT
-      etag:
-      - W/"26010852-0000-0100-0000-61fa160f0000"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.17.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"identity": {"type": "SystemAssigned"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appconfig identity remove
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '40'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - -n -g --identities
-      User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:41+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '932'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 02 Feb 2022 05:26:40 GMT
-      etag:
-      - W/"26015f52-0000-0100-0000-61fa16110000"
+      - W/"ca00ca2a-0000-0100-0000-6216bd7a0000"
       expires:
       - '-1'
       pragma:
@@ -653,29 +349,334 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:27+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '992'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:26 GMT
+      etag:
+      - W/"ca00ca2a-0000-0100-0000-6216bd7a0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:27+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '992'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:27 GMT
+      etag:
+      - W/"ca00ca2a-0000-0100-0000-6216bd7a0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned,UserAssigned", "userAssignedIdentities":
+      {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '258'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"d01ade9c-43c1-4d7d-a6d2-be5aea4c3a6a","clientId":"c7f03f99-bf92-4ede-b27d-2c26d41d48de"}},"principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:31+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:31 GMT
+      etag:
+      - W/"ca00f82a-0000-0100-0000-6216bd7f0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig identity assign
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"d01ade9c-43c1-4d7d-a6d2-be5aea4c3a6a","clientId":"c7f03f99-bf92-4ede-b27d-2c26d41d48de"}},"principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:31+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:31 GMT
+      etag:
+      - W/"ca00f82a-0000-0100-0000-6216bd7f0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig identity remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned,
+        UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/UserAssignedIdentity000003":{"principalId":"d01ade9c-43c1-4d7d-a6d2-be5aea4c3a6a","clientId":"c7f03f99-bf92-4ede-b27d-2c26d41d48de"}},"principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:31+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1310'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:31 GMT
+      etag:
+      - W/"ca00f82a-0000-0100-0000-6216bd7f0000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appconfig identity remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --identities
+      User-Agent:
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
+  response:
+    body:
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:34+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '992'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 23 Feb 2022 23:04:33 GMT
+      etag:
+      - W/"ca00342b-0000-0100-0000-6216bd820000"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.17.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - appconfig identity show
       Connection:
       - keep-alive
       ParameterSetName:
       - -n -g
       User-Agent:
-      - AZURECLI/2.32.0 azsdk-python-mgmt-appconfiguration/2.0.0 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-appconfiguration/1.0.0b1 Python/3.9.7 (Windows-10-10.0.22538-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/IdentityTest000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"71e7d7bb-bddf-4879-8803-82c88f81e544","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-02T05:26:21+00:00","endpoint":"https://identitytestsdkgi5vrzxc7.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-02T05:26:21+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-02T05:26:41+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestsdkgi5vrzxc7","name":"IdentityTest000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","identity":{"type":"SystemAssigned","principalId":"40b0f7eb-702d-4966-9813-98936aac257b","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"},"properties":{"provisioningState":"Succeeded","creationDate":"2022-02-23T23:04:10+00:00","endpoint":"https://identitytestywbxks4jpzmu.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-02-23T23:04:10+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-02-23T23:04:34+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/identitytestywbxks4jpzmu","name":"IdentityTest000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '932'
+      - '992'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 02 Feb 2022 05:26:41 GMT
+      - Wed, 23 Feb 2022 23:04:34 GMT
       etag:
-      - W/"26015f52-0000-0100-0000-61fa16110000"
+      - W/"ca00342b-0000-0100-0000-6216bd820000"
       expires:
       - '-1'
       pragma:
