@@ -2221,7 +2221,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             credentialResults = client.list_cluster_user_credentials(
                 resource_group_name, name, serverType, credential_format)
         else:
-            credentialResults = client.list_cluster_admin_credentials(
+            credentialResults = client.list_cluster_user_credentials(
                 resource_group_name, name)
 
     # Check if KUBECONFIG environmental variable is set
