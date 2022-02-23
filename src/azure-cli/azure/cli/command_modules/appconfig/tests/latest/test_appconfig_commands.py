@@ -581,11 +581,15 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert len(revisions) == 2
 
         assert revisions[0]['content_type'] == 'text'
+        assert revisions[1]['content_type'] == 'text'
         assert revisions[0]['label'] == 'newlabel'
         assert revisions[1]['label'] == 'v1.0.0'
         assert revisions[0]['value'] == 'Green'
+        assert revisions[1]['value'] == 'Green'
         assert revisions[0]['last_modified'] is not None
+        assert revisions[1]['last_modified'] is not None
         assert revisions[1]['etag'] is not None
+        assert revisions[0]['etag'] is not None
         assert 'key' not in revisions[0]
         assert 'key' not in revisions[1]
         assert 'locked' not in revisions[0]
