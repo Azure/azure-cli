@@ -6844,25 +6844,23 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
 
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
-    @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
-            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
-            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
-    @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
-            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
-            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
     # @unittest.skip('Service does not work')
@@ -6870,6 +6868,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     def test_disk_trusted_launch(self):
         self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
+    def test_vmss_trusted(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
+        self.cmd('vmss show -g {rg} -n vm', checks=[
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
 
