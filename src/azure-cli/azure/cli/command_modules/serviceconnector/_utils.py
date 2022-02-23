@@ -4,10 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from knack.log import get_logger
 from azure.cli.core.azclierror import (
+    ValidationError,
     CLIInternalError
 )
 
+logger = get_logger(__name__)
 
 def should_load_source(source):
     '''Check whether to load `az {source} connection`
@@ -129,3 +132,83 @@ def auto_register(func, *args, **kwargs):
             raise CLIInternalError('Registeration failed, please manually run command '
                                    '`az provider register -n Microsoft.ServiceLinker` to register the provider.')
         raise ex
+
+
+def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, key_vault_id):
+    logger.warning('get valid key vualt reference connection')
+    all_connections = run_cli_cmd('az webapp connection list --source-id {} -o json'.format(source_id))
+    key_vault_connections = []
+    for connection in all_connections:
+        if connection.get('targetId') == key_vault_id:
+            key_vault_connections.append(connection)
+
+    auth_type = 'systemAssignedIdentity'
+    client_id = None
+    subscription_id = None
+    if len(key_vault_connections) > 0:
+        from ._validators import get_source_resource_name
+        from ._resource_config import RESOURCE
+        from msrestazure.tools import (
+            parse_resource_id,
+            is_valid_resource_id
+        )
+        source_name = get_source_resource_name(cmd)
+        if source_name == RESOURCE.WebApp: # https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+            try:
+                webapp = run_cli_cmd('az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+                reference_identity = webapp.get('properties').get('keyVaultReferenceIdentity')
+            except Exception as e:
+                raise ValidationError('{}. Unable to get "properties.keyVaultReferenceIdentity" from {}. Please check your source id is correct.'.format(e, source_id))
+
+            if is_valid_resource_id(reference_identity): # User Identity
+                auth_type = 'userAssignedIdentity'
+                segments = parse_resource_id(reference_identity)
+                subscription_id = segments.get('subscription')
+                try:
+                    identity = webapp.get('identity').get('userAssignedIdentities').get(reference_identity)
+                    client_id = identity.get('clientId')
+                except:
+                    try:
+                        identity = run_cli_cmd('az identity show --ids {} -o json'.format(reference_identity))
+                        client_id = identity.get('clientId')
+                    except:
+                        pass
+                if not subscription_id or not client_id:
+                    raise ValidationError('Unable to get subscriptionId or clientId of the keyVaultReferenceIdentity {}'.format(reference_identity))
+                for connection in key_vault_connections:
+                    auth_info = connection.get('authInfo')
+                    if auth_info.get('clientId') == client_id and auth_info.get('subscriptionId') == subscription_id:
+                        logger.warning('key vualt reference connection: {}'.format(connection.get('id')))
+                        return
+            else: # System Identity
+                for connection in key_vault_connections:
+                    if connection.get('authInfo').get('authType') == auth_type:
+                        logger.warning('key vualt reference connection: {}'.format(connection.get('id')))
+                        return
+        else:
+            logger.warning('key vualt reference connection: {}'.format(key_vault_connections[0].get('id')))
+            return
+
+    # No Valid Key Vault Connection, Create
+    logger.warning('no valid key vault connection found. Creating...')
+    client = set_user_token_header(client, cmd.cli_ctx)
+    auth_info = {
+        'authType': auth_type
+    }
+    if client_id and subscription_id:
+        auth_info['clientId'] = client_id
+        auth_info['subscriptionId'] = subscription_id
+
+    from ._resource_config import CLIENT_TYPE
+
+    connection_name = generate_random_string(prefix = 'keyvault_')
+    parameters = {
+        'target_id': key_vault_id,
+        'auth_info': auth_info,
+        'client_type': CLIENT_TYPE.Dotnet, # Key Vault Configuration are same across all client types
+    }
+
+    return auto_register(client.begin_create_or_update,
+                         resource_uri=source_id,
+                         linker_name=connection_name,
+                         parameters=parameters)
