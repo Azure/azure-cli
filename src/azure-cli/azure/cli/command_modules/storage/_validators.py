@@ -1052,10 +1052,10 @@ def process_blob_delete_batch_parameters(cmd, namespace):
 def _process_blob_batch_container_parameters(cmd, namespace, source=True):
     """Process the container parameters for storage blob batch commands before populating args from environment."""
     if source:
-        container_arg, container_name_arg = 'source', 'container_name'
+        container_arg, container_name_arg = 'source', 'source_container_name'
     else:
         # destination
-        container_arg, container_name_arg = 'destination', 'container_name'
+        container_arg, container_name_arg = 'destination', 'destination_container_name'
 
     # try to extract account name and container name from source string
     from .storage_url_helpers import StorageResourceIdentifier

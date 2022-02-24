@@ -407,7 +407,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
                               source_files=None, destination_path=None,
-                              container_name=None, blob_type=None,
+                              destination_container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
@@ -426,7 +426,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     if dryrun:
         logger.info('upload action: from %s to %s', source, destination)
         logger.info('    pattern %s', pattern)
-        logger.info('  container %s', container_name)
+        logger.info('  container %s', destination_container_name)
         logger.info('       type %s', blob_type)
         logger.info('      total %d', len(source_files))
         results = []
@@ -451,7 +451,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             if progress_callback:
                 progress_callback.message = '{}/{}: "{}"'.format(
                     index + 1, len(source_files), normalize_blob_file_path(destination_path, dst))
-            blob_client = client.get_blob_client(container=container_name,
+            blob_client = client.get_blob_client(container=destination_container_name,
                                                  blob=normalize_blob_file_path(destination_path, dst))
             include, result = _upload_blob(cmd, blob_client, file_path=src,
                                            blob_type=blob_type, content_settings=guessed_content_settings,
@@ -495,7 +495,7 @@ def _adjust_block_blob_size(client, blob_type, length):
 
     # increase the block size to 4000MB when the block list will contain more than
     # 50,000 blocks(each block 100MB)
-    if length > 50000 * 100 * 1024 * 1024:
+    if length is not None and length > 50000 * 100 * 1024 * 1024:
         client._config.max_block_size = 4000 * 1024 * 1024
         client._config.max_single_put_size = 5000 * 1024 * 1024
 
