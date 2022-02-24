@@ -5,7 +5,7 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, tags_type, file_type, get_location_type,
+from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type,
                                                 get_enum_type, get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 

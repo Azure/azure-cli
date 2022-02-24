@@ -1019,7 +1019,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
-    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
+    namespace.source_files = list(glob_files_locally(namespace.source, namespace.pattern))
 
     # 4. determine blob type
     if namespace.blob_type is None:
