@@ -431,7 +431,7 @@ class TestAAZArg(unittest.TestCase):
 
         schema.work_day = AAZStrArg(
             options=["--work-day", "-d"],
-            enum=AAZArgEnum(items={
+            enum={
                 "1": "Monday",
                 "2": "Tuesday",
                 "3": "Wednesday",
@@ -446,7 +446,7 @@ class TestAAZArg(unittest.TestCase):
                 "Fri": "Friday",
                 "Sat": "Saturday",
                 "Sun": "Sunday",
-            }),
+            },
             nullable=True,
             blank="Sunday"
         )
@@ -543,12 +543,12 @@ class TestAAZArg(unittest.TestCase):
 
         schema.score = AAZIntArg(
             options=["--score", "-s"],
-            enum=AAZArgEnum(items={
+            enum={
                 "A": 100,
                 "B": 90,
                 "C": 80,
                 "D": 0,
-            }),
+            },
             nullable=True,
             blank=0
         )
@@ -632,12 +632,12 @@ class TestAAZArg(unittest.TestCase):
 
         schema.score = AAZFloatArg(
             options=["--score", "-s"],
-            enum=AAZArgEnum(items={
+            enum={
                 "A": 100.0,
                 "B": 90.0,
                 "C": 80.0,
                 "D": 0.0,
-            }),
+            },
             nullable=True,
             blank=0.0
         )

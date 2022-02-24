@@ -128,8 +128,8 @@ class AAZCommand(CLICommand):
     @classmethod
     def get_arguments_schema(cls):
         if not hasattr(cls, "_arguments_schema"):
-            cls._arguments_schema = cls._build_arguments_schema()
-        return cls._arguments_schema
+            cls._args_schema = cls._build_arguments_schema()
+        return cls._args_schema
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

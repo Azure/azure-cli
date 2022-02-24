@@ -62,8 +62,17 @@ class AAZBaseArg(AAZBaseType):
 
     def __init__(self, options=None, required=False, help=None, arg_group=None, is_preview=False, is_experimental=False,
                  id_part=None, default=AAZUndefined, blank=AAZUndefined, nullable=False):
-        super(AAZBaseArg, self).__init__(options=options, nullable=nullable)
-        self._help = help
+        super().__init__(options=options, nullable=nullable)
+        self._help = {}  # the key of self._help is 'name', 'short-summary', 'long-summery', 'populator-commands'
+
+        if self._options:
+            self._help['name'] = ' '.join(self._options)
+            if isinstance(help, str):
+                self._help['short-summery'] = help
+            elif isinstance(help, dict):
+                self._help.update(help)
+        # TODO: add arguments help into command's AZ_HELP
+
         self._required = required
         self._arg_group = arg_group
         self._is_preview = is_preview
@@ -77,7 +86,7 @@ class AAZBaseArg(AAZBaseType):
             dest=name,
             options_list=[*self._options] if self._options else None,
             required=self._required,
-            help=self._help,
+            help=self._help.get('short-summery', None),
             default=self._default,
         )
         if self._arg_group:
@@ -98,9 +107,9 @@ class AAZBaseArg(AAZBaseType):
 
 class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
 
-    def __init__(self, enum=None, fmt=None, **kwargs):
+    def __init__(self, enum=None, enum_case_sensitive=False, fmt=None, **kwargs):
         super().__init__(**kwargs)
-        self.enum = enum
+        self.enum = AAZArgEnum(enum, case_sensitive=enum_case_sensitive) if enum else None
         self._fmt = fmt
 
     def to_cmd_arg(self, name):
@@ -127,11 +136,11 @@ class AAZIntArg(AAZSimpleTypeArg, AAZIntType):
 class AAZBoolArg(AAZSimpleTypeArg, AAZBoolType):
 
     def __init__(self, blank=True, enum=None, **kwargs):
-        enum = enum or AAZArgEnum({
+        enum = enum or {
             'true': True, 't': True, 'yes': True, 'y': True, '1': True,
             "false": False, 'f': False, 'no': False, 'n': False, '0': False,
-        })
-        super(AAZBoolArg, self).__init__(blank=blank, enum=enum, **kwargs)
+        }
+        super().__init__(blank=blank, enum=enum, **kwargs)
 
 
 class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
@@ -142,7 +151,7 @@ class AAZFloatArg(AAZSimpleTypeArg, AAZFloatType):
 class AAZObjectArg(AAZBaseArg, AAZObjectType):
 
     def __init__(self, fmt=None, **kwargs):
-        super(AAZObjectArg, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._fmt = fmt
 
     def to_cmd_arg(self, name):
@@ -209,13 +218,11 @@ class AAZListArg(AAZBaseArg, AAZListType):
 
 class AAZResourceGroupNameArg(AAZStrArg):
 
-    def __init__(self,
-                 options=['--resource-group', '-g'],
-                 id_part='resource_group',
-                 help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
-                 **kwargs,
-                 ):
-        super(AAZResourceGroupNameArg, self).__init__(
+    def __init__(
+            self, options=('--resource-group', '-g'), id_part='resource_group',
+            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
+            **kwargs):
+        super().__init__(
             options=options,
             id_part=id_part,
             help=help,
