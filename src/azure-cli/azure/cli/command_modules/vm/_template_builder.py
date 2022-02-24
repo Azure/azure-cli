@@ -846,9 +846,10 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                         enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                         orchestration_mode=None, user_data=None, network_api_version=None,
+                        enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
-                        enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
-                        v_cpus_available=None, v_cpus_per_core=None):
+                        enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None,
+                        v_cpus_per_core=None):
 
     # Build IP configuration
     ip_configuration = {}
