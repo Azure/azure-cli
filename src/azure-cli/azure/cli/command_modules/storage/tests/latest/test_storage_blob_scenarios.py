@@ -515,16 +515,16 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                     JMESPathCheck('properties.contentLength', 128 * 1024),
                                     JMESPathCheck('properties.blobTier', tier))
 
-        page_blob_tiers = ["P4","P6","P10","P15","P20","P30","P40","P50","P60","P70","P80"]
-        for tier in page_blob_tiers:
-            blob_name = self.create_random_name(prefix='blob', length=24)
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} --debug', account_info,
-                             container, local_file, blob_name, 'page', tier)
-            self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
-                .assert_with_checks(JMESPathCheck('name', blob_name),
-                                    JMESPathCheck('properties.blobType', 'PageBlob'),
-                                    JMESPathCheck('properties.contentLength', 128 * 1024),
-                                    JMESPathCheck('properties.blobTier', tier))
+        # page_blob_tiers = ["P4","P6","P10","P15","P20","P30","P40","P50","P60","P70","P80"]
+        # for tier in page_blob_tiers:
+        #     blob_name = self.create_random_name(prefix='blob', length=24)
+        #     self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type {} --tier {} --debug', account_info,
+        #                      container, local_file, blob_name, 'page', tier)
+        #     self.storage_cmd('storage blob show -c {} -n {} ', account_info, container, blob_name) \
+        #         .assert_with_checks(JMESPathCheck('name', blob_name),
+        #                             JMESPathCheck('properties.blobType', 'PageBlob'),
+        #                             JMESPathCheck('properties.contentLength', 128 * 1024),
+        #                             JMESPathCheck('properties.blobTier', tier))
 
         # test with data
         blob_name = self.create_random_name(prefix='blob', length=24)
