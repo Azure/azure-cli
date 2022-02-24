@@ -25,7 +25,7 @@ class RoleCommandsLoader(AzCommandsLoader):
             logger = get_logger(__name__)
             logger.warning("The underlying Active Directory Graph API will be replaced by Microsoft Graph API in "
                            "Azure CLI 2.35.0. Please carefully review all breaking changes introduced during this "
-                           "migration: https://docs.microsoft.com/cli/azure/microsoft-graph")
+                           "migration: https://docs.microsoft.com/cli/azure/microsoft-graph-migration")
         from azure.cli.command_modules.role.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
