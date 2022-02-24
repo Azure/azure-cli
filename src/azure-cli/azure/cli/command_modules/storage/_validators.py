@@ -1019,7 +1019,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
-    namespace.source_files = list(glob_files_locally(namespace.source, namespace.pattern))
+    namespace.source_files = [c for c in glob_files_locally(namespace.source, namespace.pattern)]
 
     # 4. determine blob type
     if namespace.blob_type is None:
@@ -1028,8 +1028,9 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             # when all the listed files are vhd files use page
             namespace.blob_type = 'page'
         elif any(vhd_files):
+            from azure.cli.core.azclierror import ArgumentUsageError
             # source files contain vhd files but not all of them
-            raise CLIError("""Fail to guess the required blob type. Type of the files to be
+            raise ArgumentUsageError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
             type or ensure the pattern matches a correct set of files.""")
@@ -1038,9 +1039,10 @@ def process_blob_upload_batch_parameters(cmd, namespace):
 
     # 5. call other validators
     validate_metadata(namespace)
-    t_blob_content_settings = cmd.loader.get_sdk('blob.models#ContentSettings')
+    t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
     get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
-    add_progress_callback(cmd, namespace)
+    add_upload_progress_callback(cmd, namespace)
+    blob_tier_validator_track2(cmd, namespace)
 
 
 def process_blob_delete_batch_parameters(cmd, namespace):
@@ -1050,10 +1052,10 @@ def process_blob_delete_batch_parameters(cmd, namespace):
 def _process_blob_batch_container_parameters(cmd, namespace, source=True):
     """Process the container parameters for storage blob batch commands before populating args from environment."""
     if source:
-        container_arg, container_name_arg = 'source', 'source_container_name'
+        container_arg, container_name_arg = 'source', 'container_name'
     else:
         # destination
-        container_arg, container_name_arg = 'destination', 'destination_container_name'
+        container_arg, container_name_arg = 'destination', 'container_name'
 
     # try to extract account name and container name from source string
     from .storage_url_helpers import StorageResourceIdentifier
