@@ -3644,3 +3644,125 @@ type: command
 short-summary: Get a list of all virtual machines in a VM scale sets.
 long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode, please use "az vm list" to get full details.
 """
+
+helps['restore-point'] = """
+    type: group
+    short-summary: Manage restore point with res
+"""
+
+helps['restore-point show'] = """
+    type: command
+    short-summary: "Get the restore point."
+    examples:
+      - name: Get a restore point
+        text: |-
+               az restore-point show --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
+"""
+
+helps['restore-point create'] = """
+    type: command
+    short-summary: "Create the restore point. Updating properties of an existing restore point is not allowed."
+    parameters:
+      - name: --exclude-disks
+        short-summary: "List of disk resource ids that the customer wishes to exclude from the restore point. If no \
+disks are specified, all disks will be included."
+        long-summary: |
+            Usage: --exclude-disks id=XX
+            id: The ARM resource id in the form of /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/.\
+..
+            Multiple actions can be specified by using more than one --exclude-disks argument.
+    examples:
+      - name: Create a restore point
+        text: |-
+               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour\
+               ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" \
+               --collection-name "rpcName" --name "rpName"
+"""
+
+helps['restore-point delete'] = """
+    type: command
+    short-summary: "Delete the restore point."
+"""
+
+helps['restore-point wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the restore-point is met.
+    examples:
+      - name: Pause executing next line of CLI script until the restore-point is successfully created.
+        text: |-
+               az restore-point wait --resource-group "myResourceGroup" --collection-name "rpcName" \
+--name "rpName" --created
+      - name: Pause executing next line of CLI script until the restore-point is successfully deleted.
+        text: |-
+               az restore-point wait --resource-group "myResourceGroup" --collection-name "rpcName" \
+--name "rpName" --deleted
+"""
+
+helps['restore-point collection'] = """
+    type: group
+    short-summary: Manage restore point collection
+"""
+
+helps['restore-point collection list'] = """
+    type: command
+    short-summary: "Get the list of restore point collections in a resource group."
+    examples:
+      - name: Get the list of restore point collections in a resource group.
+        text: |-
+               az restore-point collection list --resource-group "myResourceGroup"
+"""
+
+helps['restore-point collection show'] = """
+    type: command
+    short-summary: "Get the restore point collection."
+    examples:
+      - name: Get a restore point collection (but not the restore points contained in the restore point collection)
+        text: |-
+               az restore-point collection show --resource-group "myResourceGroup" --collection-name "myRpc"
+      - name: Get a restore point collection, including the restore points contained in the restore point collection
+        text: |-
+               az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
+"""
+
+helps['restore-point collection create'] = """
+    type: command
+    short-summary: "Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
+for more details. When updating a restore point collection, only tags may be modified."
+    examples:
+      - name: Create or update a restore point collection.
+        text: |-
+               az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}\
+/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" \
+--resource-group "myResourceGroup" --collection-name "myRpc"
+"""
+
+helps['restore-point collection update'] = """
+    type: command
+    short-summary: "Update the restore point collection."
+"""
+
+helps['restore-point collection delete'] = """
+    type: command
+    short-summary: "Delete the restore point collection. This operation will also delete all the \
+contained restore points."
+"""
+
+helps['restore-point collection list-all'] = """
+    type: command
+    short-summary: "Get the list of restore point collections in the subscription. Use nextLink property in the \
+response to get the next page of restore point collections. Do this till nextLink is not null to fetch all the restore \
+point collections."
+    examples:
+      - name: Get the list of restore point collections in a subscription
+        text: |-
+               az restore-point collection list-all
+"""
+
+helps['restore-point collection wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
+    examples:
+      - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
+        text: |-
+               az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
+"""

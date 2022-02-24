@@ -83,6 +83,7 @@ from ._client_factory import cf_snapshots_client
 from ._client_factory import get_msi_client
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
+from ._consts import CONST_SCALE_DOWN_MODE_DELETE
 from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
 from ._consts import CONST_MONITORING_ADDON_NAME
 from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
@@ -2199,25 +2200,30 @@ def aks_get_versions(cmd, client, location):
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser(
                             '~'), '.kube', 'config'),
-                        overwrite_existing=False, context_name=None, public_fqdn=False):
+                        overwrite_existing=False, context_name=None, public_fqdn=False,
+                        credential_format=None):
     credentialResults = None
     serverType = None
     if public_fqdn:
         serverType = 'public'
+    if credential_format:
+        credential_format = credential_format.lower()
+        if admin:
+            raise InvalidArgumentValueError("--format can only be specified when requesting clusterUser credential.")
     if admin:
-        if serverType is None:
-            credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name)
-        else:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_admin_credentials(
                 resource_group_name, name, serverType)
+        else:
+            credentialResults = client.list_cluster_admin_credentials(
+                resource_group_name, name)
     else:
-        if serverType is None:
+        if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name)
+                resource_group_name, name, serverType, credential_format)
         else:
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType)
+                resource_group_name, name)
 
     # Check if KUBECONFIG environmental variable is set
     # If path is different than default then that means -f/--file is passed
@@ -3135,6 +3141,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
+                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
                       node_taints=None,
                       priority=CONST_SCALE_SET_PRIORITY_REGULAR,
                       eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
@@ -3218,6 +3225,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
         scale_set_priority=priority,
+        scale_down_mode=scale_down_mode,
         enable_node_public_ip=enable_node_public_ip,
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
@@ -3365,6 +3373,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
+                         scale_down_mode=None,
                          min_count=None, max_count=None,
                          tags=None,
                          max_surge=None,
@@ -3384,11 +3393,13 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler"')
 
-    if (update_autoscaler == 0 and not tags and not mode and not max_surge and labels is None and node_taints is None):
+    if (update_autoscaler == 0 and not tags and not scale_down_mode and not mode and not max_surge and
+            labels is None and node_taints is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge" or "--labels"or "--node-taints"')
+                       '"--tags" or "--mode" or "--max-surge" or "--scale-down-mode or '
+                       '"--labels"or "--node-taints"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -3429,6 +3440,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.max_count = None
 
     instance.tags = tags
+
+    if scale_down_mode is not None:
+        instance.scale_down_mode = scale_down_mode
 
     if mode is not None:
         instance.mode = mode

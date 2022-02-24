@@ -128,6 +128,10 @@ def load_arguments(self, _):
              'with the current page. If specified, this generator will begin returning results from the point '
              'where the previous generator stopped.')
 
+    enable_vtpm_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable vTPM.')
+    enable_secure_boot_type = CLIArgumentType(arg_type=get_three_state_flag(), min_api='2020-12-01', help='Enable secure boot.')
+    security_type = CLIArgumentType(arg_type=get_enum_type(['TrustedLaunch']), min_api='2020-12-01', help='Specify if the VM is Trusted Launch enabled. See https://docs.microsoft.com/azure/virtual-machines/trusted-launch.')
+
     # region MixedScopes
     for scope in ['vm', 'disk', 'snapshot', 'image', 'sig']:
         with self.argument_context(scope) as c:
@@ -361,10 +365,8 @@ def load_arguments(self, _):
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
         c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
-        c.argument('enable_secure_boot', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   help='Enable secure boot.')
-        c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   help='Enable vTPM.')
+        c.argument('enable_secure_boot', enable_secure_boot_type)
+        c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('size', help='The new size of the virtual machine. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--size`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
@@ -400,12 +402,9 @@ def load_arguments(self, _):
                    help='Specify the scale set logical fault domain into which the virtual machine will be created. By default, the virtual machine will be automatically assigned to a fault domain that best maintains balance across available fault domains. This is applicable only if the virtualMachineScaleSet property of this virtual machine is set. The virtual machine scale set that is referenced, must have platform fault domain count. This property cannot be updated once the virtual machine is created. Fault domain assignment can be viewed in the virtual machine instance view')
         c.argument('count', type=int, is_preview=True,
                    help='Number of virtual machines to create. Value range is [2, 250], inclusive. Don\'t specify this parameter if you want to create a normal single VM. The VMs are created in parallel. The output of this command is an array of VMs instead of one single VM. Each VM has its own public IP, NIC. VNET and NSG are shared. It is recommended that no existing public IP, NIC, VNET and NSG are in resource group. When --count is specified, --attach-data-disks, --attach-os-disk, --boot-diagnostics-storage, --computer-name, --host, --host-group, --nics, --os-disk-name, --private-ip-address, --public-ip-address, --public-ip-address-dns-name, --storage-account, --storage-container-name, --subnet, --use-unmanaged-disk, --vnet-name are not allowed.')
-        c.argument('security_type', arg_type=get_enum_type(['TrustedLaunch']), min_api='2020-12-01',
-                   help='Specify if the VM is Trusted Launch enabled. See https://docs.microsoft.com/azure/virtual-machines/trusted-launch.')
-        c.argument('enable_secure_boot', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   help='Enable secure boot. It is part of trusted launch.')
-        c.argument('enable_vtpm', arg_type=get_three_state_flag(), min_api='2020-12-01',
-                   help='Enable vTPM. It is part of trusted launch.')
+        c.argument('security_type', security_type)
+        c.argument('enable_secure_boot', enable_secure_boot_type)
+        c.argument('enable_vtpm', enable_vtpm_type)
         c.argument('user_data', help='UserData for the VM. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('enable_hibernation', arg_type=get_three_state_flag(), min_api='2021-03-01', help='The flag that enable or disable hibernation capability on the VM.')
 
@@ -653,6 +652,7 @@ def load_arguments(self, _):
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
+        c.argument('automatic_repairs_action', arg_type=get_enum_type(['Replace', 'Restart', 'Reimage']), min_api='2021-11-01', help='Type of repair action that will be used for repairing unhealthy virtual machines in the scale set.')
         c.argument('user_data', help='UserData for the virtual machines in the scale set. It can be passed in as file or string.', completer=FilesCompleter(), type=file_type, min_api='2021-03-01')
         c.argument('network_api_version', min_api='2021-03-01',
                    help="Specify the Microsoft.Network API version used when creating networking resources in the Network "
@@ -666,6 +666,9 @@ def load_arguments(self, _):
                    help='Indicate whether Automatic Updates is enabled for the Windows virtual machine')
         c.argument('patch_mode', arg_type=get_enum_type(['AutomaticByOS', 'AutomaticByPlatform', 'Manual', 'ImageDefault']), min_api='2020-12-01',
                    help='Mode of in-guest patching to IaaS virtual machine. Allowed values for Windows VM: AutomaticByOS, AutomaticByPlatform, Manual. Allowed values for Linux VM: AutomaticByPlatform, ImageDefault. Manual - You control the application of patches to a virtual machine. You do this by applying patches manually inside the VM. In this mode, automatic updates are disabled; the paramater --enable-auto-update must be false. AutomaticByOS - The virtual machine will automatically be updated by the OS. The parameter --enable-auto-update must be true. AutomaticByPlatform - the virtual machine will automatically updated by the OS. ImageDefault - The virtual machine\'s default patching configuration is used. The parameter --enable-agent and --enable-auto-update must be true')
+        c.argument('security_type', security_type)
+        c.argument('enable_secure_boot', enable_secure_boot_type)
+        c.argument('enable_vtpm', enable_vtpm_type)
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -704,13 +707,17 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='The new size of the virtual machine instances in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.', is_preview=True)
         c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                    help='Only applicable when used with `--vm-sku`. Allows you to choose the Ephemeral OS disk provisioning location.', is_preview=True)
+        c.argument('enable_secure_boot', enable_secure_boot_type)
+        c.argument('enable_vtpm', enable_vtpm_type)
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
+
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument(
             'automatic_repairs_grace_period',
             help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.'
         )
+        c.argument('automatic_repairs_action', arg_type=get_enum_type(['Replace', 'Restart', 'Reimage']), min_api='2021-11-01', help='Type of repair action that will be used for repairing unhealthy virtual machines in the scale set.')
 
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
@@ -1379,6 +1386,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
     # endRegion
 
+    # region Capacity
     with self.argument_context('capacity reservation group') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-n'],
@@ -1410,3 +1418,42 @@ def load_arguments(self, _):
 
     with self.argument_context('capacity reservation show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')
+    # endRegion
+
+    # region Restore point
+    with self.argument_context('restore-point') as c:
+        c.argument('restore_point_collection_name', options_list=['--collection-name'],
+                   help='The name of the restore point collection.')
+
+    with self.argument_context('restore-point create') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+        c.argument('exclude_disks', nargs='+', help='List of disk resource ids that the '
+                   'customer wishes to exclude from the restore point. If no disks are specified, all disks will be '
+                   'included.')
+
+    with self.argument_context('restore-point show') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+
+    with self.argument_context('restore-point delete') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+
+    with self.argument_context('restore-point wait') as c:
+        c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],
+                   help='The name of the restore point.')
+    # endRegion
+
+    # region Restore point collection
+    with self.argument_context('restore-point collection create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
+                   validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
+                   arg_group='Source')
+
+    with self.argument_context('restore-point collection update') as c:
+        c.argument('tags', tags_type)
+
+    # endRegion
