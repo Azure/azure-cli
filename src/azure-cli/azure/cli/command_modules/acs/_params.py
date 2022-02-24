@@ -24,7 +24,7 @@ from ._validators import (
     validate_load_balancer_outbound_ips, validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
-    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity)
+    validate_ppg, validate_assign_identity, validate_max_surge, validate_assign_kubelet_identity, validate_credential_format)
 from ._consts import (
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
@@ -32,6 +32,8 @@ from ._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DELETE,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
+    CONST_SCALE_DOWN_MODE_DELETE,
+    CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_OS_DISK_TYPE_MANAGED,
     CONST_OS_DISK_TYPE_EPHEMERAL,
     CONST_RAPID_UPGRADE_CHANNEL,
@@ -381,6 +383,7 @@ def load_arguments(self, _):
         c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
         c.argument('public_fqdn', default=False, action='store_true')
+        c.argument('credential_format', type=str, options_list=['--format'], validator=validate_credential_format)
 
     for scope in ['aks', 'acs kubernetes', 'acs dcos']:
         with self.argument_context('{} install-cli'.format(scope)) as c:
@@ -435,6 +438,7 @@ def load_arguments(self, _):
             c.argument('os_sku', completer=get_ossku_completion_list)
             c.argument('enable_cluster_autoscaler', options_list=[
                        "--enable-cluster-autoscaler", "-e"], action='store_true')
+            c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
             c.argument('node_taints', validator=validate_taints)
             c.argument('priority', arg_type=get_enum_type(node_priorities), validator=validate_priority)
             c.argument('eviction_policy', arg_type=get_enum_type(node_eviction_policies), validator=validate_eviction_policy)
@@ -470,6 +474,7 @@ def load_arguments(self, _):
                    "--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=[
                    "--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('scale_down_mode', arg_type=get_enum_type([CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]))
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(node_mode_types))
         c.argument('max_surge', type=str, validator=validate_max_surge)

@@ -5,7 +5,7 @@
 from azure.cli.command_modules.monitor._client_factory import _log_analytics_client_factory
 from azure.cli.core.commands.transform import _parse_id
 from azure.mgmt.loganalytics.models import WorkspaceSkuNameEnum, Workspace, WorkspaceSku, WorkspaceCapping, Table,\
-    Schema, Column, SearchResults, ColumnTypeEnum
+    Schema, Column, SearchResults, RestoredLogs, ColumnTypeEnum
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.util import CLIError
@@ -190,6 +190,17 @@ def create_log_analytics_workspace_table_search_job(client, resource_group_name,
                   total_retention_in_days=total_retention_in_days,
                   search_results=search_results,
                   )
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
+                       workspace_name, table_name, table)
+
+
+def create_log_analytics_workspace_table_restore(client, resource_group_name, workspace_name, table_name,
+                                                 start_restore_time, end_restore_time, restore_source_table,
+                                                 no_wait=False):
+    restored_logs = RestoredLogs(start_restore_time=start_restore_time,
+                                 end_restore_time=end_restore_time,
+                                 source_table=restore_source_table)
+    table = Table(restored_logs=restored_logs)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
                        workspace_name, table_name, table)
 
