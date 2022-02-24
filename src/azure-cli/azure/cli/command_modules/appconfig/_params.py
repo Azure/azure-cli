@@ -102,6 +102,8 @@ def load_arguments(self, _):
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disable all authentication methods other than AAD authentication.')
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), is_preview=True,
+                   help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig update', arg_group='Customer Managed Key') as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
