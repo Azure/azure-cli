@@ -1019,6 +1019,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -1924,7 +1925,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
 class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
-    @StorageAccountPreparer(name_prefix='clitestbootdiag')
+    @StorageAccountPreparer(name_prefix='clitestbootdiag', sku='Standard_LRS')
     @AllowLargeResponse()
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
@@ -1934,7 +1935,6 @@ class VMBootDiagnostics(ScenarioTest):
         })
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
-        self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l westus')
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
 
         self.cmd('vm boot-diagnostics enable -g {rg} -n {vm}')
@@ -5055,13 +5055,15 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
 
     @ResourceGroupPreparer(location='eastus')
-    def test_gallery_application_version(self, resource_group, resource_group_location):
+    @StorageAccountPreparer(location='eastus', name_prefix='account', length=15)
+    def test_gallery_application_version(self, resource_group, resource_group_location, storage_account_info):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'app_name': self.create_random_name('app', 10),
             'gallery': self.create_random_name('gellery', 15),
             'ver_name': "1.0.0",
-            'account': self.create_random_name('account', 15),
+            'account': storage_account_info[0],
+            'storage_key': storage_account_info[1],
             'container': self.create_random_name('container', 15),
             'blob': self.create_random_name('blob', 15),
             'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\')
@@ -5074,9 +5076,6 @@ class VMGalleryApplication(ScenarioTest):
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
         ])
-        self.cmd('storage account create -n {account} -g {rg}')
-        self.kwargs['storage_key'] = str(
-            self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
         self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
         self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
@@ -6236,11 +6235,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Test raise error if not provide health probe or load balance
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser')
 
         # Prepare health probe
@@ -6248,10 +6247,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         # Test enable automatic repairs with a health probe when create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser',
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser',
                  checks=[
                      self.check('vmss.automaticRepairsPolicy.enabled', True),
-                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('vmss.automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_probe_')
@@ -6266,10 +6266,10 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username azureuser')
 
         # Validate automatic repairs parameters
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd(
                 'vmss update -g {rg} -n {vmss} --enable-automatic-repairs false --automatic-repairs-grace-period 30')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true')
 
         # Prepare health probe
@@ -6289,10 +6289,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
             self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()
         )
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids {instance_ids}')
-        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30',
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30 --automatic-repairs-action restart',
                  checks=[
                      self.check('automaticRepairsPolicy.enabled', True),
-                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_extension_')

@@ -848,7 +848,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         orchestration_mode=None, user_data=None, network_api_version=None,
                         enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
                         enable_auto_update=None, patch_mode=None, enable_agent=None, security_type=None,
-                        enable_secure_boot=None, enable_vtpm=None,):
+                        enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1167,10 +1167,11 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         }
         virtual_machine_profile['scheduledEventsProfile'] = scheduled_events_profile
 
-    if automatic_repairs_grace_period is not None:
+    if automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         automatic_repairs_policy = {
             'enabled': 'true',
-            'gracePeriod': automatic_repairs_grace_period
+            'gracePeriod': automatic_repairs_grace_period or 'PT10M',
+            'repairAction': automatic_repairs_action or 'Replace'
         }
         vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 

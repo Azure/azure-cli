@@ -104,6 +104,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     azure_storage_sid_type = CLIArgumentType(min_api='2019-04-01', arg_group="Azure Active Directory Properties",
                                              help="Specify the security identifier (SID) for Azure Storage. "
                                                   "Required when --enable-files-adds is set to True")
+    sam_account_name_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+                                            help="Specify the Active Directory SAMAccountName for Azure Storage.")
+    t_account_type = self.get_models('ActiveDirectoryPropertiesAccountType', resource_type=ResourceType.MGMT_STORAGE)
+    account_type_type = CLIArgumentType(min_api='2021-08-01', arg_group="Azure Active Directory Properties",
+                                        arg_type=get_enum_type(t_account_type),
+                                        help="Specify the Active Directory account type for Azure Storage.")
     exclude_pattern_type = CLIArgumentType(arg_group='Additional Flags', help='Exclude these files where the name '
                                            'matches the pattern list. For example: *.jpg;*.pdf;exactName. This '
                                            'option supports wildcard characters (*)')
@@ -322,6 +328,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('sam_account_name', sam_account_name_type)
+        c.argument('account_type', account_type_type)
         c.argument('enable_hierarchical_namespace', arg_type=get_three_state_flag(),
                    options_list=['--enable-hierarchical-namespace', '--hns',
                                  c.deprecate(target='--hierarchical-namespace', redirect='--hns', hide=True)],
@@ -433,6 +441,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('sam_account_name', sam_account_name_type)
+        c.argument('account_type', account_type_type)
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
