@@ -278,12 +278,9 @@ quotes = '""' if platform.system() == 'Windows' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
-    nargs='*', validator=validate_tags, min_api='2019-12-12',
-    help=f'space-separated tags: key[=value] [key[=value] ...]. {quote_text} Tags are case-sensitive. The tag set may '
-    'contain at most 10 tags.  Tag keys must be between 1 and 128 characters, and tag values must be '
-    'between 0 and 256 characters. Valid tag key and value characters include: lowercase and uppercase '
-    'letters, digits (0-9), space (` `), plus (+), minus (-), period (.), solidus (/), colon (:), equals '
-    '(=), underscore (_).'
+    validator=validate_tags,
+    help="space-separated tags: key[=value] [key[=value] ...]. {}".format(quote_text),
+    nargs='*'
 )
 
 tag_type = CLIArgumentType(
