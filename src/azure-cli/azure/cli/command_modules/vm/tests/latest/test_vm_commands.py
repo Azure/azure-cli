@@ -1703,6 +1703,7 @@ class VMMonitorTestDefault(ScenarioTest):
             replay_processors=[TimeSpanProcessor(TIMESPANTEMPLATE)]
         )
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_with_monitor', location='eastus')
     def test_vm_create_with_monitor(self, resource_group):
 
@@ -3174,6 +3175,7 @@ class VMSSUpdateTests(ScenarioTest):
             self.check('sku.name', '{vm_sku}'),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_ephemeral_os_disk_placement_', location='westus2')
     def test_vmss_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3359,6 +3361,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
 class VMSSCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_options')
     def test_vmss_create_existing_options(self):
 
@@ -4561,6 +4564,8 @@ class VMGenericUpdate(ScenarioTest):
 
 
 class VMGalleryImage(ScenarioTest):
+    
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus')
     def test_shared_gallery(self, resource_group, resource_group_location):
         self.kwargs.update({
