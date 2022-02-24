@@ -10,6 +10,7 @@ from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccoun
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.mgmt.iothub.models import RoutingSource
 from azure.cli.command_modules.iot.shared import IdentityType
+from azure.core.exceptions import HttpResponseError
 from .recording_processors import KeyReplacer
 
 
@@ -412,6 +413,20 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
+
+        # Data Residency tests
+        dr_hub_name = self.create_random_name('dps-dr', 20)
+
+        # Data residency not enabled in this region
+        with self.assertRaises(HttpResponseError):
+            self.cmd('az iot hub create -g {} -n {} --edr'.format(rg, dr_hub_name))
+
+        # Successfully create in this region
+        self.cmd('az iot hub create -g {} -n {} --location southeastasia --edr'.format(rg, dr_hub_name),
+                 checks=[self.check('name', dr_hub_name),
+                         self.check('location', 'southeastasia'),
+                         self.check('properties.enableDataResidency', True)])
+        self.cmd('az iot hub delete -n {}'.format(dr_hub_name))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
