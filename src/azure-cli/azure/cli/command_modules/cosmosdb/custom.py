@@ -2385,7 +2385,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_create(client,
                                                      disk_capacity=None,
                                                      availability_zone=None):
 
-    """Creates an Azure Managed Cassandra Datacenter"""
+    """Creates an Azure Managed Cassandra DataCenter"""
 
     data_center_properties = DataCenterResourceProperties(
         data_center_location=data_center_location,
