@@ -410,7 +410,15 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 
     def on_request(self, request):
         http_request = request.http_request
-        if (getattr(http_request, 'data', {}) or {}).get('properties', {}).get('template'):
+        request_data = getattr(http_request, 'data', {}) or {}
+
+        # In the case of retry, because the first request has been processed and
+        # converted the type of "request.http_request.data" from string to bytes,
+        # so there is no need to process request object again during retry
+        if isinstance(request_data, bytes):
+            return
+
+        if request_data.get('properties', {}).get('template'):
             template = http_request.data["properties"]["template"]
             if not isinstance(template, JsonCTemplate):
                 raise ValueError()
