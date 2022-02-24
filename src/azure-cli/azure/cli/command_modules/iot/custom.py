@@ -110,11 +110,11 @@ def iot_dps_get(client, dps_name, resource_group_name=None):
     return client.iot_dps_resource.get(dps_name, resource_group_name)
 
 
-def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1, tags=None):
+def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1, tags=None, enable_data_residency=None):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
-    dps_property = IotDpsPropertiesDescription()
+    dps_property = IotDpsPropertiesDescription(enable_data_residency=enable_data_residency)
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
                                                      sku=IotDpsSkuInfo(name=sku, capacity=unit),
@@ -410,12 +410,7 @@ def iot_dps_certificate_delete(client, dps_name, certificate_name, etag, resourc
 
 def iot_dps_certificate_gen_code(client, dps_name, certificate_name, etag, resource_group_name=None):
     resource_group_name = _ensure_dps_resource_group_name(client, resource_group_name, dps_name)
-    response = client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
-    properties = getattr(response, 'properties', {})
-    cert = getattr(properties, 'certificate', None)
-    if isinstance(cert, bytearray):
-        response.properties.certificate = response.properties.certificate.decode('utf-8')
-    return response
+    return client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
 
 
 def iot_dps_certificate_verify(client, dps_name, certificate_name, certificate_path, etag, resource_group_name=None):
@@ -498,6 +493,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    disable_local_auth=None,
                    disable_device_sas=None,
                    disable_module_sas=None,
+                   enable_data_residency=None,
                    feedback_lock_duration=5,
                    feedback_ttl=1,
                    feedback_max_delivery_count=10,
@@ -565,6 +561,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                                   storage_endpoints=storage_endpoint_dic,
                                   cloud_to_device=cloud_to_device_properties,
                                   min_tls_version=min_tls_version,
+                                  enable_data_residency=enable_data_residency,
                                   disable_local_auth=disable_local_auth,
                                   disable_device_sas=disable_device_sas,
                                   disable_module_sas=disable_module_sas)
