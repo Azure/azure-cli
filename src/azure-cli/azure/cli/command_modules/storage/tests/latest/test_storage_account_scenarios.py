@@ -776,6 +776,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         assert renewed_kerb_keys[2] != original_keys[2]
         assert renewed_kerb_keys[3] == original_keys[3]
 
+    @record_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
