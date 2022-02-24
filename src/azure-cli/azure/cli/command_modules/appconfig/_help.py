@@ -28,7 +28,7 @@ examples:
 
 helps['appconfig list-deleted'] = """
 type: command
-short-summary: Lists all deleted, but not yet purged App Configurations.
+short-summary: List all deleted, but not yet purged App Configurations.
 examples:
   - name: List all deleted, but not yet purged App Configurations.
     text: az appconfig list-deleted
