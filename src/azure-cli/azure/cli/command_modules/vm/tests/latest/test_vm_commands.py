@@ -6235,11 +6235,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Test raise error if not provide health probe or load balance
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser')
 
         # Prepare health probe
@@ -6247,10 +6247,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         # Test enable automatic repairs with a health probe when create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser',
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser',
                  checks=[
                      self.check('vmss.automaticRepairsPolicy.enabled', True),
-                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('vmss.automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_probe_')
@@ -6265,10 +6266,10 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username azureuser')
 
         # Validate automatic repairs parameters
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd(
                 'vmss update -g {rg} -n {vmss} --enable-automatic-repairs false --automatic-repairs-grace-period 30')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true')
 
         # Prepare health probe
@@ -6288,10 +6289,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
             self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()
         )
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids {instance_ids}')
-        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30',
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30 --automatic-repairs-action restart',
                  checks=[
                      self.check('automaticRepairsPolicy.enabled', True),
-                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_extension_')
