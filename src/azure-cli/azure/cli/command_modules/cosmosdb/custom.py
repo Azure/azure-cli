@@ -2416,7 +2416,7 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
                                                      managed_disk_customer_key_uri=None,
                                                      backup_storage_customer_key_uri=None):
 
-    """Updates an Azure Managed Cassandra Datacenter"""
+    """Updates an Azure Managed Cassandra DataCenter"""
 
     data_center_resource = client.get(resource_group_name, cluster_name, data_center_name)
 
