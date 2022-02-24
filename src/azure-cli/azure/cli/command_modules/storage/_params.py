@@ -5,7 +5,7 @@
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, tags_type_preview, file_type, get_location_type,
+from azure.cli.core.commands.parameters import (tags_type, tags_type, file_type, get_location_type,
                                                 get_enum_type, get_three_state_flag, edge_zone_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
@@ -964,7 +964,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='A predefined encryption scope used to encrypt the data on the service.',
                    arg_group="Additional Flags")
         c.argument('lease_id', help='Required if the blob has an active lease.')
-        c.extra('tags', arg_type=tags_type_preview, arg_group="Additional Flags")
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
         c.argument('metadata', arg_group="Additional Flags")
         c.argument('timeout', arg_group="Additional Flags")
 
