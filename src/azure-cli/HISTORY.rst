@@ -95,7 +95,7 @@ Release History
 
 **Network**
 
-* : az command network: Provide support for Bastion SSH access on Darwin and Linux (#21171)
+* `az bastion ssh`: Provide support for Bastion SSH access on Darwin and Linux (#21171)
 * `az network private-endpoint`: Associate IP configurations and ASGs when creating PE (#21284)
 
 **Packaging**
