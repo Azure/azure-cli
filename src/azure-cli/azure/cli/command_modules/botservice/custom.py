@@ -100,7 +100,7 @@ def __handle_failed_name_check(name_response, cmd, client, resource_group_name, 
 
 
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
-           description=None, display_name=None, endpoint=None, tags=None, location='global',
+           description=None, display_name=None, endpoint=None, tags=None, location='southcentralus',
            sku_name='F0', deploy_echo=None, cmek_key_vault_url=None):
     # Kind parameter validation
     kind = kind.lower()
