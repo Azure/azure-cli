@@ -881,7 +881,57 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('spring-cloud connection delete --id {} --yes'.format(connection_id))
-    
+
+
+    # @record_only
+    def test_springcloud_storageblob_keyvault_ref(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'spring': 'servicelinker-springcloud',
+            'app': 'storageblob',
+            'deployment': 'default',
+            'account': 'servicelinkerteststorage',
+            'vault': 'servicelinker-kv-ref',
+        })
+
+        # prepare params
+        name = 'testconn2'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id))
+
+        self.cmd(
+            'spring-cloud connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+            ]
+        )
+
+        self.cmd(
+            'spring-cloud connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        # update connection
+        self.cmd('spring-cloud connection update storage-blob --connection {} --source-id {} '
+                 '--secret'.format(name, source_id, target_id))
+
+        self.cmd(
+            'spring-cloud connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+
 
     # @record_only
     def test_springcloud_storagequeue_e2e(self):

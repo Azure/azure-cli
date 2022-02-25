@@ -83,8 +83,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-config-app2',
-            'config_store': 'servicelinker-app-configuration2'
+            'site': 'servicelinker-config-app',
+            'config_store': 'servicelinker-app-configuration'
         })
 
         # prepare params
@@ -126,8 +126,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-cassandra-cosmos-asp-app2',
-            'account': 'servicelinker-cassandra-cosmos2',
+            'site': 'servicelinker-cassandra-cosmos-asp-app',
+            'account': 'servicelinker-cassandra-cosmos',
             'key_space': 'coredb'
         })
 
@@ -170,8 +170,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-gremlin-cosmos-asp-app2',
-            'account': 'servicelinker-gremlin-cosmos2',
+            'site': 'servicelinker-gremlin-cosmos-asp-app',
+            'account': 'servicelinker-gremlin-cosmos',
             'database': 'coreDB',
             'graph': 'MyItem'
         })
@@ -215,8 +215,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-mongo-cosmos-asp-app2',
-            'account': 'servicelinker-mongo-cosmos2',
+            'site': 'servicelinker-mongo-cosmos-asp-app',
+            'account': 'servicelinker-mongo-cosmos',
             'database': 'coreDB'
         })
 
@@ -259,8 +259,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-sql-cosmos-asp-app2',
-            'account': 'servicelinker-sql-cosmos2',
+            'site': 'servicelinker-sql-cosmos-asp-app',
+            'account': 'servicelinker-sql-cosmos',
             'database': 'coreDB'
         })
 
@@ -303,8 +303,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-table-cosmos-asp-app2',
-            'account': 'servicelinker-table-cosmos2',
+            'site': 'servicelinker-table-cosmos-asp-app',
+            'account': 'servicelinker-table-cosmos',
             'table': 'MyItem'
         })
 
@@ -347,8 +347,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-eventhub-app2',
-            'namespace': 'servicelinkertesteventhub2' 
+            'site': 'servicelinker-eventhub-app',
+            'namespace': 'servicelinkertesteventhub' 
         })
 
         # prepare params
@@ -390,8 +390,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-servicebus-app2',
-            'namespace': 'servicelinkertestservicebus2' 
+            'site': 'servicelinker-servicebus-app',
+            'namespace': 'servicelinkertestservicebus' 
         })
 
         # prepare params
@@ -433,8 +433,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-signalr-app2',
-            'signalr': 'servicelinker-signalr2' 
+            'site': 'servicelinker-signalr-app',
+            'signalr': 'servicelinker-signalr' 
         })
 
         # prepare params
@@ -476,8 +476,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-keyvault-app2',
-            'vault': 'servicelinker-test-kv2'
+            'site': 'servicelinker-keyvault-app',
+            'vault': 'servicelinker-test-kv'
         })
 
         # prepare params
@@ -519,8 +519,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblepostgresql-app2',
-            'server': 'servicelinker-flexiblepostgresql2',
+            'site': 'servicelinker-flexiblepostgresql-app',
+            'server': 'servicelinker-flexiblepostgresql',
             'database': 'test'
         })
 
@@ -569,7 +569,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-redis-app2',
+            'site': 'servicelinker-redis-app',
             'server': 'servicelinker-redis',
             'database': '0'
         })
@@ -614,7 +614,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-redis-enterprise-app2',
+            'site': 'servicelinker-redis-enterprise-app',
             'server': 'servicelinker-redis-enterprise',
             'database': 'default'
         })
@@ -658,8 +658,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-mysql-app2',
-            'server': 'servicelinker-mysql2',
+            'site': 'servicelinker-mysql-app',
+            'server': 'servicelinker-mysql',
             'database': 'mysqlDB'
         })
 
@@ -707,8 +707,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblemysql-app2',
-            'server': 'servicelinker-flexible-mysql2',
+            'site': 'servicelinker-flexiblemysql-app',
+            'server': 'servicelinker-flexible-mysql',
             'database': 'mysqlDB'
         })
 
@@ -756,8 +756,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-postgresql-app2',
-            'server': 'servicelinker-postgresql2',
+            'site': 'servicelinker-postgresql-app',
+            'server': 'servicelinker-postgresql',
             'database': 'test'
         })
 
@@ -806,7 +806,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-sql-app2',
+            'site': 'servicelinker-sql-app',
             'server': 'servicelinker-sql',
             'database': 'handler-test'
         })
@@ -855,8 +855,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storageblob-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -890,7 +890,54 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
-    
+
+
+    @record_only()
+    def test_webapp_storageblob_keyvault_ref(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-app',
+            'account': 'servicelinkerstorage',
+            'vault': 'servicelinker-kv-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id))
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --connection {} --source-id {} '
+                 '--secret'.format(name, source_id, target_id))
+
+        self.cmd(
+            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
 
     @record_only()
     def test_webapp_storagequeue_e2e(self):
@@ -898,8 +945,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagequeue-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagequeue-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -941,8 +988,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagefile-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagefile-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -984,8 +1031,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagetable-app2',
-            'account': 'servicelinkerstorage2'
+            'site': 'servicelinker-storagetable-app',
+            'account': 'servicelinkerstorage'
         })
 
         # prepare params
@@ -1027,7 +1074,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-kafka-app2',
+            'site': 'servicelinker-kafka-app',
         })
 
         # prepare params
@@ -1061,3 +1108,51 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @record_only()
+    def test_webapp_confluentkafka_keyvault_ref(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-kafka-app',
+            'vault': 'servicelinker-kv-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create confluent-cloud --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type python --kv-id {}'.format(name, source_id, keyvault_id))
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 3),
+                self.check('[0].secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        # update connection
+        self.cmd('webapp connection update confluent-cloud --connection {} --source-id {} '
+                 '--kafka-secret Secret'.format(name, source_id))
+
+        self.cmd(
+            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
