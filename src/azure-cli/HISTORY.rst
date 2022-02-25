@@ -17,12 +17,9 @@ Release History
 * `az aks get-credentials`: Add new parameter `--format` to support specifying the format of returned credential (#21383)
 * `az aks nodepool`: Allow specifying `--scale-down-mode` in nodepool create and update (#21396)
 
-**API Management**
-
-* `az apim api import`: Update api-id description  #18306 (#21248)
-
 **APIM**
 
+* `az apim api import`: Update api-id description  #18306 (#21248)
 * Fix #21187: `az apim api create/update/import`: Fix header and query param names being swapped (#21202)
 
 **App Config**
