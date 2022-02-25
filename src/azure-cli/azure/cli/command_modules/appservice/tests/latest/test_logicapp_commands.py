@@ -28,7 +28,6 @@ DEFAULT_LOCATION = "westus"
 
 class LogicappBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @unittest.skip("Temp skip")
     def test_logicapp_e2e(self, resource_group):
         logicapp_name = self.create_random_name(prefix='logic-e2e', length=24)
         plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
@@ -157,25 +156,21 @@ class LogicAppPlanTest(ScenarioTest):
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    @unittest.skip("Temp skip")
     def test_asp_ws1_create(self, resource_group, storage_account):
         self._run_sku_test("WS1", resource_group, storage_account)
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    @unittest.skip("Temp skip")
     def test_asp_ws2_create(self, resource_group, storage_account):
         self._run_sku_test("WS2", resource_group, storage_account)
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    @unittest.skip("Temp skip")
     def test_asp_ws3_create(self, resource_group, storage_account):
         self._run_sku_test("WS3", resource_group, storage_account)
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
-    @unittest.skip("temp skip")
     def test_autocreate_asp_for_logicapp(self, resource_group, storage_account):
         name = self.create_random_name('logicapp', 24)
         self.cmd('logicapp create -g {} -n {} --storage-account {}'.format(resource_group, name, storage_account))
@@ -193,7 +188,6 @@ class LogicAppPlanTest(ScenarioTest):
         self._create_app_service_plan("WS3", resource_group, plan_name, expect_failure=True)
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @unittest.skip("Temp skip")
     def test_update_logicapp_asp_sku(self, resource_group):
         plan_name = self._create_app_service_plan("WS1", resource_group)
         self._create_app_service_plan("WS2", resource_group, plan_name)
@@ -203,7 +197,6 @@ class LogicAppPlanTest(ScenarioTest):
 class LogicAppOnWindows(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_LOGICAPP)
     @StorageAccountPreparer()
-    @unittest.skip("Temp skip")
     def test_logicapp_windows(self, resource_group, storage_account):
         logicapp_name = self.create_random_name(
             'logicappwindowsruntime', 40)
@@ -220,7 +213,6 @@ class LogicAppOnWindows(ScenarioTest):
 class LogicAppOnLinux(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_LOGICAPP)
     @StorageAccountPreparer()
-    @unittest.skip("Temp skip")
     def test_logicapp_on_linux(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         logicapp_name = self.create_random_name(
