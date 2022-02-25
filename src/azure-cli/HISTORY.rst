@@ -28,12 +28,12 @@ Release History
 
 **App Service**
 
-* [BREAKING CHANGE] `az webapp up` : Change supported runtimes (#21057)
-* [BREAKING CHANGE] `az webapp create` : Change supported runtimes (#21057)
-* [BREAKING CHANGE] `az webapp list-runtimes` : Add `--os`/`--os-type` argument, change runtimes, change default behavior to return both linux and windows stacks, and deprecate `--linux` argument (#21057)
-* [BREAKING CHANGE] `az functionapp create` : Take runtime names and versions from API instead of hardcoded list (#21057)
+* [BREAKING CHANGE] `az webapp up`: Change supported runtimes (#21057)
+* [BREAKING CHANGE] `az webapp create`: Change supported runtimes (#21057)
+* [BREAKING CHANGE] `az webapp list-runtimes`: Add `--os`/`--os-type` argument, change runtimes, change default behavior to return both linux and windows stacks, and deprecate `--linux` argument (#21057)
+* [BREAKING CHANGE] `az functionapp create`: Take runtime names and versions from API instead of hardcoded list (#21057)
 * `az functionapp plan`: Update the max value of `--max-burst` to 100 (#21233)
-* `az functionapp list-runtimes` : Add new command to show function app runtimes, versions, and compatible functions versions (#21057)
+* `az functionapp list-runtimes`: Add new command to show function app runtimes, versions, and compatible functions versions (#21057)
 * `az webapp create`: Provide support `--https-only` flag (#21286)
 * `az webapp deployment github-actions remove`: Fix the bug that path cannot start with a slash (#21392)
 
