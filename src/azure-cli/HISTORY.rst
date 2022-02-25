@@ -75,8 +75,8 @@ Release History
 
 **IoT**
 
-* `az iot hub create`: Add the `--enforce-data-residency` parameter to support creating resources with data residency enforced (and cross-region disaster recovery disabled). (#21348)
-* `az iot dps create`: Add the `--enforce-data-residency` parameter to support creating resources with data residency enforced (and cross-region disaster recovery disabled). (#21348)
+* `az iot hub create`: Add the `--enforce-data-residency` parameter to support creating resources with data residency enforced (and cross-region disaster recovery disabled) (#21348)
+* `az iot dps create`: Add the `--enforce-data-residency` parameter to support creating resources with data residency enforced (and cross-region disaster recovery disabled) (#21348)
 
 **Key Vault**
 
@@ -97,11 +97,10 @@ Release History
 
 **Packaging**
 
-* [BREAKING CHANGE] Drop `jmespath-terminal` from docker image (#21206)
-* [BREAKING CHANGE] Drop support for Ubuntu 14.04 Trusty Tahr and Debian 8 Jessie (#20869)
-* Bump embedded Python to 3.8 for deb packages (#20869)
+* [BREAKING CHANGE] Drop Ubuntu 14.04 Trusty Tahr and Debian 8 Jessie support (#20869)
+* [BREAKING CHANGE] Drop Ubuntu 21.04 Hirsute Hippo support (#21151)
 * Add Ubuntu 21.10 Impish Indri support (#21151)
-* Drop Ubuntu 21.04 Hirsute Hippo support (#21151)
+* Bump embedded Python to 3.8 for deb packages (#20869)
 
 **Profile**
 
