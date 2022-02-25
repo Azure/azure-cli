@@ -19,7 +19,7 @@ Release History
 
 **API Management**
 
-* apim api import: Update api-id description  #18306 (#21248)
+* `az apim api import`: Update api-id description  #18306 (#21248)
 
 **APIM**
 
