@@ -19,12 +19,12 @@ Release History
 
 **APIM**
 
-* `az apim api import`: Update api-id description  #18306 (#21248)
+* `az apim api import`: Update api-id description #18306 (#21248)
 * Fix #21187: `az apim api create/update/import`: Fix header and query param names being swapped (#21202)
 
 **App Config**
 
-* `az appconfig kv import`: Add new parameter `--strict` to support strict import. (#21067)
+* `az appconfig kv import`: Add new parameter `--strict` to support strict import (#21067)
 
 **App Service**
 
@@ -51,7 +51,7 @@ Release History
 
 * Add private endpoints support for Microsoft.RecoveryServices/vaults (#21097)
 
-**Compute **
+**Compute**
 
 * `az vm create`: Fix the issue that VMCustomization is not enabled (#21232)
 * `az vm disk attach`: Modify help description to guide how to use the `--ids` parameter correctly (#21300)
@@ -66,10 +66,10 @@ Release History
 
 **Eventhub**
 
-* `az eventhubs namespace create`: Add  `--user-assigned`, `--system-assigned`, `--encryption-config` (#21191)
+* `az eventhubs namespace create`: Add `--user-assigned`, `--system-assigned`, `--encryption-config` (#21191)
 * `az eventhubs namespace identity`: Cmdlets for event hubs identity (#21191)
 * `az eventhubs namespace encryption`: Cmdlets for event hubs encryption (#21191)
-* `az servicebus namespace create`: Add  `--user-assigned`, `--system-assigned`, `--encryption-config` (#21270)
+* `az servicebus namespace create`: Add `--user-assigned`, `--system-assigned`, `--encryption-config` (#21270)
 * `az servicebus namespace identity`: Cmdlets for event hubs identity (#21270)
 * `az servicebus namespace encryption`: Cmdlets for event hubs encryption (#21270)
 
@@ -86,9 +86,9 @@ Release History
 
 **Monitor**
 
-* `az monitor log-analytics workspace table`: Add new command `create`, `delete` and `search-job create` to support Microsoft/Custom log/Search Results table operations, (#20968)
+* `az monitor log-analytics workspace table`: Add new command `create`, `delete` and `search-job create` to support Microsoft/Custom log/Search Results table operations (#20968)
 * `az monitor log-analytics workspace update`: Add a new parameter `--data-collection-rule` to support update defaultDataCollectionRuleResourceId (#20968)
-* `az monitor log-analytics workspace table`: Add new command `restore create` and `migrate`  to support Restored logs table/migrate operations (#21340)
+* `az monitor log-analytics workspace table`: Add new command `restore create` and `migrate` to support Restored logs table/migrate operations (#21340)
 
 **Network**
 
@@ -118,7 +118,7 @@ Release History
 
 **SQL**
 
-* `az sql server create/update`: Add federated client id support. (#21293)
+* `az sql server create/update`: Add federated client id support (#21293)
 
 **Storage**
 
