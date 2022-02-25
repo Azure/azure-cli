@@ -2815,7 +2815,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 max_unhealthy_upgraded_instance_percent=None, pause_time_between_batches=None,
                 enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None, edge_zone=None,
                 user_data=None, network_api_version=None, enable_spot_restore=None, spot_restore_timeout=None,
-                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None):
+                capacity_reservation_group=None, enable_auto_update=None, patch_mode=None, enable_agent=None,
+                security_type=None, enable_secure_boot=None, enable_vtpm=None, automatic_repairs_action=None,
+                v_cpus_available=None, v_cpus_per_core=None):
+
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3077,7 +3080,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             orchestration_mode=orchestration_mode, network_api_version=network_api_version,
             enable_spot_restore=enable_spot_restore, spot_restore_timeout=spot_restore_timeout,
             capacity_reservation_group=capacity_reservation_group, enable_auto_update=enable_auto_update,
-            patch_mode=patch_mode, enable_agent=enable_agent)
+            patch_mode=patch_mode, enable_agent=enable_agent, security_type=security_type,
+            enable_secure_boot=enable_secure_boot, enable_vtpm=enable_vtpm,
+            automatic_repairs_action=automatic_repairs_action, v_cpus_available=v_cpus_available,
+            v_cpus_per_core=v_cpus_per_core)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3367,7 +3373,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_unhealthy_instance_percent=None, max_unhealthy_upgraded_instance_percent=None,
                 pause_time_between_batches=None, enable_cross_zone_upgrade=None, prioritize_unhealthy_instances=None,
                 user_data=None, enable_spot_restore=None, spot_restore_timeout=None, capacity_reservation_group=None,
-                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, **kwargs):
+                vm_sku=None, ephemeral_os_disk_placement=None, force_deletion=None, enable_secure_boot=None,
+                enable_vtpm=None, automatic_repairs_action=None, v_cpus_available=None, v_cpus_per_core=None,
+                **kwargs):
     vmss = kwargs['parameters']
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
@@ -3409,6 +3417,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if user_data is not None:
         vmss.virtual_machine_profile.user_data = b64encode(user_data)
 
+    if v_cpus_available is not None or v_cpus_per_core is not None:
+        HardwareProfile = cmd.get_models('HardwareProfile')
+        VMSizeProperties = cmd.get_models('VMSizeProperties')
+        hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
+                                                                               v_cpus_per_core=v_cpus_per_core))
+        vmss.virtual_machine_profile.hardware_profile = hardware_profile
+
     if capacity_reservation_group is not None:
         CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
         SubResource = cmd.get_models('SubResource')
@@ -3427,10 +3442,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
 
-    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None:
+    if enable_automatic_repairs is not None or \
+            automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
         AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
         vmss.automatic_repairs_policy = \
-            AutomaticRepairsPolicy(enabled="true", grace_period=automatic_repairs_grace_period)
+            AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
+                                   grace_period=automatic_repairs_grace_period,
+                                   repair_action=automatic_repairs_action)
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
@@ -3466,6 +3484,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if enable_secure_boot is not None or enable_vtpm is not None:
+        vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
+            'secureBootEnabled': enable_secure_boot,
+            'vTpmEnabled': enable_vtpm
+        }}
 
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}

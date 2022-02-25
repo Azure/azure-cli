@@ -129,6 +129,29 @@ def connected_registry_list_output_format(result):
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
+def list_referrers_output_format(result):
+    manifests = []
+    for manifest in result['references']:
+        manifests.append(OrderedDict([
+            ('Digest', _get_value(manifest, 'digest')),
+            ('ArtifactType', _get_value(manifest, 'artifactType')),
+            ('MediaType', _get_value(manifest, 'mediaType')),
+            ('Size', _get_value(manifest, 'size'))
+        ]))
+    return manifests
+
+
+def manifest_output_format(result):
+    manifests = []
+    for manifest in result:
+        manifests.append(OrderedDict([
+            ('MediaType', _get_value(manifest, 'mediaType')),
+            ('ArtifactType', _get_value(manifest, 'artifactType')),
+            ('SubjectDigest', _get_value(manifest, 'subject', 'digest'))
+        ]))
+    return manifests
+
+
 def _recursive_format_list_acr_childs(family_tree, connected_registry_id):
     connected_registry = family_tree[connected_registry_id]
     childs = connected_registry['childs']
