@@ -45,7 +45,7 @@ Release History
 * `az account management-group subscription show`: Get the details of a given subscription under a given management group (#20942)
 * `az account management-group subscription show-sub-under-mg`: Show what subscription is under a given management group (#20942)
 * `az account management-group check-name-availability`: Check if a management group name is valid and available (#20942)
-* `az deployment`: Fix the bug of `'bytes' object has no attribute 'get'` for error handling in retry cases (#21220)
+* `az deployment`: Fix the bug of 'bytes object has no attribute get' for error handling in retry cases (#21220)
 
 **Backup**
 
