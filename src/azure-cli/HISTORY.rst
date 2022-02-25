@@ -60,6 +60,10 @@ Release History
 * `az vmss create/update`: Add new parameters `--automatic-repairs-action` to support repair action (#20485)
 * `az vmss create/update`: Add new parameters `--v-cpus-available` and `--v-cpus-per-core` to support VMSize customization (#21368)
 
+**Cosmos DB**
+
+* `az managed-cassandra cluster update`: Fix to allow `--external-seed-nodes` and `--external-gossip-certificates` to be updated by the user (#21420)
+
 **Eventhub**
 
 * `az eventhubs namespace create`: Add  `--user-assigned`, `--system-assigned`, `--encryption-config` (#21191)
@@ -79,10 +83,6 @@ Release History
 * Fix #21341: `az keyvault update`: Support updating tags (#21350)
 * `az keyvault key create/import/set-attributes`: Support `--immutable` to mark release policy immutable (#21371)
 * `az keyvault key import`: Support `--kty oct` to import AES key (#21380)
-
-**managed-cassandra**
-
-* `az managed-cassandra cluster update`: Fix to allow `--external-seed-nodes` and `--external-gossip-certificates` to be updated by the user. (#21420)
 
 **Monitor**
 
