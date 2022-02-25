@@ -45,6 +45,13 @@ def get_blob_tier_names(cli_ctx, model):
     return [v for v in dir(t_blob_tier_model) if not v.startswith('_')]
 
 
+def get_blob_tier_names_track2(cli_ctx, model_path, track2=False):
+    t_blob_tier_model = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, model_path)
+    if track2:
+        t_blob_tier_model = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, model_path)
+    return [v for v in dir(t_blob_tier_model) if not v.startswith('_')]
+
+
 def get_delete_blob_snapshot_type_names():
     return 'include', 'only'
 
