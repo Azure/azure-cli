@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
+from importlib.resources import Resource
 import threading
 import time
 
@@ -4197,9 +4198,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
-    if runtime and html:
-        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
-
     if runtime:
         runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime, _is_linux)
@@ -4266,7 +4264,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("The webapp '%s' doesn't exist", name)
-        sku = get_sku_to_use(src_dir, html, sku, runtime)
+        sku = get_sku_to_use(src_dir, html, sku, runtime, app_service_environment)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
@@ -4311,6 +4309,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
                                 number_of_workers=1 if _is_linux else None, location=loc,
                                 app_service_environment=app_service_environment)
+    except ResourceNotFoundError as ex:
+        raise ex
+    except CLIError as ex:
+        raise ex
     except Exception as ex:  # pylint: disable=broad-except
         if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
             try:

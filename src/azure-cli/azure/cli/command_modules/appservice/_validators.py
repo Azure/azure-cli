@@ -358,3 +358,17 @@ def validate_vnet_integration(cmd, namespace):
                                      "Plan sku cannot be one of: {}. "
                                      "Please run 'az appservice plan create -h' "
                                      "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
+
+
+# if the ASP exists, validate that it is in the ASE
+def _validate_plan_in_ase(cmd, plan, ase):
+    pass
+
+def validate_webapp_up(cmd, namespace):
+    if namespace.runtime and namespace.html:
+        raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
+
+    if namespace.app_service_environment:
+        if namespace.plan:
+            _validate_plan_in_ase(cmd, namespace.plan, namespace.app_service_environment)
+
