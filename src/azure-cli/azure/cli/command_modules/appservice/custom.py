@@ -99,8 +99,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         raise MutuallyExclusiveArgumentError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
-
+    
     client = web_client_factory(cmd.cli_ctx)
+    plan_info = None
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
@@ -111,7 +112,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                 parse_result = parse_resource_id(user_plan.id)
                 plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     if not plan_info:
-        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
+        raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}'".format(plan,
                                                                                                    resource_group_name))
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
