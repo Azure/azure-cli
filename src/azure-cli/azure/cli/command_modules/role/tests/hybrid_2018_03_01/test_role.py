@@ -58,7 +58,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {app_id} -g {rg}',
                          checks=[
                              self.check("length([])", 1),
-                             self.check("[0].properties.roleDefinitionName", 'Reader'),
+                             self.check("[0].properties.roleDefinitionName", '{role}'),
                              self.check("[0].properties.scope", '{scope}')
                          ])
                 self.cmd('role assignment delete --assignee {app_id} -g {rg}',
