@@ -105,7 +105,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(name=plan, resource_group_name=resource_group_name)
+        plans = list(client.app_service_plans.list(detailed=True))
+        for user_plan in plans: 
+            if user_plan.name.lower() == plan.lower():
+                parse_result = parse_resource_id(user_plan.id)
+                plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     if not plan_info:
         raise ResourceNotFoundError("The plan '{}' doesn't exist in the resource group '{}".format(plan,
                                                                                                    resource_group_name))
