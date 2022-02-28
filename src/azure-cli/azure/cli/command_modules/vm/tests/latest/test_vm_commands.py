@@ -5254,8 +5254,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
-            'host': 'my-host',
-            'vm-name': self.create_random_name('vm-', 10)
+            'host': 'my-host'
         })
 
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
@@ -5275,16 +5274,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
         self.cmd('vm host update -n {host} --host-group {host-group} -g {rg} --set tags.foo="bar"', checks=[
             self.check('tags.foo', 'bar')
         ])
-
-        self.cmd('vm create -n {vm-name} --image debian -g {rg} --size Standard_D4s_v3 '
-                 '--generate-ssh-keys --admin-username azureuser --nsg-rule NONE')
-        host_id = self.cmd('vm host show -g {rg} -n {host} --host-group {host-group}').get_output_in_json()['id']
-        self.kwargs.update({
-            'host_id': host_id
-        })
-        self.cmd('vm deallocate -n {vm-name} -g {rg}')
-        self.cmd('vm update -n {vm-name} -g {rg} --host {host_id} --set tags.tagName=tagValue')
-        self.cmd('vm start -n {vm-name} -g {rg}')
 
         self.cmd('vm host restart -n {host} --host-group {host-group} -g {rg}')
 
