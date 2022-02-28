@@ -29,6 +29,10 @@ class NatGatewayScenarioTests(ScenarioTest):
         # create public ip prefix
         self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
 
+        from azure.cli.core.azclierror import ValidationError
+        with self.assertRaises(ValidationError):
+            self.cmd('network nat gateway create --resource-group {rg} --name {name} --location {location} --idle-timeout {idle_timeout} --zone {zone}')
+
         self.cmd('az network nat gateway create --resource-group {rg} --public-ip-prefixes {ip_prefix} --name {name} --location {location} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}', checks=[
             self.check('resourceGroup', '{rg}'),
             self.check('idleTimeoutInMinutes', '{idle_timeout}'),
