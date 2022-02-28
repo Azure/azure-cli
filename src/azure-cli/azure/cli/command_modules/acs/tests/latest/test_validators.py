@@ -359,3 +359,25 @@ class TestExtractCommaSeparatedString(unittest.TestCase):
         t14 = validators.extract_comma_separated_string(s14, extract_kv=True, allow_empty_value=True)
         g14 = {"": ""}
         self.assertEqual(t14, g14)
+
+
+class CredentialFormatNamespace:
+    def __init__(self, credential_format):
+        self.credential_format = credential_format
+
+
+class TestCredentialFormat(unittest.TestCase):
+    def test_invalid_format(self):
+        credential_format = "foobar"
+        namespace = CredentialFormatNamespace(credential_format)
+        err = ("--format can only be azure or exec.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_credential_format(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_format(self):
+        credential_format = "exec"
+        namespace = CredentialFormatNamespace(credential_format)
+
+        validators.validate_credential_format(namespace)

@@ -8,6 +8,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 from azure.cli.command_modules.iot.tests.latest._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 from azure.cli.command_modules.iot.tests.latest.recording_processors import KeyReplacer
+from azure.core.exceptions import HttpResponseError
 import random
 
 
@@ -95,6 +96,20 @@ class IoTDpsTest(ScenarioTest):
 
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
+
+        # Data Residency tests
+        dr_dps_name = self.create_random_name('dps-dr', 20)
+
+        # Data residency not enabled in this region
+        with self.assertRaises(HttpResponseError):
+            self.cmd('az iot dps create -g {} -n {} --edr'.format(group_name, dr_dps_name))
+
+        # Successfully create in this region
+        self.cmd('az iot dps create -g {} -n {} --location southeastasia --edr'.format(group_name, dr_dps_name),
+                 checks=[self.check('name', dr_dps_name),
+                         self.check('location', 'southeastasia'),
+                         self.check('properties.enableDataResidency', True)])
+        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dr_dps_name))
 
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')

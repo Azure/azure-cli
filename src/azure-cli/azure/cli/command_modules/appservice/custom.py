@@ -5158,7 +5158,7 @@ def remove_github_actions(cmd, resource_group, name, repo, token=None, slot=None
         branch.replace('/', '-'), name.lower(), slot) if slot else "{}_{}.yml".format(
             branch.replace('/', '-'), name.lower())
     dir_path = "{}/{}".format('.github', 'workflows')
-    file_path = "/{}/{}".format(dir_path, file_name)
+    file_path = "{}/{}".format(dir_path, file_name)
     existing_publish_profile_name = None
     try:
         existing_workflow_file = github_repo.get_contents(path=file_path, ref=branch)

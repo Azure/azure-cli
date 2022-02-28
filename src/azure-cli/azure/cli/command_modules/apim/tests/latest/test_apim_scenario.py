@@ -309,6 +309,10 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('name', '{release_id}'),
                     self.check('notes', '{release_notes}')])
 
+        # check the revision is being updated
+        self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}',
+                 checks=[self.check('apiRevision', '{api_revision}')])
+
         # show API release
         self.cmd('apim api release show -g "{rg}" -n "{service_name}" --api-id "{api_id}" --release-id "{release_id}"')
 
