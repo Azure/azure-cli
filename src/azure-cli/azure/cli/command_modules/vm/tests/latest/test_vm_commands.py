@@ -5275,8 +5275,6 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('tags.foo', 'bar')
         ])
 
-        self.cmd('vm host restart -n {host} --host-group {host-group} -g {rg}')
-
         self.cmd('vm host delete -n {host} --host-group {host-group} -g {rg} --yes')
         self.cmd('vm host group delete -n {host-group} -g {rg} --yes')
 
