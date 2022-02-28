@@ -7,6 +7,8 @@
 
 from azure.cli.core.commands.parameters import tags_type, get_enum_type, resource_group_name_type, name_type, get_location_type, get_three_state_flag, get_resource_name_completion_list
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.command_modules.servicebus.action import AlertAddEncryption
+from azure.cli.core.profiles import ResourceType
 
 
 def load_arguments_sb(self, _):
@@ -33,6 +35,12 @@ def load_arguments_sb(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', arg_type=get_enum_type(SkuName), help='Namespace SKU.')
         c.argument('capacity', type=int, choices=[1, 2, 4, 8, 16], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
+        c.argument('mi_system_assigned', arg_group='Managed Identity',
+                   arg_type=get_three_state_flag(),
+                   help='Enable System Assigned Identity')
+        c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
+        c.argument('encryption_config', action=AlertAddEncryption, nargs='+',
+                   help='List of KeyVaultProperties objects.')
 
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
@@ -270,3 +278,22 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace network-rule add') as c:
         c.argument('ignore_missing_vnet_service_endpoint', arg_group='Virtual Network Rule', options_list=['--ignore-missing-endpoint'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to ignore missing vnet Service Endpoint')
         c.argument('action', arg_group='IP Address Rule', options_list=['--action'], arg_type=get_enum_type(['Allow']), help='Action of the IP rule')
+
+# Identity
+    with self.argument_context('servicebus namespace identity',
+                               resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['servicebus namespace identity assign', 'servicebus namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+            c.argument('system_assigned', arg_type=get_three_state_flag(), help='System Assigned Identity')
+            c.argument('user_assigned', nargs='+', help='User Assigned Identity')
+
+# Encryption
+    with self.argument_context('servicebus namespace encryption', resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['servicebus namespace encryption add', 'servicebus namespace identity remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_SERVICEBUS) as c:
+            c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')

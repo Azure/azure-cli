@@ -168,3 +168,58 @@ class NatRuleCreate(argparse._AppendAction):
                 raise UnrecognizedArgumentError('key error: key must be one of type, mode, internal-mappings,'
                                                 'external-mappings, ip-config-id')
         return d
+
+
+class IPConfigsCreate(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(IPConfigsCreate, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise UnrecognizedArgumentError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'name':
+                d['name'] = v[0]
+            elif kl == 'group-id':
+                d['group_id'] = v[0]
+            elif kl == 'member-name':
+                d['member_name'] = v[0]
+            elif kl == 'private-ip-address':
+                d['private_ip_address'] = v[0]
+            else:
+                raise UnrecognizedArgumentError('key error: key must be one of group-id, member-name, '
+                                                'private-ip-address.')
+        return d
+
+
+class ASGsCreate(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super(ASGsCreate, self).__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise UnrecognizedArgumentError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            kl = k.lower()
+            v = properties[k]
+            if kl == 'id':
+                d['id'] = v[0]
+            else:
+                raise UnrecognizedArgumentError('key error: key must be id')
+        return d

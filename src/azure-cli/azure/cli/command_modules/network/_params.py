@@ -44,7 +44,7 @@ from azure.cli.command_modules.network._completers import (
     get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate, NatRuleCreate)
+    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -904,6 +904,12 @@ def load_arguments(self, _):
         c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
         c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
+
+    with self.argument_context('network private-endpoint', arg_group='Static IP Configuration') as c:
+        c.argument('ip_configurations', options_list=['--ip-config'], min_api='2021-05-01', nargs='+', action=IPConfigsCreate)
+
+    with self.argument_context('network private-endpoint', arg_group='Application Security Group') as c:
+        c.argument('application_security_groups', options_list=['--asg'], min_api='2021-05-01', nargs='+', action=ASGsCreate)
 
     with self.argument_context('network private-endpoint ip-config') as c:
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)

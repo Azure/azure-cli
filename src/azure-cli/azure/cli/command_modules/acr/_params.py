@@ -36,9 +36,26 @@ from ._validators import (
     validate_set_secret,
     validate_retention_days,
     validate_registry_name,
-    validate_expiration_time
+    validate_expiration_time,
+    validate_manifest_id,
+    validate_repo_id,
+    validate_repository
 )
 from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
+
+repo_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_repo_id,
+    help="A fully qualified repository specifier such as 'MyRegistry.azurecr.io/hello-world'."
+)
+
+manifest_id_type = CLIArgumentType(
+    nargs='*',
+    default=None,
+    validator=validate_manifest_id,
+    help="A fully qualified manifest specifier such as 'MyRegistry.azurecr.io/hello-world:latest'."
+)
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -134,6 +151,42 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('list_enabled', help='Indicates whether this item shows in list operation results.', arg_type=get_three_state_flag())
         c.argument('read_enabled', help='Indicates whether read operation is allowed.', arg_type=get_three_state_flag())
         c.argument('write_enabled', help='Indicates whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+
+    with self.argument_context('acr manifest') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
+        c.argument('top', type=int, help='Limit the number of items in the results.')
+        c.argument('orderby', help='Order the items in the results. Default to alphabetical order of names.', arg_type=get_enum_type(['time_asc', 'time_desc']))
+        c.argument('delete_enabled', help='Indicate whether delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('list_enabled', help='Indicate whether this item shows in list operation results.', arg_type=get_three_state_flag())
+        c.argument('read_enabled', help='Indicate whether read operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('write_enabled', help='Indicate whether write or delete operation is allowed.', arg_type=get_three_state_flag())
+        c.argument('repository', help='The name of the repository.', options_list=['--name', '-n'], validator=validate_repository)
+        c.argument('manifest_spec', help="The name of the artifact. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.", options_list=['--name', '-n'])
+
+    # Positional arguments must be specified on each individual command, they cannot be assigned to a command group
+    with self.argument_context('acr manifest show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('raw_output', help='Output the raw manifest text with no formatting.', options_list=['--raw'], action='store_true')
+
+    with self.argument_context('acr manifest list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest delete') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest list-referrers') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+        c.argument('artifact_type', help='Filter referrers based on artifact type.')
+        c.argument('recursive', help='Recursively include referrer artifacts.', action='store_true')
+
+    with self.argument_context('acr manifest metadata show') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
+
+    with self.argument_context('acr manifest metadata list') as c:
+        c.positional('repo_id', arg_type=repo_id_type)
+
+    with self.argument_context('acr manifest metadata update') as c:
+        c.positional('manifest_id', arg_type=manifest_id_type)
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")

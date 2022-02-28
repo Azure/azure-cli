@@ -210,6 +210,9 @@ def validate_key_type(ns):
 
 
 def process_key_release_policy(cmd, ns):
+    immutable = ns.immutable
+    del ns.immutable
+
     if not ns.release_policy:
         return
 
@@ -222,7 +225,8 @@ def process_key_release_policy(cmd, ns):
     import json
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
-    ns.release_policy = KeyReleasePolicy(data=json.dumps(data).encode('utf-8'))
+    ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(data).encode('utf-8'),
+                                         immutable=immutable)
 
 
 def validate_policy_permissions(ns):
