@@ -112,7 +112,7 @@ class TestAAZField(unittest.TestCase):
 
         v.tags["flag_1"] = "f1"
 
-        assert v.tags["flag_1"]._data == "f1"
+        assert v.tags["flag_1"]._arg_data == "f1"
         assert v.tags["flag_1"] == "f1"
         assert "flag_1" in v.tags
         assert "flag_2" not in v.tags
@@ -125,12 +125,12 @@ class TestAAZField(unittest.TestCase):
             assert key == "flag_1"
 
         for value in v.tags.values():
-            assert value._data == "f1"
+            assert value._arg_data == "f1"
             assert value == "f1"
 
         for key, value in v.tags.items():
             assert key == "flag_1"
-            assert value._data == "f1"
+            assert value._arg_data == "f1"
             assert value == "f1"
 
         v.tags.clear()
@@ -169,18 +169,18 @@ class TestAAZField(unittest.TestCase):
         v.sub_nets[0].id = "/0/"
         assert len(v.sub_nets) == 1
         assert v.sub_nets[0]._is_patch
-        assert v.sub_nets[0].id._data == "/0/"
+        assert v.sub_nets[0].id._arg_data == "/0/"
         assert v.sub_nets[0].id == "/0/"
         v.sub_nets[1] = {
             "id": "/1/"
         }
         assert len(v.sub_nets) == 2
         assert not v.sub_nets[1]._is_patch
-        assert v.sub_nets[1].id._data == "/1/"
+        assert v.sub_nets[1].id._arg_data == "/1/"
         assert v.sub_nets[1].id == "/1/"
 
         assert not v.sub_nets[-1]._is_patch
-        assert v.sub_nets[-1].id._data == "/1/"
+        assert v.sub_nets[-1].id._arg_data == "/1/"
         assert v.sub_nets[-1].id == "/1/"
 
         assert v.sub_nets._is_patch
@@ -194,7 +194,7 @@ class TestAAZField(unittest.TestCase):
         assert len(v.sub_nets) == 1
         assert not v.sub_nets._is_patch
         assert not v.sub_nets[0]._is_patch
-        assert v.sub_nets[0].id._data == "/2/"
+        assert v.sub_nets[0].id._arg_data == "/2/"
         assert v.sub_nets[0].id == "/2/"
 
         for sub_net in v.sub_nets:
@@ -245,14 +245,14 @@ class TestAAZField(unittest.TestCase):
                 }
             ]
         }
-        assert v.sub_properties.vnet_id._data == "vnetId"
-        assert v.sub_properties.sub_tags._data == {"aa": "aa", "bb": "bb"}
-        assert v.sub_properties.sub_nets[0].address_id._data == "1.1.1.1"
-        assert v.sub_properties.sub_nets[1].address_id._data == "2.2.2.2"
-        assert v.sub_properties.vnetId._data == "vnetId"
-        assert v.sub_properties.subTags._data == {"aa": "aa", "bb": "bb"}
-        assert v.sub_properties.subNets[0].addressId._data == "1.1.1.1"
-        assert v.sub_properties.subNets[1].addressId._data == "2.2.2.2"
+        assert v.sub_properties.vnet_id._arg_data == "vnetId"
+        assert v.sub_properties.sub_tags._arg_data == {"aa": "aa", "bb": "bb"}
+        assert v.sub_properties.sub_nets[0].address_id._arg_data == "1.1.1.1"
+        assert v.sub_properties.sub_nets[1].address_id._arg_data == "2.2.2.2"
+        assert v.sub_properties.vnetId._arg_data == "vnetId"
+        assert v.sub_properties.subTags._arg_data == {"aa": "aa", "bb": "bb"}
+        assert v.sub_properties.subNets[0].addressId._arg_data == "1.1.1.1"
+        assert v.sub_properties.subNets[1].addressId._arg_data == "2.2.2.2"
 
         v.sub_properties = {
             "vnet-id": "vnet-id",
@@ -266,12 +266,12 @@ class TestAAZField(unittest.TestCase):
             ]
         }
 
-        assert v.sub_properties.vnet_id._data == "vnet-id"
-        assert v.sub_properties.sub_tags._data == {"cc": "cc"}
-        assert v.sub_properties.sub_nets[0].address_id._data == "3.3.3.3"
-        assert v.sub_properties.vnetId._data == "vnet-id"
-        assert v.sub_properties.subTags._data == {"cc": "cc"}
-        assert v.sub_properties.subNets[0].addressId._data == "3.3.3.3"
+        assert v.sub_properties.vnet_id._arg_data == "vnet-id"
+        assert v.sub_properties.sub_tags._arg_data == {"cc": "cc"}
+        assert v.sub_properties.sub_nets[0].address_id._arg_data == "3.3.3.3"
+        assert v.sub_properties.vnetId._arg_data == "vnet-id"
+        assert v.sub_properties.subTags._arg_data == {"cc": "cc"}
+        assert v.sub_properties.subNets[0].addressId._arg_data == "3.3.3.3"
 
         model_schema.sub_properties.err_sub_nets = AAZListType()
         with self.assertRaises(AssertionError):

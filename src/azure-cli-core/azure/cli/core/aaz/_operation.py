@@ -3,7 +3,10 @@ import json
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 
-from ._base import AAZUndefined, AAZBaseValue
+from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, AAZValuePatch
+from ._field_type import AAZSimpleType
+from ._content_builder import AAZContentBuilder, AAZContentArgBrowser
+
 
 try:
     from urllib import quote  # type: ignore
@@ -32,13 +35,13 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def serialize_url_param(name, value, required=True, skip_quote=False, **kwargs):
+        if isinstance(value, AAZBaseValue):
+            value = value.to_serialized_data()
+
         if value == AAZUndefined or value == None:
             if required:
                 raise ValueError(f"url parameter {name} is required.")
             return {}
-
-        if isinstance(value, AAZBaseValue):
-            value = value.to_serialized_data()
 
         if isinstance(value, (list, dict)):
             raise NotImplementedError(f"not support type {type(value)} for url parameter")
@@ -55,13 +58,13 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def serialize_query_param(name, value, required=False, skip_quote=False, **kwargs):
+        if isinstance(value, AAZBaseValue):
+            value = value.to_serialized_data()
+
         if value == AAZUndefined:
             if required:
                 raise ValueError(f"query parameter {name} is required.")
             return {}
-
-        if isinstance(value, AAZBaseValue):
-            value = value.to_serialized_data()
 
         def process_element(e):
             if isinstance(e, (list, dict)):
@@ -98,13 +101,13 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def serialize_header_param(name, value, required=False, **kwargs):
+        if isinstance(value, AAZBaseValue):
+            value = value.to_serialized_data()
+
         if value == AAZUndefined:
             if required:
                 raise ValueError(f"query parameter {name} is required.")
             return {}
-
-        if isinstance(value, AAZBaseValue):
-            value = value.to_serialized_data()
 
         def process_element(e):
             if isinstance(e, (list, dict)):
@@ -124,6 +127,18 @@ class AAZHttpOperation(AAZOperation):
         return {name: value}
 
     @staticmethod
+    def serialize_content(value, required=False):
+        if isinstance(value, AAZBaseValue):
+            value = value.to_serialized_data()
+
+        if value == AAZUndefined or value == None:
+            if required:
+                raise ValueError(f"content is required.")
+            return None
+
+        return value
+
+    @staticmethod
     def deserialize_http_content(session):
         from azure.core.pipeline.policies import ContentDecodePolicy
         if ContentDecodePolicy.CONTEXT_NAME in session.context:
@@ -133,6 +148,30 @@ class AAZHttpOperation(AAZOperation):
             raise NotImplementedError()
         else:
             raise ValueError("This pipeline didn't have the ContentDecode Policy; can't deserialize")
+
+    @staticmethod
+    def new_content(typ, arg_value):
+        assert issubclass(typ, AAZBaseType)
+        assert isinstance(arg_value, AAZBaseValue)
+        arg_data = arg_value.to_serialized_data()
+
+        schema = typ()
+        if isinstance(schema, AAZSimpleType):
+            value = typ._ValueCls(
+                schema=schema,
+                data=schema.process_data(arg_data)
+            )
+        else:
+            value = typ._ValueCls(
+                schema=schema,
+                data=schema.process_data(None)
+            )
+
+        builder = AAZContentBuilder(
+            values=[value],
+            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+        )
+        return value, builder
 
     @property
     def url(self):

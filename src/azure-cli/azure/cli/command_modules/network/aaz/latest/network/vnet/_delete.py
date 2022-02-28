@@ -52,8 +52,7 @@ class Delete(AAZCommand):
                     lro_options={'final-state-via': 'azure-async-operation'},
                     path_format_arguments=self.url_parameters,
                 )
-            else:
-                return self.on_error(session)
+            return self.on_error(session)
 
         @property
         def url(self):
@@ -85,7 +84,7 @@ class Delete(AAZCommand):
         @property
         def header_parameters(self):
             parameters = {
-                **self.serialize_query_param('Accept', "application/json"),
+                **self.serialize_header_param('Accept', "application/json"),
             }
             return parameters
 

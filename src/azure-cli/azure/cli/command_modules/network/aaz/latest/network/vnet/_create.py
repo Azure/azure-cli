@@ -24,113 +24,188 @@ class Create(AAZCommand):
 
     """
 
+    _args_schema = None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        schema = super()._build_arguments_schema(*args, **kwargs)
+        if cls._args_schema is not None:
+            return cls._args_schema
 
-        schema.virtual_network_name = AAZStrArg(
+        cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        _args_schema = cls._args_schema
+        _args_schema.virtual_network_name = AAZStrArg(
             options=["--virtual-network-name", "--name", "-n"], required=True, id_part="name",
             help="The name of the virtual network.",
         )
-        schema.location = AAZStrArg(
+        _args_schema.location = AAZStrArg(
             options=["--location", "-l"], required=True,
             help="Resource location.",
         )
-        schema.count = AAZIntArg(
+        _args_schema.count = AAZIntArg(
             options=["--count", '-c'],
             help="Integer argument"
         )
-        schema.enable = AAZBoolArg(
+        _args_schema.enable = AAZBoolArg(
             options=["--enable", "-e"],
             help="Boolean argument"
         )
-        schema.float = AAZFloatArg(
+        _args_schema.float = AAZFloatArg(
             options=["--float", "-f"],
             help="Float argument"
         )
-        schema.encrypt_type = AAZStrArg(
+        _args_schema.encrypt_type = AAZStrArg(
             options=["--encrypt-type", "--et"],
-            enum=AAZArgEnum({
+            enum={
                 "AS": "a-secret",
                 "BS": "b-secret"
-            }),
+            },
             help="Encrypt Type"
         )
 
-        schema.tags = AAZDictArg(
+        _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Resource tags."
         )
-        schema.tags.Element = AAZStrArg()
+        _args_schema.tags.Element = AAZStrArg()
 
-        schema.flags = AAZListArg(
+        _args_schema.flags = AAZListArg(
             options=["--flags"],
             singular_options=["--flag"],
             help="Flags"
         )
-        schema.flags.Element = AAZIntArg()
+        _args_schema.flags.Element = AAZIntArg()
 
-        schema.extended_location = AAZObjectArg(
+        _args_schema.extended_location = AAZObjectArg(
             options=["--extended-location"],
             help="The extended location of the virtual network."
         )
-        schema.extended_location.name = AAZStrArg(
+        _args_schema.extended_location.name = AAZStrArg(
             help="The name of the extended location."
         )
-        schema.extended_location.type = AAZStrArg(
+        _args_schema.extended_location.type = AAZStrArg(
             help="The type of the extended location.",
-            enum=AAZArgEnum(["EdgeZone", "CoreZone"])
+            enum=["EdgeZone", "CoreZone"]
         )
 
-        schema.address_space = AAZObjectArg(
+        _args_schema.address_space = AAZObjectArg(
             options=["--address-space"],
             help="The AddressSpace that contains an array of IP address ranges that can be used by subnets."
         )
-        schema.address_space.address_prefixes = AAZListArg(
+        _args_schema.address_space.address_prefixes = AAZListArg(
             options=["address-prefixes"],
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
         )
-        schema.address_space.address_prefixes.Element = AAZStrArg()
+        _args_schema.address_space.address_prefixes.Element = AAZStrArg()
 
-        schema.dhcp_options = AAZObjectArg(
+        _args_schema.dhcp_options = AAZObjectArg(
             options=["--dhcp-options"],
             help="The dhcpOptions that contains an array of DNS servers available to VMs deployed in the virtual network."
         )
-        schema.dhcp_options.dns_servers = AAZListArg(
+        _args_schema.dhcp_options.dns_servers = AAZListArg(
             options=["dns-servers"],
             help="The list of DNS servers IP addresses."
         )
-        schema.dhcp_options.dns_servers.Element = AAZStrArg()
+        _args_schema.dhcp_options.dns_servers.Element = AAZStrArg()
 
-        schema.flow_timeout_in_minutes = AAZIntArg(
+        _args_schema.flow_timeout_in_minutes = AAZIntArg(
             options=["--flow-timeout-in-minutes"],
             help="The FlowTimeout value (in minutes) for the Virtual Network"
         )
 
-        schema.subnets = AAZListArg(
+        _args_schema.subnets = AAZListArg(
             options=["--subnets"],
             help="A list of subnets in a Virtual Network.",
         )
-        schema.subnets.Element = AAZObjectArg()
-        schema.subnets.Element.address_prefix = AAZStrArg(
+        _args_schema.subnets.Element = AAZObjectArg()
+        _args_schema.subnets.Element.address_prefix = AAZStrArg(
             options=["address-prefix"],
             help="The address prefix for the subnet."
         )
-        schema.subnets.Element.address_prefixes = AAZListArg(
+        _args_schema.subnets.Element.address_prefixes = AAZListArg(
             options=["address-prefixes"],
             help="List of address prefixes for the subnet.",
         )
-        schema.subnets.Element.address_prefixes.Element = AAZStrArg()
-        schema.subnets.Element.network_security_group = AAZObjectArg(
+        _args_schema.subnets.Element.address_prefixes.Element = AAZStrArg()
+        _args_schema.subnets.Element.network_security_group = AAZObjectArg(
             options=["network-security-group"],
             help="The reference to the NetworkSecurityGroup resource.",
         )
-        schema.subnets.Element.network_security_group.id = AAZStrArg(
+        _args_schema.subnets.Element.network_security_group.id = AAZStrArg(
             options=["id"],
             help="Resource ID."
         )
 
-        return schema
+        return _args_schema
+
+    _args_address_space_create = None
+
+    @classmethod
+    def _build_args_address_space_create(cls, schema):
+        if cls._args_address_space_create is not None:
+            schema.address_prefixes = cls._args_address_space_create.address_prefixes
+            return
+
+        cls._args_address_space_create = _args_address_space_create = AAZObjectArg()
+        _args_address_space_create.address_prefixes = AAZListArg(
+            options=["address-prefixes"], singular_options=["address-prefix"],
+            help="A list of address blocks reserved for this virtual network in CIDR notation.",
+        )
+        # assign schema
+        schema.address_prefixes = _args_address_space_create.address_prefixes
+
+        # define deeper
+        address_prefixes = _args_address_space_create.address_prefixes
+        address_prefixes.Element = AAZStrArg()
+
+    # @property
+    # def content(self):
+    #     _content_value, _builder = self.new_content(typ=AAZObjectType, arg=self.ctx.args)
+    #
+    #     _builder.set_prop('id', AAZStrType, '.id')
+    #     _builder.set_prop('location', AAZStrType, '.location')
+    #     _builder.set_prop('subnets', AAZListType, '.subnets')
+    #     _builder.set_prop('tags', AAZDictType, '.tags')
+    #     _builder.set_prop('extendedLocation', AAZObjectType, '.extended_location')
+    #     _builder.set_prop('properties', AAZObjectType, '.')
+    #
+    #     tags = _builder.get('.tags')
+    #     if tags is not None:
+    #         tags.set_elements(AAZStrType, '.')
+    #
+    #     extended_location = _builder.get('.extendedLocation')
+    #     if extended_location is not None:
+    #         extended_location.set_prop('name', AAZStrType, '.name')
+    #         extended_location.set_prop('type', AAZStrType, '.type')
+    #
+    #     properties = _builder.get('.properties')
+    #     if properties is not None:
+    #         properties.set_prop('addressSpace', AAZObjectType, '.address_space')
+    #         properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+    #
+    #     address_prefixes = _builder.get('.properties.addressPrefixes')
+    #     if address_prefixes is not None:
+    #         address_prefixes.set_elements(AAZStrType, '.')
+    #
+    #     subnets = _builder.get('.subnets')
+    #     if subnets is not None:
+    #         subnets.set_elements(AAZObjectType, '.')
+    #
+    #     elements = _builder.get('.subnets[]')
+    #     if elements is not None:
+    #         elements.set_prop('id', AAZStrType, '.id')
+    #         elements.set_prop('properties', AAZObjectType, '.')
+    #
+    #     properties = _builder.get('.subnets[].properties')
+    #     if properties is not None:
+    #         properties.set_prop('addressPrefix', AAZStrType, '.address_prefix')
+    #         properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+    #
+    #     address_prefixes = _builder.get('.subnets[].properties.addressPrefixes')
+    #     if address_prefixes is not None:
+    #         address_prefixes.set_elements(AAZStrType, '.')
+    #
+    #     return self.serialize_content(_content_value)
 
 
 __all__ = ["Create"]

@@ -60,7 +60,7 @@ class AAZFloatType(AAZSimpleType):
 
 
 # compound types
-
+# TODO: add support for discriminator in AAZObjectType
 class AAZObjectType(AAZBaseType):
     _PROTECTED_KEYWORDS = ("get_attr_name", "process_data", "to_serialized_data")
 
