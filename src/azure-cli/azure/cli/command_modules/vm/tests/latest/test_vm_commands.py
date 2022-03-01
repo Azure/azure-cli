@@ -5264,7 +5264,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
-            'host': 'my-host',
+            'host': 'my-host'
         })
 
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
