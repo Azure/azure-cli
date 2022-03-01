@@ -6402,51 +6402,47 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_and_update_ipv6_count(self, resource_group, resource_group_location):
-        _, create_version = self._get_versions(resource_group_location)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='centraluseuap')
+    def test_aks_create_with_windows_gmsa(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'location': resource_group_location,
-            'k8s_version': create_version,
-            'ssh_key_value': self.generate_ssh_keys(),
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replace-Password1234$',
+            'nodepool2_name': 'npwin',
+            'ssh_key_value': self.generate_ssh_keys()
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--pod-cidr 172.126.0.0/16 --service-cidr 172.56.0.0/16 --dns-service-ip 172.56.0.10 ' \
-                     '--pod-cidrs 172.126.0.0/16,2001:abcd:1234::/64 --service-cidrs 172.56.0.0/16,2001:ffff::/108 ' \
-                     '--ip-families IPv4,IPv6 --load-balancer-managed-outbound-ipv6-count 2 ' \
-                     '--network-plugin kubenet --ssh-key-value={ssh_key_value} --kubernetes-version {k8s_version} ' \
-                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-EnableDualStack'
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure ' \
+                     '--ssh-key-value={ssh_key_value} --enable-windows-gmsa --yes ' \
+                     '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindowsGmsaPreview'
         self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('networkProfile.podCidr', '172.126.0.0/16'),
-            self.check('networkProfile.podCidrs', ['172.126.0.0/16', '2001:abcd:1234::/64']),
-            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
-            self.check('networkProfile.serviceCidrs', ['172.56.0.0/16', '2001:ffff::/108']),
-            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
-            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 2),
-            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.check('networkProfile.loadBalancerProfile.effectiveOutboundIPs[] | length(@)', 3)
+            self.check('windowsProfile.adminUsername', 'azureuser1'),
+            self.check('windowsProfile.gmsaProfile.enabled', 'True')
         ])
 
-        # update
-        update_cmd = 'aks update -g {resource_group} -n {name} --load-balancer-managed-outbound-ipv6-count 4'
-
-        self.cmd(update_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('networkProfile.podCidr', '172.126.0.0/16'),
-            self.check('networkProfile.podCidrs', ['172.126.0.0/16', '2001:abcd:1234::/64']),
-            self.check('networkProfile.serviceCidr', '172.56.0.0/16'),
-            self.check('networkProfile.serviceCidrs', ['172.56.0.0/16', '2001:ffff::/108']),
-            self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
-            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 4),
-            self.check('networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
-            self.check('networkProfile.loadBalancerProfile.effectiveOutboundIPs[] | length(@)', 5)
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --os-type Windows --node-count=1', checks=[
+            self.check('provisioningState', 'Succeeded')
         ])
+
+        # nodepool delete
+        self.cmd(
+            'aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
 
         # delete
         self.cmd(
