@@ -5,7 +5,7 @@ https://docs.microsoft.com/en-us/azure/storage/common/storage-service-encryption
 
 ### How to use ###
 Install Azure CLI in one of the following ways:
-1. [Public Released Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+1. [Public Released Azure CLI](/cli/azure/install-azure-cli)
 2. [Try Features before Release](https://github.com/Azure/azure-cli/blob/dev/doc/try_new_features_before_release.md)
 
 ### Included Features
