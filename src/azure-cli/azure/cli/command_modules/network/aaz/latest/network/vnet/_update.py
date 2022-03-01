@@ -29,6 +29,7 @@ class Update(AAZCommand):
         self.VirtualNetworkGet(ctx=self.ctx)()
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        yield self.VirtualNetworksCreateOrUpdate(ctx=self.ctx)()
 
     def _output(self, *args, **kwargs):
         return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -102,6 +103,15 @@ class Update(AAZCommand):
                 self.ctx.args.force_string,
                 client_flatten=True,
             )
+
+    class VirtualNetworksCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+        ERROR_FORMAT = "MgmtErrorFormat"
+        # ignore implement here
+
+        @property
+        def content(self):
+            return self.serialize_content(self.ctx.vars.instance)
 
 
 __all__ = ["Update"]

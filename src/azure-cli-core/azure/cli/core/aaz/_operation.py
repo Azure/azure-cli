@@ -128,14 +128,18 @@ class AAZHttpOperation(AAZOperation):
 
     @staticmethod
     def serialize_content(value, required=False):
+        def processor(schema, result):
+            if schema._flags.get('read_only', False):
+                return AAZUndefined
+            return result
+
         if isinstance(value, AAZBaseValue):
-            value = value.to_serialized_data()
+            value = value.to_serialized_data(processor=processor)
 
         if value == AAZUndefined or value == None:
             if required:
                 raise ValueError(f"content is required.")
             return None
-
         return value
 
     @staticmethod
@@ -256,4 +260,5 @@ class AAZInstanceUpdateOperation(AAZOperation):
     @staticmethod
     def _update_by_generic(instance, add_arg, set_arg, remove_arg, force_string_arg, client_flatten=True):
         # TODO: implement generic instance update
+
         return instance

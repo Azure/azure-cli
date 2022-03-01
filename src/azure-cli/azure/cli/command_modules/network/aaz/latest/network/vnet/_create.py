@@ -158,54 +158,59 @@ class Create(AAZCommand):
         address_prefixes = _args_address_space_create.address_prefixes
         address_prefixes.Element = AAZStrArg()
 
-    # @property
-    # def content(self):
-    #     _content_value, _builder = self.new_content(typ=AAZObjectType, arg=self.ctx.args)
-    #
-    #     _builder.set_prop('id', AAZStrType, '.id')
-    #     _builder.set_prop('location', AAZStrType, '.location')
-    #     _builder.set_prop('subnets', AAZListType, '.subnets')
-    #     _builder.set_prop('tags', AAZDictType, '.tags')
-    #     _builder.set_prop('extendedLocation', AAZObjectType, '.extended_location')
-    #     _builder.set_prop('properties', AAZObjectType, '.')
-    #
-    #     tags = _builder.get('.tags')
-    #     if tags is not None:
-    #         tags.set_elements(AAZStrType, '.')
-    #
-    #     extended_location = _builder.get('.extendedLocation')
-    #     if extended_location is not None:
-    #         extended_location.set_prop('name', AAZStrType, '.name')
-    #         extended_location.set_prop('type', AAZStrType, '.type')
-    #
-    #     properties = _builder.get('.properties')
-    #     if properties is not None:
-    #         properties.set_prop('addressSpace', AAZObjectType, '.address_space')
-    #         properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
-    #
-    #     address_prefixes = _builder.get('.properties.addressPrefixes')
-    #     if address_prefixes is not None:
-    #         address_prefixes.set_elements(AAZStrType, '.')
-    #
-    #     subnets = _builder.get('.subnets')
-    #     if subnets is not None:
-    #         subnets.set_elements(AAZObjectType, '.')
-    #
-    #     elements = _builder.get('.subnets[]')
-    #     if elements is not None:
-    #         elements.set_prop('id', AAZStrType, '.id')
-    #         elements.set_prop('properties', AAZObjectType, '.')
-    #
-    #     properties = _builder.get('.subnets[].properties')
-    #     if properties is not None:
-    #         properties.set_prop('addressPrefix', AAZStrType, '.address_prefix')
-    #         properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
-    #
-    #     address_prefixes = _builder.get('.subnets[].properties.addressPrefixes')
-    #     if address_prefixes is not None:
-    #         address_prefixes.set_elements(AAZStrType, '.')
-    #
-    #     return self.serialize_content(_content_value)
+    class VirtualNetworksCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+        ERROR_FORMAT = "MgmtErrorFormat"
+        # ignore implement here
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content(typ=AAZObjectType, arg=self.ctx.args)
+
+            _builder.set_prop('id', AAZStrType, '.id')
+            _builder.set_prop('location', AAZStrType, '.location')
+            _builder.set_prop('subnets', AAZListType, '.subnets')
+            _builder.set_prop('tags', AAZDictType, '.tags')
+            _builder.set_prop('extendedLocation', AAZObjectType, '.extended_location')
+            _builder.set_prop('properties', AAZObjectType, '.')
+
+            tags = _builder.get('.tags')
+            if tags is not None:
+                tags.set_elements(AAZStrType, '.')
+
+            extended_location = _builder.get('.extendedLocation')
+            if extended_location is not None:
+                extended_location.set_prop('name', AAZStrType, '.name')
+                extended_location.set_prop('type', AAZStrType, '.type')
+
+            properties = _builder.get('.properties')
+            if properties is not None:
+                properties.set_prop('addressSpace', AAZObjectType, '.address_space')
+                properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+
+            address_prefixes = _builder.get('.properties.addressPrefixes')
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, '.')
+
+            subnets = _builder.get('.subnets')
+            if subnets is not None:
+                subnets.set_elements(AAZObjectType, '.')
+
+            elements = _builder.get('.subnets[]')
+            if elements is not None:
+                elements.set_prop('id', AAZStrType, '.id')
+                elements.set_prop('properties', AAZObjectType, '.')
+
+            properties = _builder.get('.subnets[].properties')
+            if properties is not None:
+                properties.set_prop('addressPrefix', AAZStrType, '.address_prefix')
+                properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+
+            address_prefixes = _builder.get('.subnets[].properties.addressPrefixes')
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, '.')
+
+            return self.serialize_content(_content_value)
 
 
 __all__ = ["Create"]
