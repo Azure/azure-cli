@@ -4886,6 +4886,7 @@ class AKSCreateDecorator:
             # this would throw an error if windows_admin_username is empty (the user enters an empty
             # string after being prompted), since admin_username is a required parameter
             windows_profile = self.models.ManagedClusterWindowsProfile(
+                # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="variable name")]
                 admin_username=windows_admin_username,
                 admin_password=windows_admin_password,
                 license_type=windows_license_type,
