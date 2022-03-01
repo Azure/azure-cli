@@ -19,7 +19,89 @@ class Update(AAZCommand):
         az network vnet update --address-prefixes 40.1.0.0/24 --name MyVNet --resource-group MyResourceGroup
 
     """
-    pass
+
+    def _handler(self, command_args):
+        super()._handler(command_args)
+        self._execute_operations()
+        return self._output()
+
+    def _execute_operations(self):
+        self.VirtualNetworkGet(ctx=self.ctx)()
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+
+    def _output(self, *args, **kwargs):
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualNetworkGet(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+        ERROR_FORMAT = "MgmtErrorFormat"
+        # ignore implement here
+
+    class InstanceUpdateByJson(AAZInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self.ctx.vars['instance'] = self._update_object(self.ctx.vars['instance'])
+
+        def _update_object(self, instance):
+            _value, _updater = self.new_updater(instance, self.ctx.args)
+
+            _updater.set_prop('id', AAZStrType, '.id')
+            _updater.set_prop('location', AAZStrType, '.location')
+            _updater.set_prop('subnets', AAZListType, '.subnets')
+            _updater.set_prop('tags', AAZDictType, '.tags')
+            _updater.set_prop('extendedLocation', AAZObjectType, '.extended_location')
+            _updater.set_prop('properties', AAZObjectType, '.')
+
+            tags = _updater.get('.tags')
+            if tags is not None:
+                tags.set_elements(AAZStrType, '.')
+
+            extended_location = _updater.get('.extendedLocation')
+            if extended_location is not None:
+                extended_location.set_prop('name', AAZStrType, '.name')
+                extended_location.set_prop('type', AAZStrType, '.type')
+
+            properties = _updater.get('.properties')
+            if properties is not None:
+                properties.set_prop('addressSpace', AAZObjectType, '.address_space')
+                properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+
+            address_prefixes = _updater.get('.properties.addressPrefixes')
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, '.')
+
+            subnets = _updater.get('.subnets')
+            if subnets is not None:
+                subnets.set_elements(AAZObjectType, '.')
+
+            elements = _updater.get('.subnets[]')
+            if elements is not None:
+                elements.set_prop('id', AAZStrType, '.id')
+                elements.set_prop('properties', AAZObjectType, '.')
+
+            properties = _updater.get('.subnets[].properties')
+            if properties is not None:
+                properties.set_prop('addressPrefix', AAZStrType, '.address_prefix')
+                properties.set_prop('addressPrefixes', AAZListType, '.address_prefixes')
+
+            address_prefixes = _updater.get('.subnets[].properties.addressPrefixes')
+            if address_prefixes is not None:
+                address_prefixes.set_elements(AAZStrType, '.')
+
+            return _value
+
+    class InstanceUpdateByGeneric(AAZInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self.ctx.vars['instance'] = self._update_by_generic(
+                self.ctx.vars['instance'],
+                self.ctx.args.add,
+                self.ctx.args.set,
+                self.ctx.args.remove,
+                self.ctx.args.force_string,
+                client_flatten=True,
+            )
 
 
 __all__ = ["Update"]

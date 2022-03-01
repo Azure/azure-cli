@@ -236,4 +236,24 @@ class AAZHttpOperation(AAZOperation):
 
 
 class AAZInstanceUpdateOperation(AAZOperation):
-    pass
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    @staticmethod
+    def new_updater(value, arg_value):
+        assert issubclass(value, AAZBaseType)
+        assert isinstance(arg_value, AAZBaseValue)
+
+        arg_data = arg_value.to_serialized_data()
+
+        updater = AAZContentBuilder(
+            values=[value],
+            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+        )
+        return value, updater
+
+    @staticmethod
+    def _update_by_generic(instance, add_arg, set_arg, remove_arg, force_string_arg, client_flatten=True):
+        # TODO: implement generic instance update
+        return instance

@@ -48,9 +48,8 @@ class Show(AAZCommand):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
-                self.on_200(session)
-            else:
-                self.on_error(session)
+                return self.on_200(session)
+            return self.on_error(session)
 
         @property
         def url(self):
