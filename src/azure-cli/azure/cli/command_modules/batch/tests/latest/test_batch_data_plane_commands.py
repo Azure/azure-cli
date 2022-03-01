@@ -304,8 +304,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create iaas pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_A1 '
-                       '--image Canonical:UbuntuServer:16.04.0-LTS '
-                       '--node-agent-sku-id "batch.node.ubuntu 16.04"')
+                       '--image Canonical:UbuntuServer:18.04-LTS '
+                       '--node-agent-sku-id "batch.node.ubuntu 18.04"')
 
         # test create pool with missing parameters
         with self.assertRaises(SystemExit):

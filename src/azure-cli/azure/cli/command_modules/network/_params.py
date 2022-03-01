@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._validators import (
     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
     validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-    get_network_watcher_from_vm, get_network_watcher_from_location,
+    get_network_watcher_from_vm, get_network_watcher_from_location, validate_capture_size_and_limit,
     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
     validate_service_endpoint_policy, validate_delegations, validate_subresource_list,
     validate_er_peer_circuit, validate_ag_address_pools, validate_custom_error_pages,
@@ -44,7 +44,7 @@ from azure.cli.command_modules.network._completers import (
     get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
     AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
-    SslProfilesCreate, NatRuleCreate)
+    SslProfilesCreate, NatRuleCreate, IPConfigsCreate, ASGsCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -905,6 +905,12 @@ def load_arguments(self, _):
         c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
 
+    with self.argument_context('network private-endpoint', arg_group='Static IP Configuration') as c:
+        c.argument('ip_configurations', options_list=['--ip-config'], min_api='2021-05-01', nargs='+', action=IPConfigsCreate)
+
+    with self.argument_context('network private-endpoint', arg_group='Application Security Group') as c:
+        c.argument('application_security_groups', options_list=['--asg'], min_api='2021-05-01', nargs='+', action=ASGsCreate)
+
     with self.argument_context('network private-endpoint ip-config') as c:
         c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
         c.argument('ip_config_name', help='Name of the ip configuration.', options_list=['--name', '-n'])
@@ -1638,7 +1644,7 @@ def load_arguments(self, _):
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
-    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packet-capture create']:
+    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view']:
         with self.argument_context('network watcher {}'.format(item)) as c:
             c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
             c.ignore('location')
@@ -1646,6 +1652,17 @@ def load_arguments(self, _):
             c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
             c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
             c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
+
+    with self.argument_context('network watcher packet-capture create') as c:
+        c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
+        c.ignore('location')
+        c.ignore('watcher_rg')
+        c.argument('capture_limit', type=int, validator=validate_capture_size_and_limit, help='The maximum size in bytes of the capture output.')
+        c.argument('capture_size', type=int, validator=validate_capture_size_and_limit, help='Number of bytes captured per packet. Excess bytes are truncated.')
+        c.argument('time_limit', type=int, validator=validate_capture_size_and_limit, help='Maximum duration of the capture session in seconds.')
+        c.argument('vm', help='Name or ID of the VM to target. If the name of the VM is provided, the --resource-group is required.')
+        c.argument('resource_group_name', help='Name of the resource group the target VM is in.')
+        c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
 
     with self.argument_context('network watcher test-connectivity') as c:
         c.argument('source_port', type=int)

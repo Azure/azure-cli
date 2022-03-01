@@ -3317,7 +3317,8 @@ def update_express_route_port_link(cmd, instance, parent, express_route_port_nam
 def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, subnet,
                             private_connection_resource_id, connection_name, group_ids=None,
                             virtual_network_name=None, tags=None, location=None,
-                            request_message=None, manual_request=None, edge_zone=None, custom_interface_name=None):
+                            request_message=None, manual_request=None, edge_zone=None,
+                            ip_configurations=None, application_security_groups=None, custom_interface_name=None):
     client = network_client_factory(cmd.cli_ctx).private_endpoints
     PrivateEndpoint, Subnet, PrivateLinkServiceConnection = cmd.get_models('PrivateEndpoint',
                                                                            'Subnet',
@@ -3340,8 +3341,30 @@ def create_private_endpoint(cmd, resource_group_name, private_endpoint_name, sub
     if edge_zone:
         private_endpoint.extended_location = _edge_zone_model(cmd, edge_zone)
 
-    if cmd.supported_api_version(min_api='2021-05-01') and custom_interface_name:
-        private_endpoint.custom_network_interface_name = custom_interface_name
+    if cmd.supported_api_version(min_api='2021-05-01'):
+        if ip_configurations:
+            PrivateEndpointIPConfiguration = cmd.get_models("PrivateEndpointIPConfiguration")
+            for prop in ip_configurations:
+                ip_config = PrivateEndpointIPConfiguration(
+                    name=prop['name'],
+                    group_id=prop['group_id'],
+                    member_name=prop['member_name'],
+                    private_ip_address=prop['private_ip_address']
+                )
+                try:
+                    private_endpoint.ip_configurations.append(ip_config)
+                except AttributeError:
+                    private_endpoint.ip_configurations = [ip_config]
+        if application_security_groups:
+            ApplicationSecurityGroup = cmd.get_models("ApplicationSecurityGroup")
+            for prop in application_security_groups:
+                asg = ApplicationSecurityGroup(id=prop["id"])
+                try:
+                    private_endpoint.application_security_groups.append(asg)
+                except AttributeError:
+                    private_endpoint.application_security_groups = [asg]
+        if custom_interface_name:
+            private_endpoint.custom_network_interface_name = custom_interface_name
 
     return client.begin_create_or_update(resource_group_name, private_endpoint_name, private_endpoint)
 
@@ -8049,8 +8072,13 @@ def _get_ssh_path(ssh_command="ssh"):
 
         if not os.path.isfile(ssh_path):
             raise CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+    elif platform.system() in ('Linux', 'Darwin'):
+        import shutil
+        ssh_path = shutil.which(ssh_command)
+        if not ssh_path:
+            raise UnrecognizedArgumentError(f"{ssh_command} not found in path. Is the OpenSSH client installed?")
     else:
-        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows")
+        raise UnrecognizedArgumentError("Platform is not supported for this command. Supported platforms: Windows, Darwin, Linux")
 
     return ssh_path
 
@@ -8136,6 +8164,8 @@ def ssh_bastion_host(cmd, auth_type, target_resource_id, resource_group_name, ba
         subprocess.call(command, shell=platform.system() == 'Windows')
     except Exception as ex:
         raise CLIInternalError(ex)
+    finally:
+        tunnel_server.cleanup()
 
 
 def rdp_bastion_host(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port=None):
@@ -8169,6 +8199,13 @@ def get_tunnel(cmd, resource_group_name, name, vm_id, resource_port, port=None):
     return tunnel_server
 
 
+def tunnel_close_handler(tunnel):
+    logger.info("Ctrl + C received. Clean up and then exit.")
+    tunnel.cleanup()
+    import sys
+    sys.exit()
+
+
 def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_host_name, resource_port, port, timeout=None):
     if not is_valid_resource_id(target_resource_id):
         raise InvalidArgumentValueError("Please enter a valid Virtual Machine resource Id.")
@@ -8179,6 +8216,10 @@ def create_bastion_tunnel(cmd, target_resource_id, resource_group_name, bastion_
     logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
     logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
     logger.warning('Ctrl + C to close')
+
+    import signal
+    # handle closing the tunnel with an active session still connected
+    signal.signal(signal.SIGINT, lambda signum, frame: tunnel_close_handler(tunnel_server))
 
     if timeout:
         time.sleep(int(timeout))
