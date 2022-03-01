@@ -8,6 +8,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import ValidationError, AzureInternalError, ResourceNotFoundError
 
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders
@@ -41,19 +42,19 @@ def resolve_store_metadata(cmd, config_store_name):
         all_stores = config_store_client.list()
         for store in all_stores:
             if store.name.lower() == config_store_name.lower():
-                if resource_group is not None:
-                    raise CLIError('Multiple configuration stores found with name {}.'.format(config_store_name))
-                else:
+                if resource_group is None:
                     # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
                     resource_group = store.id.split('/')[4]
                     endpoint = store.endpoint
+                else:
+                    raise ValidationError('Multiple configuration stores found with name {}.'.format(config_store_name))
     except HttpResponseError as ex:
-        raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
+        raise AzureInternalError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
 
     if resource_group is not None and endpoint is not None:
         return resource_group, endpoint
 
-    raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))
+    raise ResourceNotFoundError("Failed to find the App Configuration store '{}'.".format(config_store_name))
 
 
 def resolve_deleted_store_metadata(cmd, config_store_name):
@@ -64,19 +65,19 @@ def resolve_deleted_store_metadata(cmd, config_store_name):
         deleted_stores = client.list_deleted()
         for deleted_store in deleted_stores:
             if deleted_store.name.lower() == config_store_name.lower():
-                if location is not None:
-                    raise CLIError('Multiple configuration stores found with name {}.'.format(config_store_name))
-                else:
+                if location is None:
                     # configuration_store_id has a fixed structure /subscriptions/subscription_id/resourceGroups/resource_group_name/providers/Microsoft.AppConfiguration/configurationStores/configuration_store_name
                     resource_group = deleted_store.configuration_store_id.split('/')[4]
                     location = deleted_store.location
+                else:
+                    raise ValidationError('Multiple configuration stores found with name {}.'.format(config_store_name))
     except HttpResponseError as ex:
-        raise CLIError("Failed to get the list of deleted App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
+        raise AzureInternalError("Failed to get the list of deleted App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
 
     if resource_group is not None and location is not None:
         return resource_group, location
 
-    raise CLIError("Failed to find the deleted App Configuration store '{}'.".format(config_store_name))
+    raise ResourceNotFoundError("Failed to find the deleted App Configuration store '{}'.".format(config_store_name))
 
 
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):

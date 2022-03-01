@@ -61,8 +61,10 @@ def recover_deleted_configstore(cmd, client, name, resource_group_name=None, loc
     if resource_group_name is None or location is None:
         metadata_resource_group, metadata_location = resolve_deleted_store_metadata(cmd, name)
 
-        resource_group_name = resource_group_name if resource_group_name is not None else metadata_resource_group
-        location = location if location is not None else metadata_location
+        if resource_group_name is None:
+            resource_group_name = metadata_resource_group
+        if location is None:
+            location = metadata_location
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             sku=Sku(name="Standard"),  # Only Standard SKU stores can be recovered!
