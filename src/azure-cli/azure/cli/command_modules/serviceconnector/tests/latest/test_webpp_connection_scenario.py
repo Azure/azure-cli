@@ -521,7 +521,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'target_resource_group': 'servicelinker-test-linux-group',
             'site': 'servicelinker-flexiblepostgresql-app',
             'server': 'servicelinker-flexiblepostgresql',
-            'database': 'test'
+            'database': 'postgres'
         })
 
         # prepare password
@@ -898,7 +898,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
+            'site': 'servicelinker-storageblob-ref-app',
             'account': 'servicelinkerstorage',
             'vault': 'servicelinker-kv-ref',
         })
@@ -910,8 +910,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
 
         # create connection
-        self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id))
+        id = self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
 
         self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -921,22 +921,25 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         )
 
         self.cmd(
-            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            'webapp connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
         )
 
         # update connection
-        self.cmd('webapp connection update storage-blob --connection {} --source-id {} '
-                 '--secret'.format(name, source_id, target_id))
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret'.format(id))
 
         self.cmd(
-            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            'webapp connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
         )
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
 
 
     @record_only()
@@ -1116,7 +1119,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-kafka-app',
+            'site': 'servicelinker-kafka-ref-app',
             'vault': 'servicelinker-kv-ref',
         })
 
@@ -1131,16 +1134,24 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
                  '--client-type python --kv-id {}'.format(name, source_id, keyvault_id))
 
+        id = f'{source_id}/providers/Microsoft.ServiceLinker/linkers/{name}'
+
         self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
             checks = [
                 self.check('length(@)', 3),
-                self.check('[0].secretStore.keyVaultId', keyvault_id),
             ]
         )
 
         self.cmd(
-            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}_schema'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
@@ -1151,8 +1162,11 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  '--kafka-secret Secret'.format(name, source_id))
 
         self.cmd(
-            'webapp connection show --connection {} --source-id {}'.format(name, source_id),
+            'webapp connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
         )
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))

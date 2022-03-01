@@ -413,7 +413,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         })
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn2'
         source_id = SOURCE_RESOURCES.get(RESOURCE.SpringCloud).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.ServiceBus).format(**self.kwargs)
 
@@ -903,8 +903,8 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
 
         # create connection
-        self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id))
+        id = self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type java --kv-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
 
         self.cmd(
             'spring-cloud connection list --source-id {}'.format(source_id),
@@ -914,18 +914,18 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
         )
 
         self.cmd(
-            'spring-cloud connection show --connection {} --source-id {}'.format(name, source_id),
+            'spring-cloud connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
         )
 
         # update connection
-        self.cmd('spring-cloud connection update storage-blob --connection {} --source-id {} '
-                 '--secret'.format(name, source_id, target_id))
+        self.cmd('spring-cloud connection update storage-blob --id {} '
+                 '--secret'.format(id))
 
         self.cmd(
-            'spring-cloud connection show --connection {} --source-id {}'.format(name, source_id),
+            'spring-cloud connection show --id {}'.format(id),
             checks = [
                 self.check('secretStore.keyVaultId', keyvault_id),
             ]
