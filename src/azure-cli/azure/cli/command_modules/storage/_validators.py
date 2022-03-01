@@ -811,14 +811,14 @@ def get_permission_validator(permission_class):
     return validator
 
 
-def table_permission_validator(cmd, namespace):
+def table_permission_validator(namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    t_table_permissions = get_table_data_type(cmd.cli_ctx, 'table', 'TablePermissions')
+    from azure.data.tables._models import TableSasPermissions
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        namespace.permission = t_table_permissions(_str=namespace.permission)
+        namespace.permission = TableSasPermissions(_str=namespace.permission)
 
 
 def validate_container_public_access(cmd, namespace):

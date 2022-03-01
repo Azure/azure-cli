@@ -746,21 +746,21 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage table', table_sdk,
                             custom_command_type=get_custom_sdk('acl', table_data_service_factory)) as g:
-        from ._format import transform_boolean_for_table
-        from ._transformers import create_boolean_result_output_transformer
+        # from ._format import transform_boolean_for_table
+        # from ._transformers import create_boolean_result_output_transformer
 
-        g.storage_command('create', 'create_table', transform=create_boolean_result_output_transformer('created'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command('delete', 'delete_table', transform=create_boolean_result_output_transformer('deleted'),
-                          table_transformer=transform_boolean_for_table)
-        g.storage_command(
-            'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command(
-            'generate-sas', 'generate_table_shared_access_signature')
+        # g.storage_command('create', 'create_table', transform=create_boolean_result_output_transformer('created'),
+        #                   table_transformer=transform_boolean_for_table)
+        # g.storage_command('delete', 'delete_table', transform=create_boolean_result_output_transformer('deleted'),
+        #                   table_transformer=transform_boolean_for_table)
+        # g.storage_command(
+        #     'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        # g.storage_command(
+        #     'generate-sas', 'generate_table_shared_access_signature')
         # g.storage_command('list', 'list_tables',
         #                   transform=transform_storage_list_output)
-        g.storage_command('stats', 'get_table_service_stats',
-                          min_api='2016-05-31')
+        # g.storage_command('stats', 'get_table_service_stats',
+        #                   min_api='2016-05-31')
 
         g.storage_custom_command('policy create', 'create_acl_policy')
         g.storage_custom_command('policy delete', 'delete_acl_policy')
@@ -770,8 +770,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
 
-    with self.command_group('storage table', table_service_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE) as g:
-        g.storage_command_oauth('list', 'list_tables')
+    with self.command_group('storage table', table_service_sdk, resource_type=ResourceType.DATA_STORAGE_TABLE,
+                            custom_command_type=get_custom_sdk('table', cf_table_service)) as g:
+        g.storage_custom_command_oauth('create', 'create_table',
+                                       transform=create_boolean_result_output_transformer('created'),
+                                       table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('delete', 'delete_table',
+                                       transform=create_boolean_result_output_transformer('deleted'),
+                                       table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command('generate-sas', 'generate_sas')
+        g.storage_custom_command_oauth('list', 'list_tables')
+        g.storage_command_oauth('stats', 'get_service_stats')
 
     with self.command_group('storage entity', table_sdk,
                             custom_command_type=get_custom_sdk('table', table_data_service_factory)) as g:

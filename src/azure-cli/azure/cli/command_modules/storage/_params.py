@@ -67,7 +67,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                                                                 parent='share_name'))
     share_name_type = CLIArgumentType(options_list=['--share-name', '-s'], help='The file share name.',
                                       completer=get_storage_name_completion_list(t_file_service, 'list_shares'))
-    table_name_type = CLIArgumentType(options_list=['--table-name', '-t'],
+    table_name_type = CLIArgumentType(options_list=['--table-name', '-t'], help='The table name.',
                                       completer=get_storage_name_completion_list(t_table_service, 'list_tables'))
     queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
@@ -1811,6 +1811,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage table create') as c:
         c.argument('table_name', table_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the table already exists.')
+
+    with self.argument_context('storage table delete') as c:
+        c.argument('fail_not_exist', help='Throw an exception if the table does not exist.')
+
+    with self.argument_context('storage table list') as c:
+        c.argument('marker', arg_type=marker_type)
+        c.argument('num_results', type=int, help='The maximum number of tables to return.')
+        c.argument('show_next_marker', action='store_true',
+                   help='Show nextMarker in result when specified.')
 
     with self.argument_context('storage table policy') as c:
         from ._validators import table_permission_validator
