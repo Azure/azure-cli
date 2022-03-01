@@ -254,6 +254,18 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('name', webapp_name)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group', parameter_name_for_location='resource_group_location', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', parameter_name_for_location='resource_group_location2', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_in_different_group_name(self, resource_group, resource_group_location, resource_group2, resource_group_location2):
+        plan = self.create_random_name(prefix='planInOneRG', length=15)
+        webapp_name = self.create_random_name(prefix='webInOtherRG', length=24)
+        self.cmd('group create -n {} -l {}'.format(resource_group2, resource_group_location))
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group2, webapp_name, plan), checks=[
+            JMESPathCheck('name', webapp_name)
+        ])
+
     @unittest.skip("This test needs to be updated first to have unique names & re-tested before recording")
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name="resource_group_one", name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
