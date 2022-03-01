@@ -106,3 +106,12 @@ def transform_key_output(result, **command_args):
         'releasePolicy': result.properties.release_policy
     }
     return output
+
+
+# pylint: disable=unused-argument
+def transform_key_random_output(result, **command_args):
+    if result and isinstance(result, bytes):
+        import base64
+        return {"value": base64.b64encode(result)}
+
+    return result

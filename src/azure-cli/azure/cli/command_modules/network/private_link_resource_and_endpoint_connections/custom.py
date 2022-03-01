@@ -62,6 +62,7 @@ def register_providers():
     _register_one_provider('Microsoft.SignalRService/WebPubSub', '2021-09-01-preview', False)
     _register_one_provider('Microsoft.DataFactory/factories', '2018-06-01', True)
     _register_one_provider('Microsoft.Databricks/workspaces', '2021-04-01-preview', True)
+    _register_one_provider('Microsoft.RecoveryServices/vaults', '2021-07-01', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long
