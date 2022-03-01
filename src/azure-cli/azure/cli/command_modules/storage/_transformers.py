@@ -298,3 +298,10 @@ def transform_container_list_output(result):
         except KeyError:  # Deal with BlobPrefix object when there is delimiter specified
             result[i] = {"name": item.name}
     return result
+
+
+def transform_blob_upload_output(result):
+    if "last_modified" in result:
+        result["lastModified"] = result["last_modified"]
+        del result["last_modified"]
+    return result
