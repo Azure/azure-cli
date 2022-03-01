@@ -1,7 +1,8 @@
 interactions:
 - request:
-    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-      "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+      "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+      "secretStore": {}}}'
     headers:
       Accept:
       - application/json
@@ -12,37 +13,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '292'
+      - '310'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:23:02.9467094Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:23:07.9213649Z"},
-        "properties": {"provisioningState": "Accepted", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:05:39.7885565Z", "lastModifiedBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:05:39.7885565Z"},
+        "properties": {"provisioningState": "Accepted", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+        "authInfo": {"authType": "systemAssignedIdentity"}, "vNetSolution": null,
+        "clientType": "python", "secretStore": {"keyVaultId": null}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/8b8c2651-cb7b-4e71-859a-c94663fbaad7*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c33d9b03-2935-45d4-81c2-5d7b0ee9f3ca*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '845'
+      - '955'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:14 GMT
+      - Tue, 01 Mar 2022 08:05:40 GMT
       etag:
-      - '"200018c0-0000-0100-0000-617a424a0000"'
+      - '"f5048224-0000-0200-0000-621dd3d40000"'
       expires:
       - '-1'
       pragma:
@@ -54,7 +56,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -72,27 +74,27 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/8b8c2651-cb7b-4e71-859a-c94663fbaad7*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c33d9b03-2935-45d4-81c2-5d7b0ee9f3ca*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/8b8c2651-cb7b-4e71-859a-c94663fbaad7*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "name": "8b8c2651-cb7b-4e71-859a-c94663fbaad7*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:25:14.5274985Z", "endTime":
-        "2021-10-28T06:25:25.3217609Z", "properties": {}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c33d9b03-2935-45d4-81c2-5d7b0ee9f3ca*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "name": "c33d9b03-2935-45d4-81c2-5d7b0ee9f3ca*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:05:40.0317908Z", "endTime":
+        "2022-03-01T08:05:45.2859777Z", "properties": {}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '688'
+      - '700'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:44 GMT
+      - Tue, 01 Mar 2022 08:06:10 GMT
       etag:
-      - '"11004672-0000-0100-0000-617a42550000"'
+      - '"0e00843a-0000-0400-0000-621dd3d90000"'
       expires:
       - '-1'
       pragma:
@@ -122,29 +124,30 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --system-identity --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:23:02.9467094Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:25:25.0950991Z"},
-        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:05:39.7885565Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:05:45.1848161Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+        "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '846'
+      - '916'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:45 GMT
+      - Tue, 01 Mar 2022 08:06:10 GMT
       etag:
-      - '"2000e0c0-0000-0100-0000-617a42550000"'
+      - '"1600788f-0000-0400-0000-621dd3d90000"'
       expires:
       - '-1'
       pragma:
@@ -176,27 +179,28 @@ interactions:
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:23:02.9467094Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:25:25.0950991Z"},
-        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}]}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:05:39.7885565Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:05:45.1848161Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+        "secretStore": {}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '858'
+      - '929'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:51 GMT
+      - Tue, 01 Mar 2022 08:06:14 GMT
       expires:
       - '-1'
       pragma:
@@ -230,22 +234,22 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
   response:
     body:
       string: '{"configurations": [{"name": "AZURE_STORAGEBLOB_RESOURCEENDPOINT",
-        "value": "https://servicelinkerstorage2.blob.core.windows.net/"}]}'
+        "value": "https://servicelinkerstorage.blob.core.windows.net/"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '129'
+      - '132'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:54 GMT
+      - Tue, 01 Mar 2022 08:06:16 GMT
       expires:
       - '-1'
       pragma:
@@ -261,7 +265,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -279,29 +283,30 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:23:02.9467094Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:25:25.0950991Z"},
-        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:05:39.7885565Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:05:45.1848161Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+        "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '846'
+      - '916'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:55 GMT
+      - Tue, 01 Mar 2022 08:06:17 GMT
       etag:
-      - '"2000e0c0-0000-0100-0000-617a42550000"'
+      - '"1600788f-0000-0400-0000-621dd3d90000"'
       expires:
       - '-1'
       pragma:
@@ -335,15 +340,15 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/758604f1-2da5-46be-b7f5-17c4de9e5e82*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/95f3b12d-b938-468e-9fda-4e78c9678617*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -351,11 +356,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:25:56 GMT
+      - Tue, 01 Mar 2022 08:06:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/758604f1-2da5-46be-b7f5-17c4de9e5e82*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/95f3b12d-b938-468e-9fda-4e78c9678617*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -365,7 +370,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 202
       message: Accepted
@@ -383,32 +388,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/758604f1-2da5-46be-b7f5-17c4de9e5e82*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/95f3b12d-b938-468e-9fda-4e78c9678617*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/758604f1-2da5-46be-b7f5-17c4de9e5e82*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "name": "758604f1-2da5-46be-b7f5-17c4de9e5e82*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:25:56.2781365Z", "endTime":
-        "2021-10-28T06:25:59.2996868Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/95f3b12d-b938-468e-9fda-4e78c9678617*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "name": "95f3b12d-b938-468e-9fda-4e78c9678617*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:06:18.3599487Z", "endTime":
+        "2022-03-01T08:06:21.0224078Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
         target existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         target service firewall is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         configured values is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
         identity existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
-        identity permission is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2021-10-28T06:25:57.8697908Z\",\"ReportEndTimeUtc\":\"2021-10-28T06:25:59.1991623Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default\",\"AuthType\":0}"}}'
+        identity permission is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2022-03-01T08:06:19.8931301Z\",\"ReportEndTimeUtc\":\"2022-03-01T08:06:20.9601163Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default\",\"AuthType\":0}"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1560'
+      - '1572'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:26:26 GMT
+      - Tue, 01 Mar 2022 08:06:48 GMT
       etag:
-      - '"05000f04-0000-0500-0000-617a42770000"'
+      - '"af00c34b-0000-0200-0000-621dd3fd0000"'
       expires:
       - '-1'
       pragma:
@@ -438,29 +443,30 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:23:02.9467094Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:25:25.0950991Z"},
-        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage2/blobServices/default",
-        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python"}}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:05:39.7885565Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:05:45.1848161Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Storage/storageAccounts/servicelinkerstorage/blobServices/default",
+        "authInfo": {"authType": "systemAssignedIdentity"}, "clientType": "python",
+        "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '846'
+      - '916'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:26:29 GMT
+      - Tue, 01 Mar 2022 08:06:49 GMT
       etag:
-      - '"2000e0c0-0000-0100-0000-617a42550000"'
+      - '"1600788f-0000-0400-0000-621dd3d90000"'
       expires:
       - '-1'
       pragma:
@@ -494,15 +500,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/dd3177dd-add9-48a2-ad1b-0ebbbed3fd54*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/70eeab59-fed8-4188-b321-7ec38524196d*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -510,13 +516,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:26:35 GMT
+      - Tue, 01 Mar 2022 08:06:53 GMT
       etag:
-      - '"200045c5-0000-0100-0000-617a429b0000"'
+      - '"f504e960-0000-0200-0000-621dd41e0000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/dd3177dd-add9-48a2-ad1b-0ebbbed3fd54*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/70eeab59-fed8-4188-b321-7ec38524196d*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -526,7 +532,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14996'
     status:
       code: 202
       message: Accepted
@@ -544,27 +550,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/dd3177dd-add9-48a2-ad1b-0ebbbed3fd54*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/70eeab59-fed8-4188-b321-7ec38524196d*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/dd3177dd-add9-48a2-ad1b-0ebbbed3fd54*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "name": "dd3177dd-add9-48a2-ad1b-0ebbbed3fd54*2E85DC879B0DEFBEE7C0F1A4CAEF619393E2E4BAA5517FEA0723254292834D3D",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:26:35.1224165Z", "endTime":
-        "2021-10-28T06:26:38.1344697Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/70eeab59-fed8-4188-b321-7ec38524196d*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "name": "70eeab59-fed8-4188-b321-7ec38524196d*FE7F78E8B9CFFDB9E710A6821DFC983C3CC929A45BC45B6216A1A9AB91FECA7C",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-storageblob-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:06:54.3393983Z", "endTime":
+        "2022-03-01T08:07:00.6741217Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '690'
+      - '702'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:27:05 GMT
+      - Tue, 01 Mar 2022 08:07:25 GMT
       etag:
-      - '"11006b74-0000-0100-0000-617a429e0000"'
+      - '"af00f84b-0000-0200-0000-621dd4240000"'
       expires:
       - '-1'
       pragma:

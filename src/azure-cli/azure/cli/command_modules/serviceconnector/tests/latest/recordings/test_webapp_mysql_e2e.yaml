@@ -13,12 +13,12 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31) msrest/0.6.21
+        msrest_azure/0.6.4 azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
-    uri: https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword/?api-version=7.0
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/secrets/TestDbPassword/?api-version=7.0
   response:
     body:
       string: '{"error": {"code": "Unauthorized", "message": "AKV10000: Request is
@@ -27,11 +27,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '97'
+      - '101'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:58:58 GMT
+      - Tue, 01 Mar 2022 08:03:50 GMT
       expires:
       - '-1'
       pragma:
@@ -44,11 +44,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.32;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=40.119.237.139;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.150.1
+      - 1.9.291.1
       x-powered-by:
       - ASP.NET
     status:
@@ -68,12 +68,12 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.21 msrest_azure/0.6.3
-        azure-keyvault/7.0 Azure-SDK-For-Python
+      - python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31) msrest/0.6.21
+        msrest_azure/0.6.4 azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
-    uri: https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword/?api-version=7.0
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/secrets/TestDbPassword/?api-version=7.0
   response:
     body:
       string: '{"value": "microsoft123!", "id": "https://cupertino-kv-test.vault.azure.net/secrets/TestDbPassword/e6c944984acc4f7dab51acf30b3d19cc",
@@ -83,11 +83,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '242'
+      - '254'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:00 GMT
+      - Tue, 01 Mar 2022 08:03:51 GMT
       expires:
       - '-1'
       pragma:
@@ -97,20 +97,20 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.32;act_addr_fam=InterNetwork;
+      - conn_type=Ipv4;addr=40.119.237.139;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - eastus
       x-ms-keyvault-service-version:
-      - 1.9.150.1
+      - 1.9.291.1
       x-powered-by:
       - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
+    body: '{"properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
       "authInfo": {"authType": "secret", "name": "servicelinker", "secret": "microsoft123!"},
-      "clientType": "python"}}'
+      "clientType": "python", "secretStore": {}}}'
     headers:
       Accept:
       - application/json
@@ -121,38 +121,38 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '319'
+      - '337'
       Content-Type:
       - application/json
       ParameterSetName:
       - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:59:02.6787311Z", "lastModifiedBy": "honc@microsoft.com", "lastModifiedByType":
-        "User", "lastModifiedAt": "2021-10-28T06:59:02.6787311Z"}, "properties": {"targetId":
-        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
-        "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Accepted"}}'
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:03:52.2360696Z", "lastModifiedBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:03:52.2360696Z"},
+        "properties": {"provisioningState": "Accepted", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
+        "authInfo": {"name": "servicelinker", "authType": "secret"}, "vNetSolution":
+        null, "clientType": "python", "secretStore": {"keyVaultId": null}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6aedf17a-4092-4e5b-a11e-25e220ee3890*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/4aa811c1-0893-4293-9401-1a0bd3d7a5de*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '812'
+      - '949'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:03 GMT
+      - Tue, 01 Mar 2022 08:03:52 GMT
       etag:
-      - '"2100642f-0000-0100-0000-617a4a370000"'
+      - '"f5049209-0000-0200-0000-621dd3680000"'
       expires:
       - '-1'
       pragma:
@@ -164,7 +164,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -182,27 +182,29 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6aedf17a-4092-4e5b-a11e-25e220ee3890*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/4aa811c1-0893-4293-9401-1a0bd3d7a5de*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/6aedf17a-4092-4e5b-a11e-25e220ee3890*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "name": "6aedf17a-4092-4e5b-a11e-25e220ee3890*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:59:02.9794887Z", "endTime":
-        "2021-10-28T06:59:23.9649095Z", "properties": {}}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/4aa811c1-0893-4293-9401-1a0bd3d7a5de*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "name": "4aa811c1-0893-4293-9401-1a0bd3d7a5de*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:03:52.4320596Z", "endTime":
+        "2022-03-01T08:03:55.8202736Z", "properties": {"message": "Deny public network
+        access is set to yes. Please confirm you are using private endpoint connection
+        to access target resource."}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:33 GMT
+      - Tue, 01 Mar 2022 08:04:23 GMT
       etag:
-      - '"05005405-0000-0500-0000-617a4a4b0000"'
+      - '"af00ec4a-0000-0200-0000-621dd36b0000"'
       expires:
       - '-1'
       pragma:
@@ -232,30 +234,30 @@ interactions:
       ParameterSetName:
       - --connection --source-id --target-id --secret --client-type
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:59:02.6787311Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:59:23.5699338Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:03:52.2360696Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:03:55.7043645Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}'
+        "python", "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '838'
+      - '910'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:33 GMT
+      - Tue, 01 Mar 2022 08:04:23 GMT
       etag:
-      - '"3406d575-0000-0500-0000-617a4a4c0000"'
+      - '"f504fb09-0000-0200-0000-621dd36b0000"'
       expires:
       - '-1'
       pragma:
@@ -287,28 +289,28 @@ interactions:
       ParameterSetName:
       - --source-id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"value": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:59:02.6787311Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:59:23.5699338Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:03:52.2360696Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:03:55.7043645Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}]}'
+        "python", "secretStore": {}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '850'
+      - '923'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:40 GMT
+      - Tue, 01 Mar 2022 08:04:27 GMT
       expires:
       - '-1'
       pragma:
@@ -342,24 +344,24 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn/listConfigurations?api-version=2021-11-01-preview
   response:
     body:
       string: '{"configurations": [{"name": "AZURE_MYSQL_NAME", "value": "mysqlDB"},
-        {"name": "AZURE_MYSQL_HOST", "value": "servicelinker-mysql2.mysql.database.azure.com"},
-        {"name": "AZURE_MYSQL_USER", "value": "servicelinker@servicelinker-mysql2"},
+        {"name": "AZURE_MYSQL_HOST", "value": "servicelinker-mysql.mysql.database.azure.com"},
+        {"name": "AZURE_MYSQL_USER", "value": "servicelinker@servicelinker-mysql"},
         {"name": "AZURE_MYSQL_PASSWORD", "value": "microsoft123!"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '279'
+      - '293'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:57 GMT
+      - Tue, 01 Mar 2022 08:04:29 GMT
       expires:
       - '-1'
       pragma:
@@ -375,7 +377,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -393,30 +395,30 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:59:02.6787311Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:59:23.5699338Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:03:52.2360696Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:03:55.7043645Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}'
+        "python", "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '838'
+      - '910'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:58 GMT
+      - Tue, 01 Mar 2022 08:04:30 GMT
       etag:
-      - '"3406d575-0000-0500-0000-617a4a4c0000"'
+      - '"f504fb09-0000-0200-0000-621dd36b0000"'
       expires:
       - '-1'
       pragma:
@@ -450,15 +452,15 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn/validateLinker?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/368f1ae4-c2e0-498b-a57f-072cb6b8d4a3*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/a0a4f68b-e7c9-46cc-9053-883079e8767a*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -466,11 +468,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 06:59:59 GMT
+      - Tue, 01 Mar 2022 08:04:31 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/368f1ae4-c2e0-498b-a57f-072cb6b8d4a3*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/a0a4f68b-e7c9-46cc-9053-883079e8767a*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -480,7 +482,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1194'
     status:
       code: 202
       message: Accepted
@@ -498,30 +500,32 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/368f1ae4-c2e0-498b-a57f-072cb6b8d4a3*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/a0a4f68b-e7c9-46cc-9053-883079e8767a*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/368f1ae4-c2e0-498b-a57f-072cb6b8d4a3*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "name": "368f1ae4-c2e0-498b-a57f-072cb6b8d4a3*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T06:59:59.6460589Z", "endTime":
-        "2021-10-28T07:00:11.3861549Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/a0a4f68b-e7c9-46cc-9053-883079e8767a*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "name": "a0a4f68b-e7c9-46cc-9053-883079e8767a*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:04:30.7293412Z", "endTime":
+        "2022-03-01T08:04:33.0296574Z", "properties": {"message": "{\"ConnectionName\":\"testconn\",\"IsConnectionAvailable\":true,\"ValidationDetail\":[{\"Name\":\"The
         target existence is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
-        target service firewall is validated\",\"Description\":null,\"Result\":0},{\"Name\":\"The
-        username and password is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2021-10-28T07:00:01.424852Z\",\"ReportEndTimeUtc\":\"2021-10-28T07:00:11.2478158Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB\",\"AuthType\":4}"}}'
+        target''s network access is validated\",\"Description\":\"Deny public network
+        access is set to yes. Please confirm you are using private endpoint connection
+        to access target resource.\",\"Result\":2},{\"Name\":\"The configured values
+        (except username/password) is validated\",\"Description\":null,\"Result\":0}],\"ReportStartTimeUtc\":\"2022-03-01T08:04:32.1305055Z\",\"ReportEndTimeUtc\":\"2022-03-01T08:04:32.9727526Z\",\"SourceId\":null,\"TargetId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB\",\"AuthType\":4}"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1377'
+      - '1538'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:00:29 GMT
+      - Tue, 01 Mar 2022 08:05:01 GMT
       etag:
-      - '"05006f05-0000-0500-0000-617a4a7b0000"'
+      - '"af002e4b-0000-0200-0000-621dd3910000"'
       expires:
       - '-1'
       pragma:
@@ -551,30 +555,30 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
         "name": "testconn", "type": "microsoft.servicelinker/linkers", "systemData":
-        {"createdBy": "honc@microsoft.com", "createdByType": "User", "createdAt":
-        "2021-10-28T06:59:02.6787311Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
-        "lastModifiedByType": "Application", "lastModifiedAt": "2021-10-28T06:59:23.5699338Z"},
-        "properties": {"targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql2/databases/mysqlDB",
+        {"createdBy": "0a5612a4-bc9a-47ea-b5dd-b9280aca1b09", "createdByType": "Application",
+        "createdAt": "2022-03-01T08:03:52.2360696Z", "lastModifiedBy": "c4288165-6698-45ba-98a5-48ea7791fed3",
+        "lastModifiedByType": "Application", "lastModifiedAt": "2022-03-01T08:03:55.7043645Z"},
+        "properties": {"provisioningState": "Succeeded", "targetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.DBForMySQL/servers/servicelinker-mysql/databases/mysqlDB",
         "authInfo": {"name": "servicelinker", "authType": "secret"}, "clientType":
-        "python", "provisioningState": "Succeeded"}}'
+        "python", "secretStore": {}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '838'
+      - '910'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:00:32 GMT
+      - Tue, 01 Mar 2022 08:05:02 GMT
       etag:
-      - '"3406d575-0000-0500-0000-617a4a4c0000"'
+      - '"f504fb09-0000-0200-0000-621dd36b0000"'
       expires:
       - '-1'
       pragma:
@@ -608,15 +612,15 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn?api-version=2021-11-01-preview
   response:
     body:
       string: 'null'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c308fecc-30e1-489d-9ec0-8a04ab6ae7db*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/15216e89-11d6-4dcc-8bc3-c5f678b7cdc9*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -624,13 +628,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:00:52 GMT
+      - Tue, 01 Mar 2022 08:05:08 GMT
       etag:
-      - '"34064296-0000-0500-0000-617a4aa40000"'
+      - '"f504b113-0000-0200-0000-621dd3b40000"'
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c308fecc-30e1-489d-9ec0-8a04ab6ae7db*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/15216e89-11d6-4dcc-8bc3-c5f678b7cdc9*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
       pragma:
       - no-cache
       strict-transport-security:
@@ -640,7 +644,7 @@ interactions:
       x-ms-providerhub-traffic:
       - 'True'
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14997'
     status:
       code: 202
       message: Accepted
@@ -658,27 +662,27 @@ interactions:
       ParameterSetName:
       - --id --yes
       User-Agent:
-      - AZURECLI/2.29.1 azsdk-python-mgmt-servicelinker/1.0.0b1 Python/3.8.2 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.33.1 azsdk-python-mgmt-servicelinker/1.0.0b2 Python/3.10.0 (Linux-5.4.0-1062-azure-x86_64-with-glibc2.31)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c308fecc-30e1-489d-9ec0-8a04ab6ae7db*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1?api-version=2021-11-01-preview
+    uri: https://mitmproxy.proxy.svc.cluster.local:8080/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/15216e89-11d6-4dcc-8bc3-c5f678b7cdc9*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B?api-version=2021-11-01-preview
   response:
     body:
-      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/c308fecc-30e1-489d-9ec0-8a04ab6ae7db*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "name": "c308fecc-30e1-489d-9ec0-8a04ab6ae7db*BD6F4CA1930C44D3F9C95A7DCDFCED269DD2351F9E56305A13938B2D57672CA1",
-        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app2/providers/Microsoft.ServiceLinker/linkers/testconn",
-        "status": "Succeeded", "startTime": "2021-10-28T07:00:52.2930957Z", "endTime":
-        "2021-10-28T07:00:56.4362072Z", "properties": null}'
+      string: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceLinker/locations/EASTUS/operationStatuses/15216e89-11d6-4dcc-8bc3-c5f678b7cdc9*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "name": "15216e89-11d6-4dcc-8bc3-c5f678b7cdc9*DE3FEB8500ECA2E2B642C2822CE0E4C7F340AFE2B731BB287BF1AB2D5D6A504B",
+        "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/servicelinker-test-linux-group/providers/Microsoft.Web/sites/servicelinker-mysql-app/providers/Microsoft.ServiceLinker/linkers/testconn",
+        "status": "Succeeded", "startTime": "2022-03-01T08:05:07.7661259Z", "endTime":
+        "2022-03-01T08:05:15.8497498Z", "properties": null}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '696'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Oct 2021 07:01:22 GMT
+      - Tue, 01 Mar 2022 08:05:38 GMT
       etag:
-      - '"110025a1-0000-0100-0000-617a4aa80000"'
+      - '"af006e4b-0000-0200-0000-621dd3bb0000"'
       expires:
       - '-1'
       pragma:
