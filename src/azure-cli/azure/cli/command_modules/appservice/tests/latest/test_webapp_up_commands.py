@@ -8,6 +8,7 @@
 
 import unittest
 import os
+from pytest import skip
 import requests
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -69,6 +70,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
 
     @live_only()
+    @unittest.skip("Flaky test skipping")
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_no_plan_different_os_e2e(self, resource_group):
         webapp_name = self.create_random_name('up-nodeapp', 24)
@@ -943,6 +945,7 @@ class WebAppUpE2ETests(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @unittest.skip("Temp skip - flaky test")
     def test_windows_to_linux_fail(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
