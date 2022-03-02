@@ -2063,6 +2063,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                yes=False,
                enable_azure_rbac=False,
                aks_custom_headers=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
                snapshot_id=None,
                ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
@@ -2358,6 +2361,9 @@ def aks_update(cmd, client, resource_group_name, name,
                rotation_poll_interval=None,
                tags=None,
                nodepool_labels=None,
+               enable_windows_gmsa=False,
+               gmsa_dns_server=None,
+               gmsa_root_domain_name=None,
                aks_custom_headers=None):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
