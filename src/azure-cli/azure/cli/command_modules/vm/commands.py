@@ -22,8 +22,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_gallery_application_version, cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery,
                                                           cf_community_gallery_image,
-                                                          cf_community_gallery_image_version,
-                                                          cf_community_gallery_sharing_profile)
+                                                          cf_community_gallery_image_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -252,10 +251,6 @@ def load_command_table(self, _):
     community_gallery_image_version_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#CommunityGalleryImageVersionsOperations.{}',
         client_factory=cf_community_gallery_image_version)
-
-    community_gallery_sharing_profile_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GallerySharingProfileOperations.{}',
-        client_factory=cf_community_gallery_sharing_profile)
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
@@ -558,9 +553,6 @@ def load_command_table(self, _):
         g.command('show-community', 'get', is_experimental=True)
         g.custom_command('list-community', 'sig_community_image_version_list', is_experimental=True)
 
-    with self.command_group('sig share', community_gallery_sharing_profile_sdk, client_factory=cf_community_gallery_sharing_profile, operation_group='galleries', min_api='2021-07-01') as g:
-        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
-
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.command('list', 'list_by_gallery')
@@ -600,6 +592,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'sig_share_update', supports_no_wait=True)
         g.custom_command('remove', 'sig_share_update', supports_no_wait=True)
         g.custom_command('reset', 'sig_share_reset', supports_no_wait=True)
+        g.custom_command('enable-community', 'sig_share_update', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_gallery_instance', getter_type=compute_custom)
 
     vm_shared_gallery_image = CliCommandType(

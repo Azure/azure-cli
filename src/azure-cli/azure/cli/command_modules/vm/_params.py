@@ -1221,7 +1221,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')
-        c.argument('permissions', arg_type=get_enum_type(['Private', 'Groups', 'Community']), arg_group='Sharing Profile',
+        c.argument('permissions', arg_type=get_enum_type(GallerySharingPermissionTypes), arg_group='Sharing Profile',
                    min_api='2020-09-30', is_experimental=True,
                    help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_type=get_three_state_flag(), min_api='2021-03-01', is_preview=True,
