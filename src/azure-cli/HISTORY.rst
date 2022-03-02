@@ -9,13 +9,9 @@ Release History
 **Compute**
 
 * Hotfix: Fix #20489: `az webapp log tail`: Fix the AttributeError that 'NoneType' object has no attribute 'host_name_ssl_states' (#21398)
-
 * Hotfix: Fix #20747: `az webapp create-remote-connection`: Fix the EOFError that ran out of input (#21398)
-
 * Hotfix: Fix #20544: `az webapp config snapshot restore`: Fix the AttributeError that 'WebAppsOperations' object has no attribute 'restore_snapshot' (#21398)
-
 * Hotfix: Fix #20011: `az webapp config ssl bind`: Fix the AttributeError that 'str' object has no attribute 'value' (#21398)
-
 * Hotfix: Fix #19492: `az webapp config backup restore`: Fix the AttributeError that 'WebAppsOperations' object has no attribute 'restore' (#21398)
 
 **Storage**
