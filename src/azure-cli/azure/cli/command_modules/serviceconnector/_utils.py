@@ -151,7 +151,6 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
 
     # No Valid Key Vault Connection, Create
     logger.warning('no valid key vault connection found. Creating...')
-    client = set_user_token_header(client, cmd.cli_ctx)
 
     from ._resource_config import CLIENT_TYPE
 
