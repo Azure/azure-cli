@@ -590,7 +590,7 @@ class TestStaticAppCommands(unittest.TestCase):
         reset_envelope = literal_eval(self.staticapp_client.reset_static_site_api_key.call_args[1]["reset_properties_envelope"].__str__())
         self.assertEqual(reset_envelope["repository_token"], self.token1)
 
-    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_functionapp")
+    @mock.patch("azure.cli.command_modules.appservice.static_sites.show_app")
     def test_functions_link(self, *args, **kwargs):
         functionapp_name = "functionapp"
         functionapp_resource_id = "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/sites/{}".format(
