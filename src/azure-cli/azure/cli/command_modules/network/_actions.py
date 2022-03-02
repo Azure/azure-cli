@@ -237,7 +237,7 @@ class AddMappingRequest(argparse.Action):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise UnrecognizedArgumentError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
