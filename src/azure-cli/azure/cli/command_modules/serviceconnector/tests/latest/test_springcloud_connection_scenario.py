@@ -904,7 +904,7 @@ class SpringCloudConnectionScenarioTest(ScenarioTest):
 
         # create connection
         id = self.cmd('spring-cloud connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type java --kv-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
+                 '--secret --client-type java --vault-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
 
         self.cmd(
             'spring-cloud connection list --source-id {}'.format(source_id),

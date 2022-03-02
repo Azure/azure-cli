@@ -105,7 +105,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             context.ignore('new_addon')
 
     def add_secret_store_argument(context):
-        context.argument('key_vault_id', options_list=['--kv-id'], help='The id of key vault to store secret value')
+        context.argument('key_vault_id', options_list=['--vault-id'], help='The id of key vault to store secret value')
 
     def add_confluent_kafka_argument(context):
         context.argument('bootstrap_server', options_list=['--bootstrap-server'], help='Kafka bootstrap server url')

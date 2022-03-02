@@ -911,7 +911,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # create connection
         id = self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
-                 '--secret --client-type python --kv-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
+                 '--secret --client-type python --vault-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
 
         self.cmd(
             'webapp connection list --source-id {}'.format(source_id),
@@ -1132,7 +1132,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection create confluent-cloud --connection {} --source-id {} '
                  '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
                  '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
-                 '--client-type python --kv-id {}'.format(name, source_id, keyvault_id))
+                 '--client-type python --vault-id {}'.format(name, source_id, keyvault_id))
 
         id = f'{source_id}/providers/Microsoft.ServiceLinker/linkers/{name}'
 
