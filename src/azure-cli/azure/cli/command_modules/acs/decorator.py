@@ -631,7 +631,9 @@ class AKSContext:
                     "You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time."
                 )
         else:
-            if gmsa_dns_server_is_none != gmsa_root_domain_name_is_none:
+            if gmsa_dns_server_is_none != gmsa_root_domain_name_is_none or (
+                gmsa_dns_server and gmsa_root_domain_name
+            ):
                 raise RequiredArgumentMissingError(
                     "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
                     "when setting --enable-windows-gmsa."

@@ -4586,6 +4586,12 @@ class AKSContextTestCase(unittest.TestCase):
                 False, None, "test_gmsa_root_domain_name", False
             )
 
+        # fail on enable_windows_gmsa not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._AKSContext__validate_gmsa_options(
+                False, "test_gmsa_dns_server", "test_gmsa_root_domain_name", False
+            )
+
     def test_get_enable_windows_gmsa(self):
         # default
         ctx_1 = AKSContext(
