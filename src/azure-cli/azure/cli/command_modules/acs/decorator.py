@@ -615,25 +615,20 @@ class AKSContext:
 
         :return: bool
         """
-        gmsa_dns_server_is_none = gmsa_dns_server is None
-        gmsa_root_domain_name_is_none = gmsa_root_domain_name is None
         if enable_windows_gmsa:
-            if gmsa_dns_server_is_none == gmsa_root_domain_name_is_none:
-                if gmsa_dns_server_is_none:
-                    msg = (
-                        "Please assure that you have set the DNS server in the vnet used by the cluster "
-                        "when not specifying --gmsa-dns-server and --gmsa-root-domain-name"
-                    )
-                    if not yes and not prompt_y_n(msg, default="n"):
-                        raise DecoratorEarlyExitException()
-            else:
+            if gmsa_dns_server is None and gmsa_root_domain_name is None:
+                msg = (
+                    "Please assure that you have set the DNS server in the vnet used by the cluster "
+                    "when not specifying --gmsa-dns-server and --gmsa-root-domain-name"
+                )
+                if not yes and not prompt_y_n(msg, default="n"):
+                    raise DecoratorEarlyExitException()
+            elif not all([gmsa_dns_server, gmsa_root_domain_name]):
                 raise RequiredArgumentMissingError(
                     "You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time."
                 )
         else:
-            if gmsa_dns_server_is_none != gmsa_root_domain_name_is_none or (
-                gmsa_dns_server and gmsa_root_domain_name
-            ):
+            if any([gmsa_dns_server, gmsa_root_domain_name]):
                 raise RequiredArgumentMissingError(
                     "You only can set --gmsa-dns-server and --gmsa-root-domain-name "
                     "when setting --enable-windows-gmsa."
@@ -1687,12 +1682,13 @@ class AKSContext:
         return admin_username
 
     def _get_windows_admin_username_and_password(
-        self, read_only: bool = False
+        self, read_only: bool = False, enable_validation: bool = False
     ) -> Tuple[Union[str, None], Union[str, None]]:
         """Internal function to dynamically obtain the value of windows_admin_username and windows_admin_password
         according to the context.
 
         Note: This function is intended to be used in create mode.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
@@ -1700,6 +1696,9 @@ class AKSContext:
         raised.
 
         This function supports the option of read_only. When enabled, it will skip dynamic completion and validation.
+        This function supports the option of enable_validation. When enabled, if neither windows_admin_username or
+        windows_admin_password is specified and any of enable_windows_gmsa, gmsa_dns_server or gmsa_root_domain_name is
+        specified, raise a RequiredArgumentMissingError.
 
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
@@ -1778,7 +1777,19 @@ class AKSContext:
                     "Please specify both username and password in non-interactive mode."
                 )
 
-        # these parameters does not need validation
+        # validation
+        # Note: The external parameters involved in the validation are not verified in their own getters.
+        if enable_validation:
+            if self.decorator_mode == DecoratorMode.CREATE:
+                if not any([windows_admin_username, windows_admin_password]):
+                    if self._get_enable_windows_gmsa(
+                        enable_validation=False
+                    ) or any(self._get_gmsa_dns_server_and_root_domain_name(
+                        enable_validation=False
+                    )):
+                        raise RequiredArgumentMissingError(
+                            "Please set windows admin username and password before setting gmsa related configs."
+                        )
         return windows_admin_username, windows_admin_password
 
     def get_windows_admin_username_and_password(
@@ -1787,16 +1798,21 @@ class AKSContext:
         """Dynamically obtain the value of windows_admin_username and windows_admin_password according to the context.
 
         Note: This function is intended to be used in create mode.
+        Note: All the external parameters involved in the validation are not verified in their own getters.
 
         When one of windows_admin_username and windows_admin_password is not assigned, dynamic completion will be
         triggerd. The user will be prompted to enter the missing windows_admin_username or windows_admin_password in
         tty (pseudo terminal). If the program is running in a non-interactive environment, a NoTTYError error will be
         raised.
 
+        This function will verify the parameter by default. If neither windows_admin_username or windows_admin_password
+        is specified and any of enable_windows_gmsa, gmsa_dns_server or gmsa_root_domain_name is specified, raise a
+        RequiredArgumentMissingError.
+
         :return: a tuple containing two elements: windows_admin_username of string type or None and
         windows_admin_password of string type or None
         """
-        return self._get_windows_admin_username_and_password()
+        return self._get_windows_admin_username_and_password(enable_validation=True)
 
     def get_windows_admin_password(self) -> Union[str, None]:
         """Obtain the value of windows_admin_password.
@@ -4251,7 +4267,6 @@ class AKSContext:
 
         # this parameter does not need dynamic completion
         # validation
-        # Note: The parameter involved in the validation is not verified in its own getter.
         if enable_validation:
             if self.decorator_mode == DecoratorMode.UPDATE:
                 if enable_public_fqdn:

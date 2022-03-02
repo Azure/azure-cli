@@ -1476,6 +1476,23 @@ class AKSContextTestCase(unittest.TestCase):
                 ("test_win_admin_name", "test_win_admin_pd"),
             )
 
+        # custom value
+        ctx_4 = AKSContext(
+            self.cmd,
+            {
+                "windows_admin_username": None,
+                "windows_admin_password": None,
+                "enable_windows_gmsa": False,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": "test_gmsa_root_domain_name",
+            },
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        # fail on windows admin username/password not specified
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_4.get_windows_admin_username_and_password()
+
     def test_get_windows_admin_password(self):
         # default
         ctx_1 = AKSContext(
