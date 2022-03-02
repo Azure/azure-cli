@@ -4973,6 +4973,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "windows_admin_username": None,
                 "windows_admin_password": None,
                 "enable_ahub": False,
+                "enable_windows_gmsa": False,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -4993,6 +4996,9 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
                 "windows_admin_username": "test_win_admin_name",
                 "windows_admin_password": None,
                 "enable_ahub": True,
+                "enable_windows_gmsa": True,
+                "gmsa_dns_server": "test_gmsa_dns_server",
+                "gmsa_root_domain_name": "test_gmsa_root_domain_name",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -5003,17 +5009,41 @@ class AKSCreateDecoratorTestCase(unittest.TestCase):
         ):
             dec_mc_2 = dec_2.set_up_windows_profile(mc_2)
 
+        gmsa_profile_2 = self.models.WindowsGmsaProfile(
+            enabled=True,
+            dns_server="test_gmsa_dns_server",
+            root_domain_name="test_gmsa_root_domain_name",
+        )
         windows_profile_2 = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_win_admin_name",
             admin_password="test_win_admin_pd",
             license_type="Windows_Server",
+            gmsa_profile=gmsa_profile_2,
         )
 
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location", windows_profile=windows_profile_2
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "windows_admin_username": None,
+                "windows_admin_password": None,
+                "enable_ahub": True,
+                "enable_windows_gmsa": True,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_3.set_up_windows_profile(mc_3)
 
     def test_set_up_service_principal_profile(self):
         # default value in `aks_create`
@@ -7423,6 +7453,9 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "enable_ahub": False,
                 "disable_ahub": False,
                 "windows_admin_password": None,
+                "enable_windows_gmsa": False,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7448,13 +7481,22 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "enable_ahub": True,
                 "disable_ahub": False,
                 "windows_admin_password": "test_admin_password",
+                "enable_windows_gmsa": True,
+                "gmsa_dns_server": "test_gmsa_dns_server",
+                "gmsa_root_domain_name": "test_gmsa_root_domain_name",
             },
             ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        gmsa_profile_2 = self.models.WindowsGmsaProfile(
+            enabled=True,
+            dns_server="test_mc_gmsa_dns_server",
+            root_domain_name="test_mc_gmsa_root_domain_name",
         )
         windows_profile_2 = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_mc_win_admin_name",
             admin_password="test_mc_win_admin_pd",
+            gmsa_profile=gmsa_profile_2
         )
         mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -7463,11 +7505,17 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         dec_2.context.attach_mc(mc_2)
         dec_mc_2 = dec_2.update_windows_profile(mc_2)
 
+        ground_truth_gmsa_profile_2 = self.models.WindowsGmsaProfile(
+            enabled=True,
+            dns_server="test_gmsa_dns_server",
+            root_domain_name="test_gmsa_root_domain_name",
+        )
         ground_truth_windows_profile_2 = self.models.ManagedClusterWindowsProfile(
             # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="fake secrets in unit test")]
             admin_username="test_mc_win_admin_name",
             admin_password="test_admin_password",
             license_type="Windows_Server",
+            gmsa_profile=ground_truth_gmsa_profile_2,
         )
         ground_truth_mc_2 = self.models.ManagedCluster(
             location="test_location",
@@ -7483,6 +7531,9 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "enable_ahub": False,
                 "disable_ahub": True,
                 "windows_admin_password": None,
+                "enable_windows_gmsa": False,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7518,6 +7569,9 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
                 "enable_ahub": True,
                 "disable_ahub": False,
                 "windows_admin_password": None,
+                "enable_windows_gmsa": False,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
             },
             ResourceType.MGMT_CONTAINERSERVICE,
         )
@@ -7528,6 +7582,31 @@ class AKSUpdateDecoratorTestCase(unittest.TestCase):
         # fail on incomplete mc object (no windows profile)
         with self.assertRaises(UnknownError):
             dec_4.update_windows_profile(mc_4)
+
+        # custom value
+        dec_5 = AKSUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_ahub": False,
+                "disable_ahub": False,
+                "windows_admin_password": None,
+                "enable_windows_gmsa": True,
+                "gmsa_dns_server": None,
+                "gmsa_root_domain_name": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_5.context.attach_mc(mc_5)
+        # fail on incomplete mc object (no windows profile)
+        with patch(
+            "azure.cli.command_modules.acs.decorator.prompt_y_n",
+            return_value=True,
+        ), self.assertRaises(UnknownError):
+            dec_5.update_windows_profile(mc_5)
 
     def test_update_aad_profile(self):
         # default value in `aks_update`
