@@ -164,7 +164,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         formatted["isDefault"] = sub["isDefault"]
         formatted["name"] = sub["name"]
         formatted["state"] = sub["state"]
-        formatted["tenantId"] = sub["tenantId"]
+        formatted["subscriptionId"] = sub["id"]
         formatted_subs.append(formatted)
 
     if default_sub:
