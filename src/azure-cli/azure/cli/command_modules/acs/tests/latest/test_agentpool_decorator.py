@@ -13,7 +13,7 @@ from azure.cli.command_modules.acs._consts import (
 )
 from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolContext,
-    AKSAgentPoolCreateDecorator,
+    AKSAgentPoolAddDecorator,
     AKSAgentPoolModels,
     AKSAgentPoolUpdateDecorator,
 )
@@ -94,6 +94,16 @@ class AKSAgentPoolContextTestCase(unittest.TestCase):
         # fail on attach again
         with self.assertRaises(CLIInternalError):
             ctx_1.attach_agentpool(agentpool)
+
+
+class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
+    def test(self):
+        pass
+
+
+class AKSAgentPoolUpdateDecoratorTestCase(unittest.TestCase):
+    def test(self):
+        pass
 
 
 if __name__ == "__main__":

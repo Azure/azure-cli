@@ -26,7 +26,7 @@ AgentPoolsOperations = TypeVar("AgentPoolsOperations")
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class AKSAgentPoolModels:
-    """Store the models used in aks_agentpool_create and aks_agentpool_update.
+    """Store the models used in aks_agentpool_add and aks_agentpool_update.
 
     The api version of the class corresponding to a model is determined by resource_type.
     """
@@ -52,7 +52,7 @@ class AKSAgentPoolModels:
 
 # pylint: disable=too-many-public-methods
 class AKSAgentPoolContext:
-    """Implement getter functions for all parameters in aks_agentpool_create and aks_agentpool_update.
+    """Implement getter functions for all parameters in aks_agentpool_add and aks_agentpool_update.
     """
     def __init__(
         self,
@@ -158,7 +158,7 @@ class AKSAgentPoolContext:
         return nodepool_name
 
 
-class AKSAgentPoolCreateDecorator:
+class AKSAgentPoolAddDecorator:
     def __init__(
         self,
         cmd: AzCliCommand,
@@ -166,9 +166,9 @@ class AKSAgentPoolCreateDecorator:
         raw_parameters: Dict,
         resource_type: ResourceType,
     ):
-        """Internal controller of aks_agentpool_create.
+        """Internal controller of aks_agentpool_add.
 
-        Break down the all-in-one aks_agentpool_create function into several relatively independent functions (some of
+        Break down the all-in-one aks_agentpool_add function into several relatively independent functions (some of
         them have a certain order dependency) that only focus on a specific profile or process a specific piece of
         logic. In addition, an overall control function is provided. By calling the aforementioned independent functions
         one by one, a complete AgentPool object is gradually decorated and finally requests are sent to create a node
