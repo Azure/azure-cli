@@ -60,7 +60,7 @@ def load_arguments(self, _):
     retention_days_arg_type = CLIArgumentType(
         options_list=['--retention-days'],
         type=int,
-        help='Number of days to retain the soft delete enabled App Configuration after deleting. Must be a positive integer.'
+        help='Number of days to retain the soft delete enabled App Configuration after deleting. Must be a positive integer between 0 and 7.'
     )
     identities_arg_type = CLIArgumentType(
         nargs='*',
@@ -95,14 +95,14 @@ def load_arguments(self, _):
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type, is_preview=True)
-        c.argument('enable_purge_protection', options_list=['--enable_purge_protection', '-p'], arg_type=get_three_state_flag(), is_preview=True, help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), is_preview=True, help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), is_preview=True,
                    help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), is_preview=True, help='Disable all authentication methods other than AAD authentication.')
-        c.argument('enable_purge_protection', options_list=['--enable_purge_protection', '-p'], arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), is_preview=True,
                    help='Property specifying whether protection against purge is enabled for this App Configuration. Setting this property to true activates protection against purge for this App Configuration and its contents. Enabling this functionality is irreversible.')
 
     with self.argument_context('appconfig recover') as c:
