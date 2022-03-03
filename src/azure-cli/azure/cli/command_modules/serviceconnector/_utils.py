@@ -138,7 +138,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     logger = get_logger(__name__)
 
     logger.warning('get valid key vualt reference connection')
-    all_connections = run_cli_cmd('az webapp connection list --source-id {} -o json'.format(source_id))
+    all_connections = client.list(resource_uri = source_id)
     key_vault_connections = []
     for connection in all_connections:  # pylint: disable=not-an-iterable
         if connection.get('targetId') == key_vault_id:
