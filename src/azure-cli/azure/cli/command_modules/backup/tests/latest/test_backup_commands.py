@@ -429,8 +429,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ItemPreparer()
     @RPPreparer()
     @StorageAccountPreparer(location="southeastasia")
-    @StorageAccountPreparer(parameter_name="secondary_region_sa", location="eastasia")
-    def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account, secondary_region_sa):
+    def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
@@ -438,16 +437,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'target_rg': target_resource_group,
             'rg': resource_group,
             'sa': storage_account,
-            'secondary_sa': secondary_region_sa,
             'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
-            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
         })
         self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
         # Original Storage Account Restore Fails
         self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-to-staging-storage-account false', expect_failure=True)
 
-        # Trigger Restore
+        # Trigger Restore Disks
         trigger_restore_job_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
@@ -489,6 +490,50 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+        # Trigger Original Location Restore
+        trigger_restore_job3_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-mode OriginalLocation', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.extendedInfo.internalPropertyBag.restoreLocationType", "OriginalLocation")
+        ]).get_output_in_json()
+        self.kwargs['job3'] = trigger_restore_job3_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job3}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job3}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # Trigger Alternate Location Restore
+        vnet_json = self.cmd('network vnet create -g {target_rg} -n {vnet_name} --subnet-name {subnet_name}',
+                 checks=[
+            self.check("newVNet.name", '{vnet_name}')
+        ]).get_output_in_json()
+
+        self.assertIn(self.kwargs['subnet_name'].lower(), vnet_json['newVNet']['subnets'][0]['name'].lower())
+
+        trigger_restore_job4_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --storage-account {sa} --restore-mode AlternateLocation --target-vm-name {target_vm_name} --target-vnet-name {vnet_name} --target-subnet-name {subnet_name} --target-vnet-resource-group {target_rg} -t {target_rg}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}'),
+            self.check("properties.extendedInfo.internalPropertyBag.restoreLocationType", "AlternateLocation")
+        ]).get_output_in_json()
+        self.kwargs['job4'] = trigger_restore_job4_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job4}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job4}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
 
     #@AllowLargeResponse()
     #@ResourceGroupPreparer(location="centraluseuap")

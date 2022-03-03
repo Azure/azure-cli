@@ -145,17 +145,18 @@ def fetch_tier_for_rp(rp):
 
     for i in range(len(rp.properties.recovery_point_tier_details)):
         currRpTierDetails = rp.properties.recovery_point_tier_details[i]
-        if (currRpTierDetails.type == "ArchivedRP" and currRpTierDetails.status == "Rehydrated"):
+        if (currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP and
+                currRpTierDetails.status == RecoveryPointTierStatus.REHYDRATED):
             isRehydrated = True
 
-        if currRpTierDetails.status == "Valid":
-            if currRpTierDetails.type == "InstantRP":
+        if currRpTierDetails.status == RecoveryPointTierStatus.VALID:
+            if currRpTierDetails.type == RecoveryPointTierType.INSTANT_RP:
                 isInstantRecoverable = True
 
-            if currRpTierDetails.type == "HardenedRP":
+            if currRpTierDetails.type == RecoveryPointTierType.HARDENED_RP:
                 isHardenedRP = True
 
-            if currRpTierDetails.type == "ArchivedRP":
+            if currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP:
                 isArchived = True
 
     if (isHardenedRP and isArchived) or (isRehydrated):
@@ -319,4 +320,3 @@ def _check_map(item_type, item_type_map):
     az_error = InvalidArgumentValueError(error_text)
     az_error.set_recommendation(recommendation_text)
     raise az_error
-
