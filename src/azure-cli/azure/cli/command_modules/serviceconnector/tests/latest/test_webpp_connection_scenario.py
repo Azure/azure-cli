@@ -11,6 +11,7 @@ from azure.cli.testsdk import (
     record_only
 )
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
+from azure.cli.testsdk.scenario_tests.decorators import live_only
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
@@ -892,7 +893,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    @live_only()
+    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
     def test_webapp_storageblob_keyvault_ref(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
@@ -1113,7 +1115,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
 
-    @record_only()
+    @live_only()
+    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
     def test_webapp_confluentkafka_keyvault_ref(self):
         self.kwargs.update({
             'subscription': get_subscription_id(self.cli_ctx),
