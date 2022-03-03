@@ -247,15 +247,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
                                               resource_type=ResourceType.MGMT_STORAGE)
 
-    overwrite_type = CLIArgumentType(
-        arg_type=get_three_state_flag(),
-        help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob will '
-             'overwrite the existing data. If set to False, the operation will fail with ResourceExistsError. '
-             'The exception to the above is with Append blob types: if set to False and the data already exists, '
-             'an error will not be raised and the data will be appended to the existing blob. If set '
-             'overwrite=True, then the existing append blob will be deleted, and a new one created. '
-             'Defaults to False.')
-
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -968,6 +959,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('metadata', arg_group="Additional Flags")
         c.argument('timeout', arg_group="Additional Flags")
 
+    # pylint: disable=line-too-long
     with self.argument_context('storage blob upload-batch', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         from .sdkutil import get_blob_types
 
@@ -985,7 +977,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type, validator=add_upload_progress_callback)
         c.extra('tier', tier_type, is_preview=True, validator=blob_tier_validator_track2)
-        c.extra('overwrite', overwrite_type, is_preview=True)
+        c.extra('overwrite', arg_type=get_three_state_flag(), is_preview=True,
+                help='Whether the blob to be uploaded should overwrite the current data. If True, blob upload '
+                     'operation will overwrite the existing data. If set to False, the operation will fail with '
+                     'ResourceExistsError. The exception to the above is with Append blob types: if set to False and the '
+                     'data already exists, an error will not be raised and the data will be appended to the existing '
+                     'blob. If set overwrite=True, then the existing append blob will be deleted, and a new one created. '
+                     'Defaults to False.')
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type,

@@ -8,7 +8,8 @@ import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
-    record_only
+    record_only,
+    live_only
 )
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
@@ -569,7 +570,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-redis-app2',
+            'site': 'servicelinker-redis-app',
             'server': 'servicelinker-redis',
             'database': '0'
         })
@@ -614,7 +615,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-redis-enterprise-app2',
+            'site': 'servicelinker-redis-enterprise-app',
             'server': 'servicelinker-redis-enterprise',
             'database': 'default'
         })
@@ -806,7 +807,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-sql-app2',
+            'site': 'servicelinker-sql-app',
             'server': 'servicelinker-sql',
             'database': 'handler-test'
         })
@@ -890,7 +891,58 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
-    
+
+
+    @live_only()
+    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    def test_webapp_storageblob_keyvault_ref(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-storageblob-ref-app',
+            'account': 'servicelinkerstorage',
+            'vault': 'servicelinker-kv-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        id = self.cmd('webapp connection create storage-blob --connection {} --source-id {} --target-id {} '
+                 '--secret --client-type python --vault-id {}'.format(name, source_id, target_id, keyvault_id)).get_output_in_json().get('id')
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 2),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        # update connection
+        self.cmd('webapp connection update storage-blob --id {} '
+                 '--secret'.format(id))
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
+
 
     @record_only()
     def test_webapp_storagequeue_e2e(self):
@@ -1061,3 +1113,63 @@ class WebAppConnectionScenarioTest(ScenarioTest):
 
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
+
+
+    @live_only()
+    @unittest.skip('"run_cli_cmd" could only work at live mode, please comment it for live test')
+    def test_webapp_confluentkafka_keyvault_ref(self):
+        self.kwargs.update({
+            'subscription': get_subscription_id(self.cli_ctx),
+            'source_resource_group': 'servicelinker-test-linux-group',
+            'target_resource_group': 'servicelinker-test-linux-group',
+            'site': 'servicelinker-kafka-ref-app',
+            'vault': 'servicelinker-kv-ref',
+        })
+
+        # prepare params
+        name = 'testconn'
+        source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
+        keyvault_id = TARGET_RESOURCES.get(RESOURCE.KeyVault).format(**self.kwargs)
+
+        # create connection
+        self.cmd('webapp connection create confluent-cloud --connection {} --source-id {} '
+                 '--bootstrap-server xxx.eastus.azure.confluent.cloud:9092 --kafka-key Name --kafka-secret Secret '
+                 '--schema-registry https://xxx.eastus.azure.confluent.cloud --schema-key Name --schema-secret Secret '
+                 '--client-type python --vault-id {}'.format(name, source_id, keyvault_id))
+
+        id = f'{source_id}/providers/Microsoft.ServiceLinker/linkers/{name}'
+
+        self.cmd(
+            'webapp connection list --source-id {}'.format(source_id),
+            checks = [
+                self.check('length(@)', 3),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        self.cmd(
+            'webapp connection show --id {}_schema'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        # update connection
+        self.cmd('webapp connection update confluent-cloud --connection {} --source-id {} '
+                 '--kafka-secret Secret'.format(name, source_id))
+
+        self.cmd(
+            'webapp connection show --id {}'.format(id),
+            checks = [
+                self.check('secretStore.keyVaultId', keyvault_id),
+            ]
+        )
+
+        for conn in self.cmd('webapp connection list --source-id {}'.format(source_id)).get_output_in_json():
+            self.cmd('webapp connection delete --id {} --yes'.format(conn.get('id')))
