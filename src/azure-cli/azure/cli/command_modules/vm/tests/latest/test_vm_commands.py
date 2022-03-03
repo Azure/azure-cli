@@ -1019,6 +1019,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             self.check('instanceView.statuses[1].code', expected_power_state),
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_state_mod')
     def test_vm_create_state_modifications(self, resource_group):
 
@@ -1111,7 +1112,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_size_properties')
     def test_vm_size_properties(self, resource_group):
         self.kwargs.update({
-            'vm': self.create_random_name('vm-', 10)
+            'vm': self.create_random_name('vm-', 10),
+            'vmss': self.create_random_name('vmss', 10)
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --size Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1')
@@ -1122,6 +1124,16 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         self.cmd('vm update -g {rg} -n {vm} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
             self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', 2),
             self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --vm-sku Standard_D2s_v3 --v-cpus-available 1 --v-cpus-per-core 1')
+        self.cmd('vmss show -g {rg} -n {vmss} ', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusAvailable', 1),
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 1)
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss} --v-cpus-available 2 --v-cpus-per-core 2', checks=[
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusAvailable', 2),
+            self.check('virtualMachineProfile.hardwareProfile.vmSizeProperties.vCpusPerCore', 2)
         ])
 
 
@@ -1800,6 +1812,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
 class VMMonitorTestUpdateLinux(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_linux', location='eastus')
     def test_vm_update_with_workspace_linux(self, resource_group):
 
@@ -1923,7 +1936,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
 class VMBootDiagnostics(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_diagnostics')
-    @StorageAccountPreparer(name_prefix='clitestbootdiag')
+    @StorageAccountPreparer(name_prefix='clitestbootdiag', sku='Standard_LRS')
     @AllowLargeResponse()
     def test_vm_boot_diagnostics(self, resource_group, storage_account):
 
@@ -1933,7 +1946,6 @@ class VMBootDiagnostics(ScenarioTest):
         })
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
-        self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l westus')
         self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
 
         self.cmd('vm boot-diagnostics enable -g {rg} -n {vm}')
@@ -2148,6 +2160,7 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
 class VMCreateExistingOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing')
     @StorageAccountPreparer()
     def test_vm_create_existing_options(self, resource_group, storage_account):
@@ -2234,6 +2247,7 @@ class VMCreateExistingOptions(ScenarioTest):
 
 class VMCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_existing_ids')
     @StorageAccountPreparer()
     def test_vm_create_existing_ids_options(self, resource_group, storage_account):
@@ -2634,6 +2648,7 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
 
 class VMSSCreateAndModify(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_and_modify')
     def test_vmss_create_and_modify(self):
 
@@ -2715,6 +2730,7 @@ class VMSSCreateAndModify(ScenarioTest):
 
 class VMSSCreateOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
     def test_vmss_create_options(self, resource_group):
 
@@ -3375,6 +3391,7 @@ class VMSSCreateExistingOptions(ScenarioTest):
 
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
     def test_vmss_create_existing_ids_options(self, resource_group):
 
@@ -5049,13 +5066,15 @@ class VMGalleryApplication(ScenarioTest):
         self.cmd('sig gallery-application list -r {gallery} -g {rg}', checks=self.is_empty())
 
     @ResourceGroupPreparer(location='eastus')
-    def test_gallery_application_version(self, resource_group, resource_group_location):
+    @StorageAccountPreparer(location='eastus', name_prefix='account', length=15)
+    def test_gallery_application_version(self, resource_group, resource_group_location, storage_account_info):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'app_name': self.create_random_name('app', 10),
             'gallery': self.create_random_name('gellery', 15),
             'ver_name': "1.0.0",
-            'account': self.create_random_name('account', 15),
+            'account': storage_account_info[0],
+            'storage_key': storage_account_info[1],
             'container': self.create_random_name('container', 15),
             'blob': self.create_random_name('blob', 15),
             'f1': os.path.join(curr_dir, 'my_app_installer.txt').replace('\\', '\\\\')
@@ -5068,9 +5087,6 @@ class VMGalleryApplication(ScenarioTest):
             self.check('tags', None),
             self.check('type', 'Microsoft.Compute/galleries/applications')
         ])
-        self.cmd('storage account create -n {account} -g {rg}')
-        self.kwargs['storage_key'] = str(
-            self.cmd('az storage account keys list -n {account} -g {rg} --query "[0].value"').output)
         self.cmd('storage container create -g {rg} --account-name {account} -n {container} --public-access blob --account-key {storage_key}')
         self.cmd('storage blob upload -n {blob} --account-name {account} --container-name {container} --file {f1} --type page --account-key {storage_key}')
         self.cmd('sig gallery-application version create -n {ver_name} --application-name {app_name} -r {gallery} -g {rg} --package-file-link https://{account}.blob.core.windows.net/{container}/{blob} --install-command install  --remove-command remove', checks=[
@@ -5248,7 +5264,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
-            'host': 'my-host',
+            'host': 'my-host'
         })
 
         self.cmd('vm host group create -n {host-group} -c 3 -g {rg}')
@@ -6186,6 +6202,7 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
 
 class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_subnet')
     def test_vm_create_auto_create_subnet(self, resource_group):
 
@@ -6229,11 +6246,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Test raise error if not provide health probe or load balance
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --automatic-repairs-grace-period 30 --admin-username azureuser')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser')
 
         # Prepare health probe
@@ -6241,10 +6258,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
         self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         # Test enable automatic repairs with a health probe when create vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser',
+        self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30  --automatic-repairs-action restart --admin-username azureuser',
                  checks=[
                      self.check('vmss.automaticRepairsPolicy.enabled', True),
-                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('vmss.automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_probe_')
@@ -6259,10 +6277,10 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image UbuntuLTS --admin-username azureuser')
 
         # Validate automatic repairs parameters
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd(
                 'vmss update -g {rg} -n {vmss} --enable-automatic-repairs false --automatic-repairs-grace-period 30')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ArgumentUsageError):
             self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true')
 
         # Prepare health probe
@@ -6282,10 +6300,11 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
             self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()
         )
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids {instance_ids}')
-        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30',
+        self.cmd('vmss update -g {rg} -n {vmss} --enable-automatic-repairs true --automatic-repairs-grace-period 30 --automatic-repairs-action restart',
                  checks=[
                      self.check('automaticRepairsPolicy.enabled', True),
-                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
+                     self.check('automaticRepairsPolicy.gracePeriod', 'PT30M'),
+                     self.check('automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_extension_')
@@ -6838,25 +6857,23 @@ class VMInstallPatchesScenarioTest(ScenarioTest):
 
 
 class VMTrustedLaunchScenarioTest(ScenarioTest):
-    @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_', location='southcentralus')
     def test_vm_trusted_launch(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
-            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
-            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
-    @unittest.skip('Not supported')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_trusted_launch_update_', location='southcentralus')
     def test_vm_trusted_launch_update(self, resource_group):
-        self.cmd('vm create -g {rg} -n vm --image Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
+        self.cmd('vm create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0 --nsg-rule None')
         self.cmd('vm update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n vm', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch'),
-            self.check('securityProfile.UefiSettings.secureBootEnabled', True),
-            self.check('securityProfile.UefiSettings.vTpmEnabled', True)
+            self.check('securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
     # @unittest.skip('Service does not work')
@@ -6864,6 +6881,16 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     def test_disk_trusted_launch(self):
         self.cmd('disk create -g {rg} -n d1 --image-reference Canonical:UbuntuServer:18_04-lts-gen2:18.04.202004290 --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
             self.check('securityProfile.securityType', 'TrustedLaunch')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_trusted_launch_', location='southcentralus')
+    def test_vmss_trusted(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vm --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --admin-username azureuser --admin-password testPassword0')
+        self.cmd('vmss update -g {rg} -n vm --enable-secure-boot true --enable-vtpm true')
+        self.cmd('vmss show -g {rg} -n vm', checks=[
+            self.check('virtualMachineProfile.securityProfile.securityType', 'TrustedLaunch'),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
+            self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
 
 
@@ -7437,6 +7464,107 @@ class DiskRPTestScenario(ScenarioTest):
         self.cmd('snapshot show -g {rg2} -n snapb', checks=[
             self.check_pattern('completionPercent', '\d?.\d?')
         ])
+
+
+class RestorePointScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collections', location='westus')
+    def test_restore_point(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('collection_', 20),
+            'point_name': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        point = self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+            self.check('name', '{point_name}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs.update({
+            'point_id': point['id']
+        })
+
+        self.cmd('restore-point show -g {rg} -n {point_name} --collection-name {collection_name}', checks=[
+            self.check('id', '{point_id}'),
+            self.check('name', '{point_name}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('restorePoints[0].id', '{point_id}'),
+            self.check('restorePoints[0].name', '{point_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}')
+        ])
+
+        self.cmd('restore-point delete -g {rg} -n {point_name} --collection-name {collection_name} -y')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_collection', location='westus')
+    def test_restore_point_collection(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'collection_name': self.create_random_name('point_', 15),
+            'vm_name': self.create_random_name('vm_', 15)
+        })
+
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image UbuntuLTS').get_output_in_json()
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}'),
+            self.check('tags', None),
+            self.check('type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection update -g {rg} --collection-name {collection_name} --tags tag=test', checks=[
+            self.check('tags', {'tag': 'test'})
+        ])
+
+        self.cmd('restore-point collection show -g {rg} --collection-name {collection_name}', checks=[
+            self.check('location', 'westus'),
+            self.check('name', '{collection_name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('source.id', '{vm_id}'),
+            self.check('tags', {'tag': 'test'}),
+            self.check('type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection list -g {rg}', checks=[
+            self.check('[0].location', 'westus'),
+            self.check('[0].name', '{collection_name}'),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].source.id', '{vm_id}'),
+            self.check('[0].tags', {'tag': 'test'}),
+            self.check('[0].type', 'Microsoft.Compute/restorePointCollections')
+        ])
+
+        self.cmd('restore-point collection list-all', checks=[
+            self.check('type(@)', 'array')
+        ])
+
+        self.cmd('restore-point collection delete -g {rg} --collection-name {collection_name} -y')
+
 
 if __name__ == '__main__':
     unittest.main()

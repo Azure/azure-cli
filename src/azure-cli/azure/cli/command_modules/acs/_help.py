@@ -481,6 +481,21 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+  - name: --enable-windows-gmsa
+    type: bool
+    short-summary: Enable Windows gmsa.
+  - name: --gmsa-dns-server
+    type: string
+    short-summary: Specify DNS server for Windows gmsa for this cluster.
+    long-summary: |-
+        You do not need to set this if you have set DNS server in the VNET used by the cluster.
+        You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --gmsa-root-domain-name
+    type: string
+    short-summary: Specify root domain name for Windows gmsa for this cluster.
+    long-summary: |-
+        You do not need to set this if you have set DNS server in the VNET used by the cluster.
+        You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this cluster.
@@ -539,6 +554,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
   - name: Create a kubernetes cluster with FIPS-enabled OS
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-fips-image
+  - name: Create a kubernetes cluster with enabling Windows gmsa and with setting DNS server in the vnet used by the cluster.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-windows-gmsa
+  - name: Create a kubernetes cluster with enabling Windows gmsa but without setting DNS server in the vnet used by the cluster.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
   - name: create a kubernetes cluster with a snapshot id.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.20.9 --snapshot-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/snapshots/mysnapshot1"
 """
@@ -668,6 +687,21 @@ parameters:
   - name: --rotation-poll-interval
     type: string
     short-summary: Set interval of rotation poll. Use with azure-keyvault-secrets-provider addon.
+  - name: --enable-windows-gmsa
+    type: bool
+    short-summary: Enable Windows gmsa on cluster.
+  - name: --gmsa-dns-server
+    type: string
+    short-summary: Specify DNS server for Windows gmsa on cluster.
+    long-summary: |-
+        You do not need to set this if you have set DNS server in the VNET used by the cluster.
+        You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
+  - name: --gmsa-root-domain-name
+    type: string
+    short-summary: Specify root domain name for Windows gmsa on cluster.
+    long-summary: |-
+        You do not need to set this if you have set DNS server in the VNET used by the cluster.
+        You must set or not set --gmsa-dns-server and --gmsa-root-domain-name at the same time when setting --enable-windows-gmsa.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -709,6 +743,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --tags "foo=bar" "baz=qux"
   - name: Update a kubernetes cluster with custom headers
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aks-custom-headers WindowsContainerRuntime=containerd,AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomNodeConfigPreview
+  - name: Enable Windows gmsa for a kubernetes cluster with setting DNS server in the vnet used by the cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa
+  - name: Enable Windows gmsa for a kubernetes cluster without setting DNS server in the vnet used by the cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-windows-gmsa --gmsa-dns-server "10.240.0.4" --gmsa-root-domain-name "contoso.com"
 """
 
 helps['aks delete'] = """
@@ -811,6 +849,10 @@ parameters:
   - name: --public-fqdn
     type: bool
     short-summary: Get private cluster credential with server address to be public fqdn.
+  - name: --format
+    type: string
+    short-summary: Specify the format of the returned credential. Available values are ["exec", "azure"].
+                  Only take effect when requesting clusterUser credential of AAD clusters.
 examples:
   - name: Get access credentials for a managed Kubernetes cluster. (autogenerated)
     text: az aks get-credentials --name MyManagedCluster --resource-group MyResourceGroup
@@ -905,6 +947,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --scale-down-mode
+    type: string
+    short-summary: "Describe how VMs are added to or removed from nodepools."
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool.
@@ -976,7 +1021,7 @@ parameters:
 
 helps['aks nodepool list'] = """
 type: command
-short-summary: List node pools in the managed Kubernetes cluster.
+short-summary: List node pools in the managed Kubernetes cluster. To get list of nodes in the cluster run `kubectl get nodes` command.
 """
 
 helps['aks nodepool scale'] = """
@@ -1012,6 +1057,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --scale-down-mode
+    type: string
+    short-summary: "Describe how VMs are added to or removed from nodepools."
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.

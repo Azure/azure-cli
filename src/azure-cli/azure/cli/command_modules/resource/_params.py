@@ -591,6 +591,14 @@ def load_arguments(self, _):
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
 
+    with self.argument_context('account management-group hierarchy-settings create') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
+
+    with self.argument_context('account management-group hierarchy-settings update') as c:
+        c.argument('default_management_group', options_list=['--default-management-group', '-m'])
+        c.argument('require_authorization_for_group_creation', options_list=['--require-authorization-for-group-creation', '-r'])
+
     with self.argument_context('ts') as c:
         c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')
         c.argument('version', options_list=['--version', '-v'], help='The template spec version.')

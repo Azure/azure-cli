@@ -102,8 +102,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('admin_site_name', help='The name of the admin web app.',
-                   deprecate_info=c.deprecate(expiration='0.2.17'))
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
@@ -155,6 +154,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the webapp join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.",
+                   arg_type=get_three_state_flag(return_label=True))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -565,7 +566,7 @@ def load_arguments(self, _):
         c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
                    help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
-                   arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
+                   arg_group='Azure Active Directory', help="One or more token audiences (comma-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from `az cloud show` at \"endpoints.activeDirectory\". '
                         'The tenantID can be found using `az account show`. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.',
@@ -574,7 +575,7 @@ def load_arguments(self, _):
                    help="Application ID to integrate Facebook Sign-in into your web app")
         c.argument('facebook_app_secret', arg_group='Facebook', help='Facebook Application client secret')
         c.argument('facebook_oauth_scopes', nargs='+',
-                   help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
+                   help="One or more facebook authentication scopes (comma-delimited).", arg_group='Facebook')
         c.argument('twitter_consumer_key', arg_group='Twitter',
                    help='Application ID to integrate Twitter Sign-in into your web app')
         c.argument('twitter_consumer_secret', arg_group='Twitter', help='Twitter Application client secret')
@@ -587,7 +588,7 @@ def load_arguments(self, _):
                    help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+',
-                   help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
+                   help="One or more Microsoft authentification scopes (comma-delimited).", arg_group='Microsoft')
 
     with self.argument_context('webapp hybrid-connection') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -715,9 +716,7 @@ def load_arguments(self, _):
                        help="name or resource id of the {} app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.".format(scope),
                        local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
             c.argument('name', options_list=['--name', '-n'], help='name of the new {} app'.format(app_type),
-                       local_context_attribute=LocalContextAttribute(name=scope + '_name',
-                       actions=[LocalContextAction.SET],
-                       scopes=[scope]))
+                       local_context_attribute=LocalContextAttribute(name=scope + '_name', actions=[LocalContextAction.SET], scopes=[scope]))
             c.argument('storage_account', options_list=['--storage-account', '-s'],
                        help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
                        local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
@@ -871,8 +870,7 @@ def load_arguments(self, _):
             c.argument('ignore_missing_vnet_service_endpoint',
                        options_list=['--ignore-missing-endpoint', '-i'],
                        help='Create access restriction rule with checking if the subnet has Microsoft.Web service endpoint enabled',
-                       arg_type=get_three_state_flag(),
-                       default=False)
+                       arg_type=get_three_state_flag(), default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
             c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
