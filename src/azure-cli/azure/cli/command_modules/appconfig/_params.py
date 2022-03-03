@@ -109,6 +109,12 @@ def load_arguments(self, _):
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration. Can be viewed using command `az appconfig show-deleted`.')
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='Resource group of the deleted App Configuration.')
 
+    with self.argument_context('appconfig show-deleted') as c:
+        c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration.')
+
+    with self.argument_context('appconfig purge') as c:
+        c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration. Can be viewed using command `az appconfig show-deleted`.')
+
     with self.argument_context('appconfig update', arg_group='Customer Managed Key') as c:
         c.argument('encryption_key_name', help='The name of the KeyVault key.')
         c.argument('encryption_key_vault', help='The URI of the KeyVault.')

@@ -137,6 +137,15 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                     self.check('location', '{rg_loc}'),
                     self.check('purgeProtectionEnabled', '{enable_purge_protection}')])
 
+        deleted_stores = self.cmd('appconfig list-deleted')
+
+        found = False
+        for deleted_store in deleted_stores:
+            if deleted_store['name'] == config_store_name:
+                assert deleted_store['location'] == location
+                found = True
+        assert found
+
         self.cmd('appconfig recover -n {config_store_name} -y')
 
         self.cmd('appconfig show -n {config_store_name}',

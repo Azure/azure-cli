@@ -60,7 +60,7 @@ def create_configstore(client,
 
 def recover_deleted_configstore(cmd, client, name, resource_group_name=None, location=None, yes=False):
     if resource_group_name is None or location is None:
-        metadata_resource_group, metadata_location = resolve_deleted_store_metadata(cmd, name)
+        metadata_resource_group, metadata_location = resolve_deleted_store_metadata(cmd, name, resource_group_name, location)
 
         if resource_group_name is None:
             resource_group_name = metadata_resource_group
@@ -124,7 +124,7 @@ def update_configstore(cmd,
                        identity_client_id=None,
                        enable_public_network=None,
                        disable_local_auth=None,
-                       enable_purge_protection=False):
+                       enable_purge_protection=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
