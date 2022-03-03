@@ -178,7 +178,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     logger = get_logger(__name__)
 
     logger.warning('get valid key vualt reference connection')
-    all_connections = todict(client.list(resource_uri = source_id))
+    all_connections = todict(client.list(resource_uri=source_id))
     key_vault_connections = []
     for connection in all_connections:  # pylint: disable=not-an-iterable
         if connection.get('targetId') == key_vault_id:
@@ -215,7 +215,6 @@ def get_auth_if_no_valid_key_vault_connection(logger, source_name, source_id, ke
     if len(key_vault_connections) > 0:
         from ._resource_config import RESOURCE
         from msrestazure.tools import (
-            parse_resource_id,
             is_valid_resource_id
         )
 
