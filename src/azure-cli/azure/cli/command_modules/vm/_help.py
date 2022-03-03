@@ -3204,9 +3204,11 @@ parameters:
     short-summary: Scale set VM instance id.
 examples:
   - name: Install nginx on a VMSS instance.
-    text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
+    text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+            --instance-id 0 --scripts "sudo apt-get update && sudo apt-get install -y nginx"
   - name: Invoke a run-command with parameters on a VMSS instance.
-    text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\ --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
+    text: az vmss run-command invoke -g MyResourceGroup -n MyVMSS --command-id RunShellScript \\
+            --instance-id 4 --scripts 'echo $1 $2' --parameters hello world
   - name: 'Invoke command on all VMSS instances using the VMSS instance resource IDs. Note: "@-" expands to stdin.'
     text: |-
         az vmss list-instances -n MyVMSS -g my-rg --query "[].id" --output tsv | \\

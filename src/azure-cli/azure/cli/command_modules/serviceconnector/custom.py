@@ -20,7 +20,8 @@ from ._resource_config import (
 )
 from ._validators import (
     get_source_resource_name,
-    get_target_resource_name
+    get_target_resource_name,
+    validate_service_state
 )
 from ._addon_factory import AddonFactory
 from ._utils import (
@@ -219,6 +220,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals
             raise AzureResponseError('{}. Provision failed, please create the target resource '
                                      'manually and then create the connection.'.format(str(e)))
 
+    validate_service_state(parameters)
     return auto_register(sdk_no_wait, no_wait,
                          client.begin_create_or_update,
                          resource_uri=source_id,

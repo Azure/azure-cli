@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.33.1"
+VERSION = "2.34.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -60,7 +60,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-identity',
     'azure-keyvault-administration==4.0.0b3',
-    'azure-keyvault-keys==4.5.0b4',
+    'azure-keyvault-keys==4.5.0b6',
     'azure-keyvault~=1.1.0',
     'azure-loganalytics~=0.1.0',
     'azure-mgmt-advisor==9.0.0',
@@ -93,13 +93,13 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=9.0.0',
     'azure-mgmt-imagebuilder~=1.0.0',
     'azure-mgmt-iotcentral~=9.0.0',
-    'azure-mgmt-iothub==2.1.0',
-    'azure-mgmt-iothubprovisioningservices~=1.0.0',
+    'azure-mgmt-iothub==2.2.0',
+    'azure-mgmt-iothubprovisioningservices==1.1.0',
     'azure-mgmt-keyvault==9.3.0',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=13.0.0b1',
+    'azure-mgmt-loganalytics~=13.0.0b2',
     'azure-mgmt-managedservices~=1.0',
-    'azure-mgmt-managementgroups~=0.1',
+    'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=7.0',
@@ -119,17 +119,17 @@ DEPENDENCIES = [
     'azure-mgmt-resource==20.0.0',
     'azure-mgmt-search~=8.0',
     'azure-mgmt-security~=2.0.0b1',
-    'azure-mgmt-servicebus~=6.0.0',
+    'azure-mgmt-servicebus~=7.1.0',
     'azure-mgmt-servicefabricmanagedclusters~=1.0.0',
     'azure-mgmt-servicelinker==1.0.0b2',
     'azure-mgmt-servicefabric~=1.0.0',
     'azure-mgmt-signalr~=1.0.0b2',
     'azure-mgmt-sqlvirtualmachine~=1.0.0b1',
     'azure-mgmt-sql~=3.0.1',
-    'azure-mgmt-storage~=19.0.0',
+    'azure-mgmt-storage~=19.1.0',
     'azure-mgmt-synapse~=2.1.0b2',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web~=4.0.0',
+    'azure-mgmt-web~=6.1.0',
     'azure-multiapi-storage~=0.7.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
