@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import time
+from knack.util import todict
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
@@ -138,7 +139,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     logger = get_logger(__name__)
 
     logger.warning('get valid key vualt reference connection')
-    all_connections = client.list(resource_uri = source_id)
+    all_connections = todict(client.list(resource_uri = source_id))
     key_vault_connections = []
     for connection in all_connections:  # pylint: disable=not-an-iterable
         if connection.get('targetId') == key_vault_id:
