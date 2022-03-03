@@ -63,6 +63,10 @@ class AAZCommandCtx:
         self._vars_schema = AAZObjectType()
         self.vars = AAZObject(schema=self._vars_schema, data={})
 
+    def format_args(self):
+        # TODO: apply format for argument values
+        pass
+
     def get_login_credential(self):
         credential, _, _ = self._profile.get_login_credentials(
             subscription_id=self.subscription_id,
@@ -170,6 +174,7 @@ class AAZCommand(CLICommand):
 
     def _handler(self, command_args):
         self.ctx = AAZCommandCtx(cli_ctx=self.cli_ctx, schema=self.get_arguments_schema(), command_args=command_args)
+        self.ctx.format_args()
 
     def _cli_arguments_loader(self):
         """load arguments"""

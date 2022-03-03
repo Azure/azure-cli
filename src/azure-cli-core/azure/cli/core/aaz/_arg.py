@@ -243,5 +243,38 @@ class AAZResourceGroupNameArg(AAZStrArg):
         return arg
 
 
+class AAZResourceLocationArg(AAZStrArg):
+
+    def __init__(
+            self, options=('--location', '-l'),
+            help="Location. Values from: `az account list-locations`. "
+                 "You can configure the default location using `az configure --defaults location=<location>`.",
+            **kwargs):
+        super(AAZResourceLocationArg, self).__init__(
+            options=options,
+            help=help,
+            fmt=None,   # TODO: add ResourceLocation Format, which can transform value with space
+            **kwargs
+        )
+
+    def to_cmd_arg(self, name):
+        from azure.cli.core.commands.parameters import get_location_completion_list
+        from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
+        arg = super().to_cmd_arg(name)
+        arg.completer = get_location_completion_list
+        arg.configured_default = 'location'
+        arg.local_context_attribute = LocalContextAttribute(
+            name='location',
+            actions=[LocalContextAction.SET, LocalContextAction.GET],
+            scopes=[ALL]
+        )
+        return arg
+
+
+class AAZResourceIdArg(AAZStrArg):
+    # TODO: Resource Id arg can support both name and id. And can construct id from name by ResourceId Format
+    pass
+
+
 def has_value(arg_value):
     return arg_value != AAZUndefined

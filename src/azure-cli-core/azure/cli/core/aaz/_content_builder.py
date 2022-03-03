@@ -1,56 +1,6 @@
 from ._base import AAZBaseValue, AAZUndefined
 from ._field_value import AAZSimpleValue, AAZDict, AAZList, AAZObject
-
-
-class AAZContentArgBrowser:
-
-    def __init__(self, arg_value, arg_data, parent=None):
-        assert isinstance(arg_value, AAZBaseValue)
-        self._arg_value = arg_value
-        self._arg_data = arg_data  # data should be the serialized data of value
-        self._parent = parent
-
-    def get_prop(self, key):
-        if key is None or key == '.':
-            return self
-
-        if key.startswith('..'):
-            if self._parent is None:
-                raise ValueError(f"Invalid Key: '{key}' : parent is None")
-            return self._parent.get(key[1:])
-        elif key.startswith('.'):
-            names = key[1:].split('.', maxsplit=1)
-            prop_name = names[0]
-            if prop_name not in self._arg_data:
-                return None
-            sub_value = self._arg_value[prop_name]
-            sub_data = self._arg_data[prop_name]
-            sub_browser = AAZContentArgBrowser(sub_value, sub_data, parent=self)
-            if len(names) == 1:
-                return sub_browser
-            else:
-                assert len(names) == 2
-                return sub_browser.get_prop(f'.{names[1]}')
-        else:
-            raise NotImplementedError()
-
-    def get_elements(self):
-        if isinstance(self._arg_data, list):
-            for idx, d in enumerate(self._arg_data):
-                yield idx, AAZContentArgBrowser(self._arg_value[idx], d, parent=None)  # not support to access parent from element args
-        elif isinstance(self._arg_data, dict):
-            for k, d in self._arg_data.items():
-                yield k, AAZContentArgBrowser(self._arg_value[k], d, parent=None)  # not support to access parent from element args
-        else:
-            raise NotImplementedError()
-
-    @property
-    def data(self):
-        return self._arg_data
-
-    @property
-    def is_patch(self):
-        return self._arg_value._is_patch
+from ._arg_browser import AAZArgBrowser
 
 
 class AAZContentBuilder:
@@ -58,7 +8,7 @@ class AAZContentBuilder:
     def __init__(self, values, args):
         assert len(args) > 0
         for arg in args:
-            assert isinstance(arg, AAZContentArgBrowser)
+            assert isinstance(arg, AAZArgBrowser)
         assert len(values) == len(args)
         for value in values:
             assert isinstance(value, AAZBaseValue)

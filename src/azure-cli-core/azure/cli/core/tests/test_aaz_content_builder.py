@@ -51,7 +51,8 @@ class TestAAZContentBuilder(unittest.TestCase):
         return _schema
 
     def test_aaz_content_builder_for_create(self):
-        from azure.cli.core.aaz._content_builder import AAZContentBuilder, AAZContentArgBrowser
+        from azure.cli.core.aaz._content_builder import AAZContentBuilder
+        from azure.cli.core.aaz._arg_browser import AAZArgBrowser
         from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
 
         _args_schema = self._define_args_schema()
@@ -108,7 +109,7 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         _builder = AAZContentBuilder(
             values=[_value],
-            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
 
         _builder.set_prop('name', AAZStrType, '.name')
@@ -282,7 +283,8 @@ class TestAAZContentBuilder(unittest.TestCase):
         return value
 
     def test_aaz_content_builder_for_update(self):
-        from azure.cli.core.aaz._content_builder import AAZContentBuilder, AAZContentArgBrowser
+        from azure.cli.core.aaz._content_builder import AAZContentBuilder
+        from azure.cli.core.aaz._arg_browser import AAZArgBrowser
         from azure.cli.core.aaz._field_type import AAZStrType, AAZObjectType, AAZListType, AAZDictType
 
         _value = self._define_instance_value()
@@ -319,7 +321,7 @@ class TestAAZContentBuilder(unittest.TestCase):
 
         _builder = AAZContentBuilder(
             values=[_value],
-            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_value.to_serialized_data())]
+            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_value.to_serialized_data())]
         )
 
         _builder.set_prop('name', AAZStrType, '.name')

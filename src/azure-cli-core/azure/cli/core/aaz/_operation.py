@@ -3,9 +3,10 @@ import json
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 
-from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, AAZValuePatch
+from ._base import AAZUndefined, AAZBaseValue, AAZBaseType
 from ._field_type import AAZSimpleType
-from ._content_builder import AAZContentBuilder, AAZContentArgBrowser
+from ._content_builder import AAZContentBuilder
+from ._arg_browser import AAZArgBrowser
 
 
 try:
@@ -173,7 +174,7 @@ class AAZHttpOperation(AAZOperation):
 
         builder = AAZContentBuilder(
             values=[value],
-            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
         return value, builder
 
@@ -253,7 +254,7 @@ class AAZInstanceUpdateOperation(AAZOperation):
 
         updater = AAZContentBuilder(
             values=[value],
-            args=[AAZContentArgBrowser(arg_value=arg_value, arg_data=arg_data)]
+            args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
         return value, updater
 
