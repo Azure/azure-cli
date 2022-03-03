@@ -212,22 +212,7 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
     elif system == 'Linux':
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
-        if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
-            from azure.cli.core.util import in_cloud_console
-            if not in_cloud_console():
-                exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                if exit_code != 0:
-                    logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
-                    apt_update_cmd = 'apt-get update'.split()
-                    apt_install_cmd = 'apt-get install -y gcc libpq-dev python3-dev'.split()
-                    if os.geteuid() != 0:  # pylint: disable=no-member
-                        apt_update_cmd.insert(0, 'sudo')
-                        apt_install_cmd.insert(0, 'sudo')
-                    exit_code = subprocess.call(apt_update_cmd, True)
-                    if exit_code == 0:
-                        logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
-                        subprocess.call(apt_install_cmd, True)
-        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+        if installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
             if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
                 yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
                 if os.geteuid() != 0:  # pylint: disable=no-member
