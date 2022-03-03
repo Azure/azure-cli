@@ -8,10 +8,10 @@ import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.testsdk import (
     ScenarioTest,
-    record_only
+    record_only,
+    live_only
 )
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
-from azure.cli.testsdk.scenario_tests.decorators import live_only
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
 from azure.cli.command_modules.serviceconnector._resource_config import (
     RESOURCE,
@@ -84,8 +84,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-config-app',
-            'config_store': 'servicelinker-app-configuration'
+            'site': 'servicelinker-config-app2',
+            'config_store': 'servicelinker-app-configuration2'
         })
 
         # prepare params
@@ -127,8 +127,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-cassandra-cosmos-asp-app',
-            'account': 'servicelinker-cassandra-cosmos',
+            'site': 'servicelinker-cassandra-cosmos-asp-app2',
+            'account': 'servicelinker-cassandra-cosmos2',
             'key_space': 'coredb'
         })
 
@@ -171,8 +171,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-gremlin-cosmos-asp-app',
-            'account': 'servicelinker-gremlin-cosmos',
+            'site': 'servicelinker-gremlin-cosmos-asp-app2',
+            'account': 'servicelinker-gremlin-cosmos2',
             'database': 'coreDB',
             'graph': 'MyItem'
         })
@@ -216,8 +216,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-mongo-cosmos-asp-app',
-            'account': 'servicelinker-mongo-cosmos',
+            'site': 'servicelinker-mongo-cosmos-asp-app2',
+            'account': 'servicelinker-mongo-cosmos2',
             'database': 'coreDB'
         })
 
@@ -260,8 +260,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-sql-cosmos-asp-app',
-            'account': 'servicelinker-sql-cosmos',
+            'site': 'servicelinker-sql-cosmos-asp-app2',
+            'account': 'servicelinker-sql-cosmos2',
             'database': 'coreDB'
         })
 
@@ -304,8 +304,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-win-group',
             'target_resource_group': 'servicelinker-test-win-group',
-            'site': 'servicelinker-table-cosmos-asp-app',
-            'account': 'servicelinker-table-cosmos',
+            'site': 'servicelinker-table-cosmos-asp-app2',
+            'account': 'servicelinker-table-cosmos2',
             'table': 'MyItem'
         })
 
@@ -348,8 +348,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-eventhub-app',
-            'namespace': 'servicelinkertesteventhub' 
+            'site': 'servicelinker-eventhub-app2',
+            'namespace': 'servicelinkertesteventhub2' 
         })
 
         # prepare params
@@ -391,8 +391,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-servicebus-app',
-            'namespace': 'servicelinkertestservicebus' 
+            'site': 'servicelinker-servicebus-app2',
+            'namespace': 'servicelinkertestservicebus2' 
         })
 
         # prepare params
@@ -434,8 +434,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-signalr-app',
-            'signalr': 'servicelinker-signalr' 
+            'site': 'servicelinker-signalr-app2',
+            'signalr': 'servicelinker-signalr2' 
         })
 
         # prepare params
@@ -477,8 +477,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-keyvault-app',
-            'vault': 'servicelinker-test-kv'
+            'site': 'servicelinker-keyvault-app2',
+            'vault': 'servicelinker-test-kv2'
         })
 
         # prepare params
@@ -520,9 +520,9 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblepostgresql-app',
-            'server': 'servicelinker-flexiblepostgresql',
-            'database': 'postgres'
+            'site': 'servicelinker-flexiblepostgresql-app2',
+            'server': 'servicelinker-flexiblepostgresql2',
+            'database': 'test'
         })
 
         # prepare password
@@ -659,8 +659,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-mysql-app',
-            'server': 'servicelinker-mysql',
+            'site': 'servicelinker-mysql-app2',
+            'server': 'servicelinker-mysql2',
             'database': 'mysqlDB'
         })
 
@@ -708,8 +708,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-flexiblemysql-app',
-            'server': 'servicelinker-flexible-mysql',
+            'site': 'servicelinker-flexiblemysql-app2',
+            'server': 'servicelinker-flexible-mysql2',
             'database': 'mysqlDB'
         })
 
@@ -757,8 +757,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-postgresql-app',
-            'server': 'servicelinker-postgresql',
+            'site': 'servicelinker-postgresql-app2',
+            'server': 'servicelinker-postgresql2',
             'database': 'test'
         })
 
@@ -856,8 +856,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storageblob-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storageblob-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -950,8 +950,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagequeue-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storagequeue-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -993,8 +993,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagefile-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storagefile-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -1036,8 +1036,8 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-storagetable-app',
-            'account': 'servicelinkerstorage'
+            'site': 'servicelinker-storagetable-app2',
+            'account': 'servicelinkerstorage2'
         })
 
         # prepare params
@@ -1079,7 +1079,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
             'subscription': get_subscription_id(self.cli_ctx),
             'source_resource_group': 'servicelinker-test-linux-group',
             'target_resource_group': 'servicelinker-test-linux-group',
-            'site': 'servicelinker-kafka-app',
+            'site': 'servicelinker-kafka-app2',
         })
 
         # prepare params
