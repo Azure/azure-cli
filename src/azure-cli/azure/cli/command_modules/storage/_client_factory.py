@@ -23,19 +23,19 @@ Missing credentials to access storage service. The following variations are acce
 """
 
 
-def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+def get_storage_data_service_client(cli_ctx, service, storage_account_url=None, name=None, key=None, connection_string=None, sas_token=None,
                                     socket_timeout=None, token_credential=None, location_mode=None):
-    return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+    return get_data_service_client(cli_ctx, service, storage_account_url, name, key, connection_string, sas_token,
                                    socket_timeout=socket_timeout,
                                    token_credential=token_credential,
                                    endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint,
                                    location_mode=location_mode)
 
 
-def generic_data_service_factory(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None,
+def generic_data_service_factory(cli_ctx, service, storage_account_url=None, name=None, key=None, connection_string=None, sas_token=None,
                                  socket_timeout=None, token_credential=None, location_mode=None):
     try:
-        return get_storage_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
+        return get_storage_data_service_client(cli_ctx, service, storage_account_url, name, key, connection_string, sas_token,
                                                socket_timeout, token_credential, location_mode=location_mode)
     except ValueError as val_exception:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
@@ -75,7 +75,9 @@ def blob_data_service_factory(cli_ctx, kwargs):
     blob_type = kwargs.get('blob_type')
     blob_service = get_blob_service_by_type(cli_ctx, blob_type) or get_blob_service_by_type(cli_ctx, 'block')
 
-    return generic_data_service_factory(cli_ctx, blob_service, kwargs.pop('account_name', None),
+    return generic_data_service_factory(cli_ctx, blob_service,
+                                        kwargs.pop('storage_account_url', None),
+                                        kwargs.pop('account_name', None),
                                         kwargs.pop('account_key', None),
                                         connection_string=kwargs.pop('connection_string', None),
                                         sas_token=kwargs.pop('sas_token', None),
@@ -212,6 +214,7 @@ def cf_blob_service(cli_ctx, kwargs):
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
+    storage_account_url = kwargs.pop('storage_account_url', None)
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
@@ -226,8 +229,11 @@ def cf_blob_service(cli_ctx, kwargs):
                                             .format(connection_string, str(err)),
                                             recommendation='Try `az storage account show-connection-string` '
                                                            'to get a valid connection string')
-
-    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
+    if storage_account_url:
+        account_url = storage_account_url
+    else:
+        account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
+    
     credential = account_key or sas_token or token_credential
 
     return t_blob_service(account_url=account_url, credential=credential, **client_kwargs)

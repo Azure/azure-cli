@@ -295,6 +295,9 @@ Authentication failure. This may be caused by either invalid account key, connec
             return
 
         group_name = 'Storage Account'
+        command.add_argument('storage_account_url', '--storage-account-url', required=False, default=None,
+                             arg_group=group_name,
+                             help='It will come later.')
         command.add_argument('account_name', '--account-name', required=False, default=None,
                              arg_group=group_name,
                              completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),

@@ -237,12 +237,13 @@ def _get_mgmt_service_client(cli_ctx,
     return client, subscription_id
 
 
-def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
+def get_data_service_client(cli_ctx, service_type, storage_account_url, account_name, account_key, connection_string=None,
                             sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None,
                             location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
-        client_kwargs = {'account_name': account_name,
+        client_kwargs = {'storage_account_url': storage_account_url,
+                         'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
                          'sas_token': sas_token}
