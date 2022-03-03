@@ -3,20 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader
-from azure.cli.core.profiles import ResourceType
-from azure.cli.core.commands import AzCliCommand
-from azure.cli.command_modules.acs._client_factory import cf_agent_pools
 from typing import Dict, TypeVar
-from azure.cli.command_modules.acs._consts import (
-    DecoratorMode,
-)
-from knack.log import get_logger
+
+from azure.cli.command_modules.acs._client_factory import cf_agent_pools
+from azure.cli.command_modules.acs._consts import DecoratorMode
+from azure.cli.command_modules.acs.decorator import validate_decorator_mode
+from azure.cli.core import AzCommandsLoader
 from azure.cli.core.azclierror import (
     CLIInternalError,
     InvalidArgumentValueError,
 )
-from azure.cli.command_modules.acs.decorator import validate_decorator_mode
+from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.profiles import ResourceType
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -55,7 +54,13 @@ class AKSAgentPoolModels:
 class AKSAgentPoolContext:
     """Implement getter functions for all parameters in aks_agentpool_create and aks_agentpool_update.
     """
-    def __init__(self, cmd: AzCliCommand, raw_parameters: Dict, models: AKSAgentPoolModels, decorator_mode: DecoratorMode):
+    def __init__(
+        self,
+        cmd: AzCliCommand,
+        raw_parameters: Dict,
+        models: AKSAgentPoolModels,
+        decorator_mode: DecoratorMode,
+    ):
         if not isinstance(raw_parameters, dict):
             raise CLIInternalError(
                 "Unexpected raw_parameters object with type '{}'.".format(
