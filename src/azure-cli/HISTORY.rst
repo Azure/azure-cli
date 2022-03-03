@@ -6,7 +6,7 @@ Release History
 2.34.1
 ++++++
 
-**Compute**
+**App Service**
 
 * Hotfix: Fix #20489: `az webapp log tail`: Fix the AttributeError that 'NoneType' object has no attribute 'host_name_ssl_states' (#21398)
 * Hotfix: Fix #20747: `az webapp create-remote-connection`: Fix the EOFError that ran out of input (#21398)
