@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from email.policy import default
 import os
+from typing import OrderedDict
 
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
@@ -11,6 +13,7 @@ from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import in_cloud_console
+from azure.cli.core._output import  set_output_format
 
 logger = get_logger(__name__)
 
@@ -102,6 +105,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
           identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
     """Log in to access Azure subscriptions"""
 
+    set_output_format(cmd.cli_ctx, "table")
+
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
@@ -146,10 +151,32 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer)
-    all_subscriptions = list(subscriptions)
-    for sub in all_subscriptions:
-        sub['cloudName'] = sub.pop('environmentName', None)
-    return all_subscriptions
+    all_subs= list(subscriptions)
+
+    default_sub = next(iter([s for s in all_subs if s["isDefault"]]), None)
+    if default_sub:
+        # ensure the default occurs as the first element
+        all_subs.insert(0, all_subs.pop(all_subs.index(default_sub)))
+
+    formatted_subs = []
+    # format the output for readability
+    for sub in all_subs:
+        formatted = OrderedDict()
+        formatted["isDefault"] = sub["isDefault"]
+        formatted["name"] = sub["name"]
+        formatted["state"] = sub["state"]
+        formatted["tenantId"] = sub["tenantId"]
+        formatted_subs.append(formatted)
+
+    if default_sub:
+        logger.warning("\nThe default subscription is : %s", default_sub["name"])
+        logger.warning("Use 'az account set -n \"<sub-name>\"' to change the default subscription.")
+    else:
+        logger.warning("\nUse 'az account set -n \"<sub-name>\"' to change the default subscription.")
+
+    logger.warning("You have access to the following subscriptions: \n")
+
+    return formatted_subs
 
 
 def logout(cmd, username=None):
