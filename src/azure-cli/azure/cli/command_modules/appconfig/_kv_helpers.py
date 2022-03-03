@@ -463,6 +463,10 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add="", conten
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
+    if not key_values:
+        logger.warning('\nSource configuration is empty. No changes will be made.')
+        return
+
     try:
         non_slot_settings = []
         slot_settings = []
