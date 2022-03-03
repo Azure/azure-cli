@@ -20,6 +20,12 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # upload test files to storage account
         self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
                          test_dir, src_container)
+        from azure.cli.core.azclierror import AzureResponseError
+        with self.assertRaises(AzureResponseError):
+            self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                                 test_dir, src_container)
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --overwrite', storage_account_info,
+                         test_dir, src_container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 41))
 
