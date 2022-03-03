@@ -198,3 +198,11 @@ def cf_capacity_reservation_groups(cli_ctx, *_):
 
 def cf_capacity_reservations(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).capacity_reservations
+
+
+def cf_restore_point(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_points
+
+
+def cf_restore_point_collection(cli_ctx, *_):
+    return cf_vm_cl(cli_ctx).restore_point_collections
