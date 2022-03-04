@@ -122,8 +122,13 @@ def regex_line(line):
                 logger.info('%s%s: missing ` around %s', line, yellow, command)
                 logger.error(' ' * idx + '↑' + ' ' * (index - idx - 2) + '↑')
                 error_flag = True
-        # First word after the colon must be capitalized
         if i == ':':
+            # check extra space character before colon
+            if idx - 1 >= 0 and line[idx - 1] == ' ':
+                logger.info('%s%s: please delete extra space character before :', line, yellow)
+                logger.error(' ' * (idx - 1) + '↑')
+                error_flag = True
+            # First word after the colon must be capitalized
             index = 0
             if line[idx + 1] == ' ' and line[idx + 2].islower() and line[idx + 2: idx + 5] != 'az ':
                 index = idx + 2
@@ -163,6 +168,17 @@ def regex_line(line):
                         'follow https://aka.ms/submitAzPR\n', red, word, yellow, green, k, yellow)
                     error_flag = True
                     break
+        # check extra consecutive spaces
+        if i == ' ' and (idx + 1) < len(line) and line[idx + 1] == ' ':
+            logger.info('%s%s: please delete the extra space character', line, yellow)
+            logger.error(' ' * (idx + 1) + '↑')
+            error_flag = True
+
+    # last character check
+    if line[-1] in ['.', ',', ' ']:
+        logger.info('%s%s: please delete the last character', line, yellow)
+        logger.error(' ' * idx + '↑')
+        error_flag = True
 
     return error_flag
 
