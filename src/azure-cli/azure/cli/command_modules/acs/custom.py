@@ -4106,12 +4106,24 @@ def _put_managed_cluster_ensuring_permission(
                                           virtual_node_addon_enabled or
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
-        # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
+        poller = client.begin_create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            headers=headers))
+            headers=headers)
+        # Grant vnet permission to system assigned identity RIGHT AFTER
+        # the cluster is put, this operation can reduce latency for the
+        # role assignment take effect
+        if need_grant_vnet_permission_to_cluster_identity:
+            instant_cluster = client.get(resource_group_name, name)
+            if not _add_role_assignment(cmd, 'Network Contributor',
+                                        instant_cluster.identity.principal_id, scope=vnet_subnet_id,
+                                        is_service_principal=False):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
+
+        # adding a wait here since we rely on the result for role assignment
+        cluster = LongRunningOperation(cmd.cli_ctx)(poller)
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -4128,12 +4140,6 @@ def _put_managed_cluster_ensuring_permission(
             add_ingress_appgw_addon_role_assignment(cluster, cmd)
         if virtual_node_addon_enabled:
             add_virtual_node_role_assignment(cmd, cluster, vnet_subnet_id)
-        if need_grant_vnet_permission_to_cluster_identity:
-            if not _create_role_assignment(cmd, 'Network Contributor',
-                                           cluster.identity.principal_id, scope=vnet_subnet_id,
-                                           resolve_assignee=False):
-                logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
 
         if enable_managed_identity and attach_acr:
             # Attach ACR to cluster enabled managed identity
