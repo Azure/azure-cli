@@ -104,7 +104,9 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
           identity=False, use_device_code=False, use_cert_sn_issuer=None, scopes=None, client_assertion=None):
     """Log in to access Azure subscriptions"""
 
-    set_output_format(cmd.cli_ctx, "table")
+    global_params = cmd.cli_ctx.data.get("safe_params", [])
+    if "--output" not in global_params and "-o" not in global_params:
+        set_output_format(cmd.cli_ctx, "table")
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:

@@ -14,6 +14,8 @@ long-summary: >-
     By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
     If a web browser is not available, CLI will fall back to device code login.
 
+    Default output type is table (not json).
+
     To login with a service principal, specify --service-principal.
 examples:
     - name: Log in interactively.
