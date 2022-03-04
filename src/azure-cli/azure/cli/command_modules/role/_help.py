@@ -20,6 +20,7 @@ short-summary: Manage applications with AAD Graph.
 helps['ad app create'] = """
 type: command
 short-summary: Create a web application, web API or native application
+long-summary: For more detailed documentation, see https://docs.microsoft.com/graph/api/resources/application
 examples:
   - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user"
     text: |
@@ -55,14 +56,23 @@ examples:
             "idToken": [
                 {
                     "name": "auth_time",
-                    "source": null,
                     "essential": false
                 }
             ],
             "accessToken": [
                 {
-                    "name": "email",
-                    "source": null,
+                    "name": "ipaddr",
+                    "essential": false
+                }
+            ],
+            "saml2Token": [
+                {
+                    "name": "upn",
+                    "essential": false
+                },
+                {
+                    "name": "extension_ab603c56068041afb2f6832e2a17e237_skypeId",
+                    "source": "user",
                     "essential": false
                 }
             ]
@@ -96,6 +106,9 @@ helps['ad app credential reset'] = """
 type: command
 short-summary: Append or overwrite an application's password or certificate credentials
 long-summary: >-
+    By default, this command clears all passwords and keys, and let graph service generate a password credential.
+
+
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an alternative, consider using
     [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
@@ -170,16 +183,14 @@ long-summary: >-
 
 
     To get available permissions of the resource app, run `az ad sp show --id <resource-appId>`. For example,
-    to get available permissions for Graph API:
-      - Azure Active Directory Graph: `az ad sp show --id 00000002-0000-0000-c000-000000000000`
-      - Microsoft Graph: `az ad sp show --id 00000003-0000-0000-c000-000000000000`
+    to get available permissions for Microsoft Graph API, run `az ad sp show --id 00000003-0000-0000-c000-000000000000`.
     Application permissions under the `appRoles` property correspond to `Role` in --api-permissions.
     Delegated permissions under the `oauth2Permissions` property correspond to `Scope` in --api-permissions.
 examples:
-  - name: Add Azure Active Directory Graph delegated permission User.Read (Sign in and read user profile).
-    text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
-  - name: Add Azure Active Directory Graph application permission Application.ReadWrite.All (Read and write all applications).
-    text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 1cda74f2-2616-4834-b122-5cb1b07f8a59=Role
+  - name: Add Microsoft Graph delegated permission User.Read (Sign in and read user profile).
+    text: az ad app permission add --id {appId} --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
+  - name: Add Microsoft Graph application permission Application.ReadWrite.All (Read and write all applications).
+    text: az ad app permission add --id {appId} --api 00000003-0000-0000-c000-000000000000 --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role
 """
 
 helps['ad app permission admin-consent'] = """
@@ -212,7 +223,7 @@ long-summary: >
     For Application permissions, please use "ad app permission admin-consent"
 examples:
   - name: Grant a native application with permissions to access an existing API with TTL of 2 years
-    text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
+    text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678
 """
 
 helps['ad app permission list'] = """
@@ -278,14 +289,23 @@ examples:
             "idToken": [
                 {
                     "name": "auth_time",
-                    "source": null,
                     "essential": false
                 }
             ],
             "accessToken": [
                 {
-                    "name": "email",
-                    "source": null,
+                    "name": "ipaddr",
+                    "essential": false
+                }
+            ],
+            "saml2Token": [
+                {
+                    "name": "upn",
+                    "essential": false
+                },
+                {
+                    "name": "extension_ab603c56068041afb2f6832e2a17e237_skypeId",
+                    "source": "user",
                     "essential": false
                 }
             ]
@@ -394,8 +414,6 @@ long-summary: >-
     You may also use `az role assignment create` to create role assignments for this service principal later.
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
 parameters:
-  - name: --name -n
-    short-summary: Display name of the service principal. If not present, default to azure-cli-%Y-%m-%d-%H-%M-%S where the suffix is the time of creation.
   - name: --cert
     short-summary: Certificate to use for credentials.
     long-summary: When used with `--keyvault,` indicates the name of the cert to use or create. Otherwise, supply a PEM or DER formatted public certificate string. Use `@{path}` to load from a file. Do not include private key info.
@@ -578,6 +596,23 @@ examples:
   - name: Update Azure Active Directory users. (autogenerated)
     text: az ad user update --id 00000000-0000-0000-0000-000000000000
     crafted: true
+"""
+
+helps['ad user delete'] = """
+type: command
+short-summary: Delete Azure Active Directory user.
+examples:
+  - name: Delete Azure Active Directory users. 
+    text: az ad user delete --id 00000000-0000-0000-0000-000000000000
+"""
+
+
+helps['ad user show'] = """
+type: command
+short-summary: Show details for a Azure Active Directory user.
+examples:
+  - name: Show Azure Active Directory user. 
+    text: az ad user show --id 00000000-0000-0000-0000-000000000000
 """
 
 helps['role'] = """

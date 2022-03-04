@@ -17,6 +17,10 @@ def _auth_client_factory(cli_ctx, scope=None):
 
 
 def _graph_client_factory(cli_ctx, **_):
+    from ._graph_client import GraphClient
+    client = GraphClient(cli_ctx)
+    return client
+
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import configure_common_settings
     from azure.graphrbac import GraphRbacManagementClient

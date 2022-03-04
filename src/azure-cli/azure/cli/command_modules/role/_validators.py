@@ -13,8 +13,8 @@ VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']
 
 def _get_group_count_and_id(namespace, group_filter):
     client = _graph_client_factory(namespace.cmd.cli_ctx)
-    result = list(client.groups.list(filter=group_filter))
-    return len(result), result[0].object_id if len(result) == 1 else None
+    result = list(client.group_list(filter=group_filter))
+    return len(result), result[0]['id'] if len(result) == 1 else None
 
 
 def validate_group(namespace):

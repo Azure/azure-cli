@@ -3348,7 +3348,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         user_principal = self.cmd(
             'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-        principal_id = user_principal['objectId']
+        principal_id = user_principal['id']
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
@@ -3427,7 +3427,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         user_principal = self.cmd(
             'ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
-        principal_id = user_principal['objectId']
+        principal_id = user_principal['id']
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             role_assignment = self.cmd(
@@ -3506,7 +3506,7 @@ class ManagedAppScenarioTest(ScenarioTest):
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
             'uri': 'https://github.com/Azure/azure-managedapp-samples/raw/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
-            'auth': user_principal['objectId'] + ':' + role_definition_id,
+            'auth': user_principal['id'] + ':' + role_definition_id,
             'lock': 'None',
             'rg': resource_group
         })

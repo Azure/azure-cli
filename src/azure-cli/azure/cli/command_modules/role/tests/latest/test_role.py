@@ -273,7 +273,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             result = self.cmd('ad user create --display-name tester123 --password Test123456789'
                               ' --user-principal-name {upn}').get_output_in_json()
             self.kwargs.update({
-                'user_id': result['objectId']})
+                'user_id': result['id']})
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
             group = self.create_random_name('testgroup', 15)
@@ -283,7 +283,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             group_result = self.cmd(
                 'ad group create --display-name group123 --mail-nickname {group}').get_output_in_json()
             self.kwargs.update({
-                'group_id': group_result['objectId']})
+                'group_id': group_result['id']})
             self.cmd(
                 'ad group member add --group {group_id} --member-id {user_id}')
 
@@ -399,7 +399,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
             try:
-                _test_role_assignment_graph_call(result['objectId'], 'User')
+                _test_role_assignment_graph_call(result['id'], 'User')
             finally:
                 try:
                     self.cmd('ad user delete --upn-or-object-id {upn}')
@@ -449,7 +449,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             })
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
-            self.kwargs['object_id'] = result['objectId']
+            self.kwargs['object_id'] = result['id']
             try:
                 # Test create role assignment with description, condition and condition_version
                 self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
