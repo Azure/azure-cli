@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"publicNetworkAccess":
-      "Enabled", "softDeleteRetentionInDays": 7, "enablePurgeProtection": false, "createMode":
+      "Enabled", "softDeleteRetentionInDays": 1, "enablePurgeProtection": false, "createMode":
       "Default"}}'
     headers:
       Accept:
@@ -17,17 +17,17 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g -l --sku --enable-public-network
+      - -n -g -l --sku --enable-public-network --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-03-03T17:49:28.4588554+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002","name":"PubNetworkTrue000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-03-04T23:05:06.2291867+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002","name":"PubNetworkTrue000002","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/08629f24-483d-5ae8-4207-91db756f345f?api-version=2021-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b9a3a9b8-2060-428a-b470-a71aa6befb1a?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:27 GMT
+      - Fri, 04 Mar 2022 23:05:06 GMT
       expires:
       - '-1'
       pragma:
@@ -63,17 +63,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku --enable-public-network
+      - -n -g -l --sku --enable-public-network --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/08629f24-483d-5ae8-4207-91db756f345f?api-version=2021-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b9a3a9b8-2060-428a-b470-a71aa6befb1a?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/08629f24-483d-5ae8-4207-91db756f345f","name":"08629f24-483d-5ae8-4207-91db756f345f","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b9a3a9b8-2060-428a-b470-a71aa6befb1a","name":"b9a3a9b8-2060-428a-b470-a71aa6befb1a","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/08629f24-483d-5ae8-4207-91db756f345f?api-version=2021-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b9a3a9b8-2060-428a-b470-a71aa6befb1a?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -81,7 +81,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:38 GMT
+      - Fri, 04 Mar 2022 23:05:16 GMT
       expires:
       - '-1'
       pragma:
@@ -111,14 +111,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku --enable-public-network
+      - -n -g -l --sku --enable-public-network --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkTrue000002?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-03T17:49:28+00:00","endpoint":"https://pubnetworktruemf7pljgqg2.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-03T17:49:28+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-03T17:49:30+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworktruemf7pljgqg2","name":"PubNetworkTrue000002","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-04T23:05:06+00:00","endpoint":"https://pubnetworktrueya63u3v4t4.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-04T23:05:06+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-04T23:05:07+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworktrueya63u3v4t4","name":"PubNetworkTrue000002","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -127,9 +127,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:38 GMT
+      - Fri, 04 Mar 2022 23:05:16 GMT
       etag:
-      - W/"7c0068ac-0000-0100-0000-6220ffa90000"
+      - W/"46015376-0000-0100-0000-62229b220000"
       expires:
       - '-1'
       pragma:
@@ -149,7 +149,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "eastus", "sku": {"name": "Standard"}, "properties": {"softDeleteRetentionInDays":
-      7, "enablePurgeProtection": false, "createMode": "Default"}}'
+      1, "enablePurgeProtection": false, "createMode": "Default"}}'
     headers:
       Accept:
       - application/json
@@ -164,17 +164,17 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g -l --sku
+      - -n -g -l --sku --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-03-03T17:49:40.7194967+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003","name":"PubNetworkNull000003","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Creating","creationDate":"2022-03-04T23:05:19.2956811+00:00","endpoint":null,"encryption":null,"privateEndpointConnections":null,"disableLocalAuth":null,"softDeleteRetentionInDays":null,"enablePurgeProtection":null},"sku":{"name":"Standard"},"systemData":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003","name":"PubNetworkNull000003","tags":{}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b0313055-eac4-2e74-7288-dbb1e3ef3ebc?api-version=2021-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9f044b4-ddeb-46db-bbf1-4d6e7d6dc5cb?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -182,7 +182,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:39 GMT
+      - Fri, 04 Mar 2022 23:05:19 GMT
       expires:
       - '-1'
       pragma:
@@ -210,17 +210,17 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku
+      - -n -g -l --sku --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b0313055-eac4-2e74-7288-dbb1e3ef3ebc?api-version=2021-10-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9f044b4-ddeb-46db-bbf1-4d6e7d6dc5cb?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b0313055-eac4-2e74-7288-dbb1e3ef3ebc","name":"b0313055-eac4-2e74-7288-dbb1e3ef3ebc","status":"Succeeded","error":null}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9f044b4-ddeb-46db-bbf1-4d6e7d6dc5cb","name":"d9f044b4-ddeb-46db-bbf1-4d6e7d6dc5cb","status":"Succeeded","error":null}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/b0313055-eac4-2e74-7288-dbb1e3ef3ebc?api-version=2021-10-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.AppConfiguration/locations/eastus/operationsStatus/d9f044b4-ddeb-46db-bbf1-4d6e7d6dc5cb?api-version=2021-10-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -228,7 +228,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:50 GMT
+      - Fri, 04 Mar 2022 23:05:29 GMT
       expires:
       - '-1'
       pragma:
@@ -258,14 +258,14 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g -l --sku
+      - -n -g -l --sku --retention-days
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-03T17:49:41+00:00","endpoint":"https://pubnetworknullggqfaseuge.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-03T17:49:41+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-03T17:49:42+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullggqfaseuge","name":"PubNetworkNull000003","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-04T23:05:19+00:00","endpoint":"https://pubnetworknull6olnk32dzt.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-04T23:05:19+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-04T23:05:20+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknull6olnk32dzt","name":"PubNetworkNull000003","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -274,9 +274,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:51 GMT
+      - Fri, 04 Mar 2022 23:05:29 GMT
       etag:
-      - W/"7c00bbac-0000-0100-0000-6220ffb50000"
+      - W/"8500a766-0000-0100-0000-62229b300000"
       expires:
       - '-1'
       pragma:
@@ -312,12 +312,12 @@ interactions:
       ParameterSetName:
       - -n -g --enable-public-network
       User-Agent:
-      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22538-SP0)
+      - AZURECLI/2.34.1 azsdk-python-mgmt-appconfiguration/2.1.0b2 Python/3.9.7 (Windows-10-10.0.22567-SP0)
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/PubNetworkNull000003?api-version=2021-10-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-03T17:49:41+00:00","endpoint":"https://pubnetworknullggqfaseuge.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"softDeleteRetentionInDays":7,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-03T17:49:41+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-03T17:49:52+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknullggqfaseuge","name":"PubNetworkNull000003","tags":{}}'
+      string: '{"type":"Microsoft.AppConfiguration/configurationStores","location":"eastus","properties":{"provisioningState":"Succeeded","creationDate":"2022-03-04T23:05:19+00:00","endpoint":"https://pubnetworknull6olnk32dzt.azconfig.io","encryption":{"keyVaultProperties":null},"privateEndpointConnections":null,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"softDeleteRetentionInDays":1,"enablePurgeProtection":false},"sku":{"name":"standard"},"systemData":{"createdBy":"prsangli@microsoft.com","createdByType":"User","createdAt":"2022-03-04T23:05:19+00:00","lastModifiedBy":"prsangli@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2022-03-04T23:05:32+00:00"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/pubnetworknull6olnk32dzt","name":"PubNetworkNull000003","tags":{}}'
     headers:
       cache-control:
       - no-cache
@@ -326,9 +326,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Mar 2022 17:49:52 GMT
+      - Fri, 04 Mar 2022 23:05:31 GMT
       etag:
-      - W/"7c0009ad-0000-0100-0000-6220ffc00000"
+      - W/"8500f466-0000-0100-0000-62229b3b0000"
       expires:
       - '-1'
       pragma:
@@ -344,7 +344,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
