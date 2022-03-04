@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.34.1.1
+++++++++
+
+**Role**
+
+* Migrate to Microsoft Graph as the underlying API
+
 2.34.1
 ++++++
 

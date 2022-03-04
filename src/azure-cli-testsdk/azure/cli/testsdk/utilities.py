@@ -157,6 +157,37 @@ class GraphClientPasswordReplacer(RecordingProcessor):
         return response
 
 
+class MicrosoftGraphClientPasswordReplacer(RecordingProcessor):
+    """Replace 'secretText' property in 'addPassword' API's response."""
+
+    PWD_REPLACEMENT = 'replaced-microsoft-graph-password'
+
+    def __init__(self):
+        self._activated = False
+
+    def reset(self):
+        self._activated = False
+
+    def process_request(self, request):
+        if request.body and self.PWD_REPLACEMENT in _py3_byte_to_str(request.body):
+            return request
+        if request.path.endswith('/addPassword') and request.method.lower() == 'post':
+            self._activated = True
+        return request
+
+    def process_response(self, response):
+        if self._activated:
+            import json
+
+            body = json.loads(response['body']['string'])
+            body['secretText'] = self.PWD_REPLACEMENT
+
+            response['body']['string'] = json.dumps(body)
+            self._activated = False
+
+        return response
+
+
 class AADGraphUserReplacer:
     def __init__(self, test_user, mock_user):
         self.test_user = test_user
