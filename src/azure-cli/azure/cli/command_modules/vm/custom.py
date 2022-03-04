@@ -1842,6 +1842,14 @@ def list_extensions(cmd, resource_group_name, vm_name):
     result = [r for r in (vm.resources or []) if r.type == extension_type]
     return result
 
+def show_extensions(client, resource_group_name, vm_name, vm_extension_name, instance_view=False, expand=None):
+    if instance_view:
+        expand = 'instanceView'
+    return client.get(resource_group_name=resource_group_name,
+                      vm_name=vm_name,
+                      vm_extension_name=vm_extension_name,
+                      expand=expand)
+
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,

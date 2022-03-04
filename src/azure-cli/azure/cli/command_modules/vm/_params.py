@@ -488,6 +488,10 @@ def load_arguments(self, _):
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
+    with self.argument_context('vm extension list') as c:
+        c.argument('instance_view', action='store_true', help='Track the run command progress')
+
+
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
         c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
