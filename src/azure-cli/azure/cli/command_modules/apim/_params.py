@@ -109,7 +109,52 @@ def load_arguments(self, _):
         c.argument('filter_display_name', arg_group='API', help='Filter of APIs by displayName.')
         c.argument('skip', type=int, help='Number of records to skip.')
         c.argument('top', type=int, help='Number of records to return.')
-
+        
+    with self.argument_context('apim api schema create') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('schema_name', 
+                   help='The name of the schema resource.')
+        c.argument(
+            'api_id', arg_group='API',
+            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        c.argument('schema_path', help='File path specified to import schema of the API.')
+        c.argument('schema_content', help='Json escaped string defining the document representing the Schema')
+        c.argument(
+            'schema_id', arg_group='API',
+            help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        c.argument(
+            'schema_type', arg_group='API',
+            help='Schema content type. Must be a valid a media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document (e.g. application/json, application/xml).',
+            required=True)
+        c.argument('if_match', help='ETag of the Entity.')
+        
+    with self.argument_context('apim api schema delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument(
+            'api_id', arg_group='API',
+            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        c.argument(
+            'schema_id', arg_group='API',
+            help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+    
+    with self.argument_context('apim api schema show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument(
+            'api_id', arg_group='API',
+            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        c.argument(
+            'schema_id', arg_group='API',
+            help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')

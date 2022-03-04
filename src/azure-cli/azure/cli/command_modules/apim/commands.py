@@ -9,7 +9,7 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
-                                                            cf_apirelease, cf_apirevision, cf_apiversionset)
+                                                            cf_apirelease, cf_apirevision, cf_apiversionset, cf_apischema)
 
 
 def load_command_table(self, _):
@@ -21,6 +21,11 @@ def load_command_table(self, _):
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
         client_factory=cf_api
+    )
+
+    api_schema = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#ApiSchemaOperations.{}',
+        client_factory=cf_apischema
     )
 
     product_sdk = CliCommandType(
@@ -55,16 +60,21 @@ def load_command_table(self, _):
 
     # pylint: disable=line-too-long
     with self.command_group('apim', service_sdk) as g:
-        g.custom_command('create', 'apim_create', supports_no_wait=True, table_transformer=service_output_format)
-        g.custom_show_command('show', 'apim_get', table_transformer=service_output_format)
-        g.custom_command('list', 'apim_list', table_transformer=service_output_format)
-        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('create', 'apim_create', supports_no_wait=True,
+                         table_transformer=service_output_format)
+        g.custom_show_command('show', 'apim_get',
+                              table_transformer=service_output_format)
+        g.custom_command('list', 'apim_list',
+                         table_transformer=service_output_format)
+        g.command('delete', 'begin_delete',
+                  confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='apim_update', getter_name='get',
                                  setter_name='begin_create_or_update', supports_no_wait=True)
         g.custom_command('check-name', 'apim_check_name_availability')
         g.custom_command('backup', 'apim_backup', supports_no_wait=True)
         g.custom_command('restore', 'apim_restore', supports_no_wait=True)
-        g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
+        g.custom_command('apply-network-updates',
+                         'apim_apply_network_configuration_updates', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('apim api', api_sdk) as g:
@@ -72,7 +82,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'apim_api_create', supports_no_wait=True)
         g.custom_show_command('show', 'apim_api_get')
         g.custom_command('list', 'apim_api_list')
-        g.custom_command('delete', 'apim_api_delete', confirmation=True, supports_no_wait=True)
+        g.custom_command('delete', 'apim_api_delete',
+                         confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='apim_api_update',
                                  setter_name='begin_create_or_update', getter_name='get', supports_no_wait=True)
         g.wait_command('wait')
@@ -82,6 +93,11 @@ def load_command_table(self, _):
         g.custom_command('check', 'apim_product_api_check_association')
         g.custom_command('add', 'apim_product_api_add')
         g.custom_command('delete', 'apim_product_api_delete')
+    
+    with self.command_group('apim api schema', api_schema) as g:
+        g.custom_command('create', 'apim_api_schema_create', supports_no_wait=True)
+        g.custom_command('delete', 'apim_api_schema_delete', confirmation=True, supports_no_wait=True)
+        g.custom_show_command('show', 'apim_api_schema_get')
 
     with self.command_group('apim product', product_sdk) as g:
         g.custom_command('list', 'apim_product_list')

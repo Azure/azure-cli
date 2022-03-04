@@ -40,3 +40,6 @@ def cf_apirevision(cli_ctx, *_):
 
 def cf_apiversionset(cli_ctx, *_):
     return cf_apim(cli_ctx).api_version_set
+
+def cf_apischema(cli_ctx, *_):
+    return cf_apim(cli_ctx).api_schema
