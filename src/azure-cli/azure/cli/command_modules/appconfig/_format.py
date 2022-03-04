@@ -61,7 +61,9 @@ def _configstore_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
         ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
-        ('SKU', sku)
+        ('SKU', sku),
+        ('PURGE PROTECTION', 'ENABLED' if _get_value(item, 'enablePurgeProtection').lower() == 'true' else 'DISABLED'),
+        ('SOFT DELETE RETENTION PERIOD', _get_value(item, 'softDeleteRetentionInDays') + ' DAYS')
     ])
 
 

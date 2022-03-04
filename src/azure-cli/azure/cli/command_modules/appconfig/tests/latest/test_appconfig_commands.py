@@ -43,7 +43,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'sku': sku,
             'tags': tag,
             'identity': system_assigned_identity,
-            'retention_days': 5,
+            'retention_days': 1,
             'enable_purge_protection': False
         })
 
@@ -172,10 +172,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
-            'disable_local_auth': 'true'
+            'disable_local_auth': 'true',
+            'retention_days': 1
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --disable-local-auth {disable_local_auth} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -214,10 +215,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
-            'enable_public_network': 'true'
+            'enable_public_network': 'true',
+            'retention_days': 1
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network {enable_public_network} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -231,7 +233,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'config_store_name': config_store_name
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -2630,7 +2632,11 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
 
 def _create_config_store(test, kwargs):
-    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku}')
+    if 'retention_days' not in kwargs:
+        kwargs.update({
+            'retention_days': 1
+        })
+    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}')
 
 
 def _create_user_assigned_identity(test, kwargs):

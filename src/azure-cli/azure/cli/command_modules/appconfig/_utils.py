@@ -57,7 +57,7 @@ def resolve_store_metadata(cmd, config_store_name):
     raise ResourceNotFoundError("Failed to find the App Configuration store '{}'.".format(config_store_name))
 
 
-def resolve_deleted_store_metadata(cmd, config_store_name, resource_group_name, location):
+def resolve_deleted_store_metadata(cmd, config_store_name, resource_group_name=None, location=None):
     resource_group = None
     metadata_location = None
     try:
@@ -80,7 +80,7 @@ def resolve_deleted_store_metadata(cmd, config_store_name, resource_group_name, 
     if resource_group is not None and metadata_location is not None:
         return resource_group, metadata_location
 
-    raise ResourceNotFoundError("Failed to find the deleted App Configuration store '{}'.".format(config_store_name))
+    raise ResourceNotFoundError("Failed to find the deleted App Configuration store '{}'. If you think that the store name is correct, please validate all your input parameters again.".format(config_store_name))
 
 
 def resolve_connection_string(cmd, config_store_name=None, connection_string=None):

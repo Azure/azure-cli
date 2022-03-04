@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-
+from azure.core.exceptions import HttpResponseError
+from azure.cosmos.http_constants import StatusCodes
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
@@ -18,6 +19,7 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 RegenerateKeyParameters, CreateMode)
 
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
+from azure.cli.core.azclierror import AzureResponseError
 
 logger = get_logger(__name__)
 
@@ -146,10 +148,14 @@ def update_configstore(cmd,
             key_vault_properties = KeyVaultProperties(key_identifier=key_identifier, identity_client_id=identity_client_id)
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
-
-    return client.begin_update(resource_group_name=resource_group_name,
-                               config_store_name=name,
-                               config_store_update_parameters=update_params)
+    try:
+        return client.begin_update(resource_group_name=resource_group_name,
+                                   config_store_name=name,
+                                   config_store_update_parameters=update_params)
+    except HttpResponseError as ex:
+        if ex.status_code == StatusCodes.BAD_REQUEST and ex.message.find("The property 'EnablePurgeProtection' is not valid.") > -1:
+            raise AzureResponseError("The option '--enable-purge-protection' or '-p' can not be changed if purge protection is already enabled. Please remove '--enable-purge-protection' or '-p' option and try again.")
+        raise ex
 
 
 def assign_managed_identity(cmd, client, name, resource_group_name=None, identities=None):
