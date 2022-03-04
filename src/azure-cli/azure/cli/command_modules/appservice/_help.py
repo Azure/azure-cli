@@ -2255,7 +2255,7 @@ helps['appservice ase create'] = """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Private DNS Zone for Internal ASEv2.
+    short-summary: Private DNS Zone for Internal (ILB) App Service Environments.
     examples:
     - name: Create Private DNS Zone and A records.
       text: |
