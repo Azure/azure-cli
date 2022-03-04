@@ -560,10 +560,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --content-md5 {}', account_info,
                          container, local_file, blob_name, md5_base64_encode)
 
-        dir_name = self.create_temp_dir()
-        self.storage_cmd('storage blob upload-batch -d {} -s "{}" -n {} --content-md5 {}', account_info,
-                         container, local_file, blob_name, md5_base64_encode)
-
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
