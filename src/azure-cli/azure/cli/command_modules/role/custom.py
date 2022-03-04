@@ -35,6 +35,7 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse, is_guid
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 from ._graph_client import GraphClient
+from ._graph_objects import application_property_map, set_object_properties
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -900,7 +901,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 # web
                 web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
                 enable_id_token_issuance=enable_id_token_issuance,
-                enable_access_token_token_issuance=enable_access_token_issuance,
+                enable_access_token_issuance=enable_access_token_issuance,
                 # publicClient
                 public_client_redirect_uris=public_client_redirect_uris,
                 # JSON properties
@@ -912,26 +913,21 @@ def create_application(cmd, client, display_name, identifier_uris=None,
             # no need to resolve identifierUris or appId. Just use id.
             return client.application_get(existing_apps[0][ID])
 
-    if not identifier_uris:
-        identifier_uris = []
-
+    # identifierUris is no longer required, compared to AD Graph
     key_credentials = _build_key_credentials(
         key_value, key_type, key_usage, start_date, end_date, credential_description)
 
-    body = {
-        "displayName": display_name,
-        "identifierUris": identifier_uris,
-    }
+    body = {}
 
     _set_application_properties(
-        body,
+        body, display_name=display_name, identifier_uris=identifier_uris,
         is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
         web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
         enable_id_token_issuance=enable_id_token_issuance,
-        enable_access_token_token_issuance=enable_access_token_issuance,
+        enable_access_token_issuance=enable_access_token_issuance,
         # publicClient
         public_client_redirect_uris=public_client_redirect_uris,
         # JSON properties
@@ -956,7 +952,7 @@ def update_application(instance, display_name=None, identifier_uris=None,
                        credential_description=None,
                        # web
                        web_home_page_url=None, web_redirect_uris=None,
-                       enable_id_token_issuance=None, enable_access_token_token_issuance=None,
+                       enable_id_token_issuance=None, enable_access_token_issuance=None,
                        # publicClient
                        public_client_redirect_uris=None,
                        # JSON properties
@@ -968,20 +964,15 @@ def update_application(instance, display_name=None, identifier_uris=None,
         key_credentials = _build_key_credentials(
             key_value, key_type, key_usage, start_date, end_date, credential_description)
 
-    if identifier_uris is not None:
-        body['identifierUris'] = identifier_uris
-    if display_name is not None:
-        body['displayName'] = display_name
-
     _set_application_properties(
-        body,
+        body, display_name=display_name, identifier_uris=identifier_uris,
         is_fallback_public_client=is_fallback_public_client, sign_in_audience=sign_in_audience,
         # keyCredentials
         key_credentials=key_credentials,
         # web
         web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
         enable_id_token_issuance=enable_id_token_issuance,
-        enable_access_token_token_issuance=enable_access_token_token_issuance,
+        enable_access_token_issuance=enable_access_token_issuance,
         # publicClient
         public_client_redirect_uris=public_client_redirect_uris,
         # JSON properties
@@ -1010,17 +1001,18 @@ def delete_application(client, identifier):
 
 def _resolve_application(client, identifier):
     """Resolve an application and return its id."""
-    result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
-    if not result:
-        if is_guid(identifier):
-            # it is either app id or object id, let us verify
-            result = client.application_list(filter="appId eq '{}'".format(identifier))
-        else:
-            error = CLIError("Application '{}' doesn't exist".format(identifier))
+    if is_guid(identifier):
+        # it is either app id or object id, let us verify
+        result = client.application_list(filter="appId eq '{}'".format(identifier))
+        # If not found, this looks like an object id
+        return result[0][ID] if result else identifier
+    else:
+        result = client.application_list(filter="identifierUris/any(s:s eq '{}')".format(identifier))
+        if not result:
+            error = CLIError("Application with identifier URI '{}' doesn't exist".format(identifier))
             error.status_code = 404  # Make sure CLI returns 3
             raise error
-
-    return result[0][ID] if result else identifier
+        return result[0][ID]
 
 
 def reset_application_credential(cmd, client, identifier, create_cert=False, cert=None, years=None,
@@ -1805,50 +1797,17 @@ def _application_add_password(client, app, start_datetime, end_datetime, display
     return result
 
 
-def _set_application_properties(
-        body, is_fallback_public_client=None, sign_in_audience=None,
-        # keyCredentials
-        key_credentials=None,
-        # web
-        web_home_page_url=None, web_redirect_uris=None,
-        enable_id_token_issuance=None, enable_access_token_token_issuance=None,
-        # publicClient
-        public_client_redirect_uris=None,
-        # JSON properties
-        app_roles=None, optional_claims=None, required_resource_accesses=None):
+def _set_application_properties(body, **kwargs):
 
-    if key_credentials:
-        body['keyCredentials'] = key_credentials
+    # Preprocess JSON properties
+    if kwargs.get('app_roles'):
+        kwargs['app_roles'] = _build_app_roles(kwargs['app_roles'])
+    if kwargs.get('optional_claims'):
+        kwargs['optional_claims'] = _build_optional_claims(kwargs['optional_claims'])
+    if kwargs.get('required_resource_accesses'):
+        kwargs['required_resource_accesses'] = _build_required_resource_accesses(kwargs['required_resource_accesses'])
 
-    if sign_in_audience is not None:
-        body['signInAudience'] = sign_in_audience
-
-    if is_fallback_public_client is not None:
-        body['isFallbackPublicClient'] = is_fallback_public_client
-
-    if enable_id_token_issuance is not None:
-        body.setdefault('web', {}).setdefault('implicitGrantSettings', {})['enableIdTokenIssuance'] = \
-            enable_id_token_issuance
-
-    if enable_access_token_token_issuance is not None:
-        body.setdefault('web', {}).setdefault('implicitGrantSettings', {})['enableAccessTokenIssuance'] = \
-            enable_access_token_token_issuance
-
-    # list properties
-    if web_redirect_uris is not None:
-        body.setdefault('web', {})['redirectUris'] = web_redirect_uris
-    if public_client_redirect_uris is not None:
-        body.setdefault('publicClient', {})['redirectUris'] = public_client_redirect_uris
-    if web_home_page_url is not None:
-        body.setdefault('web', {})['homePageUrl'] = web_home_page_url
-
-    # JSON properties
-    if app_roles:
-        body['appRoles'] = _build_app_roles(app_roles)
-    if optional_claims:
-        body['optionalClaims'] = _build_optional_claims(optional_claims)
-    if required_resource_accesses:
-        body['requiredResourceAccess'] = _build_required_resource_accesses(required_resource_accesses)
+    set_object_properties(application_property_map, body, **kwargs)
 
 
 def _datetime_to_utc(dt):

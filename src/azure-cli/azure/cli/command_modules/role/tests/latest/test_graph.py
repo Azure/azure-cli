@@ -14,6 +14,60 @@ from azure.cli.testsdk import ScenarioTest, AADGraphUserReplacer, MOCKED_USER_NA
 from knack.util import CLIError
 
 
+# This test example is from
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#example-user-app-role
+TEST_APP_ROLES = '''[
+    {
+        "allowedMemberTypes": [
+            "User"
+        ],
+        "displayName": "Writer",
+        "id": "d1c2ade8-0000-0000-0000-6d06b947c66f",
+        "isEnabled": true,
+        "description": "Writers Have the ability to create tasks.",
+        "value": "Writer"
+    },
+    {
+        "allowedMemberTypes": [
+            "Application"
+        ],
+        "displayName": "ConsumerApps",
+        "id": "47fbb575-0000-0000-0000-0f7a6c30beac",
+        "isEnabled": true,
+        "description": "Consumer apps have access to the consumer data.",
+        "value": "Consumer"
+    }
+]'''
+
+# This test example is from
+# https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#configuring-optional-claims
+TEST_OPTIONAL_CLAIMS = '''{
+    "idToken": [
+        {
+            "name": "auth_time",
+            "essential": false
+        }
+    ],
+    "accessToken": [
+        {
+            "name": "ipaddr",
+            "essential": false
+        }
+    ],
+    "saml2Token": [
+        {
+            "name": "upn",
+            "essential": false
+        },
+        {
+            "name": "extension_ab603c56068041afb2f6832e2a17e237_skypeId",
+            "source": "user",
+            "essential": false
+        }
+    ]
+}'''
+
+
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
@@ -155,41 +209,144 @@ lBMWCjI8gO6W8YQMu7AH""".replace('\n', '')
 class ApplicationScenarioTest(ScenarioTest):
 
     def test_application_scenario(self):
-        display_name = self.create_random_name(prefix='azure-cli-test-graph-app', length=30)
+        """
+        - Test creating application with its properties.
+        - Test creating application first and update its properties.
+        """
+        display_name = self.create_random_name(prefix='azure-cli-test', length=30)
 
         # identifierUris must be on verified domain
         # https://docs.microsoft.com/en-us/azure/active-directory/develop/security-best-practices-for-app-registration#appid-uri-configuration
-
-        # tenant_id will be 0000... in playback mode, so register it in name_replacer
-        tenant_id = self.cmd('account show --query tenantId').get_output_in_json()
-        self.name_replacer.register_name_pair(tenant_id, MOCKED_TENANT_ID)
-
-        identifier_uri = f'api://{tenant_id}/{display_name}'
-
         self.kwargs.update({
-            'identifier_uri': identifier_uri,
-            'homepage': 'https://myapp.com/',
             'display_name': display_name,
-            'app_roles': json.dumps([
-                {
-                    "allowedMemberTypes": [
-                        "User"
-                    ],
-                    "description": "Approvers can mark documents as approved",
-                    "displayName": "Approver",
-                    "isEnabled": "true",
-                    "value": "approver"
-                }
-            ])
+            'identifier_uri': f'api://{display_name}',
+            'homepage': 'https://myapp.com/',
+            'web_redirect_uri_1': 'http://localhost/webtest1',
+            'web_redirect_uri_2': 'http://localhost/webtest2',
+            'public_client_redirect_uri_1': 'http://localhost/publicclienttest1',
+            'public_client_redirect_uri_2': 'http://localhost/publicclienttest2',
+            'app_roles': TEST_APP_ROLES,
+            'optional_claims': TEST_OPTIONAL_CLAIMS
         })
 
-        # create app through general option
-        result = self.cmd('ad app create --display-name {display_name} --web-home-page-url {homepage} '
-                          '--identifier-uris {identifier_uri}',
-                          checks=[
-                              self.check('identifierUris[0]', '{identifier_uri}'),
-                              self.check('web.homePageUrl', '{homepage}')
-                          ]).get_output_in_json()
+        # Create
+        result = self.cmd(
+            'ad app create --display-name {display_name} '
+            '--identifier-uris {identifier_uri} '
+            '--is-fallback-public-client True '
+            '--sign-in-audience AzureADMultipleOrgs '
+            # web
+            '--web-home-page-url {homepage} '
+            '--web-redirect-uris {web_redirect_uri_1} {web_redirect_uri_2} '
+            '--enable-access-token-issuance true --enable-id-token-issuance true '
+            # publicClient
+            '--public-client-redirect-uris {public_client_redirect_uri_1} {public_client_redirect_uri_2} '
+            "--app-roles '{app_roles}' "
+            "--optional-claims '{optional_claims}'",
+            checks=[
+                self.check('displayName', '{display_name}'),
+                self.check('identifierUris[0]', '{identifier_uri}'),
+                self.check('isFallbackPublicClient', True),
+                self.check('signInAudience', 'AzureADMultipleOrgs'),
+                self.check('web.homePageUrl', '{homepage}'),
+                self.check('web.redirectUris[0]', '{web_redirect_uri_1}'),
+                self.check('web.redirectUris[1]', '{web_redirect_uri_2}'),
+                self.check('web.implicitGrantSettings.enableIdTokenIssuance', True),
+                self.check('web.implicitGrantSettings.enableAccessTokenIssuance', True),
+                self.check('publicClient.redirectUris[0]', '{public_client_redirect_uri_1}'),
+                self.check('publicClient.redirectUris[1]', '{public_client_redirect_uri_2}'),
+                self.check('length(appRoles)', 2),
+                self.check('length(optionalClaims)', 3)
+            ]).get_output_in_json()
+
+        app_id = result['appId']
+        self.kwargs['app_id'] = app_id
+        self.cmd('ad app delete --id {app_id}')
+        self.cmd('ad app show --id {app_id}', expect_failure=True)
+
+        # Create, then update
+        display_name_2 = self.create_random_name(prefix='azure-cli-test', length=30)
+        display_name_3 = self.create_random_name(prefix='azure-cli-test', length=30)
+        self.kwargs.update({
+            'display_name_2': display_name_2,
+            'display_name_3': display_name_3,
+            'identifier_uri_3': f'api://{display_name_3}',
+        })
+
+        # Graph cannot create app with same identifierUris even after deleting the previous one. Still confirming with
+        # service team.
+        result = self.cmd('ad app create --display-name {display_name_2}').get_output_in_json()
+        app_id = result['appId']
+        self.kwargs['app_id'] = app_id
+
+        self.cmd(
+            'ad app update --id {app_id} --display-name {display_name_3} '
+            '--identifier-uris {identifier_uri_3} '
+            '--is-fallback-public-client True '
+            '--sign-in-audience AzureADMultipleOrgs '
+            # web
+            '--web-home-page-url {homepage} '
+            '--web-redirect-uris {web_redirect_uri_1} {web_redirect_uri_2} '
+            '--enable-access-token-issuance true --enable-id-token-issuance true '
+            # publicClient
+            '--public-client-redirect-uris {public_client_redirect_uri_1} {public_client_redirect_uri_2} '
+            "--app-roles '{app_roles}' "
+            "--optional-claims '{optional_claims}'"
+        )
+        self.cmd(
+            'ad app show --id {app_id}',
+            checks=[
+                self.check('displayName', '{display_name_3}'),
+                self.check('identifierUris[0]', '{identifier_uri_3}'),
+                self.check('isFallbackPublicClient', True),
+                self.check('signInAudience', 'AzureADMultipleOrgs'),
+                self.check('web.homePageUrl', '{homepage}'),
+                # redirectUris doesn't preserve item order. Checking with service team.
+                # self.check('web.redirectUris[0]', '{web_redirect_uri_1}'),
+                # self.check('web.redirectUris[1]', '{web_redirect_uri_2}'),
+                self.check('length(web.redirectUris)', 2),
+                self.check('web.implicitGrantSettings.enableIdTokenIssuance', True),
+                self.check('web.implicitGrantSettings.enableAccessTokenIssuance', True),
+                # self.check('publicClient.redirectUris[0]', '{public_client_redirect_uri_1}'),
+                # self.check('publicClient.redirectUris[1]', '{public_client_redirect_uri_2}'),
+                self.check('length(publicClient.redirectUris)', 2),
+                self.check('length(appRoles)', 2),
+                self.check('length(optionalClaims)', 3)
+            ]).get_output_in_json()
+
+        self.cmd('ad app delete --id {app_id}')
+        self.cmd('ad app show --id {app_id}', expect_failure=True)
+
+    def test_app_resolution(self):
+        """Test application can be resolved with identifierUris, appId, or id."""
+        display_name = self.create_random_name(prefix='azure-cli-test', length=30)
+        self.kwargs.update({
+            'display_name': display_name,
+            'identifier_uri': f'api://{display_name}'
+        })
+
+        app = self.cmd('ad app create --display-name {display_name} '
+                       '--identifier-uris {identifier_uri}').get_output_in_json()
+
+        self.kwargs['app_id'] = app['appId']
+        self.kwargs['id'] = app['id']
+
+        # Show with appId
+        self.cmd('ad app show --id {app_id}', checks=[self.check('displayName', '{display_name}')])
+        # Show with id
+        self.cmd('ad app show --id {id}', checks=[self.check('displayName', '{display_name}')])
+        # Show with identifierUris
+        self.cmd('ad app show --id {identifier_uri}', checks=[self.check('displayName', '{display_name}')])
+
+        self.cmd('ad app delete --id {app_id}')
+
+    def test_app_credential_scenario(self):
+        display_name = self.create_random_name(prefix='azure-cli-test', length=30)
+        self.kwargs.update({
+            'display_name': display_name
+        })
+
+        result = self.cmd('ad app create --display-name {display_name} ').get_output_in_json()
         app_id = result['appId']
         # set app password
         result = self.cmd('ad app credential reset --id {identifier_uri} --append --years 2').get_output_in_json()
@@ -262,60 +419,48 @@ class ApplicationScenarioTest(ScenarioTest):
             self.assertEqual(self.cmd('ad app show --id non-exist-identifierUris').exit_code, 3)
             self.assertEqual(self.cmd('ad app show --id 00000000-0000-0000-0000-000000000000').exit_code, 3)
 
-    def test_application_optional_claims(self):
-        try:
-            # Create with optionalClaims
-            name1 = self.create_random_name(prefix='cli-app-', length=14)
-            self.kwargs.update({
-                'name1': name1,
-                'optional_claims': json.dumps({
-                    "idToken": [
-                        {
-                            "name": "auth_time",
-                            "source": None,
-                            "essential": False
-                        }
-                    ],
-                    "accessToken": [
-                        {
-                            "name": "email",
-                            "source": None,
-                            "essential": False
-                        }
-                    ]
-                })
-            })
 
-            app_id1 = self.cmd("ad app create --display-name {name1} --optional-claims '{optional_claims}'",
-                               checks=[
-                                   self.check('displayName', '{name1}'),
-                                   self.check('length(optionalClaims.idToken)', 1),
-                                   self.check('length(optionalClaims.accessToken)', 1)
-                               ]).get_output_in_json()['appId']
+class ServicePrincipalScenarioTest(ScenarioTest):
 
-            # Create with no optionalClaims, then update with optionalClaims
-            name2 = self.create_random_name(prefix='cli-app-', length=14)
-            self.kwargs.update({
-                "name2": name2
-            })
-            app_id2 = self.cmd('ad app create --display-name {name2}').get_output_in_json()['appId']
-            self.kwargs.update({
-                'app_id': app_id2
-            })
+    def test_service_principal_scenario(self):
+        """
+        - Test service principal creation.
+        - Test service principal can be resolved with servicePrincipalNames (appId and identifierUris) or id.
+        """
+        display_name = self.create_random_name(prefix='azure-cli-test', length=30)
 
-            self.cmd("ad app update --id {app_id} --optional-claims '{optional_claims}'")
-            self.cmd('ad app show --id {app_id}',
-                     checks=[
-                         self.check('displayName', '{name2}'),
-                         self.check('length(optionalClaims.idToken)', 1),
-                         self.check('length(optionalClaims.accessToken)', 1)
-                     ])
-        finally:
-            try:
-                self.cmd("ad app delete --id " + app_id1)
-                self.cmd("ad app delete --id " + app_id2)
-            except:
-                pass
+        self.kwargs.update({
+            'display_name': display_name,
+            'identifier_uri': f'api://{display_name}'
+        })
+
+        # Create
+        app = self.cmd('ad app create --display-name {display_name} '
+                       '--identifier-uris {identifier_uri}').get_output_in_json()
+
+        self.kwargs['app_id'] = app['appId']
+
+        sp = self.cmd('ad sp create --id {app_id}',
+                      checks=[
+                          self.check('appId', app['appId']),
+                          self.check('appDisplayName', app['displayName']),
+                          self.check('servicePrincipalNames[0]', '{app_id}')
+                      ]).get_output_in_json()
+
+        self.kwargs['id'] = sp['id']
+
+        # Show with appId as one of servicePrincipalNames
+        self.cmd('ad sp show --id {app_id}')
+        # Show with identifierUri as one of servicePrincipalNames
+        self.cmd('ad sp show --id {identifier_uri}')
+        # Show with id
+        self.cmd('ad sp show --id {id}')
+
+        self.cmd('ad sp delete --id {app_id}')
+        self.cmd('ad app delete --id {app_id}')
+
+        self.cmd('ad sp show --id {app_id}', expect_failure=True)
+        self.cmd('ad app show --id {app_id}', expect_failure=True)
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
