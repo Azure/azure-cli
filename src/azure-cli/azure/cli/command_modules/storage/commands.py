@@ -359,8 +359,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table, transform_blob_output
         from ._transformers import (transform_storage_list_output, transform_url,
                                     create_boolean_result_output_transformer)
-        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
-                                  process_blob_upload_batch_parameters)
+        from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters)
         from ._exception_handler import file_related_exception_handler
         g.storage_command_oauth(
             'download', 'get_blob_to_path', table_transformer=transform_blob_output,

@@ -23,6 +23,7 @@ from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
+from ._client_factory import cf_blob_service
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -592,6 +593,73 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
     return validator
 
 
+def get_content_setting_validator_track2(settings_class, update, guess_from_file=None, process_md5=False):
+    def _class_name(class_type):
+        return class_type.__module__ + "." + class_type.__class__.__name__
+
+    def validator(cmd, namespace):
+        t_blob_content_settings = cmd.get_models('_models#ContentSettings',
+                                                 resource_type=ResourceType.DATA_STORAGE_BLOB)
+
+        # must run certain validators first for an update
+        if update:
+            validate_client_parameters(cmd, namespace)
+
+        ns = vars(namespace)
+        clear_content_settings = ns.pop('clear_content_settings', False)
+
+        # retrieve the existing object properties for an update
+        if update and not clear_content_settings:
+            account = ns.get('account_name')
+            key = ns.get('account_key')
+            cs = ns.get('connection_string')
+            sas = ns.get('sas_token')
+            token_credential = ns.get('token_credential')
+            if _class_name(settings_class) == _class_name(t_blob_content_settings):
+                container = ns.get('container_name')
+                blob = ns.get('blob_name')
+                lease_id = ns.get('lease_id')
+                account_kwargs = {'connection_string': cs,
+                                  'account_name': account,
+                                  'account_key': key,
+                                  'token_credential': token_credential,
+                                  'sas_token': sas}
+                client = cf_blob_service(cmd.cli_ctx, account_kwargs).get_blob_client(container=container, blob=blob)
+                props = client.get_blob_properties(lease=lease_id).content_settings
+
+        # create new properties
+        new_props = settings_class(
+            content_type=ns.pop('content_type', None),
+            content_disposition=ns.pop('content_disposition', None),
+            content_encoding=ns.pop('content_encoding', None),
+            content_language=ns.pop('content_language', None),
+            content_md5=ns.pop('content_md5', None),
+            cache_control=ns.pop('content_cache_control', None)
+        )
+
+        # if update, fill in any None values with existing
+        if update:
+            if not clear_content_settings:
+                for attr in ['content_type', 'content_disposition', 'content_encoding', 'content_language',
+                             'content_md5', 'cache_control']:
+                    if getattr(new_props, attr) is None:
+                        setattr(new_props, attr, getattr(props, attr))
+        else:
+            if guess_from_file:
+                new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
+
+        # In track2 SDK, the content_md5 type should be bytearray. And then it will serialize to a string for request.
+        # To keep consistent with track1 input and CLI will treat all parameter values as string. Here is to transform
+        # content_md5 value to bytearray. And track2 SDK will serialize it into the right value with str type in header.
+        if process_md5 and new_props.content_md5:
+            from .track2_util import _str_to_bytearray
+            new_props.content_md5 = _str_to_bytearray(new_props.content_md5)
+
+        ns['content_settings'] = new_props
+
+    return validator
+
+
 def validate_custom_domain(namespace):
     if namespace.use_subdomain and not namespace.custom_domain:
         raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
@@ -1037,10 +1105,13 @@ def process_blob_upload_batch_parameters(cmd, namespace):
         else:
             namespace.blob_type = 'block'
 
-    # 5. call other validators
+    # 5. Ignore content-md5 for batch upload
+    namespace.content_md5 = None
+
+    # 6. call other validators
     validate_metadata(namespace)
     t_blob_content_settings = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#ContentSettings')
-    get_content_setting_validator(t_blob_content_settings, update=False)(cmd, namespace)
+    get_content_setting_validator_track2(t_blob_content_settings, update=False)(cmd, namespace)
     add_upload_progress_callback(cmd, namespace)
     blob_tier_validator_track2(cmd, namespace)
 
