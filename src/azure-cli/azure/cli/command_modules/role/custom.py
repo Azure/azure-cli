@@ -869,7 +869,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
-                       credential_description=None,
+                       key_display_name=None,
                        # web
                        web_home_page_url=None, web_redirect_uris=None,
                        enable_id_token_issuance=None, enable_access_token_issuance=None,
@@ -897,7 +897,7 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                 # keyCredentials
                 key_value=key_value, key_type=key_type, key_usage=key_usage,
                 start_date=start_date, end_date=end_date,
-                credential_description=credential_description,
+                key_display_name=key_display_name,
                 # web
                 web_home_page_url=web_home_page_url, web_redirect_uris=web_redirect_uris,
                 enable_id_token_issuance=enable_id_token_issuance,
@@ -915,7 +915,8 @@ def create_application(cmd, client, display_name, identifier_uris=None,
 
     # identifierUris is no longer required, compared to AD Graph
     key_credentials = _build_key_credentials(
-        key_value, key_type, key_usage, start_date, end_date, credential_description)
+        key_value=key_value, key_type=key_type, key_usage=key_usage,
+        start_date=start_date, end_date=end_date, display_name=key_display_name)
 
     body = {}
 
@@ -949,7 +950,7 @@ def update_application(instance, display_name=None, identifier_uris=None,
                        is_fallback_public_client=None, sign_in_audience=None,
                        # keyCredentials
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
-                       credential_description=None,
+                       key_display_name=None,
                        # web
                        web_home_page_url=None, web_redirect_uris=None,
                        enable_id_token_issuance=None, enable_access_token_issuance=None,
@@ -962,7 +963,8 @@ def update_application(instance, display_name=None, identifier_uris=None,
     key_credentials = None
     if key_value:
         key_credentials = _build_key_credentials(
-            key_value, key_type, key_usage, start_date, end_date, credential_description)
+            key_value=key_value, key_type=key_type, key_usage=key_usage,
+            start_date=start_date, end_date=end_date, display_name=key_display_name)
 
     _set_application_properties(
         body, display_name=display_name, identifier_uris=identifier_uris,
@@ -1690,12 +1692,6 @@ def _get_public(x509):
     return stripped
 
 
-def _encode_custom_key_description(key_description):
-    # utf16 is used by AAD portal. Do not change it to other random encoding
-    # unless you know what you are doing.
-    return key_description.encode('utf-16')
-
-
 def _get_principal_type_from_object_id(cli_ctx, assignee_object_id):
     client = _graph_client_factory(cli_ctx)
     try:
@@ -1856,9 +1852,13 @@ def _build_add_password_credential_body(display_name, start_datetime, end_dateti
 
 
 def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
-                           start_date=None, end_date=None, display_name=None, key_description=None):
-    # TODO: display name
+                           start_date=None, end_date=None, display_name=None):
+    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
     # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+    # Only displayName should be set.
+    # For passwordCredential, customKeyIdentifier is not applicable.
+    # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
+    # https://github.com/Azure/azure-cli/issues/20561
     if not key_value:
         # No key credential should be set
         return []
@@ -1873,17 +1873,12 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
-    custom_key_id = None
-    if key_description:
-        custom_key_id = _encode_custom_key_description(key_description)
-
     key_type = key_type or 'AsymmetricX509Cert'
     key_usage = key_usage or 'Verify'
 
     # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
     key_credential = {
         "@odata.type": "#microsoft.graph.keyCredential",
-        "customKeyIdentifier": custom_key_id,
         "displayName": display_name,
         "endDateTime": _datetime_to_utc(end_date),
         "key": key_value,
@@ -1948,7 +1943,7 @@ def _reset_credentials(cmd, graph_object, add_password_func, remove_password_fun
             key_creds = graph_object['keyCredentials']
 
         new_key_creds = _build_key_credentials(
-            public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
+            key_value=public_cert_string, start_date=app_start_date, end_date=app_end_date, display_name=display_name)
 
         key_id = new_key_creds[0]['keyId']
         key_creds.extend(new_key_creds)
@@ -1960,7 +1955,7 @@ def _reset_credentials(cmd, graph_object, add_password_func, remove_password_fun
 
     result = {
         'appId': graph_object['appId'],
-        'keyId': key_id,
+        # 'keyId': key_id,
         'password': password
     }
     if cert_file:

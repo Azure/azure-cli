@@ -74,23 +74,39 @@ def load_arguments(self, _):
 
         # keyCredentials
         c.argument('start_date', arg_group='keyCredentials',
-                   help="Date or datetime at which credentials become valid(e.g. '2017-01-01T01:00:00+00:00' or '2017-01-01'). Default value is current time")
+                   help="Date or datetime at which credentials become valid (e.g. '2017-01-01T01:00:00+00:00' or "
+                        "'2017-01-01'). Default value is current time")
         c.argument('end_date', arg_group='keyCredentials',
-                   help="Date or datetime after which credentials expire(e.g. '2017-12-31T11:59:59+00:00' or '2017-12-31'). Default value is one year after current time")
+                   help="Date or datetime after which credentials expire (e.g. '2017-12-31T11:59:59+00:00' or "
+                        "'2017-12-31'). Default value is one year after current time")
         c.argument('key_value', arg_group='keyCredentials',
                    help='the value for the key credentials associated with the application')
         c.argument('key_type', arg_group='keyCredentials',
-                   help='the type of the key credentials associated with the application', arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert'))
+                   help='the type of the key credentials associated with the application',
+                   arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'],
+                                          default='AsymmetricX509Cert'))
         c.argument('key_usage', arg_group='keyCredentials',
-                   help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
-        c.argument('credential_description', help="the description of the password")
+                   help='the usage of the key credentials associated with the application.',
+                   arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
+        c.argument('key_display_name', arg_group='keyCredentials',
+                   help="Friendly name for the key.")
 
-        c.argument('required_resource_accesses', type=validate_file_or_dict,
-                   help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
-        c.argument('app_roles', type=validate_file_or_dict,
-                   help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
-        c.argument('optional_claims', type=validate_file_or_dict,
-                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
+        # JSON properties
+        json_property_help = "Should be in manifest JSON format. See examples below for details"
+        c.argument('required_resource_accesses', arg_group='JSON property', type=validate_file_or_dict,
+                   help="Specifies the resources that the application needs to access. This property also specifies "
+                        "the set of delegated permissions and application roles that it needs for each of those "
+                        "resources. This configuration of access to the required resources drives the consent "
+                        "experience. " + json_property_help)
+        c.argument('app_roles', arg_group='JSON property', type=validate_file_or_dict,
+                   help="The collection of roles assigned to the application. With app role assignments, these roles "
+                        "can be assigned to users, groups, or service principals associated with other applications. "
+                        + json_property_help)
+        c.argument('optional_claims', arg_group='JSON property', type=validate_file_or_dict,
+                   help="Application developers can configure optional claims in their Azure AD applications to "
+                        "specify the claims that are sent to their application by the Microsoft security token "
+                        "service. For more information, see https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims. "
+                        + json_property_help)
 
     with self.argument_context('ad app owner list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
@@ -186,7 +202,7 @@ def load_arguments(self, _):
         c.argument('cert', arg_group='Credential', validator=validate_cert, help='Certificate to use for credentials')
         c.argument('years', type=int, default=None, arg_group='Credential', help='Number of years for which the credentials will be valid')
         c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
-        c.argument('display_name', help="Friendly name for the password.")
+        c.argument('display_name', help="Friendly name for the password or key.")
 
         c.argument('create_cert', action='store_true', arg_group='keyCredentials', help='Create a self-signed certificate to use for the credential')
         c.argument('keyvault', arg_group='keyCredentials', help='Name or ID of a KeyVault to use for creating or retrieving certificates.')
