@@ -38,14 +38,21 @@ def create_configstore(client,
                        assign_identity=None,
                        enable_public_network=None,
                        disable_local_auth=None,
-                       retention_days=7,
-                       enable_purge_protection=False):
+                       retention_days=None,
+                       enable_purge_protection=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
+    if sku.lower() == 'free' and (enable_purge_protection or retention_days):
+        logger.warning("Options '--enable-purge-protection' and '--retention-days' will be ignored when creating a free store.")
+        retention_days = None
+        enable_purge_protection = None
+    elif sku.lower() == 'standard' and not retention_days:
+        retention_days = 7
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
