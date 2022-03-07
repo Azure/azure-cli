@@ -488,8 +488,8 @@ def load_arguments(self, _):
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
-    with self.argument_context('vm extension list') as c:
-        c.argument('instance_view', action='store_true', help='Track the run command progress')
+    with self.argument_context('vm extension show') as c:
+        c.argument('instance_view', action='store_true', help='Track the vm extension progress')
 
 
     with self.argument_context('vm secret') as c:

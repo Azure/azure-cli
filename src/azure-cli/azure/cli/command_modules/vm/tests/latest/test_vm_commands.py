@@ -1333,6 +1333,11 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
+        self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext} --instance-view', checks=[
+            self.check('instanceView.name', 'VMAccessForLinux'),
+            self.check('instanceView.statuses[0].displayStatus', 'Provisioning succeeded'),
+        ]).get_output_in_json()
+        uuid.UUID(result['forceUpdateTag'])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_extension_2')
