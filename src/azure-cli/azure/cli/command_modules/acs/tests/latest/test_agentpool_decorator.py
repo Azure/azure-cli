@@ -7,21 +7,15 @@ import importlib
 import unittest
 from unittest.mock import Mock, call, patch
 
-from azure.cli.command_modules.acs._consts import (
-    DecoratorEarlyExitException,
-    DecoratorMode,
-)
+from azure.cli.command_modules.acs._consts import DecoratorEarlyExitException, DecoratorMode
 from azure.cli.command_modules.acs.agentpool_decorator import (
-    AKSAgentPoolContext,
     AKSAgentPoolAddDecorator,
+    AKSAgentPoolContext,
     AKSAgentPoolModels,
     AKSAgentPoolUpdateDecorator,
 )
-from azure.cli.command_modules.acs.tests.latest.mocks import (
-    MockCLI,
-    MockClient,
-    MockCmd,
-)
+from azure.cli.command_modules.acs.decorator import AKSParamDict
+from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockClient, MockCmd
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     AzCLIError,
@@ -197,8 +191,100 @@ class AKSAgentPoolContextTestCase(unittest.TestCase):
 
 
 class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
-    def test(self):
-        pass
+    def setUp(self):
+        self.cli_ctx = MockCLI()
+        self.cmd = MockCmd(self.cli_ctx)
+        self.models = AKSAgentPoolModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+        self.client = MockClient()
+
+    def test_ensure_agentpool(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_agentpool(None)
+        mc_1 = self.models.AgentPool()
+        # fail on inconsistent mc with internal context
+        with self.assertRaises(CLIInternalError):
+            dec_1._ensure_agentpool(mc_1)
+
+    def test_init_agentpool(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        dec_agentpool_1 = dec_1.init_agentpool()
+        ground_truth_agentpool_1 = self.models.AgentPool()
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+        self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
+
+    def test_set_up_upgrade_settings(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"max_surge": "test_max_surge"},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        agentpool_1 = self.models.AgentPool()
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_upgrade_settings(None)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_upgrade_settings(agentpool_1)
+        ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings(max_surge="test_max_surge")
+        ground_truth_agentpool_1 = self.models.AgentPool(upgrade_settings=ground_truth_upgrade_settings_1)
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+    def test_construct_default_agentpool(self):
+        import inspect
+
+        from azure.cli.command_modules.acs.custom import aks_agentpool_add
+
+        optional_params = {}
+        positional_params = []
+        for _, v in inspect.signature(aks_agentpool_add).parameters.items():
+            if v.default != v.empty:
+                optional_params[v.name] = v.default
+            else:
+                positional_params.append(v.name)
+        ground_truth_positional_params = [
+            "cmd",
+            "client",
+            "resource_group_name",
+            "cluster_name",
+            "nodepool_name",
+        ]
+        self.assertEqual(positional_params, ground_truth_positional_params)
+
+        # prepare a dictionary of default parameters
+        raw_param_dict = {
+            "resource_group_name": "test_rg_name",
+            "cluster_name": "test_cluster_name",
+            "nodepool_name": "test_nodepool_name",
+        }
+        raw_param_dict.update(optional_params)
+        raw_param_dict = AKSParamDict(raw_param_dict)
+
+        # default value in `aks_create`
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            raw_param_dict,
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
+
+        upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        agentpool_1 = self.models.AgentPool(upgrade_settings=upgrade_settings_1)
+        self.assertEqual(dec_agentpool_1, agentpool_1)
+        raw_param_dict.print_usage_statistics()
 
 
 class AKSAgentPoolUpdateDecoratorTestCase(unittest.TestCase):

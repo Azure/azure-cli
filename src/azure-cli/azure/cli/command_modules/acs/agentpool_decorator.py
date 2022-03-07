@@ -305,7 +305,7 @@ class AKSAgentPoolAddDecorator:
         agentpool.upgrade_settings = upgrade_settings
         return agentpool
 
-    def construct_default_agentpool(self) -> AgentPool:
+    def construct_default_agentpool_profile(self) -> AgentPool:
         """The overall controller used to construct the default AgentPool profile.
 
         The completely constructed AgentPool object will later be passed as a parameter to the underlying SDK
