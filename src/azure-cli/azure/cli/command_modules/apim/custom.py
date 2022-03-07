@@ -231,7 +231,21 @@ def apim_api_schema_get(client, resource_group_name, service_name, api_id, schem
     return client.api_schema.get(resource_group_name=resource_group_name,
                           service_name=service_name,
                           api_id=api_id,
-                          schema_id=schema_id)   
+                          schema_id=schema_id)
+
+def apim_api_schema_entity(client, resource_group_name, service_name, api_id, schema_id):
+    """Shows details of an API Schema. """
+
+    return client.api_schema.get_entity_tag(resource_group_name=resource_group_name,
+                          service_name=service_name,
+                          api_id=api_id,
+                          schema_id=schema_id)
+
+def apim_api_schema_list(client, resource_group_name, api_id, service_name, filter_display_name=None, top=None, skip=None):
+    """Get the schema configuration at the API level. """
+
+    return client.api_schema.list_by_api(resource_group_name, service_name, api_id, filter=filter_display_name, skip=skip, top=top)
+   
 # API Operations
 def apim_api_create(client, resource_group_name, service_name, api_id, description=None,
                     subscription_key_header_name=None, subscription_key_query_param_name=None,

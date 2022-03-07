@@ -517,3 +517,44 @@ examples:
     text: |-
         az apim api versionset delete --resource-group MyResourceGroup --service-name MyServiceName --version-set-id MyVersionSetId
 """
+
+helps['apim api create schema'] = """
+type: command
+short-summary: Create an API Management API Schema.
+parameters:
+  - name: --api-id
+    type: string
+    short-summary: unique name of the api to be created
+    long-summary: |
+        API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  - name: --schema-id
+    type: string
+    short-summary: unique name of the api schema to be created
+    long-summary: |
+        Schema identifier. Must be unique in the current API Management service instance.
+  - name: --schema-path
+    type: string
+    short-summary: Path to the schema file
+  - name: --schema-type
+    type: string
+    short-summary: Schema content type. Must be a valid a media type used in a Content-Type header as defined in the RFC 2616. Media type of the schema document (e.g. application/json, application/xml).
+examples:
+  - name: Create a API Schema.
+    text: |-
+        az apim api create schema --service-name MyApim -g MyResourceGroup --api-id MyApi --schema-id schemaId --schema-type schemaType --schema-path schemaFilePath
+"""
+
+helps['apim api schema delete'] = """
+type: command
+short-summary: Delete an API Management API Schema.
+"""
+
+helps['apim api schema show'] = """
+type: command
+short-summary: Show details of an API Management API Schema.
+"""
+
+helps['apim api schema list'] = """
+type: command
+short-summary: List API Management API's schema's.
+"""

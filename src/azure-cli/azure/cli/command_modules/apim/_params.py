@@ -154,7 +154,30 @@ def load_arguments(self, _):
             'schema_id', arg_group='API',
             help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
             required=True)
-        
+    
+    with self.argument_context('apim api schema list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('filter_display_name', arg_group='API', help='Filter of APIs by displayName.')
+        c.argument('skip', type=int, help='Number of records to skip.')
+        c.argument('top', type=int, help='Number of records to return.')
+        c.argument(
+            'api_id', arg_group='API',
+            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+    
+    with self.argument_context('apim api schema entity') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument(
+            'api_id', arg_group='API',
+            help='API identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+        c.argument(
+            'schema_id', arg_group='API',
+            help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.',
+            required=True)
+          
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
