@@ -213,6 +213,8 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
         if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
+          from azure.cli.core.util import in_cloud_console
+          if not in_cloud_console():
             exit_code = subprocess.call(['dpkg', '-s', 'gcc', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if exit_code != 0:
                 logger.warning('This extension depends on gcc, libpq-dev, python3-dev and they will be installed first.')
