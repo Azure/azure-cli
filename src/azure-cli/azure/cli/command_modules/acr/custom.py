@@ -6,9 +6,9 @@
 # pylint: disable=too-many-locals
 
 import re
-from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.util import CLIError
 from knack.log import get_logger
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.util import user_confirmation
 from ._constants import get_managed_sku, get_premium_sku
 from ._utils import (
