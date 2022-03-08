@@ -1853,12 +1853,6 @@ def _build_add_password_credential_body(display_name, start_datetime, end_dateti
 
 def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
                            start_date=None, end_date=None, display_name=None):
-    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
-    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
-    # Only displayName should be set.
-    # For passwordCredential, customKeyIdentifier is not applicable.
-    # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
-    # https://github.com/Azure/azure-cli/issues/20561
     if not key_value:
         # No key credential should be set
         return []
@@ -1893,13 +1887,22 @@ def _build_key_credentials(key_value=None, key_type=None, key_usage=None,
 def _reset_credentials(cmd, graph_object, add_password_func, remove_password_func, patch_func,
                        create_cert=False, cert=None, years=None,
                        end_date=None, keyvault=None, append=False, display_name=None):
-    """Application and service principal share the same interface for operating credentials.
+    """Reset passwordCredentials and keyCredentials properties for application or service principal.
+    Application and service principal share the same interface for operating credentials.
 
     :param graph_object: The application or service principal object (dict).
     :param add_password_func: Add password API function.
     :param remove_password_func: Remove password API function.
     :param patch_func: Patch API function. Used to update keyCredentials.
     """
+
+    # https://docs.microsoft.com/en-us/graph/api/resources/passwordcredential
+    # https://docs.microsoft.com/en-us/graph/api/resources/keycredential
+    # Only displayName should be set.
+    # For passwordCredential, customKeyIdentifier is not applicable.
+    # For keyCredential, customKeyIdentifier is automatically computed by Graph service as certificate thumbprint.
+    # https://github.com/Azure/azure-cli/issues/20561
+
     app_start_date = datetime.datetime.now(datetime.timezone.utc)
     if years is not None and end_date is not None:
         raise CLIError('usage error: --years | --end-date')
