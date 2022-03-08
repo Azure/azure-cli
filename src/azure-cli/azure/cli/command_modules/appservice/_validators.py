@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from ast import parse
 import ipaddress
 
 
@@ -17,7 +18,8 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
-from .utils import _normalize_sku, get_sku_tier, _normalize_location
+from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
+                   get_resource_if_exists)
 
 logger = get_logger(__name__)
 
@@ -359,16 +361,51 @@ def validate_vnet_integration(cmd, namespace):
                                      "Please run 'az appservice plan create -h' "
                                      "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
 
+def _validate_ase_exists(client, ase_name, ase_rg):
+    extant_ase = get_resource_if_exists(client.app_service_environments,
+                                        resource_group_name=ase_rg, name=ase_name)
+    if extant_ase is None:
+        raise ValidationError("App Service Environment {} does not exist.".format(ase_name))
+
 
 # if the ASP exists, validate that it is in the ASE
-def _validate_plan_in_ase(cmd, plan, ase):
-    pass
+def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
+    if plan_name is not None:
+        plan_info  = get_resource_if_exists(client.app_service_plans,
+                                            resource_group_name=plan_rg, name=plan_name)
+        if plan_info is not None:
+            plan_hosting_env = plan_info.hosting_environment_profile
+
+            if not plan_hosting_env or plan_hosting_env.id != ase_id:
+                raise ValidationError("Plan {} already exists and is not in the "
+                                      "app service environment.".format(plan_name))
+
+
+def _validate_ase_is_v3(ase):
+    if ase.kind.upper != "ASEV3":
+        raise ValidationError("Only V3 App Service Environments supported")
+
+
+def _validate_ase_not_ilb(ase):
+    if ase.properties.get("internalLoadBalancingMode") is not 0:
+        raise ValidationError("Internal Load Balancing (ILB) App Service Environments not supported")
+
 
 def validate_webapp_up(cmd, namespace):
     if namespace.runtime and namespace.html:
         raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
 
+    client = web_client_factory(cmd.cli_ctx)
     if namespace.app_service_environment:
-        if namespace.plan:
-            _validate_plan_in_ase(cmd, namespace.plan, namespace.app_service_environment)
+        ase_name, ase_rg, ase_id = get_resource_name_and_group(cmd, namespace.app_service_environment,
+                                                               namespace.resource_group_name,
+                                                               namespace="Microsoft.Web",
+                                                               type="hostingEnvironments")
+        _validate_ase_exists(client, ase_name, ase_rg)
+        _validate_plan_in_ase(client, namespace.plan, namespace.resource_group_name, ase_id)
+
+        ase = client.app_service_environments(resource_group_name=ase_rg, name=ase_name)
+        _validate_ase_is_v3(ase)
+        _validate_ase_not_ilb(ase)
+
 
