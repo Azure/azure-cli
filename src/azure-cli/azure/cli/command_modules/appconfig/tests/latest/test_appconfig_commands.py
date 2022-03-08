@@ -132,6 +132,15 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
+        config_store_name = self.create_random_name(prefix='MgmtTestdel', length=24)
+
+        self.kwargs.update({
+            'config_store_name': config_store_name
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --tags {tags} --assign-identity {identity} --retention-days {retention_days} --enable-purge-protection {enable_purge_protection}')
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
         self.cmd('appconfig show-deleted -n {config_store_name}',
             checks=[self.check('name', '{config_store_name}'),
                     self.check('location', '{rg_loc}'),
@@ -144,6 +153,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             if deleted_store['name'] == config_store_name:
                 assert deleted_store['location'] == location
                 found = True
+                break
         assert found
 
         self.cmd('appconfig recover -n {config_store_name} -y')
