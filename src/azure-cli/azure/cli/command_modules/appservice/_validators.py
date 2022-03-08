@@ -365,12 +365,12 @@ def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
 
 
 def _validate_ase_is_v3(ase):
-    if ase.kind.upper != "ASEV3":
+    if ase.kind.upper() != "ASEV3":
         raise ValidationError("Only V3 App Service Environments supported")
 
 
 def _validate_ase_not_ilb(ase):
-    if ase.properties.get("internalLoadBalancingMode") is not 0:
+    if ase.internal_load_balancing_mode != 0:
         raise ValidationError("Internal Load Balancing (ILB) App Service Environments not supported")
 
 
@@ -387,8 +387,6 @@ def validate_webapp_up(cmd, namespace):
         _validate_ase_exists(client, ase_name, ase_rg)
         _validate_plan_in_ase(client, namespace.plan, namespace.resource_group_name, ase_id)
 
-        ase = client.app_service_environments(resource_group_name=ase_rg, name=ase_name)
+        ase = client.app_service_environments.get(resource_group_name=ase_rg, name=ase_name)
         _validate_ase_is_v3(ase)
         _validate_ase_not_ilb(ase)
-
-
