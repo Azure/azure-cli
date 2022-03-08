@@ -17,7 +17,7 @@ class AAZContentBuilder:
         self._sub_prop_builders = {}
         self._sub_elements_builder = None
 
-    def set_prop(self, prop_name, typ, arg_key=None):
+    def set_prop(self, prop_name, typ, arg_key=None, typ_kwargs=None):
         sub_values = []
         sub_args = []
         for value, arg in zip(self._values, self._args):
@@ -25,7 +25,7 @@ class AAZContentBuilder:
             sub_arg = arg.get_prop(arg_key)
             if sub_arg is not None and sub_arg.data != AAZUndefined:
                 if schema.get_attr_name(prop_name) is None:
-                    schema[prop_name] = typ()
+                    schema[prop_name] = typ(**typ_kwargs) if typ_kwargs else typ()
                 else:
                     assert isinstance(schema[prop_name], typ)
                 if not sub_arg.is_patch and arg_key:
@@ -46,13 +46,13 @@ class AAZContentBuilder:
         else:
             return None
 
-    def set_elements(self, typ, arg_key=None):
+    def set_elements(self, typ, arg_key=None, typ_kwargs=None):
         sub_values = []
         sub_args = []
         for value, arg in zip(self._values, self._args):
             schema = value._schema
             if schema._element is None:
-                schema.Element = typ()
+                schema.Element = typ(**typ_kwargs) if typ_kwargs else typ()
             else:
                 assert isinstance(schema.Element, typ)
             if isinstance(value, (AAZDict, AAZList)):
