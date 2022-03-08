@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ast import parse
 import ipaddress
 
 
@@ -19,7 +18,7 @@ from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, _normalize_location, get_resource_name_and_group,
-                   get_resource_if_exists)
+                    get_resource_if_exists)
 
 logger = get_logger(__name__)
 
@@ -344,6 +343,7 @@ def validate_vnet_integration(cmd, namespace):
                                      "Please run 'az appservice plan create -h' "
                                      "to see all available App Service Plan SKUs ".format(sku_name, disallowed_skus))
 
+
 def _validate_ase_exists(client, ase_name, ase_rg):
     extant_ase = get_resource_if_exists(client.app_service_environments,
                                         resource_group_name=ase_rg, name=ase_name)
@@ -354,7 +354,7 @@ def _validate_ase_exists(client, ase_name, ase_rg):
 # if the ASP exists, validate that it is in the ASE
 def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
     if plan_name is not None:
-        plan_info  = get_resource_if_exists(client.app_service_plans,
+        plan_info = get_resource_if_exists(client.app_service_plans,
                                             resource_group_name=plan_rg, name=plan_name)
         if plan_info is not None:
             plan_hosting_env = plan_info.hosting_environment_profile
@@ -371,7 +371,7 @@ def _validate_ase_is_v3(ase):
 
 def _validate_ase_not_ilb(ase):
     if ase.internal_load_balancing_mode != 0:
-        raise ValidationError("Internal Load Balancing (ILB) App Service Environments not supported")
+        raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
 
 
 def validate_webapp_up(cmd, namespace):

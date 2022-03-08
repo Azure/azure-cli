@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
-from importlib.resources import Resource
 import threading
 import time
 
@@ -4366,14 +4365,15 @@ def _set_webapp_up_default_args(cmd, rg_name, sku, plan, loc, name):
 
 
 def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
+    app_settings = _generic_site_operation(cmd.cli_ctx, rg_name, name, 'list_application_settings', slot=None)
     update_needed = False
     if 'node' in runtime_version:
         settings = []
         for k, v in match.configs.items():
-            for app_setting in site_config.app_settings:
-                if app_setting.name == k and app_setting.value != v:
+            for app_setting_name, app_setting_value in app_settings.properties.items():
+                if app_setting_name == k and app_setting_value != v:
                     update_needed = True
-                    settings.append('%s=%s', k, v)
+                    settings.append(f"{k}={v}")
         if update_needed:
             logger.warning('Updating runtime version to %s', runtime_version)
             update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
