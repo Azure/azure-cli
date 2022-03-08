@@ -845,7 +845,7 @@ parameters:
 examples:
   - name: Create diagnostic settings , retention here only applies when the target is a storage account.
     text: |
-        az monitor diagnostic-settings create --resource {ID} -n {name} 
+        az monitor diagnostic-settings create --resource {ID} -n {name}
            --storage-account {storageAccount}
            --logs '[
              {
