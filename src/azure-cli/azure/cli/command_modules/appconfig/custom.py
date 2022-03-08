@@ -4,11 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.core.exceptions import HttpResponseError
-from azure.cosmos.http_constants import StatusCodes
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.util import user_confirmation
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -17,9 +14,12 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 EncryptionProperties,
                                                 KeyVaultProperties,
                                                 RegenerateKeyParameters, CreateMode)
+from azure.core.exceptions import HttpResponseError
+from azure.cosmos.http_constants import StatusCodes
+from azure.cli.core.azclierror import AzureResponseError
+from azure.cli.core.util import user_confirmation
 
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
-from azure.cli.core.azclierror import AzureResponseError
 
 logger = get_logger(__name__)
 
