@@ -155,22 +155,25 @@ class AAZHttpOperation(AAZOperation):
             raise ValueError("This pipeline didn't have the ContentDecode Policy; can't deserialize")
 
     @staticmethod
-    def new_content(typ, arg_value):
-        assert issubclass(typ, AAZBaseType)
+    def new_content_builder(arg_value, value=None, typ=None, typ_kwargs=None):
         assert isinstance(arg_value, AAZBaseValue)
         arg_data = arg_value.to_serialized_data()
+        if value is None:
+            assert issubclass(typ, AAZBaseType)
+            schema = typ(**typ_kwargs) if typ_kwargs else typ()
 
-        schema = typ()
-        if isinstance(schema, AAZSimpleType):
-            value = typ._ValueCls(
-                schema=schema,
-                data=schema.process_data(arg_data)
-            )
+            if isinstance(schema, AAZSimpleType):
+                value = typ._ValueCls(
+                    schema=schema,
+                    data=schema.process_data(arg_data)
+                )
+            else:
+                value = typ._ValueCls(
+                    schema=schema,
+                    data=schema.process_data(None)
+                )
         else:
-            value = typ._ValueCls(
-                schema=schema,
-                data=schema.process_data(None)
-            )
+            assert issubclass(value, AAZBaseValue)
 
         builder = AAZContentBuilder(
             values=[value],
@@ -246,17 +249,30 @@ class AAZInstanceUpdateOperation(AAZOperation):
         raise NotImplementedError()
 
     @staticmethod
-    def new_updater(value, arg_value):
-        assert issubclass(value, AAZBaseType)
+    def new_content_builder(arg_value, value=None, typ=None):
         assert isinstance(arg_value, AAZBaseValue)
-
         arg_data = arg_value.to_serialized_data()
+        if value is None:
+            assert issubclass(typ, AAZBaseType)
+            schema = typ()
+            if isinstance(schema, AAZSimpleType):
+                value = typ._ValueCls(
+                    schema=schema,
+                    data=schema.process_data(arg_data)
+                )
+            else:
+                value = typ._ValueCls(
+                    schema=schema,
+                    data=schema.process_data(None)
+                )
+        else:
+            assert issubclass(value, AAZBaseValue)
 
-        updater = AAZContentBuilder(
+        builder = AAZContentBuilder(
             values=[value],
             args=[AAZArgBrowser(arg_value=arg_value, arg_data=arg_data)]
         )
-        return value, updater
+        return value, builder
 
     @staticmethod
     def _update_by_generic(instance, add_arg, set_arg, remove_arg, force_string_arg, client_flatten=True):
