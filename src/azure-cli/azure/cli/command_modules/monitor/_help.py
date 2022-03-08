@@ -843,7 +843,7 @@ parameters:
   - name: --event-hub-rule
     short-summary: Name or ID of the event hub authorization rule.
 examples:
-  - name: Create diagnostic settings , retention here only applies when the target is a storage account.
+  - name: Create diagnostic settings, retention here only applies when the target is a storage account.
     text: |
         az monitor diagnostic-settings create --resource {ID} -n {name} 
            --storage-account {storageAccount}
