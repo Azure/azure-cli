@@ -4104,7 +4104,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # nodepool update nodepool2 taint
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints key1=value2:NoSchedule', checks=[
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints key1=value2:PreferNoSchedule', checks=[
             self.check('nodeTaints[0]', 'key1=value2:PreferNoSchedule'),
         ])
 
@@ -4117,8 +4117,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints "" ')
 
         # nodepool show
-        show_nodepool = self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} -o json').get_output_in_json()
-        assert len(show_nodepool["nodeTaints"]) == 0
+        self.cmd(
+            "aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name}",
+            checks=[
+                self.check("nodeTaints", None),
+            ],
+        )
 
         # delete
         self.cmd(
