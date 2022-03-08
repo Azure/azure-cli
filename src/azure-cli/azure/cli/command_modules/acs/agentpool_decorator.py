@@ -282,12 +282,17 @@ class AKSAgentPoolAddDecorator:
             )
 
     def init_agentpool(self) -> AgentPool:
-        """Initialize an AgentPool object and attach it to internal context.
+        """Initialize an AgentPool object with name and attach it to internal context.
+
+        Note: As a read only property, name would be ignored when serialized.
 
         :return: the AgentPool object
         """
-        # Initialize a AgentPool object.
+        # Initialize a AgentPool object with name.
         agentpool = self.models.AgentPool()
+        # Note: As a read only property, name would be ignored when serialized.
+        # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
+        agentpool.name = self.context._get_nodepool_name(enable_validation=False)
 
         # attach mc to AKSContext
         self.context.attach_agentpool(agentpool)

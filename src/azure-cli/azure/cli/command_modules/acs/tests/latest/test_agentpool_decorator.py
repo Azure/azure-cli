@@ -216,11 +216,12 @@ class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
             self.client,
-            {},
+            {"nodepool_name": "test_nodepool_name"},
             ResourceType.MGMT_CONTAINERSERVICE,
         )
         dec_agentpool_1 = dec_1.init_agentpool()
         ground_truth_agentpool_1 = self.models.AgentPool()
+        ground_truth_agentpool_1.name = "test_nodepool_name"
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
         self.assertEqual(dec_agentpool_1, dec_1.context.agentpool)
 
@@ -283,6 +284,7 @@ class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         agentpool_1 = self.models.AgentPool(upgrade_settings=upgrade_settings_1)
+        agentpool_1.name = "test_nodepool_name"
         self.assertEqual(dec_agentpool_1, agentpool_1)
         raw_param_dict.print_usage_statistics()
 
