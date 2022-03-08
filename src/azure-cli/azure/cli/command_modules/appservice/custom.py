@@ -4795,17 +4795,17 @@ def _configure_default_logging(cmd, rg_name, name):
 
 # TODO remove once appservice-kube extension removes
 def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
-     ase_is_id = is_valid_resource_id(ase)
-     if ase_is_id:
-         return ase
+    ase_is_id = is_valid_resource_id(ase)
+    if ase_is_id:
+        return ase
 
-     from azure.cli.core.commands.client_factory import get_subscription_id
-     return resource_id(
-         subscription=get_subscription_id(cli_ctx),
-         resource_group=resource_group_name,
-         namespace='Microsoft.Web',
-         type='hostingEnvironments',
-         name=ase)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Web',
+        type='hostingEnvironments',
+        name=ase)
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
