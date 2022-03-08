@@ -11,7 +11,7 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_acr_connectedregistry(self, resource_group):
         # Agentpool prerequisites for connected registry testing
-        crName = 'connectedRegistry'
+        crName = 'connectedregistry'
         rootName = 'rootregistry'
         childName = 'child'
         grandchildName = 'grandchild'

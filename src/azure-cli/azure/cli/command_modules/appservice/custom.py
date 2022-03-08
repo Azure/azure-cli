@@ -239,7 +239,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    # TO DO: (Check with Calvin) This seems to be something specific to portal client use only & should be removed
     if current_stack:
         _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
@@ -535,7 +534,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
     headers['User-Agent'] = get_az_user_agent()
-
+    headers['x-ms-client-request-id'] = cmd.cli_ctx.data['headers']['x-ms-client-request-id']
     import requests
     import os
     from azure.cli.core.util import should_disable_connection_verify
@@ -718,10 +717,6 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
             raise ex
 
 
-def show_webapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, "webapp", slot)
-
-
 # for generic updater
 def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -745,7 +740,7 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
         args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
-        plan = get_app_service_plan_from_webapp(cmd, instance, api_version="2021-01-15")
+        plan = get_app_service_plan_from_webapp(cmd, instance)
         sku = _normalize_sku(plan.sku.name)
         if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
             raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
@@ -841,10 +836,6 @@ def get_functionapp(cmd, resource_group_name, name, slot=None):
     return function_app
 
 
-def show_functionapp(cmd, resource_group_name, name, slot=None):
-    return _show_app(cmd, resource_group_name, name, 'functionapp', slot)
-
-
 def list_webapp(cmd, resource_group_name=None):
     full_list = _list_app(cmd.cli_ctx, resource_group_name)
     # ignore apps with kind==null & not functions apps
@@ -868,30 +859,16 @@ def list_function_app(cmd, resource_group_name=None):
                        _list_app(cmd.cli_ctx, resource_group_name)))
 
 
-def _show_app(cmd, resource_group_name, name, cmd_app_type, slot=None):
+def show_app(cmd, resource_group_name, name, slot=None):
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not app:
-        raise ResourceNotFoundError("Unable to find {} '{}', in RG '{}'."
-                                    .format(cmd_app_type, name, resource_group_name))
-    app_type = _kind_to_app_type(app.kind) if app else None
-    if app_type != cmd_app_type:
-        raise ResourceNotFoundError(
-            "Unable to find {app_type} '{name}', in resource group '{resource_group}'".format(
-                app_type=cmd_app_type, name=name, resource_group=resource_group_name),
-            "Use 'az {app_type} show' to show {app_type}s".format(app_type=app_type))
+        raise ResourceNotFoundError("Unable to find resource'{}', in ResourceGroup '{}'.".format(name,
+                                                                                                 resource_group_name))
     app.site_config = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration',
-                                              slot, api_version="2021-01-15")
+                                              slot)
     _rename_server_farm_props(app)
     _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
     return app
-
-
-def _kind_to_app_type(kind):
-    if "workflow" in kind:
-        return "logicapp"
-    if "function" in kind:
-        return "functionapp"
-    return "webapp"
 
 
 def _list_app(cli_ctx, resource_group_name=None):
@@ -939,7 +916,7 @@ def _build_identities_info(identities):
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
                                                                   'ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentity')
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identities)
 
     def getter():
@@ -974,7 +951,7 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
-    webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
+    webapp = _assign_identity(cmd.cli_ctx, getter, setter, identity_role=role, identity_scope=scope)
     return webapp.identity
 
 
@@ -987,7 +964,7 @@ def show_identity(cmd, resource_group_name, name, slot=None):
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentity')
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
@@ -2100,15 +2077,15 @@ def restore_snapshot(cmd, resource_group_name, name, time, slot=None, restore_co
         request = SnapshotRestoreRequest(overwrite=False, snapshot_time=time, recovery_source=source,
                                          recover_configuration=recover_config)
         if slot:
-            return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
-        return client.web_apps.restore_snapshot(resource_group_name, name, request)
+            return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+        return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
     if any([source_resource_group, source_name]):
         raise CLIError('usage error: --source-resource-group and --source-name must both be specified if one is used')
     # Overwrite app with its own snapshot
     request = SnapshotRestoreRequest(overwrite=True, snapshot_time=time, recover_configuration=recover_config)
     if slot:
-        return client.web_apps.restore_snapshot_slot(resource_group_name, name, request, slot)
-    return client.web_apps.restore_snapshot(resource_group_name, name, request)
+        return client.web_apps.begin_restore_snapshot_slot(resource_group_name, name, request, slot)
+    return client.web_apps.begin_restore_snapshot(resource_group_name, name, request)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -2273,7 +2250,7 @@ def _get_url(cmd, resource_group_name, name, slot=None):
     return ('https' if ssl_host else 'http') + '://' + url
 
 
-# TODO: expose new blob suport
+# TODO: expose new blob support
 def config_diagnostics(cmd, resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
                        docker_container_logging=None, detailed_error_messages=None,
@@ -2287,7 +2264,6 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     site = client.web_apps.get(resource_group_name, name)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(name))
-    location = site.location
 
     application_logs = None
     if application_logging:
@@ -2320,8 +2296,7 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
                                     else EnabledConfig(enabled=detailed_error_messages))
     failed_request_tracing_logs = (None if failed_request_tracing is None
                                    else EnabledConfig(enabled=failed_request_tracing))
-    site_log_config = SiteLogsConfig(location=location,
-                                     application_logs=application_logs,
+    site_log_config = SiteLogsConfig(application_logs=application_logs,
                                      http_logs=http_logs,
                                      failed_requests_tracing=failed_request_tracing_logs,
                                      detailed_error_messages=detailed_error_messages_logs)
@@ -2801,7 +2776,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                         h, ssl_type, certificate_thumbprint, slot)
 
-        return show_webapp(cmd, resource_group_name, name, slot)
+        return show_app(cmd, resource_group_name, name, slot)
 
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found.".format(certificate_thumbprint))
 
@@ -3674,14 +3649,16 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
 
 def list_consumption_locations(cmd):
-    client = web_client_factory(cmd.cli_ctx)
+    # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
+    client = web_client_factory(cmd.cli_ctx, api_version='2020-09-01')
     regions = client.list_geo_regions(sku='Dynamic')
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    web_client = web_client_factory(cmd.cli_ctx)
+    web_client = web_client_factory(cmd.cli_ctx, api_version="2020-09-01")
     full_sku = get_sku_tier(sku)
+    # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
     web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
@@ -3975,11 +3952,6 @@ def appservice_list_vnet(cmd, resource_group_name, plan):
 
 
 def remove_hc(cmd, resource_group_name, name, namespace, hybrid_connection, slot=None):
-    linux_webapp = show_webapp(cmd, resource_group_name, name, slot)
-    is_linux = linux_webapp.reserved
-    if is_linux:
-        return logger.warning("hybrid connections not supported on a linux app.")
-
     client = web_client_factory(cmd.cli_ctx)
     if slot is None:
         return_hc = client.web_apps.delete_hybrid_connection(resource_group_name, name, namespace, hybrid_connection)
@@ -4462,7 +4434,7 @@ def is_webapp_up(tunnel_server):
 
 
 def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=None):
-    webapp = show_webapp(cmd, resource_group_name, name, slot)
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     is_linux = webapp.reserved
     if not is_linux:
         raise CLIError("Only Linux App Service Plans supported, Found a Windows App Service Plan")
@@ -4796,7 +4768,7 @@ def _start_ssh_session(hostname, port, username, password):
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
-        webapp = show_webapp(cmd, resource_group_name, name, slot)
+        webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
         is_linux = webapp.reserved
         if not is_linux:
             raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
@@ -4818,7 +4790,7 @@ def _configure_default_logging(cmd, rg_name, name):
     logger.warning("Configuring default logging for the app, if not already enabled")
     return config_diagnostics(cmd, rg_name, name,
                               application_logging=True, web_server_logging='filesystem',
-                              docker_container_logging='true')
+                              docker_container_logging='filesystem')
 
 
 def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
@@ -5412,3 +5384,7 @@ def _encrypt_github_actions_secret(public_key, secret_value):
     sealed_box = public.SealedBox(public_key)
     encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
     return b64encode(encrypted).decode("utf-8")
+
+
+def show_webapp(cmd, resource_group_name, name, slot=None):  # adding this to not break extensions
+    return show_app(cmd, resource_group_name, name, slot)

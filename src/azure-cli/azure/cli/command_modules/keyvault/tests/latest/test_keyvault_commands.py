@@ -443,7 +443,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault show-deleted -n {kv}', checks=self.check('type', 'Microsoft.KeyVault/deletedVaults'))
         self.cmd('keyvault purge -n {kv}')
         # ' will be parsed by shlex, so need escaping
-        self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
+        self.cmd(r"az keyvault list-deleted --resource-type vault --query [?name==\'{kv}\']", checks=self.is_empty())
 
         # test create keyvault further
         self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} '  # enableSoftDelete is True if omitted
@@ -469,6 +469,40 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_list_deleted')
+    def test_keyvault_list_deleted(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'hsm': self.create_random_name('cli-test-hsm-mgmt-', 24),
+            'loc': 'eastus'
+        })
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+        _create_hsm(self)
+
+        # delete resources
+        self.cmd('keyvault delete --name {kv}')
+        self.cmd('keyvault delete --hsm-name {hsm}')
+
+        # test list deleted vaults
+        self.cmd('keyvault list-deleted --resource-type vault', checks=[
+            self.exists("[?name=='{kv}']"),
+            self.not_exists("[?name=='{hsm}']")
+        ])
+        # test list deleted hsms
+        self.cmd('keyvault list-deleted --resource-type hsm', checks=[
+            self.exists("[?name=='{hsm}']"),
+            self.not_exists("[?name=='{kv}']")
+        ])
+        # test list deleted vaults and hsms
+        self.cmd('keyvault list-deleted', checks=[
+            self.exists("[?name=='{hsm}']"),
+            self.exists("[?name=='{kv}']")
+        ])
+
+        # clean resources
+        self.cmd('keyvault purge --name {kv} -l {loc}')
+        self.cmd('keyvault purge --hsm-name {hsm} -l {loc}')
 
 
 class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):

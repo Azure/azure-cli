@@ -3886,6 +3886,16 @@ examples:
     text: az network lb list-nic -g MyResourceGroup --name MyLb
 """
 
+helps['network lb list-mapping'] = """
+type: command
+short-summary: List inbound NAT rule port mappings.
+examples:
+  - name: List inbound NAT rule port mappings based on IP.
+    text: az network lb list-mapping -n MyLb -g MyResourceGroup --backend-pool-name MyAddressPool --request ip=XX
+  - name: List inbound NAT rule port mappings based on NIC.
+    text: az network lb list-mapping -n MyLb -g MyResourceGroup --backend-pool-name MyAddressPool --request nic=XX
+"""
+
 helps['network lb outbound-rule'] = """
 type: group
 short-summary: Manage outbound rules of a load balancer.
