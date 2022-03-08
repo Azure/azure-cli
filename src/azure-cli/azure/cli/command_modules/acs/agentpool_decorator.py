@@ -141,7 +141,8 @@ class AKSAgentPoolContext:
         This is a required parameter and its value should be provided by user explicitly.
 
         This function supports the option of enable_validation. When enabled, it will check if the given nodepool name
-        is used by any nodepool of the cluster, if so, raise the InvalidArgumentValueError.
+        is used by any nodepool of the cluster, if so, raise the InvalidArgumentValueError. This verification operation
+        will send a get request, skip the validation appropriately to avoid multiple api calls.
 
         :return: string
         """
@@ -173,7 +174,8 @@ class AKSAgentPoolContext:
         This is a required parameter and its value should be provided by user explicitly.
 
         This function will verify the parameter by default. It will check if the given nodepool name is used by any
-        nodepool of the cluster, if so, raise the InvalidArgumentValueError.
+        nodepool of the cluster, if so, raise the InvalidArgumentValueError. This verification operation will send a
+        get request, may use the internal function to skip the validation appropriately and avoid multiple api calls.
 
         :return: string
         """
@@ -263,7 +265,7 @@ class AKSAgentPoolAddDecorator:
         """Internal function to ensure that the incoming `agentpool` object is valid and the same as the attached
         `agentpool` object in the context.
 
-        If the incomding `agentpool` is not valid or is inconsistent with the `agentpool` in the context, raise a
+        If the incoming `agentpool` is not valid or is inconsistent with the `agentpool` in the context, raise a
         CLIInternalError.
 
         :return: None
