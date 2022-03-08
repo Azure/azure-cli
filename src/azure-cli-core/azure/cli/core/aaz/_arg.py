@@ -113,7 +113,7 @@ class AAZSimpleTypeArg(AAZBaseArg, AAZSimpleType):
         self._fmt = fmt
 
     def to_cmd_arg(self, name):
-        arg = super().to_cmd_arg(name=name)
+        arg = super().to_cmd_arg(name)
         if self.enum:
             arg.choices = self.enum.to_choices()
         return arg
@@ -268,6 +268,25 @@ class AAZResourceLocationArg(AAZStrArg):
             actions=[LocalContextAction.SET, LocalContextAction.GET],
             scopes=[ALL]
         )
+        return arg
+
+
+class AAZSubscriptionIdArg(AAZStrArg):
+
+    def __init__(
+            self, help="Name or ID of subscription.",
+            **kwargs):
+        super().__init__(
+            help=help,
+            fmt=None,  # TODO: add format, which can transform name to subscription id
+            **kwargs
+        )
+
+    def to_cmd_arg(self, name):
+        from azure.cli.core._completers import get_subscription_id_list
+        arg = super().to_cmd_arg(name)
+        arg.completer = get_subscription_id_list
+
         return arg
 
 
