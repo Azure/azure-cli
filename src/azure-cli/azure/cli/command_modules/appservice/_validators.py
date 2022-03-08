@@ -355,7 +355,7 @@ def _validate_ase_exists(client, ase_name, ase_rg):
 def _validate_plan_in_ase(client, plan_name, plan_rg, ase_id):
     if plan_name is not None:
         plan_info = get_resource_if_exists(client.app_service_plans,
-                                            resource_group_name=plan_rg, name=plan_name)
+                                           resource_group_name=plan_rg, name=plan_name)
         if plan_info is not None:
             plan_hosting_env = plan_info.hosting_environment_profile
 
