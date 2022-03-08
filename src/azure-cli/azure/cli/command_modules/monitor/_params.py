@@ -16,8 +16,8 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id,
-    process_subscription_id, process_workspace_data_export_destination)
+    get_action_group_id_validator, validate_metric_dimension, validate_storagitge_accounts_name_or_id,
+    process_subscription_id, process_workspace_data_export_destination, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
 
@@ -283,8 +283,10 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor diagnostic-settings create') as c:
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
-        c.argument('logs', type=get_json_object)
-        c.argument('metrics', type=get_json_object)
+        c.argument('logs', type=get_json_object, help=" JSON encoded list of logs settings. Use '@{file}' to load from a file."
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings')
+        c.argument('metrics', type=get_json_object, help="JSON encoded list of metric settings. Use '@{file}' to load from a file. "
+                   'For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings')
         c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
                    help='Indicate that the export to LA must be done to a resource specific table, '
                         'a.k.a. dedicated or fixed schema table, '
