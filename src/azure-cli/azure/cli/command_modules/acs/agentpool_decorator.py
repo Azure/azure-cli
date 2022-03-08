@@ -292,7 +292,7 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.models.AgentPool()
         # Note: As a read only property, name would be ignored when serialized.
         # Set the name property by explicit assignment, otherwise it will be ignored by initialization.
-        agentpool.name = self.context._get_nodepool_name(enable_validation=False)
+        agentpool.name = self.context.get_nodepool_name()
 
         # attach mc to AKSContext
         self.context.attach_agentpool(agentpool)
@@ -326,6 +326,7 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_upgrade_settings(agentpool)
         return agentpool
 
+    # pylint: disable=protected-access
     def add_agentpool(self, agentpool: AgentPool) -> AgentPool:
         """Send request to add a new agentpool.
 
@@ -341,7 +342,8 @@ class AKSAgentPoolAddDecorator:
             self.client.begin_create_or_update,
             self.context.get_resource_group_name(),
             self.context.get_cluster_name(),
-            self.context.get_nodepool_name(),
+            # validated in "init_agentpool", skip to avoid duplicate api calls
+            self.context._get_nodepool_name(enable_validation=False),
             agentpool,
             headers=self.context.get_aks_custom_headers(),
         )

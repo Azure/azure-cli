@@ -219,7 +219,11 @@ class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
             {"nodepool_name": "test_nodepool_name"},
             ResourceType.MGMT_CONTAINERSERVICE,
         )
-        dec_agentpool_1 = dec_1.init_agentpool()
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(),
+        ):
+            dec_agentpool_1 = dec_1.init_agentpool()
         ground_truth_agentpool_1 = self.models.AgentPool()
         ground_truth_agentpool_1.name = "test_nodepool_name"
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
@@ -280,7 +284,11 @@ class AKSAgentPoolAddDecoratorTestCase(unittest.TestCase):
             ResourceType.MGMT_CONTAINERSERVICE,
         )
 
-        dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+            return_value=Mock(),
+        ):
+            dec_agentpool_1 = dec_1.construct_default_agentpool_profile()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
         agentpool_1 = self.models.AgentPool(upgrade_settings=upgrade_settings_1)
